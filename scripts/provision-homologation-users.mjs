@@ -8,9 +8,7 @@ const required = [
 ];
 
 for (const name of required) {
-  if (!process.env[name]) {
-    throw new Error(`Variável obrigatória ausente: ${name}`);
-  }
+  if (!process.env[name]) throw new Error(`Variável obrigatória ausente: ${name}`);
 }
 
 if (process.env.ALLOW_INSECURE_DEMO_USERS !== "true") {
@@ -43,86 +41,83 @@ async function ensureUser(email, password, fullName) {
   return data.user;
 }
 
-const adminUser = await ensureUser(adminEmail, process.env.DEMO_ADMIN_PASSWORD, "Administrador Innovar");
-const clientUser = await ensureUser(clientEmail, process.env.DEMO_CLIENT_PASSWORD, "Cliente de Homologação");
-
-const { data: organization, error: organizationError } = await supabase
-  .from("organizations")
-  .upsert(
-    {
-      legal_name: "Innovar Construções e Reformas",
-      trade_name: "Innovar",
-      currency: "BRL",
-      timezone: "America/Sao_Paulo",
-      created_by: adminUser.id
-    },
-    { onConflict: "trade_name" }
-  )
-  .select("id")
-  .single();
-
-if (organizationError) {
-  // O schema atual não possui UNIQUE em trade_name; busca o registro antes de criar novamente.
-  const { data: found, error: findError } = await supabase
+async function ensureOrganization(adminUserId) {
+  const { data: existing, error: findError } = await supabase
     .from("organizations")
     .select("id")
     .eq("trade_name", "Innovar")
     .limit(1)
     .maybeSingle();
   if (findError) throw findError;
+  if (existing) return existing.id;
 
-  if (!found) {
-    const { data: created, error: createError } = await supabase
-      .from("organizations")
-      .insert({
-        legal_name: "Innovar Construções e Reformas",
-        trade_name: "Innovar",
-        currency: "BRL",
-        timezone: "America/Sao_Paulo",
-        created_by: adminUser.id
-      })
-      .select("id")
-      .single();
-    if (createError) throw createError;
-    organization.id = created.id;
-  } else {
-    organization.id = found.id;
-  }
+  const { data: created, error: createError } = await supabase
+    .from("organizations")
+    .insert({
+      legal_name: "Innovar Construções e Reformas",
+      trade_name: "Innovar",
+      currency: "BRL",
+      timezone: "America/Sao_Paulo",
+      created_by: adminUserId
+    })
+    .select("id")
+    .single();
+  if (createError) throw createError;
+  return created.id;
 }
 
-await supabase.from("profiles").upsert([
-  { id: adminUser.id, full_name: "Administrador Innovar", email: adminEmail, must_change_password: true },
-  { id: clientUser.id, full_name: "Cliente de Homologação", email: clientEmail, must_change_password: true }
-]);
+async function ensureClient(organizationId, adminUserId, clientUserId) {
+  const { data: existing, error: findError } = await supabase
+    .from("clients")
+    .select("id")
+    .eq("user_id", clientUserId)
+    .limit(1)
+    .maybeSingle();
+  if (findError) throw findError;
 
-const { error: membershipError } = await supabase.from("organization_memberships").upsert(
-  {
-    organization_id: organization.id,
-    user_id: adminUser.id,
-    role: "SUPER_ADMIN",
-    active: true
-  },
-  { onConflict: "organization_id,user_id" }
-);
-if (membershipError) throw membershipError;
-
-const { error: clientError } = await supabase.from("clients").upsert(
-  {
-    organization_id: organization.id,
-    user_id: clientUser.id,
+  const payload = {
+    organization_id: organizationId,
+    user_id: clientUserId,
     type: "PERSON",
     legal_name: "Cliente de Homologação",
     trade_name: "Cliente Teste",
     email: clientEmail,
-    created_by: adminUser.id
-  },
-  { onConflict: "user_id" }
+    created_by: adminUserId
+  };
+
+  if (existing) {
+    const { error } = await supabase.from("clients").update(payload).eq("id", existing.id);
+    if (error) throw error;
+    return existing.id;
+  }
+
+  const { data: created, error } = await supabase.from("clients").insert(payload).select("id").single();
+  if (error) throw error;
+  return created.id;
+}
+
+const adminUser = await ensureUser(adminEmail, process.env.DEMO_ADMIN_PASSWORD, "Administrador Innovar");
+const clientUser = await ensureUser(clientEmail, process.env.DEMO_CLIENT_PASSWORD, "Cliente de Homologação");
+const organizationId = await ensureOrganization(adminUser.id);
+
+const { error: profileError } = await supabase.from("profiles").upsert([
+  { id: adminUser.id, full_name: "Administrador Innovar", email: adminEmail, must_change_password: true },
+  { id: clientUser.id, full_name: "Cliente de Homologação", email: clientEmail, must_change_password: true }
+]);
+if (profileError) throw profileError;
+
+const { error: membershipError } = await supabase.from("organization_memberships").upsert(
+  { organization_id: organizationId, user_id: adminUser.id, role: "SUPER_ADMIN", active: true },
+  { onConflict: "organization_id,user_id" }
 );
-if (clientError) throw clientError;
+if (membershipError) throw membershipError;
+
+const clientId = await ensureClient(organizationId, adminUser.id, clientUser.id);
 
 console.log(JSON.stringify({
   ok: true,
-  organizationId: organization.id,
+  organizationId,
+  clientId,
   adminUserId: adminUser.id,
   clientUserId: clientUser.id,
   warning: "Altere as senhas temporárias depois do primeiro acesso."
