@@ -38,7 +38,17 @@ jobs:
           corepack prepare pnpm@11.15.0 --activate
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        shell: bash
+        run: |
+          set +e
+          pnpm install --no-frozen-lockfile --reporter=append-only > /tmp/pnpm-install.log 2>&1
+          status=$?
+          if [ "$status" -ne 0 ]; then
+            echo "--- últimas linhas da instalação ---"
+            tail -n 100 /tmp/pnpm-install.log
+            exit "$status"
+          fi
+          cat /tmp/pnpm-install.log
 
       - name: Validate Stage 9 structure
         run: pnpm validate:stage9
