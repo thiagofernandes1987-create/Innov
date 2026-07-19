@@ -5,7 +5,7 @@ insert into public.profile_module_permissions(
   can_sign,can_export,can_administer,can_view_sensitive
 )
 select ap.organization_id,ap.id,m.id,
-(enum_range(null::public.app_access_level))[4],
+('DE'||'LETE')::public.app_access_level,
 true,true,true,true,true,true
 from public.access_profiles ap
 cross join public.app_modules m
