@@ -1,5 +1,6 @@
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
+import { singleRelation } from "@/lib/supabase/relations";
 
 export default async function AmendmentsPage() {
   const { supabase, organizationId } = await requireOrganizationContext();
@@ -18,7 +19,7 @@ export default async function AmendmentsPage() {
           <thead><tr><th>Aditivo</th><th>Contrato</th><th>Motivo</th><th>Status</th><th>Valor</th><th>Prazo</th><th>Nova data</th><th>Portal</th></tr></thead>
           <tbody>
             {(data ?? []).map((amendment) => {
-              const contract = amendment.contracts as { code: string; title: string } | null;
+              const contract = singleRelation(amendment.contracts);
               return <tr key={amendment.id}>
                 <td><strong>{amendment.code}</strong></td>
                 <td>{contract?.code ?? "—"}<br /><span className="muted">{contract?.title ?? ""}</span></td>
