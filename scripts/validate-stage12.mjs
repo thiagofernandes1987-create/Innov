@@ -5,7 +5,9 @@ const root = process.cwd();
 const migrationFiles = [
   "supabase/migrations/20260719223000_stage12_planning_schema.sql",
   "supabase/migrations/20260719223100_stage12_planning_functions.sql",
-  "supabase/migrations/20260719223200_stage12_planning_security.sql"
+  "supabase/migrations/20260719223200_stage12_planning_rls.sql",
+  "supabase/migrations/20260719223300_stage12_planning_storage.sql",
+  "supabase/migrations/20260719223400_stage12_planning_permissions.sql"
 ];
 const requiredFiles = [
   "app/actions/projects.ts",
