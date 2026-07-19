@@ -1,0 +1,49 @@
+name: Stage 11 Homologation E2E
+
+on:
+  workflow_dispatch:
+
+env:
+  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+  DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
+  DEMO_CLIENT_PASSWORD: ${{ secrets.DEMO_CLIENT_PASSWORD }}
+  ALLOW_INSECURE_DEMO_USERS: "true"
+
+jobs:
+  authenticated-e2e:
+    name: Authenticated E2E
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate required secrets
+        run: |
+          test -n "$NEXT_PUBLIC_SUPABASE_URL"
+          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
+          test -n "$SUPABASE_SERVICE_ROLE_KEY"
+          test -n "$DEMO_ADMIN_PASSWORD"
+          test -n "$DEMO_CLIENT_PASSWORD"
+
+      - name: Provision homologation accounts
+        run: pnpm provision:homologation
+
+      - name: Run authenticated Stage 11 E2E
+        run: pnpm test:e2e:stage11
