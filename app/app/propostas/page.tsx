@@ -1,5 +1,6 @@
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
+import { singleRelation } from "@/lib/supabase/relations";
 
 export default async function ProposalsPage() {
   const { supabase, organizationId } = await requireOrganizationContext();
@@ -22,8 +23,8 @@ export default async function ProposalsPage() {
           <thead><tr><th>Código</th><th>Cliente</th><th>Versão</th><th>Status</th><th>Preço</th><th>Documento</th><th>Cliente</th></tr></thead>
           <tbody>
             {(data ?? []).map((proposal) => {
-              const version = proposal.proposal_versions as { version_number: number; title: string; sale_price: number; document_sha256: string | null; frozen_at: string | null } | null;
-              const client = proposal.clients as { legal_name: string } | null;
+              const version = singleRelation(proposal.proposal_versions);
+              const client = singleRelation(proposal.clients);
               return <tr key={proposal.id}>
                 <td><strong>{proposal.code}</strong><br /><span className="muted">{version?.title ?? "—"}</span></td>
                 <td>{client?.legal_name ?? "—"}</td>
