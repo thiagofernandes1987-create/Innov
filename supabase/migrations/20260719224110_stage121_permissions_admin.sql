@@ -4,7 +4,8 @@ insert into public.profile_module_permissions(
   organization_id,profile_id,module_id,access_level,can_approve,can_release,
   can_sign,can_export,can_administer,can_view_sensitive
 )
-select ap.organization_id,ap.id,m.id,'DELETE'::public.app_access_level,
+select ap.organization_id,ap.id,m.id,
+(enum_range(null::public.app_access_level))[4],
 true,true,true,true,true,true
 from public.access_profiles ap
 cross join public.app_modules m
