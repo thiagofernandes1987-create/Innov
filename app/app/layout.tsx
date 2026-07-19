@@ -5,11 +5,14 @@ import { requireOrganizationContext } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
 const navItems = [
-  ["Visão geral", "/app/orcamentos"],
+  ["Visão geral", "/app/obras"],
   ["CRM", "/app/crm"],
   ["Clientes", "/app/clientes"],
   ["Obras", "/app/obras"],
   ["Planejamento", "/app/planejamento"],
+  ["Tarefas", "/app/tarefas"],
+  ["Diário de obras", "/app/diario"],
+  ["Equipes", "/app/equipes"],
   ["Orçamentos", "/app/orcamentos"],
   ["Propostas", "/app/propostas"],
   ["Contratos", "/app/contratos"],
