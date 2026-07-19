@@ -11,7 +11,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "validate:stage9": "node scripts/validate-stage9.mjs"
+    "validate:stage9": "node scripts/validate-stage9.mjs",
+    "provision:homologation": "node scripts/provision-homologation-users.mjs",
+    "test:e2e:stage11": "node scripts/run-stage11-e2e.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
