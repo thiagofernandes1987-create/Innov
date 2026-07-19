@@ -12,7 +12,8 @@ const migrationFiles = [
   "supabase/migrations/20260719223300_stage12_planning_storage.sql",
   "supabase/migrations/20260719223400_stage12_permissions_helpers.sql",
   "supabase/migrations/20260719223450_stage12_permissions_planning.sql",
-  "supabase/migrations/20260719223475_stage12_permissions_field.sql"
+  "supabase/migrations/20260719223475_stage12_permissions_field.sql",
+  "supabase/migrations/20260719223500_stage12_performance_indexes.sql"
 ];
 const requiredFiles = [
   "app/actions/projects.ts","app/app/obras/page.tsx","app/app/obras/novo/page.tsx",
@@ -40,7 +41,7 @@ const requiredFunctions = [
 const requiredSecurity = [
   "enable row level security","project-documents","daily-log-media","client_released_at",
   "security definer","revoke all on function","storage.objects.name",
-  "prevent_released_document_mutation"
+  "prevent_released_document_mutation","project_tasks_org_idx","daily_log_media_project_idx"
 ];
 const failures = [];
 for (const file of requiredFiles) if (!fs.existsSync(path.join(root, file))) failures.push(`Arquivo ausente: ${file}`);
