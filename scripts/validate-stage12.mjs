@@ -2,6 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
+const migrationFiles = [
+  "supabase/migrations/20260719223000_stage12_planning_schema.sql",
+  "supabase/migrations/20260719223100_stage12_planning_functions.sql",
+  "supabase/migrations/20260719223200_stage12_planning_security.sql"
+];
 const requiredFiles = [
   "app/actions/projects.ts",
   "app/app/obras/page.tsx",
@@ -19,10 +24,12 @@ const requiredFiles = [
   "app/cliente/cronograma/page.tsx",
   "app/cliente/documentos/page.tsx",
   "app/cliente/midia/page.tsx",
-  "supabase/migrations/20260719223000_stage12_planning_field.sql"
+  ...migrationFiles
 ];
 
-const migration = fs.readFileSync(path.join(root, requiredFiles.at(-1)), "utf8");
+const migration = migrationFiles
+  .map((file) => fs.readFileSync(path.join(root, file), "utf8"))
+  .join("\n");
 const requiredTables = [
   "project_memberships",
   "work_breakdown_items",
@@ -50,7 +57,8 @@ const requiredFunctions = [
   "create_schedule_baseline",
   "submit_daily_log",
   "decide_daily_log",
-  "release_project_document_version"
+  "release_project_document_version",
+  "can_write_daily_log"
 ];
 const requiredSecurity = [
   "enable row level security",
@@ -58,7 +66,9 @@ const requiredSecurity = [
   "daily-log-media",
   "client_released_at",
   "security definer",
-  "revoke all on function"
+  "revoke all on function",
+  "storage.objects.name",
+  "prevent_released_document_mutation"
 ];
 
 const failures = [];
@@ -84,6 +94,7 @@ console.log(JSON.stringify({
   ok: true,
   stage: 12,
   files: requiredFiles.length,
+  migrations: migrationFiles.length,
   tables: requiredTables.length,
   functions: requiredFunctions.length,
   buckets: 2
