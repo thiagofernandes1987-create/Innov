@@ -5,9 +5,13 @@ const root = process.cwd();
 const migrationFiles = [
   "supabase/migrations/20260719223000_stage12_planning_schema.sql",
   "supabase/migrations/20260719223100_stage12_planning_functions.sql",
-  "supabase/migrations/20260719223200_stage12_planning_rls.sql",
+  "supabase/migrations/20260719223200_stage12_rls_core.sql",
+  "supabase/migrations/20260719223250_stage12_rls_resources.sql",
+  "supabase/migrations/20260719223260_stage12_rls_baselines.sql",
+  "supabase/migrations/20260719223275_stage12_rls_field_documents.sql",
   "supabase/migrations/20260719223300_stage12_planning_storage.sql",
-  "supabase/migrations/20260719223400_stage12_planning_permissions.sql"
+  "supabase/migrations/20260719223400_stage12_permissions_helpers.sql",
+  "supabase/migrations/20260719223450_stage12_permissions_business.sql"
 ];
 const requiredFiles = [
   "app/actions/projects.ts",
@@ -28,48 +32,22 @@ const requiredFiles = [
   "app/cliente/midia/page.tsx",
   ...migrationFiles
 ];
-
-const migration = migrationFiles
-  .map((file) => fs.readFileSync(path.join(root, file), "utf8"))
-  .join("\n");
+const migration = migrationFiles.map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
 const requiredTables = [
-  "project_memberships",
-  "work_breakdown_items",
-  "project_tasks",
-  "task_dependencies",
-  "project_milestones",
-  "schedule_baselines",
-  "schedule_baseline_tasks",
-  "project_resources",
-  "task_resource_allocations",
-  "project_teams",
-  "project_team_members",
-  "daily_logs",
-  "daily_log_activities",
-  "daily_log_resources",
-  "daily_log_media",
-  "project_documents",
-  "project_document_versions",
-  "project_progress_snapshots"
+  "project_memberships","work_breakdown_items","project_tasks","task_dependencies",
+  "project_milestones","schedule_baselines","schedule_baseline_tasks","project_resources",
+  "task_resource_allocations","project_teams","project_team_members","daily_logs",
+  "daily_log_activities","daily_log_resources","daily_log_media","project_documents",
+  "project_document_versions","project_progress_snapshots"
 ];
 const requiredFunctions = [
-  "create_project_from_contract",
-  "recalculate_project_progress",
-  "move_project_task",
-  "create_schedule_baseline",
-  "submit_daily_log",
-  "decide_daily_log",
-  "release_project_document_version",
-  "can_write_daily_log"
+  "create_project_from_contract","recalculate_project_progress","move_project_task",
+  "create_schedule_baseline","submit_daily_log","decide_daily_log",
+  "release_project_document_version","can_write_daily_log"
 ];
 const requiredSecurity = [
-  "enable row level security",
-  "project-documents",
-  "daily-log-media",
-  "client_released_at",
-  "security definer",
-  "revoke all on function",
-  "storage.objects.name",
+  "enable row level security","project-documents","daily-log-media","client_released_at",
+  "security definer","revoke all on function","storage.objects.name",
   "prevent_released_document_mutation"
 ];
 
@@ -86,12 +64,10 @@ for (const fn of requiredFunctions) {
 for (const token of requiredSecurity) {
   if (!migration.toLowerCase().includes(token.toLowerCase())) failures.push(`Controle ausente: ${token}`);
 }
-
 if (failures.length) {
   console.error(failures.join("\n"));
   process.exit(1);
 }
-
 console.log(JSON.stringify({
   ok: true,
   stage: 12,
