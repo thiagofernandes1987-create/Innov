@@ -29,7 +29,19 @@ async function ensureUser(email, password, fullName) {
   if (listError) throw listError;
 
   const existing = listed.users.find((user) => user.email?.toLowerCase() === email.toLowerCase());
-  if (existing) return existing;
+  if (existing) {
+    const { data, error } = await supabase.auth.admin.updateUserById(existing.id, {
+      password,
+      email_confirm: true,
+      user_metadata: {
+        ...existing.user_metadata,
+        full_name: fullName,
+        environment: "homologation"
+      }
+    });
+    if (error) throw error;
+    return data.user;
+  }
 
   const { data, error } = await supabase.auth.admin.createUser({
     email,
