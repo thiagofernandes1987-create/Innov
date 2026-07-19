@@ -1,5 +1,6 @@
 import { requireClientContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
+import { singleRelation } from "@/lib/supabase/relations";
 
 export default async function ClientAmendmentsPage() {
   const { supabase, client } = await requireClientContext();
@@ -31,15 +32,8 @@ export default async function ClientAmendmentsPage() {
 
       <section className="grid">
         {(data ?? []).map((amendment) => {
-          const contract = amendment.contracts as { id: string; code: string; title: string; client_id: string };
-          const version = amendment.amendment_versions as {
-            id: string;
-            version_number: number;
-            status: string;
-            document_path: string | null;
-            document_sha256: string | null;
-            client_released_at: string | null;
-          } | null;
+          const contract = singleRelation(amendment.contracts);
+          const version = singleRelation(amendment.amendment_versions);
 
           return (
             <article key={amendment.id} className="card card-pad">
@@ -47,7 +41,7 @@ export default async function ClientAmendmentsPage() {
                 <div>
                   <span className="badge">{amendment.code} · V{version?.version_number ?? "—"}</span>
                   <h2 style={{ marginTop: 12 }}>{amendment.reason}</h2>
-                  <p className="muted">Contrato {contract.code} · {contract.title}</p>
+                  <p className="muted">Contrato {contract?.code ?? "—"} · {contract?.title ?? ""}</p>
                 </div>
                 <span className="badge badge-warning">{amendment.status}</span>
               </div>
