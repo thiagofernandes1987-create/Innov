@@ -2,7 +2,7 @@
 
 **Escopo:** gestão de obras, planejamento, campo, documentos e portal do cliente.  
 **Ambiente:** Supabase de homologação.  
-**Estado:** migrations aplicadas; CI final em validação.
+**Estado:** migrations aplicadas e CI final aprovado.
 
 ## Banco aplicado
 
