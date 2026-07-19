@@ -53,7 +53,7 @@ export async function requireClientContext() {
   const { supabase, user } = await requireUser();
   const { data: client, error } = await supabase
     .from("clients")
-    .select("id, organization_id, legal_name")
+    .select("id, organization_id, legal_name, trade_name")
     .eq("user_id", user.id)
     .maybeSingle();
 
