@@ -5,12 +5,15 @@ import { requireClientContext } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
 const clientNav = [
-  ["Início", "/cliente/orcamentos"],
+  ["Início", "/cliente"],
+  ["Minhas obras", "/cliente/obras"],
+  ["Cronograma", "/cliente/cronograma"],
+  ["Documentos", "/cliente/documentos"],
+  ["Fotos e vídeos", "/cliente/midia"],
   ["Orçamentos e propostas", "/cliente/orcamentos"],
   ["Contratos", "/cliente/contratos"],
   ["Aditivos", "/cliente/aditivos"],
   ["Assinaturas", "/cliente/assinaturas"],
-  ["Documentos", "/cliente/documentos"],
   ["Ocorrências", "/cliente/ocorrencias"],
   ["Perfil e segurança", "/cliente/perfil"]
 ] as const;
@@ -35,7 +38,7 @@ export default async function ClientLayout({ children }: Readonly<{ children: Re
         </div>
       </aside>
       <div className="main">
-        <header className="topbar"><strong>Portal do cliente</strong><span>Conteúdo comercial liberado</span></header>
+        <header className="topbar"><strong>Portal do cliente</strong><span>Conteúdo autorizado pela Innovar</span></header>
         {children}
       </div>
     </div>
