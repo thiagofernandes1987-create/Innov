@@ -9,6 +9,8 @@ on:
 
 permissions:
   contents: read
+  issues: write
+  pull-requests: write
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -49,6 +51,20 @@ jobs:
             exit "$status"
           fi
           cat /tmp/pnpm-install.log
+
+      - name: Publish install diagnostic on PR
+        if: failure() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "### Diagnóstico temporário do CI"
+            echo
+            echo '```text'
+            tail -n 100 /tmp/pnpm-install.log
+            echo '```'
+          } > /tmp/ci-comment.md
+          gh pr comment "${{ github.event.pull_request.number }}" --body-file /tmp/ci-comment.md
 
       - name: Validate Stage 9 structure
         run: pnpm validate:stage9
