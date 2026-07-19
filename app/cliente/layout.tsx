@@ -2,6 +2,8 @@ import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 import { requireClientContext } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 const clientNav = [
   ["Início", "/cliente/orcamentos"],
   ["Orçamentos e propostas", "/cliente/orcamentos"],
