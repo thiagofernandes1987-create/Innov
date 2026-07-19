@@ -1,5 +1,6 @@
 import { requireClientContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
+import { singleRelation } from "@/lib/supabase/relations";
 
 export default async function ClientBudgetsPage() {
   const { supabase, client } = await requireClientContext();
@@ -45,9 +46,7 @@ export default async function ClientBudgetsPage() {
             <thead><tr><th>Proposta</th><th>Versão</th><th>Status</th><th>Preço comercial</th><th>Validade</th></tr></thead>
             <tbody>
               {(proposals ?? []).map((proposal) => {
-                const version = proposal.proposal_versions as {
-                  id: string; version_number: number; title: string; sale_price: number; client_released_at: string | null;
-                } | null;
+                const version = singleRelation(proposal.proposal_versions);
                 return (
                   <tr key={proposal.id}>
                     <td><strong>{proposal.code}</strong><br /><span className="muted">{version?.title ?? "Proposta comercial"}</span></td>
