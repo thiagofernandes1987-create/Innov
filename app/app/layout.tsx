@@ -2,6 +2,8 @@ import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 import { requireOrganizationContext } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
 const navItems = [
   ["Visão geral", "/app/orcamentos"],
   ["CRM", "/app/crm"],
