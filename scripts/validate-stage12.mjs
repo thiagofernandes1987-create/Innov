@@ -11,25 +11,17 @@ const migrationFiles = [
   "supabase/migrations/20260719223275_stage12_rls_field_documents.sql",
   "supabase/migrations/20260719223300_stage12_planning_storage.sql",
   "supabase/migrations/20260719223400_stage12_permissions_helpers.sql",
-  "supabase/migrations/20260719223450_stage12_permissions_business.sql"
+  "supabase/migrations/20260719223450_stage12_permissions_planning.sql",
+  "supabase/migrations/20260719223475_stage12_permissions_field.sql"
 ];
 const requiredFiles = [
-  "app/actions/projects.ts",
-  "app/app/obras/page.tsx",
-  "app/app/obras/novo/page.tsx",
-  "app/app/obras/[id]/page.tsx",
-  "app/app/obras/[id]/eap/page.tsx",
-  "app/app/obras/[id]/cronograma/page.tsx",
-  "app/app/obras/[id]/tarefas/page.tsx",
-  "app/app/obras/[id]/diario/page.tsx",
-  "app/app/obras/[id]/diario/[logId]/page.tsx",
-  "app/app/obras/[id]/documentos/page.tsx",
-  "app/app/obras/[id]/equipes/page.tsx",
-  "app/cliente/obras/page.tsx",
-  "app/cliente/obras/[id]/page.tsx",
-  "app/cliente/cronograma/page.tsx",
-  "app/cliente/documentos/page.tsx",
-  "app/cliente/midia/page.tsx",
+  "app/actions/projects.ts","app/app/obras/page.tsx","app/app/obras/novo/page.tsx",
+  "app/app/obras/[id]/page.tsx","app/app/obras/[id]/eap/page.tsx",
+  "app/app/obras/[id]/cronograma/page.tsx","app/app/obras/[id]/tarefas/page.tsx",
+  "app/app/obras/[id]/diario/page.tsx","app/app/obras/[id]/diario/[logId]/page.tsx",
+  "app/app/obras/[id]/documentos/page.tsx","app/app/obras/[id]/equipes/page.tsx",
+  "app/cliente/obras/page.tsx","app/cliente/obras/[id]/page.tsx",
+  "app/cliente/cronograma/page.tsx","app/cliente/documentos/page.tsx","app/cliente/midia/page.tsx",
   ...migrationFiles
 ];
 const migration = migrationFiles.map((file) => fs.readFileSync(path.join(root, file), "utf8")).join("\n");
@@ -50,30 +42,10 @@ const requiredSecurity = [
   "security definer","revoke all on function","storage.objects.name",
   "prevent_released_document_mutation"
 ];
-
 const failures = [];
-for (const file of requiredFiles) {
-  if (!fs.existsSync(path.join(root, file))) failures.push(`Arquivo ausente: ${file}`);
-}
-for (const table of requiredTables) {
-  if (!migration.includes(`create table public.${table}`)) failures.push(`Tabela ausente: ${table}`);
-}
-for (const fn of requiredFunctions) {
-  if (!migration.includes(`function public.${fn}`)) failures.push(`Função ausente: ${fn}`);
-}
-for (const token of requiredSecurity) {
-  if (!migration.toLowerCase().includes(token.toLowerCase())) failures.push(`Controle ausente: ${token}`);
-}
-if (failures.length) {
-  console.error(failures.join("\n"));
-  process.exit(1);
-}
-console.log(JSON.stringify({
-  ok: true,
-  stage: 12,
-  files: requiredFiles.length,
-  migrations: migrationFiles.length,
-  tables: requiredTables.length,
-  functions: requiredFunctions.length,
-  buckets: 2
-}, null, 2));
+for (const file of requiredFiles) if (!fs.existsSync(path.join(root, file))) failures.push(`Arquivo ausente: ${file}`);
+for (const table of requiredTables) if (!migration.includes(`create table public.${table}`)) failures.push(`Tabela ausente: ${table}`);
+for (const fn of requiredFunctions) if (!migration.includes(`function public.${fn}`)) failures.push(`Função ausente: ${fn}`);
+for (const token of requiredSecurity) if (!migration.toLowerCase().includes(token.toLowerCase())) failures.push(`Controle ausente: ${token}`);
+if (failures.length) { console.error(failures.join("\n")); process.exit(1); }
+console.log(JSON.stringify({ ok:true, stage:12, files:requiredFiles.length, migrations:migrationFiles.length, tables:requiredTables.length, functions:requiredFunctions.length, buckets:2 }, null, 2));
