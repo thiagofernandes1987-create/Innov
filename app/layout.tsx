@@ -3,6 +3,7 @@ import "./globals.css";
 import "./stage12.css";
 import "./signatures.css";
 import "./quality.css";
+import "./procurement.css";
 
 export const metadata: Metadata = {
   title: {
