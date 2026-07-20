@@ -23,7 +23,18 @@ export default async function ProfilesAdminPage({ searchParams }: { searchParams
   const profiles=profilesResult.data??[]; const applications=appsResult.data??[]; const capabilities=capsResult.data??[]; const grants=grantsResult.data??[];
   const capById=new Map(capabilities.map(cap=>[cap.id,cap]));
   const levels=new Map<string,ModuleAccessLevel>();
-  for(const profile of profiles){for(const app of applications){const keys=new Set<string>();for(const grant of grants){if(grant.profile_id!==profile.id||grant.effect!=="ALLOW")continue;const cap=capById.get(grant.capability_id);if(cap?.application_id===app.id)keys.add(cap.key);}levels.set(`${profile.id}:${app.key}`,levelFor(keys));}}
+  for(const profile of profiles){
+    for(const app of applications){
+      const keys=new Set<string>();
+      for(const grant of grants){
+        if(grant.profile_id!==profile.id||grant.effect!=="ALLOW")continue;
+        const cap=capById.get(grant.capability_id);
+        if(!cap)continue;
+        if(cap.application_id===app.id)keys.add(cap.key);
+      }
+      levels.set(`${profile.id}:${app.key}`,levelFor(keys));
+    }
+  }
 
   return <main className="content">
     <section className="page-heading"><div><span className="badge">PERFIS PLUG-AND-PLAY</span><h1>Perfis e níveis por aplicativo</h1><p>Perfis são conjuntos reutilizáveis de capacidades. Nomes podem mudar sem alterar as regras de negócio.</p></div></section>
