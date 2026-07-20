@@ -3,14 +3,16 @@
 import {useState} from "react";
 
 type Item={id:string;description:string;specification:string;unit:string;quantity:number;targetUnitPrice:string;notes:string};
-const newItem=():Item=>({id:crypto.randomUUID(),description:"",specification:"",unit:"un",quantity:1,targetUnitPrice:"",notes:""});
+const itemWithId=(id:string):Item=>({id,description:"",specification:"",unit:"un",quantity:1,targetUnitPrice:"",notes:""});
 
 export function RequestItemsBuilder(){
-  const[items,setItems]=useState<Item[]>([newItem()]);
+  const[items,setItems]=useState<Item[]>([itemWithId("item-1")]);
   function update(id:string,key:keyof Item,value:string|number){setItems(current=>current.map(item=>item.id===id?{...item,[key]:value}:item));}
+  function addItem(){setItems(current=>[...current,itemWithId(`item-${current.length+1}`)]);}
+  const serialized=items.map(item=>({description:item.description,specification:item.specification,unit:item.unit,quantity:item.quantity,targetUnitPrice:item.targetUnitPrice===""?null:Number(item.targetUnitPrice),notes:item.notes}));
   return <section className="card card-pad procurement-builder">
-    <div className="section-heading"><div><span className="eyebrow">ITENS</span><h2>Materiais ou serviços solicitados</h2></div><button className="button button-secondary" type="button" onClick={()=>setItems(current=>[...current,newItem()])}>Adicionar item</button></div>
-    <input type="hidden" name="itemsJson" value={JSON.stringify(items.map(({id:_,...item})=>({...item,targetUnitPrice:item.targetUnitPrice===""?null:Number(item.targetUnitPrice)}))}/>
+    <div className="section-heading"><div><span className="eyebrow">ITENS</span><h2>Materiais ou serviços solicitados</h2></div><button className="button button-secondary" type="button" onClick={addItem}>Adicionar item</button></div>
+    <input type="hidden" name="itemsJson" value={JSON.stringify(serialized)}/>
     <div className="procurement-item-list">{items.map((item,index)=><article className="procurement-item-card" key={item.id}>
       <div className="procurement-item-number">{index+1}</div>
       <label>Descrição<input required value={item.description} onChange={event=>update(item.id,"description",event.target.value)} placeholder="Ex.: Cimento CP-II 50 kg"/></label>
