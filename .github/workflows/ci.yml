@@ -54,8 +54,21 @@ jobs:
         run: pnpm validate:stage14
       - name: Lint
         run: pnpm lint
-      - name: Typecheck
-        run: pnpm typecheck
+      - name: Typecheck diagnostic
+        id: typecheck
+        continue-on-error: true
+        run: pnpm typecheck > typecheck.log 2>&1
+      - name: Upload typecheck diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage14-typecheck-log
+          path: typecheck.log
+      - name: Enforce typecheck
+        if: steps.typecheck.outcome == 'failure'
+        run: |
+          cat typecheck.log
+          exit 1
       - name: TypeScript unit tests
         run: pnpm test
       - name: Python quality form tests
