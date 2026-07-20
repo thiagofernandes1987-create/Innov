@@ -6,6 +6,7 @@ const requiredFiles=[
   "supabase/migrations/20260720080150_stage13_quality_forms_hardening.sql",
   "supabase/migrations/20260720080200_stage13_quality_forms_seed.sql",
   "supabase/migrations/20260720080210_stage13_quality_default_template_installer.sql",
+  "supabase/migrations/20260720080220_stage13_quality_performance_security.sql",
   "app/actions/quality.ts",
   "lib/quality/forms.ts",
   "components/quality/quality-form-renderer.tsx",
@@ -33,9 +34,11 @@ const seed=fs.readFileSync(requiredFiles[3],"utf8");
 for(const token of ["FVS-PADRAO","FVM-PADRAO","PESQUISA-SATISFACAO","app_modules","profile_module_permissions","membership_access_profiles"]){if(!seed.includes(token))errors.push(`Seed incompleto: ${token}`);}
 const installer=fs.readFileSync(requiredFiles[4],"utf8");
 for(const token of ["install_quality_default_templates","organizations_install_quality_defaults","service_role"]){if(!installer.includes(token))errors.push(`Instalador incompleto: ${token}`);}
+const performance=fs.readFileSync(requiredFiles[5],"utf8");
+for(const token of ["quality_documents_client_id_idx","quality_form_assignments_assignee_user_id_idx","quality_form_responses_project_id_idx","quality_public_links_assignment_id_idx","revoke execute on function public.mark_quality_response_submitted"]){if(!performance.includes(token))errors.push(`Desempenho/privilégio incompleto: ${token}`);}
 const actions=fs.readFileSync("app/actions/quality.ts","utf8");
 for(const action of ["uploadQualityDocument","createQualityTemplate","createQualityAssignment","submitPublicQualityForm","submitClientQualityForm","submitInternalQualityForm","reviewQualityResponse"]){if(!actions.includes(`function ${action}`))errors.push(`Ação ausente: ${action}`);}
 const python=fs.readFileSync("python/quality_forms/models.py","utf8");
 for(const symbol of ["class FormDefinition","build_fvs_template","build_fvm_template","evaluate_form"]){if(!python.includes(symbol))errors.push(`Motor Python incompleto: ${symbol}`);}
 if(errors.length){console.error(`Etapa 13 inválida (${errors.length} falha(s)):`);for(const error of errors)console.error(`- ${error}`);process.exit(1);}
-console.log(`Etapa 13 validada: ${requiredFiles.length} arquivos críticos, 8 tabelas, 2 buckets, RLS, hardening, instalação automática, modelos FVS/FVM, formulários internos e pesquisas.`);
+console.log(`Etapa 13 validada: ${requiredFiles.length} arquivos críticos, 8 tabelas, 2 buckets, RLS, hardening, índices, privilégio mínimo, instalação automática, modelos FVS/FVM, formulários internos e pesquisas.`);
