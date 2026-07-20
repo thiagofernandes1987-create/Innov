@@ -52,6 +52,8 @@ jobs:
         run: pnpm validate:stage13
       - name: Validate Stage 14 procurement
         run: pnpm validate:stage14
+      - name: Validate Stage 15 operational finance
+        run: pnpm validate:stage15
       - name: Lint
         run: pnpm lint
       - name: Typecheck
