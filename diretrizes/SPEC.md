@@ -2,7 +2,7 @@
 
 **Documento canônico:** sim  
 **Revisão documental:** 1.2.0  
-**Versão implementada:** 0.17.0  
+**Versão implementada da plataforma:** 0.17.0  
 **Atualizado em:** 20 de julho de 2026  
 **Fonte de verdade:** `thiagofernandes1987-create/Innov`
 
@@ -37,7 +37,7 @@ Nenhum segredo pertence à documentação. Credenciais são configuradas em cofr
 11. saldos derivados de razões, nunca editados diretamente;
 12. CI como bloqueio obrigatório.
 
-## 4. Perfis e autorização
+## 4. Modelo de autorização
 
 Perfis canônicos:
 
@@ -58,7 +58,7 @@ Perfis personalizados são permitidos e não podem ser sobrescritos por instalad
 
 Níveis: `NONE`, `READ`, `EDIT/READ_WRITE` e `FULL/DELETE`. Capacidades incluem criar, editar, excluir, aprovar, liberar, assinar, exportar, administrar, configurar e visualizar dados sensíveis. Escopos incluem organização, cliente, obra e recurso/depósito.
 
-## 5. Catálogo modular
+## 5. Aplicativos modulares
 
 1. dashboard;
 2. CRM e Vendas;
@@ -106,7 +106,7 @@ FVS/FVM/formulário → preenchimento → anexos → revisão
 solicitação → cotação → comparação → aprovação → pedido → recebimento
 ```
 
-### Estoque — Etapa 17
+### Estoque, Inventário e Almoxarifado — Etapa 17
 
 ```text
 recebimento aceito → entrada idempotente → saldo físico
@@ -210,7 +210,7 @@ pnpm build
 
 O CI do commit atual do PR `#15` está verde.
 
-## 13. Próxima etapa
+## 13. Próxima etapa oficial
 
 A Etapa 17 está estruturalmente homologada. Antes da publicação externa, deve ser executado E2E autenticado com contas reais.
 
@@ -220,6 +220,8 @@ A próxima etapa funcional planejada é:
 - Etapa 19 — auditoria e observabilidade;
 - Etapa 20 — prontidão de produção;
 - Etapa 21 — WMS avançado, RFID, automação logística, fiscal e patrimonial.
+
+A Etapa 21 mantém o WMS avançado apenas planejado.
 
 ## 14. Regra documental
 
