@@ -1,237 +1,198 @@
 # Contratos dos módulos — Innovar Platform
 
+**Versão:** 0.17.0  
 **Atualizado em:** 20 de julho de 2026  
-**Versão da branch atual:** 0.17.0  
 **Registro técnico:** `lib/modules/registry.ts`
 
-Este documento descreve o contrato atual de cada aplicativo. O estado `Operacional` significa que existe implementação funcional no repositório estável; uma etapa em branch permanece `Em implementação` até homologação, revisão e merge.
-
-## Convenções
-
-Cada módulo declara:
-
-- chave estável;
-- rota-base;
-- categoria;
-- dependências;
-- estado;
-- dados e integrações;
-- capacidades;
-- invariantes de segurança;
-- documento técnico principal.
+Cada aplicativo declara rota, estado, dependências, integrações, capacidades e invariantes. `Operacional` não significa liberação automática para produção.
 
 ## `dashboard` — Início
 
-- **Rota:** `/app`;
-- **Categoria:** Núcleo;
-- **Estado:** Operacional;
-- **Finalidade:** central de aplicativos autorizados;
-- **Regra:** exibir somente módulos habilitados e permitidos;
-- **Histórico:** `docs/ETAPA-12-1-NUCLEO-MODULAR-E-ACESSOS.md`.
+- **Rota:** `/app`.
+- **Estado:** Operacional.
+- **Finalidade:** central dos aplicativos autorizados.
+- **Regra:** exibir somente módulo habilitado e permitido.
 
 ## `crm` — CRM e Vendas
 
-- **Rota:** `/app/crm`;
-- **Categoria:** Comercial;
-- **Estado:** Parcial;
-- **Finalidade:** leads, oportunidades, qualificação e pipeline;
-- **Dependências:** clientes, orçamentos e propostas;
-- **Próxima evolução:** consolidação na Etapa 18;
-- **Segurança:** isolamento por organização e perfil.
+- **Rota:** `/app/crm`.
+- **Estado:** Parcial.
+- **Finalidade:** leads, oportunidades e pipeline.
+- **Próxima consolidação:** Etapa 18.
 
 ## `clientes` — Clientes
 
-- **Rota:** `/app/clientes`;
-- **Categoria:** Comercial;
-- **Estado:** Parcial;
-- **Finalidade:** cadastro e visão consolidada de obras, contratos e documentos;
-- **Regra:** um cliente pode possuir múltiplas obras;
-- **Integrações:** CRM, contratos, obras, SAC e portal;
-- **Próxima evolução:** Etapa 18.
+- **Rota:** `/app/clientes`.
+- **Estado:** Parcial/operacional.
+- **Regra:** um cliente pode possuir várias obras abertas ou concluídas.
+- **Integrações:** CRM, orçamentos, contratos, obras, SAC e portal.
 
 ## `obras` — Obras
 
-- **Rota:** `/app/obras`;
-- **Categoria:** Operacional;
-- **Estado:** Operacional;
-- **Dependência:** clientes;
-- **Escopo:** carteira multiobra, criação, progresso, datas e portal;
-- **Regras:** organização obrigatória; progresso em fração `0–1`; arquivamento preserva histórico;
-- **Histórico:** `docs/ETAPA-12-GESTAO-DE-OBRAS.md`.
+- **Rota:** `/app/obras`.
+- **Estado:** Operacional.
+- **Dependência:** clientes.
+- **Escopo:** carteira multiobra, progresso e portal.
+- **Regra:** organização e escopo da obra são obrigatórios.
 
 ## `planejamento` — Planejamento
 
-- **Rota:** `/app/planejamento`;
-- **Categoria:** Operacional;
-- **Estado:** Operacional;
-- **Dependência:** obras;
-- **Escopo:** EAP, cronograma, dependências, marcos e baselines;
-- **Regras:** baseline concluída é imutável; alterações relevantes são auditáveis.
+- **Rota:** `/app/planejamento`.
+- **Estado:** Operacional.
+- **Dependência:** obras.
+- **Escopo:** EAP, cronograma, marcos e baselines.
+- **Regra:** baseline concluída é imutável.
 
 ## `tarefas` — Tarefas
 
-- **Rota:** `/app/tarefas`;
-- **Categoria:** Operacional;
-- **Estado:** Operacional;
-- **Dependência:** obras;
-- **Escopo:** execução, responsáveis, prioridade, progresso, datas e bloqueios;
-- **Integração:** reservas de estoque podem apontar para tarefa;
-- **Regras:** bloqueio exige motivo; drag-and-drop possui alternativa por comando.
+- **Rota:** `/app/tarefas`.
+- **Estado:** Operacional.
+- **Dependência:** obras.
+- **Integrações:** planejamento, equipes, diário, qualidade e reservas de estoque.
 
 ## `diario` — Diário de Obras
 
-- **Rota:** `/app/diario`;
-- **Categoria:** Operacional;
-- **Estado:** Operacional;
-- **Dependência:** obras;
-- **Escopo:** atividades, mão de obra, segurança, qualidade, atrasos, ocorrências e mídias;
-- **Storage:** `daily-log-media` privado;
-- **Regra:** mídia pertence à organização e obra.
+- **Rota:** `/app/diario`.
+- **Estado:** Operacional.
+- **Dependência:** obras.
+- **Storage:** `daily-log-media`, privado.
 
 ## `equipes` — Equipes
 
-- **Rota:** `/app/equipes`;
-- **Categoria:** Operacional;
-- **Estado:** Operacional;
-- **Dependência:** obras;
-- **Escopo:** recursos, equipes, integrantes e atribuições;
-- **Integração:** custódia de ferramentas e ativos;
-- **Regra:** escopo de obra e organização obrigatório.
+- **Rota:** `/app/equipes`.
+- **Estado:** Operacional.
+- **Dependência:** obras.
+- **Integração:** custódia de ferramentas e ativos.
 
 ## `orcamentos` — Orçamentos
 
-- **Rota:** `/app/orcamentos`;
-- **Categoria:** Financeiro;
-- **Estado:** Operacional;
-- **Dependência:** clientes;
-- **Escopo:** custos, taxa administrativa, BDI, markup, margem, ROI, cenários e aprovações;
-- **Regras:** versão congelada é imutável; dupla contagem bloqueada; aprovação crítica pode exigir AAL2;
-- **Dados sensíveis:** cálculos internos.
+- **Rota:** `/app/orcamentos`.
+- **Estado:** Operacional.
+- **Dependência:** clientes.
+- **Escopo:** custos, BDI, markup, cenários e aprovações.
+- **Regra:** versão congelada é imutável.
 
 ## `propostas` — Propostas
 
-- **Rota:** `/app/propostas`;
-- **Categoria:** Comercial;
-- **Estado:** Operacional;
-- **Dependência:** orçamentos;
-- **Escopo:** versões, conteúdo comercial, PDF, validade e aceite;
-- **Storage:** `commercial-documents` privado;
-- **Regra:** cliente visualiza somente versão liberada.
+- **Rota:** `/app/propostas`.
+- **Estado:** Operacional.
+- **Dependência:** orçamentos.
+- **Regra:** cliente vê somente versão liberada.
 
 ## `contratos` — Contratos
 
-- **Rota:** `/app/contratos`;
-- **Categoria:** Jurídico;
-- **Estado:** Operacional;
-- **Dependência:** propostas;
-- **Escopo:** templates, versões, partes, vigência e valores;
-- **Storage:** `contract-documents` privado;
-- **Regra:** versão enviada ou assinada é imutável.
+- **Rota:** `/app/contratos`.
+- **Estado:** Operacional.
+- **Dependência:** propostas.
+- **Regra:** documento enviado ou assinado é imutável.
 
 ## `aditivos` — Aditivos
 
-- **Rota:** `/app/aditivos`;
-- **Categoria:** Jurídico;
-- **Estado:** Operacional;
-- **Dependência:** contratos;
-- **Escopo:** alterações de escopo, valor, prazo e data final;
-- **Regra:** aplicação ao contrato é idempotente;
-- **Integrações:** orçamento, contrato, obra, financeiro e assinatura.
+- **Rota:** `/app/aditivos`.
+- **Estado:** Operacional.
+- **Dependência:** contratos.
+- **Regra:** aplicação de valor e prazo é idempotente.
 
 ## `assinaturas` — Assinaturas
 
-- **Rota:** `/app/assinaturas`;
-- **Categoria:** Jurídico;
-- **Estado:** Operacional em sandbox;
-- **Dependência:** documentos;
-- **Escopo:** PDF/DOCX, conversão, campos, assinatura, rubrica, foto, anexos e evidência;
-- **Storage:** `signature-artifacts` privado;
-- **Regras:** token bruto não é persistido; hashes em todas as fases; conclusão idempotente;
-- **Limitação:** sandbox sem validade jurídica externa.
+- **Rota:** `/app/assinaturas`.
+- **Estado:** Operacional em sandbox.
+- **Escopo:** PDF/DOCX, conversão, campos, assinatura, rubrica, data, nome, foto, anexos, hash, evidência e cópia.
+- **Storage:** `signature-artifacts`, privado.
+- **Limitação:** sandbox não possui validade jurídica externa.
 
 ## `documentos` — Documentos
 
-- **Rota:** `/app/documentos`;
-- **Categoria:** Operacional;
-- **Estado:** Operacional;
-- **Escopo:** arquivos privados, disciplinas, versões, hashes e liberação;
-- **Storage:** `project-documents` e buckets especializados;
+- **Rota:** `/app/documentos`.
+- **Estado:** Operacional.
+- **Escopo:** arquivos privados, versões, hashes e liberação.
 - **Regra:** versão liberada é imutável.
 
 ## `qualidade` — Qualidade
 
-- **Rota:** `/app/qualidade`;
-- **Categoria:** Qualidade;
-- **Estado:** Operacional;
-- **Dependência:** obras;
-- **Escopo:** biblioteca, FVS, FVM, formulários, pesquisas, anexos e revisão;
-- **Storage:** `quality-documents` e `quality-form-attachments` privados;
-- **Regra:** schema publicado é imutável; alteração exige nova versão.
+- **Rota:** `/app/qualidade`.
+- **Estado:** Operacional.
+- **Dependência:** obras.
+- **Escopo:** PO, FVS, FVM, formulários e pesquisas.
+- **Regra:** schema publicado exige nova versão para alteração.
 
 ## `compras` — Compras e Suprimentos
 
-- **Rota:** `/app/compras`;
-- **Categoria:** Suprimentos;
-- **Estado:** Operacional;
-- **Dependências:** obras e qualidade;
-- **Escopo:** solicitações, fornecedores, cotações, comparação, aprovação, pedidos e recebimentos;
-- **Storage:** `procurement-attachments` privado;
-- **Regras:** recebimento vazio bloqueado; parcial permitido; quantidades aceitas e rejeitadas rastreadas;
+- **Rota:** `/app/compras`.
+- **Estado:** Operacional.
+- **Dependências:** obras e qualidade.
+- **Escopo:** solicitações, fornecedores, cotações, comparação, aprovação, pedidos e recebimentos.
 - **Integrações:** estoque, financeiro e relatórios.
+- **Regra:** quantidade aceita e rejeitada permanecem rastreáveis.
 
 ## `estoque` — Estoque, Inventário e Almoxarifado
 
-- **Rota:** `/app/estoque`;
-- **Categoria:** Suprimentos;
-- **Estado:** Em implementação — Etapa 17, PR `#14`;
-- **Versão do módulo:** `1.0.0`;
-- **Dependências:** compras e obras;
-- **Integrações:** equipes, financeiro e relatórios;
-- **Documento:** `docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`.
+- **Rota:** `/app/estoque`.
+- **Estado:** Implementado e homologado tecnicamente.
+- **Versão:** 1.0.0.
+- **Dependências:** compras e obras.
+- **Integrações:** equipes, financeiro e relatórios.
 
-### Escopo da Etapa 17
+### Finalidade
 
-- itens, categorias e unidades;
-- depósitos e localizações;
-- lotes e validade;
-- entradas, saídas, devoluções, transferências, perdas, ajustes e reversões;
-- reservas por obra, tarefa, depósito, localização e lote;
-- estoque mínimo e alertas;
-- ferramentas e ativos individualizados;
-- custódias, devoluções e manutenção;
-- inventário físico, recontagem, aprovação e ajuste;
-- integração idempotente com recebimentos aceitos de Compras;
-- dashboard e detalhes seguros;
-- RLS, índices, RPCs, imutabilidade e auditoria.
+Controlar materiais, consumíveis, ferramentas e ativos desde o recebimento até consumo, devolução, transferência, perda, ajuste ou inventário físico.
 
-### Razão e saldo
+### Modelo de saldo
 
 ```text
-saldo físico = soma das linhas de movimentos POSTED
-saldo reservado = reservado - consumido - liberado
-saldo disponível = físico - reservado
+físico = movimentos POSTED + originais REVERSED
+reservado = reservado - consumido - liberado
+disponível = físico - reservado
 ```
 
-- saldo não é editável diretamente;
-- movimento `POSTED` é imutável;
-- correção ocorre por reversão;
-- transferência é atômica;
-- saldo negativo é bloqueado por padrão;
-- importação de recebimento é idempotente;
-- quantidade rejeitada não entra;
-- inventário postado é imutável.
+O movimento `REVERSAL` neutraliza o original. Não existe saldo editável diretamente.
+
+### Escopo
+
+- catálogo, categorias e unidades;
+- depósitos gerais e por obra;
+- localizações, lotes e validade;
+- movimentos e reversões;
+- importação idempotente de Compras;
+- reservas e consumo;
+- ativos, custódias e manutenção;
+- inventário físico;
+- indicadores e auditoria.
+
+### Concorrência
+
+- advisory lock por posição de estoque;
+- locks em ordem determinística;
+- saldo físico e disponível verificados na transação;
+- saída comum não consome reserva;
+- transferência conserva quantidade.
+
+### Multiempresa e multiobra
+
+- vínculos entre organizações são rejeitados;
+- depósito vinculado a obra somente pode ser usado pela mesma obra;
+- depósito geral depende de autorização, sem vínculo obrigatório a uma obra.
 
 ### Segurança
 
-- RLS nas 18 tabelas;
-- isolamento multiempresa e multiobra;
-- views internas sem acesso direto;
-- custos mascarados por capacidade sensível;
+- 18 tabelas com RLS;
+- seis views `security_invoker`;
+- custos mascarados por RPC;
+- privilégios por coluna;
+- movimentos e inventários concluídos imutáveis;
 - Service Role ausente do navegador;
-- transições críticas somente por RPC;
-- eventos sem secrets.
+- RPCs privilegiadas validam autorização internamente.
 
-### Definition of Done adicional da Etapa 17
+### Homologação
+
+- schema e migration aplicada no Supabase;
+- ledger reconciliado com 18 migrations;
+- 14 testes transacionais com `ROLLBACK`;
+- correção de reversão;
+- correção de isolamento multiobra;
+- CI original verde.
+
+### Definition of Done adicional
 
 - documentação atualizada no mesmo PR;
 - migration aplicada e homologada;
@@ -242,67 +203,48 @@ saldo disponível = físico - reservado
 - isolamento multiempresa e multiobra;
 - CI verde.
 
-### Evolução agendada — Etapa 21
+Situação: todos possuem implementação/evidência, exceto o teste concorrente com duas conexões reais, que permanece obrigatório antes da produção. A branch corretiva também precisa de CI verde antes do merge.
 
-Após as Etapas 18, 19 e 20, o módulo será evoluído com:
+### Evolução posterior
 
-- WMS avançado;
-- endereçamento automatizado;
-- RFID em tempo real;
-- ressuprimento automático sem aprovação;
-- roteirização logística;
-- integração fiscal de entrada;
-- depreciação contábil oficial.
-
-Documento: `docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`.
-
-RFID e automações não substituem o razão imutável. Nenhuma capacidade da Etapa 21 é considerada implementada neste momento.
+A Etapa 21 acrescentará WMS avançado, endereçamento automatizado, RFID, ressuprimento, roteirização, integração fiscal e depreciação oficial. Esse escopo não pertence à versão 0.17.0.
 
 ## `financeiro` — Financeiro Operacional
 
-- **Rota:** `/app/financeiro`;
-- **Categoria:** Financeiro;
-- **Estado:** Operacional;
-- **Dependências:** obras, contratos e compras;
-- **Escopo:** lançamentos, contas, parcelas, aprovação, liquidação, comprovantes, medições e caixa;
-- **Storage:** `finance-attachments` privado;
-- **Regras:** capacidade sensível; baixa atômica; importações idempotentes;
-- **Integração com estoque:** custos informativos não criam lançamento automaticamente.
+- **Rota:** `/app/financeiro`.
+- **Estado:** Operacional.
+- **Dependências:** obras, contratos e compras.
+- **Regra:** leitura/escrita financeira exige capacidade sensível.
+- **Integração com estoque:** custo informativo, sem lançamento automático.
 
 ## `sac` — Pós-venda e SAC
 
-- **Rota:** `/app/ocorrencias`;
-- **Categoria:** Pós-venda;
-- **Estado:** Parcial;
-- **Dependência:** clientes;
-- **Escopo esperado:** ocorrências, prioridade, SLA, responsáveis, anexos e encerramento;
-- **Próxima evolução:** Etapa 18.
+- **Rota:** `/app/ocorrencias`.
+- **Estado:** Parcial.
+- **Dependência:** clientes.
+- **Próxima consolidação:** Etapa 18.
 
 ## `relatorios` — Relatórios e Indicadores
 
-- **Rota:** `/app/relatorios`;
-- **Categoria:** Geral;
-- **Estado:** Operacional;
-- **Dependência:** obras; fontes opcionais em planejamento, financeiro, compras, qualidade, diário, documentos e estoque;
-- **Escopo:** painel executivo, multiobra, metas, alertas, relatórios salvos, snapshots e CSV;
-- **Regras:** RPCs aplicam autorização; valores sensíveis são mascarados; snapshot concluído é imutável.
+- **Rota:** `/app/relatorios`.
+- **Estado:** Operacional.
+- **Dependência:** obras.
+- **Escopo:** dashboards, metas, relatórios salvos, snapshots e CSV.
+- **Regra:** fontes operacionais são acessadas por RPC/view autorizada.
 
 ## `auditoria` — Auditoria
 
-- **Rota:** `/app/auditoria`;
-- **Categoria:** Núcleo;
-- **Estado:** Parcial sistêmico;
-- **Finalidade:** visão unificada de eventos de segurança, acesso e alterações;
-- **Próxima evolução:** Etapa 19;
-- **Regras:** eventos críticos append-only; acesso restrito; sem segredo ou documento integral.
+- **Rota:** `/app/auditoria`.
+- **Estado:** Parcial sistêmico.
+- **Regra:** eventos append-only, sem secrets ou documentos integrais.
+- **Próxima consolidação:** Etapa 19.
 
 ## `administracao` — Administração
 
-- **Rota:** `/app/administracao`;
-- **Categoria:** Núcleo;
-- **Estado:** Operacional;
-- **Escopo:** aplicativos, perfis, usuários, escopos, overrides e justificativas;
-- **Regras:** negação explícita prevalece; alteração administrativa gera auditoria.
+- **Rota:** `/app/administracao`.
+- **Estado:** Operacional.
+- **Escopo:** aplicativos, perfis, usuários, capacidades, escopos e overrides.
+- **Regra:** negação explícita prevalece e alteração administrativa é auditada.
 
 ## Definition of Done de módulo
 
@@ -310,14 +252,12 @@ Um módulo somente muda para `Operacional` quando possui:
 
 - contrato documentado;
 - rota e interface funcional;
-- schema/migrations reproduzíveis;
-- migration aplicada e homologada;
+- migrations reproduzíveis;
 - RLS e privilégios mínimos;
 - autorização por capacidade e escopo;
 - índices necessários;
-- validação estrutural;
-- testes de regras centrais e concorrência quando houver saldo;
-- build e CI verdes;
+- operações transacionais/idempotentes;
+- testes centrais;
+- CI verde;
 - documentação histórica;
-- inventário, SPEC e roadmap atualizados;
-- procedimento de recuperação atualizado quando necessário.
+- inventário, roadmap e recuperação atualizados.
