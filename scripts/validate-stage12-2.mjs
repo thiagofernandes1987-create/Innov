@@ -13,7 +13,8 @@ const migrations=[
   "supabase/migrations/20260720054320_stage12_2_signature_privileges.sql",
   "supabase/migrations/20260720054330_stage12_2_client_signature_visibility.sql",
   "supabase/migrations/20260720054340_stage12_2_delivery_processing_status.sql",
-  "supabase/migrations/20260720054341_stage12_2_delivery_worker_lock.sql"
+  "supabase/migrations/20260720054341_stage12_2_delivery_worker_lock.sql",
+  "supabase/migrations/20260720054350_stage12_2_signature_indexes.sql"
 ];
 const files=[
   ...migrations,
@@ -39,7 +40,7 @@ const fieldTypes=["SIGNATURE","INITIALS","DATE","FULL_NAME","TEXT","CHECKBOX","P
 for(const table of tables)if(!sql.includes(`public.${table}`))failures.push(`Tabela ausente: ${table}`);
 for(const fn of functions)if(!sql.includes(`function public.${fn}`))failures.push(`Função ausente: ${fn}`);
 for(const type of fieldTypes)if(!sql.includes(`'${type}'`))failures.push(`Tipo de campo ausente: ${type}`);
-for(const token of ["token_sha256","original_sha256","rendered_pdf_sha256","final_pdf_sha256","audit_artifact_sha256","enable row level security","signature-artifacts","security definer","service_role","layout_frozen_at","client_released_at"]){if(!sql.toLowerCase().includes(token.toLowerCase()))failures.push(`Controle ausente: ${token}`);}
+for(const token of ["token_sha256","original_sha256","rendered_pdf_sha256","final_pdf_sha256","audit_artifact_sha256","enable row level security","signature-artifacts","security definer","service_role","layout_frozen_at","client_released_at","signature_envelopes_document_version_full_idx","signature_delivery_events_recipient_user_idx"]){if(!sql.toLowerCase().includes(token.toLowerCase()))failures.push(`Controle ausente: ${token}`);}
 const publicActions=fs.readFileSync(path.join(root,"app/actions/public-signing.ts"),"utf8");
 const internalActions=fs.readFileSync(path.join(root,"app/actions/advanced-signatures.ts"),"utf8");
 const conversionWorker=fs.readFileSync(path.join(root,"scripts/run-signature-conversion-worker.mjs"),"utf8");
