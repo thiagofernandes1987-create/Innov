@@ -6,6 +6,8 @@ on:
     branches:
       - main
       - "feature/**"
+      - "chore/**"
+      - "docs/**"
 
 permissions:
   contents: read
@@ -40,6 +42,8 @@ jobs:
           corepack prepare pnpm@11.15.0 --activate
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Validate canonical documentation
+        run: pnpm validate:docs
       - name: Validate Stage 9 structure
         run: pnpm validate:stage9
       - name: Validate Stage 12 structure
