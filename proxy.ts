@@ -34,21 +34,21 @@ export async function proxy(request: NextRequest) {
   const {data:{user}}=await supabase.auth.getUser();
   if(isProtected&&!user){const login=request.nextUrl.clone();login.pathname="/login";login.searchParams.set("redirect",`${request.nextUrl.pathname}${request.nextUrl.search}`);return NextResponse.redirect(login);}
 
-  const module=moduleForPath(request.nextUrl.pathname);
-  if(user&&request.nextUrl.pathname.startsWith("/app/")&&module){
+  const matchedModule=moduleForPath(request.nextUrl.pathname);
+  if(user&&request.nextUrl.pathname.startsWith("/app/")&&matchedModule){
     const {data:membership}=await supabase.from("organization_memberships").select("organization_id,role").eq("user_id",user.id).eq("active",true).limit(1).maybeSingle();
     if(!membership){const denied=request.nextUrl.clone();denied.pathname="/acesso-negado";return NextResponse.redirect(denied);}
 
     const {data:allowed,error}=await supabase.rpc("has_effective_capability",{
       p_organization_id:membership.organization_id,
-      p_application_key:module.key,
+      p_application_key:matchedModule.key,
       p_capability_key:"read",
       p_scope_id:null
     });
 
-    const legacyAllowed=legacyAdmin.has(String(membership.role))||(legacyModules[String(membership.role)]??[]).includes(module.key);
+    const legacyAllowed=legacyAdmin.has(String(membership.role))||(legacyModules[String(membership.role)]??[]).includes(matchedModule.key);
     if((!error&&allowed!==true)||(error&&!legacyAllowed)){
-      const denied=request.nextUrl.clone();denied.pathname="/acesso-negado";denied.searchParams.set("module",module.key);return NextResponse.redirect(denied);
+      const denied=request.nextUrl.clone();denied.pathname="/acesso-negado";denied.searchParams.set("module",matchedModule.key);return NextResponse.redirect(denied);
     }
   }
 
