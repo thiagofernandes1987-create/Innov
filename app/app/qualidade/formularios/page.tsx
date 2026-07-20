@@ -1,0 +1,11 @@
+import Link from "next/link";
+import { requireCapability } from "@/lib/authorization";
+
+export const dynamic="force-dynamic";
+const kindLabels:Record<string,string>={FVS:"FVS · Serviço",FVM:"FVM · Material",INTERNAL_FORM:"Formulário interno",CLIENT_FORM:"Formulário do cliente",SURVEY:"Pesquisa"};
+export default async function QualityForms(){
+  const context=await requireCapability("qualidade","read");
+  const{data:templates}=await context.supabase.from("quality_form_templates").select("*,quality_form_versions!quality_form_templates_current_version_id_fkey(version_number,schema_json,frozen_at)").eq("organization_id",context.organizationId).order("updated_at",{ascending:false});
+  return <main className="content quality-app"><Link className="back-link" href="/app/qualidade">← Qualidade</Link><section className="page-heading"><div><span className="badge">MODELOS VERSIONADOS</span><h1>FVS, FVM e formulários</h1><p>Crie internamente, publique uma versão e distribua para equipe, cliente ou pesquisa pública.</p></div><Link className="button button-primary" href="/app/qualidade/formularios/novo">Criar modelo</Link></section>
+  <section className="quality-template-grid">{(templates??[]).map((template:any)=>{const version=Array.isArray(template.quality_form_versions)?template.quality_form_versions[0]:template.quality_form_versions;const fields=Array.isArray(version?.schema_json?.fields)?version.schema_json.fields.length:0;return <Link className="card card-pad quality-template-card" href={`/app/qualidade/formularios/${template.id}`} key={template.id}><div><span className="badge">{kindLabels[template.kind]??template.kind}</span><span className={`badge ${template.status==="PUBLISHED"?"badge-success":"badge-warning"}`}>{template.status}</span></div><h2>{template.title}</h2><p>{template.description}</p><dl><div><dt>Código</dt><dd>{template.code}</dd></div><div><dt>Versão</dt><dd>V{version?.version_number??1}</dd></div><div><dt>Campos</dt><dd>{fields}</dd></div><div><dt>Escopo</dt><dd>{template.scope}</dd></div></dl><span className="text-link">Configurar e distribuir →</span></Link>})}{!templates?.length&&<div className="empty-state card card-pad"><h2>Nenhum modelo</h2><p>Comece por uma FVS, FVM, formulário do cliente ou pesquisa.</p></div>}</section></main>;
+}
