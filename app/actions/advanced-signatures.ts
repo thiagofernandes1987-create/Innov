@@ -157,7 +157,13 @@ async function embedFieldFile(pdf:PDFDocument,pageIndex:number,path:string,mimeT
   const bytes=new Uint8Array(await data.arrayBuffer());
   const image=mimeType==="image/png"?await pdf.embedPng(bytes):mimeType==="image/jpeg"?await pdf.embedJpg(bytes):null;
   if(!image)return false;
-  pdf.getPage(pageIndex).drawImage(image,{x,y,width,height,preserveAspectRatio:true});
+  const fit=image.scaleToFit(width,height);
+  pdf.getPage(pageIndex).drawImage(image,{
+    x:x+(width-fit.width)/2,
+    y:y+(height-fit.height)/2,
+    width:fit.width,
+    height:fit.height
+  });
   return true;
 }
 
