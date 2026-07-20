@@ -1,6 +1,6 @@
 # Histórico técnico das etapas
 
-Os arquivos em `docs/` preservam decisões, migrations, testes e limitações de cada etapa. Eles são históricos; a especificação atual está em `diretrizes/`.
+Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e planos aprovados. Eles são históricos ou de planejamento; a especificação atual permanece em `diretrizes/`.
 
 ## Comercial, contratos e homologação
 
@@ -25,16 +25,14 @@ Os arquivos em `docs/` preservam decisões, migrations, testes e limitações de
 - [`docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md`](../docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md) — contas, parcelas, medições, baixas e caixa.
 - [`docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md`](../docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md) — dashboards, metas, snapshots e exportações.
 
-## Próxima documentação
+## Estoque e evolução logística
 
-A Etapa 17 deve criar:
+- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](../docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md) — estoque operacional, reservas, ativos, inventário físico, migrations e homologação.
+- [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — fila aprovada de WMS avançado, endereçamento, RFID, ressuprimento, roteirização, fiscal e depreciação.
 
-- `docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`;
-- atualização do SPEC;
-- atualização do inventário;
-- atualização do contrato do módulo `estoque`;
-- atualização do roadmap;
-- atualização do procedimento de recuperação se surgir worker, bucket ou segredo novo.
+## Etapas intermediárias previstas
+
+As Etapas 18, 19 e 20 estão descritas em `diretrizes/ROADMAP.md`. Documentos técnicos próprios serão criados quando cada etapa entrar em execução.
 
 ## Regra de preservação
 
@@ -42,4 +40,5 @@ A Etapa 17 deve criar:
 - não usar histórico antigo como especificação atual;
 - registrar correções por novo documento/adendo ou atualização do canônico;
 - manter links funcionando no repositório;
-- incluir todo novo documento neste índice.
+- incluir todo novo documento neste índice;
+- distinguir claramente etapa implementada, em execução e apenas planejada.
