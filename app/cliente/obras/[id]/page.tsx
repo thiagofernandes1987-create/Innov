@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { requireClientContext } from "@/lib/auth";
 import { formatDate, formatPercent, statusBadge, taskStatusLabels } from "@/lib/stage12";
@@ -49,7 +50,7 @@ export default async function ClientProjectDetailPage({ params }: { params: Prom
         <article className="card card-pad"><h2>Atualizações de campo</h2><div style={{ marginTop: 14 }}>{(logsResult.data ?? []).map((log) => <div key={log.id} style={{ padding: "11px 0", borderBottom: "1px solid var(--border)" }}><strong>{formatDate(log.log_date)}</strong><p className="muted">{log.summary || log.executed_activities || "Atualização da obra"}</p></div>)}{!logsResult.data?.length ? <p className="muted">Nenhum diário foi liberado.</p> : null}</div></article>
       </section>
 
-      <section style={{ marginTop: 22 }}><h2>Fotos e vídeos liberados</h2><div className="media-grid" style={{ marginTop: 14 }}>{(mediaResult.data ?? []).map((media) => { const url = signedByPath.get(media.storage_path); const image = media.mime_type.startsWith("image/"); return <article className="media-card" key={media.id}><a href={url ?? "#"} target="_blank" rel="noreferrer"><div className="media-preview">{image && url ? <img src={url} alt={media.caption || media.file_name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <strong>{media.mime_type.startsWith("video/") ? "Vídeo" : "Arquivo"}</strong>}</div></a><div className="card-pad"><strong>{media.file_name}</strong><p className="muted">{media.caption || "Sem legenda"}</p></div></article>; })}{!mediaResult.data?.length ? <p className="muted">Nenhuma mídia liberada.</p> : null}</div></section>
+      <section style={{ marginTop: 22 }}><h2>Fotos e vídeos liberados</h2><div className="media-grid" style={{ marginTop: 14 }}>{(mediaResult.data ?? []).map((media) => { const url = signedByPath.get(media.storage_path); const image = media.mime_type.startsWith("image/"); return <article className="media-card" key={media.id}><a href={url ?? "#"} target="_blank" rel="noreferrer"><div className="media-preview" style={{ position:"relative" }}>{image && url ? <Image src={url} alt={media.caption || media.file_name} fill sizes="(max-width: 700px) 100vw, 33vw" unoptimized style={{ objectFit:"cover" }} /> : <strong>{media.mime_type.startsWith("video/") ? "Vídeo" : "Arquivo"}</strong>}</div></a><div className="card-pad"><strong>{media.file_name}</strong><p className="muted">{media.caption || "Sem legenda"}</p></div></article>; })}{!mediaResult.data?.length ? <p className="muted">Nenhuma mídia liberada.</p> : null}</div></section>
     </main>
   );
 }

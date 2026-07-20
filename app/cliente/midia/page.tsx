@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { requireClientContext } from "@/lib/auth";
 import { formatDate } from "@/lib/stage12";
 import { singleRelation } from "@/lib/supabase/relations";
@@ -25,7 +26,7 @@ export default async function ClientMediaPage() {
           const log = singleRelation(media.daily_logs);
           const url = signedByPath.get(media.storage_path);
           const image = media.mime_type.startsWith("image/");
-          return <article className="media-card" key={media.id}><a href={url ?? "#"} target="_blank" rel="noreferrer"><div className="media-preview">{image && url ? <img src={url} alt={media.caption || media.file_name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <strong>{media.mime_type.startsWith("video/") ? "Reproduzir vídeo" : "Abrir arquivo"}</strong>}</div></a><div className="card-pad"><span className="badge">{project?.code || "OBRA"}</span><h3>{media.caption || media.file_name}</h3><p className="muted">{project?.name || ""}</p><p className="muted">{formatDate(log?.log_date || media.captured_at?.slice(0, 10) || media.created_at.slice(0, 10))}</p></div></article>;
+          return <article className="media-card" key={media.id}><a href={url ?? "#"} target="_blank" rel="noreferrer"><div className="media-preview" style={{ position: "relative" }}>{image && url ? <Image src={url} alt={media.caption || media.file_name} fill sizes="(max-width: 700px) 100vw, 33vw" unoptimized style={{ objectFit: "cover" }} /> : <strong>{media.mime_type.startsWith("video/") ? "Reproduzir vídeo" : "Abrir arquivo"}</strong>}</div></a><div className="card-pad"><span className="badge">{project?.code || "OBRA"}</span><h3>{media.caption || media.file_name}</h3><p className="muted">{project?.name || ""}</p><p className="muted">{formatDate(log?.log_date || media.captured_at?.slice(0, 10) || media.created_at.slice(0, 10))}</p></div></article>;
         })}
         {!data?.length ? <article className="card card-pad"><strong>Nenhuma mídia foi liberada.</strong></article> : null}
       </section>

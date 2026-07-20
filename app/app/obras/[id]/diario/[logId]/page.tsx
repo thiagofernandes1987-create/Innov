@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
   addDailyLogActivity,
@@ -112,7 +113,7 @@ export default async function DailyLogDetailPage({
         {(mediaResult.data ?? []).map((media) => {
           const signedUrl = signedByPath.get(media.storage_path);
           const image = media.mime_type.startsWith("image/");
-          return <article className="media-card" key={media.id}><a href={signedUrl ?? "#"} target="_blank" rel="noreferrer"><div className="media-preview">{image && signedUrl ? <img src={signedUrl} alt={media.caption || media.file_name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <strong>{media.mime_type.startsWith("video/") ? "Vídeo" : "Documento"}</strong>}</div></a><div className="card-pad"><strong>{media.file_name}</strong><p className="muted">{media.caption || "Sem legenda"}</p>{media.client_visible ? <span className="badge badge-success">Cliente</span> : <span className="badge">Interno</span>}</div></article>;
+          return <article className="media-card" key={media.id}><a href={signedUrl ?? "#"} target="_blank" rel="noreferrer"><div className="media-preview" style={{ position:"relative" }}>{image && signedUrl ? <Image src={signedUrl} alt={media.caption || media.file_name} fill sizes="(max-width: 700px) 100vw, 33vw" unoptimized style={{ objectFit:"cover" }} /> : <strong>{media.mime_type.startsWith("video/") ? "Vídeo" : "Documento"}</strong>}</div></a><div className="card-pad"><strong>{media.file_name}</strong><p className="muted">{media.caption || "Sem legenda"}</p>{media.client_visible ? <span className="badge badge-success">Cliente</span> : <span className="badge">Interno</span>}</div></article>;
         })}
       </section>
 
