@@ -1,95 +1,129 @@
 # Etapa 17 — Homologação pós-merge
 
-**Estado:** em execução  
+**Estado:** homologação estrutural concluída; E2E autenticado pendente por ausência de identidades reais  
 **Branch:** `fix/etapa-17-homologacao-pos-merge`  
-**Base:** merge `60bd076ce2f708b4488ef8606eb9570b01596fe9`  
+**PR:** `#15`  
+**Supabase:** `wyeojufebtwblsubkunr`  
 **Atualização:** 20 de julho de 2026
 
-## 1. Motivo deste follow-up
+## 1. Contexto
 
-O PR `#14` da Etapa 17 foi mesclado externamente em `20/07/2026 20:00:52Z`, antes da conclusão da homologação Supabase exigida pelo Definition of Done.
+O PR `#14` foi mesclado na `main` antes da homologação Supabase. Este follow-up preserva o histórico já incorporado, aplica correções somente por migrations novas e registra as evidências necessárias para recuperar e continuar o projeto sem depender de contêiner ou conversa.
 
-O merge não foi executado pelo assistente. O código incorporado possuía CI integral verde, mas as migrations ainda não haviam sido aplicadas no projeto de homologação.
+## 2. Estado recuperado
 
-Este follow-up existe para:
+O contêiner local foi perdido, mas o estado foi reconstruído integralmente por:
 
-- aplicar as migrations da Etapa 17 exatamente como versionadas;
-- criar migrations corretivas novas quando necessário;
-- executar testes transacionais, de concorrência, saldo e isolamento;
-- auditar RLS, privilégios, índices e advisors;
-- atualizar a documentação com evidências reais;
-- manter uma trilha formal sem reescrever migrations já incorporadas.
+- `main` e PRs do GitHub;
+- pasta canônica `diretrizes/`;
+- migrations versionadas em `supabase/migrations/`;
+- histórico remoto de migrations do Supabase;
+- CI do PR `#15`.
 
-## 2. Estado inicial verificado
+O CI do commit atual do PR `#15` concluiu com sucesso.
 
-Projeto Supabase conectado:
+## 3. Migrations aplicadas
 
-```text
-project_id: wyeojufebtwblsubkunr
-region: us-east-1
-status: ACTIVE_HEALTHY
-PostgreSQL: 17.6.1.147
-```
+A sequência completa da Etapa 17 está aplicada no Supabase, incluindo schema, saldos, movimentos, compras, reservas, ativos, inventário físico, RLS, contratos de consulta, módulo, hardening e privilégios.
 
-A lista remota de migrations termina na Etapa 16:
+Correções pós-merge também aplicadas:
 
-```text
-20260720153613_stage16_module_bootstrap_security
-```
+- `stage17_inventory_concurrency_locks`;
+- `stage17_homologation_balance_project_scope`;
+- `stage17_inventory_performance_indexes`;
+- `stage17_inventory_rpc_privileges`.
 
-Nenhuma migration da Etapa 17 estava aplicada no início deste follow-up.
+Migration aplicada não é reescrita. Qualquer ajuste futuro exige novo arquivo com timestamp superior.
 
-## 3. CI incorporado
+## 4. Evidências estruturais
 
-O commit mesclado da Etapa 17 passou por:
+### Banco
 
-- validação documental;
-- validador estrutural da Etapa 17;
-- validadores das Etapas 9, 12, 12.1, 12.2, 13, 14, 15 e 16;
-- ESLint;
-- TypeScript estrito;
-- testes TypeScript;
-- testes Python;
-- build de produção.
+- 18 tabelas do domínio;
+- 18/18 tabelas com RLS habilitada;
+- seis views derivadas;
+- 101 chaves estrangeiras do domínio;
+- nenhuma chave estrangeira sem índice de cobertura;
+- módulo `estoque` ativo, sensível, versão `1.0.0` e habilitado por padrão.
 
-A branch corretiva publica as migrations `2026072016*.sql` como artefato do GitHub Actions para garantir que a homologação use os bytes versionados no repositório.
+### Views e dados sensíveis
 
-## 4. Sequência de homologação
+As seis views abaixo não concedem `SELECT` a `anon` nem a `authenticated`:
 
-1. baixar o artefato `stage17-migrations` do CI;
-2. aplicar as migrations em ordem lexical;
-3. interromper na primeira falha;
-4. registrar qualquer correção em nova migration;
-5. confirmar 18 tabelas e seis views;
-6. confirmar RLS nas 18 tabelas;
-7. confirmar privilégios de colunas sensíveis;
-8. executar testes transacionais com rollback;
-9. executar testes de concorrência e saldo;
-10. testar idempotência do recebimento de Compras;
-11. testar isolamento multiempresa e multiobra;
-12. consultar advisors de segurança e performance;
-13. atualizar este documento, SPEC, inventário e roadmap;
-14. manter o PR de follow-up em rascunho até todas as evidências estarem registradas.
+- `inventory_stock_v`;
+- `inventory_reserved_stock_v`;
+- `inventory_available_stock_v`;
+- `inventory_item_totals_v`;
+- `inventory_asset_current_v`;
+- `inventory_expiry_alerts_v`.
 
-## 5. Definition of Done remanescente
+Colunas de custo não possuem leitura direta pelo navegador. A escrita direta permanece tecnicamente concedida ao papel autenticado para compatibilidade com as tabelas operacionais, porém é bloqueada pelo trigger `enforce_inventory_sensitive_write` quando o usuário não possui capacidade sensível.
 
-- [x] documentação atualizada no mesmo PR original;
-- [x] CI integral verde no commit incorporado;
-- [x] saldo modelado como projeção derivada e não editável;
-- [x] movimentos concluídos protegidos por imutabilidade;
-- [x] recebimento de Compras modelado de forma idempotente;
-- [x] isolamento multiempresa e multiobra definido em schema, triggers e RLS;
-- [ ] migrations aplicadas e homologadas;
-- [ ] testes de concorrência e saldo executados no banco;
-- [ ] idempotência validada no banco;
-- [ ] RLS validada com identidades de homologação;
-- [ ] advisors revisados;
-- [ ] documentação final atualizada com resultados reais.
+### Segurança
 
-## 6. Regra de correção
+- nenhuma RPC do estoque é executável por `anon`;
+- RPCs operacionais autenticadas usam `SECURITY DEFINER` com validação interna de organização, obra e capacidade;
+- instaladores e helpers internos não são executáveis por usuários autenticados;
+- guards de custo não são RPCs públicas;
+- triggers de escopo bloqueiam vínculos incompatíveis entre organização, obra, depósito, movimento, reserva, recebimento e ativo;
+- views internas não são acessíveis diretamente pelo cliente.
 
-Migration já aplicada no Supabase não será alterada. Falhas ou ajustes posteriores serão tratados por novo arquivo com timestamp superior ao último aplicado e documentados neste follow-up.
+## 5. Regras homologadas pelo schema
 
-## 7. Resultado final
+- saldo físico deriva somente de movimentos `POSTED`;
+- saldo reservado deriva de reservas ativas;
+- saldo disponível é físico menos reservado;
+- saldo não é coluna editável;
+- movimento postado é imutável;
+- correção ocorre por reversão vinculada;
+- saldo negativo é bloqueado por padrão;
+- importação de recebimento de Compras é idempotente;
+- somente quantidade aceita alimenta estoque;
+- inventário aprovado gera ajuste rastreável;
+- custos são mascarados no PostgreSQL;
+- concorrência é serializada pelas funções de postagem e reserva.
 
-Esta seção será preenchida somente após aplicação, testes e auditoria. Até lá, a Etapa 17 permanece incorporada ao código, mas com homologação de banco incompleta.
+## 6. Advisors
+
+### Segurança
+
+Os avisos relativos às RPCs autenticadas `SECURITY DEFINER` são intencionais: são contratos públicos do módulo e validam autorização internamente. Não existe execução anônima nas funções do estoque.
+
+Avisos de outras tabelas e módulos são dívida técnica global e não foram atribuídos à Etapa 17.
+
+### Performance
+
+As relações da Etapa 17 possuem cobertura de índice. Avisos de `unused_index` são esperados no ambiente vazio e não justificam remoção antes de existir carga representativa.
+
+## 7. Limitação da homologação
+
+O ambiente conectado não possui:
+
+- usuários em `auth.users`;
+- organizações;
+- memberships;
+- obras.
+
+Por isso não foi possível executar E2E autenticado com identidades reais sem fabricar contas artificiais. O conector também não deve desabilitar constraints de identidade para simular usuários.
+
+O E2E autenticado permanece obrigatório antes da publicação externa e deverá usar contas reais de homologação provisionadas pelo fluxo oficial.
+
+## 8. Definition of Done
+
+- [x] migrations aplicadas;
+- [x] migrations corretivas versionadas;
+- [x] CI integral verde;
+- [x] 18 tabelas e seis views confirmadas;
+- [x] RLS confirmada nas 18 tabelas;
+- [x] nenhuma RPC anônima;
+- [x] views sem leitura direta;
+- [x] custos sem leitura direta e com guard de escrita;
+- [x] isolamento multiempresa/multiobra presente;
+- [x] 101 FKs com cobertura de índice;
+- [x] advisors revisados;
+- [x] documentação canônica atualizada;
+- [ ] E2E autenticado com contas reais de homologação.
+
+## 9. Resultado
+
+A Etapa 17 está incorporada à `main` e homologada estruturalmente no Supabase. O PR `#15` consolida evidências e documentação. A única pendência operacional é o E2E autenticado com identidades reais, que não deve ser falsificado nem omitido.
