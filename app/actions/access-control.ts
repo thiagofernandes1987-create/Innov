@@ -64,8 +64,15 @@ export async function assignProfileToUser(formData:FormData){
 export async function setUserCapabilityOverride(formData:FormData){
   const context=await requireAccessAdministration();
   const userId=value(formData,"userId");const moduleKey=value(formData,"applicationKey");const capabilityKey=value(formData,"capabilityKey");const effect=value(formData,"effect");const reason=value(formData,"reason");
+  const scopeType=value(formData,"scopeType")||"ORGANIZATION";const scopeId=value(formData,"scopeId")||null;
   if(!userId||!moduleKey||!capabilityKey||!["ALLOW","DENY"].includes(effect)||!reason)fail("/app/administracao/usuarios","Preencha usuário, aplicativo, capacidade, efeito e justificativa.");
-  const{error}=await context.supabase.rpc("set_user_module_capability_override",{p_organization_id:context.organizationId,p_user_id:userId,p_module_key:moduleKey,p_capability_key:capabilityKey,p_effect:effect,p_expires_at:null,p_reason:reason});
+  if(!["ORGANIZATION","PROJECT"].includes(scopeType))fail("/app/administracao/usuarios","Escopo da exceção inválido.");
+  if(scopeType==="PROJECT"&&!scopeId)fail("/app/administracao/usuarios","Informe a obra da exceção.");
+
+  const call=scopeType==="PROJECT"
+    ?context.supabase.rpc("set_project_module_capability_override",{p_project_id:scopeId,p_user_id:userId,p_module_key:moduleKey,p_capability_key:capabilityKey,p_effect:effect,p_expires_at:null,p_reason:reason})
+    :context.supabase.rpc("set_user_module_capability_override",{p_organization_id:context.organizationId,p_user_id:userId,p_module_key:moduleKey,p_capability_key:capabilityKey,p_effect:effect,p_expires_at:null,p_reason:reason});
+  const{error}=await call;
   if(error)fail("/app/administracao/usuarios",error.message);
   revalidatePath("/app");revalidatePath("/app/administracao/usuarios");
 }
