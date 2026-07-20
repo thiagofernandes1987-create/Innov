@@ -25,6 +25,8 @@ const requiredHistorical=[
  "docs/ETAPA-14-COMPRAS-SUPRIMENTOS.md",
  "docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md",
  "docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md",
+ "docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md",
+ "docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md",
  "docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md",
  "docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md"
 ];
@@ -51,6 +53,8 @@ if(errors.length===0){
  const documentationPolicy=fs.readFileSync("diretrizes/PADRAO-DOCUMENTACAO.md","utf8");
  const history=fs.readFileSync("diretrizes/HISTORICO-ETAPAS.md","utf8");
  const readme=fs.readFileSync("README.md","utf8");
+ const stage17=fs.readFileSync("docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md","utf8");
+ const stage21=fs.readFileSync("docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md","utf8");
  const packageJson=JSON.parse(fs.readFileSync("package.json","utf8"));
 
  if(uniqueKeys.length<20)errors.push(`Registro modular inesperadamente pequeno: ${uniqueKeys.length} módulos.`);
@@ -65,12 +69,25 @@ if(errors.length===0){
   "Modelo de autorização",
   "Aplicativos modulares",
   "Próxima etapa oficial",
-  "Estoque, Inventário e Almoxarifado"
+  "Estoque, Inventário e Almoxarifado",
+  "Etapa 21",
+  "WMS avançado"
  ];
  for(const token of requiredSpecTokens)if(!spec.includes(token))errors.push(`SPEC sem seção obrigatória: ${token}`);
 
- for(const token of["Etapa 17","Estoque, Inventário e Almoxarifado","Definition of Done adicional"])
-  if(!roadmap.includes(token))errors.push(`Roadmap incompleto: ${token}`);
+ for(const token of[
+  "Etapa 17",
+  "Estoque, Inventário e Almoxarifado",
+  "Definition of Done adicional",
+  "Etapa 21",
+  "WMS avançado",
+  "endereçamento automatizado",
+  "RFID em tempo real",
+  "ressuprimento automático sem aprovação",
+  "roteirização logística",
+  "integração fiscal de entrada",
+  "depreciação contábil oficial"
+ ])if(!roadmap.includes(token))errors.push(`Roadmap incompleto: ${token}`);
 
  for(const token of["git clone","supabase/migrations","pnpm validate:docs","Service Role","Checklist final de recuperação"])
   if(!recovery.includes(token))errors.push(`Recuperação incompleta: ${token}`);
@@ -86,6 +103,21 @@ if(errors.length===0){
  for(const token of["diretrizes/SPEC.md","diretrizes/INVENTARIO.md","diretrizes/RECUPERACAO.md","pnpm validate:docs"])
   if(!readme.includes(token))errors.push(`README sem referência obrigatória: ${token}`);
 
+ for(const token of["documentação atualizada no mesmo PR","migration aplicada e homologada","testes de concorrência e saldo","CI verde"])
+  if(!stage17.includes(token))errors.push(`Etapa 17 sem Definition of Done obrigatório: ${token}`);
+
+ for(const token of[
+  "WMS avançado",
+  "Endereçamento automatizado",
+  "RFID em tempo real",
+  "Ressuprimento automático sem aprovação",
+  "Roteirização logística",
+  "Integração fiscal de entrada",
+  "Depreciação contábil oficial",
+  "Definition of Done adicional",
+  "CI verde"
+ ])if(!stage21.includes(token))errors.push(`Plano da Etapa 21 incompleto: ${token}`);
+
  if(!spec.includes(`**Versão implementada da plataforma:** ${packageJson.version}`))
   errors.push(`Versão da SPEC diverge do package.json (${packageJson.version}).`);
 
@@ -96,7 +128,7 @@ if(errors.length===0){
   /sk_[a-zA-Z0-9_-]{12,}/,
   /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/
  ];
- for(const file of requiredCanonical){
+ for(const file of [...requiredCanonical,"docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md","docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md"]){
   const content=fs.readFileSync(file,"utf8");
   for(const pattern of forbiddenSecretPatterns){
    if(pattern.test(content))errors.push(`Possível segredo encontrado em ${file}: ${pattern}`);
@@ -110,4 +142,4 @@ if(errors.length){
  process.exit(1);
 }
 
-console.log(`Documentação validada: ${requiredCanonical.length} documentos canônicos, ${requiredHistorical.length} históricos e todos os módulos do registry inventariados.`);
+console.log(`Documentação validada: ${requiredCanonical.length} documentos canônicos, ${requiredHistorical.length} históricos/planejados e todos os módulos do registry inventariados.`);
