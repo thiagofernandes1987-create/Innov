@@ -32,13 +32,13 @@ const LEGACY_MODULES: Record<string, readonly string[]> = {
   SUPER_ADMIN: MODULE_REGISTRY.map(item => item.key),
   DIRECAO: MODULE_REGISTRY.map(item => item.key),
   ADMINISTRADOR: MODULE_REGISTRY.map(item => item.key),
-  COMERCIAL: ["dashboard","crm","clientes","propostas","contratos","assinaturas"],
-  FINANCEIRO: ["dashboard","financeiro","orcamentos","clientes","contratos","aditivos","assinaturas","documentos","compras"],
-  ORCAMENTISTA: ["dashboard","orcamentos","clientes","documentos","compras"],
-  GESTOR_OBRAS: ["dashboard","clientes","obras","planejamento","tarefas","diario","equipes","documentos","qualidade","compras"],
-  ENGENHEIRO: ["dashboard","obras","planejamento","tarefas","diario","documentos","qualidade","compras"],
-  QUALIDADE: ["dashboard","obras","diario","documentos","qualidade","compras"],
-  SAC: ["dashboard","clientes","obras","sac"],
+  COMERCIAL: ["dashboard","crm","clientes","propostas","contratos","assinaturas","relatorios"],
+  FINANCEIRO: ["dashboard","financeiro","orcamentos","clientes","contratos","aditivos","assinaturas","documentos","compras","estoque","relatorios"],
+  ORCAMENTISTA: ["dashboard","orcamentos","clientes","documentos","compras","estoque","relatorios"],
+  GESTOR_OBRAS: ["dashboard","clientes","obras","planejamento","tarefas","diario","equipes","documentos","qualidade","compras","estoque","relatorios"],
+  ENGENHEIRO: ["dashboard","obras","planejamento","tarefas","diario","documentos","qualidade","compras","estoque","relatorios"],
+  QUALIDADE: ["dashboard","obras","diario","documentos","qualidade","compras","estoque","relatorios"],
+  SAC: ["dashboard","clientes","obras","sac","relatorios"],
   CLIENTE: ["dashboard"]
 };
 

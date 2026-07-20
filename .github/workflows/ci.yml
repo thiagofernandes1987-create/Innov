@@ -17,7 +17,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate canonical documentation
+        run: node scripts/validate-documentation.mjs
+      - name: Validate Stage 17 inventory
+        run: |
+          set -o pipefail
+          node scripts/validate-stage17.mjs 2>&1 | tee stage17-validation.txt
+      - name: Upload Stage 17 validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage17-validation
+          path: stage17-validation.txt
+          if-no-files-found: error
+          retention-days: 7
+
   quality:
+    needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -42,8 +64,6 @@ jobs:
           corepack prepare pnpm@11.15.0 --activate
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --reporter=append-only
-      - name: Validate canonical documentation
-        run: pnpm validate:docs
       - name: Validate Stage 9 structure
         run: pnpm validate:stage9
       - name: Validate Stage 12 structure
@@ -61,9 +81,29 @@ jobs:
       - name: Validate Stage 16 reports
         run: pnpm validate:stage16
       - name: Lint
-        run: pnpm lint
+        run: |
+          set -o pipefail
+          pnpm lint 2>&1 | tee lint-report.txt
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report
+          path: lint-report.txt
+          if-no-files-found: error
+          retention-days: 7
       - name: Typecheck
-        run: pnpm typecheck
+        run: |
+          set -o pipefail
+          pnpm typecheck 2>&1 | tee typecheck-report.txt
+      - name: Upload TypeScript report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typecheck-report
+          path: typecheck-report.txt
+          if-no-files-found: error
+          retention-days: 7
       - name: TypeScript unit tests
         run: pnpm test
       - name: Python quality form tests

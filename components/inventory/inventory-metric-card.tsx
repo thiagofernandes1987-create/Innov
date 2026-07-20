@@ -1,0 +1,1 @@
+export function InventoryMetricCard({label,value,detail,tone="neutral"}:{label:string;value:string;detail:string;tone?:"neutral"|"ok"|"warning"|"critical"}){return <article className={`card inventory-metric inventory-tone-${tone}`}><small>{label}</small><strong>{value}</strong><span>{detail}</span></article>;}

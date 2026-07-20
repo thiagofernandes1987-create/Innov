@@ -6,6 +6,7 @@ import "./quality.css";
 import "./procurement.css";
 import "./finance-operational.css";
 import "./reports.css";
+import "./inventory.css";
 
 export const metadata: Metadata = {
   title: {

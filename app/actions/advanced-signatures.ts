@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { requireCapability } from "@/lib/authorization";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
-import { createSigningToken, hashCanonical, safeFileName, sha256 } from "@/lib/signatures/crypto";
+import { createSigningToken, safeFileName, sha256 } from "@/lib/signatures/crypto";
 
 const PDF_MIME="application/pdf";
 const DOCX_MIME="application/vnd.openxmlformats-officedocument.wordprocessingml.document";
