@@ -64,16 +64,27 @@ Entregas:
 - catálogo, unidades, categorias, depósitos, localizações e lotes;
 - razão imutável de movimentos;
 - saldos físico, reservado e disponível derivados;
-- integração idempotente com recebimentos de Compras;
+- recebimento de Compras integrado de forma idempotente;
 - reservas e consumo por obra;
 - ativos, custódias e manutenção;
 - inventário físico e ajustes;
-- RLS, isolamento multiempresa/multiobra e custos mascarados;
+- RLS, isolamento multiempresa e multiobra e custos mascarados;
 - 18 tabelas, seis views e 101 FKs indexadas.
 
 Pendência antes da publicação externa:
 
 - E2E autenticado com contas reais de homologação. O ambiente atual está vazio e o teste não será falsificado com identidades artificiais.
+
+#### Definition of Done adicional
+
+- documentação atualizada no mesmo PR;
+- migration aplicada e homologada;
+- recebimento de Compras integrado de forma idempotente;
+- saldo não editável diretamente;
+- movimentos concluídos imutáveis;
+- testes de concorrência e saldo;
+- isolamento multiempresa e multiobra;
+- CI verde.
 
 ## Próxima etapa funcional
 
@@ -111,12 +122,13 @@ A Etapa 18 só deve iniciar após o PR `#15` registrar e consolidar a homologaç
 
 Planejado, não implementado:
 
+- WMS avançado;
 - endereçamento automatizado;
-- RFID;
-- ressuprimento automático;
-- roteirização;
-- integração fiscal;
-- depreciação patrimonial oficial.
+- RFID em tempo real;
+- ressuprimento automático sem aprovação;
+- roteirização logística;
+- integração fiscal de entrada;
+- depreciação contábil oficial.
 
 ## Regra de avanço
 
