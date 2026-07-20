@@ -1,5 +1,8 @@
 # Arquitetura canônica — Innovar Platform
 
+**Versão:** 0.17.0  
+**Atualizado em:** 20 de julho de 2026
+
 ## 1. Visão geral
 
 A Innovar Platform é um monólito modular web com banco relacional, autenticação gerenciada, armazenamento privado e workers específicos.
@@ -11,17 +14,18 @@ Next.js 16 / React 19
   ├─ Server Components
   ├─ Server Actions
   ├─ Route Handlers
-  └─ Proxy de sessão/autorização
+  └─ sessão/autorização
   ↓
 Supabase
   ├─ Auth
   ├─ PostgreSQL
   ├─ RLS
+  ├─ RPCs transacionais
   └─ Storage privado
 
 Workers
   ├─ conversão DOCX → PDF
-  └─ entrega de mensagens de assinatura
+  └─ entrega de assinatura
 ```
 
 ## 2. Organização do repositório
@@ -29,20 +33,21 @@ Workers
 ```text
 app/                    rotas, páginas, actions e APIs
 components/             componentes de interface
-lib/                    domínio, autorização, integrações e utilitários
+lib/                    domínio, autorização e integrações
 python/                 motor auxiliar de qualidade
 scripts/                validadores, workers e homologação
-supabase/migrations/     evolução reproduzível do banco
-docs/                   histórico técnico por etapa
-diretrizes/             fonte canônica de produto e recuperação
+supabase/migrations/     evolução append-only do banco
+supabase/tests/          testes SQL reproduzíveis
+docs/                   histórico técnico e evidências
+diretrizes/             especificação canônica e recuperação
 .github/workflows/       CI e homologação
 ```
 
 ## 3. Modularidade
 
-O catálogo está em `lib/modules/registry.ts` e no banco em `app_modules`.
+O catálogo está em `lib/modules/registry.ts` e em `app_modules`.
 
-Um aplicativo possui:
+Cada aplicativo possui:
 
 - chave estável;
 - rota-base;
@@ -50,186 +55,268 @@ Um aplicativo possui:
 - dependências;
 - status por organização;
 - versão instalada;
-- manifesto/configurações;
-- matriz de permissões por perfil.
+- configurações;
+- matriz de permissões.
 
-A remoção visual de um aplicativo não remove dados. Desabilitar módulo impede acesso funcional, mas preserva histórico conforme políticas de retenção.
+Desabilitar módulo preserva dados e histórico. Instalações automáticas não sobrescrevem perfis personalizados.
 
 ## 4. Autorização
 
-### 4.1 Camadas
+### Camadas
 
 1. sessão autenticada;
 2. organização ativa;
 3. módulo habilitado;
-4. perfil e nível de acesso;
-5. capacidade granular;
+4. perfil e nível;
+5. capacidade;
 6. escopo de organização/cliente/obra;
-7. override individual `ALLOW`/`DENY`;
-8. RLS no banco;
+7. override `ALLOW`/`DENY`;
+8. RLS;
 9. políticas de Storage;
-10. checagem interna em RPCs privilegiadas.
+10. autorização interna em RPC privilegiada.
 
-### 4.2 Precedência
+### Precedência
 
 - negação explícita vence permissão;
-- escopo mais específico restringe escopo amplo;
-- usuário sem módulo habilitado não acessa a rota;
-- usuário sem capacidade sensível recebe valores mascarados ou erro;
-- cliente nunca herda acesso interno.
+- escopo específico restringe escopo amplo;
+- módulo desabilitado bloqueia acesso;
+- dado sensível é mascarado sem capacidade;
+- cliente não herda acesso interno.
 
-### 4.3 Ações críticas
+### Ações críticas
 
-Podem exigir:
-
-- MFA AAL2;
-- justificativa;
-- separação de funções;
-- alçada;
-- idempotency key;
-- evento de auditoria.
+Podem exigir MFA AAL2, justificativa, separação de funções, alçada, idempotency key e auditoria.
 
 ## 5. Banco de dados
 
-### 5.1 Convenções
+### Convenções
 
 - `organization_id` em dados multiempresa;
-- `project_id` quando o dado pertence a uma obra;
-- UUID como identificador;
-- timestamps em UTC;
+- `project_id` quando pertence a obra;
+- UUID;
+- timestamps UTC;
 - enums para estados fechados;
 - constraints para invariantes locais;
-- triggers apenas quando a regra precisa ser central e transacional;
+- triggers para integridade central;
 - RPC para operações de múltiplas tabelas;
-- índices em FKs e filtros frequentes de RLS.
+- índices em FKs e filtros de RLS.
 
-### 5.2 Migrations
+### Migrations
 
-- migrations são append-only;
-- arquivo aplicado não é reescrito como correção de ambiente;
-- correção usa nova migration;
-- timestamps precisam ser únicos e crescentes;
-- migration inclui schema, segurança, privilégios, índices e instaladores quando aplicável;
-- alterações de módulo atualizam documentação no mesmo PR.
+- append-only;
+- arquivo aplicado não é reescrito;
+- correção usa novo timestamp;
+- aplicação em ordem lexical;
+- ledger remoto alinhado ao repositório;
+- documentação no mesmo PR.
 
-### 5.3 Views analíticas
+### Views
 
 - preferir `security_invoker=true`;
-- não conceder leitura direta quando a view expõe domínio transversal sensível;
-- encapsular autorização e mascaramento em RPC;
-- não duplicar dados operacionais mutáveis em tabelas analíticas;
-- snapshots são exceção imutável e auditada.
+- não conceder leitura direta de domínio sensível;
+- autorização e mascaramento por RPC;
+- snapshots são imutáveis e auditados.
 
-## 6. Storage
+## 6. Arquitetura do Estoque
 
-- buckets sensíveis são privados;
-- caminho inclui organização e, quando aplicável, obra/entidade;
+### Razão imutável
+
+O saldo não é armazenado como campo editável.
+
+```text
+inventory_movements 1 ── N inventory_movement_lines
+```
+
+Cada linha possui `quantity_delta` assinado. O saldo considera:
+
+- movimentos `POSTED`;
+- movimentos originais `REVERSED`;
+- movimentos `REVERSAL` como contrapartida.
+
+Essa semântica mantém o original no razão e evita dupla contagem.
+
+### Projeções
+
+```text
+inventory_stock_v
+inventory_reserved_stock_v
+inventory_available_stock_v
+inventory_item_totals_v
+inventory_asset_current_v
+inventory_expiry_alerts_v
+```
+
+Todas usam `security_invoker=true` e são consumidas por contratos autorizados.
+
+### Concorrência
+
+A postagem adquire advisory lock transacional por:
+
+```text
+organization_id | warehouse_id | location_id | item_id | lot_id
+```
+
+A chave é estável e os locks são adquiridos em ordem determinística. Na mesma transação são verificados:
+
+- saldo físico;
+- saldo disponível;
+- quantidade reservada;
+- lote e ativo;
+- conservação de transferência;
+- consumo de reserva.
+
+### Isolamento multiobra
+
+- depósito geral não possui obra fixa;
+- depósito exclusivo possui `project_id`;
+- movimento, reserva, importação ou ativo não pode usar depósito exclusivo de outra obra;
+- trigger central `validate_inventory_project_scope` aplica a regra.
+
+### Compras
+
+```text
+recebimento aceito
+→ mapeamento de item e fator
+→ importação idempotente
+→ movimento PROCUREMENT_RECEIPT
+```
+
+Somente quantidade aceita entra. Quantidade rejeitada permanece no domínio de Compras.
+
+### Ativos
+
+Ativo individualizado possui entrada física, patrimônio/série, custódia, devolução e manutenção. Custódia encerrada não é reescrita.
+
+### Inventário físico
+
+```text
+abrir → congelar esperado → contar/recontar
+→ revisar → aprovar → ajustar → encerrar
+```
+
+Inventário postado é imutável.
+
+## 7. Dados sensíveis
+
+Proteção em camadas:
+
+1. capacidade `sensitive`;
+2. RLS;
+3. privilégios por coluna;
+4. RPC com mascaramento;
+5. Server Components;
+6. logs sem valores sensíveis.
+
+No estoque, custo de referência, custo de movimento, aquisição e manutenção não possuem leitura direta ampla.
+
+## 8. Storage
+
+- buckets sensíveis privados;
+- caminho por organização e recurso;
 - upload valida tipo, tamanho e contexto;
-- download usa URL assinada curta ou rota autenticada;
-- metadados e hash ficam no banco;
-- falha transacional remove arquivo órfão quando possível;
-- antivírus é requisito antes da produção externa.
+- download por URL assinada curta ou rota autenticada;
+- hash e metadados no banco;
+- falha remove órfão quando possível;
+- antimalware é requisito de produção.
 
-## 7. Documentos e imutabilidade
+A Etapa 17 não adiciona bucket.
 
-Itens que exigem versão e/ou congelamento:
+## 9. Documentos e imutabilidade
+
+Exigem versão ou congelamento:
 
 - orçamento aprovado;
 - proposta liberada;
-- contrato enviado/assinado;
-- aditivo assinado;
-- baseline de obra;
-- schema de formulário publicado;
-- documento liberado ao cliente;
-- PDF final de assinatura;
-- snapshot de relatório.
+- contrato/aditivo enviado ou assinado;
+- baseline;
+- formulário publicado;
+- documento liberado;
+- PDF final;
+- snapshot;
+- movimento de estoque postado;
+- inventário postado;
+- custódia encerrada.
 
-Mudança após congelamento cria nova versão, nunca edição silenciosa.
+Correção cria nova versão, evento ou contrapartida.
 
-## 8. Integrações
+## 10. Integrações
 
-### 8.1 Assinatura
+### Assinatura
 
-Adapter interno suporta `sandbox` e contratos para providers externos. Webhook exige HMAC, timestamp, proteção contra replay e idempotência.
+Adapter interno, sandbox e contratos para providers. Webhook exige HMAC, timestamp, replay protection e idempotência.
 
-### 8.2 E-mail
+### E-mail
 
-Entrega de assinatura é desacoplada por fila/worker e webhook HMAC. Nenhuma credencial fica no cliente.
+Fila/worker e webhook HMAC.
 
-### 8.3 LibreOffice
+### DOCX
 
-Conversão DOCX ocorre em worker headless. Original é preservado; resultado e logs possuem estado de processamento.
+Conversão em LibreOffice headless. Original preservado.
 
-### 8.4 Compras → Financeiro
+### Compras → Financeiro
 
-Pedido aprovado pode originar compromisso financeiro por importação idempotente.
+Pedido aprovado pode originar compromisso idempotente.
 
-### 8.5 Compras → Estoque
+### Compras → Estoque
 
-Na Etapa 17, recebimento aceito deve gerar entrada de estoque por operação idempotente, sem alterar retroativamente o recebimento.
+Recebimento aceito gera entrada idempotente sem reescrever o recebimento.
 
-### 8.6 Módulos → Relatórios
+### Módulos → Relatórios
 
-Relatórios consomem contratos analíticos autorizados, não tabelas internas diretamente na interface.
+Relatórios consomem RPC/view autorizada, não tabelas internas diretamente.
 
-## 9. Frontend
+## 11. Frontend
 
 - TypeScript estrito;
-- componentes server-side por padrão;
-- client components apenas quando houver interação real;
-- formulários com validação server-side;
-- mensagens de erro sem expor SQL ou segredo;
-- acessibilidade de teclado;
-- alternativa textual a drag-and-drop;
-- responsividade para uso em obra;
-- estados vazios, carregamento e acesso negado explícitos.
+- server-side por padrão;
+- client component só para interação;
+- validação server-side;
+- erro sem SQL/secrets;
+- acessibilidade;
+- alternativa a drag-and-drop;
+- responsividade para campo;
+- estados vazios e acesso negado explícitos.
 
-## 10. Observabilidade e auditoria
+## 12. Observabilidade e auditoria
 
-Cada operação crítica deve registrar, conforme domínio:
+Operações críticas registram organização, obra/recurso, ator, evento, data, estado seguro, idempotency key ou hash.
 
-- organização;
-- obra/entidade;
-- ator;
-- evento;
-- data;
-- estado anterior/novo quando seguro;
-- idempotency key ou hash;
-- metadados mínimos.
+Logs não armazenam senha, token bruto, Service Role, documento integral ou dado pessoal desnecessário.
 
-Logs não guardam:
+## 13. Advisors
 
-- senha;
-- token bruto;
-- Service Role;
-- documento integral;
-- assinatura biométrica em texto;
-- dados pessoais além do necessário.
+Aviso do advisor precisa ser classificado, não silenciado indiscriminadamente.
 
-## 11. CI
+- RPC `SECURITY DEFINER` é aceitável quando representa fronteira intencional, possui `search_path` explícito e autorização interna;
+- tabela interna pode ter RLS sem policy de usuário quando acesso ocorre apenas por RPC/worker/trigger;
+- índice não deve ser removido por “unused” em ambiente vazio;
+- FKs sem índice, RLS initplan e políticas permissivas legadas entram nas Etapas 19/20.
 
-Ordem mínima:
+## 14. CI e testes
 
-1. instalar dependências;
-2. validar documentação;
-3. validar estruturas das etapas;
-4. lint;
-5. typecheck;
-6. testes TypeScript;
-7. testes Python;
-8. build.
+Ordem:
 
-A documentação é uma dependência de entrega, não uma tarefa posterior.
+1. documentação;
+2. validadores estruturais;
+3. lint;
+4. typecheck;
+5. testes TypeScript;
+6. testes Python;
+7. build.
 
-## 12. Recuperabilidade
+A Etapa 17 também possui `supabase/tests/stage17_inventory_homologation.sql`, executado em homologação dentro de transação com `ROLLBACK`.
 
-A reconstrução exige somente:
+## 15. Recuperabilidade
+
+A reconstrução exige:
 
 - clone do GitHub;
-- secrets configurados fora do repositório;
-- aplicação ordenada das migrations;
-- instalação das dependências;
-- execução dos validadores;
-- inicialização dos workers necessários.
+- secrets externos;
+- migrations ordenadas;
+- ledger compatível;
+- dependências;
+- validadores;
+- workers;
+- teste SQL e smoke tests.
 
-O procedimento detalhado está em [`RECUPERACAO.md`](./RECUPERACAO.md).
+Procedimento detalhado: [`RECUPERACAO.md`](./RECUPERACAO.md).
