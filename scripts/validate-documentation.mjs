@@ -53,7 +53,6 @@ if(errors.length===0){
  const documentationPolicy=fs.readFileSync("diretrizes/PADRAO-DOCUMENTACAO.md","utf8");
  const history=fs.readFileSync("diretrizes/HISTORICO-ETAPAS.md","utf8");
  const readme=fs.readFileSync("README.md","utf8");
- const stage17=fs.readFileSync("docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md","utf8");
  const stage21=fs.readFileSync("docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md","utf8");
  const packageJson=JSON.parse(fs.readFileSync("package.json","utf8"));
 
@@ -63,7 +62,7 @@ if(errors.length===0){
   if(!inventory.includes(`| \`${key}\` |`))errors.push(`Módulo sem linha no inventário: ${key}`);
  }
 
- const requiredSpecTokens=[
+ for(const token of[
   "Fonte de verdade",
   "Princípios inegociáveis",
   "Modelo de autorização",
@@ -72,8 +71,7 @@ if(errors.length===0){
   "Estoque, Inventário e Almoxarifado",
   "Etapa 21",
   "WMS avançado"
- ];
- for(const token of requiredSpecTokens)if(!spec.includes(token))errors.push(`SPEC sem seção obrigatória: ${token}`);
+ ])if(!spec.includes(token))errors.push(`SPEC sem seção obrigatória: ${token}`);
 
  for(const token of[
   "Etapa 17",
@@ -89,6 +87,20 @@ if(errors.length===0){
   "depreciação contábil oficial"
  ])if(!roadmap.includes(token))errors.push(`Roadmap incompleto: ${token}`);
 
+ for(const token of[
+  "documentação atualizada no mesmo PR",
+  "migration aplicada e homologada",
+  "recebimento de Compras integrado de forma idempotente",
+  "saldo não editável diretamente",
+  "movimentos concluídos imutáveis",
+  "testes de concorrência e saldo",
+  "isolamento multiempresa e multiobra",
+  "CI verde"
+ ]){
+  if(!roadmap.includes(token))errors.push(`Roadmap sem Definition of Done da Etapa 17: ${token}`);
+  if(!modulesDoc.includes(token))errors.push(`Contrato do estoque sem Definition of Done: ${token}`);
+ }
+
  for(const token of["git clone","supabase/migrations","pnpm validate:docs","Service Role","Checklist final de recuperação"])
   if(!recovery.includes(token))errors.push(`Recuperação incompleta: ${token}`);
 
@@ -102,9 +114,6 @@ if(errors.length===0){
 
  for(const token of["diretrizes/SPEC.md","diretrizes/INVENTARIO.md","diretrizes/RECUPERACAO.md","pnpm validate:docs"])
   if(!readme.includes(token))errors.push(`README sem referência obrigatória: ${token}`);
-
- for(const token of["documentação atualizada no mesmo PR","migration aplicada e homologada","testes de concorrência e saldo","CI verde"])
-  if(!stage17.includes(token))errors.push(`Etapa 17 sem Definition of Done obrigatório: ${token}`);
 
  for(const token of[
   "WMS avançado",
