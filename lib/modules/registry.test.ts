@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MODULE_REGISTRY, capabilitiesForLevel, moduleForPath } from "@/lib/modules/registry";
+import { MODULE_REGISTRY, capabilitiesForLevel, moduleForPath } from "./registry";
 
 describe("module registry",()=>{
   it("keeps application keys unique",()=>{
