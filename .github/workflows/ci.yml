@@ -93,7 +93,17 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Typecheck
-        run: pnpm typecheck
+        run: |
+          set -o pipefail
+          pnpm typecheck 2>&1 | tee typecheck-report.txt
+      - name: Upload TypeScript report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: typecheck-report
+          path: typecheck-report.txt
+          if-no-files-found: error
+          retention-days: 7
       - name: TypeScript unit tests
         run: pnpm test
       - name: Python quality form tests
