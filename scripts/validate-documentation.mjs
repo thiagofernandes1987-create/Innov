@@ -1,0 +1,113 @@
+import fs from "node:fs";
+
+const errors=[];
+const requiredCanonical=[
+ "diretrizes/README.md",
+ "diretrizes/SPEC.md",
+ "diretrizes/INVENTARIO.md",
+ "diretrizes/MODULOS.md",
+ "diretrizes/ARQUITETURA.md",
+ "diretrizes/ROADMAP.md",
+ "diretrizes/RECUPERACAO.md",
+ "diretrizes/PADRAO-DOCUMENTACAO.md",
+ "diretrizes/HISTORICO-ETAPAS.md"
+];
+const requiredHistorical=[
+ "docs/ETAPA-09-FINANCEIRO-CONTRATOS.md",
+ "docs/ETAPA-09-TEST-PLAN.md",
+ "docs/ETAPA-10-HOMOLOGACAO-SUPABASE.md",
+ "docs/ETAPA-11-HOMOLOGACAO-AUTENTICADA.md",
+ "docs/ETAPA-12-GESTAO-DE-OBRAS.md",
+ "docs/RELATORIO-HOMOLOGACAO-ETAPA-12.md",
+ "docs/ETAPA-12-1-NUCLEO-MODULAR-E-ACESSOS.md",
+ "docs/ETAPA-12-2-ASSINATURA-AVANCADA.md",
+ "docs/ETAPA-13-QUALIDADE-FORMULARIOS.md",
+ "docs/ETAPA-14-COMPRAS-SUPRIMENTOS.md",
+ "docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md",
+ "docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md",
+ "docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md",
+ "docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md"
+];
+
+for(const file of [...requiredCanonical,...requiredHistorical]){
+ if(!fs.existsSync(file)){errors.push(`Arquivo documental ausente: ${file}`);continue;}
+ const size=fs.statSync(file).size;
+ if(size<80)errors.push(`Arquivo documental vazio ou insuficiente: ${file}`);
+}
+
+if(!fs.existsSync("lib/modules/registry.ts"))errors.push("Registro modular ausente: lib/modules/registry.ts");
+if(!fs.existsSync("package.json"))errors.push("package.json ausente");
+if(!fs.existsSync("README.md"))errors.push("README.md ausente");
+
+if(errors.length===0){
+ const registry=fs.readFileSync("lib/modules/registry.ts","utf8");
+ const moduleKeys=[...registry.matchAll(/\{\s*key:\s*"([^"]+)"/g)].map(match=>match[1]);
+ const uniqueKeys=[...new Set(moduleKeys)];
+ const modulesDoc=fs.readFileSync("diretrizes/MODULOS.md","utf8");
+ const inventory=fs.readFileSync("diretrizes/INVENTARIO.md","utf8");
+ const spec=fs.readFileSync("diretrizes/SPEC.md","utf8");
+ const roadmap=fs.readFileSync("diretrizes/ROADMAP.md","utf8");
+ const recovery=fs.readFileSync("diretrizes/RECUPERACAO.md","utf8");
+ const documentationPolicy=fs.readFileSync("diretrizes/PADRAO-DOCUMENTACAO.md","utf8");
+ const history=fs.readFileSync("diretrizes/HISTORICO-ETAPAS.md","utf8");
+ const readme=fs.readFileSync("README.md","utf8");
+ const packageJson=JSON.parse(fs.readFileSync("package.json","utf8"));
+
+ if(uniqueKeys.length<20)errors.push(`Registro modular inesperadamente pequeno: ${uniqueKeys.length} módulos.`);
+ for(const key of uniqueKeys){
+  if(!modulesDoc.includes(`## \`${key}\``))errors.push(`Módulo sem contrato canônico em MODULOS.md: ${key}`);
+  if(!inventory.includes(`| \`${key}\` |`))errors.push(`Módulo sem linha no inventário: ${key}`);
+ }
+
+ const requiredSpecTokens=[
+  "Fonte de verdade",
+  "Princípios inegociáveis",
+  "Modelo de autorização",
+  "Aplicativos modulares",
+  "Próxima etapa oficial",
+  "Estoque, Inventário e Almoxarifado"
+ ];
+ for(const token of requiredSpecTokens)if(!spec.includes(token))errors.push(`SPEC sem seção obrigatória: ${token}`);
+
+ for(const token of["Etapa 17","Estoque, Inventário e Almoxarifado","Definition of Done adicional"])
+  if(!roadmap.includes(token))errors.push(`Roadmap incompleto: ${token}`);
+
+ for(const token of["git clone","supabase/migrations","pnpm validate:docs","Service Role","Checklist final de recuperação"])
+  if(!recovery.includes(token))errors.push(`Recuperação incompleta: ${token}`);
+
+ for(const token of["Código sem documentação atualizada","Definition of Done documental","mesmo PR","Proibição de dependência em conversa ou contêiner"])
+  if(!documentationPolicy.includes(token))errors.push(`Política documental incompleta: ${token}`);
+
+ for(const file of requiredHistorical){
+  const relative=file.replace(/^docs\//,"../docs/");
+  if(!history.includes(relative))errors.push(`Histórico sem link para ${file}`);
+ }
+
+ for(const token of["diretrizes/SPEC.md","diretrizes/INVENTARIO.md","diretrizes/RECUPERACAO.md","pnpm validate:docs"])
+  if(!readme.includes(token))errors.push(`README sem referência obrigatória: ${token}`);
+
+ if(!spec.includes(`**Versão implementada da plataforma:** ${packageJson.version}`))
+  errors.push(`Versão da SPEC diverge do package.json (${packageJson.version}).`);
+
+ const forbiddenSecretPatterns=[
+  /SUPABASE_SERVICE_ROLE_KEY[ \t]*=[ \t]*[^ \t\r\n]+/,
+  /DEMO_ADMIN_PASSWORD[ \t]*=[ \t]*[^ \t\r\n]+/,
+  /DEMO_CLIENT_PASSWORD[ \t]*=[ \t]*[^ \t\r\n]+/,
+  /sk_[a-zA-Z0-9_-]{12,}/,
+  /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/
+ ];
+ for(const file of requiredCanonical){
+  const content=fs.readFileSync(file,"utf8");
+  for(const pattern of forbiddenSecretPatterns){
+   if(pattern.test(content))errors.push(`Possível segredo encontrado em ${file}: ${pattern}`);
+  }
+ }
+}
+
+if(errors.length){
+ console.error(`Documentação inválida (${errors.length} falha(s)):`);
+ for(const error of errors)console.error(`- ${error}`);
+ process.exit(1);
+}
+
+console.log(`Documentação validada: ${requiredCanonical.length} documentos canônicos, ${requiredHistorical.length} históricos e todos os módulos do registry inventariados.`);
