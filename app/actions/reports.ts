@@ -3,10 +3,11 @@
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireCapability}from"@/lib/authorization";
+import{defaultReportPeriod}from"@/lib/reports/server";
 
 function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
-function numberValue(value:unknown){const parsed=Number(value);return Number.isFinite(parsed)?parsed:null;}
+function numberValue(value:unknown){if(value===null||value===undefined||String(value).trim()==="")return null;const parsed=Number(value);return Number.isFinite(parsed)?parsed:null;}
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}
 
 export async function saveReportView(data:FormData){
@@ -34,6 +35,9 @@ export async function saveReportTarget(data:FormData){
  const metricKey=text(data,"metricKey");const comparison=text(data,"comparison")==="MAX"?"MAX":"MIN";
  if(!metricKey)fail("/app/relatorios/metas","Selecione uma métrica.");
  const warningValue=numberValue(text(data,"warningValue"));const criticalValue=numberValue(text(data,"criticalValue"));
+ if(warningValue===null&&criticalValue===null)fail("/app/relatorios/metas","Informe ao menos uma faixa de atenção ou crítica.");
+ if(comparison==="MIN"&&warningValue!==null&&criticalValue!==null&&criticalValue>warningValue)fail("/app/relatorios/metas","Para meta mínima, o valor crítico deve ser menor ou igual ao valor de atenção.");
+ if(comparison==="MAX"&&warningValue!==null&&criticalValue!==null&&criticalValue<warningValue)fail("/app/relatorios/metas","Para meta máxima, o valor crítico deve ser maior ou igual ao valor de atenção.");
  let existing=context.supabase.from("report_targets").select("id").eq("organization_id",context.organizationId).eq("metric_key",metricKey);
  existing=projectId?existing.eq("project_id",projectId):existing.is("project_id",null);
  const{data:target}=await existing.maybeSingle();
@@ -45,11 +49,12 @@ export async function saveReportTarget(data:FormData){
 }
 
 export async function generateReportSnapshot(data:FormData){
- const projectId=optional(data,"projectId");const context=await requireCapability("relatorios","update",projectId);
- const periodStart=text(data,"periodStart");const periodEnd=text(data,"periodEnd");
+ const projectId=optional(data,"projectId");const context=await requireCapability("relatorios","update",projectId);const defaults=defaultReportPeriod();
+ const periodStart=text(data,"periodStart")||defaults.start;const periodEnd=text(data,"periodEnd")||defaults.end;
+ if(periodEnd<periodStart)fail("/app/relatorios/snapshots","O período informado é inválido.");
  const{data:snapshot,error}=await context.supabase.rpc("create_report_snapshot",{
   p_organization_id:context.organizationId,p_kind:text(data,"kind")||"EXECUTIVE",p_project_id:projectId,
-  p_period_start:periodStart||null,p_period_end:periodEnd||null,p_saved_view_id:optional(data,"savedViewId"),
+  p_period_start:periodStart,p_period_end:periodEnd,p_saved_view_id:optional(data,"savedViewId"),
   p_filters:{projectId,periodStart,periodEnd}
  });
  if(error)fail("/app/relatorios/snapshots",error.message);
