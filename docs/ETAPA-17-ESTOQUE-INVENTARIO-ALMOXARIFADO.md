@@ -1,295 +1,229 @@
 # Etapa 17 — Estoque, Inventário e Almoxarifado
 
-**Estado:** em implementação  
-**Versão-alvo:** 0.17.0  
-**Início:** 20 de julho de 2026  
-**Branch:** `feature/etapa-17-estoque-inventario-almoxarifado`
+**Estado:** implementada na `main` e homologada tecnicamente  
+**Versão:** 0.17.0  
+**Módulo:** `estoque` 1.0.0  
+**PR original:** #14  
+**Data de homologação:** 20 de julho de 2026
 
 ## 1. Objetivo
 
-Implementar o aplicativo modular `estoque` com rastreabilidade integral do material recebido, armazenado, reservado, transferido, entregue, devolvido, perdido, ajustado ou inventariado.
-
-Fluxo principal:
+Controlar materiais, consumíveis, ferramentas e ativos desde o recebimento até consumo, devolução, transferência, perda, ajuste ou inventário físico.
 
 ```text
-recebimento de compras aceito
-→ entrada idempotente
-→ saldo por depósito/localização/obra
-→ reserva
-→ saída para obra/equipe/responsável
-→ devolução ou transferência
-→ ajuste/perda
-→ inventário físico
-→ divergência aprovada
-→ indicadores e auditoria
+recebimento aceito → entrada idempotente → saldo físico
+→ reserva → saldo disponível → consumo/devolução/transferência
+→ custódia de ativos → inventário físico → ajuste/reversão → auditoria
 ```
 
-## 2. Princípios
+## 2. Princípios implementados
 
-1. saldo é derivado de movimentos concluídos, nunca editado diretamente;
-2. movimento concluído é imutável;
-3. transferência é atômica: saída e entrada pertencem à mesma operação;
-4. integração com recebimento de Compras é idempotente;
-5. nenhum saldo negativo é permitido sem política explícita futura;
-6. ajuste exige motivo, capacidade administrativa e auditoria;
-7. itens, depósitos, lotes, ativos e movimentos pertencem à organização;
-8. vínculos com obra, fornecedor, pedido, recebimento, equipe e usuário precisam pertencer ao mesmo tenant;
-9. ferramentas e ativos controlados não são tratados como consumo comum;
-10. documentação, schema, testes e inventário serão atualizados no mesmo PR.
+1. saldo não editável diretamente;
+2. saldo derivado de um razão de movimentos;
+3. movimentos concluídos imutáveis;
+4. correção por reversão, sem apagar o original;
+5. recebimento de Compras integrado de forma idempotente;
+6. transferência atômica;
+7. saldo negativo bloqueado por padrão;
+8. isolamento multiempresa e multiobra;
+9. custos mascarados sem capacidade sensível;
+10. documentação, migration e testes preservados no GitHub.
 
-## 3. Escopo incluído
+## 3. Escopo entregue
 
-### 3.1 Catálogo
+### Catálogo
 
-- itens de estoque;
-- materiais consumíveis;
-- ferramentas controladas;
-- ativos/equipamentos;
 - categorias hierárquicas;
 - unidades de medida;
-- código interno e código de barras opcional;
+- materiais, consumíveis, ferramentas e ativos;
+- código, SKU e código de barras;
 - estoque mínimo;
-- controle de lote e validade configurável;
-- ativo/inativo;
-- custo de referência sem substituir o financeiro oficial.
+- lote e validade;
+- controle individual por patrimônio ou série;
+- custo de referência sensível.
 
-### 3.2 Estrutura física
+### Estrutura física
 
-- depósitos/almoxarifados;
-- localização interna opcional;
 - depósito geral;
 - depósito por obra;
-- localização padrão;
-- endereço e responsável;
+- depósito móvel ou externo;
+- localizações internas;
+- responsável;
 - ativação/desativação sem perda de histórico.
 
-### 3.3 Movimentos
+### Movimentos
 
-- entrada por recebimento de compras;
-- entrada manual autorizada;
-- saída para obra;
-- saída para equipe/responsável;
-- consumo;
+- recebimento de Compras;
+- entrada manual;
+- saída;
 - devolução;
-- transferência entre depósitos;
+- transferência;
 - perda/avaria;
-- ajuste positivo ou negativo;
-- reversão controlada por novo movimento, sem apagar o original.
+- ajuste;
+- reversão.
 
-### 3.4 Reservas
+### Reservas
 
 - reserva por obra;
-- reserva por tarefa/EAP opcional;
-- quantidade solicitada, reservada e consumida;
-- liberação parcial ou total;
-- expiração opcional;
-- bloqueio de consumo acima do reservado quando a operação exigir reserva.
+- tarefa opcional;
+- depósito, localização, item e lote;
+- consumo parcial ou total;
+- liberação;
+- expiração server-side;
+- saldo disponível reduzido sem alterar o físico.
 
-### 3.5 Lotes e validade
+### Ativos
 
-- lote do fornecedor;
-- validade;
-- quantidade por lote/localização;
-- FEFO como recomendação futura, não decisão automática nesta etapa;
-- alerta de vencimento configurável.
+- patrimônio ou número de série;
+- entrada física unitária;
+- custódia por obra, equipe ou responsável;
+- devolução;
+- manutenção;
+- histórico imutável de custódia.
 
-### 3.6 Ferramentas e ativos
+### Inventário físico
 
-- número patrimonial ou serial;
-- estado: disponível, em uso, manutenção, perdido, baixado;
-- cautela para equipe ou responsável;
-- entrega e devolução;
-- histórico de custódia;
-- manutenção básica registrada;
-- foto/documento opcional em evolução posterior.
+- abertura por depósito;
+- posição esperada congelada;
+- contagem e recontagem;
+- item encontrado com esperado zero;
+- revisão e aprovação;
+- ajuste após aprovação;
+- encerramento sem movimento artificial quando não há divergência.
 
-### 3.7 Inventário físico
+## 4. Modelo de saldo
 
-- abertura de contagem por depósito;
-- congelamento lógico do escopo contado;
-- linhas esperadas;
-- quantidade contada;
-- divergência;
-- segunda contagem opcional;
-- aprovação;
-- geração de ajuste imutável;
-- encerramento auditado.
+```text
+saldo físico
+  = soma das linhas dos movimentos POSTED
+  + linhas dos movimentos originais REVERSED
 
-### 3.8 Indicadores
+saldo reservado
+  = reservado - consumido - liberado
 
-- saldo atual;
-- saldo reservado;
+saldo disponível
+  = físico - reservado
+```
+
+O movimento de tipo `REVERSAL` neutraliza algebricamente o original. O original permanece no razão com estado `REVERSED`, preservando auditoria e evitando dupla contagem.
+
+## 5. Concorrência
+
+A migration `20260720233052_stage17_inventory_concurrency_locks.sql` implementa advisory lock transacional por:
+
+- organização;
+- depósito;
+- localização;
+- item;
+- lote.
+
+Os locks são adquiridos em ordem determinística com `pg_advisory_xact_lock`, reduzindo risco de corrida e deadlock.
+
+Antes da postagem são verificados:
+
+- saldo físico;
 - saldo disponível;
-- itens abaixo do mínimo;
-- itens sem movimento;
-- perdas e ajustes;
-- consumo por obra;
-- valor estimado por custo de referência;
-- ativos em uso, manutenção ou atraso de devolução;
-- divergências de inventário.
+- quantidade reservada;
+- conservação de transferência;
+- lote obrigatório;
+- ativo unitário;
+- consumo compatível com a reserva.
 
-## 4. Fora do escopo
+## 6. Integração com Compras
 
-- WMS avançado;
-- RFID ou IoT em tempo real;
-- ressuprimento automático sem aprovação humana;
-- roteirização logística;
-- emissão fiscal de entrada/saída;
-- depreciação contábil oficial;
-- integração direta com balança;
-- picking por onda;
-- endereçamento automatizado;
-- múltiplas empresas fiscais em uma mesma organização sem modelagem específica.
+A entrada usa:
 
-## 5. Modelo de dados planejado
+```text
+pedido → recebimento aceito → mapeamento → movimento de entrada
+```
 
-### Catálogo e estrutura
+Regras:
+
+- somente `ACCEPTED` ou `ACCEPTED_WITH_RESTRICTION`;
+- somente quantidade aceita;
+- quantidade rejeitada não entra;
+- fator de conversão explícito;
+- lote obrigatório quando configurado;
+- uma importação por recebimento;
+- repetição devolve o mesmo movimento.
+
+## 7. Isolamento
+
+### Multiempresa
+
+Todos os registros possuem `organization_id`. Triggers validam unidade, item, depósito, lote, fornecedor, pedido, recebimento, equipe, tarefa, movimento, reserva, ativo e inventário.
+
+### Multiobra
+
+Depósito geral pode atender operações autorizadas. Depósito com `project_id` só pode ser usado por operação da mesma obra.
+
+A migration `20260720233657_stage17_homologation_balance_project_scope.sql` aplica essa regra a:
+
+- linhas de movimento;
+- reservas;
+- importações de recebimento;
+- ativos.
+
+## 8. Segurança
+
+- 18 tabelas com RLS;
+- seis views com `security_invoker=true`;
+- RPCs críticas com autorização interna;
+- nenhum RPC de negócio para `anon`;
+- funções auxiliares sem execução pública;
+- `search_path=public` nas funções privilegiadas;
+- colunas de custo sem leitura direta ampla;
+- detalhes de item, ativo e movimento por RPC mascarada;
+- Service Role ausente das ações do navegador;
+- movimentos, inventários e custódias concluídos imutáveis.
+
+Avisos do advisor relativos a RPCs `SECURITY DEFINER` são esperados quando a RPC é a fronteira autorizada do aplicativo. Eles não devem ser eliminados tornando a função permissiva ou removendo a checagem interna.
+
+## 9. Estrutura técnica
+
+### Tabelas
+
+Total: 18.
 
 - `inventory_categories`;
 - `inventory_units`;
 - `inventory_items`;
 - `inventory_warehouses`;
 - `inventory_locations`;
-- `inventory_lots`.
-
-### Movimentação e saldo
-
+- `inventory_lots`;
+- `inventory_procurement_item_mappings`;
 - `inventory_movements`;
 - `inventory_movement_lines`;
 - `inventory_receipt_imports`;
-- view `inventory_stock_v`;
-- view `inventory_available_stock_v`.
-
-### Reservas
-
 - `inventory_reservations`;
-- `inventory_reservation_lines`.
-
-### Ativos e ferramentas
-
+- `inventory_reservation_lines`;
 - `inventory_assets`;
 - `inventory_asset_custodies`;
-- `inventory_asset_maintenance`.
-
-### Inventário físico
-
+- `inventory_asset_maintenance`;
 - `inventory_stocktakes`;
-- `inventory_stocktake_lines`.
-
-### Auditoria
-
+- `inventory_stocktake_lines`;
 - `inventory_events`.
 
-## 6. Estados planejados
+### Views
 
-### Movimento
+- `inventory_stock_v`;
+- `inventory_reserved_stock_v`;
+- `inventory_available_stock_v`;
+- `inventory_item_totals_v`;
+- `inventory_asset_current_v`;
+- `inventory_expiry_alerts_v`.
 
-- `DRAFT`;
-- `POSTED`;
-- `REVERSED`;
-- `CANCELED`.
+### Migrations
 
-### Reserva
+O ledger homologado contém 18 migrations:
 
-- `DRAFT`;
-- `ACTIVE`;
-- `PARTIALLY_CONSUMED`;
-- `CONSUMED`;
-- `RELEASED`;
-- `EXPIRED`;
-- `CANCELED`.
+- 16 migrations canônicas originais, de `20260720160000` a `20260720160740`;
+- `20260720233052_stage17_inventory_concurrency_locks.sql`;
+- `20260720233657_stage17_homologation_balance_project_scope.sql`.
 
-### Inventário físico
+A migration aplicada e homologada nunca deve ser editada. Nova correção exige novo timestamp.
 
-- `DRAFT`;
-- `COUNTING`;
-- `UNDER_REVIEW`;
-- `APPROVED`;
-- `POSTED`;
-- `CANCELED`.
-
-### Ativo
-
-- `AVAILABLE`;
-- `IN_USE`;
-- `MAINTENANCE`;
-- `LOST`;
-- `RETIRED`.
-
-## 7. RPCs planejadas
-
-- `create_inventory_item`;
-- `post_inventory_movement`;
-- `reverse_inventory_movement`;
-- `import_procurement_receipt_to_inventory`;
-- `create_inventory_reservation`;
-- `release_inventory_reservation`;
-- `consume_inventory_reservation`;
-- `assign_inventory_asset`;
-- `return_inventory_asset`;
-- `start_inventory_stocktake`;
-- `submit_inventory_stocktake`;
-- `approve_inventory_stocktake`;
-- `post_inventory_stocktake_adjustment`.
-
-Todas as operações de múltiplas tabelas serão transacionais e idempotentes quando houver fonte externa.
-
-## 8. Integrações
-
-### Compras
-
-- recebimento `ACCEPTED` ou `ACCEPTED_WITH_RESTRICTION` pode originar entrada;
-- importação usa chave única do recebimento;
-- quantidade rejeitada não entra no estoque;
-- repetição da importação devolve o mesmo resultado sem duplicar saldo.
-
-### Obras
-
-- depósitos podem ser gerais ou vinculados a obra;
-- saídas e reservas podem apontar para obra;
-- consumo por obra alimenta indicadores.
-
-### Equipes
-
-- saída/custódia pode apontar para equipe ou responsável;
-- ferramenta deve manter histórico de quem recebeu e devolveu.
-
-### Financeiro
-
-- custo do movimento é informativo e rastreável;
-- contabilização oficial permanece no módulo Financeiro;
-- nenhuma baixa de estoque altera lançamento financeiro diretamente nesta etapa.
-
-### Relatórios
-
-- indicadores serão expostos por view/RPC autorizada;
-- valores estimados exigem capacidade sensível quando aplicável;
-- o módulo de Relatórios não consultará tabelas internas diretamente pela interface.
-
-## 9. Segurança
-
-- módulo habilitado por organização;
-- RLS em todas as tabelas de domínio;
-- leitura por capacidade `read` e escopo;
-- criação/edição por `EDIT`;
-- ajustes, reversões, aprovação de inventário e administração por capacidades elevadas;
-- nenhum RPC acessível a `anon`;
-- funções auxiliares com execução revogada;
-- `security definer` somente com `search_path` explícito e checagem interna;
-- validação multi-tenant em vínculos;
-- índices em todas as FKs e filtros críticos;
-- eventos sem segredo ou documento integral.
-
-## 10. Imutabilidade e correção
-
-- movimento `POSTED` não pode ser editado ou excluído;
-- correção ocorre por movimento de reversão vinculado ao original;
-- inventário `POSTED` é imutável;
-- custódia encerrada não pode ter responsável ou datas reescritos;
-- importação de recebimento não pode ser repetida com novo saldo;
-- saldo é soma algébrica de linhas postadas.
-
-## 11. Rotas planejadas
+## 10. Rotas
 
 ```text
 /app/estoque
@@ -310,48 +244,73 @@ Todas as operações de múltiplas tabelas serão transacionais e idempotentes q
 /app/estoque/inventarios/[id]
 ```
 
-## 12. Migrations planejadas
+## 11. Homologação
 
-1. schema, enums e tabelas;
-2. views de saldo;
-3. funções e invariantes;
-4. RLS e privilégios;
-5. registro modular e padrões;
-6. integração com recebimentos;
-7. índices e hardening;
-8. correções de homologação, se necessárias.
+O teste reproduzível está em:
 
-## 13. Testes obrigatórios
+```text
+supabase/tests/stage17_inventory_homologation.sql
+```
 
+Ele cria identidade, organizações, obras e dados efêmeros dentro de uma transação e termina com `ROLLBACK`.
+
+Os 14 testes aprovados foram:
+
+- autorização do Super Admin;
+- saldo sem coluna editável;
+- categorias padrão;
+- unidades padrão;
 - entrada aumenta saldo;
 - saída reduz saldo;
-- saldo negativo é bloqueado;
-- transferência reduz origem e aumenta destino atomicamente;
-- falha na entrada da transferência reverte a saída;
-- importação de recebimento é idempotente;
-- quantidade rejeitada não entra;
-- movimento postado é imutável;
-- reversão restaura saldo sem apagar histórico;
-- reserva reduz disponível, não saldo físico;
-- consumo de reserva atualiza estados;
-- inventário gera ajuste aprovado;
-- vínculo entre organizações é bloqueado;
-- usuário sem capacidade não movimenta;
-- perfil sem acesso sensível não visualiza valor estimado;
-- todas as FKs críticas possuem índice;
-- CI e documentação passam.
+- instalação do módulo;
+- idempotência de movimento;
+- isolamento multiempresa;
+- isolamento multiobra;
+- bloqueio de saldo negativo;
+- imutabilidade de movimento postado;
+- reversão restaura saldo;
+- transferência conserva saldo.
 
-## 14. Homologação
+Relatório completo:
 
-A homologação deverá utilizar transações revertidas para regras estruturais e contas reais para RLS/capacidades. Não serão persistidos dados artificiais permanentes.
+```text
+docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md
+```
 
-## 15. Documentação obrigatória no PR
+## 12. Definition of Done adicional
 
-- atualizar `diretrizes/SPEC.md`;
-- atualizar `diretrizes/INVENTARIO.md`;
-- atualizar `diretrizes/MODULOS.md`;
-- atualizar `diretrizes/ROADMAP.md`;
-- atualizar `diretrizes/RECUPERACAO.md` se houver novo bucket, worker ou variável;
-- incluir migrations, rotas, RPCs, testes e limitações neste documento;
-- atualizar `diretrizes/HISTORICO-ETAPAS.md`;
-- incluir `validate:stage17` no CI.
+- documentação atualizada no mesmo PR — atendida na branch corretiva;
+- migration aplicada e homologada — atendida;
+- recebimento de Compras integrado de forma idempotente — implementado e protegido estruturalmente;
+- saldo não editável diretamente — atendido;
+- movimentos concluídos imutáveis — atendido;
+- testes de concorrência e saldo — locks implementados, saldo testado; disputa real com duas conexões permanece pendente;
+- isolamento multiempresa e multiobra — atendido pelos testes;
+- CI verde — branch original aprovada; branch corretiva precisa permanecer verde antes do merge.
+
+## 13. Limitações
+
+- ambiente não possui contas permanentes de homologação;
+- E2E de navegador ainda não foi repetido após a Etapa 17;
+- teste simultâneo com duas sessões reais ainda está pendente;
+- fluxo completo de recebimento com fornecedor/pedido real permanece pendente;
+- carga, volumetria e operação offline não foram homologadas;
+- proteção contra senhas comprometidas e MFA adicional dependem da configuração do Supabase Auth.
+
+## 14. Fora do escopo desta etapa
+
+Os itens abaixo foram movidos para a Etapa 21, não descartados:
+
+- WMS avançado;
+- endereçamento automatizado;
+- RFID em tempo real;
+- ressuprimento automático sem aprovação;
+- roteirização logística;
+- integração fiscal de entrada;
+- depreciação contábil oficial.
+
+## 15. Estado final
+
+A Etapa 17 está implementada, aplicada no Supabase, com ledger reconciliado, advisory lock preservado no GitHub, dois defeitos de homologação corrigidos e 14 testes transacionais aprovados.
+
+Ela está tecnicamente homologada, mas não liberada para produção enquanto as limitações da seção 13 permanecerem abertas.
