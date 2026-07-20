@@ -32,6 +32,11 @@ jobs:
         with:
           node-version: 24
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
       - name: Enable pnpm
         run: |
           corepack enable
@@ -52,14 +57,20 @@ jobs:
       - name: Validate Stage 12.2 advanced signatures
         run: pnpm validate:stage12.2
 
+      - name: Validate Stage 13 quality forms
+        run: pnpm validate:stage13
+
       - name: Lint
         run: pnpm lint
 
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Unit tests
+      - name: TypeScript unit tests
         run: pnpm test
+
+      - name: Python quality form tests
+        run: pnpm test:python
 
       - name: Build
         run: pnpm build
