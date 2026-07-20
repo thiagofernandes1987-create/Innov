@@ -2,7 +2,7 @@
 
 **Atualizado em:** 20 de julho de 2026
 
-O roadmap segue o estado real da `main`. Numerações antigas de documentos externos não prevalecem sobre esta sequência.
+O roadmap segue o estado real da `main` e das branches de etapa explicitamente identificadas. Numerações antigas de documentos externos não prevalecem sobre esta sequência.
 
 ## Concluído e consolidado
 
@@ -108,13 +108,14 @@ O roadmap segue o estado real da `main`. Numerações antigas de documentos exte
 - histórico;
 - validador obrigatório no CI.
 
-## Próxima etapa
+## Em execução
 
-## Etapa 17 — Estoque, Inventário e Almoxarifado
+### Etapa 17 — Estoque, Inventário e Almoxarifado
 
-### Objetivo
+**Branch:** `feature/etapa-17-estoque-inventario-almoxarifado`  
+**PR:** `#14` — rascunho, sem merge
 
-Implementar o fluxo:
+#### Objetivo
 
 ```text
 recebimento aceito → entrada → saldo por depósito/obra
@@ -122,7 +123,7 @@ recebimento aceito → entrada → saldo por depósito/obra
 → ajuste/perda → inventário físico → auditoria e indicadores
 ```
 
-### Escopo obrigatório
+#### Escopo obrigatório
 
 - catálogo de itens;
 - categorias e unidades;
@@ -145,7 +146,9 @@ recebimento aceito → entrada → saldo por depósito/obra
 - relatórios e exportação;
 - RLS, índices, RPCs e auditoria.
 
-### Fora da Etapa 17
+#### Fora da Etapa 17, mas já agendado
+
+As capacidades abaixo pertencem à Etapa 21 e não devem ser antecipadas nesta branch:
 
 - WMS avançado;
 - endereçamento automatizado;
@@ -155,7 +158,7 @@ recebimento aceito → entrada → saldo por depósito/obra
 - integração fiscal de entrada;
 - depreciação contábil oficial.
 
-### Definition of Done adicional
+#### Definition of Done adicional da Etapa 17
 
 - documentação atualizada no mesmo PR;
 - migration aplicada e homologada;
@@ -196,6 +199,113 @@ recebimento aceito → entrada → saldo por depósito/obra
 - plano de incidentes;
 - publicação controlada.
 
+### Etapa 21 — WMS avançado e automação logística, fiscal e patrimonial
+
+**Posição na fila:** após a conclusão da Etapa 20.  
+**Dependências:** Etapas 17, 19 e 20 concluídas e estáveis.  
+**Documento de planejamento:** `docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`.
+
+#### Objetivo
+
+Evoluir o estoque operacional da Etapa 17 para uma camada avançada de gestão de armazéns, automação logística, rastreamento em tempo real e integração fiscal/contábil oficial.
+
+#### Subetapas planejadas
+
+##### 21.1 — WMS avançado
+
+- recebimento dirigido;
+- put-away;
+- separação;
+- conferência;
+- expedição;
+- ondas e prioridades;
+- inventário cíclico;
+- regras FEFO/FIFO configuráveis;
+- indicadores de produtividade e acuracidade.
+
+##### 21.2 — Endereçamento automatizado
+
+- estrutura zona → corredor → módulo → nível → posição;
+- sugestão automática de endereço;
+- capacidade volumétrica e peso;
+- restrições por item, lote, validade e risco;
+- bloqueio de incompatibilidades;
+- reendereçamento auditado.
+
+##### 21.3 — RFID em tempo real
+
+- cadastro e ciclo de vida de tags;
+- leitores, antenas e zonas;
+- eventos de presença e movimentação;
+- reconciliação entre leitura física e razão de estoque;
+- deduplicação e tolerância a eventos fora de ordem;
+- alertas de saída não autorizada.
+
+##### 21.4 — Ressuprimento automático sem aprovação
+
+- políticas explícitas por item, depósito e obra;
+- estoque mínimo, máximo, ponto de pedido e lead time;
+- execução automática idempotente;
+- limites financeiros e operacionais;
+- circuit breaker e suspensão manual;
+- auditoria integral de cada decisão.
+
+##### 21.5 — Roteirização logística
+
+- coletas e entregas entre depósitos e obras;
+- janelas de atendimento;
+- capacidade de veículo;
+- prioridade e restrições;
+- rota planejada versus executada;
+- prova de entrega;
+- integração futura com telemetria.
+
+##### 21.6 — Integração fiscal de entrada
+
+- importação e validação fiscal de documentos de entrada;
+- vínculo entre documento fiscal, pedido, recebimento e movimento;
+- idempotência por chave fiscal;
+- divergências de quantidade, valor, imposto e fornecedor;
+- armazenamento privado do documento;
+- trilha de aceite, rejeição e correção;
+- revisão fiscal obrigatória antes de produção.
+
+##### 21.7 — Depreciação contábil oficial
+
+- classes patrimoniais;
+- vida útil e valor residual;
+- métodos de depreciação aprovados pela contabilidade;
+- competências e fechamentos;
+- baixas, transferências e reavaliações;
+- conciliação com o razão patrimonial;
+- imutabilidade após fechamento;
+- revisão contábil obrigatória.
+
+#### Definition of Done adicional da Etapa 21
+
+- documentação atualizada no mesmo PR;
+- migrations aplicadas e homologadas;
+- recebimento de Compras e integração fiscal idempotentes;
+- saldo e posição de endereço não editáveis diretamente;
+- movimentos e eventos concluídos imutáveis;
+- testes de concorrência, saldo, endereçamento e duplicidade de eventos;
+- testes de falha parcial e recuperação;
+- isolamento multiempresa, multiobra e multidepósito;
+- reconciliação RFID versus razão de estoque;
+- ressuprimento automático com limites, circuit breaker e auditoria;
+- revisão fiscal e contábil formal antes de produção;
+- CI verde;
+- homologação E2E registrada;
+- plano de rollback e recuperação atualizado.
+
+#### Restrições de implantação
+
+- não iniciar antes da Etapa 20;
+- não habilitar ressuprimento sem aprovação até existirem limites, circuit breaker e testes de concorrência;
+- não declarar integração fiscal oficial sem validação legal/fiscal;
+- não declarar depreciação oficial sem aprovação contábil;
+- RFID não pode substituir o razão imutável de movimentos: eventos físicos alimentam reconciliação e operações autorizadas.
+
 ## Regra de alteração do roadmap
 
 Mudança de ordem ou escopo exige atualização conjunta de:
@@ -204,4 +314,5 @@ Mudança de ordem ou escopo exige atualização conjunta de:
 - `diretrizes/ROADMAP.md`;
 - `diretrizes/INVENTARIO.md`;
 - `diretrizes/MODULOS.md`;
-- documento técnico da etapa.
+- documento técnico da etapa;
+- validador documental quando a nova fila ou Definition of Done se tornar obrigatória.
