@@ -2,7 +2,7 @@
 
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
-import{requireCapability}from"@/lib/authorization";
+import{hasCapability,requireCapability}from"@/lib/authorization";
 
 function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
@@ -13,13 +13,14 @@ function parseArray(raw:string,label:string){try{const value:unknown=JSON.parse(
 
 export async function createInventoryItem(data:FormData){
  const context=await requireCapability("estoque","create");const path="/app/estoque/itens/novo";
- const code=text(data,"code");const name=text(data,"name");const unitId=text(data,"unitId");
+ const code=text(data,"code");const name=text(data,"name");const unitId=text(data,"unitId");const referenceCost=numberOrNull(text(data,"referenceUnitCost"));
  if(!code||!name||!unitId)fail(path,"Informe código, nome e unidade.");
+ if(referenceCost!==null&&!await hasCapability("estoque","view_sensitive_financials",null,context))fail(path,"Seu perfil não pode definir custo de referência.");
  const{data:item,error}=await context.supabase.rpc("create_inventory_item",{
   p_organization_id:context.organizationId,p_category_id:optional(data,"categoryId"),p_unit_id:unitId,
   p_code:code,p_name:name,p_kind:text(data,"kind")||"MATERIAL",p_description:text(data,"description"),
   p_specification:text(data,"specification"),p_sku:optional(data,"sku"),p_barcode:optional(data,"barcode"),
-  p_minimum_stock:numberOrNull(text(data,"minimumStock"))??0,p_reference_unit_cost:numberOrNull(text(data,"referenceUnitCost")),
+  p_minimum_stock:numberOrNull(text(data,"minimumStock"))??0,p_reference_unit_cost:referenceCost,
   p_controls_lot:boolean(data,"controlsLot"),p_controls_expiry:boolean(data,"controlsExpiry"),
   p_controls_individual_asset:boolean(data,"controlsIndividualAsset")
  });
@@ -28,13 +29,15 @@ export async function createInventoryItem(data:FormData){
 
 export async function updateInventoryItem(data:FormData){
  const itemId=text(data,"itemId");const context=await requireCapability("estoque","update");const path=`/app/estoque/itens/${itemId}`;
- const{error}=await context.supabase.from("inventory_items").update({
+ const payload:Record<string,unknown>={
   category_id:optional(data,"categoryId"),unit_id:text(data,"unitId"),name:text(data,"name"),description:text(data,"description"),
   specification:text(data,"specification"),sku:optional(data,"sku"),barcode:optional(data,"barcode"),kind:text(data,"kind"),
-  minimum_stock:numberOrNull(text(data,"minimumStock"))??0,reference_unit_cost:numberOrNull(text(data,"referenceUnitCost")),
-  controls_lot:boolean(data,"controlsLot"),controls_expiry:boolean(data,"controlsExpiry"),
-  controls_individual_asset:boolean(data,"controlsIndividualAsset"),active:data.get("active")!==null,updated_at:new Date().toISOString()
- }).eq("id",itemId).eq("organization_id",context.organizationId);
+  minimum_stock:numberOrNull(text(data,"minimumStock"))??0,controls_lot:boolean(data,"controlsLot"),
+  controls_expiry:boolean(data,"controlsExpiry"),controls_individual_asset:boolean(data,"controlsIndividualAsset"),
+  active:data.get("active")!==null,updated_at:new Date().toISOString()
+ };
+ if(await hasCapability("estoque","view_sensitive_financials",null,context))payload.reference_unit_cost=numberOrNull(text(data,"referenceUnitCost"));
+ const{error}=await context.supabase.from("inventory_items").update(payload).eq("id",itemId).eq("organization_id",context.organizationId);
  if(error)fail(path,error.message);revalidatePath(path);revalidatePath("/app/estoque");
 }
 
@@ -125,12 +128,13 @@ export async function consumeInventoryReservation(data:FormData){
 }
 
 export async function createInventoryAsset(data:FormData){
- const warehouseId=text(data,"warehouseId");const context=await requireCapability("estoque","create");const path="/app/estoque/ativos";
+ const context=await requireCapability("estoque","create");const path="/app/estoque/ativos";const acquisitionCost=numberOrNull(text(data,"acquisitionCost"));
+ if(acquisitionCost!==null&&!await hasCapability("estoque","view_sensitive_financials",null,context))fail(path,"Seu perfil não pode definir custo de aquisição.");
  const{data:asset,error}=await context.supabase.rpc("create_inventory_asset",{
-  p_organization_id:context.organizationId,p_item_id:text(data,"itemId"),p_warehouse_id:warehouseId,
+  p_organization_id:context.organizationId,p_item_id:text(data,"itemId"),p_warehouse_id:text(data,"warehouseId"),
   p_location_id:optional(data,"locationId"),p_lot_id:optional(data,"lotId"),p_patrimony_code:optional(data,"patrimonyCode"),
   p_serial_number:optional(data,"serialNumber"),p_acquired_on:optional(data,"acquiredOn"),
-  p_acquisition_cost:numberOrNull(text(data,"acquisitionCost")),p_condition:text(data,"condition")
+  p_acquisition_cost:acquisitionCost,p_condition:text(data,"condition")
  });
  if(error)fail(path,error.message);const result=Array.isArray(asset)?asset[0]:asset;redirect(`/app/estoque/ativos/${result?.id??""}`);
 }
@@ -155,9 +159,9 @@ export async function returnInventoryAsset(data:FormData){
 }
 
 export async function startInventoryStocktake(data:FormData){
- const warehouseId=text(data,"warehouseId");const projectId=optional(data,"projectId");const context=await requireCapability("estoque","manage",projectId);
+ const projectId=optional(data,"projectId");const context=await requireCapability("estoque","manage",projectId);
  const{data:stocktake,error}=await context.supabase.rpc("start_inventory_stocktake",{
-  p_organization_id:context.organizationId,p_warehouse_id:warehouseId,p_name:text(data,"name"),p_notes:text(data,"notes")
+  p_organization_id:context.organizationId,p_warehouse_id:text(data,"warehouseId"),p_name:text(data,"name"),p_notes:text(data,"notes")
  });
  if(error)fail("/app/estoque/inventarios/novo",error.message);const result=Array.isArray(stocktake)?stocktake[0]:stocktake;redirect(`/app/estoque/inventarios/${result?.id??""}`);
 }
