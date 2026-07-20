@@ -8,7 +8,8 @@ const paths={
  hardening:"supabase/migrations/20260720143300_stage16_reports_hardening.sql",
  integrity:"supabase/migrations/20260720143400_stage16_reports_integrity.sql",
  installerFix:"supabase/migrations/20260720143500_stage16_reports_installer_fix.sql",
- linkFix:"supabase/migrations/20260720143700_stage16_report_link_guard_fix.sql"
+ linkFix:"supabase/migrations/20260720143700_stage16_report_link_guard_fix.sql",
+ progressScale:"supabase/migrations/20260720143800_stage16_progress_scale_fix.sql"
 };
 const files=[...Object.values(paths),
  "lib/reports/metrics.ts","lib/reports/metrics.test.ts","lib/reports/server.ts",
@@ -39,6 +40,8 @@ if(errors.length===0){
  for(const token of["ensure_organization_access_profiles","base_role is not null","overdue_days","install_report_defaults"])if(!installerFix.includes(token))errors.push(`Correção do instalador incompleta: ${token}`);
  const linkFix=fs.readFileSync(paths.linkFix,"utf8");
  for(const token of["to_jsonb(new)","saved_view_id","snapshot_id","validate_report_links"])if(!linkFix.includes(token))errors.push(`Correção do validador incompleta: ${token}`);
+ const progressScale=fs.readFileSync(paths.progressScale,"utf8");
+ for(const token of["report_project_kpis_fraction_v","project.progress*100","planned_progress,project.progress,0)*100","project.progress,0)<1","revoke all on public.report_project_kpis_v"])if(!progressScale.includes(token))errors.push(`Escala de progresso incompleta: ${token}`);
  const engine=fs.readFileSync("lib/reports/metrics.ts","utf8");
  for(const token of["normalizeReportDashboard","evaluateMetric","targetFor","buildProjectCsv","formatReportNumber"])if(!engine.includes(token))errors.push(`Motor ausente: ${token}`);
  const actions=fs.readFileSync("app/actions/reports.ts","utf8");
@@ -47,4 +50,4 @@ if(errors.length===0){
  for(const token of["record_report_export","X-Content-SHA256","text/csv","Cache-Control"])if(!route.includes(token))errors.push(`Exportação incompleta: ${token}`);
 }
 if(errors.length){console.error(`Etapa 16 inválida (${errors.length} falha(s)):`);for(const error of errors)console.error(`- ${error}`);process.exit(1);}
-console.log(`Etapa 16 validada: ${files.length} arquivos críticos, seis tabelas, duas views, RLS, guards multi-tenant, metas, snapshots e exportação auditada.`);
+console.log(`Etapa 16 validada: ${files.length} arquivos críticos, seis tabelas, views privadas, escala percentual, RLS, metas, snapshots e exportação auditada.`);
