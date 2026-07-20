@@ -1,31 +1,31 @@
 # Recuperação completa a partir do repositório
 
-Este procedimento existe para reconstruir a Innovar Platform quando um contêiner, máquina local, ambiente de desenvolvimento ou histórico de conversa for perdido.
+Este procedimento reconstrói a Innovar Platform quando contêiner, máquina local, ambiente de desenvolvimento ou histórico de conversa for perdido.
 
-## 1. Pré-requisitos
-
-- Git;
-- Node.js 24 ou superior;
-- Corepack;
-- pnpm 11.15.0;
-- Python 3.13 para a suíte auxiliar de Qualidade;
-- acesso ao projeto Supabase correto;
-- acesso aos secrets do ambiente;
-- LibreOffice headless no host do worker de conversão DOCX;
-- acesso ao provider de hospedagem.
-
-## 2. Clonar a fonte oficial
+## 1. Fonte oficial
 
 ```bash
 git clone https://github.com/thiagofernandes1987-create/Innov.git
 cd Innov
+```
+
+Para recuperar o estado estável:
+
+```bash
 git checkout main
 git pull --ff-only
 ```
 
-Nunca reconstruir a partir de ZIP antigo quando a `main` estiver disponível.
+Para recuperar a Etapa 17 ainda não incorporada:
 
-## 3. Conferir a documentação antes de executar
+```bash
+git checkout feature/etapa-17-estoque-inventario-almoxarifado
+git pull --ff-only
+```
+
+Nunca reconstruir a partir de ZIP antigo quando o repositório estiver disponível.
+
+## 2. Documentação obrigatória
 
 Ler nesta ordem:
 
@@ -34,7 +34,28 @@ Ler nesta ordem:
 3. `diretrizes/MODULOS.md`;
 4. `diretrizes/ARQUITETURA.md`;
 5. `diretrizes/ROADMAP.md`;
-6. documento histórico da etapa relevante em `docs/`.
+6. `diretrizes/HISTORICO-ETAPAS.md`;
+7. documento técnico da etapa relevante em `docs/`.
+
+Para a etapa atual:
+
+- `docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`.
+
+Planejamento posterior, sem implementação atual:
+
+- `docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`.
+
+## 3. Pré-requisitos
+
+- Git;
+- Node.js 24 ou superior;
+- Corepack;
+- pnpm 11.15.0;
+- Python 3.13;
+- acesso ao projeto Supabase correto;
+- acesso aos secrets do ambiente;
+- LibreOffice headless para o worker DOCX;
+- acesso ao provider de hospedagem.
 
 ## 4. Instalar dependências
 
@@ -44,9 +65,7 @@ corepack prepare pnpm@11.15.0 --activate
 pnpm install --no-frozen-lockfile
 ```
 
-O CI usa a mesma versão de pnpm.
-
-## 5. Configurar ambiente local
+## 5. Configurar ambiente
 
 ```bash
 cp .env.example .env.local
@@ -71,13 +90,18 @@ Regras:
 - não enviar `.env.local` ao Git;
 - não colar Service Role em issue, PR ou documentação;
 - não usar senha de produção em homologação;
-- rotacionar segredo exposto antes de continuar.
+- rotacionar segredo exposto antes de continuar;
+- nunca enviar `SUPABASE_SERVICE_ROLE_KEY` ao navegador.
 
 ## 6. Reconstruir o banco
 
-### 6.1 Ambiente vazio
+As migrations reproduzíveis ficam em:
 
-Aplicar todas as migrations de `supabase/migrations/` na ordem lexical.
+```text
+supabase/migrations/
+```
+
+Aplicar em ordem lexical.
 
 Com Supabase CLI configurado:
 
@@ -86,27 +110,55 @@ supabase link --project-ref <PROJECT_REF>
 supabase db push
 ```
 
-Ou aplicar pelo mecanismo oficial do ambiente, mantendo o histórico de migrations.
-
-### 6.2 Ambiente existente
+Regras para ambiente existente:
 
 - comparar migrations locais e remotas;
-- nunca reaplicar manualmente migration já registrada;
-- nunca editar migration aplicada para “corrigir” o ambiente;
+- nunca reaplicar manualmente migration registrada;
+- nunca editar migration aplicada;
 - criar nova migration corretiva;
-- validar backups antes de mudança destrutiva.
+- validar backup antes de mudança destrutiva.
 
-### 6.3 Verificações mínimas
+### Migrations da Etapa 17
+
+A faixa atual começa em:
+
+```text
+20260720160000_stage17_inventory_schema.sql
+```
+
+e termina em:
+
+```text
+20260720160740_stage17_inventory_state_guards.sql
+```
+
+A lista integral está em `diretrizes/INVENTARIO.md`.
+
+## 7. Verificações mínimas do banco
 
 - RLS ativo nas tabelas de negócio;
 - módulos instalados nas organizações;
-- perfis canônicos criados sem duplicação;
+- perfis canônicos sem duplicação;
 - buckets privados existentes;
 - funções anônimas indevidas revogadas;
 - índices de FKs e caminhos de RLS;
-- migrations da etapa mais recente presentes.
+- migrations da etapa mais recente presentes;
+- views internas sem acesso direto;
+- colunas sensíveis mascaradas.
 
-## 7. Buckets a conferir
+### Verificações da Etapa 17
+
+- 18 tabelas de estoque;
+- seis views derivadas;
+- módulo `estoque` versão `1.0.0`;
+- unidades, categorias, `ALM-GERAL` e `PADRAO` instalados;
+- saldo não editável diretamente;
+- movimentos postados imutáveis;
+- importação de recebimento idempotente;
+- RLS multiempresa e multiobra;
+- custos sensíveis protegidos.
+
+## 8. Buckets privados
 
 ```text
 commercial-documents
@@ -120,73 +172,45 @@ procurement-attachments
 finance-attachments
 ```
 
-Todos devem permanecer privados. Políticas e limites são definidos por migrations.
+A Etapa 17 e o planejamento da Etapa 21 não adicionam bucket atual. Todos os buckets existentes permanecem privados.
 
-## 8. Provisionar homologação
+## 9. Provisionar homologação
 
-As contas de homologação conhecidas são:
+Contas conhecidas:
 
 - `admin@innov.eng.br`;
 - `cliente@cliente.com`.
 
-As senhas não pertencem ao repositório. Configure:
+Senhas não pertencem ao repositório:
 
 ```env
 DEMO_ADMIN_PASSWORD=
 DEMO_CLIENT_PASSWORD=
 ```
 
-Depois execute, em ambiente protegido:
+Em ambiente protegido:
 
 ```bash
 pnpm provision:homologation
-```
-
-Para o E2E da Etapa 11:
-
-```bash
 pnpm test:e2e:stage11
 ```
 
-O provisionamento deve ser idempotente e limitado à homologação.
+O provisionamento é idempotente e restrito à homologação.
 
-## 9. Iniciar a aplicação
+## 10. Iniciar aplicação e workers
 
 ```bash
 pnpm dev
 ```
 
-Acesso local padrão:
-
-```text
-http://localhost:3000
-```
-
-## 10. Iniciar workers quando necessários
-
-### Conversão DOCX
+Workers existentes:
 
 ```bash
 pnpm worker:signature-conversion
-```
-
-Requisitos:
-
-- LibreOffice headless disponível;
-- acesso ao Supabase;
-- Service Role apenas no processo server-side.
-
-### Entrega de assinatura
-
-```bash
 pnpm worker:signature-delivery
 ```
 
-Requisitos:
-
-- `SIGNATURE_EMAIL_WEBHOOK_URL`;
-- segredo HMAC correspondente;
-- política de retry e idempotência.
+A rotina `expire_inventory_reservations` deve ser executada somente por processo server-side autorizado quando o agendamento for adotado.
 
 ## 11. Validar a reconstrução
 
@@ -200,6 +224,7 @@ pnpm validate:stage13
 pnpm validate:stage14
 pnpm validate:stage15
 pnpm validate:stage16
+pnpm validate:stage17
 pnpm lint
 pnpm typecheck
 pnpm test
@@ -207,87 +232,77 @@ pnpm test:python
 pnpm build
 ```
 
-A recuperação não está concluída enquanto algum desses comandos falhar.
+A recuperação não está concluída enquanto algum comando falhar.
 
-## 12. Testes manuais mínimos
+## 12. Smoke test da Etapa 17
 
-### Administrador
+1. confirmar módulo e dados padrão;
+2. cadastrar item;
+3. criar entrada e postar;
+4. verificar saldo físico;
+5. criar reserva e verificar disponível;
+6. consumir reserva;
+7. tentar saldo negativo;
+8. transferir entre depósitos;
+9. reverter movimento;
+10. importar o mesmo recebimento duas vezes;
+11. confirmar que quantidade rejeitada não entrou;
+12. cadastrar ativo, entregar e devolver;
+13. abrir inventário, contar, aprovar e contabilizar;
+14. testar acesso entre organizações;
+15. testar custo com e sem capacidade sensível;
+16. confirmar bloqueio de `anon`;
+17. confirmar imutabilidade de movimento concluído.
 
-- login;
-- módulo exibido conforme perfil;
-- criação/consulta de orçamento;
-- acesso a obra;
-- consulta financeira sensível;
-- relatório executivo;
-- download privado.
-
-### Cliente
-
-- login;
-- somente dados próprios;
-- proposta/contrato liberados;
-- documentos da própria obra;
-- formulários atribuídos;
-- ausência de custos internos.
-
-### Segurança
-
-- URL direta sem capacidade retorna acesso negado;
-- usuário de outra organização não lê dados;
-- bucket privado não possui URL pública;
-- token bruto não aparece no banco/log;
-- Service Role não aparece no bundle do navegador;
-- snapshot/documento congelado não aceita alteração.
+Testes estruturais devem usar transações revertidas quando possível. Testes de RLS usam identidades reais de homologação.
 
 ## 13. Restaurar hospedagem
 
-No provider escolhido:
-
 1. conectar o repositório oficial;
-2. selecionar `main` como produção;
-3. configurar as variáveis por cofre;
-4. usar Node.js compatível;
-5. executar build `pnpm build`;
+2. usar `main` em produção;
+3. usar branch de etapa somente em ambiente de homologação/revisão;
+4. configurar variáveis por cofre;
+5. executar `pnpm build`;
 6. validar domínio e HTTPS;
 7. executar smoke tests autenticados.
 
 ## 14. Restaurar Supabase a partir de backup
 
-Em incidente real:
-
 1. congelar writes ou colocar aplicação em manutenção;
 2. identificar o último backup íntegro;
-3. restaurar em projeto isolado primeiro;
-4. aplicar migrations posteriores necessárias;
-5. executar validadores e testes de RLS;
-6. comparar contagens e hashes críticos;
-7. promover somente após aprovação;
-8. registrar incidente e causa.
+3. restaurar primeiro em projeto isolado;
+4. comparar migrations e schema;
+5. executar validadores e smoke tests;
+6. somente depois promover o ambiente restaurado.
 
-## 15. Diagnóstico de divergência
+## 15. Estado que não vive no Git
 
-Quando o código e o banco divergirem:
+O repositório não contém deliberadamente:
 
-- identificar o último commit implantado;
-- listar migrations locais e remotas;
-- verificar PRs mesclados após o deploy;
-- não apagar histórico de migration;
-- criar correção reproduzível;
-- atualizar `diretrizes/INVENTARIO.md` e o documento da etapa.
+- valores de secrets;
+- usuários reais do Auth;
+- dados reais do banco;
+- conteúdo dos buckets;
+- DNS;
+- credenciais de provedores;
+- backups físicos;
+- dispositivos RFID ou configurações da futura Etapa 21.
+
+Esses elementos precisam de cofre, backup e inventário externo.
 
 ## 16. Checklist final de recuperação
 
-- [ ] `main` atualizada;
-- [ ] documentação canônica presente;
-- [ ] dependências instaladas;
-- [ ] secrets configurados fora do Git;
-- [ ] migrations sincronizadas;
-- [ ] buckets privados;
-- [ ] perfis e módulos instalados;
-- [ ] workers funcionais;
-- [ ] validadores verdes;
-- [ ] build verde;
-- [ ] login administrador e cliente testados;
-- [ ] RLS multiempresa testada;
-- [ ] backup/restauração documentados;
-- [ ] nenhuma credencial exposta.
+- [ ] código obtido do repositório;
+- [ ] branch correta selecionada;
+- [ ] diretrizes lidas;
+- [ ] secrets configurados por cofre;
+- [ ] migrations aplicadas em ordem;
+- [ ] RLS e privilégios conferidos;
+- [ ] storage privado conferido;
+- [ ] módulos e perfis carregados;
+- [ ] workers necessários configurados;
+- [ ] `pnpm validate:docs` aprovado;
+- [ ] `pnpm validate:stage17` aprovado quando a branch estiver ativa;
+- [ ] lint, typecheck, testes e build aprovados;
+- [ ] smoke tests concluídos;
+- [ ] documentação compatível com o commit implantado.
