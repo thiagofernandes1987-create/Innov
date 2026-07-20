@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:python": "PYTHONPATH=python python3 -m unittest discover -s python/tests -v",
+    "validate:docs": "node scripts/validate-documentation.mjs",
     "validate:stage9": "node scripts/validate-stage9.mjs",
     "validate:stage12": "node scripts/validate-stage12.mjs",
     "validate:stage12.1": "node scripts/validate-stage12-1.mjs",
