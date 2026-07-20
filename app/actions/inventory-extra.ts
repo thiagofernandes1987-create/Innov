@@ -2,7 +2,7 @@
 
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
-import{requireCapability}from"@/lib/authorization";
+import{hasCapability,requireCapability}from"@/lib/authorization";
 
 function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
@@ -36,8 +36,12 @@ export async function createInventoryUnit(data:FormData){
 
 export async function createInventoryMaintenance(data:FormData){
  const assetId=text(data,"assetId");const projectId=optional(data,"projectId");const context=await requireCapability("estoque","update",projectId);const path=`/app/estoque/ativos/${assetId}`;
+ const cost=numberOrNull(text(data,"cost"));
+ if(cost!==null&&!await hasCapability("estoque","view_sensitive_financials",projectId,context))fail(path,"Seu perfil não pode registrar custo de manutenção.");
  const{error}=await context.supabase.from("inventory_asset_maintenance").insert({
-  organization_id:context.organizationId,asset_id:assetId,status:text(data,"status")||"SCHEDULED",title:text(data,"title"),description:text(data,"description"),provider_name:optional(data,"providerName"),scheduled_for:optional(data,"scheduledFor"),cost:numberOrNull(text(data,"cost")),notes:text(data,"notes"),created_by:context.userId
+  organization_id:context.organizationId,asset_id:assetId,status:text(data,"status")||"SCHEDULED",title:text(data,"title"),
+  description:text(data,"description"),provider_name:optional(data,"providerName"),scheduled_for:optional(data,"scheduledFor"),
+  cost,notes:text(data,"notes"),created_by:context.userId
  });
  if(error)fail(path,error.message);revalidatePath(path);
 }
