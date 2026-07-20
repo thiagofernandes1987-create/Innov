@@ -8,9 +8,9 @@ describe("module registry",()=>{
   });
 
   it("resolves the most specific application for a route",()=>{
-    expect(moduleForPath("/app/orcamentos/123")?.key).toBe("budgets");
-    expect(moduleForPath("/app/obras/abc/cronograma")?.key).toBe("works");
-    expect(moduleForPath("/app/administracao/perfis")?.key).toBe("administration");
+    expect(moduleForPath("/app/orcamentos/123")?.key).toBe("orcamentos");
+    expect(moduleForPath("/app/obras/abc/cronograma")?.key).toBe("obras");
+    expect(moduleForPath("/app/administracao/perfis")?.key).toBe("administracao");
   });
 
   it("maps simple levels to granular capabilities",()=>{
