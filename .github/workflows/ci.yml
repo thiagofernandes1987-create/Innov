@@ -17,7 +17,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate canonical documentation
+        run: node scripts/validate-documentation.mjs
+      - name: Validate Stage 17 inventory
+        run: node scripts/validate-stage17.mjs
+
   quality:
+    needs: preflight
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -42,8 +54,6 @@ jobs:
           corepack prepare pnpm@11.15.0 --activate
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --reporter=append-only
-      - name: Validate canonical documentation
-        run: pnpm validate:docs
       - name: Validate Stage 9 structure
         run: pnpm validate:stage9
       - name: Validate Stage 12 structure
@@ -60,8 +70,6 @@ jobs:
         run: pnpm validate:stage15
       - name: Validate Stage 16 reports
         run: pnpm validate:stage16
-      - name: Validate Stage 17 inventory
-        run: pnpm validate:stage17
       - name: Lint
         run: pnpm lint
       - name: Typecheck
