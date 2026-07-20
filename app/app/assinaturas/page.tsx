@@ -1,65 +1,43 @@
-import { requireOrganizationContext } from "@/lib/auth";
+import Link from "next/link";
+import { requireCapability } from "@/lib/authorization";
 
-export default async function SignaturesPage() {
-  const { supabase, organizationId } = await requireOrganizationContext();
-  const { data, error } = await supabase
-    .from("signature_envelopes")
-    .select(`
-      id, provider, status, external_id, sent_at, completed_at, created_at,
-      contract_versions(contract_id,version_number),
-      amendment_versions(amendment_id,version_number),
-      signature_signers(id,name,email,role_label,signing_order,status,viewed_at,signed_at)
-    `)
-    .eq("organization_id", organizationId)
-    .order("created_at", { ascending: false });
+function dateTime(value:string|null){return value?new Intl.DateTimeFormat("pt-BR",{dateStyle:"medium",timeStyle:"short"}).format(new Date(value)):"—";}
 
-  return (
-    <main className="content">
-      <div className="page-head">
-        <div>
-          <span className="badge">ASSINATURA ELETRÔNICA</span>
-          <h1>Envelopes e signatários</h1>
-          <p className="muted">O provider SANDBOX é exclusivo para homologação e não representa assinatura jurídica real.</p>
-        </div>
-      </div>
-      {error ? <div className="validation blocking">{error.message}</div> : null}
-      <section className="grid">
-        {(data ?? []).map((envelope) => {
-          const signers = (envelope.signature_signers ?? []) as Array<{
-            id: string; name: string; email: string; role_label: string | null;
-            signing_order: number; status: string; viewed_at: string | null; signed_at: string | null;
-          }>;
-          return (
-            <article key={envelope.id} className="card card-pad">
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 18, flexWrap: "wrap" }}>
-                <div>
-                  <span className={envelope.provider === "SANDBOX" ? "badge badge-warning" : "badge"}>{envelope.provider}</span>
-                  <h2 style={{ marginTop: 12 }}>Envelope {String(envelope.id).slice(0, 8)}</h2>
-                  <p className="muted">Criado em {new Intl.DateTimeFormat("pt-BR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(envelope.created_at))}</p>
-                </div>
-                <span className={envelope.status === "COMPLETED" ? "badge badge-success" : envelope.status === "ERROR" ? "badge badge-danger" : "badge"}>{envelope.status}</span>
-              </div>
-              <div className="table-wrap">
-                <table>
-                  <thead><tr><th>Ordem</th><th>Signatário</th><th>Papel</th><th>Status</th><th>Visualização</th><th>Assinatura</th></tr></thead>
-                  <tbody>
-                    {signers.map((signer) => <tr key={signer.id}>
-                      <td className="mono">{signer.signing_order}</td>
-                      <td><strong>{signer.name}</strong><br /><span className="muted">{signer.email}</span></td>
-                      <td>{signer.role_label ?? "—"}</td>
-                      <td><span className="badge">{signer.status}</span></td>
-                      <td>{signer.viewed_at ? "Registrada" : "—"}</td>
-                      <td>{signer.signed_at ? "Registrada" : "—"}</td>
-                    </tr>)}
-                    {!signers.length ? <tr><td colSpan={6}>Nenhum signatário cadastrado.</td></tr> : null}
-                  </tbody>
-                </table>
-              </div>
-            </article>
-          );
-        })}
-        {!data?.length ? <section className="card card-pad"><strong>Nenhum envelope criado.</strong><p className="muted">A criação exige documento congelado, signatários, idempotency key e MFA AAL2.</p></section> : null}
-      </section>
-    </main>
-  );
+export default async function SignaturesPage(){
+  const context=await requireCapability("assinaturas","read");
+  const[{data:documents,error:documentsError},{data:envelopes,error:envelopesError},{data:jobs}]=await Promise.all([
+    context.supabase.from("signature_documents").select("id,title,category,status,client_id,project_id,updated_at,current_version_id,clients(legal_name,trade_name),projects(code,name),signature_document_versions!signature_documents_current_version_id_fkey(source_format,conversion_status,page_count,original_sha256,completed_at)").eq("organization_id",context.organizationId).order("updated_at",{ascending:false}),
+    context.supabase.from("signature_envelopes").select("id,provider,status,document_version_id,contract_version_id,amendment_version_id,sent_at,completed_at,created_at,client_copy_sent_at,signature_signers(id,name,email,role_label,signing_order,status,viewed_at,signed_at)").eq("organization_id",context.organizationId).order("created_at",{ascending:false}).limit(20),
+    context.supabase.from("signature_conversion_jobs").select("document_version_id,status,attempts,last_error,next_attempt_at").eq("organization_id",context.organizationId)
+  ]);
+  const error=documentsError??envelopesError;
+  const jobsByVersion=new Map((jobs??[]).map(job=>[job.document_version_id,job]));
+  const completed=(documents??[]).filter(document=>document.status==="COMPLETED").length;
+  const pending=(documents??[]).filter(document=>!["COMPLETED","CANCELED","ARCHIVED"].includes(document.status)).length;
+
+  return <main className="content">
+    <section className="page-heading"><div><span className="badge">APLICATIVO DE ASSINATURAS</span><h1>Documentos e envelopes</h1><p>PDF/DOCX, campos posicionáveis, evidências, hashes e entrega de cópia.</p></div><Link className="button button-primary" href="/app/assinaturas/novo">Novo documento</Link></section>
+    {error&&<div className="validation blocking">{error.message}</div>}
+    <section className="stats-grid"><article className="card"><small>DOCUMENTOS</small><strong>{documents?.length??0}</strong><span>no módulo</span></article><article className="card"><small>EM ANDAMENTO</small><strong>{pending}</strong><span>aguardando layout ou assinatura</span></article><article className="card"><small>CONCLUÍDOS</small><strong>{completed}</strong><span>PDF final imutável</span></article></section>
+
+    <section style={{marginTop:28}}><div className="section-heading"><div><span className="eyebrow">DOCUMENTOS</span><h2>Assinatura avançada</h2></div></div><div className="grid">
+      {(documents??[]).map(document=>{
+        const client=Array.isArray(document.clients)?document.clients[0]:document.clients;
+        const project=Array.isArray(document.projects)?document.projects[0]:document.projects;
+        const version=Array.isArray(document.signature_document_versions)?document.signature_document_versions[0]:document.signature_document_versions;
+        const job=version?jobsByVersion.get(document.current_version_id):undefined;
+        return <Link key={document.id} href={`/app/assinaturas/documentos/${document.id}`} className="card card-pad signature-document-card" style={{textDecoration:"none",color:"inherit"}}>
+          <div style={{display:"flex",justifyContent:"space-between",gap:12}}><span className="badge">{document.category}</span><span className={document.status==="COMPLETED"?"badge badge-success":version?.conversion_status==="FAILED"?"badge badge-danger":"badge"}>{document.status}</span></div>
+          <h2>{document.title}</h2><p className="muted">{client?.legal_name||client?.trade_name||"Sem cliente"}{project?` · ${project.code} ${project.name}`:""}</p>
+          <div className="signature-hash"><span>{version?.source_format||"—"} · {version?.page_count??"—"} pág.</span><code>{version?.original_sha256?.slice(0,16)}…</code></div>
+          {job&&<small className="muted">Conversão: {job.status} · tentativa {job.attempts}{job.last_error?` · ${job.last_error}`:""}</small>}
+        </Link>;
+      })}
+      {!documents?.length&&<article className="card card-pad"><strong>Nenhum documento enviado.</strong><p className="muted">Comece com um PDF ou DOCX.</p></article>}
+    </div></section>
+
+    <section style={{marginTop:32}}><div className="section-heading"><div><span className="eyebrow">HISTÓRICO</span><h2>Envelopes recentes</h2></div></div><div className="grid">
+      {(envelopes??[]).map(envelope=>{const signers=envelope.signature_signers??[];return <article key={envelope.id} className="card card-pad"><div style={{display:"flex",justifyContent:"space-between",gap:18}}><div><span className={envelope.provider==="SANDBOX"?"badge badge-warning":"badge"}>{envelope.provider}</span><h3>Envelope {envelope.id.slice(0,8)}</h3><p className="muted">Criado em {dateTime(envelope.created_at)}</p></div><span className={envelope.status==="COMPLETED"?"badge badge-success":"badge"}>{envelope.status}</span></div><ul className="compact-list">{signers.map(signer=><li key={signer.id}><strong>{signer.name}</strong><small>{signer.email} · {signer.status}</small></li>)}</ul>{envelope.client_copy_sent_at&&<span className="badge badge-success">Cópia enviada</span>}</article>})}
+    </div></section>
+  </main>;
 }
