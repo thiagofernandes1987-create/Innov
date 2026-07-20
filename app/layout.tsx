@@ -4,6 +4,7 @@ import "./stage12.css";
 import "./signatures.css";
 import "./quality.css";
 import "./procurement.css";
+import "./finance-operational.css";
 
 export const metadata: Metadata = {
   title: {
