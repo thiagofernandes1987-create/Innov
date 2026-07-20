@@ -163,28 +163,28 @@ left join public.finance_installments installment on installment.entry_id=entry.
 group by entry.id;
 
 create or replace view public.finance_cash_flow_monthly_v with (security_invoker=true) as
-select organization_id,project_id,month,
- sum(planned_inflow)::numeric(18,2) planned_inflow,
- sum(planned_outflow)::numeric(18,2) planned_outflow,
- sum(realized_inflow)::numeric(18,2) realized_inflow,
- sum(realized_outflow)::numeric(18,2) realized_outflow
+select organization_id,project_id,period_month,
+ sum(planned_inflow)::numeric(18,2) as planned_inflow,
+ sum(planned_outflow)::numeric(18,2) as planned_outflow,
+ sum(realized_inflow)::numeric(18,2) as realized_inflow,
+ sum(realized_outflow)::numeric(18,2) as realized_outflow
 from (
- select entry.organization_id,entry.project_id,date_trunc('month',installment.due_date)::date month,
-  case when entry.direction='RECEIVABLE' then installment.total_due else 0 end planned_inflow,
-  case when entry.direction='PAYABLE' then installment.total_due else 0 end planned_outflow,
-  0::numeric realized_inflow,0::numeric realized_outflow
+ select entry.organization_id,entry.project_id,date_trunc('month',installment.due_date)::date as period_month,
+  case when entry.direction='RECEIVABLE' then installment.total_due else 0 end as planned_inflow,
+  case when entry.direction='PAYABLE' then installment.total_due else 0 end as planned_outflow,
+  0::numeric as realized_inflow,0::numeric as realized_outflow
  from public.finance_installments installment join public.finance_entries entry on entry.id=installment.entry_id
  where installment.status<>'CANCELED' and entry.status<>'CANCELED'
  union all
- select entry.organization_id,entry.project_id,date_trunc('month',settlement.settled_at)::date month,
-  0::numeric,0::numeric,
-  case when entry.direction='RECEIVABLE' then settlement.amount else 0 end,
-  case when entry.direction='PAYABLE' then settlement.amount else 0 end
+ select entry.organization_id,entry.project_id,date_trunc('month',settlement.settled_at)::date as period_month,
+  0::numeric as planned_inflow,0::numeric as planned_outflow,
+  case when entry.direction='RECEIVABLE' then settlement.amount else 0 end as realized_inflow,
+  case when entry.direction='PAYABLE' then settlement.amount else 0 end as realized_outflow
  from public.finance_settlements settlement
  join public.finance_installments installment on installment.id=settlement.installment_id
  join public.finance_entries entry on entry.id=installment.entry_id
 ) cash
- group by organization_id,project_id,month;
+ group by organization_id,project_id,period_month;
 
 insert into storage.buckets(id,name,public,file_size_limit,allowed_mime_types)
 values('finance-attachments','finance-attachments',false,26214400,array['application/pdf','image/png','image/jpeg','image/webp','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'])
