@@ -4,13 +4,9 @@ insert into public.app_modules(key,name,description,href,icon_key,display_order,
 values(
   'relatorios','Relatórios e Indicadores','Painéis executivos, indicadores por obra, snapshots e exportações.','/app/relatorios','reports',190,true,true,'1.0.0','Geral',
   jsonb_build_object(
-    'navigationLabel','Relatórios',
-    'plugin','executive-analytics',
-    'dependencies',jsonb_build_array('obras'),
+    'navigationLabel','Relatórios','plugin','executive-analytics','dependencies',jsonb_build_array('obras'),
     'optionalSources',jsonb_build_array('financeiro','compras','qualidade','planejamento','diario','documentos'),
-    'snapshots',true,
-    'csvExport',true,
-    'publicDashboards',false
+    'snapshots',true,'csvExport',true,'publicDashboards',false
   ),true,false
 )
 on conflict(key) do update set
@@ -25,6 +21,25 @@ begin
     raise exception 'Organização não encontrada.';
   end if;
 
+  perform public.ensure_organization_access_profiles(p_organization_id);
+
+  update public.access_profiles set
+    name=case base_role
+      when 'SUPER_ADMIN' then 'Super Administrador' when 'DIRECAO' then 'Direção'
+      when 'ADMINISTRADOR' then 'Administrador' when 'COMERCIAL' then 'Vendas'
+      when 'GESTOR_OBRAS' then 'Operacional / Gestor de Obras' when 'ENGENHEIRO' then 'Engenharia'
+      when 'ORCAMENTISTA' then 'Orçamentista' when 'FINANCEIRO' then 'Financeiro'
+      when 'QUALIDADE' then 'Qualidade' when 'SAC' then 'Pós-venda' when 'CLIENTE' then 'Cliente' else name end,
+    description=case base_role
+      when 'SUPER_ADMIN' then 'Acesso completo à plataforma.' when 'DIRECAO' then 'Gestão, aprovações e informações sensíveis.'
+      when 'ADMINISTRADOR' then 'Administração operacional da plataforma.' when 'COMERCIAL' then 'CRM, clientes, propostas e indicadores comerciais.'
+      when 'GESTOR_OBRAS' then 'Obras, planejamento, campo e indicadores operacionais.' when 'ENGENHEIRO' then 'Planejamento, campo e indicadores técnicos.'
+      when 'ORCAMENTISTA' then 'Orçamentos, custos e indicadores autorizados.' when 'FINANCEIRO' then 'Financeiro, contratos e relatórios sensíveis.'
+      when 'QUALIDADE' then 'Inspeções, conformidade e indicadores de qualidade.' when 'SAC' then 'Ocorrências, pesquisas e relacionamento.'
+      when 'CLIENTE' then 'Acesso ao portal do cliente.' else description end,
+    system=true,active=true,updated_at=now()
+  where organization_id=p_organization_id and base_role is not null;
+
   insert into public.organization_modules(organization_id,module_id,status,installed_version,settings,enabled_at)
   select p_organization_id,module.id,'ENABLED',module.version,
     jsonb_build_object('defaultPeriodMonths',12,'showSensitiveOnlyWithCapability',true),now()
@@ -34,37 +49,19 @@ begin
     settings=public.organization_modules.settings||excluded.settings,
     enabled_at=coalesce(public.organization_modules.enabled_at,now()),disabled_at=null,archived_at=null,updated_at=now();
 
-  insert into public.access_profiles(organization_id,code,name,description,base_role,system,active)
-  select p_organization_id,profile.code,profile.name,profile.description,profile.role::public.org_role,true,true
-  from (values
-    ('super-admin','Super Administrador','Acesso completo à plataforma.','SUPER_ADMIN'),
-    ('direcao','Direção','Gestão, aprovações e informações sensíveis.','DIRECAO'),
-    ('administrador','Administrador','Administração operacional da plataforma.','ADMINISTRADOR'),
-    ('vendas','Vendas','CRM, clientes, propostas e indicadores comerciais.','COMERCIAL'),
-    ('gestor-obras','Operacional / Gestor de Obras','Obras, planejamento, campo e indicadores operacionais.','GESTOR_OBRAS'),
-    ('engenharia','Engenharia','Planejamento, campo e indicadores técnicos.','ENGENHEIRO'),
-    ('orcamentista','Orçamentista','Orçamentos, custos e indicadores autorizados.','ORCAMENTISTA'),
-    ('financeiro','Financeiro','Financeiro, contratos e relatórios sensíveis.','FINANCEIRO'),
-    ('qualidade','Qualidade','Inspeções, conformidade e indicadores de qualidade.','QUALIDADE'),
-    ('pos-venda','Pós-venda','Ocorrências, pesquisas e relacionamento.','SAC'),
-    ('cliente','Cliente','Acesso ao portal do cliente.','CLIENTE')
-  ) as profile(code,name,description,role)
-  on conflict(organization_id,code) do update set
-    name=excluded.name,description=excluded.description,base_role=excluded.base_role,system=true,active=true,updated_at=now();
-
   insert into public.profile_module_permissions(
     organization_id,profile_id,module_id,access_level,can_approve,can_release,can_sign,can_export,can_administer,can_view_sensitive
   )
   select profile.organization_id,profile.id,module.id,
     case
-      when profile.code in ('super-admin','direcao','administrador') then 'DELETE'::public.app_access_level
-      when profile.code in ('financeiro','orcamentista','gestor-obras','engenharia','qualidade','vendas','pos-venda') then 'READ'::public.app_access_level
+      when profile.base_role in ('SUPER_ADMIN','DIRECAO','ADMINISTRADOR') then 'DELETE'::public.app_access_level
+      when profile.base_role in ('FINANCEIRO','ORCAMENTISTA','GESTOR_OBRAS','ENGENHEIRO','QUALIDADE','COMERCIAL','SAC') then 'READ'::public.app_access_level
       else 'NONE'::public.app_access_level
     end,
     false,false,false,
-    profile.code in ('super-admin','direcao','administrador','financeiro','orcamentista','gestor-obras','engenharia','qualidade','vendas','pos-venda'),
-    profile.code in ('super-admin','direcao','administrador'),
-    profile.code in ('super-admin','direcao','administrador','financeiro','orcamentista')
+    profile.base_role in ('SUPER_ADMIN','DIRECAO','ADMINISTRADOR','FINANCEIRO','ORCAMENTISTA','GESTOR_OBRAS','ENGENHEIRO','QUALIDADE','COMERCIAL','SAC'),
+    profile.base_role in ('SUPER_ADMIN','DIRECAO','ADMINISTRADOR'),
+    profile.base_role in ('SUPER_ADMIN','DIRECAO','ADMINISTRADOR','FINANCEIRO','ORCAMENTISTA')
   from public.access_profiles profile cross join public.app_modules module
   where profile.organization_id=p_organization_id and module.key='relatorios'
   on conflict(profile_id,module_id) do update set
@@ -87,6 +84,7 @@ begin
     ('blocked_tasks','tarefas','Tarefas bloqueadas','Tarefas operacionais bloqueadas.','COUNT','SCHEDULE',false,80),
     ('overdue_tasks','planejamento','Tarefas atrasadas','Tarefas com prazo vencido e não concluídas.','COUNT','SCHEDULE',false,90),
     ('schedule_variance_pp','planejamento','Desvio de avanço','Diferença em pontos percentuais entre realizado e previsto.','PERCENT_POINT','SCHEDULE',false,100),
+    ('overdue_days','obras','Dias de atraso','Dias além do término planejado para obras não concluídas.','DAYS','SCHEDULE',false,105),
     ('overdue_purchase_orders','compras','Pedidos atrasados','Pedidos com entrega prevista vencida.','COUNT','PROCUREMENT',false,110),
     ('pending_quality_reviews','qualidade','Revisões de qualidade','Respostas aguardando revisão.','COUNT','QUALITY',false,120),
     ('average_quality_score','qualidade','Conformidade média','Pontuação média das inspeções e formulários.','PERCENT','QUALITY',false,130),
