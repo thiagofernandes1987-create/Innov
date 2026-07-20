@@ -43,6 +43,9 @@ jobs:
       - name: Validate Stage 9 structure
         run: pnpm validate:stage9
 
+      - name: Validate Stage 12 structure
+        run: pnpm validate:stage12
+
       - name: Lint
         run: pnpm lint
 
