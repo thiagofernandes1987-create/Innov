@@ -1,0 +1,20 @@
+import Link from "next/link";
+import { requireCapability } from "@/lib/authorization";
+import { relationFrom, type QualityTemplateSummary } from "@/lib/quality/database";
+
+export const dynamic="force-dynamic";
+
+export default async function QualityDashboard(){
+  const context=await requireCapability("qualidade","read");
+  const[{count:documents},{count:templates},{count:openAssignments},{count:pendingReview},{data:recent}]=await Promise.all([
+    context.supabase.from("quality_documents").select("id",{count:"exact",head:true}).eq("organization_id",context.organizationId).eq("is_current",true),
+    context.supabase.from("quality_form_templates").select("id",{count:"exact",head:true}).eq("organization_id",context.organizationId),
+    context.supabase.from("quality_form_assignments").select("id",{count:"exact",head:true}).eq("organization_id",context.organizationId).in("status",["PENDING","OPEN"]),
+    context.supabase.from("quality_form_responses").select("id",{count:"exact",head:true}).eq("organization_id",context.organizationId).eq("status","SUBMITTED"),
+    context.supabase.from("quality_form_responses").select("id,status,score,result,submitted_at,quality_form_assignments(title)").eq("organization_id",context.organizationId).order("created_at",{ascending:false}).limit(6)
+  ]);
+  return <main className="content quality-app"><section className="page-heading"><div><span className="badge">APLICATIVO · QUALIDADE</span><h1>Qualidade e formulários</h1><p>Biblioteca online, FVS, FVM, formulários internos e pesquisas para clientes.</p></div><div className="page-actions"><Link className="button button-secondary" href="/app/qualidade/documentos">Enviar arquivo</Link><Link className="button button-primary" href="/app/qualidade/formularios/novo">Criar formulário</Link></div></section>
+  <section className="stats-grid quality-stats"><article className="card"><small>DOCUMENTOS</small><strong>{documents??0}</strong><span>versões atuais</span></article><article className="card"><small>MODELOS</small><strong>{templates??0}</strong><span>FVS, FVM e formulários</span></article><article className="card"><small>EM ABERTO</small><strong>{openAssignments??0}</strong><span>aguardando preenchimento</span></article><article className="card"><small>PARA REVISAR</small><strong>{pendingReview??0}</strong><span>respostas enviadas</span></article></section>
+  <section className="quality-launch-grid"><Link className="card card-pad quality-launch" href="/app/qualidade/documentos"><span>▤</span><div><h2>Biblioteca online</h2><p>Procedimentos, FVS, FVM e arquivos privados com leitura no navegador.</p></div></Link><Link className="card card-pad quality-launch" href="/app/qualidade/formularios"><span>☷</span><div><h2>Modelos e pesquisas</h2><p>Crie formulários versionados e distribua por obra, cliente ou link.</p></div></Link><Link className="card card-pad quality-launch" href="/app/qualidade/preenchimentos"><span>✓</span><div><h2>Preenchimentos</h2><p>Acompanhe inspeções, respostas, pontuações e aprovações.</p></div></Link></section>
+  <section className="card card-pad"><div className="section-heading"><div><span className="eyebrow">ATIVIDADE RECENTE</span><h2>Respostas e inspeções</h2></div><Link className="text-link" href="/app/qualidade/preenchimentos">Ver todas →</Link></div><div className="quality-response-list">{(recent??[]).map(item=>{const assignment=relationFrom<QualityTemplateSummary>(item,"quality_form_assignments");return <Link href={`/app/qualidade/respostas/${item.id}`} className="quality-response-row" key={item.id}><div><strong>{assignment?.title??"Formulário"}</strong><small>{item.submitted_at?new Date(item.submitted_at).toLocaleString("pt-BR"):"Rascunho"}</small></div><div><span className="badge">{item.status}</span><strong>{item.score==null?"—":Number(item.score).toFixed(1)}</strong></div></Link>})}{!recent?.length&&<div className="empty-state"><h3>Nenhuma resposta registrada</h3><p>Distribua um modelo para iniciar o acompanhamento.</p></div>}</div></section></main>;
+}

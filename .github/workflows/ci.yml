@@ -26,40 +26,37 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
-
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
       - name: Enable pnpm
         run: |
           corepack enable
           corepack prepare pnpm@11.15.0 --activate
-
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --reporter=append-only
-
       - name: Validate Stage 9 structure
         run: pnpm validate:stage9
-
       - name: Validate Stage 12 structure
         run: pnpm validate:stage12
-
       - name: Validate Stage 12.1 modular access
         run: pnpm validate:stage12.1
-
       - name: Validate Stage 12.2 advanced signatures
         run: pnpm validate:stage12.2
-
+      - name: Validate Stage 13 quality forms
+        run: pnpm validate:stage13
       - name: Lint
         run: pnpm lint
-
       - name: Typecheck
         run: pnpm typecheck
-
-      - name: Unit tests
+      - name: TypeScript unit tests
         run: pnpm test
-
+      - name: Python quality form tests
+        run: pnpm test:python
       - name: Build
         run: pnpm build
