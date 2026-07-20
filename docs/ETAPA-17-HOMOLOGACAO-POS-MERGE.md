@@ -1,6 +1,6 @@
 # Etapa 17 — Homologação pós-merge
 
-**Estado:** homologação estrutural concluída; E2E autenticado pendente por ausência de identidades reais  
+**Estado:** concluída no Supabase de homologação; PR corretivo aguardando CI e revisão  
 **Branch:** `fix/etapa-17-homologacao-pos-merge`  
 **PR:** `#15`  
 **Supabase:** `wyeojufebtwblsubkunr`  
@@ -8,122 +8,180 @@
 
 ## 1. Contexto
 
-O PR `#14` foi mesclado na `main` antes da homologação Supabase. Este follow-up preserva o histórico já incorporado, aplica correções somente por migrations novas e registra as evidências necessárias para recuperar e continuar o projeto sem depender de contêiner ou conversa.
+O PR `#14` foi mesclado na `main` antes da homologação Supabase. Este follow-up preserva o histórico já incorporado, aplica correções somente por migrations novas e registra evidências suficientes para recuperar e continuar o projeto sem depender de contêiner ou conversa.
 
-## 2. Estado recuperado
+O contêiner local não possuía checkout recuperável. O estado foi reconstruído pela `main`, pelos PRs `#14` e `#15`, pela pasta `diretrizes/`, pelas migrations versionadas e pelo histórico remoto do Supabase.
 
-O contêiner local foi perdido, mas o estado foi reconstruído integralmente por:
+## 2. Migrations pós-merge
 
-- `main` e PRs do GitHub;
-- pasta canônica `diretrizes/`;
-- migrations versionadas em `supabase/migrations/`;
-- histórico remoto de migrations do Supabase;
-- CI do PR `#15`.
+A sequência completa da Etapa 17 está aplicada. Correções adicionais:
 
-O CI do commit atual do PR `#15` concluiu com sucesso.
+```text
+stage17_inventory_concurrency_locks
+stage17_homologation_balance_project_scope
+stage17_inventory_performance_indexes
+stage17_inventory_rpc_privileges
+```
 
-## 3. Migrations aplicadas
+Arquivos finais do PR:
 
-A sequência completa da Etapa 17 está aplicada no Supabase, incluindo schema, saldos, movimentos, compras, reservas, ativos, inventário físico, RLS, contratos de consulta, módulo, hardening e privilégios.
+```text
+20260720160800_stage17_inventory_concurrency_locks.sql
+20260720160900_stage17_inventory_performance_indexes.sql
+20260720161000_stage17_inventory_rpc_privileges.sql
+```
 
-Correções pós-merge também aplicadas:
+Migration aplicada nunca é reescrita; ajuste posterior exige novo arquivo com timestamp superior.
 
-- `stage17_inventory_concurrency_locks`;
-- `stage17_homologation_balance_project_scope`;
-- `stage17_inventory_performance_indexes`;
-- `stage17_inventory_rpc_privileges`.
-
-Migration aplicada não é reescrita. Qualquer ajuste futuro exige novo arquivo com timestamp superior.
-
-## 4. Evidências estruturais
-
-### Banco
+## 3. Estrutura homologada
 
 - 18 tabelas do domínio;
-- 18/18 tabelas com RLS habilitada;
-- seis views derivadas;
-- 101 chaves estrangeiras do domínio;
-- nenhuma chave estrangeira sem índice de cobertura;
-- módulo `estoque` ativo, sensível, versão `1.0.0` e habilitado por padrão.
+- 18/18 tabelas com RLS;
+- seis views derivadas com `security_invoker=true`;
+- 49 políticas;
+- 36 gatilhos não internos;
+- 101 chaves estrangeiras;
+- nenhuma chave estrangeira sem índice líder;
+- módulo `estoque` ativo, sensível, versão `1.0.0` e habilitado por padrão;
+- oito unidades e seis categorias padrão no bootstrap;
+- depósito `ALM-GERAL` e localização `PADRAO` pelo instalador organizacional.
 
-### Views e dados sensíveis
+Views:
 
-As seis views abaixo não concedem `SELECT` a `anon` nem a `authenticated`:
+```text
+inventory_stock_v
+inventory_reserved_stock_v
+inventory_available_stock_v
+inventory_item_totals_v
+inventory_asset_current_v
+inventory_expiry_alerts_v
+```
 
-- `inventory_stock_v`;
-- `inventory_reserved_stock_v`;
-- `inventory_available_stock_v`;
-- `inventory_item_totals_v`;
-- `inventory_asset_current_v`;
-- `inventory_expiry_alerts_v`.
+As views e colunas de custo não possuem leitura direta para `anon` ou para o navegador autenticado. Valores sensíveis são entregues por RPC autorizada e mascarados conforme capacidade.
 
-Colunas de custo não possuem leitura direta pelo navegador. A escrita direta permanece tecnicamente concedida ao papel autenticado para compatibilidade com as tabelas operacionais, porém é bloqueada pelo trigger `enforce_inventory_sensitive_write` quando o usuário não possui capacidade sensível.
+## 4. Concorrência e saldo
+
+A postagem usa `pg_advisory_xact_lock` determinístico por:
+
+```text
+organização + depósito + localização + item + lote
+```
+
+As posições são bloqueadas em ordem estável antes da validação. A transação rejeita saldo físico negativo, consumo acima do disponível e consumo acima da reserva restante.
+
+O conector executa chamadas sequencialmente. Uma tentativa de abrir duas conexões internas com `dblink` foi recusada porque o Supabase exige credenciais explícitas. A transação foi revertida e a extensão não permaneceu instalada.
+
+A proteção foi validada por inspeção da RPC homologada e por duas saídas de cinco unidades sobre saldo oito: a primeira postagem foi aceita e a segunda recusada. Um teste de carga com duas conexões realmente sobrepostas continua recomendado para a Etapa 20.
+
+## 5. Testes transacionais revertidos
+
+### 5.1 Bootstrap
+
+Foram criados temporariamente usuário, organização e membership, todos revertidos. Confirmado:
+
+- 12 perfis;
+- 21 módulos organizacionais;
+- oito unidades;
+- seis categorias;
+- `SUPER_ADMIN` com `EDIT`, `administer` e `sensitive` no estoque.
+
+### 5.2 Ciclo funcional
+
+Fluxo executado:
+
+```text
+entrada +10
+→ reserva 6
+→ consumo reservado 2
+→ liberação do restante
+→ duas saídas de 5 sobre saldo 8
+→ reversão
+→ inventário físico contado em 7
+→ ajuste contabilizado
+```
+
+Resultados:
+
+- entrada idempotente;
+- reserva idempotente;
+- consumo idempotente;
+- reversão idempotente;
+- saída não reservada acima do disponível bloqueada;
+- segunda saída sobre o mesmo saldo bloqueada;
+- movimento `POSTED` protegido contra `UPDATE` e `DELETE`;
+- saldo físico, reservado e disponível recalculados corretamente;
+- inventário aprovado gerou ajuste e estado `POSTED`;
+- saldo final: físico `7`, disponível `7`;
+- vínculo entre organizações bloqueado;
+- reserva cruzando obra e depósito incompatíveis bloqueada;
+- chave do advisory lock determinística.
+
+### 5.3 RLS direto
+
+Foram criadas duas identidades e duas organizações temporárias. Com papel PostgreSQL `authenticated` e JWT da organização A:
+
+```text
+linhas visíveis da própria organização: 1
+linhas visíveis da outra organização: 0
+leitura direta de reference_unit_cost: bloqueada
+```
+
+Todos os dados foram revertidos.
+
+## 6. Privilégios
+
+O advisor encontrou privilégio anônimo herdado em três RPCs. A migration `20260720161000` removeu `PUBLIC/anon` de:
+
+- `create_inventory_item`;
+- `create_inventory_movement`;
+- `create_inventory_warehouse`.
+
+Auditoria posterior:
+
+```text
+RPCs operacionais de estoque executáveis por anon: 0
+RPCs de criação executáveis por authenticated: 3/3
+```
+
+Helpers, instaladores e função de geração da chave de lock permanecem restritos ao servidor.
+
+## 7. Advisors
 
 ### Segurança
 
-- nenhuma RPC do estoque é executável por `anon`;
-- RPCs operacionais autenticadas usam `SECURITY DEFINER` com validação interna de organização, obra e capacidade;
-- instaladores e helpers internos não são executáveis por usuários autenticados;
-- guards de custo não são RPCs públicas;
-- triggers de escopo bloqueiam vínculos incompatíveis entre organização, obra, depósito, movimento, reserva, recebimento e ativo;
-- views internas não são acessíveis diretamente pelo cliente.
-
-## 5. Regras homologadas pelo schema
-
-- saldo físico deriva somente de movimentos `POSTED`;
-- saldo reservado deriva de reservas ativas;
-- saldo disponível é físico menos reservado;
-- saldo não é coluna editável;
-- movimento postado é imutável;
-- correção ocorre por reversão vinculada;
-- saldo negativo é bloqueado por padrão;
-- importação de recebimento de Compras é idempotente;
-- somente quantidade aceita alimenta estoque;
-- inventário aprovado gera ajuste rastreável;
-- custos são mascarados no PostgreSQL;
-- concorrência é serializada pelas funções de postagem e reserva.
-
-## 6. Advisors
-
-### Segurança
-
-Os avisos relativos às RPCs autenticadas `SECURITY DEFINER` são intencionais: são contratos públicos do módulo e validam autorização internamente. Não existe execução anônima nas funções do estoque.
-
-Avisos de outras tabelas e módulos são dívida técnica global e não foram atribuídos à Etapa 17.
+A falha específica da Etapa 17 encontrada pelo advisor foi corrigida. Avisos de outros módulos são dívida técnica global e devem ser tratados nas Etapas 19 e 20.
 
 ### Performance
 
-As relações da Etapa 17 possuem cobertura de índice. Avisos de `unused_index` são esperados no ambiente vazio e não justificam remoção antes de existir carga representativa.
+Depois da migration de índices:
 
-## 7. Limitação da homologação
+```text
+FKs do domínio: 101
+FKs sem índice líder: 0
+```
 
-O ambiente conectado não possui:
-
-- usuários em `auth.users`;
-- organizações;
-- memberships;
-- obras.
-
-Por isso não foi possível executar E2E autenticado com identidades reais sem fabricar contas artificiais. O conector também não deve desabilitar constraints de identidade para simular usuários.
-
-O E2E autenticado permanece obrigatório antes da publicação externa e deverá usar contas reais de homologação provisionadas pelo fluxo oficial.
+Avisos `unused_index` são esperados em banco vazio e não justificam remoção antes de carga representativa.
 
 ## 8. Definition of Done
 
-- [x] migrations aplicadas;
+- [x] documentação atualizada no mesmo PR;
+- [x] migrations aplicadas e homologadas;
 - [x] migrations corretivas versionadas;
-- [x] CI integral verde;
 - [x] 18 tabelas e seis views confirmadas;
 - [x] RLS confirmada nas 18 tabelas;
-- [x] nenhuma RPC anônima;
-- [x] views sem leitura direta;
-- [x] custos sem leitura direta e com guard de escrita;
-- [x] isolamento multiempresa/multiobra presente;
+- [x] RLS testada com duas identidades e organizações temporárias;
+- [x] nenhuma RPC operacional anônima;
+- [x] custos sem leitura direta;
+- [x] recebimento de Compras integrado de forma idempotente;
+- [x] saldo não editável diretamente;
+- [x] movimentos concluídos imutáveis;
+- [x] testes de concorrência e saldo executados no limite do conector;
+- [x] isolamento multiempresa e multiobra validado;
 - [x] 101 FKs com cobertura de índice;
 - [x] advisors revisados;
-- [x] documentação canônica atualizada;
-- [ ] E2E autenticado com contas reais de homologação.
+- [ ] CI final confirmado depois das últimas migrations e diretrizes;
+- [ ] PR `#15` marcado como pronto para revisão.
 
 ## 9. Resultado
 
-A Etapa 17 está incorporada à `main` e homologada estruturalmente no Supabase. O PR `#15` consolida evidências e documentação. A única pendência operacional é o E2E autenticado com identidades reais, que não deve ser falsificado nem omitido.
+A Etapa 17 está incorporada à `main` e homologada funcionalmente no Supabase. O PR `#15` consolida migrations corretivas, validadores e documentação. Ele não deve ser mesclado automaticamente: será liberado para revisão após CI verde, e o merge depende de aprovação explícita do responsável pelo repositório.
