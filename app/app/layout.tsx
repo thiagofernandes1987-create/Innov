@@ -1,32 +1,15 @@
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
-import { requireOrganizationContext } from "@/lib/auth";
+import { listAccessibleModules, requireOrganizationContext } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
-
-const navItems = [
-  ["Visão geral", "/app/obras"],
-  ["CRM", "/app/crm"],
-  ["Clientes", "/app/clientes"],
-  ["Obras", "/app/obras"],
-  ["Planejamento", "/app/planejamento"],
-  ["Tarefas", "/app/tarefas"],
-  ["Diário de obras", "/app/diario"],
-  ["Equipes", "/app/equipes"],
-  ["Orçamentos", "/app/orcamentos"],
-  ["Propostas", "/app/propostas"],
-  ["Contratos", "/app/contratos"],
-  ["Aditivos", "/app/aditivos"],
-  ["Assinaturas", "/app/assinaturas"],
-  ["Documentos", "/app/documentos"],
-  ["Auditoria", "/app/auditoria"]
-] as const;
 
 export default async function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const context = await requireOrganizationContext([
     "SUPER_ADMIN", "DIRECAO", "ADMINISTRADOR", "COMERCIAL", "GESTOR_OBRAS",
     "ENGENHEIRO", "ORCAMENTISTA", "FINANCEIRO", "QUALIDADE", "SAC"
   ]);
+  const modules = await listAccessibleModules(context);
 
   return (
     <div className="shell">
@@ -36,20 +19,25 @@ export default async function AppLayout({ children }: Readonly<{ children: React
           <div><strong>INNOVAR</strong><small>Gestão integrada</small></div>
         </div>
         <nav className="nav" aria-label="Navegação interna">
-          {navItems.map(([label, href]) => (
-            <Link key={href} href={href}><span>{label}</span></Link>
+          <Link href="/app"><span>Aplicativos</span></Link>
+          {modules.map((module) => (
+            <Link key={module.module_id} href={module.module_href}>
+              <span>{module.module_name}</span>
+            </Link>
           ))}
         </nav>
         <div className="sidebar-footer">
           <small>{context.role}</small>
           <p style={{ overflowWrap: "anywhere" }}>{context.email}</p>
-          <form action={signOut}><button className="button button-secondary" type="submit">Sair</button></form>
+          <form action={signOut}>
+            <button className="button button-secondary" type="submit">Sair</button>
+          </form>
         </div>
       </aside>
       <div className="main">
         <header className="topbar">
           <strong>Organização ativa</strong>
-          <span className="mono" style={{ fontSize: 12 }}>{context.organizationId.slice(0, 8)}</span>
+          <span>{modules.length} aplicativo(s) habilitado(s)</span>
         </header>
         {children}
       </div>
