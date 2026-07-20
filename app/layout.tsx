@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./stage12.css";
 import "./signatures.css";
+import "./quality.css";
 
 export const metadata: Metadata = {
   title: {
@@ -12,9 +13,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <html lang="pt-BR">
-      <body>{children}</body>
-    </html>
-  );
+  return <html lang="pt-BR"><body>{children}</body></html>;
 }
