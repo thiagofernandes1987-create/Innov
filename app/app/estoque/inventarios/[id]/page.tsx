@@ -1,12 +1,129 @@
-import Link from"next/link";
-import{approveInventoryStocktake,postInventoryStocktake}from"@/app/actions/inventory";
-import{addInventoryStocktakeLine}from"@/app/actions/inventory-stocktake";
-import{InventoryNavigation}from"@/components/inventory/inventory-navigation";
-import{InventoryStocktakeCountForm}from"@/components/inventory/inventory-stocktake-count-form";
-import{hasCapability,requireCapability}from"@/lib/authorization";
-import{formatInventoryQuantity}from"@/lib/inventory/domain";
+import Link from "next/link";
+import { approveInventoryStocktake, postInventoryStocktake } from "@/app/actions/inventory";
+import { addInventoryStocktakeLine } from "@/app/actions/inventory-stocktake";
+import { InventoryNavigation } from "@/components/inventory/inventory-navigation";
+import { InventoryStocktakeCountForm } from "@/components/inventory/inventory-stocktake-count-form";
+import { hasCapability, requireCapability } from "@/lib/authorization";
+import { formatInventoryQuantity } from "@/lib/inventory/domain";
 
-export const dynamic="force-dynamic";
-function one<T>(value:T|T[]|null|undefined){return Array.isArray(value)?value[0]??null:value??null;}
+export const dynamic = "force-dynamic";
 
-export default async function InventoryStocktakeDetail({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{error?:string}>}){const{id}=await params;const query=await searchParams;const context=await requireCapability("estoque","read");const{data:stocktake,error}=await context.supabase.from("inventory_stocktakes").select("*,inventory_warehouses(id,name,project_id,projects(code,name),inventory_locations(id,name)),inventory_movements(id,code),inventory_stocktake_lines(id,line_number,item_id,location_id,lot_id,expected_quantity,counted_quantity,recount_quantity,final_quantity,difference_quantity,count_notes,inventory_items(code,name,inventory_units(code),inventory_lots(id,batch_number)),inventory_locations(name),inventory_lots(batch_number))").eq("id",id).eq("organization_id",context.organizationId).single();if(error||!stocktake)return <main className="content inventory-app"><div className="empty-state"><h1>Inventário não encontrado</h1></div></main>;const warehouse=one(stocktake.inventory_warehouses);const project=one(warehouse?.projects);const adjustment=one(stocktake.inventory_movements);const canUpdate=await hasCapability("estoque","update",warehouse?.project_id??null,context);const canApprove=await hasCapability("estoque","approve",warehouse?.project_id??null,context);const canManage=await hasCapability("estoque","manage",warehouse?.project_id??null,context);const{data:items}=stocktake.status==="COUNTING"?await context.supabase.from("inventory_items").select("id,code,name,controls_lot,inventory_lots(id,batch_number)").eq("organization_id",context.organizationId).eq("active",true).order("name"):{data:[]};const lines=(stocktake.inventory_stocktake_lines??[]).map(line=>({...line,expected_quantity:Number(line.expected_quantity),counted_quantity:line.counted_quantity==null?null:Number(line.counted_quantity),recount_quantity:line.recount_quantity==null?null:Number(line.recount_quantity),inventory_items:(()=>{const item=one(line.inventory_items);return item?{...item,inventory_units:one(item.inventory_units)}:null;})(),inventory_locations:one(line.inventory_locations),inventory_lots:one(line.inventory_lots)}));const differences=lines.filter(line=>Number(line.difference_quantity??0)!==0);return <main className="content inventory-app"><Link className="back-link" href="/app/estoque/inventarios">← Inventários</Link><section className="page-heading"><div><span className="badge">{stocktake.code} · {stocktake.status}</span><h1>{stocktake.name}</h1><p>{warehouse?.name??"Depósito"}{project?` · ${project.code} · ${project.name}`:" · Geral"}</p></div>{adjustment&&<Link className="button button-secondary" href={`/app/estoque/movimentos/${adjustment.id}`}>Ver ajuste {adjustment.code}</Link>}</section><InventoryNavigation/>{query.error&&<div className="validation blocking">{query.error}</div>}<section className="stats-grid inventory-stats"><article className="card"><small>LINHAS</small><strong>{lines.length}</strong><span>posições contadas</span></article><article className="card"><small>DIVERGÊNCIAS</small><strong className={differences.length>0?"inventory-health-critical":"inventory-health-ok"}>{differences.length}</strong><span>linhas diferentes</span></article><article className="card"><small>CORTE</small><strong>{stocktake.cutoff_at?new Date(stocktake.cutoff_at).toLocaleDateString("pt-BR"):"—"}</strong><span>posição esperada</span></article></section>{stocktake.status==="COUNTING"&&canUpdate&&<><InventoryStocktakeCountForm stocktakeId={id} projectId={warehouse?.project_id??null} lines={lines}/><section className="card card-pad"><span className="eyebrow">ITEM ENCONTRADO</span><h2>Adicionar posição com esperado zero</h2><form action={addInventoryStocktakeLine} className="inventory-form"><input type="hidden" name="stocktakeId" value={id}/><input type="hidden" name="projectId" value={warehouse?.project_id??""}/><div className="form-grid form-grid-3"><label>Item<select name="itemId" required><option value="">Selecione</option>{(items??[]).map(item=><option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}</select></label><label>Localização<select name="locationId"><option value="">Sem localização</option>{(warehouse?.inventory_locations??[]).map(location=><option key={location.id} value={location.id}>{location.name}</option>)}</select></label><label>Lote<select name="lotId"><option value="">Sem lote</option>{(items??[]).flatMap(item=>(item.inventory_lots??[]).map(lot=><option key={lot.id} value={lot.id}>{item.code} · {lot.batch_number}</option>))}</select></label></div><label>Observação<input name="notes" defaultValue="Item encontrado durante a contagem"/></label><button className="button button-secondary">Adicionar à contagem</button></form></section></>}{stocktake.status!=="COUNTING"&&<section className="card card-pad report-table-wrap"><table className="data-table"><thead><tr><th>#</th><th>Item</th><th>Localização</th><th>Lote</th><th>Esperado</th><th>Contado</th><th>Recontagem</th><th>Final</th><th>Diferença</th></tr></thead><tbody>{lines.map(line=>{const item=line.inventory_items;const unit=item?.inventory_units?.code;return <tr key={line.id}><td>{line.line_number}</td><td><strong>{item?.code} · {item?.name}</strong><small>{line.count_notes}</small></td><td>{line.inventory_locations?.name??"—"}</td><td>{line.inventory_lots?.batch_number??"—"}</td><td>{formatInventoryQuantity(Number(line.expected_quantity),unit)}</td><td>{line.counted_quantity==null?"—":formatInventoryQuantity(Number(line.counted_quantity),unit)}</td><td>{line.recount_quantity==null?"—":formatInventoryQuantity(Number(line.recount_quantity),unit)}</td><td>{line.final_quantity==null?"—":formatInventoryQuantity(Number(line.final_quantity),unit)}</td><td className={Number(line.difference_quantity??0)===0?"inventory-health-ok":"inventory-health-critical"}>{line.difference_quantity==null?"—":formatInventoryQuantity(Number(line.difference_quantity),unit)}</td></tr>})}</tbody></table></section>}{stocktake.status==="UNDER_REVIEW"&&canApprove&&<form action={approveInventoryStocktake} className="card card-pad inventory-form"><input type="hidden" name="stocktakeId" value={id}/><input type="hidden" name="projectId" value={warehouse?.project_id??""}/><span className="eyebrow">APROVAÇÃO</span><h2>Revisar divergências</h2><label>Parecer<textarea name="comment" rows={3}/></label><button className="button button-primary">Aprovar inventário</button></form>}{stocktake.status==="APPROVED"&&canManage&&<form action={postInventoryStocktake} className="card card-pad inventory-form"><input type="hidden" name="stocktakeId" value={id}/><input type="hidden" name="projectId" value={warehouse?.project_id??""}/><span className="eyebrow">CONTABILIZAÇÃO</span><h2>Gerar ajuste imutável</h2><p>{differences.length>0?`${differences.length} linha(s) gerarão movimento de ajuste.`:"Não há divergências; o inventário será encerrado sem movimento artificial."}</p><button className="button button-primary">Contabilizar inventário</button></form>}<section className="card card-pad"><span className="eyebrow">TRILHA</span><h2>Datas e responsáveis</h2><dl className="detail-list"><div><dt>Início</dt><dd>{stocktake.started_at?new Date(stocktake.started_at).toLocaleString("pt-BR"):"—"}</dd></div><div><dt>Submissão</dt><dd>{stocktake.submitted_at?new Date(stocktake.submitted_at).toLocaleString("pt-BR"):"—"}</dd></div><div><dt>Aprovação</dt><dd>{stocktake.approved_at?new Date(stocktake.approved_at).toLocaleString("pt-BR"):"—"}</dd></div><div><dt>Contabilização</dt><dd>{stocktake.posted_at?new Date(stocktake.posted_at).toLocaleString("pt-BR"):"—"}</dd></div><div><dt>Observações</dt><dd>{stocktake.notes||"—"}</dd></div></dl></section></main>;}
+type UnitRelation = { code: string } | { code: string }[] | null;
+type StocktakeItemRelation = {
+  code: string;
+  name: string;
+  inventory_units: UnitRelation;
+} | Array<{
+  code: string;
+  name: string;
+  inventory_units: UnitRelation;
+}> | null;
+type NameRelation = { name: string } | { name: string }[] | null;
+type LotRelation = { batch_number: string } | { batch_number: string }[] | null;
+
+type RawStocktakeLine = {
+  id: string;
+  line_number: number;
+  item_id: string;
+  location_id: string | null;
+  lot_id: string | null;
+  expected_quantity: number | string;
+  counted_quantity: number | string | null;
+  recount_quantity: number | string | null;
+  final_quantity: number | string | null;
+  difference_quantity: number | string | null;
+  count_notes: string;
+  inventory_items: StocktakeItemRelation;
+  inventory_locations: NameRelation;
+  inventory_lots: LotRelation;
+};
+
+type NormalizedStocktakeLine = {
+  id: string;
+  line_number: number;
+  expected_quantity: number;
+  counted_quantity: number | null;
+  recount_quantity: number | null;
+  final_quantity: number | null;
+  difference_quantity: number | null;
+  count_notes: string;
+  inventory_items: { code: string; name: string; inventory_units: { code: string } | null } | null;
+  inventory_locations: { name: string } | null;
+  inventory_lots: { batch_number: string } | null;
+};
+
+type WarehouseLocation = { id: string; name: string };
+type AvailableItem = { id: string; code: string; name: string; inventory_lots: Array<{ id: string; batch_number: string }> };
+
+function one<T>(value: T | T[] | null | undefined) {
+  return Array.isArray(value) ? value[0] ?? null : value ?? null;
+}
+
+export default async function InventoryStocktakeDetail({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
+  const { id } = await params;
+  const query = await searchParams;
+  const context = await requireCapability("estoque", "read");
+  const { data: stocktake, error } = await context.supabase.from("inventory_stocktakes").select("*,inventory_warehouses(id,name,project_id,projects(code,name),inventory_locations(id,name)),inventory_movements(id,code),inventory_stocktake_lines(id,line_number,item_id,location_id,lot_id,expected_quantity,counted_quantity,recount_quantity,final_quantity,difference_quantity,count_notes,inventory_items(code,name,inventory_units(code),inventory_lots(id,batch_number)),inventory_locations(name),inventory_lots(batch_number))").eq("id", id).eq("organization_id", context.organizationId).single();
+
+  if (error || !stocktake) return <main className="content inventory-app"><div className="empty-state"><h1>Inventário não encontrado</h1></div></main>;
+
+  const warehouse = one(stocktake.inventory_warehouses);
+  const project = one(warehouse?.projects);
+  const adjustment = one(stocktake.inventory_movements);
+  const projectId = warehouse?.project_id ?? null;
+  const canUpdate = await hasCapability("estoque", "update", projectId, context);
+  const canApprove = await hasCapability("estoque", "approve", projectId, context);
+  const canManage = await hasCapability("estoque", "manage", projectId, context);
+
+  const itemResult = stocktake.status === "COUNTING"
+    ? await context.supabase.from("inventory_items").select("id,code,name,controls_lot,inventory_lots(id,batch_number)").eq("organization_id", context.organizationId).eq("active", true).order("name")
+    : { data: [] };
+  const availableItems = (itemResult.data ?? []) as AvailableItem[];
+  const warehouseLocations = (warehouse?.inventory_locations ?? []) as WarehouseLocation[];
+  const rawLines = (stocktake.inventory_stocktake_lines ?? []) as RawStocktakeLine[];
+
+  const lines: NormalizedStocktakeLine[] = rawLines.map(line => {
+    const item = one(line.inventory_items);
+    return {
+      id: line.id,
+      line_number: line.line_number,
+      expected_quantity: Number(line.expected_quantity),
+      counted_quantity: line.counted_quantity == null ? null : Number(line.counted_quantity),
+      recount_quantity: line.recount_quantity == null ? null : Number(line.recount_quantity),
+      final_quantity: line.final_quantity == null ? null : Number(line.final_quantity),
+      difference_quantity: line.difference_quantity == null ? null : Number(line.difference_quantity),
+      count_notes: line.count_notes,
+      inventory_items: item ? { code: item.code, name: item.name, inventory_units: one(item.inventory_units) } : null,
+      inventory_locations: one(line.inventory_locations),
+      inventory_lots: one(line.inventory_lots)
+    };
+  });
+  const differences = lines.filter(line => Number(line.difference_quantity ?? 0) !== 0);
+
+  return <main className="content inventory-app">
+    <Link className="back-link" href="/app/estoque/inventarios">← Inventários</Link>
+    <section className="page-heading"><div><span className="badge">{stocktake.code} · {stocktake.status}</span><h1>{stocktake.name}</h1><p>{warehouse?.name ?? "Depósito"}{project ? ` · ${project.code} · ${project.name}` : " · Geral"}</p></div>{adjustment && <Link className="button button-secondary" href={`/app/estoque/movimentos/${adjustment.id}`}>Ver ajuste {adjustment.code}</Link>}</section>
+    <InventoryNavigation />
+    {query.error && <div className="validation blocking">{query.error}</div>}
+
+    <section className="stats-grid inventory-stats"><article className="card"><small>LINHAS</small><strong>{lines.length}</strong><span>posições contadas</span></article><article className="card"><small>DIVERGÊNCIAS</small><strong className={differences.length > 0 ? "inventory-health-critical" : "inventory-health-ok"}>{differences.length}</strong><span>linhas diferentes</span></article><article className="card"><small>CORTE</small><strong>{stocktake.cutoff_at ? new Date(stocktake.cutoff_at).toLocaleDateString("pt-BR") : "—"}</strong><span>posição esperada</span></article></section>
+
+    {stocktake.status === "COUNTING" && canUpdate && <>
+      <InventoryStocktakeCountForm stocktakeId={id} projectId={projectId} lines={lines} />
+      <section className="card card-pad"><span className="eyebrow">ITEM ENCONTRADO</span><h2>Adicionar posição com esperado zero</h2><form action={addInventoryStocktakeLine} className="inventory-form"><input type="hidden" name="stocktakeId" value={id} /><input type="hidden" name="projectId" value={projectId ?? ""} /><div className="form-grid form-grid-3"><label>Item<select name="itemId" required><option value="">Selecione</option>{availableItems.map(item => <option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}</select></label><label>Localização<select name="locationId"><option value="">Sem localização</option>{warehouseLocations.map(location => <option key={location.id} value={location.id}>{location.name}</option>)}</select></label><label>Lote<select name="lotId"><option value="">Sem lote</option>{availableItems.flatMap(item => (item.inventory_lots ?? []).map(lot => <option key={lot.id} value={lot.id}>{item.code} · {lot.batch_number}</option>))}</select></label></div><label>Observação<input name="notes" defaultValue="Item encontrado durante a contagem" /></label><button className="button button-secondary">Adicionar à contagem</button></form></section>
+    </>}
+
+    {stocktake.status !== "COUNTING" && <section className="card card-pad report-table-wrap"><table className="data-table"><thead><tr><th>#</th><th>Item</th><th>Localização</th><th>Lote</th><th>Esperado</th><th>Contado</th><th>Recontagem</th><th>Final</th><th>Diferença</th></tr></thead><tbody>
+      {lines.map(line => {
+        const item = line.inventory_items;
+        const unit = item?.inventory_units?.code;
+        return <tr key={line.id}><td>{line.line_number}</td><td><strong>{item?.code} · {item?.name}</strong><small>{line.count_notes}</small></td><td>{line.inventory_locations?.name ?? "—"}</td><td>{line.inventory_lots?.batch_number ?? "—"}</td><td>{formatInventoryQuantity(line.expected_quantity, unit)}</td><td>{line.counted_quantity == null ? "—" : formatInventoryQuantity(line.counted_quantity, unit)}</td><td>{line.recount_quantity == null ? "—" : formatInventoryQuantity(line.recount_quantity, unit)}</td><td>{line.final_quantity == null ? "—" : formatInventoryQuantity(line.final_quantity, unit)}</td><td className={Number(line.difference_quantity ?? 0) === 0 ? "inventory-health-ok" : "inventory-health-critical"}>{line.difference_quantity == null ? "—" : formatInventoryQuantity(line.difference_quantity, unit)}</td></tr>;
+      })}
+    </tbody></table></section>}
+
+    {stocktake.status === "UNDER_REVIEW" && canApprove && <form action={approveInventoryStocktake} className="card card-pad inventory-form"><input type="hidden" name="stocktakeId" value={id} /><input type="hidden" name="projectId" value={projectId ?? ""} /><span className="eyebrow">APROVAÇÃO</span><h2>Revisar divergências</h2><label>Parecer<textarea name="comment" rows={3} /></label><button className="button button-primary">Aprovar inventário</button></form>}
+    {stocktake.status === "APPROVED" && canManage && <form action={postInventoryStocktake} className="card card-pad inventory-form"><input type="hidden" name="stocktakeId" value={id} /><input type="hidden" name="projectId" value={projectId ?? ""} /><span className="eyebrow">CONTABILIZAÇÃO</span><h2>Gerar ajuste imutável</h2><p>{differences.length > 0 ? `${differences.length} linha(s) gerarão movimento de ajuste.` : "Não há divergências; o inventário será encerrado sem movimento artificial."}</p><button className="button button-primary">Contabilizar inventário</button></form>}
+
+    <section className="card card-pad"><span className="eyebrow">TRILHA</span><h2>Datas e responsáveis</h2><dl className="detail-list"><div><dt>Início</dt><dd>{stocktake.started_at ? new Date(stocktake.started_at).toLocaleString("pt-BR") : "—"}</dd></div><div><dt>Submissão</dt><dd>{stocktake.submitted_at ? new Date(stocktake.submitted_at).toLocaleString("pt-BR") : "—"}</dd></div><div><dt>Aprovação</dt><dd>{stocktake.approved_at ? new Date(stocktake.approved_at).toLocaleString("pt-BR") : "—"}</dd></div><div><dt>Contabilização</dt><dd>{stocktake.posted_at ? new Date(stocktake.posted_at).toLocaleString("pt-BR") : "—"}</dd></div><div><dt>Observações</dt><dd>{stocktake.notes || "—"}</dd></div></dl></section>
+  </main>;
+}
