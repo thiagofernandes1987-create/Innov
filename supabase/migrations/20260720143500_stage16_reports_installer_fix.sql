@@ -21,11 +21,11 @@ begin
          when profile.base_role in ('FINANCEIRO','ORCAMENTISTA','GESTOR_OBRAS','ENGENHEIRO','QUALIDADE','COMERCIAL','SAC') then 'READ'::public.app_access_level
          else 'NONE'::public.app_access_level end,
     false,false,false,
-    profile.base_role in ('SUPER_ADMIN','DIRECAO','ADMINISTRADOR','FINANCEIRO','ORCAMENTISTA','GESTOR_OBRAS','ENGENHEIRO','QUALIDADE','COMERCIAL','SAC'),
-    profile.base_role in ('SUPER_ADMIN','DIRECAO','ADMINISTRADOR'),
-    profile.base_role in ('SUPER_ADMIN','DIRECAO','ADMINISTRADOR','FINANCEIRO','ORCAMENTISTA')
+    coalesce(profile.base_role in ('SUPER_ADMIN','DIRECAO','ADMINISTRADOR','FINANCEIRO','ORCAMENTISTA','GESTOR_OBRAS','ENGENHEIRO','QUALIDADE','COMERCIAL','SAC'),false),
+    coalesce(profile.base_role in ('SUPER_ADMIN','DIRECAO','ADMINISTRADOR'),false),
+    coalesce(profile.base_role in ('SUPER_ADMIN','DIRECAO','ADMINISTRADOR','FINANCEIRO','ORCAMENTISTA'),false)
   from public.access_profiles profile cross join public.app_modules module
-  where profile.organization_id=p_organization_id and module.key='relatorios'
+  where profile.organization_id=p_organization_id and module.key='relatorios' and profile.base_role is not null
   on conflict(profile_id,module_id) do update set access_level=excluded.access_level,can_approve=false,can_release=false,can_sign=false,
     can_export=excluded.can_export,can_administer=excluded.can_administer,can_view_sensitive=excluded.can_view_sensitive,updated_at=now();
 
