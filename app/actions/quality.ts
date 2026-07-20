@@ -123,7 +123,8 @@ function extractAnswers(schema:QualityFormSchema,formData:FormData){
     if(field.type==="CHECKLIST"){
       const value:Record<string,string>={};for(const item of field.items??[])value[item.key]=text(formData,`field__${field.key}__${item.key}`);
       answers[field.key]=value;
-    }else if(field.type==="CHECKBOX"||field.type==="YES_NO")answers[field.key]=formData.get(`field__${field.key}`)!==null;
+    }else if(field.type==="CHECKBOX")answers[field.key]=formData.get(`field__${field.key}`)!==null;
+    else if(field.type==="YES_NO")answers[field.key]=text(formData,`field__${field.key}`)==="true";
     else if(field.type==="FILE"||field.type==="PHOTO"){
       const file=formData.get(`file__${field.key}`);if(file instanceof File&&file.size>0){answers[field.key]=file.name;files.set(field.key,file);}else answers[field.key]=null;
     }else answers[field.key]=text(formData,`field__${field.key}`);
