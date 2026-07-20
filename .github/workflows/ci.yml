@@ -52,21 +52,8 @@ jobs:
         run: pnpm validate:stage13
       - name: Validate Stage 14 procurement
         run: pnpm validate:stage14
-      - name: Lint diagnostic
-        id: lint
-        continue-on-error: true
-        run: pnpm lint > lint.log 2>&1
-      - name: Upload lint diagnostic
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: stage14-lint-log
-          path: lint.log
-      - name: Enforce lint
-        if: steps.lint.outcome == 'failure'
-        run: |
-          cat lint.log
-          exit 1
+      - name: Lint
+        run: pnpm lint
       - name: Typecheck
         run: pnpm typecheck
       - name: TypeScript unit tests
