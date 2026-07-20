@@ -1,6 +1,6 @@
 {
   "name": "innovar-platform",
-  "version": "0.12.1",
+  "version": "0.12.2",
   "private": true,
   "packageManager": "pnpm@11.15.0",
   "scripts": {
@@ -14,6 +14,9 @@
     "validate:stage9": "node scripts/validate-stage9.mjs",
     "validate:stage12": "node scripts/validate-stage12.mjs",
     "validate:stage12.1": "node scripts/validate-stage12-1.mjs",
+    "validate:stage12.2": "node scripts/validate-stage12-2.mjs",
+    "worker:signature-conversion": "node scripts/run-signature-conversion-worker.mjs",
+    "worker:signature-delivery": "node scripts/run-signature-delivery-worker.mjs",
     "provision:homologation": "node scripts/provision-homologation-users.mjs",
     "test:e2e:stage11": "node scripts/run-stage11-e2e.mjs"
   },
