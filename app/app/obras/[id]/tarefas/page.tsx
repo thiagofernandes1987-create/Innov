@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { createTask, moveTask } from "@/app/actions/projects";
 import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
-import { formatDate, formatPercent, statusBadge, taskColumns, taskStatusLabels } from "@/lib/stage12";
+import { formatDate, formatPercent, taskColumns, taskStatusLabels } from "@/lib/stage12";
 
 export default async function TasksPage({
   params,
