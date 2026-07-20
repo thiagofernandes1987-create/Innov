@@ -7,7 +7,8 @@ export const dynamic="force-dynamic";
 
 export default async function SupplierQuotationPage({params,searchParams}:{params:Promise<{token:string}>;searchParams:Promise<{error?:string;submitted?:string}>}){
   const{token}=await params;const query=await searchParams;const admin=createSupabaseAdminClient();
-  const{data:invitation,error}=await admin.from("procurement_supplier_invitations").select("*").eq("token_sha256",sha256(token)).is("revoked_at",null).or("expires_at.is.null,expires_at.gt.now()").single();
+  const{data:invitationResult,error}=await admin.rpc("get_procurement_invitation_by_token",{p_token_sha256:sha256(token)});
+  const invitation=Array.isArray(invitationResult)?invitationResult[0]:invitationResult;
   if(error||!invitation)notFound();
   const[{data:rfq},{data:supplier}]=await Promise.all([
     admin.from("procurement_rfqs").select("*,procurement_requests(id,code,title,description,project_id,projects(name,code))").eq("id",invitation.rfq_id).single(),
