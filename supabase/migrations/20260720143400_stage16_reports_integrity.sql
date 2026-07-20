@@ -21,31 +21,39 @@ foreign key(organization_id,metric_key) references public.report_metric_definiti
 create or replace function public.validate_report_links()
 returns trigger language plpgsql set search_path=public as $$
 declare
-  v_project uuid;
-  v_saved_org uuid;
-  v_saved_project uuid;
-  v_snapshot_org uuid;
-  v_snapshot_project uuid;
+  v_row jsonb;
+  v_organization_id uuid;
+  v_project_id uuid;
+  v_saved_view_id uuid;
+  v_snapshot_id uuid;
+  v_related_org uuid;
+  v_related_project uuid;
 begin
-  if new.project_id is not null then
-    select organization_id into v_project from public.projects where id=new.project_id;
-    if v_project is null or v_project<>new.organization_id then
+  v_row:=to_jsonb(new);
+  v_organization_id:=nullif(v_row->>'organization_id','')::uuid;
+  v_project_id:=nullif(v_row->>'project_id','')::uuid;
+  v_saved_view_id:=nullif(v_row->>'saved_view_id','')::uuid;
+  v_snapshot_id:=nullif(v_row->>'snapshot_id','')::uuid;
+
+  if v_project_id is not null then
+    select organization_id into v_related_org from public.projects where id=v_project_id;
+    if v_related_org is null or v_related_org<>v_organization_id then
       raise exception 'A obra não pertence à organização do relatório.';
     end if;
   end if;
 
-  if tg_table_name in ('report_snapshots','report_exports','report_events') and new.saved_view_id is not null then
-    select organization_id,project_id into v_saved_org,v_saved_project from public.report_saved_views where id=new.saved_view_id;
-    if v_saved_org is null or v_saved_org<>new.organization_id
-       or (new.project_id is not null and v_saved_project is not null and v_saved_project<>new.project_id) then
+  if v_saved_view_id is not null then
+    select organization_id,project_id into v_related_org,v_related_project from public.report_saved_views where id=v_saved_view_id;
+    if v_related_org is null or v_related_org<>v_organization_id
+       or (v_project_id is not null and v_related_project is not null and v_related_project<>v_project_id) then
       raise exception 'O relatório salvo é incompatível com organização ou obra.';
     end if;
   end if;
 
-  if tg_table_name in ('report_exports','report_events') and new.snapshot_id is not null then
-    select organization_id,project_id into v_snapshot_org,v_snapshot_project from public.report_snapshots where id=new.snapshot_id;
-    if v_snapshot_org is null or v_snapshot_org<>new.organization_id
-       or (new.project_id is not null and v_snapshot_project is not null and v_snapshot_project<>new.project_id) then
+  if v_snapshot_id is not null then
+    select organization_id,project_id into v_related_org,v_related_project from public.report_snapshots where id=v_snapshot_id;
+    if v_related_org is null or v_related_org<>v_organization_id
+       or (v_project_id is not null and v_related_project is not null and v_related_project<>v_project_id) then
       raise exception 'O snapshot é incompatível com organização ou obra.';
     end if;
   end if;
