@@ -49,6 +49,9 @@ jobs:
       - name: Validate Stage 12.1 modular access
         run: pnpm validate:stage12.1
 
+      - name: Validate Stage 12.2 advanced signatures
+        run: pnpm validate:stage12.2
+
       - name: Lint
         run: pnpm lint
 
