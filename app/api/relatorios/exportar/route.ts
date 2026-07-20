@@ -2,11 +2,14 @@ import{createHash}from"node:crypto";
 import{NextRequest}from"next/server";
 import{requireCapability}from"@/lib/authorization";
 import{buildProjectCsv,normalizeReportDashboard}from"@/lib/reports/metrics";
+import{defaultReportPeriod}from"@/lib/reports/server";
 
 export const dynamic="force-dynamic";
 
 export async function GET(request:NextRequest){
- const projectId=request.nextUrl.searchParams.get("projectId");const periodStart=request.nextUrl.searchParams.get("start");const periodEnd=request.nextUrl.searchParams.get("end");
+ const defaults=defaultReportPeriod();const projectId=request.nextUrl.searchParams.get("projectId");
+ const periodStart=request.nextUrl.searchParams.get("start")||defaults.start;const periodEnd=request.nextUrl.searchParams.get("end")||defaults.end;
+ if(periodEnd<periodStart)return Response.json({error:"O período informado é inválido."},{status:400});
  const context=await requireCapability("relatorios","export",projectId);
  const{data,error}=await context.supabase.rpc("get_report_dashboard",{
   p_organization_id:context.organizationId,p_project_id:projectId,p_period_start:periodStart,p_period_end:periodEnd
