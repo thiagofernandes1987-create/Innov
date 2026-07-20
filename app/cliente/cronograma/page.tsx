@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { requireClientContext } from "@/lib/auth";
 import { formatDate, formatPercent, statusBadge, taskStatusLabels } from "@/lib/stage12";
-import { singleRelation } from "@/lib/supabase/relations";
 
 export default async function ClientSchedulePage() {
   const { supabase, client } = await requireClientContext();
