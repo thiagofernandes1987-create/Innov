@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - "feature/**"
+      - "fix/**"
       - "chore/**"
       - "docs/**"
 
@@ -35,6 +36,13 @@ jobs:
         with:
           name: stage17-validation
           path: stage17-validation.txt
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload Stage 17 migrations
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage17-migrations
+          path: supabase/migrations/2026072016*.sql
           if-no-files-found: error
           retention-days: 7
 
