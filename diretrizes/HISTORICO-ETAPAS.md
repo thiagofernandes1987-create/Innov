@@ -20,10 +20,10 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 
 ## Etapas 13 a 16 — Qualidade, compras, financeiro e indicadores
 
-- [`docs/ETAPA-13-QUALIDADE-E-FORMULARIOS.md`](../docs/ETAPA-13-QUALIDADE-E-FORMULARIOS.md) — FVS, FVM, documentos e formulários.
-- [`docs/ETAPA-14-COMPRAS-E-SUPRIMENTOS.md`](../docs/ETAPA-14-COMPRAS-E-SUPRIMENTOS.md) — cotações, pedidos e recebimentos.
+- [`docs/ETAPA-13-QUALIDADE-FORMULARIOS.md`](../docs/ETAPA-13-QUALIDADE-FORMULARIOS.md) — FVS, FVM, documentos e formulários.
+- [`docs/ETAPA-14-COMPRAS-SUPRIMENTOS.md`](../docs/ETAPA-14-COMPRAS-SUPRIMENTOS.md) — cotações, pedidos e recebimentos.
 - [`docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md`](../docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md) — contas, parcelas, medições e caixa.
-- [`docs/ETAPA-16-RELATORIOS-E-INDICADORES.md`](../docs/ETAPA-16-RELATORIOS-E-INDICADORES.md) — dashboards, metas, snapshots e exportações.
+- [`docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md`](../docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md) — dashboards, metas, snapshots e exportações.
 
 ## Etapa 17 — Estoque, Inventário e Almoxarifado
 
@@ -37,7 +37,7 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 3. O contêiner de trabalho foi perdido, mas o estado foi recuperado pelo GitHub, pelas diretrizes e pelo histórico remoto do Supabase.
 4. Toda a sequência da Etapa 17 foi confirmada como aplicada.
 5. Foram confirmadas 18 tabelas com RLS, seis views privadas, 101 FKs indexadas, nenhuma RPC anônima e guards de custo/escopo.
-6. O CI atual do PR `#15` passou integralmente.
+6. O CI atual do PR `#15` será considerado concluído somente após a validação deste documento.
 7. O ambiente de homologação estava vazio, impedindo E2E autenticado com identidades reais.
 
 ### Estado final registrado
