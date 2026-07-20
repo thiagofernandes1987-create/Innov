@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { QualityFieldType } from "@/lib/quality/forms";
+import type { QualityFieldType, QualityFormSchema } from "@/lib/quality/forms";
 
 type Action=(formData:FormData)=>void|Promise<void>;
 type BuilderField={id:string;key:string;label:string;type:QualityFieldType;required:boolean;options:string;items:string};
@@ -13,9 +13,10 @@ const types:Array<{value:QualityFieldType;label:string}>=[
 ];
 function slug(value:string,index:number){const result=value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"_").replace(/^_|_$/g,"");return result||`campo_${index+1}`;}
 function fresh(index:number):BuilderField{return{id:crypto.randomUUID(),key:`campo_${index+1}`,label:"",type:"SHORT_TEXT",required:false,options:"",items:""};}
+function fromSchema(schema?:QualityFormSchema):BuilderField[]{return schema?.fields?.length?schema.fields.map(field=>({id:crypto.randomUUID(),key:field.key,label:field.label,type:field.type,required:Boolean(field.required),options:(field.options??[]).join("\n"),items:(field.items??[]).map(item=>item.label).join("\n")})):[fresh(0)];}
 
-export function QualityFormBuilder({action,mode="create",templateId,initialKind="INTERNAL_FORM"}:{action:Action;mode?:"create"|"version";templateId?:string;initialKind?:"FVS"|"FVM"|"INTERNAL_FORM"|"CLIENT_FORM"|"SURVEY"}){
-  const[kind,setKind]=useState(initialKind);const[fields,setFields]=useState<BuilderField[]>([fresh(0)]);
+export function QualityFormBuilder({action,mode="create",templateId,initialKind="INTERNAL_FORM",initialSchema}:{action:Action;mode?:"create"|"version";templateId?:string;initialKind?:"FVS"|"FVM"|"INTERNAL_FORM"|"CLIENT_FORM"|"SURVEY";initialSchema?:QualityFormSchema}){
+  const[kind,setKind]=useState(initialSchema?.kind??initialKind);const[fields,setFields]=useState<BuilderField[]>(()=>fromSchema(initialSchema));
   function update(id:string,patch:Partial<BuilderField>){setFields(current=>current.map(item=>item.id===id?{...item,...patch}:item));}
   function add(){setFields(current=>[...current,fresh(current.length)]);}
   function remove(id:string){setFields(current=>current.length===1?current:current.filter(item=>item.id!==id));}
