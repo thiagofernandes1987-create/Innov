@@ -90,9 +90,9 @@ if(errors.length===0){
   errors.push(`Versão da SPEC diverge do package.json (${packageJson.version}).`);
 
  const forbiddenSecretPatterns=[
-  /SUPABASE_SERVICE_ROLE_KEY\s*=\s*[^\s\n]+/,
-  /DEMO_ADMIN_PASSWORD\s*=\s*[^\s\n]+/,
-  /DEMO_CLIENT_PASSWORD\s*=\s*[^\s\n]+/,
+  /SUPABASE_SERVICE_ROLE_KEY[ \t]*=[ \t]*[^ \t\r\n]+/,
+  /DEMO_ADMIN_PASSWORD[ \t]*=[ \t]*[^ \t\r\n]+/,
+  /DEMO_CLIENT_PASSWORD[ \t]*=[ \t]*[^ \t\r\n]+/,
   /sk_[a-zA-Z0-9_-]{12,}/,
   /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/
  ];
