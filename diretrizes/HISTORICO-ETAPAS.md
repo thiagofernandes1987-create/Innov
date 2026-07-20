@@ -27,7 +27,8 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 
 ## Estoque e evolução logística
 
-- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](../docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md) — estoque operacional, reservas, ativos, inventário físico, migrations e homologação.
+- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](../docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md) — implementação do estoque operacional, reservas, ativos e inventário físico.
+- [`docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md`](../docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md) — aplicação de migrations, testes e auditoria necessários após o PR #14 ter sido mesclado antes da homologação Supabase.
 - [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — fila aprovada de WMS avançado, endereçamento, RFID, ressuprimento, roteirização, fiscal e depreciação.
 
 ## Etapas intermediárias previstas
