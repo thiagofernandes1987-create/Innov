@@ -34,7 +34,7 @@ export const MODULE_REGISTRY: readonly ModuleManifest[] = [
   { key:"assinaturas", name:"Assinaturas", description:"Envelopes, signatários e evidências.", icon:"✎", category:"Jurídico", routePrefix:"/app/assinaturas", sortOrder:120, dependencies:["documentos"] },
   { key:"documentos", name:"Documentos", description:"Arquivos privados, versões e liberações.", icon:"□", category:"Operacional", routePrefix:"/app/documentos", sortOrder:130 },
   { key:"qualidade", name:"Qualidade", description:"PO, FVS, FVM e não conformidades.", icon:"◇", category:"Qualidade", routePrefix:"/app/qualidade", sortOrder:140, dependencies:["obras"] },
-  { key:"compras", name:"Compras", description:"Solicitações, cotações e pedidos.", icon:"◉", category:"Suprimentos", routePrefix:"/app/compras", sortOrder:150 },
+  { key:"compras", name:"Compras e Suprimentos", description:"Solicitações, cotações, aprovações, pedidos e recebimentos.", icon:"◉", category:"Suprimentos", routePrefix:"/app/compras", sortOrder:150, dependencies:["obras","qualidade"] },
   { key:"estoque", name:"Estoque", description:"Entradas, saídas e inventários.", icon:"▣", category:"Suprimentos", routePrefix:"/app/estoque", sortOrder:160, dependencies:["compras"] },
   { key:"financeiro", name:"Financeiro", description:"Contas, fluxo de caixa e conciliação.", icon:"$", category:"Financeiro", routePrefix:"/app/financeiro", sortOrder:170 },
   { key:"sac", name:"Pós-venda e SAC", description:"Ocorrências e prestação de serviços.", icon:"◌", category:"Pós-venda", routePrefix:"/app/ocorrencias", sortOrder:180, dependencies:["clientes"] },

@@ -1,0 +1,66 @@
+import Link from "next/link";
+import {notFound} from "next/navigation";
+import {
+  createProcurementRfq,
+  decideProcurementApproval,
+  inviteProcurementSupplier,
+  openProcurementRfq,
+  selectProcurementQuote,
+  submitProcurementRequest
+} from "@/app/actions/procurement";
+import {requireCapability} from "@/lib/authorization";
+import {compareProcurementQuotes,formatCurrency} from "@/lib/procurement/comparison";
+
+export const dynamic="force-dynamic";
+
+type Invitation={id:string;supplier_id:string;responded_at:string|null;expires_at:string|null};
+type Rfq={id:string;code:string;status:string;due_at:string|null;procurement_supplier_invitations:Invitation[]|null};
+
+function first<T>(value:T|T[]|null|undefined){return Array.isArray(value)?value[0]:value??undefined;}
+
+export default async function ProcurementRequestDetail({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{error?:string;share?:string}>}){
+  const{id}=await params;
+  const query=await searchParams;
+  const context=await requireCapability("compras","read");
+  const{data:request,error}=await context.supabase.from("procurement_requests").select("*,projects(id,name,code)").eq("id",id).eq("organization_id",context.organizationId).single();
+  if(error||!request)notFound();
+
+  const rfqIds=(await context.supabase.from("procurement_rfqs").select("id").eq("request_id",id)).data?.map(row=>row.id)??[];
+  const[{data:items},{data:rawRfqs},{data:suppliers},{data:quotes},{data:approvals},{data:orders}]=await Promise.all([
+    context.supabase.from("procurement_request_items").select("*").eq("request_id",id).order("line_number"),
+    context.supabase.from("procurement_rfqs").select("*,procurement_supplier_invitations(id,supplier_id,responded_at,expires_at)").eq("request_id",id).order("created_at",{ascending:false}),
+    context.supabase.from("procurement_suppliers").select("id,legal_name,trade_name,email,status").eq("organization_id",context.organizationId).in("status",["INVITED","ACTIVE"]).order("legal_name"),
+    rfqIds.length?context.supabase.from("procurement_quotes").select("*,procurement_suppliers(legal_name,trade_name),procurement_quote_items(id)").in("rfq_id",rfqIds).order("total"):Promise.resolve({data:[]}),
+    context.supabase.from("procurement_approvals").select("*").eq("request_id",id).order("requested_at",{ascending:false}),
+    context.supabase.from("procurement_orders").select("id,code,status,total,expected_at").eq("request_id",id).order("created_at",{ascending:false})
+  ]);
+
+  const rfqs=(rawRfqs??[]) as unknown as Rfq[];
+  const project=first(request.projects);
+  const comparison=compareProcurementQuotes((quotes??[]).filter(quote=>["SUBMITTED","SELECTED"].includes(quote.status)).map(quote=>{
+    const supplier=first(quote.procurement_suppliers);
+    return{id:quote.id,supplierName:supplier?.trade_name||supplier?.legal_name||"Fornecedor",total:Number(quote.total),leadTimeDays:quote.lead_time_days==null?null:Number(quote.lead_time_days),quotedItems:Array.isArray(quote.procurement_quote_items)?quote.procurement_quote_items.length:0,totalItems:items?.length??0,paymentTerms:quote.payment_terms};
+  }));
+  const pendingApprovals=(approvals??[]).filter(approval=>approval.status==="PENDING");
+
+  return <main className="content procurement-app">
+    <Link className="back-link" href="/app/compras/solicitacoes">← Solicitações</Link>
+    <section className="page-heading"><div><span className="badge">{request.code} · {request.priority}</span><h1>{request.title}</h1><p>{project?.code} · {project?.name} · {request.description||"Sem descrição complementar"}</p></div><span className="badge">{request.status}</span></section>
+    {query.error&&<div className="validation blocking">{query.error}</div>}
+    {query.share&&<section className="validation procurement-share"><strong>Link seguro do fornecedor</strong><code>{query.share}</code><p>Copie agora. Apenas o hash do token foi armazenado.</p></section>}
+
+    <div className="procurement-two-column"><section>
+      <article className="card card-pad"><div className="section-heading"><div><span className="eyebrow">ITENS SOLICITADOS</span><h2>{items?.length??0} item(ns)</h2></div>{request.status==="DRAFT"&&<form action={submitProcurementRequest}><input type="hidden" name="requestId" value={id}/><button className="button button-primary">Enviar solicitação</button></form>}</div><div className="procurement-item-list">{(items??[]).map(item=><div className="procurement-summary-item" key={item.id}><span>{item.line_number}</span><div><strong>{item.description}</strong><small>{item.specification||"Sem especificação"}</small></div><b>{Number(item.quantity)} {item.unit}</b></div>)}</div></article>
+
+      {rfqs.map(rfq=>{const invitations=rfq.procurement_supplier_invitations??[];return <article className="card card-pad" key={rfq.id}><div className="section-heading"><div><span className="eyebrow">RODADA DE COTAÇÃO</span><h2>{rfq.code}</h2><p>{rfq.status} · {rfq.due_at?new Date(rfq.due_at).toLocaleString("pt-BR"):"sem prazo"}</p></div>{rfq.status==="DRAFT"&&invitations.length>0&&<form action={openProcurementRfq}><input type="hidden" name="requestId" value={id}/><input type="hidden" name="rfqId" value={rfq.id}/><button className="button button-primary">Abrir cotação</button></form>}</div><div className="procurement-invites">{invitations.map(invitation=>{const supplier=(suppliers??[]).find(item=>item.id===invitation.supplier_id);return <div key={invitation.id}><strong>{supplier?.trade_name||supplier?.legal_name||"Fornecedor"}</strong><small>{invitation.responded_at?"Proposta recebida":"Aguardando resposta"}</small></div>})}</div>{rfq.status==="DRAFT"&&<form action={inviteProcurementSupplier} className="inline-form"><input type="hidden" name="requestId" value={id}/><input type="hidden" name="rfqId" value={rfq.id}/><select required name="supplierId" defaultValue=""><option value="" disabled>Selecione um fornecedor</option>{(suppliers??[]).filter(supplier=>!invitations.some(invitation=>invitation.supplier_id===supplier.id)).map(supplier=><option key={supplier.id} value={supplier.id}>{supplier.trade_name||supplier.legal_name}</option>)}</select><input name="expiresAt" type="datetime-local"/><button className="button button-secondary">Gerar convite</button></form>}</article>})}
+
+      {!!comparison.length&&<article className="card card-pad"><div className="section-heading"><div><span className="eyebrow">MAPA COMPARATIVO</span><h2>Propostas recebidas</h2><p>60% preço · 25% prazo · 15% cobertura</p></div></div><div className="procurement-comparison">{comparison.map(row=><div className="procurement-comparison-row" key={row.id}><span className="procurement-rank">#{row.rank}</span><div><strong>{row.supplierName}</strong><small>{row.coveragePercent}% dos itens · {row.leadTimeDays==null?"prazo não informado":`${row.leadTimeDays} dias`}</small></div><div><strong>{formatCurrency(row.total)}</strong><small>nota {row.finalScore.toFixed(2)}</small></div><form action={selectProcurementQuote}><input type="hidden" name="requestId" value={id}/><input type="hidden" name="quoteId" value={row.id}/><button className="button button-secondary">Selecionar</button></form></div>)}</div></article>}
+
+      {!!orders?.length&&<article className="card card-pad"><h2>Pedidos emitidos</h2>{orders.map(order=><Link className="procurement-row" href={`/app/compras/pedidos/${order.id}`} key={order.id}><div><strong>{order.code}</strong><small>{order.status}</small></div><strong>{formatCurrency(Number(order.total))}</strong></Link>)}</article>}
+    </section><aside>
+      {request.status==="SUBMITTED"&&!rfqs.length&&<form action={createProcurementRfq} className="card card-pad"><input type="hidden" name="requestId" value={id}/><input type="hidden" name="projectId" value={request.project_id}/><span className="eyebrow">INICIAR COTAÇÃO</span><h2>Nova rodada</h2><label>Prazo para resposta<input name="dueAt" type="datetime-local"/></label><label>Condições<textarea name="terms" rows={5}/></label><button className="button button-primary">Criar rodada</button></form>}
+      {pendingApprovals.map(approval=><form action={decideProcurementApproval} className="card card-pad" key={approval.id}><input type="hidden" name="requestId" value={id}/><input type="hidden" name="approvalId" value={approval.id}/><span className="eyebrow">APROVAÇÃO PENDENTE</span><h2>{formatCurrency(Number(approval.amount))}</h2><label>Parecer<textarea name="comment" rows={4}/></label><div className="page-actions"><button className="button button-secondary" name="decision" value="REJECTED">Rejeitar</button><button className="button button-primary" name="decision" value="APPROVED">Aprovar e emitir pedido</button></div></form>)}
+      <section className="card card-pad"><span className="eyebrow">DADOS DA DEMANDA</span><dl className="detail-list"><div><dt>Necessidade</dt><dd>{request.needed_by?new Date(`${request.needed_by}T12:00:00`).toLocaleDateString("pt-BR"):"Não definida"}</dd></div><div><dt>Centro de custo</dt><dd>{request.cost_center||"—"}</dd></div></dl></section>
+    </aside></div>
+  </main>;
+}

@@ -50,6 +50,8 @@ jobs:
         run: pnpm validate:stage12.2
       - name: Validate Stage 13 quality forms
         run: pnpm validate:stage13
+      - name: Validate Stage 14 procurement
+        run: pnpm validate:stage14
       - name: Lint
         run: pnpm lint
       - name: Typecheck

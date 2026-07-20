@@ -33,11 +33,11 @@ const LEGACY_MODULES: Record<string, readonly string[]> = {
   DIRECAO: MODULE_REGISTRY.map(item => item.key),
   ADMINISTRADOR: MODULE_REGISTRY.map(item => item.key),
   COMERCIAL: ["dashboard","crm","clientes","propostas","contratos","assinaturas"],
-  FINANCEIRO: ["dashboard","financeiro","orcamentos","clientes","contratos","aditivos","assinaturas","documentos"],
-  ORCAMENTISTA: ["dashboard","orcamentos","clientes","documentos"],
-  GESTOR_OBRAS: ["dashboard","clientes","obras","planejamento","tarefas","diario","equipes","documentos"],
-  ENGENHEIRO: ["dashboard","obras","planejamento","tarefas","diario","documentos"],
-  QUALIDADE: ["dashboard","obras","diario","documentos","qualidade"],
+  FINANCEIRO: ["dashboard","financeiro","orcamentos","clientes","contratos","aditivos","assinaturas","documentos","compras"],
+  ORCAMENTISTA: ["dashboard","orcamentos","clientes","documentos","compras"],
+  GESTOR_OBRAS: ["dashboard","clientes","obras","planejamento","tarefas","diario","equipes","documentos","qualidade","compras"],
+  ENGENHEIRO: ["dashboard","obras","planejamento","tarefas","diario","documentos","qualidade","compras"],
+  QUALIDADE: ["dashboard","obras","diario","documentos","qualidade","compras"],
   SAC: ["dashboard","clientes","obras","sac"],
   CLIENTE: ["dashboard"]
 };
