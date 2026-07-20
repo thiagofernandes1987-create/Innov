@@ -21,9 +21,11 @@ const paths={
  hardening:"supabase/migrations/20260720160700_stage17_inventory_hardening.sql",
  sensitiveColumns:"supabase/migrations/20260720160720_stage17_inventory_sensitive_columns.sql",
  sensitiveWrite:"supabase/migrations/20260720160730_stage17_inventory_sensitive_write_guard.sql",
- states:"supabase/migrations/20260720160740_stage17_inventory_state_guards.sql"
+ states:"supabase/migrations/20260720160740_stage17_inventory_state_guards.sql",
+ concurrency:"supabase/migrations/20260720160800_stage17_inventory_concurrency_locks.sql",
+ performance:"supabase/migrations/20260720160900_stage17_inventory_performance_indexes.sql"
 };
-const migrations=[paths.schema,paths.balances,paths.movements,paths.reservations,...paths.assets,paths.security,paths.dashboard,paths.movementDetail,paths.entityDetail,paths.foundItems,paths.module,paths.creation,paths.hardening,paths.sensitiveColumns,paths.sensitiveWrite,paths.states];
+const migrations=[paths.schema,paths.balances,paths.movements,paths.reservations,...paths.assets,paths.security,paths.dashboard,paths.movementDetail,paths.entityDetail,paths.foundItems,paths.module,paths.creation,paths.hardening,paths.sensitiveColumns,paths.sensitiveWrite,paths.states,paths.concurrency,paths.performance];
 const appFiles=[
  "lib/inventory/domain.ts","lib/inventory/server.ts","app/actions/inventory.ts","app/actions/inventory-extra.ts","app/actions/inventory-stocktake.ts",
  "components/inventory/inventory-navigation.tsx","components/inventory/inventory-metric-card.tsx","components/inventory/inventory-movement-form.tsx",
@@ -63,6 +65,8 @@ if(!errors.length){
  requireRegex(read(paths.sensitiveColumns),[/reference_unit_cost/i,/unit_cost/i,/acquisition_cost/i,/revoke select/i],"Colunas sensíveis");
  requireRegex(read(paths.sensitiveWrite),[/enforce_inventory_sensitive_write/i,/inventory_items_sensitive_write_guard/i,/inventory_assets_sensitive_write_guard/i],"Escrita sensível");
  requireRegex(read(paths.states),[/inventory_reservation_lines_recalculate_status/i,/protect_inventory_asset_custody/i],"Estados finais");
+ requireRegex(read(paths.concurrency),[/inventory_stock_lock_key/i,/pg_advisory_xact_lock/i,/unreserved_delta/i,/grant execute on function public\.post_inventory_movement/i],"Concorrência");
+ requireRegex(read(paths.performance),[/inventory_asset_custodies_organization_idx/i,/inventory_asset_maintenance_organization_idx/i,/inventory_locations_organization_idx/i,/inventory_lots_item_idx/i,/inventory_movement_lines_organization_idx/i,/inventory_procurement_item_mappings_organization_idx/i,/inventory_receipt_imports_organization_idx/i,/inventory_reservation_lines_organization_idx/i,/inventory_stocktake_lines_organization_idx/i],"Índices finais");
  const actions=requireTokens("app/actions/inventory.ts",["createInventoryItem","createInventoryMovement","importProcurementReceipt","createInventoryReservation","createInventoryAsset","startInventoryStocktake","view_sensitive_financials"],"Ações");
  if(actions.includes("SUPABASE_SERVICE_ROLE_KEY"))errors.push("Ações web referenciam Service Role.");
  const itemPage=read("app/app/estoque/itens/[id]/page.tsx"),assetPage=read("app/app/estoque/ativos/[id]/page.tsx");
@@ -71,4 +75,4 @@ if(!errors.length){
  if(!/key:\s*"estoque"/.test(read("lib/modules/registry.ts")))errors.push("Registry sem estoque.");
 }
 if(errors.length){console.error(`Etapa 17 inválida (${errors.length} falha(s)):`);for(const error of errors)console.error(`- ${error}`);process.exit(1);}
-console.log(`Etapa 17 validada: ${migrations.length} migrations, 18 tabelas, 6 views, RLS, contratos seguros e ${appFiles.length} arquivos de aplicação/documentação.`);
+console.log(`Etapa 17 validada: ${migrations.length} migrations, 18 tabelas, 6 views, RLS, locks de concorrência, índices e ${appFiles.length} arquivos de aplicação/documentação.`);
