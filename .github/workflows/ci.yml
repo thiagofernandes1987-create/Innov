@@ -26,7 +26,17 @@ jobs:
       - name: Validate canonical documentation
         run: node scripts/validate-documentation.mjs
       - name: Validate Stage 17 inventory
-        run: node scripts/validate-stage17.mjs
+        run: |
+          set -o pipefail
+          node scripts/validate-stage17.mjs 2>&1 | tee stage17-validation.txt
+      - name: Upload Stage 17 validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage17-validation
+          path: stage17-validation.txt
+          if-no-files-found: error
+          retention-days: 7
 
   quality:
     needs: preflight
