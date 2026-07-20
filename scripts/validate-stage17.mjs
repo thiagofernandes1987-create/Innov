@@ -16,7 +16,13 @@ const migrations=[
  "supabase/migrations/20260720160700_stage17_inventory_hardening.sql",
  "supabase/migrations/20260720160720_stage17_inventory_sensitive_columns.sql",
  "supabase/migrations/20260720160730_stage17_inventory_sensitive_write_guard.sql",
- "supabase/migrations/20260720160740_stage17_inventory_state_guards.sql"
+ "supabase/migrations/20260720160740_stage17_inventory_state_guards.sql",
+ "supabase/migrations/20260720233052_stage17_inventory_concurrency_locks.sql",
+ "supabase/migrations/20260720233657_stage17_homologation_balance_project_scope.sql"
+];
+
+const testFiles=[
+ "supabase/tests/stage17_inventory_homologation.sql"
 ];
 
 const appFiles=[
@@ -54,7 +60,7 @@ const appFiles=[
 
 const errors=[];
 const read=file=>fs.readFileSync(file,"utf8");
-const allFiles=[...migrations,...appFiles];
+const allFiles=[...migrations,...testFiles,...appFiles];
 for(const file of allFiles)if(!fs.existsSync(file))errors.push(`Arquivo ausente: ${file}`);
 
 function requireTokens(file,tokens,label){
@@ -132,6 +138,34 @@ if(errors.length===0){
  requireRegex(migrations[14],[/enforce_inventory_sensitive_write/i,/inventory_items_sensitive_write_guard/i,/inventory_assets_sensitive_write_guard/i],"Escrita sensível");
  requireRegex(migrations[15],[/inventory_reservation_lines_recalculate_status/i,/protect_inventory_asset_custody/i],"Estados finais");
 
+ requireRegex(migrations[16],[
+  /inventory_stock_lock_key/i,
+  /pg_advisory_xact_lock/i,
+  /inventory_available_stock_v/i,
+  /consumiria quantidade reservada/i,
+  /order by 1/i
+ ],"Concorrência e saldo disponível");
+
+ requireRegex(migrations[17],[
+  /movement\.status in \('POSTED','REVERSED'\)/i,
+  /validate_inventory_project_scope/i,
+  /inventory_movement_lines_project_scope/i,
+  /inventory_reservations_project_scope/i,
+  /inventory_receipt_imports_project_scope/i,
+  /inventory_assets_project_scope/i,
+  /Depósito exclusivo de outra obra/i
+ ],"Correções de homologação");
+
+ const homologation=read(testFiles[0]);
+ for(const testName of[
+  "authorization_super_admin","balance_not_direct_column","defaults_categories","defaults_units",
+  "entry_increases_balance","issue_reduces_balance","module_installation","movement_idempotency",
+  "multi_company_isolation","multi_project_isolation","negative_stock_block",
+  "posted_movement_immutable","reversal_restores_balance","transfer_atomic_conservation"
+ ])if(!homologation.includes(`'${testName}'`))errors.push(`Teste de homologação ausente: ${testName}`);
+ if(!/^begin;/mi.test(homologation)||!/rollback;\s*$/i.test(homologation))errors.push("Teste da Etapa 17 precisa executar dentro de transação e terminar com ROLLBACK.");
+ if(!homologation.includes("request.jwt.claims"))errors.push("Teste da Etapa 17 não simula identidade autenticada.");
+
  const domain=requireTokens("lib/inventory/domain.ts",["normalizeInventoryDashboard","formatInventoryQuantity","formatInventoryCurrency","movementLabel"],"Domínio TypeScript");
  if(domain.includes("reference_unit_cost"))errors.push("Dashboard TypeScript não pode depender de coluna SQL sensível direta.");
 
@@ -156,7 +190,7 @@ if(errors.length===0){
  if(!auth.includes('"estoque"')||!auth.includes('"relatorios"'))errors.push("Fallback de autorização não reconhece estoque/relatórios.");
 
  const docs=read("docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md");
- for(const token of["saldo","idempotente","imutável","RLS","inventário físico"])
+ for(const token of["saldo","idempotente","imutável","RLS","inventário físico","advisory lock","14 testes"])
   if(!docs.toLowerCase().includes(token.toLowerCase()))errors.push(`Documento da Etapa 17 sem ${token}.`);
 }
 
@@ -166,4 +200,4 @@ if(errors.length){
  process.exit(1);
 }
 
-console.log(`Etapa 17 validada: ${migrations.length} migrations, 18 tabelas, 6 views derivadas, RLS, contratos seguros, reservas, ativos, inventário físico e ${appFiles.length} arquivos de aplicação/documentação.`);
+console.log(`Etapa 17 validada: ${migrations.length} migrations, ${testFiles.length} teste transacional, 18 tabelas, 6 views derivadas, RLS, locks de concorrência, isolamento multiobra, contratos seguros, reservas, ativos, inventário físico e ${appFiles.length} arquivos de aplicação/documentação.`);
