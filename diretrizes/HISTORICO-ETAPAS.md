@@ -1,45 +1,56 @@
 # Histórico técnico das etapas
 
-Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e planos aprovados. Eles são históricos ou de planejamento; a especificação atual permanece em `diretrizes/`.
+Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e planos. A especificação vigente permanece em `diretrizes/`.
 
-## Comercial, contratos e homologação
+## Etapas 9 a 11 — Comercial e homologação
 
 - [`docs/ETAPA-09-FINANCEIRO-CONTRATOS.md`](../docs/ETAPA-09-FINANCEIRO-CONTRATOS.md) — orçamentos, propostas, contratos, aditivos e assinatura inicial.
-- [`docs/ETAPA-09-TEST-PLAN.md`](../docs/ETAPA-09-TEST-PLAN.md) — plano de testes da base comercial.
-- [`docs/ETAPA-10-HOMOLOGACAO-SUPABASE.md`](../docs/ETAPA-10-HOMOLOGACAO-SUPABASE.md) — preparação do ambiente Supabase.
-- [`docs/ETAPA-11-HOMOLOGACAO-AUTENTICADA.md`](../docs/ETAPA-11-HOMOLOGACAO-AUTENTICADA.md) — E2E com Auth, MFA e assinatura sandbox.
+- [`docs/ETAPA-09-TEST-PLAN.md`](../docs/ETAPA-09-TEST-PLAN.md) — plano de testes.
+- [`docs/ETAPA-10-HOMOLOGACAO-SUPABASE.md`](../docs/ETAPA-10-HOMOLOGACAO-SUPABASE.md) — preparação do Supabase.
+- [`docs/ETAPA-11-HOMOLOGACAO-AUTENTICADA.md`](../docs/ETAPA-11-HOMOLOGACAO-AUTENTICADA.md) — Auth, MFA e assinatura sandbox.
 
-## Obras, modularidade e documentos
+## Etapa 12 — Obras, modularidade e assinatura
 
-- [`docs/ETAPA-12-GESTAO-DE-OBRAS.md`](../docs/ETAPA-12-GESTAO-DE-OBRAS.md) — obras, EAP, cronograma, tarefas, campo e portal.
-- [`docs/RELATORIO-HOMOLOGACAO-ETAPA-12.md`](../docs/RELATORIO-HOMOLOGACAO-ETAPA-12.md) — evidências técnicas da homologação.
-- [`docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md`](../docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md) — multiobra, assinatura e acessos.
-- [`docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md`](../docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md) — decisão arquitetural de módulos.
-- [`docs/ETAPA-12-1-NUCLEO-MODULAR-E-ACESSOS.md`](../docs/ETAPA-12-1-NUCLEO-MODULAR-E-ACESSOS.md) — perfis, capacidades, escopos e administração.
-- [`docs/ETAPA-12-2-ASSINATURA-AVANCADA.md`](../docs/ETAPA-12-2-ASSINATURA-AVANCADA.md) — PDF/DOCX, campos, evidência e entrega.
+- [`docs/ETAPA-12-GESTAO-DE-OBRAS.md`](../docs/ETAPA-12-GESTAO-DE-OBRAS.md) — obras, planejamento, campo e portal.
+- [`docs/RELATORIO-HOMOLOGACAO-ETAPA-12.md`](../docs/RELATORIO-HOMOLOGACAO-ETAPA-12.md) — evidências da homologação.
+- [`docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md`](../docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md) — multiobra e acessos.
+- [`docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md`](../docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md) — arquitetura modular.
+- [`docs/ETAPA-12-1-NUCLEO-MODULAR-E-ACESSOS.md`](../docs/ETAPA-12-1-NUCLEO-MODULAR-E-ACESSOS.md) — perfis, capacidades e administração.
+- [`docs/ETAPA-12-2-ASSINATURA-AVANCADA.md`](../docs/ETAPA-12-2-ASSINATURA-AVANCADA.md) — PDF/DOCX, campos, hashes e evidências.
 
-## Qualidade, compras, financeiro e indicadores
+## Etapas 13 a 16 — Qualidade, compras, financeiro e indicadores
 
-- [`docs/ETAPA-13-QUALIDADE-FORMULARIOS.md`](../docs/ETAPA-13-QUALIDADE-FORMULARIOS.md) — FVS, FVM, formulários e pesquisas.
-- [`docs/ETAPA-14-COMPRAS-SUPRIMENTOS.md`](../docs/ETAPA-14-COMPRAS-SUPRIMENTOS.md) — solicitações, cotações, pedidos e recebimentos.
-- [`docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md`](../docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md) — contas, parcelas, medições, baixas e caixa.
-- [`docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md`](../docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md) — dashboards, metas, snapshots e exportações.
+- [`docs/ETAPA-13-QUALIDADE-E-FORMULARIOS.md`](../docs/ETAPA-13-QUALIDADE-E-FORMULARIOS.md) — FVS, FVM, documentos e formulários.
+- [`docs/ETAPA-14-COMPRAS-E-SUPRIMENTOS.md`](../docs/ETAPA-14-COMPRAS-E-SUPRIMENTOS.md) — cotações, pedidos e recebimentos.
+- [`docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md`](../docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md) — contas, parcelas, medições e caixa.
+- [`docs/ETAPA-16-RELATORIOS-E-INDICADORES.md`](../docs/ETAPA-16-RELATORIOS-E-INDICADORES.md) — dashboards, metas, snapshots e exportações.
 
-## Estoque e evolução logística
+## Etapa 17 — Estoque, Inventário e Almoxarifado
 
-- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](../docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md) — implementação do estoque operacional, reservas, ativos e inventário físico.
-- [`docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md`](../docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md) — aplicação de migrations, testes e auditoria necessários após o PR #14 ter sido mesclado antes da homologação Supabase.
-- [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — fila aprovada de WMS avançado, endereçamento, RFID, ressuprimento, roteirização, fiscal e depreciação.
+- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](../docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md) — implementação funcional e arquitetura do módulo.
+- [`docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md`](../docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md) — aplicação das migrations, correções pós-merge, auditorias e limitações reais.
 
-## Etapas intermediárias previstas
+### Linha do tempo
 
-As Etapas 18, 19 e 20 estão descritas em `diretrizes/ROADMAP.md`. Documentos técnicos próprios serão criados quando cada etapa entrar em execução.
+1. PR `#14` implementou a Etapa 17 e foi mesclado à `main` antes da homologação final do Supabase.
+2. PR `#15` foi aberto para preservar a trilha corretiva sem reescrever migrations incorporadas.
+3. O contêiner de trabalho foi perdido, mas o estado foi recuperado pelo GitHub, pelas diretrizes e pelo histórico remoto do Supabase.
+4. Toda a sequência da Etapa 17 foi confirmada como aplicada.
+5. Foram confirmadas 18 tabelas com RLS, seis views privadas, 101 FKs indexadas, nenhuma RPC anônima e guards de custo/escopo.
+6. O CI atual do PR `#15` passou integralmente.
+7. O ambiente de homologação estava vazio, impedindo E2E autenticado com identidades reais.
 
-## Regra de preservação
+### Estado final registrado
 
-- não remover histórico válido;
-- não usar histórico antigo como especificação atual;
-- registrar correções por novo documento/adendo ou atualização do canônico;
-- manter links funcionando no repositório;
-- incluir todo novo documento neste índice;
-- distinguir claramente etapa implementada, em execução e apenas planejada.
+A Etapa 17 está incorporada e estruturalmente homologada. O E2E autenticado permanece requisito pré-publicação e deverá usar contas reais provisionadas pelo fluxo oficial.
+
+## Planejamento posterior
+
+- Etapa 18 — consolidação de CRM, Clientes e SAC;
+- Etapa 19 — auditoria e observabilidade;
+- Etapa 20 — prontidão de produção;
+- [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — WMS avançado, RFID, automação logística, fiscal e patrimonial; somente planejamento.
+
+## Regra histórica
+
+Documento histórico não substitui SPEC, inventário, arquitetura, módulos ou roadmap. Toda nova etapa deve atualizar documentação canônica e seu próprio relatório no mesmo PR.
