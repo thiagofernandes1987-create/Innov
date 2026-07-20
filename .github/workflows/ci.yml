@@ -56,23 +56,23 @@ jobs:
         run: pnpm lint
 
       - name: Typecheck
-        id: typecheck
-        continue-on-error: true
-        run: pnpm typecheck 2>&1 | tee typecheck-stage12-2.txt
-
-      - name: Upload TypeScript diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: typecheck-stage12-2
-          path: typecheck-stage12-2.txt
-
-      - name: Fail on TypeScript errors
-        if: steps.typecheck.outcome == 'failure'
-        run: exit 1
+        run: pnpm typecheck
 
       - name: Unit tests
         run: pnpm test
 
       - name: Build
-        run: pnpm build
+        id: build
+        continue-on-error: true
+        run: pnpm build 2>&1 | tee build-stage12-2.txt
+
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-stage12-2
+          path: build-stage12-2.txt
+
+      - name: Fail on build errors
+        if: steps.build.outcome == 'failure'
+        run: exit 1
