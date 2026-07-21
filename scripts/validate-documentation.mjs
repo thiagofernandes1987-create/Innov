@@ -45,7 +45,8 @@ const requiredHistorical=[
 ];
 
 function isSafeSecretPlaceholder(rawValue){
- const value=String(rawValue??"").trim().replace(/^("|'|`)|("|'|`)$/g,"").trim();
+ const withoutContinuation=String(rawValue??"").replace(/[ \t]*\\[ \t]*$/,"").trim();
+ const value=withoutContinuation.replace(/^("|'|`)|("|'|`)$/g,"").trim();
  if(!value)return true;
  return value==="..."
   || /^\*+$/.test(value)
@@ -59,7 +60,7 @@ function isSafeSecretPlaceholder(rawValue){
 }
 
 function validateSecrets(file,content){
- const assignmentPattern=/\b(SUPABASE_SERVICE_ROLE_KEY|DEMO_ADMIN_PASSWORD|DEMO_CLIENT_PASSWORD)\s*=\s*("[^"]*"|'[^']*'|`[^`]*`|[^\s\\]+)/g;
+ const assignmentPattern=/^(?:export[ \t]+)?(SUPABASE_SERVICE_ROLE_KEY|DEMO_ADMIN_PASSWORD|DEMO_CLIENT_PASSWORD)[ \t]*=[ \t]*(.*)$/gm;
  for(const match of content.matchAll(assignmentPattern)){
   if(!isSafeSecretPlaceholder(match[2]))errors.push(`Possível segredo encontrado em ${file}: variável ${match[1]}.`);
  }
