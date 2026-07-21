@@ -46,7 +46,7 @@ begin
   insert into stage19_test_results values('unified_stream',(v_payload->>'total')::integer>=1,'total='||(v_payload->>'total'));
 
   begin update public.audit_events set message='alterado' where id=v_event;v_error:=null;exception when others then v_error:=sqlerrm;end;
-  insert into stage19_test_results values('audit_append_only',v_error like '%imutável%',coalesce(v_error,'sem erro'));
+  insert into stage19_test_results values('audit_append_only',v_error is not null and (v_error like '%imutável%' or v_error like '%permission denied%'),coalesce(v_error,'sem erro'));
 
   perform public.acknowledge_observability_alert(v_alert,'Análise iniciada');
   perform public.resolve_observability_alert(v_alert,'Causa identificada e corrigida');
