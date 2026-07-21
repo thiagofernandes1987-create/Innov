@@ -36,6 +36,8 @@ const requiredHistorical=[
  "docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md",
  "docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md",
  "docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md",
+ "docs/ETAPA-18-CRM-CLIENTES-SAC.md",
+ "docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md",
  "docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md",
  "docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md",
  "docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md"
@@ -65,6 +67,8 @@ if(errors.length===0){
  const readme=fs.readFileSync("README.md","utf8");
  const stage17=fs.readFileSync("docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md","utf8");
  const stage17Report=fs.readFileSync("docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md","utf8");
+ const stage18=fs.readFileSync("docs/ETAPA-18-CRM-CLIENTES-SAC.md","utf8");
+ const stage18E2E=fs.readFileSync("docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md","utf8");
  const stage21=fs.readFileSync("docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md","utf8");
  const packageJson=JSON.parse(fs.readFileSync("package.json","utf8"));
 
@@ -119,6 +123,12 @@ if(errors.length===0){
  for(const token of["advisory lock","14 testes","isolamento multiobra","migration aplicada"])
   if(!stage17.toLowerCase().includes(token.toLowerCase()))errors.push(`Documento da Etapa 17 incompleto: ${token}`);
 
+ for(const token of["Cliente 360","múltiplas obras","SAC e pós-venda","RLS","Definition of Done"])
+  if(!stage18.includes(token))errors.push(`Documento da Etapa 18 incompleto: ${token}`);
+
+ for(const token of["login paralelo","mensagem interna","Promise.all","cleanup","Vacinas aplicadas","Critério de conclusão"])
+  if(!stage18E2E.includes(token))errors.push(`Documento E2E concorrente incompleto: ${token}`);
+
  for(const token of[
   "WMS avançado","Endereçamento automatizado","RFID em tempo real",
   "Ressuprimento automático sem aprovação","Roteirização logística",
@@ -136,7 +146,7 @@ if(errors.length===0){
   /sk_[a-zA-Z0-9_-]{12,}/,
   /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/
  ];
- for(const file of [...requiredCanonical,...requiredVaccines,"docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md","docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md","docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md"]){
+ for(const file of [...requiredCanonical,...requiredVaccines,...requiredHistorical]){
   const content=fs.readFileSync(file,"utf8");
   for(const pattern of forbiddenSecretPatterns){
    if(pattern.test(content))errors.push(`Possível segredo encontrado em ${file}: ${pattern}`);
