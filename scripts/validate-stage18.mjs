@@ -27,7 +27,6 @@ const appFiles=[
 ];
 const errors=[];const read=file=>fs.readFileSync(file,"utf8");
 for(const file of[...migrations,testFile,...appFiles])if(!fs.existsSync(file))errors.push(`Arquivo ausente: ${file}`);
-function requireTokens(file,tokens,label){const content=read(file);for(const token of tokens)if(!content.includes(token))errors.push(`${label} sem ${token}: ${file}`);return content;}
 function requireRegex(content,patterns,label){for(const pattern of patterns)if(!pattern.test(content))errors.push(`${label} não atende ${pattern}`);}
 
 if(!errors.length){
