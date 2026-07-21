@@ -27,8 +27,9 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 
 ## Etapa 17 — Estoque, Inventário e Almoxarifado
 
-- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](../docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md) — implementação funcional e arquitetura.
-- [`docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md`](../docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md) — migrations corretivas, testes transacionais, RLS, privilégios, índices e advisors.
+- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](../docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md) — contrato técnico, schema, operações e segurança do estoque operacional.
+- [`docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md`](../docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md) — recuperação pós-interrupção, auditoria do Supabase, defeitos encontrados, correções e 14 testes transacionais.
+- [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — fila aprovada de WMS avançado, endereçamento, RFID, ressuprimento, roteirização, fiscal e depreciação.
 
 ### Linha do tempo
 

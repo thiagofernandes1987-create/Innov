@@ -2,6 +2,10 @@
 
 Plataforma modular da **Innovar Construções e Reformas** para clientes, contratos, obras, qualidade, suprimentos, estoque, financeiro, indicadores e pós-venda.
 
+**Versão:** `0.17.0`  
+**Estado:** Etapa 17 implementada na `main`, aplicada e homologada tecnicamente no Supabase  
+**Produção:** ainda não liberada
+
 ## Fonte de verdade
 
 Toda informação necessária para recuperar e continuar o projeto está versionada no repositório. O contêiner e o histórico de conversa não são dependências.
@@ -16,37 +20,54 @@ Leitura obrigatória:
 6. [`diretrizes/RECUPERACAO.md`](./diretrizes/RECUPERACAO.md);
 7. [`diretrizes/HISTORICO-ETAPAS.md`](./diretrizes/HISTORICO-ETAPAS.md).
 
-Os documentos em `docs/` preservam histórico técnico, homologações e planejamento aprovado.
+Evidências da etapa atual:
 
-## Estado atual
+- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](./docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md);
+- [`docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md`](./docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md).
 
-**Versão:** `0.17.0`
+## Estado consolidado
 
-Consolidado na `main`:
+- orçamentos, propostas, contratos, aditivos e assinatura;
+- gestão multiobra, EAP, cronograma, tarefas, equipes e diário;
+- módulos plug-and-play e perfis configuráveis;
+- PDF/DOCX, campos de assinatura, evidências e entrega;
+- qualidade, FVS, FVM, formulários e pesquisas;
+- compras e suprimentos;
+- financeiro operacional;
+- relatórios e indicadores;
+- estoque, reservas, ativos e inventário físico;
+- documentação canônica recuperável.
 
-- comercial, orçamento, propostas, contratos, aditivos e assinatura;
-- gestão multiobra, planejamento, tarefas, equipes, diário e portal;
-- núcleo modular plug-and-play e administração de acessos;
-- documentos, Qualidade, FVS, FVM, formulários e pesquisas;
-- Compras e Suprimentos;
-- Financeiro Operacional;
-- Relatórios e Indicadores Executivos;
-- Estoque, Inventário e Almoxarifado — Etapa 17, código incorporado pelo PR `#14`.
+## Etapa 17
 
-Follow-up em revisão:
+O estoque utiliza razão imutável:
 
-- branch `fix/etapa-17-homologacao-pos-merge`;
-- PR `#15`;
-- migrations corretivas, locks de concorrência, índices, privilégios, testes e documentação da homologação da Etapa 17;
-- Supabase de homologação validado com testes transacionais revertidos;
-- merge do PR depende de aprovação explícita.
+```text
+saldo físico = soma das linhas de movimentos POSTED e originais REVERSED
+saldo reservado = reservado - consumido - liberado
+saldo disponível = físico - reservado
+```
 
-Fila oficial:
+A contrapartida `REVERSAL` neutraliza o movimento original. O saldo não é editável diretamente.
 
-- Etapa 18 — CRM, Clientes e SAC;
-- Etapa 19 — Auditoria e observabilidade;
-- Etapa 20 — Prontidão de produção;
-- Etapa 21 — WMS avançado e automação logística, fiscal e patrimonial.
+Homologação registrada:
+
+- 18 tabelas com RLS;
+- seis views `security_invoker`;
+- advisory locks por posição de estoque;
+- importação idempotente;
+- isolamento multiempresa e multiobra;
+- 14 testes transacionais aprovados com `ROLLBACK`;
+- ledger remoto reconciliado com 18 migrations canônicas.
+
+## Próximas etapas
+
+- Etapa 18 — consolidação de CRM, Clientes e SAC;
+- Etapa 19 — auditoria e observabilidade unificadas;
+- Etapa 20 — prontidão de produção;
+- Etapa 21 — WMS avançado e automação logística.
+
+A Etapa 21 inclui endereçamento automatizado, RFID, ressuprimento automático, roteirização, integração fiscal de entrada e depreciação contábil oficial.
 
 ## Stack
 
@@ -67,6 +88,7 @@ cp .env.example .env.local
 pnpm dev
 ```
 
+Valores secretos nunca são versionados.
 Variáveis conhecidas, sem valores versionados:
 
 ```env
@@ -97,20 +119,41 @@ pnpm test:python
 pnpm build
 ```
 
-O CI também executa os validadores das Etapas 9, 12, 12.1, 12.2, 13, 14, 15 e 16.
+Teste SQL reproduzível:
+
+```text
+supabase/tests/stage17_inventory_homologation.sql
+```
+
+Ele deve ser executado somente em desenvolvimento/homologação e termina com `ROLLBACK`.
+
+## Banco
+
+Migrations ficam em `supabase/migrations/` e são aplicadas em ordem lexical. Migration aplicada nunca é reescrita; correções usam novo timestamp.
 
 ## Segurança
 
 - Service Role somente no servidor;
 - RLS em tabelas de negócio;
 - autorização por módulo, capacidade e escopo;
-- buckets privados e downloads autenticados;
-- MFA AAL2 em ações críticas;
-- tokens públicos persistidos apenas por hash;
-- saldos derivados, idempotência e imutabilidade;
-- custos de estoque mascarados no PostgreSQL;
-- movimentos de estoque serializados por advisory lock transacional.
+- buckets sensíveis privados;
+- URLs assinadas ou rotas autenticadas;
+- MFA AAL2 nas ações configuradas;
+- documentos, snapshots e movimentos concluídos imutáveis;
+- tokens públicos armazenados somente por hash;
+- auditoria, idempotência e locks transacionais.
+
+## Limitações para produção
+
+Permanecem necessários:
+
+-  autenticado com contas permanentes de homologação;
+- teste concorrente com duas conexões reais;
+- proteção contra senhas comprometidas;
+- opções adicionais de MFA;
+- revisão jurídica, contábil e LGPD;
+- pentest, backup/restauração e observabilidade.
 
 ## Recuperação
 
-O procedimento integral está em [`diretrizes/RECUPERACAO.md`](./diretrizes/RECUPERACAO.md). A reconstrução não está concluída enquanto `pnpm validate:docs`, validadores estruturais, lint, TypeScript, testes e build não estiverem verdes.
+O projeto não depende do histórico da conversa nem de contêiner persistente. Consulte [`diretrizes/RECUPERACAO.md`](./diretrizes/RECUPERACAO.md).
