@@ -1,44 +1,44 @@
 # Etapa 19 — Auditoria e Observabilidade
 
-## Estado
+**Estado:** implementada e homologada tecnicamente no Supabase; PR empilhado sobre o PR `#18`  
+**Versão da plataforma:** `0.19.0`  
+**Módulo:** `auditoria` versão `1.0.0`  
+**Projeto Supabase:** `wyeojufebtwblsubkunr`
 
-Implementação em branch empilhada sobre o PR `#18`.
-
-## Objetivo
+## 1. Objetivo
 
 Consolidar a atividade crítica da plataforma em um **fluxo unificado**, pesquisável e correlacionado, sem substituir nem duplicar as trilhas append-only dos aplicativos de domínio.
 
-## Arquitetura
-
 ```text
-eventos dos módulos
-+ audit_events transversal
+eventos dos módulos + audit_events
 → normalização por RPC
-→ filtros por organização, módulo, severidade e correlation_id
+→ organização, módulo, severidade e correlation_id
 → painel de auditoria
-→ regras de alerta
-→ health checks e diagnósticos
+→ regras e alertas
+→ health checks
+→ diagnósticos estruturados
 ```
 
-A tabela `audit_events` existente foi ampliada com:
+## 2. Estrutura
 
-- módulo;
-- severidade;
-- origem;
-- tipo do ator;
-- cliente e obra;
-- mensagem e metadata sanitizada;
-- request ID;
-- chave de deduplicação;
-- hashes SHA-256 de IP e user-agent;
-- data real de ocorrência;
-- data de retenção.
+A Etapa 19 utiliza seis tabelas com RLS:
 
-IP e user-agent nunca são armazenados em texto puro.
+```text
+audit_events
+observability_alert_rules
+observability_alerts
+observability_health_checks
+observability_diagnostics
+observability_retention_policies
+```
 
-## Fluxo unificado
+`audit_events` foi ampliada com módulo, severidade, origem, tipo de ator, cliente, mensagem, metadata sanitizada, request ID, chave de deduplicação, hashes de IP/user-agent, data real de ocorrência e retenção.
 
-A RPC `get_observability_events` normaliza, sem copiar registros, as fontes:
+IP, user-agent, senha, token e segredo nunca são armazenados em texto puro.
+
+## 3. Fluxo unificado
+
+`get_observability_events` consulta sem copiar registros de 12 origens:
 
 1. `audit_events`;
 2. `permission_change_events`;
@@ -53,130 +53,137 @@ A RPC `get_observability_events` normaliza, sem copiar registros, as fontes:
 11. `crm_opportunity_stage_history`;
 12. `crm_activities`.
 
-Cada item expõe contrato comum:
+Contrato comum:
 
 ```text
-id
-organization_id
-project_id
-client_id
-module_key
-event_type
-severity
-source
-actor_user_id
-actor_type
-resource_type
-resource_id
-action
-result
-message
-metadata
-correlation_id
-occurred_at
-origin_table
+id, organization_id, project_id, client_id, module_key,
+event_type, severity, source, actor_user_id, actor_type,
+resource_type, resource_id, action, result, message,
+metadata, correlation_id, occurred_at, origin_table
 ```
 
-Payloads brutos de assinatura não são expostos. O fluxo mostra somente identificadores do provedor e hashes.
+Payload bruto de assinatura não é exposto; somente identificadores e hashes necessários.
 
-## Sanitização
+## 4. Sanitização
 
-`sanitize_audit_json` percorre objetos e arrays recursivamente. Chaves compatíveis com senha, token, authorization, secret, Service Role, private key, access key, refresh token ou cookie recebem `[REDACTED]`.
+`sanitize_audit_json` percorre objetos e arrays recursivamente. Chaves relacionadas a senha, token, authorization, secret, Service Role, private key, access key, refresh token ou cookie recebem `[REDACTED]`.
 
-A sanitização ocorre no banco, antes da persistência e antes da leitura de eventos de domínio.
+A homologação confirmou:
 
-## Idempotência e correlação
+```json
+{
+  "password": "[REDACTED]",
+  "nested": {"token": "[REDACTED]", "safe": "ok"},
+  "authorization": "[REDACTED]",
+  "items": [{"secret": "[REDACTED]", "visible": 1}]
+}
+```
+
+## 5. Idempotência e correlação
 
 `record_audit_event` aceita:
 
-- `deduplication_key` por organização;
-- `correlation_id` compartilhado por uma operação distribuída;
-- `request_id` técnico;
+- `deduplication_key` única por organização;
+- `correlation_id` compartilhada;
+- `request_id`;
 - obra e cliente opcionais;
-- hash de IP e user-agent.
+- SHA-256 de IP e user-agent.
 
-Repetição da mesma chave retorna o evento existente.
+Repetir a mesma chave retorna o evento existente.
 
-## Alertas
+## 6. Alertas
 
-Tabelas:
-
-- `observability_alert_rules`;
-- `observability_alerts`.
-
-Regras suportam:
-
-- módulo opcional;
-- padrão de evento;
-- severidade mínima;
-- quantidade mínima;
-- janela temporal;
-- cooldown;
-- ativação.
-
-Eventos críticos geram alerta mesmo sem regra específica. Estados:
+Regras suportam módulo, padrão de evento, severidade mínima, quantidade, janela, cooldown e ativação.
 
 ```text
 OPEN → ACKNOWLEDGED → RESOLVED
 ```
 
-Reconhecimento e resolução exigem motivo, usuário autenticado e capacidade administrativa no módulo `auditoria`. Cada transição gera novo evento de auditoria.
+Eventos críticos criam alerta mesmo sem regra. Reconhecimento e resolução exigem motivo, usuário autenticado e capacidade administrativa. Cada transição cria novo evento.
 
-## Health checks
+## 7. Health checks
 
-`run_observability_health_snapshot` registra seis verificações:
+`run_observability_health_snapshot` registra seis verificações append-only:
 
 1. conectividade do banco;
-2. conversão de documentos de assinatura;
-3. entrega de cópias assinadas;
+2. conversão de assinatura;
+3. entrega de assinatura;
 4. geração de relatórios;
 5. SLA do SAC;
-6. diagnósticos técnicos pendentes.
-
-Os resultados são append-only em `observability_health_checks`.
+6. diagnósticos pendentes.
 
 Estados:
 
 ```text
-HEALTHY
-DEGRADED
-UNHEALTHY
-UNKNOWN
+HEALTHY | DEGRADED | UNHEALTHY | UNKNOWN
 ```
 
-## Diagnósticos
+## 8. Diagnósticos
 
-`observability_diagnostics` recebe achados reproduzíveis dos advisors e do ledger:
+`observability_diagnostics` recebe achados reproduzíveis:
 
-- FKs sem índice;
-- avaliação repetida em RLS;
+- FK sem índice;
+- `auth_rls_initplan`;
 - políticas permissivas sobrepostas;
 - privilégios de funções;
-- divergência de migrations;
-- outros diagnósticos estruturados.
+- divergência de ledger;
+- outros achados técnicos.
 
 `record_observability_diagnostic` é idempotente por organização, tipo, objeto e código.
 
-## Retenção
+### Diagnósticos globais
 
-`observability_retention_policies` define retenção entre 30 e 3650 dias. A política inicial de `audit_events` é 365 dias e preserva eventos críticos.
+A homologação identificou que `organization_id is null` poderia ser visto por qualquer sessão autenticada. A migration de hardening criou `stage19_can_read_global_diagnostics()` e substituiu a política:
 
-A Etapa 19 registra `retention_until`, mas não implementa exclusão automática. O worker de purge fica reservado para a prontidão de produção da Etapa 20, com dry-run, exportação e preservação legal.
+- membro interno autorizado: vê diagnóstico global;
+- sessão autenticada sem membership, incluindo cliente: não vê;
+- resultado do teste: interno `1`, externo `0`.
 
-## RLS e privilégios
+## 9. Retenção
 
-- leitura somente com `has_module_permission(...,'auditoria','READ',...)`;
-- cliente não recebe acesso ao aplicativo;
-- apenas `SUPER_ADMIN`, `DIRECAO` e `ADMINISTRADOR` recebem acesso padrão;
-- `audit_events`, health checks e diagnósticos não aceitam escrita direta de usuários;
+`observability_retention_policies` aceita 30 a 3650 dias. A política inicial de `audit_events` é 365 dias e preserva críticos.
+
+A Etapa 19 registra `retention_until`, mas não executa purge automático. O purge pertence à Etapa 20 e deverá possuir dry-run, exportação e retenção legal.
+
+## 10. RLS e privilégios
+
+- seis tabelas, todas com RLS;
+- 13 políticas;
+- seis gatilhos não internos;
+- leitura somente por módulo `auditoria`;
+- cliente não recebe o aplicativo;
+- acesso padrão somente para `SUPER_ADMIN`, `DIRECAO` e `ADMINISTRADOR`;
+- `audit_events`, health checks e diagnósticos não aceitam escrita direta do navegador;
 - eventos e health checks são append-only;
 - regras e retenção exigem administração;
-- RPCs não são executáveis por `anon`;
-- Service Role é permitida somente nas operações técnicas explicitamente concedidas.
+- nenhuma função da Etapa 19 é executável por `anon`;
+- helpers e instaladores permanecem internos;
+- RPCs `SECURITY DEFINER` autenticadas validam organização, módulo, capacidade e escopo internamente.
 
-## Interface
+## 11. Índices
 
-Rotas:
+A auditoria encontrou sete FKs sem índice líder. A migration de hardening adicionou:
+
+```text
+audit_events_actor_user_idx
+observability_alert_rules_created_by_idx
+observability_alerts_acknowledged_by_idx
+observability_alerts_audit_event_idx
+observability_alerts_resolved_by_idx
+observability_alerts_rule_idx
+observability_retention_policies_created_by_idx
+```
+
+Resultado final:
+
+```text
+FKs do domínio: 16
+zero FK sem índice
+```
+
+Avisos `unused_index` foram preservados porque o ambiente não possui carga representativa.
+
+## 12. Interface
 
 ```text
 /app/auditoria
@@ -187,65 +194,86 @@ Rotas:
 /app/auditoria/configuracao
 ```
 
-A tela inicial mostra atividade, alertas, componentes degradados, diagnósticos e distribuição por módulo.
+A página inicial mostra atividade, alertas, componentes degradados, diagnósticos e distribuição por módulo.
 
-## Migrations
+## 13. Seis migrations alinhadas ao ledger
 
 ```text
-20260721093000_stage19_observability_schema.sql
-20260721093100_stage19_observability_security.sql
-20260721093200_stage19_observability_functions.sql
-20260721093300_stage19_observability_unified_stream.sql
-20260721093400_stage19_observability_module_performance.sql
+20260721100108_stage19_observability_schema.sql
+20260721100159_stage19_observability_security.sql
+20260721122302_stage19_observability_functions.sql
+20260721122355_stage19_observability_unified_stream.sql
+20260721122436_stage19_observability_module_performance.sql
+20260721123305_stage19_observability_hardening.sql
 ```
 
-## Homologação
+Os arquivos usam exatamente os timestamps registrados em `supabase_migrations.schema_migrations`.
 
-Arquivo:
+## 14. Homologação
+
+Arquivo reproduzível:
 
 ```text
 supabase/tests/stage19_observability_homologation.sql
 ```
 
-Testes:
+O teste cria identidades e organizações temporárias, alterna para o papel `authenticated`, simula JWT e termina com `ROLLBACK`.
 
-- instalação do módulo;
-- regras padrão;
-- idempotência;
+Resultados confirmados:
+
+- módulo instalado: `1`;
+- regras padrão: `2`;
+- evento idempotente;
 - sanitização recursiva;
-- alerta crítico;
-- fluxo unificado;
-- append-only;
-- workflow do alerta;
-- health checks;
-- isolamento multiempresa.
+- alerta crítico criado;
+- fluxo unificado retornando evento;
+- append-only bloqueado por privilégio e trigger;
+- alerta reconhecido e resolvido;
+- seis health checks;
+- acesso a outra organização negado;
+- diagnóstico global visível somente para membro interno autorizado;
+- nenhum dado artificial persistido.
 
-A bateria usa identidades autenticadas, RLS real e termina com `ROLLBACK`.
+## 15. Advisors
 
-## Limitações
+### Segurança
 
-- a Etapa 19 não substitui um APM externo;
-- não armazena conteúdo bruto de requisições;
-- métricas de infraestrutura do runner/Vercel dependem de integração futura;
-- purge automático e teste de carga pertencem à Etapa 20;
-- o E2E concorrente da Etapa 18 continua bloqueado pelos secrets do ambiente `homologation`.
+Os avisos específicos da Etapa 19 para funções `SECURITY DEFINER` autenticadas são intencionais: representam fronteiras transacionais, possuem `search_path` explícito, autorização interna e zero acesso `anon`.
 
-## Definition of Done
+Os avisos globais de tabelas internas antigas sem policy de usuário, funções de módulos anteriores e políticas permissivas duplicadas permanecem registrados para a continuidade da Etapa 19 e para a Etapa 20. Nenhuma policy permissiva artificial foi criada apenas para silenciar o advisor.
 
-- [x] schema transversal criado;
+### Performance
+
+- zero FK sem índice na Etapa 19;
+- índices `unused` mantidos até existir carga real;
+- alertas legados de `auth_rls_initplan`, múltiplas policies e FKs de módulos antigos permanecem no backlog de hardening transversal.
+
+## 16. Limitações
+
+- não substitui APM externo;
+- não armazena corpo bruto de requisição;
+- métricas de runner/Vercel dependem de integração futura;
+- purge automático e carga pertencem à Etapa 20;
+- E2E concorrente da Etapa 18 continua bloqueado pelos cinco secrets do ambiente GitHub `homologation`.
+
+## 17. Definition of Done
+
+- [x] schema transversal;
 - [x] fluxo unificado sem duplicação;
 - [x] sanitização recursiva;
-- [x] idempotência e correlation_id;
+- [x] idempotência e `correlation_id`;
 - [x] RLS e privilégio mínimo;
 - [x] eventos append-only;
 - [x] regras e alertas;
 - [x] health checks;
 - [x] diagnósticos de banco;
+- [x] diagnósticos globais protegidos;
 - [x] retenção configurável;
 - [x] interface administrativa;
-- [x] teste transacional com ROLLBACK;
-- [x] validador estrutural;
-- [ ] migrations aplicadas na homologação;
-- [ ] advisors revisados;
-- [ ] CI verde;
-- [ ] PR pronto para revisão.
+- [x] teste transacional com `ROLLBACK`;
+- [x] seis migrations aplicadas e alinhadas ao ledger;
+- [x] zero FK sem índice;
+- [x] advisors revisados;
+- [x] validador estrutural atualizado;
+- [ ] CI final após os últimos commits;
+- [ ] PR pronto para revisão após desbloqueio da dependência do PR `#18`.
