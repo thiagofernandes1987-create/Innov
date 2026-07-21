@@ -74,7 +74,6 @@ create policy clients_stage18_delete on public.clients for delete to authenticat
 drop policy if exists opportunities_stage18_select on public.opportunities;
 create policy opportunities_stage18_select on public.opportunities for select to authenticated using (
   public.has_module_permission(organization_id,'crm','READ',null,null)
-  or (client_id is not null and public.is_client_owner(client_id))
 );
 drop policy if exists opportunities_stage18_write on public.opportunities;
 create policy opportunities_stage18_write on public.opportunities for all to authenticated using (
@@ -122,7 +121,10 @@ create policy client_consents_insert on public.client_consents for insert to aut
 drop policy if exists sac_categories_select on public.sac_categories;
 create policy sac_categories_select on public.sac_categories for select to authenticated using (
   public.has_module_permission(organization_id,'sac','READ',null,null)
-  or exists(select 1 from public.clients client where client.organization_id=sac_categories.organization_id and client.user_id=auth.uid())
+  or exists(
+    select 1 from public.clients client
+    where client.organization_id=sac_categories.organization_id and client.user_id=auth.uid()
+  )
 );
 drop policy if exists sac_categories_write on public.sac_categories;
 create policy sac_categories_write on public.sac_categories for all to authenticated using (
