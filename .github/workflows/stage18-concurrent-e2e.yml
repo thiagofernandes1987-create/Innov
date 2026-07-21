@@ -11,6 +11,15 @@ on:
       - ".github/workflows/stage18-concurrent-e2e.yml"
       - "supabase/migrations/20260721*.sql"
       - "package.json"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "scripts/run-stage18-concurrent-e2e.mjs"
+      - "scripts/provision-homologation-users.mjs"
+      - ".github/workflows/stage18-concurrent-e2e.yml"
+      - "supabase/migrations/20260721*.sql"
+      - "package.json"
 
 permissions:
   contents: read
@@ -22,6 +31,7 @@ concurrency:
 jobs:
   concurrent-admin-client:
     name: Admin + Client simultaneous Supabase E2E
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     environment: homologation
     timeout-minutes: 20
