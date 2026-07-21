@@ -4,18 +4,20 @@ Este procedimento reconstrói a Innovar Platform após perda de contêiner, máq
 
 ## 1. Princípio
 
-O GitHub é a fonte canônica. Não reconstruir a partir de memória, conversa ou ZIP antigo quando o repositório estiver disponível.
+O GitHub é a fonte canônica. Não reconstruir a partir de memória, conversa, ZIP antigo ou arquivo temporário quando o repositório estiver disponível.
+
+O Git recupera código, migrations, testes, vacinas, documentação e workflows. Segredos, dados reais, conteúdo de buckets, usuários Auth, DNS e backups permanecem externos.
 
 ## 2. Pré-requisitos
 
 - Git;
 - Node.js 24 ou superior;
-- Corepack e pnpm 11.15.0;
+- Corepack e `pnpm@11.15.0`;
 - Python 3.13;
-- acesso ao Supabase correto;
-- secrets em cofre externo;
+- acesso ao projeto Supabase correto;
+- acesso ao cofre de secrets;
 - LibreOffice headless para conversão DOCX;
-- acesso ao provider de hospedagem.
+- acesso ao provedor de hospedagem.
 
 ## 3. Clonar
 
@@ -26,41 +28,38 @@ git checkout main
 git pull --ff-only
 ```
 
-Para revisar correções ainda não mescladas, consulte `diretrizes/INVENTARIO.md` antes de mudar de branch.
+Para recuperar trabalho ainda não incorporado, consultar `diretrizes/INVENTARIO.md` e os PRs em rascunho antes de mudar de branch.
 
-## 4. Ler antes de executar
+Estado documentado em 21 de julho de 2026:
+
+```text
+PR #18 → test/etapa-18-e2e-concorrente-supabase
+PR #19 → feature/etapa-19-auditoria-observabilidade
+```
+
+O PR #19 está empilhado sobre o PR #18. Nenhum merge deve ser presumido.
+
+## 4. Ordem de leitura
 
 1. `diretrizes/SPEC.md`;
 2. `diretrizes/INVENTARIO.md`;
 3. `diretrizes/MODULOS.md`;
 4. `diretrizes/ARQUITETURA.md`;
 5. `diretrizes/ROADMAP.md`;
-6. `docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`;
-7. `docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md`.
+6. `diretrizes/VACINAS.md`;
+7. `diretrizes/HISTORICO-ETAPAS.md`;
+8. `docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md`;
+9. `docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md`.
 
 ## 5. Instalar dependências
-6. `diretrizes/HISTORICO-ETAPAS.md`;
-7. `docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`;
-8. `docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md`.
-
-## 3. Pré-requisitos
-
-- Git;
-- Node.js 24+;
-- Corepack e pnpm 11.15.0;
-- Python 3.13;
-- acesso ao Supabase correto;
-- acesso ao cofre de secrets;
-- LibreOffice headless para conversão DOCX;
-- acesso à hospedagem.
-
-## 4. Dependências
 
 ```bash
 corepack enable
 corepack prepare pnpm@11.15.0 --activate
-pnpm install --no-frozen-lockfile
+pnpm install --no-frozen-lockfile --reporter=append-only
 ```
+
+A política transitória de instalação está documentada na VACINA-008. Não alternar somente um workflow para `--frozen-lockfile`.
 
 ## 6. Configurar ambiente
 
@@ -87,9 +86,24 @@ Regras:
 - `.env.local` não é versionado;
 - Service Role somente no servidor;
 - não colar credencial em PR, issue, log ou documentação;
-- segredo exposto precisa ser rotacionado.
+- segredo exposto precisa ser rotacionado;
+- exemplos documentais usam placeholders explícitos.
 
-## 7. Reconstruir o banco
+## 7. Ambiente GitHub `homologation`
+
+O E2E autenticado e concorrente exige estes secrets no ambiente protegido:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+SUPABASE_SERVICE_ROLE_KEY
+DEMO_ADMIN_PASSWORD
+DEMO_CLIENT_PASSWORD
+```
+
+O conector não cria esses secrets. Enquanto estiverem ausentes, o workflow deve falhar antes da instalação e gerar relatório JSON com `blocked_missing_secrets`, sem valores sensíveis.
+
+## 8. Reconstruir o banco
 
 As migrations ficam em:
 
@@ -97,7 +111,7 @@ As migrations ficam em:
 supabase/migrations/
 ```
 
-Aplicar em ordem lexical com o mecanismo oficial do ambiente, por exemplo:
+Aplicar em ordem lexical com o mecanismo oficial:
 
 ```bash
 supabase link --project-ref <PROJECT_REF>
@@ -110,151 +124,108 @@ Regras:
 - não reaplicar manualmente migration registrada;
 - correção usa novo timestamp;
 - conferir backup antes de alteração destrutiva;
-- ledger remoto precisa corresponder aos arquivos locais.
+- ledger remoto precisa corresponder aos arquivos locais;
+- executar `pnpm validate:migrations` antes do push.
 
-## 8. Migrations da Etapa 17
+## 9. Migrations essenciais recentes
 
-O estado canônico possui 18 migrations:
+### Etapa 17 — Estoque
 
-- 16 arquivos de `20260720160000` a `20260720160740`;
-- `20260720233052_stage17_inventory_concurrency_locks.sql`;
-- `20260720233657_stage17_homologation_balance_project_scope.sql`.
+A lista completa está em `diretrizes/INVENTARIO.md`. A implementação de ativos/inventários está dividida em `_01` a `_04`; a migration monolítica antiga não existe.
 
-### Histórico de recuperação
+### Etapa 18 — CRM, Clientes e SAC
 
-Durante a interrupção, as 16 migrations originais haviam sido aplicadas em 28 blocos remotos. O ledger foi reconciliado sem desfazer ou reaplicar DDL:
+```text
+20260721012434_stage18_relationship_schema.sql
+20260721012505_stage18_relationship_idempotency.sql
+20260721012701_stage18_relationship_security.sql
+20260721013434_stage18_relationship_invariants.sql
+20260721013534_stage18_crm_functions.sql
+20260721013547_stage18_sac_client_actors.sql
+20260721013654_stage18_sac_functions.sql
+20260721013941_stage18_relationship_queries.sql
+20260721014030_stage18_relationship_module.sql
+20260721014621_stage18_relationship_performance.sql
+20260721015350_stage18_sac_portal_release_guard.sql
+20260721020003_stage18_workflow_privilege_hardening.sql
+```
 
-- versões fracionadas removidas somente do histórico;
-- 16 versões canônicas registradas;
-- migrations de concorrência e correção mantidas com os números remotos reais.
+### Etapa 19 — Auditoria e Observabilidade
 
-Em novo ambiente vazio, executar normalmente os 18 arquivos. Em ambiente já homologado, não repetir o reparo de ledger.
+```text
+20260721093000_stage19_observability_schema.sql
+20260721093100_stage19_observability_security.sql
+20260721093200_stage19_observability_functions.sql
+20260721093300_stage19_observability_unified_stream.sql
+20260721093400_stage19_observability_module_performance.sql
+```
 
-## 9. Verificações da Etapa 17
+## 10. Verificar o banco
 
 Confirmar:
 
-- 18 tabelas de inventário;
-- RLS nas 18;
-- seis views `security_invoker`;
-- módulo `estoque` 1.0.0;
-- oito unidades e seis categorias por organização;
-- depósito `ALM-GERAL` e localização `PADRAO`;
-- advisory lock por posição;
-- view de saldo considerando `POSTED` e originais `REVERSED`;
-- trigger de isolamento por obra;
-- custos mascarados;
-- RPCs sem acesso `anon`.
+- RLS habilitada nas tabelas de negócio;
+- módulos instalados por organização;
+- RPCs operacionais sem acesso `anon`;
+- funções `SECURITY DEFINER` com `search_path` e autorização interna;
+- FKs com índice líder;
+- buckets privados;
+- dados sensíveis sem leitura ampla;
+- ledger remoto alinhado.
 
-## 10. Teste transacional reproduzível
+Etapa 19:
 
-Arquivo:
+- cinco tabelas `observability_*`;
+- `audit_events` com módulo, severidade, origem, ator, request, deduplicação, hashes e retenção;
+- módulo `auditoria` habilitado;
+- acesso padrão somente para Super Administrador, Direção e Administrador;
+- cliente sem acesso;
+- eventos e health checks append-only;
+- `sanitize_audit_json` redigindo chaves sensíveis;
+- `get_observability_events` normalizando 12 origens.
+
+## 11. Testes SQL reproduzíveis
+
+Executar somente em desenvolvimento ou homologação:
 
 ```text
 supabase/tests/stage17_inventory_homologation.sql
+supabase/tests/stage18_relationship_homologation.sql
+supabase/tests/stage19_observability_homologation.sql
 ```
 
-Executar somente em desenvolvimento/homologação. O script cria dados efêmeros e termina com `ROLLBACK`.
-
-Ele valida 14 regras, incluindo saldo, idempotência, imutabilidade, reversão, transferência e isolamento multiempresa/multiobra.
-
-Nunca remover o `ROLLBACK` do arquivo canônico.
-
-## 11. Buckets privados
-Termina, no PR `#15`, em:
-
-```text
-20260720161000_stage17_inventory_rpc_privileges.sql
-```
-
-A lista completa está em `diretrizes/INVENTARIO.md`. O histórico remoto também deve conter a correção de escopo de saldo por obra registrada durante a homologação.
-
-## 7. Verificações do banco
-
-- 18 tabelas de estoque com RLS;
-- seis views internas sem acesso direto;
-- módulo `estoque` versão `1.0.0`;
-- 101 FKs sem lacuna de índice líder;
-- zero RPC operacional de estoque executável por `anon`;
-- custos sem leitura direta;
-- unidades, categorias, `ALM-GERAL` e `PADRAO` no bootstrap;
-- movimentos postados imutáveis;
-- saldo derivado e bloqueio de saldo negativo;
-- locks transacionais em postagem;
-- isolamento multiempresa e multiobra.
-
-Conferir os buckets criados pelas etapas históricas:
-
-```text
-commercial-documents
-contract-documents
-project-documents
-daily-log-media
-signature-artifacts
-quality-documents
-quality-form-attachments
-procurement-attachments
-finance-attachments
-```
-
-A Etapa 17 não adiciona bucket novo.
+Todos criam dados artificiais e terminam com `ROLLBACK`. Nunca remover o `ROLLBACK` dos arquivos canônicos.
 
 ## 12. Provisionar homologação
-
-Contas permanentes só devem ser criadas por processo protegido:
 
 ```bash
 pnpm provision:homologation
 ```
 
-As senhas vêm de `DEMO_ADMIN_PASSWORD` e `DEMO_CLIENT_PASSWORD`. Não registrar valores.
+Contas conhecidas:
 
-Durante a recuperação da Etapa 17, o Supabase estava sem usuários permanentes; por isso o E2E autenticado pós-Etapa 17 permanece pendente.
+```text
+admin@innov.eng.br
+cliente@cliente.com
+```
+
+Senhas ficam somente em secrets. O provisionamento é idempotente e restrito à homologação.
 
 ## 13. Workers
 
-### Conversão DOCX
-
 ```bash
-pnpm worker:signature-conversion
-```
-
-### Entrega de assinatura
-
-```bash
-pnpm worker:signature-delivery
-```
-
-Rotinas server-side podem usar Service Role; navegador não.
-A Etapa 17 não cria bucket novo.
-
-## 9. Homologação
-
-Contas conhecidas:
-
-- `admin@innov.eng.br`;
-- `cliente@cliente.com`.
-
-Senhas ficam somente em secrets. O provisionamento oficial continua idempotente e restrito ao ambiente de homologação.
-
-Os testes pós-merge da Etapa 17 criaram identidades, organizações, obras, itens e movimentos apenas em transações revertidas. Confirmaram bootstrap, saldo, reservas, idempotência, reversão, inventário, RLS e custo protegido.
-
-Limitação: o conector não abriu duas conexões simultâneas sem credenciais explícitas. O teste concorrente realmente paralelo deve ser executado na Etapa 20.
-
-## 10. Aplicação e workers
-
-```bash
-pnpm dev
 pnpm worker:signature-conversion
 pnpm worker:signature-delivery
 ```
 
-`expire_inventory_reservations` deve ser acionada apenas por processo server-side autorizado quando houver agendamento.
+Workers podem usar Service Role somente no servidor e precisam registrar falhas sem expor payload sensível.
 
 ## 14. Validar código e documentação
 
 ```bash
 pnpm validate:docs
+pnpm validate:vaccines
+pnpm validate:migrations
 pnpm validate:stage9
 pnpm validate:stage12
 pnpm validate:stage12.1
@@ -264,6 +235,8 @@ pnpm validate:stage14
 pnpm validate:stage15
 pnpm validate:stage16
 pnpm validate:stage17
+pnpm validate:stage18
+pnpm validate:stage19
 pnpm lint
 pnpm typecheck
 pnpm test
@@ -273,48 +246,52 @@ pnpm build
 
 A recuperação não está concluída enquanto algum comando falhar.
 
-## 15. Smoke tests manuais
+## 15. Smoke tests
 
 ### Administrador
 
 - login e MFA conforme configuração;
-- módulos exibidos conforme perfil;
-- acesso ao estoque;
-- criação de item e entrada;
-- reserva, consumo e reversão;
-- inventário físico;
-- consulta de custos quando autorizado.
+- aplicativos exibidos conforme perfil;
+- CRM, Cliente 360, SAC, estoque e relatórios;
+- `/app/auditoria` visível somente quando autorizado;
+- fluxo de eventos filtrável;
+- alerta reconhecido e resolvido com motivo;
+- snapshot de saúde registrado;
+- configuração de regra e retenção protegida.
 
 ### Cliente
 
 - somente dados próprios;
-- ausência de custos internos;
-- somente documentos e formulários liberados.
+- somente obras e documentos liberados;
+- nenhuma mensagem ou anexo interno;
+- ausência do aplicativo de auditoria;
+- pipeline comercial oculto.
 
 ### Segurança
 
 - acesso direto sem capacidade negado;
 - organização diferente não lê dados;
-- depósito exclusivo não cruza obra;
-- movimento concluído não é alterado;
-- saldo não é editado diretamente;
-- bucket privado não possui URL pública;
+- estado crítico não muda por update direto;
+- eventos append-only não são alterados;
+- payload sensível aparece como `[REDACTED]`;
+- bucket privado sem URL pública;
 - Service Role não aparece no bundle.
 
 ## 16. Advisors
 
 Executar advisors de segurança e performance após DDL.
 
-Não remover índices somente porque o ambiente vazio informa “unused index”. Não criar política permissiva apenas para eliminar aviso de tabela interna sem policy.
-
-Antes de produção, revisar:
+Revisar:
 
 - FKs sem índice;
-- políticas RLS com avaliação repetida;
+- RLS com avaliação repetida;
 - múltiplas políticas permissivas;
-- RPCs `SECURITY DEFINER` e suas checagens internas;
+- funções `SECURITY DEFINER`;
+- privilégios herdados por `PUBLIC` ou `anon`;
 - proteção contra senhas comprometidas;
 - métodos adicionais de MFA.
+
+Não remover índice apenas porque ambiente vazio informa `unused index`. Registrar achados reproduzíveis em `observability_diagnostics` quando a Etapa 19 estiver aplicada.
 
 ## 17. Restaurar hospedagem
 
@@ -326,8 +303,6 @@ Antes de produção, revisar:
 6. executar smoke tests autenticados.
 
 ## 18. Estado não recuperado pelo Git
-
-O GitHub não contém deliberadamente:
 
 - valores de secrets;
 - conteúdo de buckets;
@@ -342,58 +317,17 @@ Esses itens exigem cofre e backup externos.
 ## 19. Checklist final de recuperação
 
 - [ ] código clonado da fonte oficial;
-- [ ] documentação lida;
+- [ ] branch/PR correto identificado;
+- [ ] documentação canônica lida;
 - [ ] dependências instaladas;
 - [ ] secrets configurados;
 - [ ] migrations e ledger alinhados;
 - [ ] RLS e privilégios confirmados;
 - [ ] buckets privados confirmados;
-- [ ] teste SQL com `ROLLBACK` aprovado;
+- [ ] testes SQL com `ROLLBACK` aprovados;
 - [ ] E2E autenticado executado;
-- [ ] teste com duas conexões concorrentes executado;
+- [ ] concorrência real executada;
 - [ ] advisors revisados;
+- [ ] vacinas validadas;
 - [ ] CI verde;
 - [ ] backup/restauração verificados antes da produção.
-## 12. Smoke test do estoque
-
-1. confirmar módulo e dados padrão;
-2. cadastrar item e depósito;
-3. criar entrada e postar;
-4. criar reserva e consumir parcialmente;
-5. tentar saída acima do disponível;
-6. reverter movimento;
-7. repetir importação do mesmo recebimento;
-8. confirmar que quantidade rejeitada não entrou;
-9. cadastrar, entregar e devolver ativo;
-10. abrir, contar, aprovar e contabilizar inventário;
-11. testar acesso entre organizações;
-12. testar custo com e sem capacidade sensível;
-13. confirmar bloqueio de `anon`;
-14. confirmar imutabilidade;
-15. executar disputa realmente simultânea em teste de carga antes de produção.
-
-## 13. O que não vive no Git
-
-- valores de secrets;
-- usuários e dados reais;
-- conteúdo dos buckets;
-- backups físicos;
-- DNS e credenciais de provedores;
-- dispositivos RFID e configurações da futura Etapa 21.
-
-## 14. Checklist final de recuperação
-
-- [ ] código obtido do GitHub;
-- [ ] branch correta selecionada;
-- [ ] diretrizes lidas;
-- [ ] secrets configurados por cofre;
-- [ ] migrations comparadas e aplicadas;
-- [ ] RLS, privilégios e índices conferidos;
-- [ ] buckets privados conferidos;
-- [ ] módulos e perfis carregados;
-- [ ] workers configurados;
-- [ ] `pnpm validate:docs` aprovado;
-- [ ] validadores estruturais aprovados;
-- [ ] lint, typecheck, testes e build aprovados;
-- [ ] smoke tests concluídos;
-- [ ] documentação compatível com o commit implantado.
