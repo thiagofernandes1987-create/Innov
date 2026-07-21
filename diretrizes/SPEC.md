@@ -98,6 +98,34 @@ Perfis personalizados são suportados e não podem ser sobrescritos automaticame
 A resolução considera associação ativa, módulo habilitado, perfil, capacidades, escopo, overrides e AAL. Negação explícita prevalece.
 
 ## 6. Aplicativos modulares
+## 2. Regra de continuidade
+
+GitHub é a fonte definitiva de código, migrations, documentação, testes e recuperação. A solução precisa ser reconstruível mesmo após perda total de contêiner, conversa ou ambiente local. Nenhum segredo pertence à documentação.
+
+## 3. Princípios inegociáveis
+
+1. módulos plug-and-play por organização;
+2. isolamento multiempresa e multiobra;
+3. autorização em rota, RPC, tabela e arquivo;
+4. RLS por padrão;
+5. Service Role somente no servidor;
+6. documentos e buckets privados;
+7. versionamento, hash e imutabilidade;
+8. auditoria de ações críticas;
+9. idempotência em integrações;
+10. documentação atualizada no mesmo PR;
+11. saldos derivados de razões, nunca editados diretamente;
+12. CI como bloqueio obrigatório;
+13. migrations append-only;
+14. privilégio mínimo.
+
+## 4. Modelo de autorização
+
+Perfis canônicos: Super Administrador, Direção, Administrador, Comercial/Vendas, Gestor de Obras, Engenharia, Orçamentista, Financeiro, Qualidade, Compras/Almoxarifado, Pós-venda/SAC e Cliente. Perfis personalizados não são sobrescritos por instaladores.
+
+Níveis: `NONE`, `READ`, `EDIT/READ_WRITE` e `FULL/DELETE`. Capacidades incluem criar, editar, excluir, aprovar, liberar, assinar, exportar, administrar, configurar e visualizar dados sensíveis. Escopos incluem organização, cliente, obra e recurso/depósito.
+
+## 5. Aplicativos modulares
 
 1. dashboard;
 2. CRM e Vendas;
@@ -268,6 +296,65 @@ Ainda pendentes para produção:
 - FKs usadas por RLS e consultas precisam de índices.
 
 ## 11. Frontend e backend
+Estado real:
+
+- implementação incorporada à `main` pelo PR `#14`;
+- migrations aplicadas no Supabase;
+- homologação funcional e RLS executadas com dados temporários revertidos;
+- correções, evidências e documentação consolidadas no PR `#15`;
+- CI integral verde e PR `#15` pronto para revisão;
+- merge depende de aprovação explícita.
+
+### Financeiro e relatórios
+
+```text
+contrato/pedido/medição → lançamento → parcelas → aprovação → liquidação
+fontes autorizadas → métricas → dashboard → snapshot → exportação auditada
+```
+
+## 7. Regras essenciais do estoque
+
+- 18 tabelas com RLS;
+- seis views internas sem acesso direto;
+- saldo físico = soma de movimentos `POSTED`;
+- saldo reservado = reservas ativas líquidas;
+- saldo disponível = físico menos reservado;
+- saldo não é editável diretamente;
+- movimento postado é imutável;
+- reversão referencia o original;
+- transferência conserva quantidade;
+- saldo negativo é bloqueado por padrão;
+- recebimento de Compras integrado de forma idempotente;
+- somente quantidade aceita entra;
+- inventário aprovado gera ajuste rastreável;
+- custos não possuem leitura direta;
+- vínculos incompatíveis entre organização e obra são bloqueados;
+- postagem usa `pg_advisory_xact_lock` por posição;
+- 101 FKs possuem índice líder;
+- nenhuma RPC operacional é executável por `anon`.
+
+Evidências transacionais:
+
+- bootstrap de módulos e perfis;
+- entrada, reserva, consumo e reversão idempotentes;
+- tentativa acima do disponível bloqueada;
+- segunda saída sobre saldo insuficiente bloqueada;
+- movimento postado bloqueado para alteração e exclusão;
+- inventário físico contabilizado;
+- RLS direto: dados próprios visíveis e dados da outra organização ocultos;
+- custo direto bloqueado;
+- dados artificiais revertidos.
+
+## 8. Dados e migrations
+
+- PostgreSQL/Supabase, Auth e Storage privado;
+- migrations exclusivamente em `supabase/migrations/`;
+- migration aplicada nunca é reescrita;
+- funções `SECURITY DEFINER` usam `search_path` explícito e autorização interna;
+- helpers internos têm execução revogada;
+- correções pós-merge incluem concorrência, escopo de obra, índices e privilégios.
+
+## 9. Stack
 
 - Next.js 16;
 - React 19;
@@ -297,8 +384,21 @@ Ainda pendentes para produção:
 ### Produção
 
 Exige revisão jurídica, contábil e LGPD, provider jurídico real, pentest, backups testados, observabilidade, rotação de segredos, proteção de anexos e aprovação explícita.
+- interfaces responsivas e acessíveis.
 
-## 13. Qualidade e CI
+## 10. Ambientes
+
+### Homologação
+
+O projeto conectado é `wyeojufebtwblsubkunr`. Testes criaram identidades, organizações, memberships, obras, itens e movimentos apenas dentro de transações revertidas. Nenhum dado artificial permaneceu.
+
+O conector não conseguiu abrir duas conexões simultâneas sem credenciais explícitas. Teste de carga concorrente real permanece obrigatório na Etapa 20.
+
+### Produção
+
+Exige revisão jurídica, fiscal, contábil e LGPD, provider jurídico real, pentest, backup/restauração testados, observabilidade, rotação de segredos, antimalware e aprovação explícita.
+
+## 11. CI obrigatório
 
 ```bash
 pnpm validate:docs
@@ -324,13 +424,20 @@ Após a consolidação documental da Etapa 17, a sequência planejada é:
 ## 15. Etapa 21 — WMS avançado
 
 Fila aprovada:
+O CI integral da branch corretiva foi aprovado antes da liberação do PR `#15` para revisão.
 
-- WMS avançado;
-- endereçamento automatizado;
-- RFID em tempo real;
-- ressuprimento automático sem aprovação;
-- roteirização logística;
-- integração fiscal de entrada;
-- depreciação contábil oficial.
+## 12. Próxima etapa oficial
+
+Depois da decisão explícita sobre o merge do PR `#15`:
 
 Essa fila é planejamento, não funcionalidade disponível na versão 0.17.0.
+- Etapa 18 — CRM, Clientes e SAC;
+- Etapa 19 — auditoria e observabilidade;
+- Etapa 20 — prontidão de produção;
+- **Etapa 21 — WMS avançado**, endereçamento automatizado, RFID em tempo real, ressuprimento automático sem aprovação, roteirização logística, integração fiscal de entrada e depreciação contábil oficial.
+
+A Etapa 21 permanece apenas planejada e não substitui o razão imutável da Etapa 17.
+
+## 13. Regra documental
+
+Toda mudança atualiza no mesmo PR: `SPEC.md`, `INVENTARIO.md`, `MODULOS.md`, `ARQUITETURA.md` quando necessário, `ROADMAP.md`, `RECUPERACAO.md`, `HISTORICO-ETAPAS.md`, documento técnico e validadores.

@@ -5,7 +5,7 @@
 
 ## 1. Visão geral
 
-A Innovar Platform é um monólito modular web com banco relacional, autenticação gerenciada, armazenamento privado e workers específicos.
+A Innovar Platform é um monólito modular web com banco relacional, autenticação gerenciada, armazenamento privado e workers especializados.
 
 ```text
 Navegador
@@ -28,7 +28,7 @@ Workers
   └─ entrega de assinatura
 ```
 
-## 2. Organização do repositório
+## 2. Repositório
 
 ```text
 app/                    rotas, páginas, actions e APIs
@@ -91,6 +91,8 @@ Podem exigir MFA AAL2, justificativa, separação de funções, alçada, idempot
 
 ### Convenções
 
+- UUID;
+- timestamps UTC;
 - `organization_id` em dados multiempresa;
 - `project_id` quando pertence a obra;
 - UUID;

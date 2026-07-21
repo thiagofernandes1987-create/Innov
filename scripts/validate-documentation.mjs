@@ -34,8 +34,7 @@ const requiredHistorical=[
 
 for(const file of [...requiredCanonical,...requiredHistorical]){
  if(!fs.existsSync(file)){errors.push(`Arquivo documental ausente: ${file}`);continue;}
- const size=fs.statSync(file).size;
- if(size<80)errors.push(`Arquivo documental vazio ou insuficiente: ${file}`);
+ if(fs.statSync(file).size<80)errors.push(`Arquivo documental vazio ou insuficiente: ${file}`);
 }
 
 if(!fs.existsSync("lib/modules/registry.ts"))errors.push("Registro modular ausente: lib/modules/registry.ts");

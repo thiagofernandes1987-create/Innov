@@ -39,6 +39,22 @@ Para revisar correções ainda não mescladas, consulte `diretrizes/INVENTARIO.m
 7. `docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md`.
 
 ## 5. Instalar dependências
+6. `diretrizes/HISTORICO-ETAPAS.md`;
+7. `docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`;
+8. `docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md`.
+
+## 3. Pré-requisitos
+
+- Git;
+- Node.js 24+;
+- Corepack e pnpm 11.15.0;
+- Python 3.13;
+- acesso ao Supabase correto;
+- acesso ao cofre de secrets;
+- LibreOffice headless para conversão DOCX;
+- acesso à hospedagem.
+
+## 4. Dependências
 
 ```bash
 corepack enable
@@ -52,7 +68,7 @@ pnpm install --no-frozen-lockfile
 cp .env.example .env.local
 ```
 
-Preencher por cofre seguro:
+Configurar por cofre:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
@@ -145,6 +161,27 @@ Ele valida 14 regras, incluindo saldo, idempotência, imutabilidade, reversão, 
 Nunca remover o `ROLLBACK` do arquivo canônico.
 
 ## 11. Buckets privados
+Termina, no PR `#15`, em:
+
+```text
+20260720161000_stage17_inventory_rpc_privileges.sql
+```
+
+A lista completa está em `diretrizes/INVENTARIO.md`. O histórico remoto também deve conter a correção de escopo de saldo por obra registrada durante a homologação.
+
+## 7. Verificações do banco
+
+- 18 tabelas de estoque com RLS;
+- seis views internas sem acesso direto;
+- módulo `estoque` versão `1.0.0`;
+- 101 FKs sem lacuna de índice líder;
+- zero RPC operacional de estoque executável por `anon`;
+- custos sem leitura direta;
+- unidades, categorias, `ALM-GERAL` e `PADRAO` no bootstrap;
+- movimentos postados imutáveis;
+- saldo derivado e bloqueio de saldo negativo;
+- locks transacionais em postagem;
+- isolamento multiempresa e multiobra.
 
 Conferir os buckets criados pelas etapas históricas:
 
@@ -189,6 +226,30 @@ pnpm worker:signature-delivery
 ```
 
 Rotinas server-side podem usar Service Role; navegador não.
+A Etapa 17 não cria bucket novo.
+
+## 9. Homologação
+
+Contas conhecidas:
+
+- `admin@innov.eng.br`;
+- `cliente@cliente.com`.
+
+Senhas ficam somente em secrets. O provisionamento oficial continua idempotente e restrito ao ambiente de homologação.
+
+Os testes pós-merge da Etapa 17 criaram identidades, organizações, obras, itens e movimentos apenas em transações revertidas. Confirmaram bootstrap, saldo, reservas, idempotência, reversão, inventário, RLS e custo protegido.
+
+Limitação: o conector não abriu duas conexões simultâneas sem credenciais explícitas. O teste concorrente realmente paralelo deve ser executado na Etapa 20.
+
+## 10. Aplicação e workers
+
+```bash
+pnpm dev
+pnpm worker:signature-conversion
+pnpm worker:signature-delivery
+```
+
+`expire_inventory_reservations` deve ser acionada apenas por processo server-side autorizado quando houver agendamento.
 
 ## 14. Validar código e documentação
 
@@ -293,3 +354,46 @@ Esses itens exigem cofre e backup externos.
 - [ ] advisors revisados;
 - [ ] CI verde;
 - [ ] backup/restauração verificados antes da produção.
+## 12. Smoke test do estoque
+
+1. confirmar módulo e dados padrão;
+2. cadastrar item e depósito;
+3. criar entrada e postar;
+4. criar reserva e consumir parcialmente;
+5. tentar saída acima do disponível;
+6. reverter movimento;
+7. repetir importação do mesmo recebimento;
+8. confirmar que quantidade rejeitada não entrou;
+9. cadastrar, entregar e devolver ativo;
+10. abrir, contar, aprovar e contabilizar inventário;
+11. testar acesso entre organizações;
+12. testar custo com e sem capacidade sensível;
+13. confirmar bloqueio de `anon`;
+14. confirmar imutabilidade;
+15. executar disputa realmente simultânea em teste de carga antes de produção.
+
+## 13. O que não vive no Git
+
+- valores de secrets;
+- usuários e dados reais;
+- conteúdo dos buckets;
+- backups físicos;
+- DNS e credenciais de provedores;
+- dispositivos RFID e configurações da futura Etapa 21.
+
+## 14. Checklist final de recuperação
+
+- [ ] código obtido do GitHub;
+- [ ] branch correta selecionada;
+- [ ] diretrizes lidas;
+- [ ] secrets configurados por cofre;
+- [ ] migrations comparadas e aplicadas;
+- [ ] RLS, privilégios e índices conferidos;
+- [ ] buckets privados conferidos;
+- [ ] módulos e perfis carregados;
+- [ ] workers configurados;
+- [ ] `pnpm validate:docs` aprovado;
+- [ ] validadores estruturais aprovados;
+- [ ] lint, typecheck, testes e build aprovados;
+- [ ] smoke tests concluídos;
+- [ ] documentação compatível com o commit implantado.

@@ -1,6 +1,6 @@
 # Innovar Platform
 
-Plataforma modular da **Innovar Construções e Reformas** para o ciclo completo de clientes, contratos, obras, qualidade, suprimentos, estoque, financeiro e indicadores.
+Plataforma modular da **Innovar Construções e Reformas** para clientes, contratos, obras, qualidade, suprimentos, estoque, financeiro, indicadores e pós-venda.
 
 **Versão:** `0.17.0`  
 **Estado:** Etapa 17 implementada na `main`, aplicada e homologada tecnicamente no Supabase  
@@ -8,7 +8,7 @@ Plataforma modular da **Innovar Construções e Reformas** para o ciclo completo
 
 ## Fonte de verdade
 
-Toda especificação necessária para recuperar e continuar o projeto está versionada em [`diretrizes/`](./diretrizes/README.md).
+Toda informação necessária para recuperar e continuar o projeto está versionada no repositório. O contêiner e o histórico de conversa não são dependências.
 
 Leitura obrigatória:
 
@@ -71,13 +71,10 @@ A Etapa 21 inclui endereçamento automatizado, RFID, ressuprimento automático, 
 
 ## Stack
 
-- Next.js 16;
-- React 19;
-- TypeScript;
-- Supabase Auth, PostgreSQL e Storage;
-- Row Level Security;
-- Zod;
-- Vitest;
+- Next.js 16 e React 19;
+- TypeScript estrito;
+- Supabase Auth, PostgreSQL, RLS e Storage privado;
+- Zod e Vitest;
 - Python para o motor auxiliar de Qualidade;
 - pnpm 11.15.0.
 
@@ -92,6 +89,23 @@ pnpm dev
 ```
 
 Valores secretos nunca são versionados.
+Variáveis conhecidas, sem valores versionados:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_APP_URL=
+SIGNATURE_PROVIDER=
+SIGNATURE_WEBHOOK_SECRET=
+SIGNATURE_EMAIL_WEBHOOK_URL=
+DEMO_ADMIN_PASSWORD=
+DEMO_CLIENT_PASSWORD=
+```
+
+## Banco
+
+Migrations reproduzíveis ficam em `supabase/migrations/` e são aplicadas em ordem lexical. Migration aplicada nunca é editada; correção exige novo arquivo.
 
 ## Validação
 
@@ -120,7 +134,7 @@ Migrations ficam em `supabase/migrations/` e são aplicadas em ordem lexical. Mi
 ## Segurança
 
 - Service Role somente no servidor;
-- RLS nas tabelas de negócio;
+- RLS em tabelas de negócio;
 - autorização por módulo, capacidade e escopo;
 - buckets sensíveis privados;
 - URLs assinadas ou rotas autenticadas;
@@ -133,7 +147,7 @@ Migrations ficam em `supabase/migrations/` e são aplicadas em ordem lexical. Mi
 
 Permanecem necessários:
 
-- E2E autenticado com contas permanentes de homologação;
+-  autenticado com contas permanentes de homologação;
 - teste concorrente com duas conexões reais;
 - proteção contra senhas comprometidas;
 - opções adicionais de MFA;

@@ -26,36 +26,16 @@ const testFiles=[
 ];
 
 const appFiles=[
- "lib/inventory/domain.ts",
- "lib/inventory/server.ts",
- "app/actions/inventory.ts",
- "app/actions/inventory-extra.ts",
- "app/actions/inventory-stocktake.ts",
- "components/inventory/inventory-navigation.tsx",
- "components/inventory/inventory-metric-card.tsx",
- "components/inventory/inventory-movement-form.tsx",
- "components/inventory/inventory-reservation-form.tsx",
- "components/inventory/inventory-reservation-consume-form.tsx",
- "components/inventory/inventory-receipt-import-form.tsx",
- "components/inventory/inventory-stocktake-count-form.tsx",
- "app/app/estoque/page.tsx",
- "app/app/estoque/itens/page.tsx",
- "app/app/estoque/itens/novo/page.tsx",
- "app/app/estoque/itens/[id]/page.tsx",
- "app/app/estoque/depositos/page.tsx",
- "app/app/estoque/depositos/[id]/page.tsx",
- "app/app/estoque/movimentos/page.tsx",
- "app/app/estoque/movimentos/novo/page.tsx",
- "app/app/estoque/movimentos/[id]/page.tsx",
- "app/app/estoque/reservas/page.tsx",
- "app/app/estoque/reservas/[id]/page.tsx",
- "app/app/estoque/ativos/page.tsx",
- "app/app/estoque/ativos/[id]/page.tsx",
- "app/app/estoque/inventarios/page.tsx",
- "app/app/estoque/inventarios/novo/page.tsx",
- "app/app/estoque/inventarios/[id]/page.tsx",
- "app/inventory.css",
- "docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md"
+ "lib/inventory/domain.ts","lib/inventory/server.ts","app/actions/inventory.ts","app/actions/inventory-extra.ts","app/actions/inventory-stocktake.ts",
+ "components/inventory/inventory-navigation.tsx","components/inventory/inventory-metric-card.tsx","components/inventory/inventory-movement-form.tsx",
+ "components/inventory/inventory-reservation-form.tsx","components/inventory/inventory-reservation-consume-form.tsx",
+ "components/inventory/inventory-receipt-import-form.tsx","components/inventory/inventory-stocktake-count-form.tsx",
+ "app/app/estoque/page.tsx","app/app/estoque/itens/page.tsx","app/app/estoque/itens/novo/page.tsx","app/app/estoque/itens/[id]/page.tsx",
+ "app/app/estoque/depositos/page.tsx","app/app/estoque/depositos/[id]/page.tsx","app/app/estoque/movimentos/page.tsx",
+ "app/app/estoque/movimentos/novo/page.tsx","app/app/estoque/movimentos/[id]/page.tsx","app/app/estoque/reservas/page.tsx",
+ "app/app/estoque/reservas/[id]/page.tsx","app/app/estoque/ativos/page.tsx","app/app/estoque/ativos/[id]/page.tsx",
+ "app/app/estoque/inventarios/page.tsx","app/app/estoque/inventarios/novo/page.tsx","app/app/estoque/inventarios/[id]/page.tsx",
+ "app/inventory.css","docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md","docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md"
 ];
 
 const errors=[];
