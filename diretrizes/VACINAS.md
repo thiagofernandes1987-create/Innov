@@ -43,6 +43,7 @@ Não é permitido encerrar um erro recorrente apenas com correção local quando
 | `VACINA-003` | Ledger local de migrations diverge do Supabase remoto | aplicada | `validate-supabase-migrations.mjs` |
 | `VACINA-004` | Função PostgreSQL herda `EXECUTE` de `PUBLIC/anon` | aplicada | revoke explícito, auditoria e migrations de privilégio mínimo |
 | `VACINA-005` | Estado crítico pode ser alterado fora da RPC de domínio | aplicada | privilégios por coluna, guards por identidade SQL e testes negativos |
+| `VACINA-006` | Workflows usam actions com runtime Node.js 20 obsoleto | aplicada | majors Node.js 24 e varredura de todos os workflows |
 
 ## 4. Arquivos
 
@@ -52,7 +53,8 @@ diretrizes/vacinas/
 ├── VACINA-002-VALIDADORES-SEMANTICOS.md
 ├── VACINA-003-LEDGER-MIGRATIONS-SUPABASE.md
 ├── VACINA-004-PRIVILEGIOS-RPCS.md
-└── VACINA-005-WORKFLOW-PROTEGIDO.md
+├── VACINA-005-WORKFLOW-PROTEGIDO.md
+└── VACINA-006-RUNTIME-GITHUB-ACTIONS.md
 ```
 
 ## 5. Critérios para nova vacina
