@@ -1,7 +1,7 @@
 # SPEC — Innovar Platform
 
 **Documento canônico:** sim  
-**Revisão documental:** 1.2.0  
+**Revisão documental:** 1.3.0  
 **Versão implementada da plataforma:** 0.17.0  
 **Atualizado em:** 20 de julho de 2026  
 **Fonte de verdade:** `thiagofernandes1987-create/Innov`
@@ -18,9 +18,7 @@ lead → cliente → orçamento → proposta → contrato → assinatura
 
 ## 2. Regra de continuidade
 
-GitHub é a fonte definitiva de código, migrations, documentação, testes e recuperação. A solução precisa ser reconstruível mesmo após perda total de contêiner, conversa ou ambiente local.
-
-Nenhum segredo pertence à documentação. Credenciais são configuradas em cofres de ambiente.
+GitHub é a fonte definitiva de código, migrations, documentação, testes e recuperação. A solução precisa ser reconstruível mesmo após perda total de contêiner, conversa ou ambiente local. Nenhum segredo pertence à documentação.
 
 ## 3. Princípios inegociáveis
 
@@ -35,26 +33,13 @@ Nenhum segredo pertence à documentação. Credenciais são configuradas em cofr
 9. idempotência em integrações;
 10. documentação atualizada no mesmo PR;
 11. saldos derivados de razões, nunca editados diretamente;
-12. CI como bloqueio obrigatório.
+12. CI como bloqueio obrigatório;
+13. migrations append-only;
+14. privilégio mínimo.
 
 ## 4. Modelo de autorização
 
-Perfis canônicos:
-
-- Super Administrador;
-- Direção;
-- Administrador;
-- Comercial/Vendas;
-- Gestor de Obras;
-- Engenharia;
-- Orçamentista;
-- Financeiro;
-- Qualidade;
-- Compras;
-- Pós-venda/SAC;
-- Cliente.
-
-Perfis personalizados são permitidos e não podem ser sobrescritos por instaladores.
+Perfis canônicos: Super Administrador, Direção, Administrador, Comercial/Vendas, Gestor de Obras, Engenharia, Orçamentista, Financeiro, Qualidade, Compras/Almoxarifado, Pós-venda/SAC e Cliente. Perfis personalizados não são sobrescritos por instaladores.
 
 Níveis: `NONE`, `READ`, `EDIT/READ_WRITE` e `FULL/DELETE`. Capacidades incluem criar, editar, excluir, aprovar, liberar, assinar, exportar, administrar, configurar e visualizar dados sensíveis. Escopos incluem organização, cliente, obra e recurso/depósito.
 
@@ -76,7 +61,7 @@ Níveis: `NONE`, `READ`, `EDIT/READ_WRITE` e `FULL/DELETE`. Capacidades incluem 
 14. documentos;
 15. qualidade;
 16. compras;
-17. estoque;
+17. **Estoque, Inventário e Almoxarifado**;
 18. financeiro;
 19. SAC;
 20. relatórios;
@@ -95,8 +80,8 @@ orçamento versionado → aprovação → proposta PDF → aceite
 ### Obras
 
 ```text
-obra → EAP → cronograma → tarefas → equipes → diário
-→ documentos → previsto x realizado → portal do cliente
+cliente → múltiplas obras → EAP → cronograma → tarefas
+→ equipes → diário → documentos → portal
 ```
 
 ### Qualidade e compras
@@ -106,7 +91,7 @@ FVS/FVM/formulário → preenchimento → anexos → revisão
 solicitação → cotação → comparação → aprovação → pedido → recebimento
 ```
 
-### Estoque, Inventário e Almoxarifado — Etapa 17
+### Estoque — Etapa 17
 
 ```text
 recebimento aceito → entrada idempotente → saldo físico
@@ -114,7 +99,13 @@ recebimento aceito → entrada idempotente → saldo físico
 → custódia de ativos → inventário físico → ajuste/reversão → auditoria
 ```
 
-**Estado real:** PR `#14` mesclado na `main`; migrations aplicadas no Supabase; homologação estrutural registrada no PR `#15`. E2E autenticado permanece pendente porque o ambiente não possui identidades reais de homologação.
+Estado real:
+
+- implementação incorporada à `main` pelo PR `#14`;
+- migrations aplicadas no Supabase;
+- homologação funcional e RLS executadas com dados temporários revertidos;
+- correções e evidências no PR `#15`, aguardando CI final e revisão;
+- merge do PR `#15` depende de aprovação explícita.
 
 ### Financeiro e relatórios
 
@@ -126,39 +117,44 @@ fontes autorizadas → métricas → dashboard → snapshot → exportação aud
 ## 7. Regras essenciais do estoque
 
 - 18 tabelas com RLS;
-- seis views internas sem acesso direto pelo navegador;
+- seis views internas sem acesso direto;
 - saldo físico = soma de movimentos `POSTED`;
 - saldo reservado = reservas ativas líquidas;
 - saldo disponível = físico menos reservado;
+- saldo não é editável diretamente;
 - movimento postado é imutável;
 - reversão referencia o original;
-- transferência é atômica;
+- transferência conserva quantidade;
 - saldo negativo é bloqueado por padrão;
-- recebimento de Compras é idempotente;
-- somente quantidade aceita entra no estoque;
+- recebimento de Compras integrado de forma idempotente;
+- somente quantidade aceita entra;
 - inventário aprovado gera ajuste rastreável;
+- custos não possuem leitura direta;
 - vínculos incompatíveis entre organização e obra são bloqueados;
-- custos não possuem leitura direta e escrita exige capacidade sensível;
-- 101 FKs do domínio possuem cobertura de índice;
-- nenhuma RPC do estoque é executável por `anon`.
+- postagem usa `pg_advisory_xact_lock` por posição;
+- 101 FKs possuem índice líder;
+- nenhuma RPC operacional é executável por `anon`.
+
+Evidências transacionais:
+
+- bootstrap de módulos e perfis;
+- entrada, reserva, consumo e reversão idempotentes;
+- tentativa acima do disponível bloqueada;
+- segunda saída sobre saldo insuficiente bloqueada;
+- movimento postado bloqueado para alteração e exclusão;
+- inventário físico contabilizado;
+- RLS direto: dados próprios visíveis e dados da outra organização ocultos;
+- custo direto bloqueado;
+- dados artificiais revertidos.
 
 ## 8. Dados e migrations
 
-- PostgreSQL/Supabase;
-- Supabase Auth;
-- Storage privado;
+- PostgreSQL/Supabase, Auth e Storage privado;
 - migrations exclusivamente em `supabase/migrations/`;
 - migration aplicada nunca é reescrita;
-- funções `SECURITY DEFINER` usam `search_path` explícito e checagem interna;
+- funções `SECURITY DEFINER` usam `search_path` explícito e autorização interna;
 - helpers internos têm execução revogada;
-- correções pós-merge usam novas migrations.
-
-Migrations corretivas da Etapa 17:
-
-- concorrência de movimentos e reservas;
-- escopo de saldo por obra;
-- índices de performance;
-- privilégios de RPC.
+- correções pós-merge incluem concorrência, escopo de obra, índices e privilégios.
 
 ## 9. Stack
 
@@ -167,36 +163,21 @@ Migrations corretivas da Etapa 17:
 - TypeScript estrito;
 - Server Components e Server Actions;
 - validação server-side;
-- módulos privilegiados com `server-only`;
 - interfaces responsivas e acessíveis.
 
 ## 10. Ambientes
 
 ### Homologação
 
-O projeto Supabase conectado é `wyeojufebtwblsubkunr`. Atualmente não possui usuários, organizações, memberships ou obras. O E2E autenticado deve ser executado quando contas reais forem provisionadas, sem fabricar identidades ou desabilitar constraints.
+O projeto conectado é `wyeojufebtwblsubkunr`. Testes criaram identidades, organizações, memberships, obras, itens e movimentos apenas dentro de transações revertidas. Nenhum dado artificial permaneceu.
+
+O conector não conseguiu abrir duas conexões simultâneas sem credenciais explícitas. Teste de carga concorrente real permanece obrigatório na Etapa 20.
 
 ### Produção
 
-Exige revisão jurídica, fiscal, contábil e LGPD, provider jurídico real, pentest, backup/restauração testados, observabilidade, rotação de segredos, antimalware de anexos e aprovação explícita.
+Exige revisão jurídica, fiscal, contábil e LGPD, provider jurídico real, pentest, backup/restauração testados, observabilidade, rotação de segredos, antimalware e aprovação explícita.
 
-## 11. Variáveis conhecidas
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_APP_URL=
-SIGNATURE_PROVIDER=
-SIGNATURE_WEBHOOK_SECRET=
-SIGNATURE_EMAIL_WEBHOOK_URL=
-DEMO_ADMIN_PASSWORD=
-DEMO_CLIENT_PASSWORD=
-```
-
-Valores nunca são versionados.
-
-## 12. CI obrigatório
+## 11. CI obrigatório
 
 ```bash
 pnpm validate:docs
@@ -208,30 +189,17 @@ pnpm test:python
 pnpm build
 ```
 
-O CI do commit atual do PR `#15` está verde.
+## 12. Próxima etapa oficial
 
-## 13. Próxima etapa oficial
+Após CI e revisão do PR `#15`:
 
-A Etapa 17 está estruturalmente homologada. Antes da publicação externa, deve ser executado E2E autenticado com contas reais.
-
-A próxima etapa funcional planejada é:
-
-- Etapa 18 — consolidação de CRM, Clientes e SAC;
+- Etapa 18 — CRM, Clientes e SAC;
 - Etapa 19 — auditoria e observabilidade;
 - Etapa 20 — prontidão de produção;
-- Etapa 21 — WMS avançado, RFID, automação logística, fiscal e patrimonial.
+- **Etapa 21 — WMS avançado**, endereçamento automatizado, RFID em tempo real, ressuprimento automático sem aprovação, roteirização logística, integração fiscal de entrada e depreciação contábil oficial.
 
-A Etapa 21 mantém o WMS avançado apenas planejado.
+A Etapa 21 permanece apenas planejada e não substitui o razão imutável da Etapa 17.
 
-## 14. Regra documental
+## 13. Regra documental
 
-Toda alteração de escopo ou arquitetura atualiza no mesmo PR:
-
-- `diretrizes/SPEC.md`;
-- `diretrizes/INVENTARIO.md`;
-- `diretrizes/MODULOS.md`;
-- `diretrizes/ARQUITETURA.md` quando necessário;
-- `diretrizes/ROADMAP.md`;
-- `diretrizes/HISTORICO-ETAPAS.md`;
-- documento técnico da etapa;
-- validadores correspondentes.
+Toda mudança atualiza no mesmo PR: `SPEC.md`, `INVENTARIO.md`, `MODULOS.md`, `ARQUITETURA.md` quando necessário, `ROADMAP.md`, `RECUPERACAO.md`, `HISTORICO-ETAPAS.md`, documento técnico e validadores.
