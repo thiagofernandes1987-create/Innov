@@ -1,10 +1,10 @@
 # Innovar Platform
 
-Plataforma modular da **Innovar Construções e Reformas** para o ciclo completo de clientes, contratos, obras, qualidade, suprimentos, estoque, financeiro e indicadores.
+Plataforma modular da **Innovar Construções e Reformas** para clientes, contratos, obras, qualidade, suprimentos, estoque, financeiro, indicadores e pós-venda.
 
 ## Fonte de verdade
 
-Toda especificação necessária para recuperar e continuar o projeto está versionada em [`diretrizes/`](./diretrizes/README.md).
+Toda informação necessária para recuperar e continuar o projeto está versionada no repositório. O contêiner e o histórico de conversa não são dependências.
 
 Leitura obrigatória:
 
@@ -16,52 +16,44 @@ Leitura obrigatória:
 6. [`diretrizes/RECUPERACAO.md`](./diretrizes/RECUPERACAO.md);
 7. [`diretrizes/HISTORICO-ETAPAS.md`](./diretrizes/HISTORICO-ETAPAS.md).
 
-Documentos em `docs/` preservam histórico técnico e planejamento aprovado.
+Os documentos em `docs/` preservam histórico técnico, homologações e planejamento aprovado.
 
 ## Estado atual
 
-**Versão da branch da etapa:** `0.17.0`
+**Versão:** `0.17.0`
 
-Consolidado na `main` até a Etapa 16:
+Consolidado na `main`:
 
-- orçamentos, propostas, contratos, aditivos e assinatura;
-- homologação com Supabase Auth/MFA;
-- gestão multiobra, EAP, cronograma, tarefas, equipes e diário;
-- núcleo modular plug-and-play e perfis configuráveis;
-- assinatura avançada de PDF/DOCX;
-- qualidade, FVS, FVM, formulários e pesquisas;
-- compras e suprimentos;
-- financeiro operacional;
-- relatórios e indicadores executivos;
-- documentação canônica e recuperável.
+- comercial, orçamento, propostas, contratos, aditivos e assinatura;
+- gestão multiobra, planejamento, tarefas, equipes, diário e portal;
+- núcleo modular plug-and-play e administração de acessos;
+- documentos, Qualidade, FVS, FVM, formulários e pesquisas;
+- Compras e Suprimentos;
+- Financeiro Operacional;
+- Relatórios e Indicadores Executivos;
+- Estoque, Inventário e Almoxarifado — Etapa 17, código incorporado pelo PR `#14`.
 
-Em execução:
+Follow-up em revisão:
 
-- **Etapa 17 — Estoque, Inventário e Almoxarifado**;
-- branch `feature/etapa-17-estoque-inventario-almoxarifado`;
-- PR `#14`, rascunho, sem merge;
-- CI e homologação ainda obrigatórios.
+- branch `fix/etapa-17-homologacao-pos-merge`;
+- PR `#15`;
+- migrations corretivas, locks de concorrência, índices, privilégios, testes e documentação da homologação da Etapa 17;
+- Supabase de homologação validado com testes transacionais revertidos;
+- merge do PR depende de aprovação explícita.
 
-Fila posterior:
+Fila oficial:
 
 - Etapa 18 — CRM, Clientes e SAC;
 - Etapa 19 — Auditoria e observabilidade;
 - Etapa 20 — Prontidão de produção;
 - Etapa 21 — WMS avançado e automação logística, fiscal e patrimonial.
 
-Plano da Etapa 21:
-
-- [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](./docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md).
-
 ## Stack
 
-- Next.js 16;
-- React 19;
-- TypeScript;
-- Supabase Auth, PostgreSQL e Storage;
-- Row Level Security;
-- Zod;
-- Vitest;
+- Next.js 16 e React 19;
+- TypeScript estrito;
+- Supabase Auth, PostgreSQL, RLS e Storage privado;
+- Zod e Vitest;
 - Python para o motor auxiliar de Qualidade;
 - pnpm 11.15.0.
 
@@ -75,31 +67,23 @@ cp .env.example .env.local
 pnpm dev
 ```
 
-Variáveis conhecidas:
+Variáveis conhecidas, sem valores versionados:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-SIGNATURE_PROVIDER=sandbox
+NEXT_PUBLIC_APP_URL=
+SIGNATURE_PROVIDER=
 SIGNATURE_WEBHOOK_SECRET=
 SIGNATURE_EMAIL_WEBHOOK_URL=
 DEMO_ADMIN_PASSWORD=
 DEMO_CLIENT_PASSWORD=
 ```
 
-Valores secretos nunca são versionados.
-
 ## Banco
 
-Migrations reproduzíveis ficam em:
-
-```text
-supabase/migrations/
-```
-
-Aplique em ordem lexical. Não edite migration já aplicada; crie nova migration corretiva.
+Migrations reproduzíveis ficam em `supabase/migrations/` e são aplicadas em ordem lexical. Migration aplicada nunca é editada; correção exige novo arquivo.
 
 ## Validação
 
@@ -113,30 +97,20 @@ pnpm test:python
 pnpm build
 ```
 
-O CI também executa validadores estruturais das Etapas 9, 12, 12.1, 12.2, 13, 14, 15 e 16.
+O CI também executa os validadores das Etapas 9, 12, 12.1, 12.2, 13, 14, 15 e 16.
 
 ## Segurança
 
 - Service Role somente no servidor;
-- RLS nas tabelas de negócio;
+- RLS em tabelas de negócio;
 - autorização por módulo, capacidade e escopo;
-- buckets sensíveis privados;
-- URLs assinadas ou rotas autenticadas;
+- buckets privados e downloads autenticados;
 - MFA AAL2 em ações críticas;
-- documentos, snapshots e movimentos concluídos imutáveis;
-- tokens públicos armazenados somente por hash;
-- auditoria e idempotência nos fluxos críticos;
-- saldos derivados e não editáveis diretamente.
-
-## Homologação
-
-Contas conhecidas:
-
-- `admin@innov.eng.br`;
-- `cliente@cliente.com`.
-
-Senhas são configuradas somente por secret e precisam ser rotacionadas antes de publicação.
+- tokens públicos persistidos apenas por hash;
+- saldos derivados, idempotência e imutabilidade;
+- custos de estoque mascarados no PostgreSQL;
+- movimentos de estoque serializados por advisory lock transacional.
 
 ## Recuperação
 
-O projeto não depende do histórico de conversa ou de contêiner persistente. O procedimento completo está em [`diretrizes/RECUPERACAO.md`](./diretrizes/RECUPERACAO.md).
+O procedimento integral está em [`diretrizes/RECUPERACAO.md`](./diretrizes/RECUPERACAO.md). A reconstrução não está concluída enquanto `pnpm validate:docs`, validadores estruturais, lint, TypeScript, testes e build não estiverem verdes.

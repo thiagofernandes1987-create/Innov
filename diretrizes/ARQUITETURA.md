@@ -2,7 +2,7 @@
 
 ## 1. Visão geral
 
-A Innovar Platform é um monólito modular web com banco relacional, autenticação gerenciada, armazenamento privado e workers específicos.
+A Innovar Platform é um monólito modular web com banco relacional, autenticação gerenciada, armazenamento privado e workers especializados.
 
 ```text
 Navegador
@@ -11,7 +11,7 @@ Next.js 16 / React 19
   ├─ Server Components
   ├─ Server Actions
   ├─ Route Handlers
-  └─ Proxy de sessão/autorização
+  └─ sessão e autorização
   ↓
 Supabase
   ├─ Auth
@@ -20,216 +20,167 @@ Supabase
   └─ Storage privado
 
 Workers
-  ├─ conversão DOCX → PDF
-  └─ entrega de mensagens de assinatura
+  ├─ DOCX → PDF
+  └─ entrega de assinatura
 ```
 
-## 2. Organização do repositório
+## 2. Repositório
 
 ```text
 app/                    rotas, páginas, actions e APIs
-components/             componentes de interface
-lib/                    domínio, autorização, integrações e utilitários
-python/                 motor auxiliar de qualidade
+components/             interface
+lib/                    domínio, autorização e integrações
+python/                 motor auxiliar de Qualidade
 scripts/                validadores, workers e homologação
-supabase/migrations/     evolução reproduzível do banco
-docs/                   histórico técnico por etapa
-diretrizes/             fonte canônica de produto e recuperação
-.github/workflows/       CI e homologação
+supabase/migrations/     evolução append-only do banco
+docs/                   histórico técnico
+diretrizes/             fonte canônica e recuperação
+.github/workflows/       CI
 ```
 
 ## 3. Modularidade
 
-O catálogo está em `lib/modules/registry.ts` e no banco em `app_modules`.
-
-Um aplicativo possui:
-
-- chave estável;
-- rota-base;
-- categoria;
-- dependências;
-- status por organização;
-- versão instalada;
-- manifesto/configurações;
-- matriz de permissões por perfil.
-
-A remoção visual de um aplicativo não remove dados. Desabilitar módulo impede acesso funcional, mas preserva histórico conforme políticas de retenção.
+O catálogo vive em `lib/modules/registry.ts` e `app_modules`. Cada aplicativo possui chave, rota, categoria, dependências, versão, estado por organização e matriz de permissões. Desabilitar módulo preserva os dados e bloqueia o acesso funcional.
 
 ## 4. Autorização
 
-### 4.1 Camadas
+Camadas:
 
 1. sessão autenticada;
 2. organização ativa;
 3. módulo habilitado;
-4. perfil e nível de acesso;
-5. capacidade granular;
-6. escopo de organização/cliente/obra;
-7. override individual `ALLOW`/`DENY`;
-8. RLS no banco;
-9. políticas de Storage;
-10. checagem interna em RPCs privilegiadas.
+4. perfil e nível;
+5. capacidade;
+6. escopo de organização, cliente, obra ou recurso;
+7. override `ALLOW`/`DENY`;
+8. RLS;
+9. Storage;
+10. checagem interna em RPC.
 
-### 4.2 Precedência
+Negação explícita prevalece. Valor sensível é mascarado ou recusado. Cliente não herda acesso interno. Ações críticas podem exigir MFA AAL2, justificativa, alçada, separação de funções, idempotency key e auditoria.
 
-- negação explícita vence permissão;
-- escopo mais específico restringe escopo amplo;
-- usuário sem módulo habilitado não acessa a rota;
-- usuário sem capacidade sensível recebe valores mascarados ou erro;
-- cliente nunca herda acesso interno.
+## 5. Banco e migrations
 
-### 4.3 Ações críticas
+Convenções:
 
-Podem exigir:
-
-- MFA AAL2;
-- justificativa;
-- separação de funções;
-- alçada;
-- idempotency key;
-- evento de auditoria.
-
-## 5. Banco de dados
-
-### 5.1 Convenções
-
+- UUID;
+- timestamps UTC;
 - `organization_id` em dados multiempresa;
-- `project_id` quando o dado pertence a uma obra;
-- UUID como identificador;
-- timestamps em UTC;
+- `project_id` quando houver obra;
 - enums para estados fechados;
 - constraints para invariantes locais;
-- triggers apenas quando a regra precisa ser central e transacional;
-- RPC para operações de múltiplas tabelas;
-- índices em FKs e filtros frequentes de RLS.
+- triggers para regras centrais e transacionais;
+- RPC para operações multi-tabela;
+- índices em FKs e filtros de RLS.
 
-### 5.2 Migrations
+Migrations são append-only, com timestamps únicos e crescentes. Arquivo aplicado nunca é reescrito. Correção inclui nova migration, documentação e validador no mesmo PR.
 
-- migrations são append-only;
-- arquivo aplicado não é reescrito como correção de ambiente;
-- correção usa nova migration;
-- timestamps precisam ser únicos e crescentes;
-- migration inclui schema, segurança, privilégios, índices e instaladores quando aplicável;
-- alterações de módulo atualizam documentação no mesmo PR.
+Função `SECURITY DEFINER` usa `search_path` explícito, valida autorização e recebe privilégio mínimo. Helper interno não é RPC pública.
 
-### 5.3 Views analíticas
+## 6. Estoque: razão, projeções e concorrência
+
+O estoque não possui coluna de saldo editável.
+
+```text
+saldo físico = soma das linhas de movimentos POSTED
+saldo reservado = reservado - consumido - liberado
+saldo disponível = físico - reservado
+```
+
+As views `inventory_stock_v`, `inventory_reserved_stock_v`, `inventory_available_stock_v`, `inventory_item_totals_v`, `inventory_asset_current_v` e `inventory_expiry_alerts_v` usam `security_invoker=true` e não são concedidas diretamente ao navegador.
+
+### Postagem
+
+`post_inventory_movement`:
+
+1. bloqueia o cabeçalho do movimento;
+2. calcula uma chave para cada posição `organização + depósito + localização + item + lote`;
+3. ordena as chaves;
+4. adquire `pg_advisory_xact_lock`;
+5. reavalia físico, reservado e disponível;
+6. valida sinal, lote, ativo, transferência e reserva;
+7. posta o movimento;
+8. atualiza a reserva;
+9. registra evento.
+
+O lock evita que duas transações validem simultaneamente o mesmo saldo antigo. A segunda transação aguarda e reavalia o saldo após a primeira.
+
+### Imutabilidade
+
+- movimento `DRAFT` não altera saldo;
+- movimento `POSTED` não aceita edição ou exclusão;
+- correção ocorre por reversão vinculada;
+- inventário contabilizado é imutável;
+- custódia encerrada preserva responsável, obra e entrega.
+
+### Segurança
+
+- 18 tabelas com RLS;
+- custos sem leitura direta;
+- escrita de custo exige capacidade sensível;
+- zero RPC operacional para `anon`;
+- 101 FKs com índice líder;
+- vínculos incompatíveis entre organização, obra, depósito, item, lote, reserva, recebimento e ativo são bloqueados.
+
+## 7. Views, relatórios e snapshots
 
 - preferir `security_invoker=true`;
-- não conceder leitura direta quando a view expõe domínio transversal sensível;
+- não conceder leitura direta a contratos analíticos sensíveis;
 - encapsular autorização e mascaramento em RPC;
-- não duplicar dados operacionais mutáveis em tabelas analíticas;
-- snapshots são exceção imutável e auditada.
+- não duplicar estado operacional mutável;
+- snapshot é exceção imutável e auditada.
 
-## 6. Storage
+## 8. Storage
 
-- buckets sensíveis são privados;
-- caminho inclui organização e, quando aplicável, obra/entidade;
+- buckets sensíveis privados;
+- caminhos incluem organização e entidade;
 - upload valida tipo, tamanho e contexto;
-- download usa URL assinada curta ou rota autenticada;
-- metadados e hash ficam no banco;
-- falha transacional remove arquivo órfão quando possível;
-- antivírus é requisito antes da produção externa.
+- download por URL assinada curta ou rota autenticada;
+- metadados e hash no banco;
+- falha remove arquivo órfão quando possível;
+- antimalware obrigatório antes de produção.
 
-## 7. Documentos e imutabilidade
+## 9. Documentos e imutabilidade
 
-Itens que exigem versão e/ou congelamento:
+Orçamento aprovado, proposta liberada, contrato enviado/assinado, aditivo assinado, baseline, schema publicado, documento liberado, PDF final e snapshot concluído são versionados ou congelados. Mudança cria nova versão.
 
-- orçamento aprovado;
-- proposta liberada;
-- contrato enviado/assinado;
-- aditivo assinado;
-- baseline de obra;
-- schema de formulário publicado;
-- documento liberado ao cliente;
-- PDF final de assinatura;
-- snapshot de relatório.
+## 10. Integrações
 
-Mudança após congelamento cria nova versão, nunca edição silenciosa.
+- assinatura: adapter `sandbox` e contrato para providers externos; webhook HMAC e idempotente;
+- e-mail: fila/worker sem credencial no cliente;
+- LibreOffice: conversão headless com original preservado;
+- Compras → Financeiro: pedido aprovado pode gerar compromisso idempotente;
+- Compras → Estoque: somente quantidade aceita gera entrada idempotente;
+- módulos → Relatórios: consumo por contratos analíticos autorizados.
 
-## 8. Integrações
-
-### 8.1 Assinatura
-
-Adapter interno suporta `sandbox` e contratos para providers externos. Webhook exige HMAC, timestamp, proteção contra replay e idempotência.
-
-### 8.2 E-mail
-
-Entrega de assinatura é desacoplada por fila/worker e webhook HMAC. Nenhuma credencial fica no cliente.
-
-### 8.3 LibreOffice
-
-Conversão DOCX ocorre em worker headless. Original é preservado; resultado e logs possuem estado de processamento.
-
-### 8.4 Compras → Financeiro
-
-Pedido aprovado pode originar compromisso financeiro por importação idempotente.
-
-### 8.5 Compras → Estoque
-
-Na Etapa 17, recebimento aceito deve gerar entrada de estoque por operação idempotente, sem alterar retroativamente o recebimento.
-
-### 8.6 Módulos → Relatórios
-
-Relatórios consomem contratos analíticos autorizados, não tabelas internas diretamente na interface.
-
-## 9. Frontend
+## 11. Frontend
 
 - TypeScript estrito;
-- componentes server-side por padrão;
-- client components apenas quando houver interação real;
-- formulários com validação server-side;
-- mensagens de erro sem expor SQL ou segredo;
-- acessibilidade de teclado;
-- alternativa textual a drag-and-drop;
-- responsividade para uso em obra;
-- estados vazios, carregamento e acesso negado explícitos.
+- Server Components por padrão;
+- Client Components apenas para interação;
+- validação server-side;
+- erro sem SQL ou segredo;
+- teclado e alternativa a drag-and-drop;
+- responsividade para campo;
+- estados de vazio, carregamento e acesso negado.
 
-## 10. Observabilidade e auditoria
+## 12. Auditoria
 
-Cada operação crítica deve registrar, conforme domínio:
+Operação crítica registra organização, obra/entidade, ator, evento, data, idempotency key/hash e metadados mínimos. Logs não guardam senha, token bruto, Service Role, documento integral ou dado pessoal desnecessário.
 
-- organização;
-- obra/entidade;
-- ator;
-- evento;
-- data;
-- estado anterior/novo quando seguro;
-- idempotency key ou hash;
-- metadados mínimos.
-
-Logs não guardam:
-
-- senha;
-- token bruto;
-- Service Role;
-- documento integral;
-- assinatura biométrica em texto;
-- dados pessoais além do necessário.
-
-## 11. CI
+## 13. CI
 
 Ordem mínima:
 
-1. instalar dependências;
-2. validar documentação;
-3. validar estruturas das etapas;
+1. dependências;
+2. documentação;
+3. validadores estruturais;
 4. lint;
 5. typecheck;
 6. testes TypeScript;
 7. testes Python;
 8. build.
 
-A documentação é uma dependência de entrega, não uma tarefa posterior.
+## 14. Recuperabilidade
 
-## 12. Recuperabilidade
-
-A reconstrução exige somente:
-
-- clone do GitHub;
-- secrets configurados fora do repositório;
-- aplicação ordenada das migrations;
-- instalação das dependências;
-- execução dos validadores;
-- inicialização dos workers necessários.
-
-O procedimento detalhado está em [`RECUPERACAO.md`](./RECUPERACAO.md).
+A reconstrução depende de clone do GitHub, secrets externos, migrations ordenadas, dependências, validadores e workers. O procedimento completo está em [`RECUPERACAO.md`](./RECUPERACAO.md).

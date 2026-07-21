@@ -7,23 +7,18 @@ Este procedimento reconstrói a Innovar Platform quando contêiner, máquina loc
 ```bash
 git clone https://github.com/thiagofernandes1987-create/Innov.git
 cd Innov
-```
-
-Para recuperar o estado estável:
-
-```bash
 git checkout main
 git pull --ff-only
 ```
 
-Para recuperar a Etapa 17 ainda não incorporada:
+Para recuperar as correções ainda em revisão da Etapa 17:
 
 ```bash
-git checkout feature/etapa-17-estoque-inventario-almoxarifado
+git checkout fix/etapa-17-homologacao-pos-merge
 git pull --ff-only
 ```
 
-Nunca reconstruir a partir de ZIP antigo quando o repositório estiver disponível.
+O PR correspondente é `#15`. Nunca usar ZIP antigo quando o GitHub estiver disponível.
 
 ## 2. Documentação obrigatória
 
@@ -35,29 +30,21 @@ Ler nesta ordem:
 4. `diretrizes/ARQUITETURA.md`;
 5. `diretrizes/ROADMAP.md`;
 6. `diretrizes/HISTORICO-ETAPAS.md`;
-7. documento técnico da etapa relevante em `docs/`.
-
-Para a etapa atual:
-
-- `docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`.
-
-Planejamento posterior, sem implementação atual:
-
-- `docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`.
+7. `docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`;
+8. `docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md`.
 
 ## 3. Pré-requisitos
 
 - Git;
-- Node.js 24 ou superior;
-- Corepack;
-- pnpm 11.15.0;
+- Node.js 24+;
+- Corepack e pnpm 11.15.0;
 - Python 3.13;
-- acesso ao projeto Supabase correto;
-- acesso aos secrets do ambiente;
-- LibreOffice headless para o worker DOCX;
-- acesso ao provider de hospedagem.
+- acesso ao Supabase correto;
+- acesso ao cofre de secrets;
+- LibreOffice headless para conversão DOCX;
+- acesso à hospedagem.
 
-## 4. Instalar dependências
+## 4. Dependências
 
 ```bash
 corepack enable
@@ -65,20 +52,20 @@ corepack prepare pnpm@11.15.0 --activate
 pnpm install --no-frozen-lockfile
 ```
 
-## 5. Configurar ambiente
+## 5. Ambiente
 
 ```bash
 cp .env.example .env.local
 ```
 
-Preencher por cofre seguro:
+Configurar por cofre:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-SIGNATURE_PROVIDER=sandbox
+NEXT_PUBLIC_APP_URL=
+SIGNATURE_PROVIDER=
 SIGNATURE_WEBHOOK_SECRET=
 SIGNATURE_EMAIL_WEBHOOK_URL=
 DEMO_ADMIN_PASSWORD=
@@ -87,76 +74,57 @@ DEMO_CLIENT_PASSWORD=
 
 Regras:
 
-- não enviar `.env.local` ao Git;
-- não colar Service Role em issue, PR ou documentação;
-- não usar senha de produção em homologação;
-- rotacionar segredo exposto antes de continuar;
-- nunca enviar `SUPABASE_SERVICE_ROLE_KEY` ao navegador.
+- `.env.local` não vai para o Git;
+- Service Role somente no servidor;
+- segredo exposto é rotacionado antes da continuidade;
+- senha de produção não é reutilizada em homologação.
 
 ## 6. Reconstruir o banco
 
-As migrations reproduzíveis ficam em:
+Migrations ficam exclusivamente em:
 
 ```text
 supabase/migrations/
 ```
 
-Aplicar em ordem lexical.
-
-Com Supabase CLI configurado:
+Aplicar em ordem lexical:
 
 ```bash
 supabase link --project-ref <PROJECT_REF>
 supabase db push
 ```
 
-Regras para ambiente existente:
+Nunca editar migration já aplicada. Comparar migrations locais e remotas; correção exige novo arquivo.
 
-- comparar migrations locais e remotas;
-- nunca reaplicar manualmente migration registrada;
-- nunca editar migration aplicada;
-- criar nova migration corretiva;
-- validar backup antes de mudança destrutiva.
+### Faixa final da Etapa 17
 
-### Migrations da Etapa 17
-
-A faixa atual começa em:
+Começa em:
 
 ```text
 20260720160000_stage17_inventory_schema.sql
 ```
 
-e termina em:
+Termina, no PR `#15`, em:
 
 ```text
-20260720160740_stage17_inventory_state_guards.sql
+20260720161000_stage17_inventory_rpc_privileges.sql
 ```
 
-A lista integral está em `diretrizes/INVENTARIO.md`.
+A lista completa está em `diretrizes/INVENTARIO.md`. O histórico remoto também deve conter a correção de escopo de saldo por obra registrada durante a homologação.
 
-## 7. Verificações mínimas do banco
+## 7. Verificações do banco
 
-- RLS ativo nas tabelas de negócio;
-- módulos instalados nas organizações;
-- perfis canônicos sem duplicação;
-- buckets privados existentes;
-- funções anônimas indevidas revogadas;
-- índices de FKs e caminhos de RLS;
-- migrations da etapa mais recente presentes;
-- views internas sem acesso direto;
-- colunas sensíveis mascaradas.
-
-### Verificações da Etapa 17
-
-- 18 tabelas de estoque;
-- seis views derivadas;
+- 18 tabelas de estoque com RLS;
+- seis views internas sem acesso direto;
 - módulo `estoque` versão `1.0.0`;
-- unidades, categorias, `ALM-GERAL` e `PADRAO` instalados;
-- saldo não editável diretamente;
+- 101 FKs sem lacuna de índice líder;
+- zero RPC operacional de estoque executável por `anon`;
+- custos sem leitura direta;
+- unidades, categorias, `ALM-GERAL` e `PADRAO` no bootstrap;
 - movimentos postados imutáveis;
-- importação de recebimento idempotente;
-- RLS multiempresa e multiobra;
-- custos sensíveis protegidos.
+- saldo derivado e bloqueio de saldo negativo;
+- locks transacionais em postagem;
+- isolamento multiempresa e multiobra.
 
 ## 8. Buckets privados
 
@@ -172,45 +140,30 @@ procurement-attachments
 finance-attachments
 ```
 
-A Etapa 17 e o planejamento da Etapa 21 não adicionam bucket atual. Todos os buckets existentes permanecem privados.
+A Etapa 17 não cria bucket novo.
 
-## 9. Provisionar homologação
+## 9. Homologação
 
 Contas conhecidas:
 
 - `admin@innov.eng.br`;
 - `cliente@cliente.com`.
 
-Senhas não pertencem ao repositório:
+Senhas ficam somente em secrets. O provisionamento oficial continua idempotente e restrito ao ambiente de homologação.
 
-```env
-DEMO_ADMIN_PASSWORD=
-DEMO_CLIENT_PASSWORD=
-```
+Os testes pós-merge da Etapa 17 criaram identidades, organizações, obras, itens e movimentos apenas em transações revertidas. Confirmaram bootstrap, saldo, reservas, idempotência, reversão, inventário, RLS e custo protegido.
 
-Em ambiente protegido:
+Limitação: o conector não abriu duas conexões simultâneas sem credenciais explícitas. O teste concorrente realmente paralelo deve ser executado na Etapa 20.
 
-```bash
-pnpm provision:homologation
-pnpm test:e2e:stage11
-```
-
-O provisionamento é idempotente e restrito à homologação.
-
-## 10. Iniciar aplicação e workers
+## 10. Aplicação e workers
 
 ```bash
 pnpm dev
-```
-
-Workers existentes:
-
-```bash
 pnpm worker:signature-conversion
 pnpm worker:signature-delivery
 ```
 
-A rotina `expire_inventory_reservations` deve ser executada somente por processo server-side autorizado quando o agendamento for adotado.
+`expire_inventory_reservations` deve ser acionada apenas por processo server-side autorizado quando houver agendamento.
 
 ## 11. Validar a reconstrução
 
@@ -234,75 +187,46 @@ pnpm build
 
 A recuperação não está concluída enquanto algum comando falhar.
 
-## 12. Smoke test da Etapa 17
+## 12. Smoke test do estoque
 
 1. confirmar módulo e dados padrão;
-2. cadastrar item;
+2. cadastrar item e depósito;
 3. criar entrada e postar;
-4. verificar saldo físico;
-5. criar reserva e verificar disponível;
-6. consumir reserva;
-7. tentar saldo negativo;
-8. transferir entre depósitos;
-9. reverter movimento;
-10. importar o mesmo recebimento duas vezes;
-11. confirmar que quantidade rejeitada não entrou;
-12. cadastrar ativo, entregar e devolver;
-13. abrir inventário, contar, aprovar e contabilizar;
-14. testar acesso entre organizações;
-15. testar custo com e sem capacidade sensível;
-16. confirmar bloqueio de `anon`;
-17. confirmar imutabilidade de movimento concluído.
+4. criar reserva e consumir parcialmente;
+5. tentar saída acima do disponível;
+6. reverter movimento;
+7. repetir importação do mesmo recebimento;
+8. confirmar que quantidade rejeitada não entrou;
+9. cadastrar, entregar e devolver ativo;
+10. abrir, contar, aprovar e contabilizar inventário;
+11. testar acesso entre organizações;
+12. testar custo com e sem capacidade sensível;
+13. confirmar bloqueio de `anon`;
+14. confirmar imutabilidade;
+15. executar disputa realmente simultânea em teste de carga antes de produção.
 
-Testes estruturais devem usar transações revertidas quando possível. Testes de RLS usam identidades reais de homologação.
-
-## 13. Restaurar hospedagem
-
-1. conectar o repositório oficial;
-2. usar `main` em produção;
-3. usar branch de etapa somente em ambiente de homologação/revisão;
-4. configurar variáveis por cofre;
-5. executar `pnpm build`;
-6. validar domínio e HTTPS;
-7. executar smoke tests autenticados.
-
-## 14. Restaurar Supabase a partir de backup
-
-1. congelar writes ou colocar aplicação em manutenção;
-2. identificar o último backup íntegro;
-3. restaurar primeiro em projeto isolado;
-4. comparar migrations e schema;
-5. executar validadores e smoke tests;
-6. somente depois promover o ambiente restaurado.
-
-## 15. Estado que não vive no Git
-
-O repositório não contém deliberadamente:
+## 13. O que não vive no Git
 
 - valores de secrets;
-- usuários reais do Auth;
-- dados reais do banco;
+- usuários e dados reais;
 - conteúdo dos buckets;
-- DNS;
-- credenciais de provedores;
 - backups físicos;
-- dispositivos RFID ou configurações da futura Etapa 21.
+- DNS e credenciais de provedores;
+- dispositivos RFID e configurações da futura Etapa 21.
 
-Esses elementos precisam de cofre, backup e inventário externo.
+## 14. Checklist final de recuperação
 
-## 16. Checklist final de recuperação
-
-- [ ] código obtido do repositório;
+- [ ] código obtido do GitHub;
 - [ ] branch correta selecionada;
 - [ ] diretrizes lidas;
 - [ ] secrets configurados por cofre;
-- [ ] migrations aplicadas em ordem;
-- [ ] RLS e privilégios conferidos;
-- [ ] storage privado conferido;
+- [ ] migrations comparadas e aplicadas;
+- [ ] RLS, privilégios e índices conferidos;
+- [ ] buckets privados conferidos;
 - [ ] módulos e perfis carregados;
-- [ ] workers necessários configurados;
+- [ ] workers configurados;
 - [ ] `pnpm validate:docs` aprovado;
-- [ ] `pnpm validate:stage17` aprovado quando a branch estiver ativa;
+- [ ] validadores estruturais aprovados;
 - [ ] lint, typecheck, testes e build aprovados;
 - [ ] smoke tests concluídos;
 - [ ] documentação compatível com o commit implantado.
