@@ -7,7 +7,8 @@ const vaccines=[
  "diretrizes/vacinas/VACINA-002-VALIDADORES-SEMANTICOS.md",
  "diretrizes/vacinas/VACINA-003-LEDGER-MIGRATIONS-SUPABASE.md",
  "diretrizes/vacinas/VACINA-004-PRIVILEGIOS-RPCS.md",
- "diretrizes/vacinas/VACINA-005-WORKFLOW-PROTEGIDO.md"
+ "diretrizes/vacinas/VACINA-005-WORKFLOW-PROTEGIDO.md",
+ "diretrizes/vacinas/VACINA-006-RUNTIME-GITHUB-ACTIONS.md"
 ];
 const required=["diretrizes/VACINAS.md",...vaccines];
 
@@ -21,7 +22,7 @@ for(const file of required){
 
 if(fs.existsSync("diretrizes/VACINAS.md")){
  const index=read("diretrizes/VACINAS.md");
- for(let id=1;id<=5;id++)if(!index.includes(`VACINA-00${id}`))errors.push(`Catálogo sem VACINA-00${id}.`);
+ for(let id=1;id<=6;id++)if(!index.includes(`VACINA-00${id}`))errors.push(`Catálogo sem VACINA-00${id}.`);
 }
 
 // VACINA-001 — relações Supabase variáveis.
@@ -58,10 +59,11 @@ if(fs.existsSync("scripts/validate-stage17.mjs")){
 // VACINA-003 — ledger de migrations.
 const packageJson=JSON.parse(read("package.json"));
 if(!packageJson.scripts?.["validate:migrations"])errors.push("package.json sem validate:migrations.");
+if(!packageJson.scripts?.["validate:vaccines"])errors.push("package.json sem validate:vaccines.");
 if(!fs.existsSync("scripts/validate-supabase-migrations.mjs"))errors.push("Validador do ledger Supabase ausente.");
-const workflow=read(".github/workflows/ci.yml");
-const migrationStep=workflow.indexOf("validate-supabase-migrations.mjs");
-const stageStep=workflow.indexOf("validate-stage17.mjs");
+const ciWorkflow=read(".github/workflows/ci.yml");
+const migrationStep=ciWorkflow.indexOf("validate-supabase-migrations.mjs");
+const stageStep=ciWorkflow.indexOf("validate-stage17.mjs");
 if(migrationStep<0||stageStep<0||migrationStep>stageStep)errors.push("CI não valida ledger antes das etapas.");
 
 // VACINA-004 — privilégio mínimo.
@@ -81,6 +83,28 @@ if(fs.existsSync("supabase/migrations/20260721020003_stage18_workflow_privilege_
   if(!hardening.includes(token))errors.push(`Hardening de workflow sem ${token}.`);
  if(hardening.includes("app.stage18_rpc"))errors.push("Hardening voltou a usar flag transacional como bypass.");
 }
+
+// VACINA-006 — runtimes das GitHub Actions.
+const workflows=fs.readdirSync(".github/workflows").filter(file=>/\.ya?ml$/i.test(file));
+const obsoleteActions=[
+ /actions\/checkout@v[1-4]\b/g,
+ /actions\/setup-node@v[1-4]\b/g,
+ /actions\/setup-python@v[1-5]\b/g,
+ /actions\/upload-artifact@v[1-4]\b/g
+];
+for(const name of workflows){
+ const file=`.github/workflows/${name}`;
+ const content=read(file);
+ for(const pattern of obsoleteActions){
+  const matches=content.match(pattern)??[];
+  for(const match of matches)errors.push(`${file} usa action obsoleta: ${match}`);
+ }
+}
+for(const token of["actions/checkout@v6","actions/setup-node@v6","actions/setup-python@v6","actions/upload-artifact@v7"])
+ if(!ciWorkflow.includes(token))errors.push(`CI sem action canônica Node 24: ${token}`);
+const homologationWorkflow=read(".github/workflows/stage11-homologation.yml");
+for(const token of["actions/checkout@v6","actions/setup-node@v6"])
+ if(!homologationWorkflow.includes(token))errors.push(`Homologação sem action canônica: ${token}`);
 
 if(errors.length){
  console.error(`Vacinas inválidas (${errors.length} falha(s)):`);
