@@ -47,6 +47,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Initialize E2E report
+        run: |
+          printf '{\n  "status": "prerequisites_pending",\n  "workflowRunId": "%s",\n  "event": "%s",\n  "startedAt": "%s"\n}\n' \
+            "$GITHUB_RUN_ID" "$GITHUB_EVENT_NAME" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            > stage18-concurrent-e2e-report.json
+
+      - name: Validate required secrets
+        run: |
+          missing=()
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || missing+=(NEXT_PUBLIC_SUPABASE_URL)
+          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || missing+=(NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || missing+=(SUPABASE_SERVICE_ROLE_KEY)
+          test -n "$DEMO_ADMIN_PASSWORD" || missing+=(DEMO_ADMIN_PASSWORD)
+          test -n "$DEMO_CLIENT_PASSWORD" || missing+=(DEMO_CLIENT_PASSWORD)
+          if [ ${#missing[@]} -gt 0 ]; then
+            printf '{\n  "status": "blocked_missing_secrets",\n  "workflowRunId": "%s",\n  "missingNames": ["%s"],\n  "finishedAt": "%s"\n}\n' \
+              "$GITHUB_RUN_ID" "$(IFS='","'; echo "${missing[*]}")" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+              > stage18-concurrent-e2e-report.json
+            printf 'Secrets ausentes no ambiente homologation: %s\n' "${missing[*]}"
+            exit 1
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -59,15 +81,7 @@ jobs:
           corepack prepare pnpm@11.15.0 --activate
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Validate required secrets
-        run: |
-          test -n "$NEXT_PUBLIC_SUPABASE_URL"
-          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
-          test -n "$SUPABASE_SERVICE_ROLE_KEY"
-          test -n "$DEMO_ADMIN_PASSWORD"
-          test -n "$DEMO_CLIENT_PASSWORD"
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
 
       - name: Provision homologation identities
         run: pnpm provision:homologation
