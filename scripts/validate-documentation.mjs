@@ -26,6 +26,7 @@ const requiredHistorical=[
  "docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md",
  "docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md",
  "docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md",
+ "docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md",
  "docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md",
  "docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md",
  "docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md"
@@ -33,8 +34,7 @@ const requiredHistorical=[
 
 for(const file of [...requiredCanonical,...requiredHistorical]){
  if(!fs.existsSync(file)){errors.push(`Arquivo documental ausente: ${file}`);continue;}
- const size=fs.statSync(file).size;
- if(size<80)errors.push(`Arquivo documental vazio ou insuficiente: ${file}`);
+ if(fs.statSync(file).size<80)errors.push(`Arquivo documental vazio ou insuficiente: ${file}`);
 }
 
 if(!fs.existsSync("lib/modules/registry.ts"))errors.push("Registro modular ausente: lib/modules/registry.ts");
@@ -53,6 +53,7 @@ if(errors.length===0){
  const documentationPolicy=fs.readFileSync("diretrizes/PADRAO-DOCUMENTACAO.md","utf8");
  const history=fs.readFileSync("diretrizes/HISTORICO-ETAPAS.md","utf8");
  const readme=fs.readFileSync("README.md","utf8");
+ const stage17Homologation=fs.readFileSync("docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md","utf8");
  const stage21=fs.readFileSync("docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md","utf8");
  const packageJson=JSON.parse(fs.readFileSync("package.json","utf8"));
 
@@ -63,39 +64,21 @@ if(errors.length===0){
  }
 
  for(const token of[
-  "Fonte de verdade",
-  "Princípios inegociáveis",
-  "Modelo de autorização",
-  "Aplicativos modulares",
-  "Próxima etapa oficial",
-  "Estoque, Inventário e Almoxarifado",
-  "Etapa 21",
-  "WMS avançado"
+  "Fonte de verdade","Princípios inegociáveis","Modelo de autorização","Aplicativos modulares",
+  "Próxima etapa oficial","Estoque, Inventário e Almoxarifado","Etapa 21","WMS avançado"
  ])if(!spec.includes(token))errors.push(`SPEC sem seção obrigatória: ${token}`);
 
  for(const token of[
-  "Etapa 17",
-  "Estoque, Inventário e Almoxarifado",
-  "Definition of Done adicional",
-  "Etapa 21",
-  "WMS avançado",
-  "endereçamento automatizado",
-  "RFID em tempo real",
-  "ressuprimento automático sem aprovação",
-  "roteirização logística",
-  "integração fiscal de entrada",
-  "depreciação contábil oficial"
+  "Etapa 17","Estoque, Inventário e Almoxarifado","Definition of Done adicional","Etapa 21",
+  "WMS avançado","endereçamento automatizado","RFID em tempo real","ressuprimento automático sem aprovação",
+  "roteirização logística","integração fiscal de entrada","depreciação contábil oficial"
  ])if(!roadmap.includes(token))errors.push(`Roadmap incompleto: ${token}`);
 
  for(const token of[
-  "documentação atualizada no mesmo PR",
-  "migration aplicada e homologada",
-  "recebimento de Compras integrado de forma idempotente",
-  "saldo não editável diretamente",
-  "movimentos concluídos imutáveis",
-  "testes de concorrência e saldo",
-  "isolamento multiempresa e multiobra",
-  "CI verde"
+  "documentação atualizada no mesmo PR","migration aplicada e homologada",
+  "recebimento de Compras integrado de forma idempotente","saldo não editável diretamente",
+  "movimentos concluídos imutáveis","testes de concorrência e saldo",
+  "isolamento multiempresa e multiobra","CI verde"
  ]){
   if(!roadmap.includes(token))errors.push(`Roadmap sem Definition of Done da Etapa 17: ${token}`);
   if(!modulesDoc.includes(token))errors.push(`Contrato do estoque sem Definition of Done: ${token}`);
@@ -116,15 +99,14 @@ if(errors.length===0){
   if(!readme.includes(token))errors.push(`README sem referência obrigatória: ${token}`);
 
  for(const token of[
-  "WMS avançado",
-  "Endereçamento automatizado",
-  "RFID em tempo real",
-  "Ressuprimento automático sem aprovação",
-  "Roteirização logística",
-  "Integração fiscal de entrada",
-  "Depreciação contábil oficial",
-  "Definition of Done adicional",
-  "CI verde"
+  "Migrations pós-merge","Testes transacionais revertidos","RLS direto","pg_advisory_xact_lock",
+  "RPCs operacionais de estoque executáveis por anon: 0","101","Definition of Done"
+ ])if(!stage17Homologation.includes(token))errors.push(`Homologação da Etapa 17 incompleta: ${token}`);
+
+ for(const token of[
+  "WMS avançado","Endereçamento automatizado","RFID em tempo real","Ressuprimento automático sem aprovação",
+  "Roteirização logística","Integração fiscal de entrada","Depreciação contábil oficial",
+  "Definition of Done adicional","CI verde"
  ])if(!stage21.includes(token))errors.push(`Plano da Etapa 21 incompleto: ${token}`);
 
  if(!spec.includes(`**Versão implementada da plataforma:** ${packageJson.version}`))
@@ -137,7 +119,7 @@ if(errors.length===0){
   /sk_[a-zA-Z0-9_-]{12,}/,
   /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/
  ];
- for(const file of [...requiredCanonical,"docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md","docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md"]){
+ for(const file of [...requiredCanonical,"docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md","docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md","docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md"]){
   const content=fs.readFileSync(file,"utf8");
   for(const pattern of forbiddenSecretPatterns){
    if(pattern.test(content))errors.push(`Possível segredo encontrado em ${file}: ${pattern}`);
