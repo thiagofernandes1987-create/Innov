@@ -1,6 +1,6 @@
 # Etapa 17 — Estoque, Inventário e Almoxarifado
 
-**Estado:** implementação incorporada à `main`; banco homologado funcionalmente  
+**Estado:** implementação incorporada à `main`; banco homologado funcionalmente; PR corretivo pronto para revisão  
 **Versão:** 0.17.0  
 **Módulo:** `estoque` versão `1.0.0`  
 **Implementação:** PR `#14`  
@@ -226,7 +226,9 @@ Confirmado:
 - custo direto bloqueado;
 - zero RPC anônima;
 - 101 FKs indexadas;
-- advisors revisados.
+- advisors revisados;
+- CI integral verde;
+- PR `#15` fora do modo rascunho e pronto para revisão.
 
 Limitação: não foi possível abrir duas sessões simultâneas pelo conector sem credenciais explícitas. O teste de carga concorrente real permanece para a Etapa 20.
 
@@ -254,6 +256,8 @@ A lista integral está em `diretrizes/INVENTARIO.md`. As últimas correções ve
 - [x] isolamento multiempresa e multiobra;
 - [x] RLS e custos protegidos;
 - [x] advisors revisados;
-- [ ] CI final do PR `#15`;
-- [ ] PR `#15` pronto para revisão;
+- [x] CI final do PR `#15`;
+- [x] PR `#15` pronto para revisão;
 - [ ] teste de carga simultâneo antes de produção.
+
+O PR `#15` não será mesclado automaticamente. O merge depende de aprovação explícita do responsável pelo repositório.
