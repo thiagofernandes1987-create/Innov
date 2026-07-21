@@ -1,6 +1,6 @@
 # Etapa 17 — Homologação pós-merge
 
-**Estado:** concluída no Supabase de homologação; PR corretivo aguardando CI e revisão  
+**Estado:** concluída no Supabase de homologação; PR corretivo pronto para revisão  
 **Branch:** `fix/etapa-17-homologacao-pos-merge`  
 **PR:** `#15`  
 **Supabase:** `wyeojufebtwblsubkunr`  
@@ -46,18 +46,7 @@ Migration aplicada nunca é reescrita; ajuste posterior exige novo arquivo com t
 - oito unidades e seis categorias padrão no bootstrap;
 - depósito `ALM-GERAL` e localização `PADRAO` pelo instalador organizacional.
 
-Views:
-
-```text
-inventory_stock_v
-inventory_reserved_stock_v
-inventory_available_stock_v
-inventory_item_totals_v
-inventory_asset_current_v
-inventory_expiry_alerts_v
-```
-
-As views e colunas de custo não possuem leitura direta para `anon` ou para o navegador autenticado. Valores sensíveis são entregues por RPC autorizada e mascarados conforme capacidade.
+As views de saldo e as colunas de custo não possuem leitura direta para `anon` ou para o navegador autenticado. Valores sensíveis são entregues por RPC autorizada e mascarados conforme capacidade.
 
 ## 4. Concorrência e saldo
 
@@ -87,8 +76,6 @@ Foram criados temporariamente usuário, organização e membership, todos revert
 
 ### 5.2 Ciclo funcional
 
-Fluxo executado:
-
 ```text
 entrada +10
 → reserva 6
@@ -102,10 +89,7 @@ entrada +10
 
 Resultados:
 
-- entrada idempotente;
-- reserva idempotente;
-- consumo idempotente;
-- reversão idempotente;
+- entrada, reserva, consumo e reversão idempotentes;
 - saída não reservada acima do disponível bloqueada;
 - segunda saída sobre o mesmo saldo bloqueada;
 - movimento `POSTED` protegido contra `UPDATE` e `DELETE`;
@@ -130,7 +114,7 @@ Todos os dados foram revertidos.
 
 ## 6. Privilégios
 
-O advisor encontrou privilégio anônimo herdado em três RPCs. A migration `20260720161000` removeu `PUBLIC/anon` de:
+A migration `20260720161000` removeu `PUBLIC/anon` de:
 
 - `create_inventory_item`;
 - `create_inventory_movement`;
@@ -152,8 +136,6 @@ Helpers, instaladores e função de geração da chave de lock permanecem restri
 A falha específica da Etapa 17 encontrada pelo advisor foi corrigida. Avisos de outros módulos são dívida técnica global e devem ser tratados nas Etapas 19 e 20.
 
 ### Performance
-
-Depois da migration de índices:
 
 ```text
 FKs do domínio: 101
@@ -179,9 +161,9 @@ Avisos `unused_index` são esperados em banco vazio e não justificam remoção 
 - [x] isolamento multiempresa e multiobra validado;
 - [x] 101 FKs com cobertura de índice;
 - [x] advisors revisados;
-- [ ] CI final confirmado depois das últimas migrations e diretrizes;
-- [ ] PR `#15` marcado como pronto para revisão.
+- [x] CI integral da branch aprovado;
+- [x] PR `#15` pronto para revisão.
 
 ## 9. Resultado
 
-A Etapa 17 está incorporada à `main` e homologada funcionalmente no Supabase. O PR `#15` consolida migrations corretivas, validadores e documentação. Ele não deve ser mesclado automaticamente: será liberado para revisão após CI verde, e o merge depende de aprovação explícita do responsável pelo repositório.
+A Etapa 17 está incorporada à `main` e homologada funcionalmente no Supabase. O PR `#15` consolida migrations corretivas, validadores e documentação e está pronto para revisão. Ele não será mesclado automaticamente; o merge depende de aprovação explícita do responsável pelo repositório.
