@@ -8,6 +8,7 @@ import "./finance-operational.css";
 import "./reports.css";
 import "./inventory.css";
 import "./relationship.css";
+import "./observability.css";
 
 export const metadata: Metadata = {
   title: {
