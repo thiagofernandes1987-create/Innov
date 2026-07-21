@@ -1,21 +1,20 @@
 # Inventário canônico — Innovar Platform
 
 **Atualizado em:** 20 de julho de 2026  
-**Base estável:** `main` com a Etapa 17  
-**Follow-up:** PR `#15` — homologação pós-merge  
+**Base estável:** `main` com o código da Etapa 17  
+**Follow-up:** branch `fix/etapa-17-homologacao-pos-merge`, PR `#15`  
 **Versão:** 0.17.0
 
-Este arquivo registra os elementos necessários para recuperar, validar e continuar o projeto após perda total do ambiente local.
+Este documento registra os elementos necessários para recuperar, validar e continuar o projeto após perda total do ambiente local.
 
 ## 1. Repositório e stack
 
 - repositório: `thiagofernandes1987-create/Innov`;
 - branch estável: `main`;
-- branch de homologação: `fix/etapa-17-homologacao-pos-merge`;
-- pacote: `pnpm@11.15.0`;
-- Node.js: `>=24`;
+- branch corretiva: `fix/etapa-17-homologacao-pos-merge`;
+- Node.js `>=24` e `pnpm@11.15.0`;
 - Next.js 16, React 19 e TypeScript;
-- PostgreSQL, Auth e Storage no Supabase;
+- Supabase Auth, PostgreSQL, RLS e Storage;
 - projeto de homologação: `wyeojufebtwblsubkunr`.
 
 ## 2. Estado dos módulos
@@ -38,7 +37,7 @@ Este arquivo registra os elementos necessários para recuperar, validar e contin
 | `documentos` | operacional |
 | `qualidade` | operacional |
 | `compras` | operacional |
-| `estoque` | incorporado e homologado estruturalmente |
+| `estoque` | código incorporado e banco homologado; PR #15 aguardando revisão |
 | `financeiro` | operacional |
 | `sac` | parcial; consolidação na Etapa 18 |
 | `relatorios` | operacional |
@@ -67,7 +66,7 @@ docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md
 docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md
 ```
 
-## 4. Rotas do estoque
+## 4. Rotas de estoque
 
 ```text
 /app/estoque
@@ -102,51 +101,36 @@ app/inventory.css
 scripts/validate-stage17.mjs
 ```
 
-## 6. Tabelas
+## 6. Banco da Etapa 17
 
-Catálogo e estrutura:
+### Tabelas
 
-- `inventory_categories`;
-- `inventory_units`;
-- `inventory_items`;
-- `inventory_warehouses`;
-- `inventory_locations`;
-- `inventory_lots`;
-- `inventory_procurement_item_mappings`.
-
-Movimentos e reservas:
-
-- `inventory_movements`;
-- `inventory_movement_lines`;
-- `inventory_receipt_imports`;
-- `inventory_reservations`;
-- `inventory_reservation_lines`.
-
-Ativos, inventário e auditoria:
-
-- `inventory_assets`;
-- `inventory_asset_custodies`;
-- `inventory_asset_maintenance`;
-- `inventory_stocktakes`;
-- `inventory_stocktake_lines`;
-- `inventory_events`.
+- catálogo: `inventory_categories`, `inventory_units`, `inventory_items`;
+- estrutura: `inventory_warehouses`, `inventory_locations`, `inventory_lots`, `inventory_procurement_item_mappings`;
+- razão: `inventory_movements`, `inventory_movement_lines`, `inventory_receipt_imports`;
+- reservas: `inventory_reservations`, `inventory_reservation_lines`;
+- ativos: `inventory_assets`, `inventory_asset_custodies`, `inventory_asset_maintenance`;
+- inventário: `inventory_stocktakes`, `inventory_stocktake_lines`;
+- auditoria: `inventory_events`.
 
 **Total:** 18 tabelas, todas com RLS.
 
-## 7. Views internas
+### Views internas
 
-- `inventory_stock_v`;
-- `inventory_reserved_stock_v`;
-- `inventory_available_stock_v`;
-- `inventory_item_totals_v`;
-- `inventory_asset_current_v`;
-- `inventory_expiry_alerts_v`.
+```text
+inventory_stock_v
+inventory_reserved_stock_v
+inventory_available_stock_v
+inventory_item_totals_v
+inventory_asset_current_v
+inventory_expiry_alerts_v
+```
 
-Nenhuma possui `SELECT` para `anon` ou `authenticated`.
+As seis usam `security_invoker=true` e não concedem `SELECT` a `anon` ou `authenticated`.
 
-## 8. RPCs principais
+### RPCs principais
 
-Consulta:
+Consulta segura:
 
 - `get_inventory_dashboard`;
 - `get_inventory_movement_detail`;
@@ -156,72 +140,111 @@ Consulta:
 Operações:
 
 - criação de item, depósito, movimento e ativo;
-- postagem e reversão de movimento;
+- postagem e reversão;
 - importação idempotente de recebimento;
 - criação, consumo, liberação e expiração de reserva;
 - entrega e devolução de ativo;
-- abertura, contagem, submissão, aprovação e ajuste de inventário físico;
+- abertura, contagem, submissão, aprovação e ajuste de inventário;
 - instalação dos padrões organizacionais.
 
-Nenhuma RPC do módulo é executável por `anon`.
+Nenhuma RPC operacional é executável por `anon`.
 
-## 9. Migrations e correções
+## 7. Migrations da Etapa 17
 
-A sequência `2026072016*.sql` está aplicada no Supabase. Inclui schema, saldos, funções, segurança, contratos de consulta, módulo, hardening e guards.
+Aplicação lexical final:
 
-Correções pós-merge:
+```text
+20260720160000_stage17_inventory_schema.sql
+20260720160100_stage17_inventory_balances.sql
+20260720160200_stage17_inventory_movement_functions.sql
+20260720160300_stage17_inventory_procurement_reservations.sql
+20260720160400_stage17_inventory_assets_stocktakes_01.sql
+20260720160410_stage17_inventory_assets_stocktakes_02.sql
+20260720160420_stage17_inventory_assets_stocktakes_03.sql
+20260720160430_stage17_inventory_assets_stocktakes_04.sql
+20260720160500_stage17_inventory_security.sql
+20260720160510_stage17_inventory_dashboard.sql
+20260720160520_stage17_inventory_movement_detail.sql
+20260720160525_stage17_inventory_item_asset_detail.sql
+20260720160530_stage17_inventory_stocktake_found_items.sql
+20260720160600_stage17_inventory_module.sql
+20260720160650_stage17_inventory_creation_rpcs.sql
+20260720160700_stage17_inventory_hardening.sql
+20260720160720_stage17_inventory_sensitive_columns.sql
+20260720160730_stage17_inventory_sensitive_write_guard.sql
+20260720160740_stage17_inventory_state_guards.sql
+20260720160800_stage17_inventory_concurrency_locks.sql
+20260720160900_stage17_inventory_performance_indexes.sql
+20260720161000_stage17_inventory_rpc_privileges.sql
+```
 
-- locks de concorrência;
-- escopo de saldo por obra;
-- índices de performance;
-- privilégios de RPC.
+O histórico remoto também registra a correção `stage17_homologation_balance_project_scope`. Migration aplicada nunca é alterada.
 
-Migration aplicada nunca é alterada.
+## 8. Invariantes
 
-## 10. Evidências de homologação
+```text
+saldo físico = soma de linhas de movimentos POSTED
+saldo reservado = reservado - consumido - liberado
+saldo disponível = físico - reservado
+```
+
+- saldo não é editável;
+- movimento postado é imutável;
+- reversão referencia o movimento original;
+- transferência conserva quantidade;
+- saldo negativo é bloqueado por padrão;
+- postagem usa advisory lock transacional por posição;
+- recebimento de Compras é idempotente;
+- somente quantidade aceita entra;
+- inventário aprovado gera ajuste rastreável;
+- custo é mascarado no PostgreSQL.
+
+## 9. Evidências de homologação
 
 - 18/18 tabelas com RLS;
 - seis views sem acesso direto;
-- 101 FKs com índice de cobertura;
-- custos sem leitura direta;
-- escrita de custos protegida por `enforce_inventory_sensitive_write`;
-- guards de escopo por organização e obra;
-- módulo `estoque` ativo, sensível, `1.0.0` e `default_enabled=true`;
-- CI do PR `#15` verde;
-- advisors revisados.
+- 49 políticas e 36 gatilhos não internos;
+- 101 FKs, nenhuma sem índice líder;
+- zero RPC operacional executável por `anon`;
+- três RPCs de criação disponíveis para `authenticated`;
+- bootstrap: 12 perfis, 21 módulos, oito unidades e seis categorias;
+- entrada, reserva, consumo e reversão idempotentes;
+- saldo disponível respeitado;
+- segunda saída sobre saldo insuficiente bloqueada;
+- movimento postado bloqueado para alteração e exclusão;
+- inventário físico contabilizado;
+- vínculos multiempresa e multiobra bloqueados;
+- RLS direto: uma linha própria, zero linha da outra organização;
+- leitura direta de `reference_unit_cost` bloqueada;
+- dados de teste revertidos;
+- advisors de segurança e performance revisados.
 
-## 11. Dados padrão
+Limitação: o conector não conseguiu abrir duas sessões simultâneas sem credenciais de banco. O lock foi homologado por inspeção e cenário sequencial de disputa. Teste de carga simultâneo permanece na Etapa 20.
 
-Para cada nova organização:
+## 10. Dados padrão
+
+Por organização:
 
 - unidades `un`, `kg`, `m`, `m2`, `m3`, `l`, `cx`, `pct`;
-- categorias iniciais;
+- seis categorias iniciais;
 - depósito `ALM-GERAL`;
 - localização `PADRAO`;
 - saldo negativo desabilitado;
 - permissões dos perfis canônicos.
 
-O ambiente atual ainda não possui organização; por isso os registros concretos de bootstrap são zero.
+## 11. Integrações
 
-## 12. Integrações
+- Compras: quantidade aceita gera entrada idempotente;
+- Obras: depósito, movimento, reserva e inventário podem ter escopo de obra;
+- Equipes: ativo pode ser entregue a equipe ou responsável;
+- Financeiro: custo de estoque não cria lançamento automaticamente;
+- Relatórios: consumo por contratos autorizados.
 
-### Compras
+## 12. Variáveis e Storage
 
-Somente quantidade aceita é importada. Repetição do recebimento não duplica movimento.
+A Etapa 17 não cria bucket ou secret. Variáveis conhecidas permanecem descritas em `.env.example` e `diretrizes/RECUPERACAO.md`; valores nunca são versionados.
 
-### Obras e equipes
-
-Depósito, movimento, reserva, custódia e inventário podem ser limitados por obra e responsável.
-
-### Financeiro e relatórios
-
-Custos do estoque são informativos e sensíveis; não geram lançamento financeiro automático.
-
-## 13. Limitação atual
-
-O Supabase de homologação não possui usuários, organizações, memberships ou obras. O E2E autenticado deverá ser executado quando contas reais forem provisionadas. Não devem ser fabricadas identidades nem desativadas constraints para simular o teste.
-
-## 14. CI
+## 13. CI
 
 ```bash
 pnpm validate:docs
@@ -233,8 +256,6 @@ pnpm test:python
 pnpm build
 ```
 
-## 15. Recuperação
+## 14. Recuperação
 
-Procedimento oficial: `diretrizes/RECUPERACAO.md`.
-
-GitHub recupera código, migrations, arquitetura, documentação e CI. Secrets, usuários, dados reais e conteúdo de buckets dependem de cofre e backup externos.
+Procedimento oficial: `diretrizes/RECUPERACAO.md`. Git recupera código, migrations, arquitetura, documentação e CI. Secrets, usuários, dados reais, conteúdo de buckets e backups dependem de cofres e inventários externos.
