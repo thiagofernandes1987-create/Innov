@@ -26,11 +26,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Validate canonical documentation
-        run: node scripts/validate-documentation.mjs
+        run: |
+          set -o pipefail
+          node scripts/validate-documentation.mjs 2>&1 | tee documentation-validation.txt
       - name: Validate engineering vaccines
-        run: node scripts/validate-vaccines.mjs
+        run: |
+          set -o pipefail
+          node scripts/validate-vaccines.mjs 2>&1 | tee vaccines-validation.txt
       - name: Validate Supabase migration ledger
-        run: node scripts/validate-supabase-migrations.mjs
+        run: |
+          set -o pipefail
+          node scripts/validate-supabase-migrations.mjs 2>&1 | tee migrations-validation.txt
       - name: Validate Stage 17 inventory
         run: |
           set -o pipefail
@@ -45,11 +51,15 @@ jobs:
         with:
           name: structural-validation
           path: |
+            documentation-validation.txt
+            vaccines-validation.txt
+            migrations-validation.txt
             stage17-validation.txt
             stage18-validation.txt
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
       - name: Upload recent migrations
+        if: success()
         uses: actions/upload-artifact@v7
         with:
           name: recent-migrations
