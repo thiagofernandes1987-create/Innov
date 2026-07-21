@@ -79,11 +79,11 @@ O roadmap segue o estado real do repositório, dos PRs e do Supabase. Planejamen
 - SAC interno e portal do cliente;
 - mensagens internas e públicas;
 - anexos privados com SHA-256;
-- SLA, pesquisa de satisfação e eventos append-only;
+- SLA, satisfação e eventos append-only;
 - estados críticos alterados somente por RPC;
 - RLS interna e do cliente.
 
-### Bloqueio atual
+### Bloqueio externo
 
 O E2E de administrador e cliente simultâneos está implementado, mas não inicia enquanto estes secrets estiverem ausentes no ambiente GitHub `homologation`:
 
@@ -95,38 +95,59 @@ DEMO_ADMIN_PASSWORD
 DEMO_CLIENT_PASSWORD
 ```
 
-Nenhum valor será hardcodado no repositório.
+Nenhum valor será hardcodado no repositório ou solicitado na conversa.
 
 ## Etapa 19 — Auditoria e observabilidade unificadas
 
-**Estado:** implementação no PR `#19`, empilhado sobre o PR `#18`.  
+**Estado técnico:** implementada e homologada no Supabase.  
+**PR:** `#19`, em rascunho e empilhado sobre o PR `#18`.  
 **Merge:** proibido automaticamente.
 
-### Escopo
+### Entregas
 
 - painel transversal;
-- fluxo unificado de eventos sem duplicação;
+- fluxo unificado de 12 origens sem duplicação;
 - correlação por ator, entidade, cliente, obra, recurso, request e `correlation_id`;
 - sanitização recursiva de senha, token, authorization, secret, cookie e chaves privadas;
 - idempotência por chave de deduplicação;
 - eventos e health checks append-only;
 - alertas técnicos e operacionais;
 - reconhecimento e resolução com motivo;
-- health checks de banco, assinatura, relatórios e SAC;
-- diagnósticos de FKs sem índice, RLS, políticas permissivas, privilégios e ledger;
+- seis health checks;
+- diagnósticos de FKs, RLS, policies, privilégios e ledger;
 - retenção configurável;
-- RLS e aplicativo sensível para Super Administrador, Direção e Administrador;
+- diagnósticos globais protegidos contra cliente e sessão sem membership;
+- aplicativo sensível disponível somente a Super Administrador, Direção e Administrador;
 - interface em `/app/auditoria`.
 
-### Migrations
+### Seis migrations alinhadas ao ledger
 
 ```text
-20260721093000_stage19_observability_schema.sql
-20260721093100_stage19_observability_security.sql
-20260721093200_stage19_observability_functions.sql
-20260721093300_stage19_observability_unified_stream.sql
-20260721093400_stage19_observability_module_performance.sql
+20260721100108_stage19_observability_schema.sql
+20260721100159_stage19_observability_security.sql
+20260721122302_stage19_observability_functions.sql
+20260721122355_stage19_observability_unified_stream.sql
+20260721122436_stage19_observability_module_performance.sql
+20260721123305_stage19_observability_hardening.sql
 ```
+
+### Homologação concluída
+
+- seis tabelas com RLS;
+- 13 políticas e seis gatilhos não internos;
+- sanitização recursiva confirmada;
+- evento idempotente;
+- alerta crítico criado;
+- fluxo unificado consultado;
+- append-only bloqueado por privilégio e trigger;
+- alerta reconhecido e resolvido;
+- seis health checks;
+- isolamento multiempresa confirmado;
+- diagnóstico global: interno autorizado vê 1 e sessão sem membership vê 0;
+- 16 FKs e zero FK sem índice;
+- zero função da Etapa 19 executável por `anon`;
+- advisors de segurança e performance revisados;
+- dados artificiais revertidos.
 
 ### Definition of Done
 
@@ -137,11 +158,12 @@ Nenhum valor será hardcodado no repositório.
 - [x] teste transacional com `ROLLBACK`;
 - [x] validador estrutural;
 - [x] documentação atualizada no mesmo PR;
-- [ ] lint, typecheck, testes e build verdes no commit final;
-- [ ] migrations aplicadas e homologadas;
-- [ ] advisors revisados;
-- [ ] relatório de homologação registrado;
-- [ ] PR pronto para revisão.
+- [x] migrations aplicadas e homologadas;
+- [x] ledger remoto alinhado;
+- [x] zero FK sem índice;
+- [x] advisors revisados;
+- [ ] lint, typecheck, testes e build verdes no commit documental final;
+- [ ] PR pronto para revisão após a estabilização do PR `#18`.
 
 ## Etapa 20 — Prontidão de produção
 
