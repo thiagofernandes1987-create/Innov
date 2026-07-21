@@ -12,7 +12,8 @@ const vaccines=[
  "diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md",
  "diretrizes/vacinas/VACINA-008-INSTALACAO-HOMOLOGACAO.md",
  "diretrizes/vacinas/VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md",
- "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md"
+ "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md",
+ "diretrizes/vacinas/VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md"
 ];
 const required=["diretrizes/VACINAS.md",...vaccines];
 
@@ -26,7 +27,7 @@ for(const file of required){
 
 if(fs.existsSync("diretrizes/VACINAS.md")){
  const index=read("diretrizes/VACINAS.md");
- for(let id=1;id<=10;id++)if(!index.includes(`VACINA-${String(id).padStart(3,"0")}`))errors.push(`Catálogo sem VACINA-${String(id).padStart(3,"0")}.`);
+ for(let id=1;id<=11;id++)if(!index.includes(`VACINA-${String(id).padStart(3,"0")}`))errors.push(`Catálogo sem VACINA-${String(id).padStart(3,"0")}.`);
 }
 
 // VACINA-001 — relações Supabase variáveis.
@@ -132,6 +133,16 @@ if(!concurrentWorkflow.includes("JSON.stringify"))errors.push("Workflow E2E não
 if(/printf\s+['"]\{[^\n]*stage18-concurrent-e2e-report\.json/s.test(concurrentWorkflow))errors.push("Workflow E2E voltou a montar JSON manualmente com printf.");
 const e2eScript=read("scripts/run-stage18-concurrent-e2e.mjs");
 if(!e2eScript.includes("JSON.stringify(report,null,2)"))errors.push("Script E2E não serializa relatório com JSON.stringify.");
+
+// VACINA-011 — identificadores reservados do Node/Next.
+for(const name of fs.readdirSync("scripts").filter(file=>file.endsWith(".mjs"))){
+ const file=`scripts/${name}`;const content=read(file);
+ for(const pattern of[/\b(?:const|let|var)\s+module\b/,/(?:^|[;{}\n])\s*module\s*=/m])
+  if(pattern.test(content))errors.push(`${file} atribui ao identificador reservado module.`);
+}
+const stage19Validator=read("scripts/validate-stage19.mjs");
+if(!stage19Validator.includes("moduleMigration"))errors.push("Validador da Etapa 19 sem nome semântico moduleMigration.");
+if(/eslint-disable[^\n]*no-assign-module-variable/.test(stage19Validator))errors.push("Validador da Etapa 19 desabilita a regra de identificador reservado.");
 
 if(errors.length){
  console.error(`Vacinas inválidas (${errors.length} falha(s)):`);
