@@ -1,11 +1,11 @@
 # Arquitetura canônica — Innovar Platform
 
-**Versão:** 0.18.0  
+**Versão:** 0.19.0  
 **Atualizado em:** 21 de julho de 2026
 
 ## 1. Visão geral
 
-A Innovar Platform é um monólito modular web com banco relacional, autenticação gerenciada, Storage privado e workers especializados.
+A Innovar Platform é um monólito modular web com banco relacional, autenticação gerenciada, Storage privado, RPCs transacionais e workers especializados.
 
 ```text
 Navegador
@@ -26,6 +26,14 @@ Supabase
 Workers
   ├─ DOCX → PDF
   └─ entrega de assinatura
+
+Observabilidade
+  ├─ trilhas de domínio
+  ├─ audit_events transversal
+  ├─ fluxo unificado
+  ├─ alertas
+  ├─ health checks
+  └─ diagnósticos
 ```
 
 ## 2. Organização do repositório
@@ -37,15 +45,15 @@ lib/                    domínio, autorização e integrações
 python/                 motor auxiliar de Qualidade
 scripts/                validadores, workers e homologação
 supabase/migrations/     evolução append-only do banco
-supabase/tests/          testes SQL reproduzíveis com rollback
+supabase/tests/          testes SQL reproduzíveis com ROLLBACK
 docs/                   histórico técnico e evidências
 diretrizes/             especificação canônica e recuperação
-.github/workflows/       CI
+.github/workflows/       CI e homologação
 ```
 
 ## 3. Modularidade plug-and-play
 
-O catálogo existe em `lib/modules/registry.ts` e `app_modules`. Cada aplicativo possui chave, rota, categoria, dependências, versão, estado por organização, configurações e matriz de permissões.
+O catálogo existe em `lib/modules/registry.ts` e `app_modules`. Cada aplicativo possui chave estável, rota, categoria, dependências, versão, estado por organização, configurações e matriz de permissões.
 
 Desabilitar módulo preserva dados e bloqueia o acesso funcional. Instaladores atualizam apenas perfis canônicos e nunca sobrescrevem perfis personalizados.
 
@@ -64,7 +72,7 @@ Camadas:
 9. política de Storage;
 10. autorização interna em RPC privilegiada.
 
-Negação explícita prevalece. Cliente não herda permissões internas. Dados sensíveis são mascarados ou recusados. Ações críticas podem exigir MFA AAL2, justificativa, separação de funções, alçada, idempotency key e auditoria.
+Negação explícita prevalece. Cliente não herda permissões internas. Ações críticas podem exigir MFA AAL2, justificativa, separação de funções, alçada, idempotency key e auditoria.
 
 ## 5. Banco e migrations
 
@@ -74,221 +82,252 @@ Convenções:
 - timestamps UTC;
 - `organization_id` em dados multiempresa;
 - `project_id` quando houver obra;
+- `client_id` quando houver contexto de cliente;
 - constraints para invariantes locais;
 - triggers para regras centrais;
 - RPC para operações multi-tabela;
-- índices em FKs e filtros de RLS.
+- índices em FKs e filtros de RLS;
+- migrations append-only em ordem lexical.
 
-Migrations são append-only, aplicadas em ordem lexical. Arquivo aplicado nunca é reescrito. O timestamp e o nome local precisam coincidir com o ledger remoto do Supabase.
-
-O validador `scripts/validate-supabase-migrations.mjs` bloqueia:
-
-- timestamp duplicado;
-- nome lógico duplicado;
-- conteúdo SQL duplicado;
-- migrations canônicas ausentes;
-- versões locais divergentes do ledger remoto.
+Arquivo aplicado nunca é reescrito. Timestamp e nome local precisam coincidir com o ledger remoto. O validador bloqueia timestamp, nome ou conteúdo duplicado e divergência do ledger.
 
 Função `SECURITY DEFINER` usa `search_path` explícito, valida autorização internamente e recebe privilégio mínimo. Helper interno não é exposto como RPC operacional.
 
-## 6. CRM, Cliente 360 e SAC — Etapa 18
+## 6. Estoque — Etapa 17
 
-### Fluxo
+O estoque usa razão imutável:
+
+```text
+inventory_movements 1 ── N inventory_movement_lines
+saldo físico = movimentos válidos
+saldo reservado = reservado - consumido - liberado
+saldo disponível = físico - reservado
+```
+
+Movimento concluído não é editado; correção ocorre por reversão. A postagem adquire advisory lock por organização, depósito, localização, item e lote. Depósito exclusivo de obra não pode ser usado por outra obra.
+
+## 7. CRM, Cliente 360 e SAC — Etapa 18
 
 ```text
 lead → qualificação → oportunidade → cliente 360
 → múltiplas obras e contratos → atendimento → pós-venda → avaliação
 ```
 
-### CRM
+- leads e conversão idempotentes;
+- pipeline exclusivamente interno;
+- cliente pode possuir diversas obras abertas ou concluídas;
+- portal mostra somente obras liberadas;
+- mensagens e anexos `INTERNAL` não aparecem ao cliente;
+- anexos possuem SHA-256;
+- estados críticos mudam somente por RPC;
+- eventos e históricos são append-only.
 
-- `crm_leads` registra origem, campanha, interesse, orçamento, responsável e follow-up;
-- duplicidade é verificada por documento, e-mail e telefone normalizados;
-- criação e conversão são idempotentes;
-- conversão reutiliza cliente existente quando possível;
-- `opportunities` mantém valor, probabilidade, previsão e motivo de perda;
-- `crm_opportunity_stage_history` é append-only;
-- estados críticos só mudam por RPC;
-- pipeline é exclusivamente interno.
+## 8. Auditoria e Observabilidade — Etapa 19
 
-### Cliente 360
+### 8.1 Princípio
 
-`get_client_360` agrega cadastro, contatos, consentimentos, oportunidades, contratos, obras, chamados e atividades. Um cliente pode possuir diversas obras abertas, em planejamento ou concluídas.
+A Etapa 19 não copia nem substitui as trilhas de domínio. Ela normaliza as origens em leitura e usa `audit_events` somente para eventos transversais que não possuem trilha própria.
 
-Dados sensíveis, como documento, observações internas e valores, dependem da capacidade `sensitive`. O portal usa contrato separado e não recebe o pipeline comercial.
-
-### SAC e pós-venda
+Fontes unificadas:
 
 ```text
-abertura → triagem → atendimento → espera → resolução → encerramento → avaliação
+audit_events
+permission_change_events
+signature_events
+document_access_logs
+quality_form_events
+procurement_events
+finance_events
+report_events
+inventory_events
+sac_ticket_events
+crm_opportunity_stage_history
+crm_activities
 ```
 
-- categorias possuem SLA de primeira resposta e resolução;
-- chamado pode vincular cliente, obra e contrato;
-- cliente só vincula obra ou contrato já liberado no portal;
-- mensagens são `INTERNAL` ou `CLIENT`;
-- anexos possuem visibilidade, autoria e SHA-256;
-- eventos são append-only;
-- estados e atribuição mudam somente por RPC;
-- avaliação é única e permitida após resolução.
-
-### Portal do cliente
-
-- consulta apenas o cliente autenticado;
-- mostra somente obras com `client_released_at`;
-- não mostra oportunidades, eventos, mensagens internas ou anexos internos;
-- permite abrir ocorrência, enviar mensagem, tirar foto/anexar arquivo e avaliar;
-- upload é autorizado pela sessão, executado no servidor e compensado se a gravação falhar.
-
-### Storage da Etapa 18
-
-Bucket privado:
+### 8.2 Contrato comum
 
 ```text
-crm-sac-attachments
+id
+organization_id
+project_id
+client_id
+module_key
+event_type
+severity
+source
+actor_user_id
+actor_type
+resource_type
+resource_id
+action
+result
+message
+metadata
+correlation_id
+occurred_at
+origin_table
 ```
 
-Caminho:
+Filtros: organização, módulo, severidade, texto, período, correlação e paginação.
+
+### 8.3 Correlação e idempotência
+
+- `correlation_id` conecta eventos da mesma operação distribuída;
+- `request_id` identifica a requisição técnica;
+- `deduplication_key` é única por organização;
+- repetição retorna o evento existente;
+- obra, cliente, ator e recurso permanecem disponíveis para investigação.
+
+### 8.4 Sanitização
+
+`sanitize_audit_json` percorre objetos e arrays antes da persistência e da leitura normalizada. Chaves relacionadas a senha, token, authorization, secret, Service Role, private key, access key, refresh token ou cookie recebem `[REDACTED]`.
+
+Não armazenar:
+
+- senha;
+- token bruto;
+- Service Role;
+- cookie;
+- IP em texto puro;
+- user-agent em texto puro;
+- payload bruto do provider de assinatura;
+- documento pessoal integral sem necessidade explícita.
+
+IP e user-agent podem ser registrados somente como SHA-256.
+
+### 8.5 Imutabilidade
+
+- `audit_events`: append-only para usuários;
+- `observability_health_checks`: append-only;
+- diagnósticos não podem ser apagados por usuários;
+- reconhecimento e resolução de alertas ocorrem por RPC;
+- cada transição de alerta cria novo evento de auditoria.
+
+### 8.6 Alertas
+
+Regras possuem:
+
+- módulo opcional;
+- padrão de evento;
+- severidade mínima;
+- quantidade mínima;
+- janela temporal;
+- cooldown.
+
+Workflow:
 
 ```text
-organization_id/ticket_id/uuid-nome-do-arquivo
+OPEN → ACKNOWLEDGED → RESOLVED
 ```
 
-Até 25 MB. Tipos: PDF, DOCX, JPEG, PNG e WebP. Download usa rota autenticada e URL assinada por 60 segundos.
+Eventos críticos criam alerta mesmo sem regra específica. Reconhecimento e resolução exigem motivo e capacidade administrativa.
 
-## 7. Estoque — Etapa 17
+### 8.7 Health checks
 
-### Razão imutável
+O snapshot atual verifica:
+
+1. conectividade do banco;
+2. conversão de documentos de assinatura;
+3. entrega de cópias assinadas;
+4. geração de relatórios;
+5. SLA do SAC;
+6. diagnósticos pendentes.
+
+Estados:
 
 ```text
-inventory_movements 1 ── N inventory_movement_lines
+HEALTHY
+DEGRADED
+UNHEALTHY
+UNKNOWN
 ```
 
-O saldo considera movimentos `POSTED`, originais `REVERSED` e contrapartidas `REVERSAL`. O original permanece no razão e não há edição direta de saldo.
+### 8.8 Diagnósticos
 
-Views:
+`observability_diagnostics` recebe achados reproduzíveis de:
 
-```text
-inventory_stock_v
-inventory_reserved_stock_v
-inventory_available_stock_v
-inventory_item_totals_v
-inventory_asset_current_v
-inventory_expiry_alerts_v
-```
+- FK sem índice;
+- RLS com avaliação repetida;
+- políticas permissivas sobrepostas;
+- privilégio indevido de função;
+- divergência de migration;
+- outros advisors estruturados.
 
-Todas usam `security_invoker=true` e são consumidas por contratos autorizados.
+O registro é idempotente por organização, tipo, objeto e código.
 
-### Concorrência
+### 8.9 Retenção
 
-A postagem adquire advisory lock por:
+A política aceita 30 a 3650 dias. `audit_events` recebe `retention_until`. A exclusão automática não pertence à Etapa 19; será implementada na Etapa 20 com dry-run, preservação de eventos críticos, exportação e retenção legal.
 
-```text
-organization_id | warehouse_id | location_id | item_id | lot_id
-```
+### 8.10 Autorização
 
-Após o lock, a transação reavalia físico, reservado, disponível, lote, ativo, transferência e consumo de reserva.
+- leitura: módulo `auditoria`, capacidade `read`;
+- configuração e transições: capacidade `administer`;
+- perfis padrão: Super Administrador, Direção e Administrador;
+- cliente: sem acesso;
+- RPCs: sem execução para `anon`;
+- Service Role: somente operações técnicas explicitamente concedidas.
 
-### Isolamento multiobra
-
-Depósito exclusivo possui `project_id`. Movimento, reserva, importação ou ativo não pode usar depósito exclusivo de outra obra.
-
-### Compras, ativos e inventário
-
-Somente quantidade aceita do recebimento entra no estoque. Ativos possuem patrimônio, custódia, devolução e manutenção. Inventário físico segue abertura, congelamento, contagem, revisão, aprovação e ajuste rastreável.
-
-## 8. Dados sensíveis
+## 9. Dados sensíveis
 
 Proteção em camadas:
 
 1. capacidade `sensitive`;
 2. RLS;
 3. privilégio por coluna;
-4. RPC com mascaramento;
+4. RPC com mascaramento/sanitização;
 5. Server Components;
 6. logs sem valor sensível.
 
-Custos de estoque, valores financeiros, documentos pessoais e observações internas não possuem exposição ampla.
+Custos, valores financeiros, documentos pessoais, observações internas e payloads de integração não possuem exposição ampla.
 
-## 9. Storage e documentos
+## 10. Storage e documentos
 
 - buckets privados;
 - caminho por organização e recurso;
 - upload valida sessão, módulo, tipo, tamanho, contexto e hash;
 - download por URL assinada curta ou rota autenticada;
 - falha remove objeto órfão quando possível;
-- antimalware é requisito de produção.
+- antimalware é requisito da Etapa 20.
 
-Exigem versão, congelamento ou contrapartida:
-
-- orçamento aprovado;
-- proposta liberada;
-- contrato/aditivo enviado ou assinado;
-- baseline;
-- formulário publicado;
-- documento liberado;
-- PDF final;
-- snapshot;
-- movimento e inventário postados;
-- custódia encerrada;
-- consentimento, mensagem, evento e histórico comercial.
-
-## 10. Integrações
-
-- assinatura: adapter interno, sandbox e contratos de providers; webhook HMAC e idempotente;
-- e-mail: fila/worker;
-- DOCX: conversão LibreOffice headless, original preservado;
-- Compras → Financeiro: compromisso idempotente;
-- Compras → Estoque: recebimento aceito gera entrada idempotente;
-- CRM → Cliente: conversão idempotente;
-- Cliente → Obras/Contratos: visão multiobra;
-- SAC → Qualidade/Pesquisas: distribuição posterior por formulário;
-- módulos → Relatórios: contratos analíticos autorizados.
+A Etapa 19 não cria bucket nem armazena arquivo de log.
 
 ## 11. Frontend
 
 - TypeScript estrito;
 - Server Components por padrão;
 - Server Actions para mutações;
-- Client Components apenas para interação necessária;
+- Client Components apenas quando necessários;
 - validação server-side;
 - erro sem SQL ou secrets;
 - acessibilidade e responsividade;
-- alternativa a drag-and-drop;
 - estados vazios e acesso negado explícitos.
 
-## 12. Auditoria e advisors
-
-Operações críticas registram organização, cliente/obra/recurso, ator, evento, data, estado seguro, idempotency key ou hash. Logs não armazenam senha, token bruto, Service Role, documento integral ou dado pessoal desnecessário.
-
-Avisos do advisor são classificados:
-
-- RPC `SECURITY DEFINER` é aceitável quando constitui fronteira intencional com autorização interna;
-- índice `unused` não é removido em ambiente vazio;
-- dívidas globais de RLS, initplan e observabilidade entram nas Etapas 19/20.
-
-## 13. CI e testes
+## 12. CI e testes
 
 Ordem mínima:
 
 1. documentação;
-2. ledger de migrations;
-3. validadores estruturais;
-4. lint;
-5. typecheck;
-6. testes TypeScript;
-7. testes Python;
-8. build.
+2. vacinas;
+3. ledger de migrations;
+4. validadores estruturais;
+5. lint;
+6. typecheck;
+7. testes TypeScript;
+8. testes Python;
+9. build.
 
-Testes SQL reproduzíveis:
+Testes SQL:
 
 ```text
 supabase/tests/stage17_inventory_homologation.sql
 supabase/tests/stage18_relationship_homologation.sql
+supabase/tests/stage19_observability_homologation.sql
 ```
 
-Ambos usam dados artificiais e terminam com `ROLLBACK`.
+Usam dados artificiais e terminam com `ROLLBACK`.
 
-## 14. Recuperabilidade
+## 13. Recuperabilidade
 
 A reconstrução exige clone do GitHub, secrets externos, migrations ordenadas, ledger compatível, dependências, validadores, workers e smoke tests. Procedimento detalhado: [`RECUPERACAO.md`](./RECUPERACAO.md).
