@@ -49,9 +49,16 @@ jobs:
 
       - name: Initialize E2E report
         run: |
-          printf '{\n  "status": "prerequisites_pending",\n  "workflowRunId": "%s",\n  "event": "%s",\n  "startedAt": "%s"\n}\n' \
-            "$GITHUB_RUN_ID" "$GITHUB_EVENT_NAME" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            > stage18-concurrent-e2e-report.json
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const payload={
+            status:"prerequisites_pending",
+            workflowRunId:process.env.GITHUB_RUN_ID,
+            event:process.env.GITHUB_EVENT_NAME,
+            startedAt:new Date().toISOString()
+          };
+          fs.writeFileSync("stage18-concurrent-e2e-report.json",JSON.stringify(payload,null,2)+"\n");
+          NODE
 
       - name: Validate required secrets
         run: |
@@ -62,9 +69,17 @@ jobs:
           test -n "$DEMO_ADMIN_PASSWORD" || missing+=(DEMO_ADMIN_PASSWORD)
           test -n "$DEMO_CLIENT_PASSWORD" || missing+=(DEMO_CLIENT_PASSWORD)
           if [ ${#missing[@]} -gt 0 ]; then
-            printf '{\n  "status": "blocked_missing_secrets",\n  "workflowRunId": "%s",\n  "missingNames": ["%s"],\n  "finishedAt": "%s"\n}\n' \
-              "$GITHUB_RUN_ID" "$(IFS='","'; echo "${missing[*]}")" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-              > stage18-concurrent-e2e-report.json
+            MISSING_NAMES="$(printf '%s\n' "${missing[@]}")" node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const missing=(process.env.MISSING_NAMES??"").split("\n").filter(Boolean);
+          const payload={
+            status:"blocked_missing_secrets",
+            workflowRunId:process.env.GITHUB_RUN_ID,
+            missingNames:missing,
+            finishedAt:new Date().toISOString()
+          };
+          fs.writeFileSync("stage18-concurrent-e2e-report.json",JSON.stringify(payload,null,2)+"\n");
+          NODE
             printf 'Secrets ausentes no ambiente homologation: %s\n' "${missing[*]}"
             exit 1
           fi
