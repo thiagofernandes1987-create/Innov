@@ -1,9 +1,9 @@
 # Roadmap oficial — Innovar Platform
 
-**Versão atual:** 0.17.0  
-**Atualizado em:** 20 de julho de 2026
+**Versão atual:** 0.19.0  
+**Atualizado em:** 21 de julho de 2026
 
-O roadmap segue o estado real do repositório e do Supabase. Planejamento não é tratado como funcionalidade entregue.
+O roadmap segue o estado real do repositório, dos PRs e do Supabase. Planejamento não é tratado como funcionalidade entregue.
 
 ## Etapas consolidadas
 
@@ -16,131 +16,40 @@ O roadmap segue o estado real do repositório e do Supabase. Planejamento não �
 - Etapa 13 — qualidade, FVS, FVM e formulários;
 - Etapa 14 — compras e suprimentos;
 - Etapa 15 — financeiro operacional;
-- Etapa 16 — relatórios e indicadores executivos.
+- Etapa 16 — relatórios e indicadores executivos;
+- Etapa 17 — Estoque, Inventário e Almoxarifado;
+- Etapa 18 — CRM, Clientes e SAC.
 
 ## Etapa 17 — Estoque, Inventário e Almoxarifado
 
-**Estado:** implementada na `main` e homologada tecnicamente.  
+**Estado:** incorporada à `main` e homologada tecnicamente.  
 **Produção:** não liberada.
 
 ### Entregas
 
-- catálogo e unidades;
-- depósitos e localizações;
-- lotes e validade;
-- movimentos e reversões;
-- saldo físico, reservado e disponível derivados;
-- importação idempotente de recebimentos;
-- reservas e consumo;
-- ativos, custódias e manutenção;
-- inventário físico;
-- RLS e custos mascarados;
-- advisory locks;
-- isolamento multiempresa e multiobra;
-- interface responsiva;
-- documentação e recuperação.
-
-### Homologação concluída
-
-- 18 tabelas com RLS;
-- seis views `security_invoker`;
-- 18 migrations alinhadas ao ledger remoto;
-- 14 testes transacionais aprovados com `ROLLBACK`;
-- correção de reversão de saldo;
-- correção de depósito exclusivo por obra;
-- CI do branch original verde.
-
-### Definition of Done adicional
-O roadmap segue o estado real da `main`, do Supabase e das branches explicitamente documentadas.
-
-## Concluído e consolidado
-
-### Etapas 9 a 11 — Comercial, contratos e homologação inicial
-
-- orçamentos, propostas, contratos e aditivos;
-- assinatura inicial e portal comercial;
-- preparação do Supabase e homologação autenticada da base.
-
-### Etapa 12 — Gestão de obras
-
-- clientes e múltiplas obras;
-- EAP, cronograma, tarefas e baselines;
-- equipes, diário, documentos e portal do cliente.
-
-### Etapa 12.1 — Núcleo modular
-
-- catálogo plug-and-play;
-- perfis, capacidades, escopos e overrides;
-- administração e dashboard por acesso.
-
-### Etapa 12.2 — Assinatura avançada
-
-- PDF/DOCX;
-- campos de assinatura, rubrica, nome, data, foto e anexos;
-- hashes, evidências e entrega.
-
-### Etapa 13 — Qualidade
-
-- documentos, FVS e FVM;
-- formulários internos e para clientes;
-- pesquisas, anexos e revisão.
-
-### Etapa 14 — Compras e Suprimentos
-
-- fornecedores convidados;
-- solicitações, cotações e mapa comparativo;
-- aprovações, pedidos, recebimentos e FVM.
-
-### Etapa 15 — Financeiro Operacional
-
-- contas a pagar e receber;
-- parcelas, aprovações e liquidações;
-- medições, comprovantes e fluxo de caixa.
-
-### Etapa 16 — Relatórios Executivos
-
-- dashboards multiobra;
-- metas e alertas;
-- snapshots e exportação auditada.
-
-### Etapa 17 — Estoque, Inventário e Almoxarifado
-
-**Estado:** código incorporado à `main`; banco homologado funcionalmente; CI integral verde; PR `#15` pronto para revisão e aguardando decisão explícita de merge.
-
-Entregas:
-
-- catálogo, unidades, categorias, depósitos, localizações e lotes;
-- razão imutável de movimentos;
+- catálogo, unidades, categorias, depósitos e localizações;
+- lotes, validade, movimentos e reversões;
 - saldos físico, reservado e disponível derivados;
 - recebimento de Compras integrado de forma idempotente;
 - reservas e consumo por obra;
 - ativos, custódias e manutenção;
 - inventário físico e ajustes;
-- RLS, isolamento multiempresa e multiobra e custos mascarados;
-- advisory locks por posição de estoque;
-- 18 tabelas, seis views e 101 FKs indexadas;
-- zero RPC operacional acessível por `anon`.
+- RLS, custos mascarados e isolamento multiempresa e multiobra;
+- advisory locks por posição;
+- interface responsiva e documentação de recuperação.
 
-Evidências concluídas:
+### Homologação
 
-- bootstrap organizacional;
-- entrada, reserva, consumo e reversão idempotentes;
-- saldo disponível e bloqueio de saldo negativo;
-- segunda saída sobre saldo insuficiente recusada;
-- imutabilidade de movimentos postados;
-- inventário físico contabilizado;
-- RLS com duas identidades e organizações temporárias;
-- dados da outra organização ocultos;
-- leitura direta de custo bloqueada;
-- dados artificiais revertidos;
-- advisors revisados;
-- CI verde e PR liberado para revisão.
+- 18 tabelas com RLS;
+- seis views `security_invoker`;
+- migrations alinhadas ao ledger remoto;
+- 14 testes transacionais com `ROLLBACK`;
+- saldo não editável diretamente;
+- movimentos concluídos imutáveis;
+- bloqueio de saldo negativo;
+- dados artificiais revertidos.
 
-Pendência antes da publicação externa:
-
-- teste de carga com duas conexões realmente simultâneas. O conector não conseguiu abrir a segunda sessão sem credenciais explícitas; a arquitetura de lock e o cenário de disputa sequencial foram validados.
-
-#### Definition of Done adicional
+### Definition of Done adicional
 
 - documentação atualizada no mesmo PR;
 - migration aplicada e homologada;
@@ -151,55 +60,88 @@ Pendência antes da publicação externa:
 - isolamento multiempresa e multiobra;
 - CI verde.
 
-Estado do DoD:
+### Pendência de produção
 
-- atendido para documentação, migration, idempotência, saldo, imutabilidade e isolamento;
-- advisory locks implementados e saldo homologado;
-- teste concorrente com duas conexões simultâneas ainda obrigatório antes de produção;
-- branch corretiva precisa permanecer com CI verde antes do merge.
-
-### Pendências de prontidão
-
-- E2E autenticado pós-Etapa 17;
-- duas conexões concorrentes disputando o mesmo saldo;
-- recebimento completo com pedido/fornecedor de homologação;
+- duas conexões realmente simultâneas disputando a mesma posição de estoque;
 - carga e volumetria;
-- proteção contra senhas comprometidas;
-- opções adicionais de MFA;
-- auditoria global de performance e segurança.
+- backup e restauração testados.
 
-## Etapa 18 — Consolidação de CRM, Clientes e SAC
+## Etapa 18 — CRM, Clientes e SAC
 
-- inventariar migrations e rotas existentes;
-- completar domínio persistido;
-- unificar histórico do cliente;
-- consolidar SLAs e ocorrências;
-- integrar CRM, obra, qualidade e pós-venda.
-Objetivos planejados:
+**Estado funcional:** incorporada à `main`.  
+**E2E concorrente:** PR `#18` em rascunho.
 
-- consolidar cadastro e histórico do cliente;
-- tratar lead → oportunidade → cliente → obra → pós-venda;
-- unificar ocorrências, chamados e comunicação;
-- eliminar duplicidade entre CRM, clientes e SAC;
-- aplicar as mesmas regras de módulos, acesso, auditoria e documentação.
+### Entregas
 
-A Etapa 18 só deve iniciar após decisão explícita sobre o merge do PR `#15`. Nenhum merge será executado automaticamente.
+- lead → oportunidade → cliente → obra → pós-venda;
+- Cliente 360 com múltiplas obras abertas ou concluídas;
+- atividades, contatos e consentimentos;
+- SAC interno e portal do cliente;
+- mensagens internas e públicas;
+- anexos privados com SHA-256;
+- SLA, pesquisa de satisfação e eventos append-only;
+- estados críticos alterados somente por RPC;
+- RLS interna e do cliente.
 
-## Fila posterior
+### Bloqueio atual
+
+O E2E de administrador e cliente simultâneos está implementado, mas não inicia enquanto estes secrets estiverem ausentes no ambiente GitHub `homologation`:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+SUPABASE_SERVICE_ROLE_KEY
+DEMO_ADMIN_PASSWORD
+DEMO_CLIENT_PASSWORD
+```
+
+Nenhum valor será hardcodado no repositório.
 
 ## Etapa 19 — Auditoria e observabilidade unificadas
 
+**Estado:** implementação no PR `#19`, empilhado sobre o PR `#18`.  
+**Merge:** proibido automaticamente.
+
+### Escopo
+
 - painel transversal;
-- correlação por ator, entidade e evento;
-- retenção e alertas;
-- revisão de FKs sem índice;
-- revisão de políticas RLS com avaliação repetida;
-- revisão de múltiplas políticas permissivas;
-- telemetria e trilha operacional.
-- trilha transversal;
-- correlação de eventos;
+- fluxo unificado de eventos sem duplicação;
+- correlação por ator, entidade, cliente, obra, recurso, request e `correlation_id`;
+- sanitização recursiva de senha, token, authorization, secret, cookie e chaves privadas;
+- idempotência por chave de deduplicação;
+- eventos e health checks append-only;
 - alertas técnicos e operacionais;
-- health checks e diagnóstico.
+- reconhecimento e resolução com motivo;
+- health checks de banco, assinatura, relatórios e SAC;
+- diagnósticos de FKs sem índice, RLS, políticas permissivas, privilégios e ledger;
+- retenção configurável;
+- RLS e aplicativo sensível para Super Administrador, Direção e Administrador;
+- interface em `/app/auditoria`.
+
+### Migrations
+
+```text
+20260721093000_stage19_observability_schema.sql
+20260721093100_stage19_observability_security.sql
+20260721093200_stage19_observability_functions.sql
+20260721093300_stage19_observability_unified_stream.sql
+20260721093400_stage19_observability_module_performance.sql
+```
+
+### Definition of Done
+
+- [x] schema e segurança versionados;
+- [x] fluxo unificado e sanitização;
+- [x] alertas, health checks e diagnósticos;
+- [x] interface administrativa;
+- [x] teste transacional com `ROLLBACK`;
+- [x] validador estrutural;
+- [x] documentação atualizada no mesmo PR;
+- [ ] lint, typecheck, testes e build verdes no commit final;
+- [ ] migrations aplicadas e homologadas;
+- [ ] advisors revisados;
+- [ ] relatório de homologação registrado;
+- [ ] PR pronto para revisão.
 
 ## Etapa 20 — Prontidão de produção
 
@@ -207,10 +149,11 @@ A Etapa 18 só deve iniciar após decisão explícita sobre o merge do PR `#15`.
 - teste real de concorrência;
 - provider jurídico real;
 - revisão jurídica, contábil e LGPD;
-- proteção/antimalware de anexos;
+- proteção e antimalware de anexos;
 - pentest;
 - backup e restauração testados;
-- observabilidade;
+- integração com telemetria externa;
+- worker de retenção com dry-run e preservação legal;
 - plano de incidentes;
 - proteção contra senhas comprometidas;
 - MFA adicional;
@@ -219,7 +162,7 @@ A Etapa 18 só deve iniciar após decisão explícita sobre o merge do PR `#15`.
 ## Etapa 21 — WMS avançado e Automação Logística
 
 **Estado:** fila aprovada após a Etapa 20.  
-**Não implementada na versão 0.17.0.**
+**Não implementada na versão 0.19.0.**
 
 ### Escopo aprovado
 
@@ -234,7 +177,7 @@ A Etapa 18 só deve iniciar após decisão explícita sobre o merge do PR `#15`.
 ### Dependências
 
 - Etapa 17 estabilizada em produção;
-- auditoria e observabilidade da Etapa 19;
+- Auditoria e observabilidade da Etapa 19;
 - prontidão de produção da Etapa 20;
 - revisão fiscal e contábil;
 - seleção de hardware/provider para RFID;
@@ -256,17 +199,4 @@ A Etapa 18 só deve iniciar após decisão explícita sobre o merge do PR `#15`.
 
 ## Regra de alteração
 
-Nenhuma etapa é concluída sem:
-
-- `diretrizes/SPEC.md`;
-- `diretrizes/ROADMAP.md`;
-- `diretrizes/INVENTARIO.md`;
-- `diretrizes/MODULOS.md`;
-- documentação técnica da etapa;
-- validações do CI.
-- código e migrations versionados;
-- documentação canônica atualizada;
-- CI verde;
-- homologação aplicável;
-- evidências e limitações registradas;
-- recuperação possível exclusivamente pelo repositório e backups declarados.
+Nenhuma etapa é concluída sem código, migrations, testes, documentação canônica, vacinas aplicáveis, homologação e CI compatíveis com o estado declarado. Nenhum merge é realizado automaticamente.
