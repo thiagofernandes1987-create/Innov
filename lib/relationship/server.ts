@@ -53,7 +53,7 @@ export async function loadSacDashboard(){
  const context=await requireCapability("sac","read");
  const[dashboardResult,ticketsResult,categoriesResult]=await Promise.all([
   context.supabase.rpc("get_sac_dashboard",{p_organization_id:context.organizationId}),
-  context.supabase.from("sac_tickets").select("id,code,client_id,project_id,category_id,title,source,priority,status,assigned_to,first_response_due_at,resolution_due_at,created_at,updated_at").eq("organization_id",context.organizationId).order("created_at",{ascending:false}).limit(200),
+  context.supabase.from("sac_tickets").select("id,code,client_id,project_id,category_id,title,source,priority,status,assigned_to,first_response_due_at,resolution_due_at,created_at,updated_at,clients:client_id(legal_name,trade_name),projects:project_id(code,name),sac_categories:category_id(name)").eq("organization_id",context.organizationId).order("created_at",{ascending:false}).limit(200),
   context.supabase.from("sac_categories").select("id,code,name,default_priority,first_response_sla_hours,resolution_sla_hours,active").eq("organization_id",context.organizationId).eq("active",true).order("name")
  ]);
  if(dashboardResult.error)throw new Error(dashboardResult.error.message);
@@ -79,8 +79,12 @@ export async function loadRelationshipOptions(){
 
 export async function loadClientPortalRelationship(){
  const context=await requireClientContext();
- const{data,error}=await context.supabase.rpc("get_client_portal_relationship");
- if(error)throw new Error(error.message);return{context,portal:data&&typeof data==="object"?data as Record<string,unknown>: {}};
+ const[portalResult,categoriesResult]=await Promise.all([
+  context.supabase.rpc("get_client_portal_relationship"),
+  context.supabase.from("sac_categories").select("id,code,name,default_priority").eq("organization_id",context.client.organization_id).eq("active",true).order("name")
+ ]);
+ if(portalResult.error)throw new Error(portalResult.error.message);
+ return{context,portal:portalResult.data&&typeof portalResult.data==="object"?portalResult.data as Record<string,unknown>: {},categories:categoriesResult.data??[]};
 }
 
 export async function loadClientSacTicket(id:string){
