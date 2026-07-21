@@ -20,7 +20,10 @@ const requiredVaccines=[
  "diretrizes/vacinas/VACINA-004-PRIVILEGIOS-RPCS.md",
  "diretrizes/vacinas/VACINA-005-WORKFLOW-PROTEGIDO.md",
  "diretrizes/vacinas/VACINA-006-RUNTIME-GITHUB-ACTIONS.md",
- "diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md"
+ "diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md",
+ "diretrizes/vacinas/VACINA-008-INSTALACAO-HOMOLOGACAO.md",
+ "diretrizes/vacinas/VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md",
+ "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md"
 ];
 const requiredHistorical=[
  "docs/ETAPA-09-FINANCEIRO-CONTRATOS.md",
@@ -142,7 +145,7 @@ if(errors.length===0){
  for(const token of["diretrizes/SPEC.md","diretrizes/INVENTARIO.md","diretrizes/RECUPERACAO.md","pnpm validate:docs"])
   if(!readme.includes(token))errors.push(`README sem referência obrigatória: ${token}`);
 
- for(const token of["VACINA-001","VACINA-002","VACINA-003","VACINA-004","VACINA-005","VACINA-006","VACINA-007","Definition of Done de erro"])
+ for(const token of["VACINA-001","VACINA-002","VACINA-003","VACINA-004","VACINA-005","VACINA-006","VACINA-007","VACINA-008","VACINA-009","VACINA-010","Definition of Done de erro"])
   if(!vaccinesIndex.includes(token))errors.push(`Catálogo de vacinas incompleto: ${token}`);
 
  for(const token of["18 tabelas","advisory locks","14 testes transacionais","ledger remoto","ROLLBACK"])
