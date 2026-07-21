@@ -6,7 +6,7 @@
 **PR atual:** `#19`, empilhado sobre o PR `#18`, ambos em rascunho  
 **Versão:** 0.19.0
 
-Este documento registra o necessário para recuperar, validar e continuar o projeto sem depender do contêiner ou da conversa.
+Este documento registra tudo o que é necessário para recuperar, validar e continuar o projeto sem depender do contêiner ou do histórico da conversa.
 
 ## 1. Repositório e runtime
 
@@ -43,7 +43,7 @@ Este documento registra o necessário para recuperar, validar e continuar o proj
 | `financeiro` | Financeiro Operacional | operacional | 15 |
 | `sac` | Pós-venda e SAC | implementado e homologado | 18 |
 | `relatorios` | Relatórios e Indicadores | operacional | 16 |
-| `auditoria` | Auditoria e Observabilidade | implementação no PR #19 | 19 |
+| `auditoria` | Auditoria e Observabilidade | implementado e homologado tecnicamente; PR #19 em rascunho | 19 |
 | `administracao` | Administração | operacional | 12.1 |
 
 ## 3. Documentação canônica
@@ -130,7 +130,7 @@ supabase/tests/stage17_inventory_homologation.sql
 20260720234549_stage17_inventory_rpc_privileges.sql
 ```
 
-A antiga migration monolítica `20260720160400_stage17_inventory_assets_stocktakes.sql` não existe; a implementação real está dividida em `_01` a `_04`.
+A migration monolítica `20260720160400_stage17_inventory_assets_stocktakes.sql` não existe. A implementação real é `_01` a `_04`, e o validador reconhece exclusivamente essa divisão.
 
 ## 5. Etapa 18 — CRM, Clientes e SAC
 
@@ -172,12 +172,12 @@ sac_ticket_events
 
 - pipeline comercial exclusivamente interno;
 - cliente vê somente cadastro e chamados próprios;
-- portal mostra apenas obras liberadas;
+- portal mostra somente obras liberadas;
 - mensagens, anexos e eventos internos não aparecem ao cliente;
-- upload autorizado pela sessão e realizado server-side;
-- SHA-256 e bucket privado `crm-sac-attachments`;
-- estados críticos somente por RPC;
-- conversão e comandos externos idempotentes;
+- upload autorizado pela sessão, realizado server-side e armazenado no bucket privado `crm-sac-attachments`;
+- anexos possuem SHA-256;
+- estados críticos são alterados somente por RPC;
+- conversão e comandos externos são idempotentes;
 - zero RPC operacional para `anon`.
 
 ### Migrations canônicas
@@ -199,7 +199,17 @@ sac_ticket_events
 
 ### E2E concorrente
 
-O PR `#18` contém duas sessões Supabase independentes, operações em paralelo, verificação de RLS e cleanup. A execução funcional permanece bloqueada porque o ambiente GitHub `homologation` não possui os cinco secrets obrigatórios.
+O PR `#18` contém duas sessões Supabase independentes, operações em paralelo, verificação de RLS e cleanup. A execução permanece bloqueada exclusivamente porque o ambiente GitHub `homologation` não possui os cinco secrets obrigatórios:
+
+```text
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+SUPABASE_SERVICE_ROLE_KEY
+DEMO_ADMIN_PASSWORD
+DEMO_CLIENT_PASSWORD
+```
+
+Valores nunca são versionados nem enviados em conversa.
 
 ## 6. Etapa 19 — Auditoria e Observabilidade
 
@@ -227,9 +237,12 @@ supabase/tests/stage19_observability_homologation.sql
 /app/auditoria/configuracao
 ```
 
-### Tabelas novas
+### Banco
+
+Seis tabelas com RLS:
 
 ```text
+audit_events
 observability_alert_rules
 observability_alerts
 observability_health_checks
@@ -237,7 +250,7 @@ observability_diagnostics
 observability_retention_policies
 ```
 
-A tabela existente `audit_events` recebe módulo, severidade, origem, ator, cliente, hashes, request, deduplicação, ocorrência e retenção.
+`audit_events` recebe módulo, severidade, origem, ator, cliente, hashes, request, deduplicação, ocorrência e retenção.
 
 ### RPCs principais
 
@@ -253,6 +266,7 @@ get_observability_events
 get_observability_event_detail
 record_observability_diagnostic
 install_observability_defaults
+stage19_can_read_global_diagnostics
 ```
 
 ### Fontes do fluxo unificado
@@ -281,26 +295,47 @@ crm_activities
 - eventos e health checks append-only;
 - payloads sanitizados recursivamente;
 - IP e user-agent somente como SHA-256;
-- RPCs bloqueadas para `anon`;
-- payload bruto de assinatura não é exposto.
+- zero função da Etapa 19 executável por `anon`;
+- payload bruto de assinatura não é exposto;
+- diagnósticos globais visíveis somente para membro interno com acesso ao módulo;
+- sessão autenticada sem membership vê zero diagnóstico global.
 
-### Migrations canônicas
+### Seis migrations canônicas alinhadas ao ledger
 
 ```text
-20260721093000_stage19_observability_schema.sql
-20260721093100_stage19_observability_security.sql
-20260721093200_stage19_observability_functions.sql
-20260721093300_stage19_observability_unified_stream.sql
-20260721093400_stage19_observability_module_performance.sql
+20260721100108_stage19_observability_schema.sql
+20260721100159_stage19_observability_security.sql
+20260721122302_stage19_observability_functions.sql
+20260721122355_stage19_observability_unified_stream.sql
+20260721122436_stage19_observability_module_performance.sql
+20260721123305_stage19_observability_hardening.sql
 ```
 
 ### Estado de homologação
 
-- validador estrutural implementado;
-- teste transacional com `ROLLBACK` implementado;
-- migrations ainda não aplicadas no Supabase;
-- advisors ainda não revisados;
-- PR `#19` permanece em rascunho e empilhado.
+- seis migrations aplicadas no Supabase;
+- arquivos locais alinhados ao ledger remoto;
+- seis tabelas com RLS;
+- 13 políticas e seis gatilhos não internos;
+- 16 FKs e zero FK sem índice líder;
+- sanitização recursiva confirmada;
+- idempotência confirmada;
+- alerta crítico, reconhecimento e resolução confirmados;
+- seis health checks confirmados;
+- fluxo unificado confirmado;
+- append-only bloqueado por privilégio e trigger;
+- isolamento multiempresa confirmado;
+- diagnósticos globais protegidos contra cliente/sessão sem membership;
+- teste oficial termina com `ROLLBACK`;
+- nenhum dado artificial persistido;
+- advisors de segurança e performance revisados;
+- PR `#19` permanece em rascunho por depender do PR `#18`.
+
+### Advisors
+
+- avisos Stage19 de `SECURITY DEFINER` autenticado são fronteiras intencionais com autorização interna e zero acesso `anon`;
+- índices `unused` foram preservados por ausência de carga representativa;
+- dívidas antigas de FKs, `auth_rls_initplan` e policies permissivas ficam no backlog transversal das Etapas 19/20.
 
 ## 7. Storage privado
 
