@@ -47,6 +47,7 @@ Não é permitido encerrar um erro recorrente apenas com correção local quando
 | `VACINA-007` | Scanner de segredos confunde placeholders com credenciais | aplicada | classificação semântica do valor e varredura histórica preservada |
 | `VACINA-008` | CI e homologação usam políticas diferentes de instalação | aplicada | versão/política pnpm alinhadas em todos os workflows |
 | `VACINA-009` | E2E valida pré-requisitos tarde e perde relatório | aplicada | secrets antes da instalação e artefato inicial obrigatório |
+| `VACINA-010` | JSON de workflow montado manualmente em shell | aplicada | `JSON.stringify` e validação de artefato parseável |
 
 ## 4. Arquivos
 
@@ -60,7 +61,8 @@ diretrizes/vacinas/
 ├── VACINA-006-RUNTIME-GITHUB-ACTIONS.md
 ├── VACINA-007-SCANNER-DE-SEGREDOS.md
 ├── VACINA-008-INSTALACAO-HOMOLOGACAO.md
-└── VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md
+├── VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md
+└── VACINA-010-JSON-DE-RELATORIOS.md
 ```
 
 ## 5. Critérios para nova vacina
