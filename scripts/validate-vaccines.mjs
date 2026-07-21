@@ -8,7 +8,8 @@ const vaccines=[
  "diretrizes/vacinas/VACINA-003-LEDGER-MIGRATIONS-SUPABASE.md",
  "diretrizes/vacinas/VACINA-004-PRIVILEGIOS-RPCS.md",
  "diretrizes/vacinas/VACINA-005-WORKFLOW-PROTEGIDO.md",
- "diretrizes/vacinas/VACINA-006-RUNTIME-GITHUB-ACTIONS.md"
+ "diretrizes/vacinas/VACINA-006-RUNTIME-GITHUB-ACTIONS.md",
+ "diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md"
 ];
 const required=["diretrizes/VACINAS.md",...vaccines];
 
@@ -22,7 +23,7 @@ for(const file of required){
 
 if(fs.existsSync("diretrizes/VACINAS.md")){
  const index=read("diretrizes/VACINAS.md");
- for(let id=1;id<=6;id++)if(!index.includes(`VACINA-00${id}`))errors.push(`Catálogo sem VACINA-00${id}.`);
+ for(let id=1;id<=7;id++)if(!index.includes(`VACINA-00${id}`))errors.push(`Catálogo sem VACINA-00${id}.`);
 }
 
 // VACINA-001 — relações Supabase variáveis.
@@ -102,9 +103,19 @@ for(const name of workflows){
 }
 for(const token of["actions/checkout@v6","actions/setup-node@v6","actions/setup-python@v6","actions/upload-artifact@v7"])
  if(!ciWorkflow.includes(token))errors.push(`CI sem action canônica Node 24: ${token}`);
-const homologationWorkflow=read(".github/workflows/stage11-homologation.yml");
-for(const token of["actions/checkout@v6","actions/setup-node@v6"])
- if(!homologationWorkflow.includes(token))errors.push(`Homologação sem action canônica: ${token}`);
+for(const workflowFile of[".github/workflows/stage11-homologation.yml",".github/workflows/stage18-concurrent-e2e.yml"]){
+ const content=read(workflowFile);
+ for(const token of["actions/checkout@v6","actions/setup-node@v6"])
+  if(!content.includes(token))errors.push(`${workflowFile} sem action canônica: ${token}`);
+}
+
+// VACINA-007 — scanner de segredos com placeholders.
+const documentationValidator=read("scripts/validate-documentation.mjs");
+for(const token of["function isSafeSecretPlaceholder","function validateSecrets","requiredHistorical","VACINA-007-SCANNER-DE-SEGREDOS.md"])
+ if(!documentationValidator.includes(token))errors.push(`Scanner documental sem prevenção: ${token}`);
+if(documentationValidator.includes("const forbiddenSecretPatterns"))errors.push("Scanner documental voltou ao modelo textual que gera falsos positivos.");
+for(const token of["value===\"...\"","/^<[^>]+>$/","secrets\\."])
+ if(!documentationValidator.includes(token))errors.push(`Scanner documental não reconhece placeholder seguro: ${token}`);
 
 if(errors.length){
  console.error(`Vacinas inválidas (${errors.length} falha(s)):`);
