@@ -23,7 +23,8 @@ const requiredVaccines=[
  "diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md",
  "diretrizes/vacinas/VACINA-008-INSTALACAO-HOMOLOGACAO.md",
  "diretrizes/vacinas/VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md",
- "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md"
+ "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md",
+ "diretrizes/vacinas/VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md"
 ];
 const requiredHistorical=[
  "docs/ETAPA-09-FINANCEIRO-CONTRATOS.md",
@@ -42,6 +43,7 @@ const requiredHistorical=[
  "docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md",
  "docs/ETAPA-18-CRM-CLIENTES-SAC.md",
  "docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md",
+ "docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md",
  "docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md",
  "docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md",
  "docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md"
@@ -100,6 +102,7 @@ if(errors.length===0){
  const stage17Report=fs.readFileSync("docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md","utf8");
  const stage18=fs.readFileSync("docs/ETAPA-18-CRM-CLIENTES-SAC.md","utf8");
  const stage18E2E=fs.readFileSync("docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md","utf8");
+ const stage19=fs.readFileSync("docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md","utf8");
  const stage21=fs.readFileSync("docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md","utf8");
  const packageJson=JSON.parse(fs.readFileSync("package.json","utf8"));
 
@@ -116,9 +119,8 @@ if(errors.length===0){
 
  for(const token of[
   "Etapa 17","Estoque, Inventário e Almoxarifado","Definition of Done adicional",
-  "Etapa 21","WMS avançado","endereçamento automatizado","RFID em tempo real",
-  "ressuprimento automático sem aprovação","roteirização logística","integração fiscal de entrada",
-  "depreciação contábil oficial"
+  "Etapa 19","Auditoria e observabilidade","Etapa 21","WMS avançado","endereçamento automatizado","RFID em tempo real",
+  "ressuprimento automático sem aprovação","roteirização logística","integração fiscal de entrada","depreciação contábil oficial"
  ])if(!roadmap.includes(token))errors.push(`Roadmap incompleto: ${token}`);
 
  for(const token of[
@@ -145,7 +147,7 @@ if(errors.length===0){
  for(const token of["diretrizes/SPEC.md","diretrizes/INVENTARIO.md","diretrizes/RECUPERACAO.md","pnpm validate:docs"])
   if(!readme.includes(token))errors.push(`README sem referência obrigatória: ${token}`);
 
- for(const token of["VACINA-001","VACINA-002","VACINA-003","VACINA-004","VACINA-005","VACINA-006","VACINA-007","VACINA-008","VACINA-009","VACINA-010","Definition of Done de erro"])
+ for(const token of["VACINA-001","VACINA-002","VACINA-003","VACINA-004","VACINA-005","VACINA-006","VACINA-007","VACINA-008","VACINA-009","VACINA-010","VACINA-011","Definition of Done de erro"])
   if(!vaccinesIndex.includes(token))errors.push(`Catálogo de vacinas incompleto: ${token}`);
 
  for(const token of["18 tabelas","advisory locks","14 testes transacionais","ledger remoto","ROLLBACK"])
@@ -159,6 +161,9 @@ if(errors.length===0){
 
  for(const token of["login paralelo","mensagem interna","Promise.all","cleanup","Vacinas aplicadas","Critério de conclusão"])
   if(!stage18E2E.includes(token))errors.push(`Documento E2E concorrente incompleto: ${token}`);
+
+ for(const token of["fluxo unificado","correlation_id","append-only","RLS","alertas","health checks","diagnósticos","Definition of Done"])
+  if(!stage19.toLowerCase().includes(token.toLowerCase()))errors.push(`Documento da Etapa 19 incompleto: ${token}`);
 
  for(const token of[
   "WMS avançado","Endereçamento automatizado","RFID em tempo real",
