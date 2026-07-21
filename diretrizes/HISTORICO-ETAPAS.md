@@ -27,35 +27,36 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 
 ## Etapa 17 — Estoque, Inventário e Almoxarifado
 
-- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](../docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md) — contrato técnico, schema, operações e segurança do estoque operacional.
-- [`docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md`](../docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md) — recuperação pós-interrupção, auditoria do Supabase, defeitos encontrados, correções e 14 testes transacionais.
-- [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — fila aprovada de WMS avançado, endereçamento, RFID, ressuprimento, roteirização, fiscal e depreciação.
+- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](../docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md) — contrato técnico, schema, operações e segurança.
+- [`docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md`](../docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md) — recuperação, auditoria Supabase, correções e testes transacionais.
+- [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — evolução futura para WMS avançado.
 
-### Linha do tempo
+## Etapa 18 — CRM, Clientes e SAC
 
-1. O PR `#14` implementou a Etapa 17 e foi mesclado antes da homologação final do Supabase.
-2. O PR `#15` foi aberto para correções append-only e evidências.
-3. O contêiner não continha checkout recuperável; o estado foi reconstruído pelo GitHub, diretrizes e histórico remoto do Supabase.
-4. Toda a sequência da Etapa 17 foi aplicada.
-5. Foram adicionados locks transacionais, índices complementares e privilégio mínimo das RPCs.
-6. Foram confirmadas 18 tabelas com RLS, seis views privadas, 49 políticas, 36 gatilhos e 101 FKs indexadas.
-7. Bootstrap, saldo, reservas, consumo, reversão, imutabilidade e inventário físico passaram em transações revertidas.
-8. RLS foi testada diretamente com duas identidades e organizações temporárias: uma linha própria, zero linha da outra organização e custo direto bloqueado.
-9. Nenhuma RPC operacional permanece acessível por `anon`.
-10. O teste de duas conexões realmente simultâneas ficou reservado para a Etapa 20 por limitação de credenciais do conector.
-11. O PR `#15` aguarda CI final e revisão; merge depende de aprovação explícita.
+- [`docs/ETAPA-18-CRM-CLIENTES-SAC.md`](../docs/ETAPA-18-CRM-CLIENTES-SAC.md) — lead, oportunidade, Cliente 360, múltiplas obras, atendimento e portal.
+- [`docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md`](../docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md) — administrador e cliente autenticados acessando simultaneamente o mesmo chamado no Supabase.
 
-### Estado registrado
+### Evidências registradas
 
-A Etapa 17 está incorporada e homologada funcionalmente no Supabase. Todos os dados artificiais foram revertidos. A única validação operacional adicional é o teste de carga concorrente com conexões realmente simultâneas antes da publicação externa.
+- Etapa 18 incorporada à `main` pelo PR `#17`;
+- 10 tabelas novas com RLS;
+- CRM, Cliente 360 e SAC homologados com transações revertidas;
+- portal restrito às obras liberadas;
+- workflow de estados protegido;
+- bucket privado e anexos com SHA-256;
+- E2E concorrente usa duas sessões reais, operações em `Promise.all`, verificação de RLS e cleanup obrigatório;
+- catálogo canônico de vacinas criado para impedir repetição das causas-raiz encontradas.
+
+## Vacinas de engenharia
+
+O catálogo atual está em [`diretrizes/VACINAS.md`](./VACINAS.md), com documentos individuais em `diretrizes/vacinas/`. Toda correção recorrente deve consultar, aplicar ou ampliar esse catálogo.
 
 ## Planejamento posterior
 
-- Etapa 18 — consolidação de CRM, Clientes e SAC;
 - Etapa 19 — auditoria e observabilidade;
-- Etapa 20 — prontidão de produção e teste concorrente simultâneo;
-- [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — WMS avançado, RFID, automação logística, fiscal e patrimonial; somente planejamento.
+- Etapa 20 — prontidão de produção e teste de carga ampliado;
+- Etapa 21 — WMS avançado, RFID, automação logística, fiscal e patrimonial.
 
 ## Regra histórica
 
-Documento histórico não substitui SPEC, inventário, arquitetura, módulos ou roadmap. Toda nova etapa atualiza documentação canônica e seu próprio relatório no mesmo PR.
+Documento histórico não substitui SPEC, inventário, arquitetura, módulos, roadmap ou vacinas. Toda nova etapa atualiza documentação canônica e seu próprio relatório no mesmo PR.
