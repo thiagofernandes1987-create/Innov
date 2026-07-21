@@ -1,7 +1,7 @@
 # SPEC — Innovar Platform
 
 **Documento canônico:** sim  
-**Revisão documental:** 1.3.0  
+**Revisão documental:** 1.3.1  
 **Versão implementada da plataforma:** 0.17.0  
 **Atualizado em:** 20 de julho de 2026  
 **Fonte de verdade:** `thiagofernandes1987-create/Innov`
@@ -104,8 +104,9 @@ Estado real:
 - implementação incorporada à `main` pelo PR `#14`;
 - migrations aplicadas no Supabase;
 - homologação funcional e RLS executadas com dados temporários revertidos;
-- correções e evidências no PR `#15`, aguardando CI final e revisão;
-- merge do PR `#15` depende de aprovação explícita.
+- correções, evidências e documentação consolidadas no PR `#15`;
+- CI integral verde e PR `#15` pronto para revisão;
+- merge depende de aprovação explícita.
 
 ### Financeiro e relatórios
 
@@ -189,9 +190,11 @@ pnpm test:python
 pnpm build
 ```
 
+O CI integral da branch corretiva foi aprovado antes da liberação do PR `#15` para revisão.
+
 ## 12. Próxima etapa oficial
 
-Após CI e revisão do PR `#15`:
+Depois da decisão explícita sobre o merge do PR `#15`:
 
 - Etapa 18 — CRM, Clientes e SAC;
 - Etapa 19 — auditoria e observabilidade;
