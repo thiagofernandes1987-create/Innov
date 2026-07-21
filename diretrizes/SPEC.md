@@ -1,7 +1,7 @@
 # SPEC — Innovar Platform
 
 **Documento canônico:** sim  
-**Revisão documental:** 1.5.0  
+**Revisão documental:** 1.5.1  
 **Versão implementada da plataforma:** 0.19.0  
 **Atualizado em:** 21 de julho de 2026  
 **Fonte de verdade:** repositório `thiagofernandes1987-create/Innov`
@@ -82,7 +82,22 @@ Capacidades incluem criar, ler, editar, excluir, aprovar, liberar, assinar, expo
 
 O catálogo canônico está em `lib/modules/registry.ts` e no banco em `app_modules`. Cada organização habilita aplicativos por `organization_modules`, perfis e overrides. A Etapa 19 consolida auditoria e observabilidade como aplicativo sensível, restrito por padrão a Super Administrador, Direção e Administrador.
 
-## 6. Auditoria e observabilidade
+## 6. Estoque, Inventário e Almoxarifado
+
+O módulo de Estoque, Inventário e Almoxarifado permanece consolidado como núcleo operacional da Etapa 17, com:
+
+- catálogo, unidades, categorias e depósitos;
+- localizações, lotes e validade;
+- movimentos append-only e reversões;
+- saldos físico, reservado e disponível derivados;
+- recebimentos de compras idempotentes;
+- reservas e consumo por obra;
+- ativos, custódias e manutenção;
+- inventário físico, ajustes e isolamento multiempresa/multiobra.
+
+Saldos não podem ser editados diretamente. Custos sensíveis dependem de capacidade específica e toda operação crítica deve permanecer auditável.
+
+## 7. Auditoria e observabilidade
 
 A versão `0.19.0` inclui:
 
@@ -96,6 +111,19 @@ A versão `0.19.0` inclui:
 - diagnósticos de índices, RLS, privilégios e ledger;
 - política configurável de retenção.
 
-## 7. Próxima etapa oficial
+## 8. Próxima etapa oficial
 
 A Etapa 20 é a prontidão de produção: E2E autenticado completo, concorrência real, provider jurídico, proteção de anexos, pentest, backup/restauração, incidentes, MFA adicional e publicação controlada. O E2E concorrente da Etapa 18 permanece bloqueado até a configuração dos secrets do ambiente GitHub `homologation`.
+
+## 9. Etapa 21 — WMS avançado
+
+A Etapa 21 permanece planejada e não integra a versão implementada atual. O WMS avançado deverá evoluir o estoque com:
+
+- endereçamento automatizado;
+- RFID em tempo real;
+- ressuprimento automático com limites e segregação de funções;
+- roteirização logística;
+- integração fiscal de entrada;
+- depreciação contábil oficial.
+
+Dependências obrigatórias: Etapa 17 estabilizada, auditoria e observabilidade da Etapa 19, prontidão de produção da Etapa 20, revisão fiscal/contábil e seleção de hardware/provider.
