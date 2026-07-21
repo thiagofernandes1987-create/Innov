@@ -3,6 +3,7 @@
 begin;
 
 create temp table stage19_test_results(test_name text primary key,passed boolean not null,detail text not null) on commit drop;
+grant select,insert,update,delete on stage19_test_results to authenticated;
 
 do $$
 declare
