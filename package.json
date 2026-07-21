@@ -1,6 +1,6 @@
 {
   "name": "innovar-platform",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
   "packageManager": "pnpm@11.15.0",
   "scripts": {
@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "test:python": "PYTHONPATH=python python3 -m unittest discover -s python/tests -v",
     "validate:docs": "node scripts/validate-documentation.mjs",
+    "validate:migrations": "node scripts/validate-supabase-migrations.mjs",
     "validate:stage9": "node scripts/validate-stage9.mjs",
     "validate:stage12": "node scripts/validate-stage12.mjs",
     "validate:stage12.1": "node scripts/validate-stage12-1.mjs",
@@ -22,6 +23,7 @@
     "validate:stage15": "node scripts/validate-stage15.mjs",
     "validate:stage16": "node scripts/validate-stage16.mjs",
     "validate:stage17": "node scripts/validate-stage17.mjs",
+    "validate:stage18": "node scripts/validate-stage18.mjs",
     "worker:signature-conversion": "node scripts/run-signature-conversion-worker.mjs",
     "worker:signature-delivery": "node scripts/run-signature-delivery-worker.mjs",
     "provision:homologation": "node scripts/provision-homologation-users.mjs",
