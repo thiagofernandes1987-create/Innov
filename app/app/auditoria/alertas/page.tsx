@@ -1,0 +1,12 @@
+import{acknowledgeAlert,resolveAlert}from"@/app/actions/observability";
+import{ObservabilityNavigation}from"@/components/observability/observability-navigation";
+import{dateTime,severityLabel}from"@/lib/observability/domain";
+import{loadObservabilityAlerts}from"@/lib/observability/server";
+
+export const dynamic="force-dynamic";
+
+export default async function ObservabilityAlerts({searchParams}:{searchParams:Promise<{error?:string}>}){
+ const query=await searchParams;const{alerts,error}=await loadObservabilityAlerts();
+ return <main className="content observability-app"><section className="page-heading"><div><span className="badge">AUDITORIA · ALERTAS</span><h1>Alertas operacionais</h1><p>Reconhecimento e resolução com motivo obrigatório e trilha imutável.</p></div></section><ObservabilityNavigation/>{(query.error||error)&&<div className="validation blocking">{query.error||error}</div>}
+ <section className="observability-alert-grid">{alerts.map(alert=><article className={`card card-pad alert-card alert-${alert.severity.toLowerCase()}`} key={alert.id}><header><span className={`severity severity-${alert.severity.toLowerCase()}`}>{severityLabel(alert.severity)}</span><span className="status-pill">{alert.status}</span></header><h2>{alert.title}</h2><p>{alert.message}</p><dl className="detail-list"><div><dt>Módulo</dt><dd>{alert.module_key??"sistema"}</dd></div><div><dt>Ocorrências</dt><dd>{alert.occurrence_count}</dd></div><div><dt>Primeira</dt><dd>{dateTime(alert.first_occurred_at)}</dd></div><div><dt>Última</dt><dd>{dateTime(alert.last_occurred_at)}</dd></div><div><dt>Correlação</dt><dd>{alert.correlation_id??"—"}</dd></div></dl>{alert.status!=="RESOLVED"&&<div className="alert-actions">{alert.status==="OPEN"&&<form action={acknowledgeAlert}><input type="hidden" name="alertId" value={alert.id}/><label>Motivo do reconhecimento<input name="reason" required minLength={3}/></label><button className="button button-secondary">Reconhecer</button></form>}<form action={resolveAlert}><input type="hidden" name="alertId" value={alert.id}/><label>Motivo da resolução<input name="reason" required minLength={3}/></label><button className="button button-primary">Resolver</button></form></div>}</article>)}{!alerts.length&&<div className="card card-pad empty-state"><h3>Nenhum alerta registrado</h3><p>Eventos críticos e regras configuradas aparecerão aqui.</p></div>}</section></main>;
+}
