@@ -1,0 +1,1 @@
+export function RelationshipMetric({label,value,detail,tone="neutral"}:{label:string;value:string;detail?:string;tone?:"neutral"|"ok"|"warning"|"critical"}){return <article className={`card relationship-metric relationship-metric-${tone}`}><small>{label}</small><strong>{value}</strong>{detail?<span>{detail}</span>:null}</article>;}

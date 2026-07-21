@@ -1,26 +1,26 @@
 # SPEC — Innovar Platform
 
 **Documento canônico:** sim  
-**Revisão documental:** 1.2.0  
-**Versão implementada da plataforma:** 0.17.0  
-**Atualizado em:** 20 de julho de 2026  
-**Fonte de verdade:** branch `main` e branches/PRs explicitamente registrados do repositório `thiagofernandes1987-create/Innov`
+**Revisão documental:** 1.4.0  
+**Versão implementada da plataforma:** 0.18.0  
+**Atualizado em:** 21 de julho de 2026  
+**Fonte de verdade:** repositório `thiagofernandes1987-create/Innov`
 
 ## 1. Propósito
 
 A Innovar Platform é a plataforma modular da **Innovar Construções e Reformas** para gerir o ciclo completo:
 
 ```text
-lead → cliente → orçamento → proposta → contrato → assinatura
-→ obra → planejamento → execução → qualidade → compras
-→ estoque → financeiro → indicadores → entrega → pós-venda → auditoria
+lead → oportunidade → cliente → orçamento → proposta → contrato → assinatura
+→ obra → planejamento → execução → qualidade → compras → estoque
+→ financeiro → indicadores → entrega → SAC/pós-venda → auditoria
 ```
 
-A arquitetura suporta múltiplas organizações, clientes e obras. Um cliente pode possuir várias obras abertas ou encerradas.
+A solução suporta múltiplas organizações e múltiplas obras por cliente, abertas ou concluídas.
 
 ## 2. Fonte de verdade e continuidade
 
-O GitHub é a fonte definitiva de código, migrations, testes e documentação. A solução precisa ser reconstruível mesmo com perda de contêiner, conversa, máquina local ou artefato temporário.
+GitHub contém código, migrations, testes, documentação, CI e recuperação. Perder contêiner, conversa ou máquina local não pode impedir a reconstrução. Segredos e dados reais permanecem fora do repositório.
 
 Ordem de leitura:
 
@@ -30,26 +30,29 @@ Ordem de leitura:
 4. `diretrizes/ARQUITETURA.md`;
 5. `diretrizes/ROADMAP.md`;
 6. `diretrizes/RECUPERACAO.md`;
-7. documentos técnicos e relatórios em `docs/`.
-
-Credenciais permanecem em cofres externos. O repositório registra somente nomes, finalidade e procedimento seguro.
+7. documentos em `docs/`.
 
 ## 3. Princípios inegociáveis
 
-1. **Modular e plug-and-play:** aplicativos habilitados por organização.
-2. **Multiempresa e multiobra:** todo dado operacional pertence a organização e, quando aplicável, obra.
-3. **Autorização real:** menu oculto não substitui controle em rota, RPC, RLS e arquivo.
-4. **RLS por padrão:** tabelas de negócio expostas ao Supabase usam Row Level Security.
-5. **Service Role somente no servidor:** nunca enviada ao navegador.
-6. **Storage privado:** arquivos sensíveis por URL assinada ou rota autenticada.
-7. **Versionamento e imutabilidade:** documentos e eventos concluídos não são reescritos.
-8. **Auditoria:** operações críticas registram ator, data, ação e contexto.
-9. **Idempotência:** repetição não produz duplicidade.
-10. **Concorrência:** saldo e operações críticas usam locks/transações adequados.
-11. **Documentação viva:** código e documentação são atualizados no mesmo PR.
-12. **Recuperabilidade:** nenhum componente necessário pode existir apenas no contêiner ou na conversa.
+1. módulos plug-and-play por organização;
+2. isolamento multiempresa e multiobra;
+3. autorização em menu, rota, Server Action, RPC, tabela e arquivo;
+4. RLS por padrão;
+5. Service Role somente no servidor;
+6. Storage privado e download autenticado;
+7. versionamento, hash e imutabilidade;
+8. auditoria de ações críticas;
+9. idempotência em integrações e comandos repetíveis;
+10. saldos derivados de razões, nunca editados diretamente;
+11. concorrência protegida por transações e locks quando necessária;
+12. migrations append-only e alinhadas ao ledger remoto;
+13. privilégios mínimos;
+14. documentação atualizada no mesmo PR;
+15. CI como bloqueio obrigatório.
 
-## 4. Atores e perfis canônicos
+## 4. Modelo de autorização
+
+Perfis canônicos:
 
 - Super Administrador;
 - Direção;
@@ -60,70 +63,20 @@ Credenciais permanecem em cofres externos. O repositório registra somente nomes
 - Orçamentista;
 - Financeiro;
 - Qualidade;
+- Compras/Almoxarifado;
 - Pós-venda/SAC;
 - Cliente.
 
-Perfis personalizados são suportados e não podem ser sobrescritos automaticamente por instaladores.
+Perfis personalizados não são sobrescritos pelos instaladores.
 
-## 5. Modelo de autorização
-
-### Níveis
+Níveis:
 
 - `NONE`;
 - `READ`;
-- `READ_WRITE`/`EDIT`;
-- `FULL`/`DELETE`.
+- `EDIT`/`READ_WRITE`;
+- `DELETE`/`FULL`.
 
-### Capacidades
-
-- criar;
-- ler;
-- editar;
-- excluir;
-- aprovar;
-- liberar ao cliente;
-- assinar;
-- exportar;
-- administrar;
-- visualizar dados financeiros sensíveis;
-- atribuir usuários;
-- configurar.
-
-### Escopos
-
-- organização;
-- cliente;
-- obra.
-
-A resolução considera associação ativa, módulo habilitado, perfil, capacidades, escopo, overrides e AAL. Negação explícita prevalece.
-
-## 6. Aplicativos modulares
-## 2. Regra de continuidade
-
-GitHub é a fonte definitiva de código, migrations, documentação, testes e recuperação. A solução precisa ser reconstruível mesmo após perda total de contêiner, conversa ou ambiente local. Nenhum segredo pertence à documentação.
-
-## 3. Princípios inegociáveis
-
-1. módulos plug-and-play por organização;
-2. isolamento multiempresa e multiobra;
-3. autorização em rota, RPC, tabela e arquivo;
-4. RLS por padrão;
-5. Service Role somente no servidor;
-6. documentos e buckets privados;
-7. versionamento, hash e imutabilidade;
-8. auditoria de ações críticas;
-9. idempotência em integrações;
-10. documentação atualizada no mesmo PR;
-11. saldos derivados de razões, nunca editados diretamente;
-12. CI como bloqueio obrigatório;
-13. migrations append-only;
-14. privilégio mínimo.
-
-## 4. Modelo de autorização
-
-Perfis canônicos: Super Administrador, Direção, Administrador, Comercial/Vendas, Gestor de Obras, Engenharia, Orçamentista, Financeiro, Qualidade, Compras/Almoxarifado, Pós-venda/SAC e Cliente. Perfis personalizados não são sobrescritos por instaladores.
-
-Níveis: `NONE`, `READ`, `EDIT/READ_WRITE` e `FULL/DELETE`. Capacidades incluem criar, editar, excluir, aprovar, liberar, assinar, exportar, administrar, configurar e visualizar dados sensíveis. Escopos incluem organização, cliente, obra e recurso/depósito.
+Capacidades incluem criar, ler, editar, excluir, aprovar, liberar, assinar, exportar, administrar, configurar e visualizar dados sensíveis. Escopos incluem organização, cliente, obra e recurso específico.
 
 ## 5. Aplicativos modulares
 
@@ -143,266 +96,151 @@ Níveis: `NONE`, `READ`, `EDIT/READ_WRITE` e `FULL/DELETE`. Capacidades incluem 
 14. documentos;
 15. qualidade;
 16. compras e suprimentos;
-17. Estoque, Inventário e Almoxarifado;
+17. **Estoque, Inventário e Almoxarifado**;
 18. financeiro operacional;
 19. pós-venda e SAC;
 20. relatórios e indicadores;
 21. auditoria;
 22. administração.
 
-O contrato de cada aplicativo está em `diretrizes/MODULOS.md`.
+Contratos detalhados: `diretrizes/MODULOS.md`.
 
-## 7. Fluxos implementados
+## 6. Fluxos implementados
+
+### Comercial e relacionamento — Etapa 18
+
+```text
+lead → qualificação → oportunidade → cliente 360
+→ múltiplas obras/contratos → atendimento → pós-venda → avaliação
+```
+
+Regras:
+
+- leads registram origem, campanha, interesse, orçamento e próximo contato;
+- duplicidade é verificada por documento, e-mail e telefone normalizados;
+- criação e conversão são idempotentes;
+- conversão pode reutilizar cliente existente;
+- funil possui histórico imutável;
+- perda exige motivo;
+- cliente 360 agrega contatos, oportunidades, contratos, obras, chamados e atividades;
+- pipeline comercial não é exposto ao cliente;
+- portal mostra somente obras liberadas;
+- chamado pode conter mensagens internas ou visíveis ao cliente;
+- anexos privados recebem SHA-256;
+- cliente pode anexar foto ou documento e avaliar atendimento resolvido;
+- eventos e consentimentos são append-only.
 
 ### Comercial e contratos
 
 ```text
-orçamento versionado → cálculo → aprovação → proposta PDF
-→ aceite → contrato → assinatura → aditivo
+orçamento versionado → aprovação → proposta PDF → aceite
+→ contrato → assinatura → aditivo
 ```
 
 ### Obras
 
 ```text
-cliente/contrato → obra → EAP → cronograma → tarefas
+cliente → múltiplas obras → EAP → cronograma → tarefas
 → equipes → diário → documentos → portal
 ```
 
 ### Assinatura avançada
 
 ```text
-PDF/DOCX → hash → conversão → layout → campos
-→ assinatura/rubrica/foto/anexo → PDF final → evidência → cópia
+PDF/DOCX → hash → layout → assinatura/rubrica/data/nome/foto/anexo
+→ PDF final → evidência → cópia ao cliente
 ```
 
-### Qualidade
+### Qualidade e Compras
 
 ```text
-biblioteca → FVS/FVM/formulário → publicação
-→ preenchimento → anexos → revisão → aprovação/rejeição
+FVS/FVM/formulário → resposta → revisão
+solicitação → cotação → aprovação → pedido → recebimento → estoque
 ```
 
-### Compras
+### Financeiro e Relatórios
 
 ```text
-solicitação → cotação → comparação → aprovação
-→ pedido → recebimento → FVM → estoque
+contrato/pedido/medição → lançamento → parcelas → aprovação → liquidação
+fontes autorizadas → indicadores → metas → snapshot → exportação auditada
 ```
 
-### Financeiro
-
-```text
-contrato/pedido/medição → lançamento → parcelas
-→ aprovação → liquidação → comprovante → fluxo de caixa
-```
-
-### Relatórios
-
-```text
-dados autorizados → métricas → dashboard → metas
-→ relatório salvo → snapshot → exportação auditada
-```
-
-### Estoque
+### Estoque, Inventário e Almoxarifado — Etapa 17
 
 ```text
 recebimento/entrada → saldo físico → reserva → saldo disponível
 → consumo/devolução/transferência → custódia → inventário → reversão
 ```
 
-## 8. Regras do Estoque, Inventário e Almoxarifado
+Regras:
 
-### Razão e saldo
-
-```text
-saldo físico = linhas de movimentos POSTED + linhas dos originais REVERSED
-saldo reservado = reservado - consumido - liberado
-saldo disponível = físico - reservado
-```
-
-- não há coluna de saldo editável;
-- `REVERSAL` neutraliza o original `REVERSED`;
-- movimento concluído é imutável;
-- correção cria novo movimento;
-- saldo negativo é bloqueado por padrão.
-
-### Concorrência
-
-- advisory lock por organização, depósito, localização, item e lote;
-- locks adquiridos em ordem determinística;
-- saldo físico e disponível validados na mesma transação;
-- saída comum não consome quantidade reservada;
-- transferência conserva quantidade.
-
-### Compras
-
-- somente recebimentos aceitos ou aceitos com ressalva;
-- somente quantidade aceita;
-- quantidade rejeitada não entra;
-- mapeamento e fator de conversão explícitos;
-- importação idempotente por recebimento.
-
-### Multiempresa e multiobra
-
-- vínculos entre tenants são bloqueados;
-- depósito com obra só pode ser usado por operação da mesma obra;
-- depósito geral depende de autorização, mas não fica preso a uma obra.
-
-### Segurança
-
-- 18 tabelas com RLS;
-- seis views `security_invoker`;
-- custos mascarados no banco;
-- detalhes sensíveis por RPC autorizada;
-- funções privilegiadas com `search_path=public`;
-- RPCs de negócio não são expostas a `anon`.
-
-## 9. Homologação da Etapa 17
-
-A Etapa 17 foi incorporada à `main`, aplicada no Supabase e homologada tecnicamente.
-
-Evidências:
-
-- 18 migrations alinhadas ao ledger remoto;
-- 14 testes transacionais aprovados com `ROLLBACK`;
-- correção de reversão de saldo;
-- correção de isolamento multiobra;
-- migration de advisory locks recuperada e versionada;
-- CI do branch original verde.
-
-Arquivos:
-
-- `docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`;
-- `docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md`;
-- `supabase/tests/stage17_inventory_homologation.sql`.
-
-Ainda pendentes para produção:
-
-- E2E autenticado após a Etapa 17;
-- teste simultâneo com duas conexões reais;
-- configuração de proteção contra senhas comprometidas;
-- opções adicionais de MFA;
-- carga, pentest, backup/restauração e observabilidade.
-
-## 10. Banco e migrations
-
-- PostgreSQL/Supabase;
-- migrations exclusivamente em `supabase/migrations/`;
-- aplicação em ordem lexical;
-- migration aplicada nunca é editada;
-- correção usa novo timestamp;
-- ledger remoto precisa corresponder aos arquivos canônicos;
-- funções `SECURITY DEFINER` exigem autorização interna e `search_path` explícito;
-- FKs usadas por RLS e consultas precisam de índices.
-
-## 11. Frontend e backend
-Estado real:
-
-- implementação incorporada à `main` pelo PR `#14`;
-- migrations aplicadas no Supabase;
-- homologação funcional e RLS executadas com dados temporários revertidos;
-- correções, evidências e documentação consolidadas no PR `#15`;
-- CI integral verde e PR `#15` pronto para revisão;
-- merge depende de aprovação explícita.
-
-### Financeiro e relatórios
-
-```text
-contrato/pedido/medição → lançamento → parcelas → aprovação → liquidação
-fontes autorizadas → métricas → dashboard → snapshot → exportação auditada
-```
-
-## 7. Regras essenciais do estoque
-
-- 18 tabelas com RLS;
-- seis views internas sem acesso direto;
-- saldo físico = soma de movimentos `POSTED`;
-- saldo reservado = reservas ativas líquidas;
-- saldo disponível = físico menos reservado;
-- saldo não é editável diretamente;
-- movimento postado é imutável;
-- reversão referencia o original;
-- transferência conserva quantidade;
-- saldo negativo é bloqueado por padrão;
+- saldo não editável diretamente;
+- movimentos concluídos imutáveis;
 - recebimento de Compras integrado de forma idempotente;
-- somente quantidade aceita entra;
-- inventário aprovado gera ajuste rastreável;
-- custos não possuem leitura direta;
-- vínculos incompatíveis entre organização e obra são bloqueados;
-- postagem usa `pg_advisory_xact_lock` por posição;
-- 101 FKs possuem índice líder;
-- nenhuma RPC operacional é executável por `anon`.
+- `REVERSAL` neutraliza o movimento original `REVERSED`;
+- `pg_advisory_xact_lock` serializa posições concorrentes;
+- custos são protegidos;
+- isolamento multiempresa e multiobra;
+- implementação e homologação preservadas em `docs/` e `supabase/tests/`.
 
-Evidências transacionais:
+## 7. Banco e migrations
 
-- bootstrap de módulos e perfis;
-- entrada, reserva, consumo e reversão idempotentes;
-- tentativa acima do disponível bloqueada;
-- segunda saída sobre saldo insuficiente bloqueada;
-- movimento postado bloqueado para alteração e exclusão;
-- inventário físico contabilizado;
-- RLS direto: dados próprios visíveis e dados da outra organização ocultos;
-- custo direto bloqueado;
-- dados artificiais revertidos.
+- PostgreSQL/Supabase Auth/RLS/Storage;
+- UUID e timestamps UTC;
+- `organization_id` em dados multiempresa;
+- `project_id` quando houver obra;
+- RPC para operações multi-tabela;
+- `SECURITY DEFINER` somente com autorização interna e `search_path` explícito;
+- helpers internos sem execução pública;
+- índices em FKs e caminhos críticos;
+- arquivo aplicado nunca é reescrito;
+- timestamp e nome local correspondem ao ledger remoto;
+- CI rejeita timestamp, nome lógico ou conteúdo SQL duplicado.
 
-## 8. Dados e migrations
+## 8. Arquivos e documentos
 
-- PostgreSQL/Supabase, Auth e Storage privado;
-- migrations exclusivamente em `supabase/migrations/`;
-- migration aplicada nunca é reescrita;
-- funções `SECURITY DEFINER` usam `search_path` explícito e autorização interna;
-- helpers internos têm execução revogada;
-- correções pós-merge incluem concorrência, escopo de obra, índices e privilégios.
+Buckets privados. Upload valida autorização, tipo, tamanho, contexto e hash. Download ocorre por URL assinada curta após consulta autorizada. Falha de gravação remove objeto órfão quando possível.
 
-## 9. Stack
+Bucket da Etapa 18:
 
-- Next.js 16;
-- React 19;
-- TypeScript estrito;
-- Server Components e Server Actions;
-- validação server-side;
-- `server-only` para credenciais privilegiadas;
-- interfaces responsivas e acessíveis;
-- alternativa a drag-and-drop.
+```text
+crm-sac-attachments
+```
 
-## 12. Ambientes
+Aceita PDF, DOCX, JPEG, PNG e WebP, até 25 MB.
 
-### Desenvolvimento
+## 9. Homologação
 
-- `.env.local` não versionado;
-- dados artificiais;
-- assinatura sandbox.
+### Etapa 17
 
-### Homologação
+- 18 tabelas com RLS;
+- seis views protegidas;
+- advisory locks;
+- 14 testes transacionais com `ROLLBACK`;
+- migrations reconciliadas com o ledger remoto.
 
-- Supabase dedicado;
-- migrations aplicadas;
-- testes com rollback;
-- contas permanentes somente por provisionamento seguro;
-- secrets em ambiente protegido.
+### Etapa 18
 
-### Produção
+- 10 tabelas novas com RLS;
+- 43 FKs, nenhuma sem índice líder;
+- 14 políticas do domínio;
+- bucket privado;
+- três módulos ativos e sensíveis;
+- zero RPC operacional acessível por `anon`;
+- bootstrap, CRM, Cliente 360, SAC e RLS testados em transações revertidas;
+- cliente de uma organização não vê dados de outra;
+- portal não vê pipeline, mensagens internas, anexos internos ou eventos;
+- obra não liberada não pode ser vinculada a chamado externo;
+- estados críticos só mudam por RPC;
+- migrations aplicadas e reconciliadas com o ledger Supabase.
 
-Exige revisão jurídica, contábil e LGPD, provider jurídico real, pentest, backups testados, observabilidade, rotação de segredos, proteção de anexos e aprovação explícita.
-- interfaces responsivas e acessíveis.
-
-## 10. Ambientes
-
-### Homologação
-
-O projeto conectado é `wyeojufebtwblsubkunr`. Testes criaram identidades, organizações, memberships, obras, itens e movimentos apenas dentro de transações revertidas. Nenhum dado artificial permaneceu.
-
-O conector não conseguiu abrir duas conexões simultâneas sem credenciais explícitas. Teste de carga concorrente real permanece obrigatório na Etapa 20.
-
-### Produção
-
-Exige revisão jurídica, fiscal, contábil e LGPD, provider jurídico real, pentest, backup/restauração testados, observabilidade, rotação de segredos, antimalware e aprovação explícita.
-
-## 11. CI obrigatório
+## 10. CI obrigatório
 
 ```bash
 pnpm validate:docs
+pnpm validate:migrations
 pnpm validate:stage17
+pnpm validate:stage18
 pnpm lint
 pnpm typecheck
 pnpm test
@@ -410,34 +248,16 @@ pnpm test:python
 pnpm build
 ```
 
-O CI precisa permanecer verde antes de qualquer merge.
+## 11. Produção
 
-## 14. Próxima etapa oficial
-
-Após a consolidação documental da Etapa 17, a sequência planejada é:
-
-- Etapa 18 — CRM, Clientes e SAC;
-- Etapa 19 — Auditoria e Observabilidade;
-- Etapa 20 — Prontidão de Produção;
-- Etapa 21 — WMS avançado e Automação Logística.
-
-## 15. Etapa 21 — WMS avançado
-
-Fila aprovada:
-O CI integral da branch corretiva foi aprovado antes da liberação do PR `#15` para revisão.
+Publicação externa exige revisão jurídica, fiscal, contábil e LGPD; provider jurídico real; proteção contra senhas comprometidas; MFA; antimalware; pentest; observabilidade; backup/restauração testados; rotação de secrets e aprovação explícita.
 
 ## 12. Próxima etapa oficial
 
-Depois da decisão explícita sobre o merge do PR `#15`:
+Depois da aprovação e merge explícito da Etapa 18:
 
-Essa fila é planejamento, não funcionalidade disponível na versão 0.17.0.
-- Etapa 18 — CRM, Clientes e SAC;
-- Etapa 19 — auditoria e observabilidade;
-- Etapa 20 — prontidão de produção;
-- **Etapa 21 — WMS avançado**, endereçamento automatizado, RFID em tempo real, ressuprimento automático sem aprovação, roteirização logística, integração fiscal de entrada e depreciação contábil oficial.
+- **Etapa 19:** auditoria e observabilidade unificadas;
+- **Etapa 20:** prontidão de produção e teste concorrente simultâneo;
+- **Etapa 21:** WMS avançado, endereçamento automatizado, RFID em tempo real, ressuprimento automático sem aprovação, roteirização logística, integração fiscal de entrada e depreciação contábil oficial.
 
-A Etapa 21 permanece apenas planejada e não substitui o razão imutável da Etapa 17.
-
-## 13. Regra documental
-
-Toda mudança atualiza no mesmo PR: `SPEC.md`, `INVENTARIO.md`, `MODULOS.md`, `ARQUITETURA.md` quando necessário, `ROADMAP.md`, `RECUPERACAO.md`, `HISTORICO-ETAPAS.md`, documento técnico e validadores.
+A Etapa 21 permanece planejada e não substitui o razão imutável do estoque.

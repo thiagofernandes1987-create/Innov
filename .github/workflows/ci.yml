@@ -20,29 +20,39 @@ concurrency:
 jobs:
   preflight:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 6
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Validate canonical documentation
         run: node scripts/validate-documentation.mjs
+      - name: Validate Supabase migration ledger
+        run: node scripts/validate-supabase-migrations.mjs
       - name: Validate Stage 17 inventory
         run: |
           set -o pipefail
           node scripts/validate-stage17.mjs 2>&1 | tee stage17-validation.txt
-      - name: Upload Stage 17 validation report
+      - name: Validate Stage 18 relationship
+        run: |
+          set -o pipefail
+          node scripts/validate-stage18.mjs 2>&1 | tee stage18-validation.txt
+      - name: Upload structural validation reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: stage17-validation
-          path: stage17-validation.txt
+          name: structural-validation
+          path: |
+            stage17-validation.txt
+            stage18-validation.txt
           if-no-files-found: error
           retention-days: 7
-      - name: Upload Stage 17 migrations
+      - name: Upload recent migrations
         uses: actions/upload-artifact@v4
         with:
-          name: stage17-migrations
-          path: supabase/migrations/2026072016*.sql
+          name: recent-migrations
+          path: |
+            supabase/migrations/20260720*.sql
+            supabase/migrations/20260721*.sql
           if-no-files-found: error
           retention-days: 7
 
@@ -88,6 +98,10 @@ jobs:
         run: pnpm validate:stage15
       - name: Validate Stage 16 reports
         run: pnpm validate:stage16
+      - name: Validate Stage 17 inventory
+        run: pnpm validate:stage17
+      - name: Validate Stage 18 relationship
+        run: pnpm validate:stage18
       - name: Lint
         run: |
           set -o pipefail

@@ -1,49 +1,50 @@
 # Inventário canônico — Innovar Platform
 
-**Atualizado em:** 20 de julho de 2026  
-**Base:** `main` com Etapa 17 incorporada  
-**Branch de consolidação:** `chore/etapa17-homologacao-recuperacao`  
-**Versão:** 0.17.0
+**Atualizado em:** 21 de julho de 2026  
+**Base estável:** `main`  
+**Branch atual:** `feature/etapa-18-crm-clientes-sac`  
+**PR:** `#17`, em rascunho  
+**Versão:** 0.18.0
 
-Este documento registra o que precisa existir para recuperar, validar e continuar o projeto.
+Este documento registra o que precisa existir para recuperar, validar e continuar o projeto sem depender do contêiner ou da conversa.
 
 ## 1. Repositório e runtime
 
-- Repositório: `thiagofernandes1987-create/Innov`;
+- repositório: `thiagofernandes1987-create/Innov`;
 - branch estável: `main`;
 - gerenciador: `pnpm@11.15.0`;
 - Node.js: `>=24`;
 - Python no CI: `3.13`;
-- framework: Next.js 16, React 19 e TypeScript;
-- banco/Auth/Storage: Supabase;
-- projeto de homologação: identificado externamente, sem credenciais versionadas.
+- Next.js 16, React 19 e TypeScript;
+- Supabase Auth, PostgreSQL, RLS e Storage;
+- homologação Supabase: `wyeojufebtwblsubkunr`.
 
 ## 2. Estado dos aplicativos
 
-| Chave | Aplicativo | Estado | Etapa principal | Observação |
-|---|---|---:|---:|---|
-| `dashboard` | Início | Operacional | 12.1 | Exibe módulos autorizados. |
-| `crm` | CRM e Vendas | Parcial | anterior | Consolidação prevista na Etapa 18. |
-| `clientes` | Clientes | Parcial/operacional | 12 | Cliente pode possuir múltiplas obras. |
-| `obras` | Obras | Operacional | 12 | Carteira multiobra e portal. |
-| `planejamento` | Planejamento | Operacional | 12 | EAP, cronograma e baselines. |
-| `tarefas` | Tarefas | Operacional | 12 | Execução, responsáveis e bloqueios. |
-| `diario` | Diário de Obras | Operacional | 12 | Campo, ocorrências e mídias. |
-| `equipes` | Equipes | Operacional | 12 | Recursos e integrantes. |
-| `orcamentos` | Orçamentos | Operacional | 9 | Custos, BDI, markup e aprovações. |
-| `propostas` | Propostas | Operacional | 9 | Versões, PDF, liberação e aceite. |
-| `contratos` | Contratos | Operacional | 9 | Partes, versões e vigência. |
-| `aditivos` | Aditivos | Operacional | 9 | Valor, prazo e aplicação idempotente. |
-| `assinaturas` | Assinaturas | Operacional em sandbox | 9/12.2 | Provider jurídico real pendente. |
-| `documentos` | Documentos | Operacional | 12/13 | Storage privado, versões e hashes. |
-| `qualidade` | Qualidade | Operacional | 13 | FVS, FVM, formulários e pesquisas. |
-| `compras` | Compras e Suprimentos | Operacional | 14 | Solicitações, cotações, pedidos e recebimentos. |
-| `estoque` | Estoque, Inventário e Almoxarifado | Implementado/homologado tecnicamente | 17 | 18 tabelas, locks, saldo derivado e 14 testes. |
-| `financeiro` | Financeiro Operacional | Operacional | 15 | Lançamentos, parcelas, medições e caixa. |
-| `sac` | Pós-venda e SAC | Parcial | anterior | Consolidação prevista na Etapa 18. |
-| `relatorios` | Relatórios e Indicadores | Operacional | 16 | Dashboards, metas, snapshots e CSV. |
-| `auditoria` | Auditoria | Parcial sistêmico | transversal | Consolidação prevista na Etapa 19. |
-| `administracao` | Administração | Operacional | 12.1 | Módulos, perfis, escopos e overrides. |
+| Chave | Aplicativo | Estado | Etapa |
+|---|---|---|---|
+| `dashboard` | Início | operacional | 12.1 |
+| `crm` | CRM e Vendas | implementado e homologado no banco; interface em revisão | 18 |
+| `clientes` | Clientes | Cliente 360 multiobra implementado; interface em revisão | 18 |
+| `obras` | Obras | operacional | 12 |
+| `planejamento` | Planejamento | operacional | 12 |
+| `tarefas` | Tarefas | operacional | 12 |
+| `diario` | Diário de Obras | operacional | 12 |
+| `equipes` | Equipes | operacional | 12 |
+| `orcamentos` | Orçamentos | operacional | 9 |
+| `propostas` | Propostas | operacional | 9 |
+| `contratos` | Contratos | operacional | 9 |
+| `aditivos` | Aditivos | operacional | 9 |
+| `assinaturas` | Assinaturas | operacional em sandbox | 9/12.2 |
+| `documentos` | Documentos | operacional | 12/13 |
+| `qualidade` | Qualidade | operacional | 13 |
+| `compras` | Compras e Suprimentos | operacional | 14 |
+| `estoque` | Estoque, Inventário e Almoxarifado | incorporado e homologado | 17 |
+| `financeiro` | Financeiro Operacional | operacional | 15 |
+| `sac` | Pós-venda e SAC | implementado e homologado no banco; interface em revisão | 18 |
+| `relatorios` | Relatórios e Indicadores | operacional | 16 |
+| `auditoria` | Auditoria | parcial transversal | 19 planejada |
+| `administracao` | Administração | operacional | 12.1 |
 
 ## 3. Documentação canônica
 
@@ -60,20 +61,34 @@ diretrizes/
 └── HISTORICO-ETAPAS.md
 ```
 
-Documentos atuais da Etapa 17:
+Documentos técnicos atuais:
 
 ```text
 docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md
+docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md
 docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md
-```
-
-Planejamento da fila logística futura:
-
-```text
+docs/ETAPA-18-CRM-CLIENTES-SAC.md
 docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md
 ```
 
-## 4. Rotas principais da Etapa 17
+## 4. Etapa 17 — Estoque
+
+### Código
+
+```text
+lib/inventory/domain.ts
+lib/inventory/server.ts
+app/actions/inventory.ts
+app/actions/inventory-extra.ts
+app/actions/inventory-stocktake.ts
+components/inventory/*
+app/app/estoque/**
+app/inventory.css
+scripts/validate-stage17.mjs
+supabase/tests/stage17_inventory_homologation.sql
+```
+
+### Rotas
 
 ```text
 /app/estoque
@@ -94,116 +109,18 @@ docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md
 /app/estoque/inventarios/[id]
 ```
 
-## 5. Código da Etapa 17
+### Banco
 
-### Domínio e servidor
+- 18 tabelas com RLS;
+- seis views `security_invoker=true` sem leitura direta;
+- saldo físico, reservado e disponível derivados;
+- movimentos concluídos imutáveis;
+- reversão vinculada;
+- advisory locks por posição;
+- custos protegidos;
+- 14 testes transacionais com `ROLLBACK`.
 
-```text
-lib/inventory/domain.ts
-lib/inventory/server.ts
-app/actions/inventory.ts
-app/actions/inventory-extra.ts
-app/actions/inventory-stocktake.ts
-components/inventory/*
-app/app/estoque/**
-app/inventory.css
-scripts/validate-stage17.mjs
-```
-
-## 6. Banco da Etapa 17
-
-```text
-components/inventory/inventory-navigation.tsx
-components/inventory/inventory-metric-card.tsx
-components/inventory/inventory-movement-form.tsx
-components/inventory/inventory-reservation-form.tsx
-components/inventory/inventory-reservation-consume-form.tsx
-components/inventory/inventory-receipt-import-form.tsx
-components/inventory/inventory-stocktake-count-form.tsx
-```
-
-### Estilos
-
-```text
-app/inventory.css
-```
-
-Importado em `app/layout.tsx`.
-### Tabelas
-
-- catálogo: `inventory_categories`, `inventory_units`, `inventory_items`;
-- estrutura: `inventory_warehouses`, `inventory_locations`, `inventory_lots`, `inventory_procurement_item_mappings`;
-- razão: `inventory_movements`, `inventory_movement_lines`, `inventory_receipt_imports`;
-- reservas: `inventory_reservations`, `inventory_reservation_lines`;
-- ativos: `inventory_assets`, `inventory_asset_custodies`, `inventory_asset_maintenance`;
-- inventário: `inventory_stocktakes`, `inventory_stocktake_lines`;
-- auditoria: `inventory_events`.
-
-**Total:** 18 tabelas, todas com RLS.
-
-### Views internas
-
-```text
-inventory_stock_v
-inventory_reserved_stock_v
-inventory_available_stock_v
-inventory_item_totals_v
-inventory_asset_current_v
-inventory_expiry_alerts_v
-```
-
-As seis usam `security_invoker=true` e não concedem `SELECT` a `anon` ou `authenticated`.
-
-### RPCs principais
-
-### Ativos
-
-- `inventory_assets`;
-- `inventory_asset_custodies`;
-- `inventory_asset_maintenance`.
-
-### Inventário e auditoria
-
-- `inventory_stocktakes`;
-- `inventory_stocktake_lines`;
-- `inventory_events`.
-
-**Total:** 18 tabelas, todas com RLS no Supabase de homologação.
-
-## 7. Views
-
-- `inventory_stock_v`;
-- `inventory_reserved_stock_v`;
-- `inventory_available_stock_v`;
-- `inventory_item_totals_v`;
-- `inventory_asset_current_v`;
-- `inventory_expiry_alerts_v`.
-
-Todas foram confirmadas com `security_invoker=true`.
-
-## 8. RPCs e funções principais
-Consulta segura:
-
-- `get_inventory_dashboard`;
-- `get_inventory_movement_detail`;
-- `get_inventory_item_detail`;
-- `get_inventory_asset_detail`.
-
-Operações:
-
-- criação de item, depósito, movimento e ativo;
-- postagem e reversão;
-- importação idempotente de recebimento;
-- criação, consumo, liberação e expiração de reserva;
-- entrega e devolução de ativo;
-- abertura, contagem, submissão, aprovação e ajuste de inventário;
-- instalação dos padrões organizacionais.
-
-Nenhuma RPC operacional é executável por `anon`.
-
-## 7. Migrations da Etapa 17
-
-Aplicação lexical final:
+### Migrations canônicas da Etapa 17
 
 ```text
 20260720160000_stage17_inventory_schema.sql
@@ -225,239 +142,207 @@ Aplicação lexical final:
 20260720160720_stage17_inventory_sensitive_columns.sql
 20260720160730_stage17_inventory_sensitive_write_guard.sql
 20260720160740_stage17_inventory_state_guards.sql
-20260720160800_stage17_inventory_concurrency_locks.sql
-20260720160900_stage17_inventory_performance_indexes.sql
-20260720161000_stage17_inventory_rpc_privileges.sql
+20260720233052_stage17_inventory_concurrency_locks.sql
+20260720233657_stage17_homologation_balance_project_scope.sql
+20260720234333_stage17_inventory_performance_indexes.sql
+20260720234549_stage17_inventory_rpc_privileges.sql
 ```
 
-O histórico remoto também registra a correção `stage17_homologation_balance_project_scope`. Migration aplicada nunca é alterada.
+A antiga migration monolítica `20260720160400_stage17_inventory_assets_stocktakes.sql` não existe. A implementação real está dividida em quatro partes `_01` a `_04`. O validador foi corrigido para reconhecer a estrutura real.
 
-### Cadastro e movimento
+## 5. Etapa 18 — CRM, Clientes e SAC
 
-- `create_inventory_item`;
-- `create_inventory_warehouse`;
-- `create_inventory_movement`;
-- `post_inventory_movement`;
-- `reverse_inventory_movement`;
-- `create_inventory_asset`.
-
-### Compras e reservas
-
-- `import_procurement_receipt_to_inventory`;
-- `create_inventory_reservation`;
-- `release_inventory_reservation`;
-- `consume_inventory_reservation`;
-- `expire_inventory_reservations`.
-
-### Ativos e inventário
-
-- `assign_inventory_asset`;
-- `return_inventory_asset`;
-- `start_inventory_stocktake`;
-- `add_inventory_stocktake_line`;
-- `submit_inventory_stocktake`;
-- `approve_inventory_stocktake`;
-- `post_inventory_stocktake_adjustment`.
-
-### Instalação e concorrência
-
-- `install_inventory_defaults`;
-- `organizations_install_inventory_defaults`;
-- `inventory_stock_lock_key`;
-- `validate_inventory_project_scope`.
-
-A auditoria encontrou 35 funções relacionadas ao domínio de inventário.
-
-## 9. Migrations da Etapa 17
-
-O ledger remoto foi reconciliado com 18 arquivos canônicos:
-
-1. `20260720160000_stage17_inventory_schema.sql`;
-2. `20260720160100_stage17_inventory_balances.sql`;
-3. `20260720160200_stage17_inventory_movement_functions.sql`;
-4. `20260720160300_stage17_inventory_procurement_reservations.sql`;
-5. `20260720160400_stage17_inventory_assets_stocktakes.sql`;
-6. `20260720160500_stage17_inventory_security.sql`;
-7. `20260720160510_stage17_inventory_dashboard.sql`;
-8. `20260720160520_stage17_inventory_movement_detail.sql`;
-9. `20260720160525_stage17_inventory_item_asset_detail.sql`;
-10. `20260720160530_stage17_inventory_stocktake_found_items.sql`;
-11. `20260720160600_stage17_inventory_module.sql`;
-12. `20260720160650_stage17_inventory_creation_rpcs.sql`;
-13. `20260720160700_stage17_inventory_hardening.sql`;
-14. `20260720160720_stage17_inventory_sensitive_columns.sql`;
-15. `20260720160730_stage17_inventory_sensitive_write_guard.sql`;
-16. `20260720160740_stage17_inventory_state_guards.sql`;
-17. `20260720233052_stage17_inventory_concurrency_locks.sql`;
-18. `20260720233657_stage17_homologation_balance_project_scope.sql`.
-
-As versões originais haviam sido aplicadas em blocos remotos. O ledger foi reparado sem reaplicar ou desfazer DDL.
-
-## 10. Testes e validação
-
-### Validador estrutural
+### Código
 
 ```text
-scripts/validate-stage17.mjs
+lib/relationship/domain.ts
+lib/relationship/server.ts
+app/actions/relationship.ts
+components/relationship/*
+app/app/crm/**
+app/app/clientes/**
+app/app/ocorrencias/**
+app/cliente/ocorrencias/**
+app/api/sac/attachments/[id]/route.ts
+app/relationship.css
+scripts/validate-stage18.mjs
+supabase/tests/stage18_relationship_homologation.sql
 ```
 
-### Teste SQL reproduzível
+### Rotas internas
 
 ```text
-supabase/tests/stage17_inventory_homologation.sql
+/app/crm
+/app/crm/leads
+/app/crm/leads/novo
+/app/crm/leads/[id]
+/app/crm/oportunidades
+/app/crm/oportunidades/novo
+/app/crm/oportunidades/[id]
+/app/clientes
+/app/clientes/novo
+/app/clientes/[id]
+/app/ocorrencias
+/app/ocorrencias/novo
+/app/ocorrencias/[id]
 ```
 
-O teste termina com `ROLLBACK` e cobre 14 regras:
-
-- autorização;
-- dados padrão;
-- instalação do módulo;
-- entrada e saída;
-- saldo negativo;
-- idempotência;
-- imutabilidade;
-- reversão;
-- transferência;
-- isolamento multiempresa;
-- isolamento multiobra;
-- ausência de saldo editável.
-
-## 11. Segurança
-
-- RLS nas 18 tabelas;
-- views sem acesso direto amplo;
-- custos mascarados por RPC;
-- privilégios por coluna;
-- Service Role ausente das ações web;
-- movimentos postados imutáveis;
-- inventários postados imutáveis;
-- custódias encerradas imutáveis;
-- advisory locks transacionais;
-- validação de saldo físico e disponível;
-- isolamento de depósito por obra;
-- funções privilegiadas com autorização interna.
-
-Tabelas internas sem política de usuário não devem receber política permissiva apenas para remover aviso do advisor.
-
-## 12. Integrações
-
-### Compras
-
-- `procurement_order_items` → mapeamento;
-- `procurement_receipts` → importação;
-- somente quantidade aceita;
-- idempotência por recebimento.
-
-### Obras e equipes
-
-- depósito, movimento, reserva e ativo podem ter obra;
-- depósito exclusivo não pode cruzar obra;
-- ativo pode ser entregue a equipe/responsável.
-
-### Financeiro
-
-- custo de estoque é informativo;
-- não cria lançamento oficial automaticamente.
-
-### Relatórios
-
-- indicadores futuros usam RPC/view autorizada;
-- tabelas internas não devem ser consultadas diretamente pela interface.
-
-## 13. Dados padrão
-
-Por organização:
-
-- módulo `estoque` 1.0.0 habilitado;
-- oito unidades;
-- seis categorias;
-- depósito `ALM-GERAL`;
-- localização `PADRAO`;
-- matriz inicial para perfis canônicos.
-
-## 14. Storage e secrets
-
-A Etapa 17 não adiciona bucket nem secret novo.
-
-Secrets conhecidos permanecem externos:
-
-- `NEXT_PUBLIC_SUPABASE_URL`;
-- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`;
-- `SUPABASE_SERVICE_ROLE_KEY`;
-- `NEXT_PUBLIC_APP_URL`;
-- secrets de assinatura;
-- senhas de homologação.
-
-## 15. CI
-## 8. Invariantes
+### Portal do cliente
 
 ```text
-saldo físico = soma de linhas de movimentos POSTED
-saldo reservado = reservado - consumido - liberado
-saldo disponível = físico - reservado
+/cliente/ocorrencias
+/cliente/ocorrencias/novo
+/cliente/ocorrencias/[id]
+/api/sac/attachments/[id]
 ```
 
-- saldo não é editável;
-- movimento postado é imutável;
-- reversão referencia o movimento original;
-- transferência conserva quantidade;
-- saldo negativo é bloqueado por padrão;
-- postagem usa advisory lock transacional por posição;
-- recebimento de Compras é idempotente;
-- somente quantidade aceita entra;
-- inventário aprovado gera ajuste rastreável;
-- custo é mascarado no PostgreSQL.
+### Tabelas existentes evoluídas
 
-## 9. Evidências de homologação
+- `clients`;
+- `opportunities`.
 
-- 18/18 tabelas com RLS;
-- seis views sem acesso direto;
-- 49 políticas e 36 gatilhos não internos;
-- 101 FKs, nenhuma sem índice líder;
-- zero RPC operacional executável por `anon`;
-- três RPCs de criação disponíveis para `authenticated`;
-- bootstrap: 12 perfis, 21 módulos, oito unidades e seis categorias;
-- entrada, reserva, consumo e reversão idempotentes;
-- saldo disponível respeitado;
-- segunda saída sobre saldo insuficiente bloqueada;
-- movimento postado bloqueado para alteração e exclusão;
-- inventário físico contabilizado;
-- vínculos multiempresa e multiobra bloqueados;
-- RLS direto: uma linha própria, zero linha da outra organização;
-- leitura direta de `reference_unit_cost` bloqueada;
-- dados de teste revertidos;
-- advisors de segurança e performance revisados.
+### Tabelas novas
 
-Limitação: o conector não conseguiu abrir duas sessões simultâneas sem credenciais de banco. O lock foi homologado por inspeção e cenário sequencial de disputa. Teste de carga simultâneo permanece na Etapa 20.
+```text
+crm_leads
+client_contacts
+client_consents
+crm_activities
+crm_opportunity_stage_history
+sac_categories
+sac_tickets
+sac_ticket_messages
+sac_ticket_attachments
+sac_ticket_events
+```
 
-## 10. Dados padrão
+**Total:** 10 tabelas novas, todas com RLS.
 
-Por organização:
+### RPCs principais
 
-- unidades `un`, `kg`, `m`, `m2`, `m3`, `l`, `cx`, `pct`;
-- seis categorias iniciais;
-- depósito `ALM-GERAL`;
-- localização `PADRAO`;
-- saldo negativo desabilitado;
-- permissões dos perfis canônicos.
+CRM:
 
-## 11. Integrações
+- `create_crm_lead`;
+- `move_crm_lead_stage`;
+- `create_crm_opportunity`;
+- `convert_crm_lead`;
+- `move_crm_opportunity_stage`;
+- `record_crm_activity`;
+- `get_crm_pipeline`;
+- `get_client_360`.
 
-- Compras: quantidade aceita gera entrada idempotente;
-- Obras: depósito, movimento, reserva e inventário podem ter escopo de obra;
-- Equipes: ativo pode ser entregue a equipe ou responsável;
-- Financeiro: custo de estoque não cria lançamento automaticamente;
-- Relatórios: consumo por contratos autorizados.
+SAC e portal:
 
-## 12. Variáveis e Storage
+- `create_sac_ticket`;
+- `add_sac_ticket_message`;
+- `register_sac_ticket_attachment`;
+- `assign_sac_ticket`;
+- `transition_sac_ticket`;
+- `rate_sac_ticket`;
+- `get_sac_dashboard`;
+- `get_sac_ticket_detail`;
+- `get_client_portal_relationship`.
 
-A Etapa 17 não cria bucket ou secret. Variáveis conhecidas permanecem descritas em `.env.example` e `diretrizes/RECUPERACAO.md`; valores nunca são versionados.
+Nenhuma RPC operacional da Etapa 18 é executável por `anon`.
 
-## 13. CI
+### Segurança e invariantes
+
+- pipeline comercial exclusivamente interno;
+- cliente vê apenas o próprio cadastro e chamados;
+- portal mostra apenas obras com `client_released_at`;
+- mensagens `INTERNAL`, anexos internos e eventos não aparecem no portal;
+- upload do portal é autorizado pela sessão e executado no servidor;
+- arquivo recebe SHA-256;
+- download usa URL assinada de 60 segundos;
+- consentimentos, mensagens, eventos e histórico de estágio são append-only;
+- estados críticos mudam somente por RPC;
+- duplicidade de lead por documento, e-mail e telefone;
+- conversão e comandos externos idempotentes;
+- vínculos entre organizações, clientes, obras e contratos incompatíveis são bloqueados;
+- 43 FKs, nenhuma sem índice líder.
+
+### Bucket
+
+```text
+crm-sac-attachments
+```
+
+Privado, até 25 MB, tipos permitidos: PDF, DOCX, JPEG, PNG e WebP.
+
+### Migrations canônicas da Etapa 18
+
+```text
+20260721012434_stage18_relationship_schema.sql
+20260721012505_stage18_relationship_idempotency.sql
+20260721012701_stage18_relationship_security.sql
+20260721013434_stage18_relationship_invariants.sql
+20260721013534_stage18_crm_functions.sql
+20260721013547_stage18_sac_client_actors.sql
+20260721013654_stage18_sac_functions.sql
+20260721013941_stage18_relationship_queries.sql
+20260721014030_stage18_relationship_module.sql
+20260721014621_stage18_relationship_performance.sql
+20260721015350_stage18_sac_portal_release_guard.sql
+20260721020003_stage18_workflow_privilege_hardening.sql
+```
+
+Os timestamps correspondem exatamente ao ledger remoto do Supabase.
+
+### Evidências de homologação
+
+- bootstrap: 12 perfis, três módulos, 33 permissões e seis categorias;
+- lead idempotente e duplicidade bloqueada;
+- conversão idempotente em cliente e oportunidade;
+- cliente com duas obras no Cliente 360;
+- funil protegido e perda com motivo obrigatório;
+- chamado idempotente;
+- mensagens internas e públicas filtradas;
+- anexos internos e públicos filtrados;
+- mudança direta de status bloqueada;
+- histórico imutável;
+- obra não liberada bloqueada no portal;
+- cliente de uma organização não vê outra;
+- pipeline oculto do cliente;
+- dados artificiais revertidos.
+
+## 6. Storage privado
+
+```text
+commercial-documents
+contract-documents
+project-documents
+daily-log-media
+signature-artifacts
+quality-documents
+quality-form-attachments
+procurement-attachments
+finance-attachments
+crm-sac-attachments
+```
+
+## 7. Variáveis conhecidas
+
+Somente nomes são versionados:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_APP_URL=
+SIGNATURE_PROVIDER=
+SIGNATURE_WEBHOOK_SECRET=
+SIGNATURE_EMAIL_WEBHOOK_URL=
+DEMO_ADMIN_PASSWORD=
+DEMO_CLIENT_PASSWORD=
+```
+
+## 8. CI
 
 ```bash
 pnpm validate:docs
+pnpm validate:migrations
 pnpm validate:stage17
+pnpm validate:stage18
 pnpm lint
 pnpm typecheck
 pnpm test
@@ -465,18 +350,8 @@ pnpm test:python
 pnpm build
 ```
 
-O branch original da Etapa 17 ficou verde antes do merge. A branch corretiva precisa repetir o CI completo.
+## 9. Recuperação
 
-## 16. Limitações abertas
+Procedimento oficial: `diretrizes/RECUPERACAO.md`.
 
-- zero usuários permanentes no ambiente de homologação durante a auditoria;
-- E2E autenticado pós-Etapa 17 pendente;
-- teste real com duas conexões concorrentes pendente;
-- fluxo completo com recebimento real de homologação pendente;
-- proteção contra senhas comprometidas e MFA adicional pendentes no Auth;
-- avisos de performance legados serão tratados nas Etapas 19/20;
-- índices não devem ser removidos apenas porque o banco está vazio.
-
-## 17. Próxima fila logística
-
-A Etapa 21 está documentada e inclui WMS avançado, endereçamento automatizado, RFID, ressuprimento, roteirização, fiscal de entrada e depreciação contábil. Nada desse escopo está declarado como implementado na versão 0.17.0.
+Git recupera código, migrations, testes, arquitetura e documentação. Não recupera valores de secrets, usuários reais, conteúdo de buckets, dados operacionais, DNS ou backups físicos.
