@@ -45,15 +45,30 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 - workflow de estados protegido;
 - bucket privado e anexos com SHA-256;
 - E2E concorrente usa duas sessões reais, operações em `Promise.all`, verificação de RLS e cleanup obrigatório;
-- catálogo canônico de vacinas criado para impedir repetição das causas-raiz encontradas.
+- E2E funcional permanece bloqueado pelos secrets ausentes no ambiente GitHub `homologation`.
+
+## Etapa 19 — Auditoria e Observabilidade
+
+- [`docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md`](../docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md) — fluxo unificado, correlação, sanitização, alertas, health checks, diagnósticos, retenção, RLS e interface administrativa.
+
+### Estado atual
+
+- branch `feature/etapa-19-auditoria-observabilidade`;
+- PR `#19` empilhado sobre o PR `#18`;
+- cinco migrations preparadas;
+- fluxo unificado de 12 origens;
+- eventos e health checks append-only;
+- sanitização recursiva e idempotência;
+- alertas com reconhecimento e resolução auditáveis;
+- homologação transacional com `ROLLBACK`;
+- aplicação no Supabase e revisão dos advisors ainda pendentes.
 
 ## Vacinas de engenharia
 
-O catálogo atual está em [`diretrizes/VACINAS.md`](./VACINAS.md), com documentos individuais em `diretrizes/vacinas/`. Toda correção recorrente deve consultar, aplicar ou ampliar esse catálogo.
+O catálogo atual está em [`diretrizes/VACINAS.md`](./VACINAS.md), com documentos individuais em `diretrizes/vacinas/`. Toda correção recorrente deve consultar, aplicar ou ampliar esse catálogo. A Etapa 19 adicionou a `VACINA-011` para identificadores reservados do Node/Next.
 
 ## Planejamento posterior
 
-- Etapa 19 — auditoria e observabilidade;
 - Etapa 20 — prontidão de produção e teste de carga ampliado;
 - Etapa 21 — WMS avançado, RFID, automação logística, fiscal e patrimonial.
 
