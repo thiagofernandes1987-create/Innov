@@ -68,7 +68,8 @@ if(!errors.length){
  const registry=read("lib/modules/registry.ts");
  for(const key of["crm","clientes","sac"])if(!new RegExp(`key:\\s*"${key}"`).test(registry))errors.push(`Registry sem módulo ${key}.`);
  const layout=read("app/layout.tsx");if(!layout.includes('"./relationship.css"'))errors.push("Layout não importa relationship.css.");
- const clientLayout=read("app/cliente/layout.tsx");if(!clientLayout.includes('href:"/cliente/ocorrencias"'))errors.push("Portal não expõe navegação de ocorrências.");
+ const clientLayout=read("app/cliente/layout.tsx");
+ if(!clientLayout.includes('"Ocorrências"')||!clientLayout.includes('"/cliente/ocorrencias"'))errors.push("Portal não expõe navegação de ocorrências.");
  const docs=read("docs/ETAPA-18-CRM-CLIENTES-SAC.md");
  for(const token of["lead → qualificação","Cliente 360","múltiplas obras","SAC e pós-venda","RLS","Definition of Done"])
   if(!docs.includes(token))errors.push(`Documento da Etapa 18 sem ${token}.`);
