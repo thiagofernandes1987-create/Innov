@@ -2,11 +2,11 @@
 
 **Atualizado em:** 21 de julho de 2026  
 **Base estável:** `main`  
-**Branch atual:** `feature/etapa-18-crm-clientes-sac`  
-**PR:** `#17`, em rascunho  
-**Versão:** 0.18.0
+**Branch atual:** `feature/etapa-19-auditoria-observabilidade`  
+**PR atual:** `#19`, empilhado sobre o PR `#18`, ambos em rascunho  
+**Versão:** 0.19.0
 
-Este documento registra o que precisa existir para recuperar, validar e continuar o projeto sem depender do contêiner ou da conversa.
+Este documento registra o necessário para recuperar, validar e continuar o projeto sem depender do contêiner ou da conversa.
 
 ## 1. Repositório e runtime
 
@@ -24,8 +24,8 @@ Este documento registra o que precisa existir para recuperar, validar e continua
 | Chave | Aplicativo | Estado | Etapa |
 |---|---|---|---|
 | `dashboard` | Início | operacional | 12.1 |
-| `crm` | CRM e Vendas | implementado e homologado no banco; interface em revisão | 18 |
-| `clientes` | Clientes | Cliente 360 multiobra implementado; interface em revisão | 18 |
+| `crm` | CRM e Vendas | implementado e homologado | 18 |
+| `clientes` | Clientes | Cliente 360 multiobra implementado | 18 |
 | `obras` | Obras | operacional | 12 |
 | `planejamento` | Planejamento | operacional | 12 |
 | `tarefas` | Tarefas | operacional | 12 |
@@ -41,9 +41,9 @@ Este documento registra o que precisa existir para recuperar, validar e continua
 | `compras` | Compras e Suprimentos | operacional | 14 |
 | `estoque` | Estoque, Inventário e Almoxarifado | incorporado e homologado | 17 |
 | `financeiro` | Financeiro Operacional | operacional | 15 |
-| `sac` | Pós-venda e SAC | implementado e homologado no banco; interface em revisão | 18 |
+| `sac` | Pós-venda e SAC | implementado e homologado | 18 |
 | `relatorios` | Relatórios e Indicadores | operacional | 16 |
-| `auditoria` | Auditoria | parcial transversal | 19 planejada |
+| `auditoria` | Auditoria e Observabilidade | implementação no PR #19 | 19 |
 | `administracao` | Administração | operacional | 12.1 |
 
 ## 3. Documentação canônica
@@ -57,6 +57,8 @@ diretrizes/
 ├── ARQUITETURA.md
 ├── ROADMAP.md
 ├── RECUPERACAO.md
+├── VACINAS.md
+├── vacinas/
 ├── PADRAO-DOCUMENTACAO.md
 └── HISTORICO-ETAPAS.md
 ```
@@ -65,15 +67,16 @@ Documentos técnicos atuais:
 
 ```text
 docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md
-docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md
 docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md
 docs/ETAPA-18-CRM-CLIENTES-SAC.md
+docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md
+docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md
 docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md
 ```
 
 ## 4. Etapa 17 — Estoque
 
-### Código
+### Código principal
 
 ```text
 lib/inventory/domain.ts
@@ -88,31 +91,10 @@ scripts/validate-stage17.mjs
 supabase/tests/stage17_inventory_homologation.sql
 ```
 
-### Rotas
-
-```text
-/app/estoque
-/app/estoque/itens
-/app/estoque/itens/novo
-/app/estoque/itens/[id]
-/app/estoque/depositos
-/app/estoque/depositos/[id]
-/app/estoque/movimentos
-/app/estoque/movimentos/novo
-/app/estoque/movimentos/[id]
-/app/estoque/reservas
-/app/estoque/reservas/[id]
-/app/estoque/ativos
-/app/estoque/ativos/[id]
-/app/estoque/inventarios
-/app/estoque/inventarios/novo
-/app/estoque/inventarios/[id]
-```
-
 ### Banco
 
 - 18 tabelas com RLS;
-- seis views `security_invoker=true` sem leitura direta;
+- seis views `security_invoker=true`;
 - saldo físico, reservado e disponível derivados;
 - movimentos concluídos imutáveis;
 - reversão vinculada;
@@ -120,7 +102,7 @@ supabase/tests/stage17_inventory_homologation.sql
 - custos protegidos;
 - 14 testes transacionais com `ROLLBACK`.
 
-### Migrations canônicas da Etapa 17
+### Migrations canônicas
 
 ```text
 20260720160000_stage17_inventory_schema.sql
@@ -148,11 +130,11 @@ supabase/tests/stage17_inventory_homologation.sql
 20260720234549_stage17_inventory_rpc_privileges.sql
 ```
 
-A antiga migration monolítica `20260720160400_stage17_inventory_assets_stocktakes.sql` não existe. A implementação real está dividida em quatro partes `_01` a `_04`. O validador foi corrigido para reconhecer a estrutura real.
+A antiga migration monolítica `20260720160400_stage17_inventory_assets_stocktakes.sql` não existe; a implementação real está dividida em `_01` a `_04`.
 
 ## 5. Etapa 18 — CRM, Clientes e SAC
 
-### Código
+### Código principal
 
 ```text
 lib/relationship/domain.ts
@@ -167,39 +149,9 @@ app/api/sac/attachments/[id]/route.ts
 app/relationship.css
 scripts/validate-stage18.mjs
 supabase/tests/stage18_relationship_homologation.sql
+scripts/run-stage18-concurrent-e2e.mjs
+.github/workflows/stage18-concurrent-e2e.yml
 ```
-
-### Rotas internas
-
-```text
-/app/crm
-/app/crm/leads
-/app/crm/leads/novo
-/app/crm/leads/[id]
-/app/crm/oportunidades
-/app/crm/oportunidades/novo
-/app/crm/oportunidades/[id]
-/app/clientes
-/app/clientes/novo
-/app/clientes/[id]
-/app/ocorrencias
-/app/ocorrencias/novo
-/app/ocorrencias/[id]
-```
-
-### Portal do cliente
-
-```text
-/cliente/ocorrencias
-/cliente/ocorrencias/novo
-/cliente/ocorrencias/[id]
-/api/sac/attachments/[id]
-```
-
-### Tabelas existentes evoluídas
-
-- `clients`;
-- `opportunities`.
 
 ### Tabelas novas
 
@@ -216,60 +168,19 @@ sac_ticket_attachments
 sac_ticket_events
 ```
 
-**Total:** 10 tabelas novas, todas com RLS.
-
-### RPCs principais
-
-CRM:
-
-- `create_crm_lead`;
-- `move_crm_lead_stage`;
-- `create_crm_opportunity`;
-- `convert_crm_lead`;
-- `move_crm_opportunity_stage`;
-- `record_crm_activity`;
-- `get_crm_pipeline`;
-- `get_client_360`.
-
-SAC e portal:
-
-- `create_sac_ticket`;
-- `add_sac_ticket_message`;
-- `register_sac_ticket_attachment`;
-- `assign_sac_ticket`;
-- `transition_sac_ticket`;
-- `rate_sac_ticket`;
-- `get_sac_dashboard`;
-- `get_sac_ticket_detail`;
-- `get_client_portal_relationship`.
-
-Nenhuma RPC operacional da Etapa 18 é executável por `anon`.
-
-### Segurança e invariantes
+### Segurança
 
 - pipeline comercial exclusivamente interno;
-- cliente vê apenas o próprio cadastro e chamados;
-- portal mostra apenas obras com `client_released_at`;
-- mensagens `INTERNAL`, anexos internos e eventos não aparecem no portal;
-- upload do portal é autorizado pela sessão e executado no servidor;
-- arquivo recebe SHA-256;
-- download usa URL assinada de 60 segundos;
-- consentimentos, mensagens, eventos e histórico de estágio são append-only;
-- estados críticos mudam somente por RPC;
-- duplicidade de lead por documento, e-mail e telefone;
+- cliente vê somente cadastro e chamados próprios;
+- portal mostra apenas obras liberadas;
+- mensagens, anexos e eventos internos não aparecem ao cliente;
+- upload autorizado pela sessão e realizado server-side;
+- SHA-256 e bucket privado `crm-sac-attachments`;
+- estados críticos somente por RPC;
 - conversão e comandos externos idempotentes;
-- vínculos entre organizações, clientes, obras e contratos incompatíveis são bloqueados;
-- 43 FKs, nenhuma sem índice líder.
+- zero RPC operacional para `anon`.
 
-### Bucket
-
-```text
-crm-sac-attachments
-```
-
-Privado, até 25 MB, tipos permitidos: PDF, DOCX, JPEG, PNG e WebP.
-
-### Migrations canônicas da Etapa 18
+### Migrations canônicas
 
 ```text
 20260721012434_stage18_relationship_schema.sql
@@ -286,26 +197,112 @@ Privado, até 25 MB, tipos permitidos: PDF, DOCX, JPEG, PNG e WebP.
 20260721020003_stage18_workflow_privilege_hardening.sql
 ```
 
-Os timestamps correspondem exatamente ao ledger remoto do Supabase.
+### E2E concorrente
 
-### Evidências de homologação
+O PR `#18` contém duas sessões Supabase independentes, operações em paralelo, verificação de RLS e cleanup. A execução funcional permanece bloqueada porque o ambiente GitHub `homologation` não possui os cinco secrets obrigatórios.
 
-- bootstrap: 12 perfis, três módulos, 33 permissões e seis categorias;
-- lead idempotente e duplicidade bloqueada;
-- conversão idempotente em cliente e oportunidade;
-- cliente com duas obras no Cliente 360;
-- funil protegido e perda com motivo obrigatório;
-- chamado idempotente;
-- mensagens internas e públicas filtradas;
-- anexos internos e públicos filtrados;
-- mudança direta de status bloqueada;
-- histórico imutável;
-- obra não liberada bloqueada no portal;
-- cliente de uma organização não vê outra;
-- pipeline oculto do cliente;
-- dados artificiais revertidos.
+## 6. Etapa 19 — Auditoria e Observabilidade
 
-## 6. Storage privado
+### Código principal
+
+```text
+lib/observability/domain.ts
+lib/observability/server.ts
+app/actions/observability.ts
+components/observability/observability-navigation.tsx
+app/app/auditoria/**
+app/observability.css
+scripts/validate-stage19.mjs
+supabase/tests/stage19_observability_homologation.sql
+```
+
+### Rotas
+
+```text
+/app/auditoria
+/app/auditoria/eventos
+/app/auditoria/eventos/[id]
+/app/auditoria/alertas
+/app/auditoria/saude
+/app/auditoria/configuracao
+```
+
+### Tabelas novas
+
+```text
+observability_alert_rules
+observability_alerts
+observability_health_checks
+observability_diagnostics
+observability_retention_policies
+```
+
+A tabela existente `audit_events` recebe módulo, severidade, origem, ator, cliente, hashes, request, deduplicação, ocorrência e retenção.
+
+### RPCs principais
+
+```text
+sanitize_audit_json
+record_audit_event
+write_audit
+acknowledge_observability_alert
+resolve_observability_alert
+run_observability_health_snapshot
+get_observability_dashboard
+get_observability_events
+get_observability_event_detail
+record_observability_diagnostic
+install_observability_defaults
+```
+
+### Fontes do fluxo unificado
+
+```text
+audit_events
+permission_change_events
+signature_events
+document_access_logs
+quality_form_events
+procurement_events
+finance_events
+report_events
+inventory_events
+sac_ticket_events
+crm_opportunity_stage_history
+crm_activities
+```
+
+### Segurança
+
+- acesso somente por `auditoria:read`;
+- administração para configuração e transições;
+- perfis padrão: Super Administrador, Direção e Administrador;
+- cliente sem acesso;
+- eventos e health checks append-only;
+- payloads sanitizados recursivamente;
+- IP e user-agent somente como SHA-256;
+- RPCs bloqueadas para `anon`;
+- payload bruto de assinatura não é exposto.
+
+### Migrations canônicas
+
+```text
+20260721093000_stage19_observability_schema.sql
+20260721093100_stage19_observability_security.sql
+20260721093200_stage19_observability_functions.sql
+20260721093300_stage19_observability_unified_stream.sql
+20260721093400_stage19_observability_module_performance.sql
+```
+
+### Estado de homologação
+
+- validador estrutural implementado;
+- teste transacional com `ROLLBACK` implementado;
+- migrations ainda não aplicadas no Supabase;
+- advisors ainda não revisados;
+- PR `#19` permanece em rascunho e empilhado.
+
+## 7. Storage privado
 
 ```text
 commercial-documents
@@ -320,7 +317,9 @@ finance-attachments
 crm-sac-attachments
 ```
 
-## 7. Variáveis conhecidas
+A Etapa 19 não cria bucket e não armazena payload bruto ou arquivo de log.
+
+## 8. Variáveis conhecidas
 
 Somente nomes são versionados:
 
@@ -336,13 +335,15 @@ DEMO_ADMIN_PASSWORD=
 DEMO_CLIENT_PASSWORD=
 ```
 
-## 8. CI
+## 9. CI
 
 ```bash
 pnpm validate:docs
+pnpm validate:vaccines
 pnpm validate:migrations
 pnpm validate:stage17
 pnpm validate:stage18
+pnpm validate:stage19
 pnpm lint
 pnpm typecheck
 pnpm test
@@ -350,8 +351,8 @@ pnpm test:python
 pnpm build
 ```
 
-## 9. Recuperação
+## 10. Recuperação
 
 Procedimento oficial: `diretrizes/RECUPERACAO.md`.
 
-Git recupera código, migrations, testes, arquitetura e documentação. Não recupera valores de secrets, usuários reais, conteúdo de buckets, dados operacionais, DNS ou backups físicos.
+Git recupera código, migrations, testes, arquitetura, vacinas e documentação. Não recupera valores de secrets, usuários reais, conteúdo de buckets, dados operacionais, DNS ou backups físicos.
