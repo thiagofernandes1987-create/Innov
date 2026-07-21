@@ -44,7 +44,7 @@ for(const file of["app/app/ocorrencias/page.tsx","app/cliente/ocorrencias/page.t
 if(fs.existsSync("scripts/validate-stage18.mjs")){
  const stage18=read("scripts/validate-stage18.mjs");
  if(stage18.includes('href:"/cliente/ocorrencias"'))errors.push("Validador da Etapa 18 voltou a depender da sintaxe href rígida.");
- for(const token of['clientLayout.includes('+'\'"Ocorrências"\'', 'clientLayout.includes('+'\'"/cliente/ocorrencias"\''])
+ for(const token of['clientLayout.includes(\'"Ocorrências"\')','clientLayout.includes(\'"/cliente/ocorrencias"\')'])
   if(!stage18.includes(token))errors.push(`Validador da Etapa 18 sem verificação semântica: ${token}`);
 }
 if(fs.existsSync("scripts/validate-stage17.mjs")){
@@ -66,7 +66,7 @@ if(migrationStep<0||stageStep<0||migrationStep>stageStep)errors.push("CI não va
 
 // VACINA-004 — privilégio mínimo.
 for(const file of[
- "supabase/migrations/20260720161000_stage17_inventory_rpc_privileges.sql",
+ "supabase/migrations/20260720234549_stage17_inventory_rpc_privileges.sql",
  "supabase/migrations/20260721020003_stage18_workflow_privilege_hardening.sql"
 ]){
  if(!fs.existsSync(file)){errors.push(`Migration de privilégio ausente: ${file}`);continue;}
