@@ -21,7 +21,7 @@ function requireRegex(content,patterns,label){for(const pattern of patterns)if(!
 if(!errors.length){
  const schema=read(migrations[0]);
  for(const table of["observability_alert_rules","observability_alerts","observability_health_checks","observability_diagnostics","observability_retention_policies"])
-  if(!new RegExp(`create table if not exists public\\.${table}`).test(schema))errors.push(`Schema sem ${table}.`);
+  if(!new RegExp(`create table if not exists public\.${table}`).test(schema))errors.push(`Schema sem ${table}.`);
  requireRegex(schema,[/alter table public\.audit_events/i,/severity text/i,/source text/i,/ip_sha256/i,/retention_until/i],"Schema");
 
  const security=read(migrations[1]);
@@ -32,8 +32,8 @@ if(!errors.length){
  for(const source of["audit_events","permission_change_events","signature_events","document_access_logs","quality_form_events","procurement_events","finance_events","report_events","inventory_events","sac_ticket_events","crm_opportunity_stage_history","crm_activities"])
   if(!stream.includes(source))errors.push(`Fluxo unificado sem ${source}.`);
  requireRegex(stream,[/get_observability_events/i,/get_observability_event_detail/i,/sanitize_audit_json/i,/p_page_size/i],"Fluxo unificado");
- const module=read(migrations[4]);
- requireRegex(module,[/'auditoria'/i,/install_observability_defaults/i,/SUPER_ADMIN/i,/DIRECAO/i,/ADMINISTRADOR/i,/audit_events_org_dedup_uidx/i,/record_observability_diagnostic/i],"Módulo e performance");
+ const moduleMigration=read(migrations[4]);
+ requireRegex(moduleMigration,[/'auditoria'/i,/install_observability_defaults/i,/SUPER_ADMIN/i,/DIRECAO/i,/ADMINISTRADOR/i,/audit_events_org_dedup_uidx/i,/record_observability_diagnostic/i],"Módulo e performance");
 
  const test=read(testFile);
  for(const name of["module_installation","default_alert_rules","event_idempotency","recursive_sanitization","critical_alert","unified_stream","audit_append_only","alert_workflow","health_snapshot","multi_company_isolation"])
