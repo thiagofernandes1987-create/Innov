@@ -27,30 +27,34 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 
 ## Etapa 17 — Estoque, Inventário e Almoxarifado
 
-- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](../docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md) — implementação funcional e arquitetura do módulo.
-- [`docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md`](../docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md) — aplicação das migrations, correções pós-merge, auditorias e limitações reais.
+- [`docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md`](../docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md) — implementação funcional e arquitetura.
+- [`docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md`](../docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md) — migrations corretivas, testes transacionais, RLS, privilégios, índices e advisors.
 
 ### Linha do tempo
 
-1. PR `#14` implementou a Etapa 17 e foi mesclado à `main` antes da homologação final do Supabase.
-2. PR `#15` foi aberto para preservar a trilha corretiva sem reescrever migrations incorporadas.
-3. O contêiner de trabalho foi perdido, mas o estado foi recuperado pelo GitHub, pelas diretrizes e pelo histórico remoto do Supabase.
-4. Toda a sequência da Etapa 17 foi confirmada como aplicada.
-5. Foram confirmadas 18 tabelas com RLS, seis views privadas, 101 FKs indexadas, nenhuma RPC anônima e guards de custo/escopo.
-6. O CI atual do PR `#15` será considerado concluído somente após a validação deste documento.
-7. O ambiente de homologação estava vazio, impedindo E2E autenticado com identidades reais.
+1. O PR `#14` implementou a Etapa 17 e foi mesclado antes da homologação final do Supabase.
+2. O PR `#15` foi aberto para correções append-only e evidências.
+3. O contêiner não continha checkout recuperável; o estado foi reconstruído pelo GitHub, diretrizes e histórico remoto do Supabase.
+4. Toda a sequência da Etapa 17 foi aplicada.
+5. Foram adicionados locks transacionais, índices complementares e privilégio mínimo das RPCs.
+6. Foram confirmadas 18 tabelas com RLS, seis views privadas, 49 políticas, 36 gatilhos e 101 FKs indexadas.
+7. Bootstrap, saldo, reservas, consumo, reversão, imutabilidade e inventário físico passaram em transações revertidas.
+8. RLS foi testada diretamente com duas identidades e organizações temporárias: uma linha própria, zero linha da outra organização e custo direto bloqueado.
+9. Nenhuma RPC operacional permanece acessível por `anon`.
+10. O teste de duas conexões realmente simultâneas ficou reservado para a Etapa 20 por limitação de credenciais do conector.
+11. O PR `#15` aguarda CI final e revisão; merge depende de aprovação explícita.
 
-### Estado final registrado
+### Estado registrado
 
-A Etapa 17 está incorporada e estruturalmente homologada. O E2E autenticado permanece requisito pré-publicação e deverá usar contas reais provisionadas pelo fluxo oficial.
+A Etapa 17 está incorporada e homologada funcionalmente no Supabase. Todos os dados artificiais foram revertidos. A única validação operacional adicional é o teste de carga concorrente com conexões realmente simultâneas antes da publicação externa.
 
 ## Planejamento posterior
 
 - Etapa 18 — consolidação de CRM, Clientes e SAC;
 - Etapa 19 — auditoria e observabilidade;
-- Etapa 20 — prontidão de produção;
+- Etapa 20 — prontidão de produção e teste concorrente simultâneo;
 - [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — WMS avançado, RFID, automação logística, fiscal e patrimonial; somente planejamento.
 
 ## Regra histórica
 
-Documento histórico não substitui SPEC, inventário, arquitetura, módulos ou roadmap. Toda nova etapa deve atualizar documentação canônica e seu próprio relatório no mesmo PR.
+Documento histórico não substitui SPEC, inventário, arquitetura, módulos ou roadmap. Toda nova etapa atualiza documentação canônica e seu próprio relatório no mesmo PR.
