@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 6
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Validate canonical documentation
         run: node scripts/validate-documentation.mjs
       - name: Validate engineering vaccines
@@ -41,7 +41,7 @@ jobs:
           node scripts/validate-stage18.mjs 2>&1 | tee stage18-validation.txt
       - name: Upload structural validation reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: structural-validation
           path: |
@@ -50,7 +50,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
       - name: Upload recent migrations
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: recent-migrations
           path: |
@@ -70,13 +70,14 @@ jobs:
       SIGNATURE_PROVIDER: sandbox
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
+          package-manager-cache: false
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
       - name: Enable pnpm
@@ -113,7 +114,7 @@ jobs:
           pnpm lint 2>&1 | tee lint-report.txt
       - name: Upload lint report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lint-report
           path: lint-report.txt
@@ -125,7 +126,7 @@ jobs:
           pnpm typecheck 2>&1 | tee typecheck-report.txt
       - name: Upload TypeScript report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: typecheck-report
           path: typecheck-report.txt
