@@ -105,13 +105,13 @@ export async function createSacTicket(data:FormData){
 }
 
 export async function createClientSacTicket(data:FormData){
- const{client,supabase}=await requireClientContext();const path="/cliente/atendimento/novo";
+ const{client,supabase}=await requireClientContext();const path="/cliente/ocorrencias/novo";
  const{data:ticket,error}=await supabase.rpc("create_sac_ticket",{p_organization_id:client.organization_id,p_client_id:client.id,p_project_id:optional(data,"projectId"),p_contract_id:optional(data,"contractId"),p_category_id:optional(data,"categoryId"),p_title:text(data,"title"),p_description:text(data,"description"),p_source:"PORTAL",p_priority:"NORMAL",p_idempotency_key:text(data,"idempotencyKey")||randomUUID()});
- if(error)fail(path,error.message);const row=resultRow(ticket as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/cliente/atendimento/${row?.id??""}`);
+ if(error)fail(path,error.message);const row=resultRow(ticket as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/cliente/ocorrencias/${row?.id??""}`);
 }
 
 export async function addSacTicketMessage(data:FormData){
- const id=text(data,"ticketId");const portal=text(data,"portal")==="true";const path=portal?`/cliente/atendimento/${id}`:`/app/ocorrencias/${id}`;
+ const id=text(data,"ticketId");const portal=text(data,"portal")==="true";const path=portal?`/cliente/ocorrencias/${id}`:`/app/ocorrencias/${id}`;
  const supabase=portal?(await requireClientContext()).supabase:(await requireCapability("sac","update",optional(data,"projectId"))).supabase;
  const{error}=await supabase.rpc("add_sac_ticket_message",{p_ticket_id:id,p_visibility:portal?"CLIENT":text(data,"visibility")||"CLIENT",p_body:text(data,"body"),p_idempotency_key:text(data,"idempotencyKey")||randomUUID()});
  if(error)fail(path,error.message);revalidatePath(path);
@@ -132,16 +132,17 @@ export async function transitionSacTicket(data:FormData){
 export async function rateSacTicket(data:FormData){
  const id=text(data,"ticketId");const{supabase}=await requireClientContext();
  const{error}=await supabase.rpc("rate_sac_ticket",{p_ticket_id:id,p_score:Number(text(data,"score")),p_comment:optional(data,"comment")});
- if(error)fail(`/cliente/atendimento/${id}`,error.message);revalidatePath(`/cliente/atendimento/${id}`);
+ if(error)fail(`/cliente/ocorrencias/${id}`,error.message);revalidatePath(`/cliente/ocorrencias/${id}`);
 }
 
 async function uploadSacAttachment(data:FormData,portal:boolean){
- const ticketId=text(data,"ticketId");const file=data.get("file");const path=portal?`/cliente/atendimento/${ticketId}`:`/app/ocorrencias/${ticketId}`;
+ const ticketId=text(data,"ticketId");const file=data.get("file");const path=portal?`/cliente/ocorrencias/${ticketId}`:`/app/ocorrencias/${ticketId}`;
  if(!(file instanceof File)||file.size===0)fail(path,"Selecione um arquivo.");
  if(file.size>26214400)fail(path,"O arquivo excede 25 MB.");
  if(!ALLOWED_FILES.has(file.type))fail(path,"Formato não permitido. Envie PDF, DOCX, JPG, PNG ou WebP.");
- const actor=portal?await requireClientContext():await requireCapability("sac","update",optional(data,"projectId"));
- const supabase=actor.supabase;const organizationId=portal?actor.client.organization_id:actor.organizationId;
+ let organizationId:string;let supabase;
+ if(portal){const context=await requireClientContext();organizationId=context.client.organization_id;supabase=context.supabase;}
+ else{const context=await requireCapability("sac","update",optional(data,"projectId"));organizationId=context.organizationId;supabase=context.supabase;}
  const buffer=Buffer.from(await file.arrayBuffer());const sha256=createHash("sha256").update(buffer).digest("hex");
  const storagePath=`${organizationId}/${ticketId}/${randomUUID()}-${cleanFileName(file.name)}`;const admin=createSupabaseAdminClient();
  const{error:uploadError}=await admin.storage.from("crm-sac-attachments").upload(storagePath,buffer,{contentType:file.type,upsert:false});
