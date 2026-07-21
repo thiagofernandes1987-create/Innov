@@ -32,8 +32,7 @@ O roadmap segue o estado real da `main`, do Supabase e das branches explicitamen
 
 ### Etapa 13 — Qualidade
 
-- documentos;
-- FVS e FVM;
+- documentos, FVS e FVM;
 - formulários internos e para clientes;
 - pesquisas, anexos e revisão.
 
@@ -57,7 +56,7 @@ O roadmap segue o estado real da `main`, do Supabase e das branches explicitamen
 
 ### Etapa 17 — Estoque, Inventário e Almoxarifado
 
-**Estado:** incorporada à `main` e homologada estruturalmente no Supabase.
+**Estado:** código incorporado à `main`; banco homologado funcionalmente; PR `#15` com correções e evidências aguardando CI final e revisão.
 
 Entregas:
 
@@ -69,11 +68,27 @@ Entregas:
 - ativos, custódias e manutenção;
 - inventário físico e ajustes;
 - RLS, isolamento multiempresa e multiobra e custos mascarados;
-- 18 tabelas, seis views e 101 FKs indexadas.
+- advisory locks por posição de estoque;
+- 18 tabelas, seis views e 101 FKs indexadas;
+- zero RPC operacional acessível por `anon`.
+
+Evidências concluídas:
+
+- bootstrap organizacional;
+- entrada, reserva, consumo e reversão idempotentes;
+- saldo disponível e bloqueio de saldo negativo;
+- segunda saída sobre saldo insuficiente recusada;
+- imutabilidade de movimentos postados;
+- inventário físico contabilizado;
+- RLS com duas identidades e organizações temporárias;
+- dados da outra organização ocultos;
+- leitura direta de custo bloqueada;
+- dados artificiais revertidos;
+- advisors revisados.
 
 Pendência antes da publicação externa:
 
-- E2E autenticado com contas reais de homologação. O ambiente atual está vazio e o teste não será falsificado com identidades artificiais.
+- teste de carga com duas conexões realmente simultâneas. O conector não conseguiu abrir a segunda sessão sem credenciais explícitas; a arquitetura de lock e o cenário de disputa sequencial foram validados.
 
 #### Definition of Done adicional
 
@@ -98,7 +113,7 @@ Objetivos planejados:
 - eliminar duplicidade entre CRM, clientes e SAC;
 - aplicar as mesmas regras de módulos, acesso, auditoria e documentação.
 
-A Etapa 18 só deve iniciar após o PR `#15` registrar e consolidar a homologação da Etapa 17.
+A Etapa 18 só deve iniciar após o PR `#15` ficar verde e ser disponibilizado para revisão. O merge depende de aprovação explícita.
 
 ## Fila posterior
 
@@ -116,6 +131,7 @@ A Etapa 18 só deve iniciar após o PR `#15` registrar e consolidar a homologaç
 - provider jurídico real;
 - antimalware;
 - pentest e observabilidade;
+- teste concorrente simultâneo do estoque;
 - checklist de publicação.
 
 ### Etapa 21 — WMS avançado e automação logística
