@@ -56,7 +56,7 @@ O roadmap segue o estado real da `main`, do Supabase e das branches explicitamen
 
 ### Etapa 17 — Estoque, Inventário e Almoxarifado
 
-**Estado:** código incorporado à `main`; banco homologado funcionalmente; PR `#15` com correções e evidências aguardando CI final e revisão.
+**Estado:** código incorporado à `main`; banco homologado funcionalmente; CI integral verde; PR `#15` pronto para revisão e aguardando decisão explícita de merge.
 
 Entregas:
 
@@ -84,7 +84,8 @@ Evidências concluídas:
 - dados da outra organização ocultos;
 - leitura direta de custo bloqueada;
 - dados artificiais revertidos;
-- advisors revisados.
+- advisors revisados;
+- CI verde e PR liberado para revisão.
 
 Pendência antes da publicação externa:
 
@@ -113,7 +114,7 @@ Objetivos planejados:
 - eliminar duplicidade entre CRM, clientes e SAC;
 - aplicar as mesmas regras de módulos, acesso, auditoria e documentação.
 
-A Etapa 18 só deve iniciar após o PR `#15` ficar verde e ser disponibilizado para revisão. O merge depende de aprovação explícita.
+A Etapa 18 só deve iniciar após decisão explícita sobre o merge do PR `#15`. Nenhum merge será executado automaticamente.
 
 ## Fila posterior
 
