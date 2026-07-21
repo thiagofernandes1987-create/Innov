@@ -1,0 +1,75 @@
+name: Stage 18 Concurrent E2E
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test/etapa-18-e2e-concorrente-supabase
+    paths:
+      - "scripts/run-stage18-concurrent-e2e.mjs"
+      - "scripts/provision-homologation-users.mjs"
+      - ".github/workflows/stage18-concurrent-e2e.yml"
+      - "supabase/migrations/20260721*.sql"
+      - "package.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage18-concurrent-e2e-homologation
+  cancel-in-progress: false
+
+jobs:
+  concurrent-admin-client:
+    name: Admin + Client simultaneous Supabase E2E
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
+      DEMO_CLIENT_PASSWORD: ${{ secrets.DEMO_CLIENT_PASSWORD }}
+      ALLOW_INSECURE_DEMO_USERS: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate required secrets
+        run: |
+          test -n "$NEXT_PUBLIC_SUPABASE_URL"
+          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
+          test -n "$SUPABASE_SERVICE_ROLE_KEY"
+          test -n "$DEMO_ADMIN_PASSWORD"
+          test -n "$DEMO_CLIENT_PASSWORD"
+
+      - name: Provision homologation identities
+        run: pnpm provision:homologation
+
+      - name: Run simultaneous admin and client E2E
+        run: pnpm test:e2e:stage18:concurrent
+
+      - name: Upload E2E report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: stage18-concurrent-e2e-report
+          path: stage18-concurrent-e2e-report.json
+          if-no-files-found: error
+          retention-days: 14
