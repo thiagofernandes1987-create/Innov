@@ -1,0 +1,60 @@
+services:
+  clamav:
+    image: clamav/clamav:1.4-debian13-slim
+    restart: unless-stopped
+    volumes:
+      - clamav_db:/var/lib/clamav
+    networks:
+      - scanner_internal
+    healthcheck:
+      test: ["CMD-SHELL", "printf 'zPING\\0' | nc -w 5 127.0.0.1 3310 | grep -q PONG"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+
+  gateway:
+    build:
+      context: ../../services/file-security-gateway
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      SCANNER_SHARED_SECRET: "${SCANNER_SHARED_SECRET}"
+      CLAMAV_HOST: clamav
+      CLAMAV_PORT: "3310"
+      CLAMAV_TIMEOUT_MS: "15000"
+      MAX_FILE_BYTES: "26214400"
+      MAX_SKEW_SECONDS: "300"
+    depends_on:
+      clamav:
+        condition: service_healthy
+    networks:
+      - scanner_internal
+      - edge
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      SCANNER_DOMAIN: "${SCANNER_DOMAIN}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - gateway
+    networks:
+      - edge
+
+networks:
+  scanner_internal:
+    internal: true
+  edge:
+
+volumes:
+  clamav_db:
+  caddy_data:
+  caddy_config:
