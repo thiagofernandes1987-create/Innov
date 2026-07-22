@@ -145,7 +145,7 @@ const stage19Validator=read("scripts/validate-stage19.mjs");
 if(!stage19Validator.includes("moduleMigration"))errors.push("Validador da Etapa 19 sem nome semântico moduleMigration.");
 if(/eslint-disable[^\n]*no-assign-module-variable/.test(stage19Validator))errors.push("Validador da Etapa 19 desabilita a regra de identificador reservado.");
 
-// VACINA-012 — coerência do estado pós-merge.
+// VACINA-012 — coerência do estado pós-merge e durante a etapa ativa.
 const stateFile="diretrizes/ESTADO-ATUAL.json";
 if(!fs.existsSync(stateFile))errors.push(`Manifesto de estado ausente: ${stateFile}`);
 else{
@@ -157,7 +157,14 @@ else{
   if(state.platformVersion!==packageJson.version)errors.push(`Manifesto diverge do package.json (${packageJson.version}).`);
   if(state.lastCompletedStage!==19)errors.push("Manifesto não registra Etapa 19 como última concluída.");
   if(state.nextStage!==20)errors.push("Manifesto não registra Etapa 20 como próxima etapa.");
-  if(state.activeFunctionalPullRequest!==null)errors.push("Manifesto registra PR funcional ativo após o fechamento da Etapa 19.");
+  const readinessStatus=state.productionReadiness?.status;
+  if(readinessStatus==="in_progress"){
+   if(state.activeFunctionalBranch!=="feature/etapa-20-prontidao-producao")errors.push("Manifesto não registra a branch da Etapa 20 em andamento.");
+   if(!Number.isInteger(state.activeFunctionalPullRequest)||state.activeFunctionalPullRequest<1)errors.push("Manifesto não registra PR funcional válido para a Etapa 20.");
+  }else{
+   if(state.activeFunctionalBranch!==null)errors.push("Manifesto registra branch funcional sem etapa em andamento.");
+   if(state.activeFunctionalPullRequest!==null)errors.push("Manifesto registra PR funcional sem etapa em andamento.");
+  }
   if(state.stage18ConcurrentE2E?.status!=="passed")errors.push("Manifesto não registra E2E da Etapa 18 como passed.");
   if(state.stage18ConcurrentE2E?.cleanup!=="passed")errors.push("Manifesto não registra cleanup da Etapa 18 como passed.");
   if(state.ci?.conclusion!=="success")errors.push("Manifesto não registra CI estável como success.");
