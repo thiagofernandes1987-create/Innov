@@ -90,6 +90,24 @@
         "cleanFixture": "clean",
         "eicarFixture": "blocked"
       },
+      "providerHealthArchitecture": {
+        "status": "implemented_ci_pending",
+        "transport": "https_application_route",
+        "authentication": "hmac_sha256_timestamped",
+        "maximumClockSkewSeconds": 300,
+        "rawClamdInternetExposureAllowed": false,
+        "route": "/api/internal/file-security/health",
+        "runtimeRequiredVariables": [
+          "CLAMAV_HOST",
+          "CLAMAV_PORT",
+          "CLAMAV_TIMEOUT_MS",
+          "FILE_SECURITY_HEALTH_SECRET"
+        ],
+        "githubEnvironmentRequiredSecrets": [
+          "HOMOLOGATION_APP_URL",
+          "FILE_SECURITY_HEALTH_SECRET"
+        ]
+      },
       "realProvider": "pending_configuration",
       "providerHealth": "pending",
       "homologationSacE2E": "pending",
