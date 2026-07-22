@@ -9,8 +9,21 @@ const requiredCanonical=[
  "diretrizes/ARQUITETURA.md",
  "diretrizes/ROADMAP.md",
  "diretrizes/RECUPERACAO.md",
+ "diretrizes/VACINAS.md",
  "diretrizes/PADRAO-DOCUMENTACAO.md",
  "diretrizes/HISTORICO-ETAPAS.md"
+];
+const requiredVaccines=[
+ "diretrizes/vacinas/VACINA-001-RELACOES-SUPABASE.md",
+ "diretrizes/vacinas/VACINA-002-VALIDADORES-SEMANTICOS.md",
+ "diretrizes/vacinas/VACINA-003-LEDGER-MIGRATIONS-SUPABASE.md",
+ "diretrizes/vacinas/VACINA-004-PRIVILEGIOS-RPCS.md",
+ "diretrizes/vacinas/VACINA-005-WORKFLOW-PROTEGIDO.md",
+ "diretrizes/vacinas/VACINA-006-RUNTIME-GITHUB-ACTIONS.md",
+ "diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md",
+ "diretrizes/vacinas/VACINA-008-INSTALACAO-HOMOLOGACAO.md",
+ "diretrizes/vacinas/VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md",
+ "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md"
 ];
 const requiredHistorical=[
  "docs/ETAPA-09-FINANCEIRO-CONTRATOS.md",
@@ -27,12 +40,41 @@ const requiredHistorical=[
  "docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md",
  "docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md",
  "docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md",
+ "docs/ETAPA-18-CRM-CLIENTES-SAC.md",
+ "docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md",
  "docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md",
  "docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md",
  "docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md"
 ];
 
-for(const file of [...requiredCanonical,...requiredHistorical]){
+function isSafeSecretPlaceholder(rawValue){
+ const withoutContinuation=String(rawValue??"").replace(/[ \t]*\\[ \t]*$/,"").trim();
+ const value=withoutContinuation.replace(/^("|'|`)|("|'|`)$/g,"").trim();
+ if(!value)return true;
+ return value==="..."
+  || /^\*+$/.test(value)
+  || /^<[^>]+>$/.test(value)
+  || /^\[?REDACTED\]?$/i.test(value)
+  || /^CHANGE(?:ME)?$/i.test(value)
+  || /^YOUR[_-]/i.test(value)
+  || /^(?:example|placeholder)/i.test(value)
+  || /^\$\{[A-Z0-9_]+\}$/.test(value)
+  || /^\$\{\{\s*secrets\.[A-Z0-9_]+\s*\}\}$/.test(value);
+}
+
+function validateSecrets(file,content){
+ const assignmentPattern=/^(?:export[ \t]+)?(SUPABASE_SERVICE_ROLE_KEY|DEMO_ADMIN_PASSWORD|DEMO_CLIENT_PASSWORD)[ \t]*=[ \t]*(.*)$/gm;
+ for(const match of content.matchAll(assignmentPattern)){
+  if(!isSafeSecretPlaceholder(match[2]))errors.push(`Possível segredo encontrado em ${file}: variável ${match[1]}.`);
+ }
+ const tokenPatterns=[
+  {name:"chave com prefixo sk_",pattern:/\bsk_[a-zA-Z0-9_-]{12,}\b/},
+  {name:"token JWT aparente",pattern:/\beyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}(?:\.[a-zA-Z0-9_-]{10,})?\b/}
+ ];
+ for(const{pattern,name}of tokenPatterns)if(pattern.test(content))errors.push(`Possível segredo encontrado em ${file}: ${name}.`);
+}
+
+for(const file of [...requiredCanonical,...requiredVaccines,...requiredHistorical]){
  if(!fs.existsSync(file)){errors.push(`Arquivo documental ausente: ${file}`);continue;}
  if(fs.statSync(file).size<80)errors.push(`Arquivo documental vazio ou insuficiente: ${file}`);
 }
@@ -50,11 +92,14 @@ if(errors.length===0){
  const spec=fs.readFileSync("diretrizes/SPEC.md","utf8");
  const roadmap=fs.readFileSync("diretrizes/ROADMAP.md","utf8");
  const recovery=fs.readFileSync("diretrizes/RECUPERACAO.md","utf8");
+ const vaccinesIndex=fs.readFileSync("diretrizes/VACINAS.md","utf8");
  const documentationPolicy=fs.readFileSync("diretrizes/PADRAO-DOCUMENTACAO.md","utf8");
  const history=fs.readFileSync("diretrizes/HISTORICO-ETAPAS.md","utf8");
  const readme=fs.readFileSync("README.md","utf8");
  const stage17=fs.readFileSync("docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md","utf8");
  const stage17Report=fs.readFileSync("docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md","utf8");
+ const stage18=fs.readFileSync("docs/ETAPA-18-CRM-CLIENTES-SAC.md","utf8");
+ const stage18E2E=fs.readFileSync("docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md","utf8");
  const stage21=fs.readFileSync("docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md","utf8");
  const packageJson=JSON.parse(fs.readFileSync("package.json","utf8"));
 
@@ -89,7 +134,7 @@ if(errors.length===0){
  for(const token of["git clone","supabase/migrations","pnpm validate:docs","Service Role","Checklist final de recuperação"])
   if(!recovery.includes(token))errors.push(`Recuperação incompleta: ${token}`);
 
- for(const token of["Código sem documentação atualizada","Definition of Done documental","mesmo PR","Proibição de dependência em conversa ou contêiner"])
+ for(const token of["Código sem documentação atualizada","Definition of Done documental","mesmo PR","Proibição de dependência em conversa ou contêiner","Vacinas de engenharia"])
   if(!documentationPolicy.includes(token))errors.push(`Política documental incompleta: ${token}`);
 
  for(const file of requiredHistorical){
@@ -100,11 +145,20 @@ if(errors.length===0){
  for(const token of["diretrizes/SPEC.md","diretrizes/INVENTARIO.md","diretrizes/RECUPERACAO.md","pnpm validate:docs"])
   if(!readme.includes(token))errors.push(`README sem referência obrigatória: ${token}`);
 
+ for(const token of["VACINA-001","VACINA-002","VACINA-003","VACINA-004","VACINA-005","VACINA-006","VACINA-007","VACINA-008","VACINA-009","VACINA-010","Definition of Done de erro"])
+  if(!vaccinesIndex.includes(token))errors.push(`Catálogo de vacinas incompleto: ${token}`);
+
  for(const token of["18 tabelas","advisory locks","14 testes transacionais","ledger remoto","ROLLBACK"])
   if(!stage17Report.includes(token))errors.push(`Relatório de homologação da Etapa 17 incompleto: ${token}`);
 
  for(const token of["advisory lock","14 testes","isolamento multiobra","migration aplicada"])
   if(!stage17.toLowerCase().includes(token.toLowerCase()))errors.push(`Documento da Etapa 17 incompleto: ${token}`);
+
+ for(const token of["Cliente 360","múltiplas obras","SAC e pós-venda","RLS","Definition of Done"])
+  if(!stage18.includes(token))errors.push(`Documento da Etapa 18 incompleto: ${token}`);
+
+ for(const token of["login paralelo","mensagem interna","Promise.all","cleanup","Vacinas aplicadas","Critério de conclusão"])
+  if(!stage18E2E.includes(token))errors.push(`Documento E2E concorrente incompleto: ${token}`);
 
  for(const token of[
   "WMS avançado","Endereçamento automatizado","RFID em tempo real",
@@ -116,19 +170,7 @@ if(errors.length===0){
  if(!spec.includes(`**Versão implementada da plataforma:** ${packageJson.version}`))
   errors.push(`Versão da SPEC diverge do package.json (${packageJson.version}).`);
 
- const forbiddenSecretPatterns=[
-  /SUPABASE_SERVICE_ROLE_KEY[ \t]*=[ \t]*[^ \t\r\n]+/,
-  /DEMO_ADMIN_PASSWORD[ \t]*=[ \t]*[^ \t\r\n]+/,
-  /DEMO_CLIENT_PASSWORD[ \t]*=[ \t]*[^ \t\r\n]+/,
-  /sk_[a-zA-Z0-9_-]{12,}/,
-  /eyJ[a-zA-Z0-9_-]{20,}\.[a-zA-Z0-9_-]{20,}/
- ];
- for(const file of [...requiredCanonical,"docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md","docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md","docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md"]){
-  const content=fs.readFileSync(file,"utf8");
-  for(const pattern of forbiddenSecretPatterns){
-   if(pattern.test(content))errors.push(`Possível segredo encontrado em ${file}: ${pattern}`);
-  }
- }
+ for(const file of [...requiredCanonical,...requiredVaccines,...requiredHistorical])validateSecrets(file,fs.readFileSync(file,"utf8"));
 }
 
 if(errors.length){
@@ -137,4 +179,4 @@ if(errors.length){
  process.exit(1);
 }
 
-console.log(`Documentação validada: ${requiredCanonical.length} documentos canônicos, ${requiredHistorical.length} históricos/planejados e todos os módulos do registry inventariados.`);
+console.log(`Documentação validada: ${requiredCanonical.length} documentos canônicos, ${requiredVaccines.length} vacinas, ${requiredHistorical.length} históricos/planejados e todos os módulos do registry inventariados.`);

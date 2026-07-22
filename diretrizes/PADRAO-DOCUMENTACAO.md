@@ -6,6 +6,8 @@ Código sem documentação atualizada é entrega incompleta.
 
 A documentação deve ser alterada no mesmo PR da mudança funcional. Não é permitido adiar a atualização para uma etapa futura.
 
+Erro recorrente ou causa raiz reutilizável sem vacina documentada, aplicada transversalmente e verificada no CI também é entrega incompleta.
+
 ## 2. Documentos canônicos
 
 Toda mudança deve avaliar impacto em:
@@ -16,6 +18,8 @@ Toda mudança deve avaliar impacto em:
 - `diretrizes/ARQUITETURA.md`;
 - `diretrizes/ROADMAP.md`;
 - `diretrizes/RECUPERACAO.md`;
+- `diretrizes/VACINAS.md`;
+- `diretrizes/vacinas/`;
 - documento técnico em `docs/`.
 
 ## 3. Definition of Done documental
@@ -36,7 +40,9 @@ Uma etapa somente pode ser marcada como concluída quando:
 - [ ] limitações e pendências foram registradas;
 - [ ] roadmap foi atualizado;
 - [ ] recuperação foi atualizada quando necessário;
+- [ ] erros detectados consultaram e atualizaram o catálogo de vacinas;
 - [ ] `pnpm validate:docs` passou;
+- [ ] `pnpm validate:vaccines` passou;
 - [ ] CI completo passou.
 
 ## 4. Documento técnico de etapa
@@ -65,6 +71,7 @@ Seção mínima:
 ## Migrations
 ## Testes
 ## Homologação
+## Vacinas aplicadas ou criadas
 ## Limitações
 ## Próximos passos
 ```
@@ -114,7 +121,8 @@ Registrar:
 - privilégios revogados;
 - idempotência;
 - auditoria;
-- teste negativo.
+- teste negativo;
+- vacina associada quando a causa puder reaparecer.
 
 ## 8. Mudanças de ambiente
 
@@ -151,6 +159,7 @@ A descrição do PR deve conter:
 - homologação;
 - CI;
 - documentação atualizada;
+- vacinas consultadas, aplicadas ou criadas;
 - limitações;
 - fora do escopo.
 
@@ -175,12 +184,41 @@ Não pode existir requisito, decisão, credencial, migration, script ou procedim
 
 Quando uma decisão tomada em conversa alterar o projeto, ela deve ser registrada antes da execução funcional seguinte.
 
-## 13. Revisão periódica
+## 13. Vacinas de engenharia
+
+Ao detectar erro:
+
+1. reproduzir e registrar o sintoma;
+2. identificar a causa raiz;
+3. consultar `diretrizes/VACINAS.md`;
+4. aplicar vacina existente ou criar `diretrizes/vacinas/VACINA-NNN-*.md`;
+5. procurar a mesma causa em todos os módulos suscetíveis;
+6. corrigir ocorrências equivalentes;
+7. criar teste negativo ou validador automático;
+8. registrar evidências e limitações;
+9. executar `pnpm validate:vaccines`.
+
+Cada vacina deve conter:
+
+- sintoma;
+- causa raiz;
+- padrão de detecção;
+- correção canônica;
+- prevenção;
+- módulos afetados;
+- teste preventivo;
+- critério de encerramento.
+
+Não é permitido criar uma segunda solução local para causa raiz já coberta por vacina sem justificar e atualizar a vacina existente.
+
+## 14. Revisão periódica
 
 Ao final de cada etapa:
 
 1. comparar registry, rotas e migrations com inventário;
 2. revisar documentos canônicos;
-3. executar `pnpm validate:docs`;
-4. registrar divergências como bloqueio do PR;
-5. somente então liberar revisão/merge.
+3. revisar erros e vacinas da etapa;
+4. executar `pnpm validate:docs`;
+5. executar `pnpm validate:vaccines`;
+6. registrar divergências como bloqueio do PR;
+7. somente então liberar revisão/merge.

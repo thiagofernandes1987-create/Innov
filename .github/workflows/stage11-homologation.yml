@@ -20,27 +20,34 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-
-      - name: Enable pnpm
-        run: corepack enable
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        uses: actions/checkout@v6
 
       - name: Validate required secrets
         run: |
-          test -n "$NEXT_PUBLIC_SUPABASE_URL"
-          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
-          test -n "$SUPABASE_SERVICE_ROLE_KEY"
-          test -n "$DEMO_ADMIN_PASSWORD"
-          test -n "$DEMO_CLIENT_PASSWORD"
+          missing=()
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || missing+=(NEXT_PUBLIC_SUPABASE_URL)
+          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || missing+=(NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || missing+=(SUPABASE_SERVICE_ROLE_KEY)
+          test -n "$DEMO_ADMIN_PASSWORD" || missing+=(DEMO_ADMIN_PASSWORD)
+          test -n "$DEMO_CLIENT_PASSWORD" || missing+=(DEMO_CLIENT_PASSWORD)
+          if [ ${#missing[@]} -gt 0 ]; then
+            printf 'Secrets ausentes no ambiente homologation: %s\n' "${missing[*]}"
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
 
       - name: Provision homologation accounts
         run: pnpm provision:homologation
