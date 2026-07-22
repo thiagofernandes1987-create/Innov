@@ -8,8 +8,13 @@ import{
  FILE_SECURITY_MAX_BYTES,
  FileSecurityError,
  parseClamAvResponse,
+ type FileSecurityProvider,
  type FileSecurityScanResult
 }from"@/lib/file-security/domain";
+import{
+ createFileSecurityGatewaySignature,
+ FILE_SECURITY_GATEWAY_PATH
+}from"@/lib/file-security/gateway-auth";
 
 const DEFAULT_QUARANTINE_BUCKET="file-quarantine";
 const DEFAULT_CLAMAV_PORT=3310;
@@ -35,13 +40,13 @@ export type SecureUploadResult={
  targetPath:string;
  sha256:string;
  sizeBytes:number;
- provider:"clamav"|"test-clean";
+ provider:FileSecurityProvider;
  scannedAt:string;
 };
 
 export type FileSecurityProviderHealth={
  status:"healthy";
- provider:"clamav"|"test-clean";
+ provider:FileSecurityProvider;
  fixtureResult:"CLEAN";
  checkedAt:string;
  durationMs:number;
@@ -72,6 +77,13 @@ function requiredEnv(name:string){
  return value;
 }
 
+function configuredTimeout(){
+ const timeout=Number(process.env.CLAMAV_TIMEOUT_MS??DEFAULT_TIMEOUT_MS);
+ if(!Number.isFinite(timeout)||timeout<1000||timeout>120_000)
+  throw new FileSecurityError("CLAMAV_TIMEOUT","Timeout do scanner inválido.");
+ return timeout;
+}
+
 function serviceClient(){
  return createClient(requiredEnv("NEXT_PUBLIC_SUPABASE_URL"),requiredEnv("SUPABASE_SERVICE_ROLE_KEY"),{
   auth:{autoRefreshToken:false,persistSession:false,detectSessionInUrl:false}
@@ -99,9 +111,8 @@ async function ensurePrivateBucket(bucket:string){
 function scanWithClamAv(buffer:Buffer):Promise<FileSecurityScanResult>{
  const host=requiredEnv("CLAMAV_HOST");
  const port=Number(process.env.CLAMAV_PORT??DEFAULT_CLAMAV_PORT);
- const timeout=Number(process.env.CLAMAV_TIMEOUT_MS??DEFAULT_TIMEOUT_MS);
+ const timeout=configuredTimeout();
  if(!Number.isInteger(port)||port<1||port>65535)throw new FileSecurityError("CLAMAV_PORT","Porta ClamAV inválida.");
- if(!Number.isFinite(timeout)||timeout<1000)throw new FileSecurityError("CLAMAV_TIMEOUT","Timeout ClamAV inválido.");
  return new Promise((resolve,reject)=>{
   const socket=net.createConnection({host,port});
   const response:Buffer[]=[];
@@ -131,6 +142,48 @@ function scanWithClamAv(buffer:Buffer):Promise<FileSecurityScanResult>{
  });
 }
 
+async function scanWithHttpGateway(buffer:Buffer):Promise<FileSecurityScanResult>{
+ const baseUrl=requiredEnv("FILE_SECURITY_SCANNER_URL");
+ const secret=requiredEnv("FILE_SECURITY_SCANNER_SECRET");
+ if(secret.length<32)throw new FileSecurityError("FILE_SECURITY_CONFIGURATION","FILE_SECURITY_SCANNER_SECRET deve possuir ao menos 32 caracteres.");
+ const endpoint=new URL(FILE_SECURITY_GATEWAY_PATH,baseUrl);
+ const insecureAllowed=process.env.NODE_ENV==="test"||process.env.ALLOW_INSECURE_FILE_SCANNER==="true";
+ if(endpoint.protocol!=="https:"&&!(insecureAllowed&&endpoint.protocol==="http:"))
+  throw new FileSecurityError("FILE_SECURITY_GATEWAY_PROTOCOL","O gateway do scanner exige HTTPS.");
+ endpoint.search="";endpoint.hash="";
+ const sha256=createHash("sha256").update(buffer).digest("hex");
+ const timestamp=String(Math.floor(Date.now()/1000));
+ const signature=createFileSecurityGatewaySignature({secret,timestamp,sha256});
+ let response:Response;
+ try{
+  response=await fetch(endpoint,{
+   method:"POST",
+   redirect:"error",
+   signal:AbortSignal.timeout(configuredTimeout()),
+   headers:{
+    "Accept":"application/json",
+    "Content-Type":"application/octet-stream",
+    "X-Innov-Timestamp":timestamp,
+    "X-Innov-Content-SHA256":sha256,
+    "X-Innov-Signature":signature
+   },
+   body:new Uint8Array(buffer)
+  });
+ }catch(error){
+  throw new FileSecurityError("FILE_SECURITY_GATEWAY_UNAVAILABLE",error instanceof Error?error.message:String(error));
+ }
+ const body=await response.json().catch(()=>null)as null|{status?:string;signature?:string|null;code?:string};
+ if(response.status===401||response.status===403)
+  throw new FileSecurityError("FILE_SECURITY_GATEWAY_AUTH","O gateway recusou a autenticação da aplicação.");
+ if(response.status===422&&body?.status==="BLOCKED")
+  return{status:"BLOCKED",provider:"clamav-http",signature:body.signature?.slice(0,200)||"malware",rawCode:"FOUND"};
+ if(!response.ok)
+  throw new FileSecurityError(body?.code?.slice(0,80)||"FILE_SECURITY_GATEWAY_UNAVAILABLE",`Gateway do scanner retornou HTTP ${response.status}.`);
+ if(body?.status!=="CLEAN")
+  throw new FileSecurityError("FILE_SECURITY_GATEWAY_RESPONSE","O gateway não retornou um resultado liberável.");
+ return{status:"CLEAN",provider:"clamav-http",signature:null,rawCode:"OK"};
+}
+
 async function scanBuffer(buffer:Buffer):Promise<FileSecurityScanResult>{
  const provider=(process.env.FILE_SECURITY_PROVIDER??"clamav").trim().toLowerCase();
  if(provider==="test-clean"){
@@ -138,8 +191,9 @@ async function scanBuffer(buffer:Buffer):Promise<FileSecurityScanResult>{
    throw new FileSecurityError("INSECURE_SCANNER_DISABLED","Provider de teste não permitido neste ambiente.");
   return{status:"CLEAN",provider:"test-clean",signature:null,rawCode:"OK"};
  }
- if(provider!=="clamav")throw new FileSecurityError("FILE_SECURITY_PROVIDER",`Provider de análise não suportado: ${provider}.`);
- return scanWithClamAv(buffer);
+ if(provider==="clamav")return scanWithClamAv(buffer);
+ if(provider==="clamav-http")return scanWithHttpGateway(buffer);
+ throw new FileSecurityError("FILE_SECURITY_PROVIDER",`Provider de análise não suportado: ${provider}.`);
 }
 
 export async function checkFileSecurityProvider():Promise<FileSecurityProviderHealth>{
