@@ -31,7 +31,8 @@
     "worker:signature-delivery": "node scripts/run-signature-delivery-worker.mjs",
     "provision:homologation": "node scripts/provision-homologation-users.mjs",
     "test:e2e:stage11": "node scripts/run-stage11-e2e.mjs",
-    "test:e2e:stage18:concurrent": "node scripts/run-stage18-concurrent-e2e.mjs"
+    "test:e2e:stage18:concurrent": "node scripts/run-stage18-concurrent-e2e.mjs",
+    "test:e2e:stage20:inventory-concurrency": "node scripts/run-stage20-inventory-concurrency-e2e.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
