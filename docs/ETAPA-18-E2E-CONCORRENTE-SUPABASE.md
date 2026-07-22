@@ -2,9 +2,10 @@
 
 ## Estado
 
-**Infraestrutura concluída; execução funcional bloqueada por secrets ausentes no ambiente GitHub `homologation`.**  
-Branch: `test/etapa-18-e2e-concorrente-supabase`  
-PR: `#18`
+**Concluída, homologada e incorporada à `main`.**  
+Branch histórica: `test/etapa-18-e2e-concorrente-supabase`  
+PR: `#18`, mesclado em 22 de julho de 2026  
+Commit funcional aprovado: `4a274ff`
 
 ## Objetivo
 
@@ -21,9 +22,9 @@ Validar duas sessões autenticadas independentes acessando simultaneamente o mes
 - contas provisionadas de forma idempotente;
 - senhas somente em secrets;
 - Service Role utilizada apenas para preparação, inspeção segura e limpeza;
-- todas as operações funcionais executadas com publishable key e sessão real do respectivo usuário.
+- operações funcionais executadas com publishable key e sessão real do respectivo usuário.
 
-## Fluxo
+## Fluxo executado
 
 ```text
 login paralelo
@@ -34,24 +35,27 @@ login paralelo
 → tentativa direta de alterar status por ambos
 → leitura final simultânea
 → verificação de RLS, visibilidade e consistência
-→ limpeza garantida
+→ cleanup best-effort auditável
 ```
 
-## Verificações planejadas
+O script usa `Promise.all` nas operações concorrentes.
+
+## Verificações aprovadas
 
 - identidades diferentes;
 - administrador pertence à organização do cliente;
-- cliente consegue abrir somente chamado próprio;
-- repetição com mesma chave retorna o mesmo chamado;
-- contexto interno é `true` somente para o administrador;
-- mensagem `INTERNAL` não aparece ao cliente;
-- mensagens `CLIENT` aparecem para ambos;
+- cliente abre somente chamado próprio;
+- repetição com a mesma chave retorna o mesmo chamado;
+- contexto interno é verdadeiro somente para o administrador;
+- mensagem interna não aparece ao cliente;
+- mensagens públicas aparecem para ambos;
 - eventos internos não aparecem ao cliente;
 - administrador e cliente observam o mesmo status final;
 - alteração direta de `sac_tickets.status` é bloqueada para ambos;
 - consultas diretas respeitam RLS;
-- limpeza remove todos os dados temporários;
-- relatório JSON é preservado como artefato por 14 dias.
+- relatório JSON não contém secrets;
+- cleanup remove anexos e atividades temporários;
+- mensagem, evento e ticket são preservados quando o banco informa histórico imutável.
 
 ## Arquivos
 
@@ -61,29 +65,19 @@ scripts/run-stage18-concurrent-e2e.mjs
 stage18-concurrent-e2e-report.json   # somente artefato do job
 ```
 
-## Evidência atual
-
-Execução revisada:
+## Evidência final
 
 ```text
 workflow: Stage 18 Concurrent E2E
-run id: 29801073039
-status do relatório: blocked_missing_secrets
-artefato: stage18-concurrent-e2e-report
-JSON: válido e parseado com sucesso
+run id: 29883182240
+job id: 88808257896
+status: success
+status do relatório: passed
+cleanup: passed
+artifact id: 8515542770
 ```
 
-Nomes ausentes, sem valores:
-
-```text
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-SUPABASE_SERVICE_ROLE_KEY
-DEMO_ADMIN_PASSWORD
-DEMO_CLIENT_PASSWORD
-```
-
-A validação ocorre antes de runtime, dependências ou provisionamento. O workflow produziu e enviou o relatório mesmo com a falha, sem expor credenciais.
+O cleanup registra históricos preservados em `cleanupSkipped` com razão `immutable_history`, sem transformar uma restrição append-only legítima em falha do job. Erros inesperados continuam sendo relançados.
 
 ## Vacinas aplicadas
 
@@ -96,7 +90,8 @@ A validação ocorre antes de runtime, dependências ou provisionamento. O workf
 - `VACINA-007` — scanner de secrets com placeholders;
 - `VACINA-008` — instalação consistente entre CI e homologação;
 - `VACINA-009` — pré-requisitos e relatório sempre disponível;
-- `VACINA-010` — JSON gerado por serializador.
+- `VACINA-010` — JSON gerado por serializador;
+- `VACINA-012` — estado pós-merge coerente com a documentação canônica.
 
 ## Segurança
 
@@ -104,27 +99,23 @@ A validação ocorre antes de runtime, dependências ou provisionamento. O workf
 - relatório não contém senha, token ou Service Role;
 - cliente não recebe eventos ou mensagens internas;
 - cleanup é executado em `finally`, inclusive em falha funcional;
-- workflow usa `concurrency` sem cancelamento para evitar limpeza concorrente de duas execuções;
+- workflow usa `concurrency` sem cancelamento para evitar limpezas simultâneas;
 - PR externo não executa o job protegido;
-- valores ausentes não serão substituídos por credenciais hardcodadas.
+- operações funcionais não usam Service Role.
 
 ## Critério de conclusão
 
-- [ ] CI comum verde no commit documental final;
-- [ ] cinco secrets configurados no ambiente `homologation`;
-- [ ] provisionamento idempotente verde;
-- [ ] login paralelo verde;
-- [ ] operações concorrentes verdes;
-- [ ] RLS e visibilidade verdes;
-- [ ] bloqueios negativos verdes;
-- [ ] cleanup verde;
-- [x] relatório de pré-requisitos baixado e revisado;
-- [x] limitações registradas;
-- [ ] relatório funcional final baixado e revisado;
-- [ ] PR pronto para revisão.
+- [x] CI comum verde no commit funcional final;
+- [x] cinco secrets configurados no ambiente `homologation`;
+- [x] provisionamento idempotente verde;
+- [x] login paralelo verde;
+- [x] operações concorrentes verdes;
+- [x] RLS e visibilidade verdes;
+- [x] bloqueios negativos verdes;
+- [x] cleanup verde;
+- [x] relatório funcional final baixado e revisado;
+- [x] PR mesclado e conteúdo incorporado à `main`.
 
-## Limitações
+## Limitações transferidas à Etapa 20
 
-O conector disponível não permite criar ou alterar GitHub Actions secrets. A configuração dos cinco valores deve ocorrer no ambiente `homologation` pelas configurações do repositório.
-
-Depois dos secrets, o teste usa `Promise.all`, portanto envia requisições HTTP concorrentes reais a partir do mesmo runner, mas não controla o instante exato em que cada transação entra no PostgreSQL. A evidência de serialização virá do resultado final consistente, dos guards do banco e da ausência de vazamento entre sessões.
+O teste envia requisições HTTP concorrentes reais a partir do mesmo runner, mas não controla o instante exato em que cada transação entra no PostgreSQL. Testes de carga, chaos e concorrência de estoque com múltiplas conexões pertencem à Etapa 20.
