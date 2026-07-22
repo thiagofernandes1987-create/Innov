@@ -1,0 +1,75 @@
+name: Stage 20 File Security Provider Health
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage20-file-security-provider-homologation
+  cancel-in-progress: false
+
+jobs:
+  provider-health:
+    name: Check homologation ClamAV provider
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 10
+    env:
+      CLAMAV_HOST: ${{ secrets.CLAMAV_HOST }}
+      CLAMAV_PORT: ${{ secrets.CLAMAV_PORT }}
+      CLAMAV_TIMEOUT_MS: ${{ secrets.CLAMAV_TIMEOUT_MS }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Initialize provider report
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          fs.writeFileSync("stage20-file-security-report.json",JSON.stringify({
+            schemaVersion:1,
+            status:"prerequisites_pending",
+            mode:"provider_health",
+            startedAt:new Date().toISOString()
+          },null,2)+"\n");
+          NODE
+
+      - name: Validate provider secret
+        run: |
+          if [ -z "$CLAMAV_HOST" ]; then
+            node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          fs.writeFileSync("stage20-file-security-report.json",JSON.stringify({
+            schemaVersion:1,
+            status:"blocked_missing_secrets",
+            mode:"provider_health",
+            missingNames:["CLAMAV_HOST"],
+            finishedAt:new Date().toISOString()
+          },null,2)+"\n");
+          NODE
+            echo "Pré-requisito ausente no ambiente homologation: CLAMAV_HOST"
+            exit 1
+          fi
+          echo "CLAMAV_PORT=${CLAMAV_PORT:-3310}" >> "$GITHUB_ENV"
+          echo "CLAMAV_TIMEOUT_MS=${CLAMAV_TIMEOUT_MS:-15000}" >> "$GITHUB_ENV"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Run provider health check
+        run: node scripts/run-stage20-file-security-e2e.mjs --health-only
+
+      - name: Upload provider health evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: stage20-file-security-provider-report
+          path: stage20-file-security-report.json
+          if-no-files-found: error
+          retention-days: 30
