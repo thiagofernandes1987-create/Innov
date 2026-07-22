@@ -32,7 +32,10 @@
     "provision:homologation": "node scripts/provision-homologation-users.mjs",
     "test:e2e:stage11": "node scripts/run-stage11-e2e.mjs",
     "test:e2e:stage18:concurrent": "node scripts/run-stage18-concurrent-e2e.mjs",
-    "test:e2e:stage20:inventory-concurrency": "node scripts/run-stage20-inventory-concurrency-e2e.mjs"
+    "test:e2e:stage20:inventory-concurrency": "node scripts/run-stage20-inventory-concurrency-e2e.mjs",
+    "test:drill:stage20:backup-restore": "node scripts/run-stage20-backup-restore-drill.mjs",
+    "test:e2e:stage20:file-security": "node scripts/run-stage20-file-security-e2e.mjs",
+    "test:health:stage20:file-security": "node scripts/run-stage20-file-security-e2e.mjs --health-only"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",
