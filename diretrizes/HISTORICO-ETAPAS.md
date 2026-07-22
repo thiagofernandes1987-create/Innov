@@ -78,7 +78,7 @@ Estado: incorporada à `main`, homologada tecnicamente e com concorrência real 
 - [`docs/ETAPA-20-PRONTIDAO-PRODUCAO.md`](../docs/ETAPA-20-PRONTIDAO-PRODUCAO.md) — contrato geral de segurança produtiva, recuperação, anexos, provider, telemetria, retenção, incidentes, publicação e UI/UX Pro Max.
 - [`docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md`](../docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md) — prova real de duas sessões disputando a mesma posição de estoque.
 - [`docs/ETAPA-20-BACKUP-RESTAURACAO.md`](../docs/ETAPA-20-BACKUP-RESTAURACAO.md) — dump lógico, restauração isolada, equivalência, RTO e limitações externas.
-- [`docs/ETAPA-20-PROTECAO-ANEXOS.md`](../docs/ETAPA-20-PROTECAO-ANEXOS.md) — fundação fail-closed para quarentena e antimalware.
+- [`docs/ETAPA-20-PROTECAO-ANEXOS.md`](../docs/ETAPA-20-PROTECAO-ANEXOS.md) — quarentena fail-closed, integração do SAC e E2E antimalware.
 
 ### Fundação UI/UX e CI
 
@@ -119,9 +119,30 @@ Estado: incorporada à `main`, homologada tecnicamente e com concorrência real 
 - artefato `8526039714`;
 - dump e lista temporária removidos.
 
+### Proteção de anexos do SAC
+
+- migration `20260722104500_stage20_sac_attachment_security.sql` versionada, ainda não aplicada em homologação;
+- estados persistidos `LEGACY` e `CLEAN` sem atribuir scan retroativo falso;
+- validação de MIME, tamanho, nome e assinatura dos bytes;
+- quarentena privada com manifestos `PENDING`, `SCANNING`, `BLOCKED`, `ERROR` e resultado `CLEAN`;
+- promoção ao bucket final somente após ClamAV `INSTREAM` liberar o arquivo;
+- registro do SAC exige `scanId`, provider e instante de análise;
+- falha na RPC remove o objeto promovido;
+- uploads interno e do portal integrados na branch;
+- portal recebe apenas anexos `CLEAN`; equipe autorizada pode identificar legado;
+- download autenticado com URL assinada por 60 segundos e `no-store`;
+- UI usa estado textual e ação `Analisar e enviar`;
+- E2E com imagem oficial ClamAV, `PING`, fixture limpa e EICAR bloqueado;
+- run `29913636268`: `passed`;
+- artefato `8526935275`;
+- CI completo `29913636056`: `passed`.
+
 ### Próxima frente
 
-- proteção real de anexos com provider ClamAV e integração nos uploads;
+- provisionar provider ClamAV privado para homologação;
+- executar health check do provider;
+- aplicar migration e aplicação de forma coordenada;
+- executar E2E real do SAC e planejar reanálise dos anexos `LEGACY`;
 - depois provider jurídico, telemetria, retenção, Auth/MFA, pentest, carga e publicação controlada.
 
 ## Vacinas de engenharia
