@@ -7,6 +7,7 @@ const requiredFiles=[
  "docs/ETAPA-20-PRONTIDAO-PRODUCAO.md",
  "diretrizes/ESTADO-ATUAL.json",
  "app/globals.css",
+ "app/stage20.css",
  "app/layout.tsx",
  "app/app/layout.tsx",
  "app/app/page.tsx"
@@ -21,6 +22,7 @@ if(errors.length===0){
  const design=read("diretrizes/UI-UX-PRO-MAX.md");
  const stage20=read("docs/ETAPA-20-PRONTIDAO-PRODUCAO.md");
  const css=read("app/globals.css");
+ const hardeningCss=read("app/stage20.css");
  const rootLayout=read("app/layout.tsx");
  const appLayout=read("app/app/layout.tsx");
  const dashboard=read("app/app/page.tsx");
@@ -49,6 +51,9 @@ if(errors.length===0){
   "@media (max-width: 960px)", "@media (max-width: 720px)"
  ])if(!css.includes(token))errors.push(`Design system sem implementação obrigatória: ${token}`);
 
+ for(const token of["@supports not (backdrop-filter: blur(1px))",".brand > span:last-child","@media (forced-colors: active)"])
+  if(!hardeningCss.includes(token))errors.push(`Hardening responsivo sem prevenção: ${token}`);
+
  for(const token of[
   'className="skip-link"','href="#conteudo-principal"','aria-label="Navegação principal"',
   'className="nav-icon"','id="conteudo-principal"','tabIndex={-1}','className="organization-chip mono"'
@@ -60,6 +65,7 @@ if(errors.length===0){
   'className="empty-state card"','aria-label={`Abrir ${application.name}. ${accessLabel[application.accessLevel]}.`}'
  ])if(!dashboard.includes(token))errors.push(`Dashboard sem composição canônica: ${token}`);
 
+ if(!rootLayout.includes('import "./stage20.css";'))errors.push("Layout raiz não carrega o hardening da Etapa 20.");
  if(!rootLayout.includes('<html lang="pt-BR">'))errors.push("Layout raiz sem locale pt-BR.");
  if(!packageJson.scripts?.["validate:stage20"])errors.push("package.json sem validate:stage20.");
  if(state){
@@ -69,7 +75,7 @@ if(errors.length===0){
   if(state.productionReleased!==false)errors.push("Manifesto declara produção liberada antes da conclusão.");
  }
 
- const uiImplementation=`${css}\n${appLayout}\n${dashboard}`;
+ const uiImplementation=`${css}\n${hardeningCss}\n${appLayout}\n${dashboard}`;
  for(const forbidden of[/#ec4899/i,/#db2777/i,/\bfuchsia\b/i,/\bpink\b/i])
   if(forbidden.test(uiImplementation))errors.push(`Implementação reintroduz preset visual proibido: ${forbidden}`);
  for(const fileContent of[["app/app/layout.tsx",appLayout],["app/app/page.tsx",dashboard]])
