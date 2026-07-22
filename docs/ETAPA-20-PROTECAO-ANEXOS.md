@@ -175,8 +175,9 @@ tests/file-security.test.ts
 ### E2E local do scanner
 
 - workflow: `Stage 20 File Security E2E`;
-- run: `29913332621`;
-- artefato: `8526808218`;
+- run: `29913636268`;
+- job: `88902223114`;
+- artefato: `8526935275`;
 - imagem oficial: `clamav/clamav:1.4`;
 - `PING` → `PONG`;
 - fixture limpa → `CLEAN`;
@@ -194,7 +195,7 @@ O workflow manual `Stage 20 File Security Provider Health` executa `PING` e scan
 1. provisionar endpoint ClamAV privado e acessível ao runtime server-side;
 2. cadastrar `CLAMAV_HOST` no ambiente `homologation`;
 3. executar e aprovar o health check do provider real;
-4. aplicar a migration em homologação;
+4. aplicar a migration em homologação em conjunto com a aplicação;
 5. executar upload limpo e EICAR pelo fluxo real do SAC;
 6. implementar reanálise dos anexos `LEGACY`;
 7. expandir o pipeline aos demais módulos;
@@ -215,10 +216,11 @@ O workflow manual `Stage 20 File Security Provider Health` executa `PING` e scan
 - [x] integração do SAC na branch;
 - [x] downloads revisados na branch;
 - [x] E2E local limpo/EICAR;
+- [x] CI completo `29913636056`;
 - [ ] provider real configurado;
 - [ ] health check do provider real aprovado;
 - [ ] migration aplicada em homologação;
 - [ ] E2E pelo fluxo real do SAC;
 - [ ] reanálise de anexos `LEGACY`;
 - [ ] integração dos demais módulos;
-- [ ] CI final da integração completo.
+- [ ] CI final da integração completa.
