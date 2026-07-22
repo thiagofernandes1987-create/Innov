@@ -1,0 +1,97 @@
+name: Stage 20 File Security Gateway E2E
+
+on:
+  pull_request:
+    paths:
+      - "services/file-security-gateway/**"
+      - "lib/file-security/gateway-auth.ts"
+      - "scripts/run-stage20-file-security-gateway-e2e.mjs"
+      - ".github/workflows/stage20-file-security-gateway-e2e.yml"
+  push:
+    branches:
+      - feature/etapa-20-prontidao-producao
+    paths:
+      - "services/file-security-gateway/**"
+      - "lib/file-security/gateway-auth.ts"
+      - "scripts/run-stage20-file-security-gateway-e2e.mjs"
+      - ".github/workflows/stage20-file-security-gateway-e2e.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  gateway-e2e:
+    name: HTTPS gateway protocol against ClamAV
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      clamav:
+        image: clamav/clamav:1.4-debian13-slim
+        ports:
+          - 3310:3310
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Wait for ClamAV
+        run: |
+          node --input-type=module <<'NODE'
+          import net from "node:net";
+          const deadline=Date.now()+240000;
+          while(Date.now()<deadline){
+            const ok=await new Promise(resolve=>{
+              const socket=net.createConnection({host:"127.0.0.1",port:3310});
+              const chunks=[];
+              const finish=value=>{socket.destroy();resolve(value);};
+              socket.setTimeout(3000,()=>finish(false));
+              socket.on("error",()=>finish(false));
+              socket.on("data",chunk=>chunks.push(Buffer.from(chunk)));
+              socket.on("end",()=>finish(Buffer.concat(chunks).toString("utf8").replace(/\0/g,"").trim()==="PONG"));
+              socket.on("connect",()=>socket.write(Buffer.from("zPING\0","utf8")));
+            });
+            if(ok)process.exit(0);
+            await new Promise(resolve=>setTimeout(resolve,5000));
+          }
+          throw new Error("ClamAV não ficou pronto dentro da janela.");
+          NODE
+
+      - name: Start authenticated gateway
+        env:
+          PORT: "8080"
+          SCANNER_SHARED_SECRET: "stage20-gateway-test-secret-0123456789abcdef0123456789abcdef"
+          CLAMAV_HOST: "127.0.0.1"
+          CLAMAV_PORT: "3310"
+          CLAMAV_TIMEOUT_MS: "15000"
+        run: |
+          node services/file-security-gateway/server.mjs > gateway.log 2>&1 &
+          echo $! > gateway.pid
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/health >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat gateway.log
+          exit 1
+
+      - name: Run clean auth and EICAR gateway E2E
+        env:
+          FILE_SECURITY_GATEWAY_TEST_URL: "http://127.0.0.1:8080/v1/scan"
+          FILE_SECURITY_GATEWAY_TEST_SECRET: "stage20-gateway-test-secret-0123456789abcdef0123456789abcdef"
+        run: node scripts/run-stage20-file-security-gateway-e2e.mjs
+
+      - name: Upload gateway evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: stage20-file-security-gateway-report
+          path: |
+            stage20-file-security-gateway-report.json
+            gateway.log
+          if-no-files-found: error
+          retention-days: 30
