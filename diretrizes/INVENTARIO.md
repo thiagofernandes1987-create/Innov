@@ -3,8 +3,8 @@
 **Atualizado em:** 22 de julho de 2026  
 **Base estável:** `main`  
 **Commit estável analisado:** `55f4d56`  
-**Branch de regularização:** `chore/encerramento-etapa-19`  
-**PRs funcionais ativos:** nenhum  
+**Branch funcional ativa:** `feature/etapa-20-prontidao-producao`  
+**PR-base de regularização:** `#22`  
 **Versão:** 0.19.0
 
 Este documento registra o estado necessário para recuperar, validar e continuar o projeto sem depender do contêiner ou do histórico da conversa.
@@ -19,14 +19,14 @@ Este documento registra o estado necessário para recuperar, validar e continuar
 - Next.js 16, React 19 e TypeScript;
 - Supabase Auth, PostgreSQL, RLS e Storage;
 - homologação Supabase: `wyeojufebtwblsubkunr`;
-- CI da `main`: run `29885340336`, conclusão `success`;
-- Vercel: status do commit estável `success`.
+- CI estável da `main`: run `29885340336`, conclusão `success`;
+- produção: não liberada.
 
 ## 2. Estado dos aplicativos
 
 | Chave | Aplicativo | Estado | Etapa |
 |---|---|---|---|
-| `dashboard` | Início | operacional | 12.1 |
+| `dashboard` | Início | operacional; fundação visual revisada na Etapa 20 | 12.1/20 |
 | `crm` | CRM e Vendas | implementado, homologado e incorporado | 18 |
 | `clientes` | Clientes | Cliente 360 multiobra implementado | 18 |
 | `obras` | Obras | operacional | 12 |
@@ -39,7 +39,7 @@ Este documento registra o estado necessário para recuperar, validar e continuar
 | `contratos` | Contratos | operacional | 9 |
 | `aditivos` | Aditivos | operacional | 9 |
 | `assinaturas` | Assinaturas | operacional em sandbox; provider jurídico pendente | 9/12.2/20 |
-| `documentos` | Documentos | operacional | 12/13 |
+| `documentos` | Documentos | operacional; proteção produtiva pendente | 12/13/20 |
 | `qualidade` | Qualidade | operacional | 13 |
 | `compras` | Compras e Suprimentos | operacional | 14 |
 | `estoque` | Estoque, Inventário e Almoxarifado | incorporado e homologado; produção pendente | 17/20 |
@@ -109,7 +109,7 @@ supabase/tests/stage17_inventory_homologation.sql
 - 14 testes transacionais com `ROLLBACK`;
 - migrations locais alinhadas ao ledger remoto.
 
-### Pendências de produção transferidas à Etapa 20
+### Pendências transferidas à Etapa 20
 
 - duas conexões realmente simultâneas disputando a mesma posição;
 - carga e volumetria;
@@ -117,32 +117,10 @@ supabase/tests/stage17_inventory_homologation.sql
 
 ## 5. Etapa 18 — CRM, Clientes e SAC
 
-### Código principal
-
-```text
-lib/relationship/domain.ts
-lib/relationship/server.ts
-app/actions/relationship.ts
-components/relationship/*
-app/app/crm/**
-app/app/clientes/**
-app/app/ocorrencias/**
-app/cliente/ocorrencias/**
-app/api/sac/attachments/[id]/route.ts
-app/relationship.css
-scripts/validate-stage18.mjs
-supabase/tests/stage18_relationship_homologation.sql
-scripts/run-stage18-concurrent-e2e.mjs
-.github/workflows/stage18-concurrent-e2e.yml
-```
-
-### Estado concluído
-
 - 10 tabelas novas com RLS;
 - pipeline comercial exclusivamente interno;
 - Cliente 360 multiobra;
 - SAC interno e portal do cliente;
-- mensagens, anexos e eventos internos ocultos do cliente;
 - bucket privado `crm-sac-attachments`;
 - anexos com SHA-256;
 - estados críticos somente por RPC;
@@ -153,21 +131,6 @@ scripts/run-stage18-concurrent-e2e.mjs
 - PR `#18` mesclado na `main`.
 
 ## 6. Etapa 19 — Auditoria e Observabilidade
-
-### Código principal
-
-```text
-lib/observability/domain.ts
-lib/observability/server.ts
-app/actions/observability.ts
-components/observability/observability-navigation.tsx
-app/app/auditoria/**
-app/observability.css
-scripts/validate-stage19.mjs
-supabase/tests/stage19_observability_homologation.sql
-```
-
-### Estado concluído
 
 - seis tabelas com RLS;
 - 13 políticas e seis gatilhos não internos;
@@ -196,9 +159,32 @@ supabase/tests/stage19_observability_homologation.sql
 
 ## 7. Etapa 20 — Prontidão de Produção
 
-**Estado:** preparação iniciada em branch própria após o fechamento documental da Etapa 19.
+**Estado:** em implementação na branch funcional ativa.
 
-Escopo operacional:
+### Fundação versionada
+
+```text
+diretrizes/UI-UX-PRO-MAX.md
+docs/ETAPA-20-PRONTIDAO-PRODUCAO.md
+scripts/validate-stage20.mjs
+app/globals.css
+app/app/layout.tsx
+app/app/page.tsx
+.github/workflows/ci.yml
+```
+
+### Entregas da primeira fatia
+
+- UI/UX Pro Max instituída como diretriz permanente;
+- identidade visual autoral `Arquitetura em operação`;
+- classes ausentes do dashboard implementadas;
+- shell com link de salto e contexto organizacional;
+- dashboard responsivo sem métricas inventadas;
+- foco visível, alvos de 44px e redução de movimento;
+- prevenção contra preset rosa/fúcsia;
+- `validate:stage20` integrado ao preflight e ao pipeline completo.
+
+### Escopo ainda pendente
 
 - E2E autenticado completo;
 - concorrência real de estoque;
@@ -208,12 +194,11 @@ Escopo operacional:
 - pentest;
 - backup e restauração testados;
 - telemetria externa;
-- worker de retenção com dry-run e preservação legal;
+- worker de retenção;
 - plano de incidentes;
 - proteção contra senhas comprometidas;
 - MFA adicional;
-- publicação controlada;
-- consolidação do design system UI/UX Pro Max adaptado à Innovar.
+- publicação controlada.
 
 ## 8. Storage privado
 
@@ -229,8 +214,6 @@ procurement-attachments
 finance-attachments
 crm-sac-attachments
 ```
-
-A Etapa 19 não cria bucket nem armazena payload bruto ou arquivo de log.
 
 ## 9. Variáveis conhecidas
 
@@ -257,6 +240,7 @@ pnpm validate:migrations
 pnpm validate:stage17
 pnpm validate:stage18
 pnpm validate:stage19
+pnpm validate:stage20
 pnpm lint
 pnpm typecheck
 pnpm test
