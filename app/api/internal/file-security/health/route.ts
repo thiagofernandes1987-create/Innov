@@ -3,6 +3,7 @@ import{
  FILE_SECURITY_HEALTH_PATH,
  verifyFileSecurityHealthSignature
 }from"@/lib/file-security/health-auth";
+import{FileSecurityError}from"@/lib/file-security/domain";
 import{checkFileSecurityProvider}from"@/lib/file-security/server";
 
 export const runtime="nodejs";
@@ -20,7 +21,7 @@ function json(body:Record<string,unknown>,status:number){
 
 export async function POST(request:Request){
  const secret=process.env.FILE_SECURITY_HEALTH_SECRET?.trim()??"";
- if(secret.length<32)return json({status:"unavailable",reason:"configuration"},503);
+ if(secret.length<32)return json({status:"unavailable",reason:"configuration",code:"FILE_SECURITY_HEALTH_SECRET"},503);
  const authorized=verifyFileSecurityHealthSignature({
   secret,
   timestamp:request.headers.get("x-innov-timestamp"),
@@ -32,7 +33,9 @@ export async function POST(request:Request){
  try{
   const health=await checkFileSecurityProvider();
   return json(health,200);
- }catch{
-  return json({status:"unavailable",reason:"provider"},503);
+ }catch(error){
+  const code=error instanceof FileSecurityError?error.code:"PROVIDER_UNKNOWN";
+  console.error(JSON.stringify({event:"file_security_provider_health_failed",code}));
+  return json({status:"unavailable",reason:"provider",code},503);
  }
 }
