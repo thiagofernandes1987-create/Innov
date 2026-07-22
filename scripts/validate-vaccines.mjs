@@ -13,7 +13,8 @@ const vaccines=[
  "diretrizes/vacinas/VACINA-008-INSTALACAO-HOMOLOGACAO.md",
  "diretrizes/vacinas/VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md",
  "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md",
- "diretrizes/vacinas/VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md"
+ "diretrizes/vacinas/VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md",
+ "diretrizes/vacinas/VACINA-012-ESTADO-POS-MERGE.md"
 ];
 const required=["diretrizes/VACINAS.md",...vaccines];
 
@@ -27,7 +28,7 @@ for(const file of required){
 
 if(fs.existsSync("diretrizes/VACINAS.md")){
  const index=read("diretrizes/VACINAS.md");
- for(let id=1;id<=11;id++)if(!index.includes(`VACINA-${String(id).padStart(3,"0")}`))errors.push(`Catálogo sem VACINA-${String(id).padStart(3,"0")}.`);
+ for(let id=1;id<=12;id++)if(!index.includes(`VACINA-${String(id).padStart(3,"0")}`))errors.push(`Catálogo sem VACINA-${String(id).padStart(3,"0")}.`);
 }
 
 // VACINA-001 — relações Supabase variáveis.
@@ -143,6 +144,44 @@ for(const name of fs.readdirSync("scripts").filter(file=>file.endsWith(".mjs")))
 const stage19Validator=read("scripts/validate-stage19.mjs");
 if(!stage19Validator.includes("moduleMigration"))errors.push("Validador da Etapa 19 sem nome semântico moduleMigration.");
 if(/eslint-disable[^\n]*no-assign-module-variable/.test(stage19Validator))errors.push("Validador da Etapa 19 desabilita a regra de identificador reservado.");
+
+// VACINA-012 — coerência do estado pós-merge.
+const stateFile="diretrizes/ESTADO-ATUAL.json";
+if(!fs.existsSync(stateFile))errors.push(`Manifesto de estado ausente: ${stateFile}`);
+else{
+ let state;
+ try{state=JSON.parse(read(stateFile));}catch(error){errors.push(`Manifesto de estado inválido: ${error instanceof Error?error.message:String(error)}`);}
+ if(state){
+  if(state.repository!=="thiagofernandes1987-create/Innov")errors.push("Manifesto aponta para repositório incorreto.");
+  if(state.baseBranch!=="main")errors.push("Manifesto não usa main como base estável.");
+  if(state.platformVersion!==packageJson.version)errors.push(`Manifesto diverge do package.json (${packageJson.version}).`);
+  if(state.lastCompletedStage!==19)errors.push("Manifesto não registra Etapa 19 como última concluída.");
+  if(state.nextStage!==20)errors.push("Manifesto não registra Etapa 20 como próxima etapa.");
+  if(state.activeFunctionalPullRequest!==null)errors.push("Manifesto registra PR funcional ativo após o fechamento da Etapa 19.");
+  if(state.stage18ConcurrentE2E?.status!=="passed")errors.push("Manifesto não registra E2E da Etapa 18 como passed.");
+  if(state.stage18ConcurrentE2E?.cleanup!=="passed")errors.push("Manifesto não registra cleanup da Etapa 18 como passed.");
+  if(state.ci?.conclusion!=="success")errors.push("Manifesto não registra CI estável como success.");
+ }
+}
+const currentStateDocs=[
+ "diretrizes/SPEC.md",
+ "diretrizes/INVENTARIO.md",
+ "diretrizes/ROADMAP.md",
+ "docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md",
+ "docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md"
+];
+const stalePatterns=[
+ /PR\s*`?#18`?\s+em\s+rascunho/i,
+ /PR\s*`?#19`?[^\n]{0,80}rascunho/i,
+ /E2E[^\n]{0,80}permanece\s+bloqueado/i,
+ /execução\s+funcional\s+bloqueada/i,
+ /status\s+do\s+relatório:\s*blocked_missing_secrets/i,
+ /aguardando\s+estabilização\s+do\s+PR\s*`?#18`?/i
+];
+for(const file of currentStateDocs){
+ const content=read(file);
+ for(const pattern of stalePatterns)if(pattern.test(content))errors.push(`${file} reintroduz estado pós-merge obsoleto: ${pattern}`);
+}
 
 if(errors.length){
  console.error(`Vacinas inválidas (${errors.length} falha(s)):`);
