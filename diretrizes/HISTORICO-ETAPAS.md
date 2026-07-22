@@ -31,41 +31,46 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 - [`docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md`](../docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md) — recuperação, auditoria Supabase, correções e testes transacionais.
 - [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — evolução futura para WMS avançado.
 
+Estado: incorporada à `main` e homologada tecnicamente; concorrência real, carga, backup e restauração permanecem na Etapa 20.
+
 ## Etapa 18 — CRM, Clientes e SAC
 
 - [`docs/ETAPA-18-CRM-CLIENTES-SAC.md`](../docs/ETAPA-18-CRM-CLIENTES-SAC.md) — lead, oportunidade, Cliente 360, múltiplas obras, atendimento e portal.
 - [`docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md`](../docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md) — administrador e cliente autenticados acessando simultaneamente o mesmo chamado no Supabase.
 
-### Evidências
+### Evidências finais
 
-- Etapa 18 incorporada à `main` pelo PR `#17`;
+- Etapa 18 incorporada à `main`;
 - 10 tabelas novas com RLS;
 - CRM, Cliente 360 e SAC homologados com transações revertidas;
 - portal restrito às obras liberadas;
 - workflow de estados protegido;
 - bucket privado e anexos com SHA-256;
-- E2E concorrente implementado com duas sessões, `Promise.all`, RLS e cleanup;
-- execução do E2E ainda bloqueada pelos secrets ausentes no ambiente GitHub `homologation`.
+- E2E concorrente executado com duas sessões, `Promise.all`, RLS e cleanup;
+- run `29883182240`: `status: passed` e `cleanup: passed`;
+- históricos append-only preservados como `immutable_history`;
+- PR `#18` mesclado.
 
 ## Etapa 19 — Auditoria e Observabilidade
 
 - [`docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md`](../docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md) — fluxo unificado, correlação, sanitização, alertas, health checks, diagnósticos, retenção, RLS e interface administrativa.
 
-### Linha do tempo
+### Linha do tempo consolidada
 
-1. PR `#19` criado como branch empilhada sobre o PR `#18`.
+1. PR `#19` criado como branch empilhada sobre a Etapa 18.
 2. Versão `0.19.0` sincronizada entre `package.json` e SPEC.
-3. Seis migrations aplicadas no Supabase e renomeadas para os timestamps exatos do ledger remoto.
-4. Fluxo unificado de 12 origens homologado sem copiar as trilhas dos módulos.
+3. Seis migrations aplicadas no Supabase e alinhadas aos timestamps do ledger remoto.
+4. Fluxo unificado de 12 origens homologado sem copiar trilhas de domínio.
 5. Sanitização recursiva confirmou `[REDACTED]` em senha, token, authorization e secret.
 6. Evento idempotente, alerta crítico, reconhecimento, resolução e seis health checks passaram.
 7. Append-only foi bloqueado por privilégio e trigger.
 8. Isolamento multiempresa foi confirmado.
-9. Hardening protegeu diagnósticos globais: interno autorizado vê; sessão sem membership não vê.
+9. Diagnósticos globais foram protegidos contra cliente e sessão sem membership.
 10. Sete índices complementares eliminaram todas as FKs sem índice do novo domínio.
-11. Advisors foram revisados; avisos globais antigos permanecem no backlog das Etapas 19/20.
+11. Advisors foram revisados; dívidas globais antigas foram transferidas à Etapa 20.
 12. Todos os dados artificiais foram revertidos.
-13. PR `#19` permanece em rascunho por depender do PR `#18`.
+13. CI final ficou verde.
+14. PR `#19` foi mesclado e o PR `#20` consolidou o conteúdo na `main`.
 
 ### Estado atual
 
@@ -76,17 +81,17 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 - seis migrations alinhadas ao ledger;
 - teste transacional oficial com `ROLLBACK`;
 - documentação e validador atualizados;
-- CI final do commit documental ainda precisa ser confirmado.
+- CI da `main` verde.
 
 ## Vacinas de engenharia
 
-O catálogo está em [`diretrizes/VACINAS.md`](./VACINAS.md), com documentos individuais em `diretrizes/vacinas/`. Toda correção recorrente deve consultar, aplicar ou ampliar esse catálogo. A Etapa 19 adicionou a `VACINA-011` para identificadores reservados do Node/Next.
+O catálogo está em [`diretrizes/VACINAS.md`](./VACINAS.md), com documentos individuais em `diretrizes/vacinas/`. Toda correção recorrente deve consultar, aplicar ou ampliar esse catálogo. A Etapa 19 adicionou a `VACINA-011`; o fechamento pós-merge adicionou a `VACINA-012`.
 
 ## Planejamento posterior
 
-- Etapa 20 — prontidão de produção, retenção automatizada e teste de carga ampliado;
+- Etapa 20 — prontidão de produção, segurança operacional, retenção automatizada, testes ampliados e consolidação UI/UX Pro Max;
 - Etapa 21 — WMS avançado, RFID, automação logística, fiscal e patrimonial.
 
 ## Regra histórica
 
-Documento histórico não substitui SPEC, inventário, arquitetura, módulos, roadmap ou vacinas. Toda nova etapa atualiza documentação canônica e seu próprio relatório no mesmo PR.
+Documento histórico não substitui SPEC, inventário, arquitetura, módulos, roadmap, manifesto de estado ou vacinas. Toda nova etapa atualiza documentação canônica e seu próprio relatório no mesmo PR.
