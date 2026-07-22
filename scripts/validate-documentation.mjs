@@ -4,6 +4,7 @@ const errors=[];
 const requiredCanonical=[
  "diretrizes/README.md",
  "diretrizes/SPEC.md",
+ "diretrizes/ESTADO-ATUAL.json",
  "diretrizes/INVENTARIO.md",
  "diretrizes/MODULOS.md",
  "diretrizes/ARQUITETURA.md",
@@ -24,7 +25,8 @@ const requiredVaccines=[
  "diretrizes/vacinas/VACINA-008-INSTALACAO-HOMOLOGACAO.md",
  "diretrizes/vacinas/VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md",
  "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md",
- "diretrizes/vacinas/VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md"
+ "diretrizes/vacinas/VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md",
+ "diretrizes/vacinas/VACINA-012-ESTADO-POS-MERGE.md"
 ];
 const requiredHistorical=[
  "docs/ETAPA-09-FINANCEIRO-CONTRATOS.md",
@@ -50,7 +52,7 @@ const requiredHistorical=[
 ];
 
 function isSafeSecretPlaceholder(rawValue){
- const withoutContinuation=String(rawValue??"").replace(/[ \t]*\\[ \t]*$/,"").trim();
+ const withoutContinuation=String(rawValue??"").replace(/[ \t]*\\[ \t]*$/,"" ).trim();
  const value=withoutContinuation.replace(/^("|'|`)|("|'|`)$/g,"").trim();
  if(!value)return true;
  return value==="..."
@@ -105,6 +107,9 @@ if(errors.length===0){
  const stage19=fs.readFileSync("docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md","utf8");
  const stage21=fs.readFileSync("docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md","utf8");
  const packageJson=JSON.parse(fs.readFileSync("package.json","utf8"));
+ let currentState;
+ try{currentState=JSON.parse(fs.readFileSync("diretrizes/ESTADO-ATUAL.json","utf8"));}
+ catch(error){errors.push(`ESTADO-ATUAL.json inválido: ${error instanceof Error?error.message:String(error)}`);}
 
  if(uniqueKeys.length<20)errors.push(`Registro modular inesperadamente pequeno: ${uniqueKeys.length} módulos.`);
  for(const key of uniqueKeys){
@@ -119,8 +124,8 @@ if(errors.length===0){
 
  for(const token of[
   "Etapa 17","Estoque, Inventário e Almoxarifado","Definition of Done adicional",
-  "Etapa 19","Auditoria e observabilidade","Etapa 21","WMS avançado","endereçamento automatizado","RFID em tempo real",
-  "ressuprimento automático sem aprovação","roteirização logística","integração fiscal de entrada","depreciação contábil oficial"
+  "Etapa 19","Auditoria e observabilidade","Etapa 21","WMS avançado","Endereçamento automatizado","RFID em tempo real",
+  "Ressuprimento automático sem aprovação","Roteirização logística","Integração fiscal de entrada","Depreciação contábil oficial"
  ])if(!roadmap.includes(token))errors.push(`Roadmap incompleto: ${token}`);
 
  for(const token of[
@@ -147,7 +152,7 @@ if(errors.length===0){
  for(const token of["diretrizes/SPEC.md","diretrizes/INVENTARIO.md","diretrizes/RECUPERACAO.md","pnpm validate:docs"])
   if(!readme.includes(token))errors.push(`README sem referência obrigatória: ${token}`);
 
- for(const token of["VACINA-001","VACINA-002","VACINA-003","VACINA-004","VACINA-005","VACINA-006","VACINA-007","VACINA-008","VACINA-009","VACINA-010","VACINA-011","Definition of Done de erro"])
+ for(const token of["VACINA-001","VACINA-002","VACINA-003","VACINA-004","VACINA-005","VACINA-006","VACINA-007","VACINA-008","VACINA-009","VACINA-010","VACINA-011","VACINA-012","Definition of Done de erro"])
   if(!vaccinesIndex.includes(token))errors.push(`Catálogo de vacinas incompleto: ${token}`);
 
  for(const token of["18 tabelas","advisory locks","14 testes transacionais","ledger remoto","ROLLBACK"])
@@ -174,6 +179,11 @@ if(errors.length===0){
 
  if(!spec.includes(`**Versão implementada da plataforma:** ${packageJson.version}`))
   errors.push(`Versão da SPEC diverge do package.json (${packageJson.version}).`);
+ if(currentState){
+  if(currentState.platformVersion!==packageJson.version)errors.push(`Versão do manifesto diverge do package.json (${packageJson.version}).`);
+  if(currentState.lastCompletedStage!==19)errors.push("Manifesto não registra a Etapa 19 como concluída.");
+  if(currentState.nextStage!==20)errors.push("Manifesto não registra a Etapa 20 como próxima etapa.");
+ }
 
  for(const file of [...requiredCanonical,...requiredVaccines,...requiredHistorical])validateSecrets(file,fs.readFileSync(file,"utf8"));
 }
