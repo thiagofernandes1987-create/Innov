@@ -8,7 +8,7 @@ A evidência valida a restauração dos schemas de aplicação e do ledger. A po
 
 ## Objetivo
 
-Comprovar que os schemas de aplicação e o ledger de migrations podem ser extraídos da origem e restaurados em um projeto Supabase descartável, sem publicar o dump como artefato.
+Comprovar a Prontidão de produção do processo de recuperação: os schemas de aplicação e o ledger de migrations podem ser extraídos da origem e restaurados em um projeto Supabase descartável, sem publicar o dump como artefato.
 
 ## Escopo incluído
 
