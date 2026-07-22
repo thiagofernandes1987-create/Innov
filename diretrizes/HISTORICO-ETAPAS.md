@@ -77,6 +77,7 @@ Estado: incorporada à `main`, homologada tecnicamente e com concorrência real 
 
 - [`docs/ETAPA-20-PRONTIDAO-PRODUCAO.md`](../docs/ETAPA-20-PRONTIDAO-PRODUCAO.md) — contrato geral de segurança produtiva, recuperação, anexos, provider, telemetria, retenção, incidentes, publicação e UI/UX Pro Max.
 - [`docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md`](../docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md) — prova real de duas sessões disputando a mesma posição de estoque.
+- [`docs/ETAPA-20-BACKUP-RESTAURACAO.md`](../docs/ETAPA-20-BACKUP-RESTAURACAO.md) — drill protegido de dump lógico, restauração isolada, comparação e smoke tests.
 
 ### Fundação UI/UX e CI
 
