@@ -11,6 +11,7 @@ const requiredCanonical=[
  "diretrizes/ROADMAP.md",
  "diretrizes/RECUPERACAO.md",
  "diretrizes/VACINAS.md",
+ "diretrizes/UI-UX-PRO-MAX.md",
  "diretrizes/PADRAO-DOCUMENTACAO.md",
  "diretrizes/HISTORICO-ETAPAS.md"
 ];
@@ -46,6 +47,7 @@ const requiredHistorical=[
  "docs/ETAPA-18-CRM-CLIENTES-SAC.md",
  "docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md",
  "docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md",
+ "docs/ETAPA-20-PRONTIDAO-PRODUCAO.md",
  "docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md",
  "docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md",
  "docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md"
@@ -97,6 +99,7 @@ if(errors.length===0){
  const roadmap=fs.readFileSync("diretrizes/ROADMAP.md","utf8");
  const recovery=fs.readFileSync("diretrizes/RECUPERACAO.md","utf8");
  const vaccinesIndex=fs.readFileSync("diretrizes/VACINAS.md","utf8");
+ const uiUx=fs.readFileSync("diretrizes/UI-UX-PRO-MAX.md","utf8");
  const documentationPolicy=fs.readFileSync("diretrizes/PADRAO-DOCUMENTACAO.md","utf8");
  const history=fs.readFileSync("diretrizes/HISTORICO-ETAPAS.md","utf8");
  const readme=fs.readFileSync("README.md","utf8");
@@ -105,6 +108,7 @@ if(errors.length===0){
  const stage18=fs.readFileSync("docs/ETAPA-18-CRM-CLIENTES-SAC.md","utf8");
  const stage18E2E=fs.readFileSync("docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md","utf8");
  const stage19=fs.readFileSync("docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md","utf8");
+ const stage20=fs.readFileSync("docs/ETAPA-20-PRONTIDAO-PRODUCAO.md","utf8");
  const stage21=fs.readFileSync("docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md","utf8");
  const packageJson=JSON.parse(fs.readFileSync("package.json","utf8"));
  let currentState;
@@ -124,7 +128,8 @@ if(errors.length===0){
 
  for(const token of[
   "Etapa 17","Estoque, Inventário e Almoxarifado","Definition of Done adicional",
-  "Etapa 19","Auditoria e observabilidade","Etapa 21","WMS avançado","Endereçamento automatizado","RFID em tempo real",
+  "Etapa 19","Auditoria e observabilidade","Etapa 20","Prontidão de produção",
+  "Etapa 21","WMS avançado","Endereçamento automatizado","RFID em tempo real",
   "Ressuprimento automático sem aprovação","Roteirização logística","Integração fiscal de entrada","Depreciação contábil oficial"
  ])if(!roadmap.includes(token))errors.push(`Roadmap incompleto: ${token}`);
 
@@ -155,6 +160,9 @@ if(errors.length===0){
  for(const token of["VACINA-001","VACINA-002","VACINA-003","VACINA-004","VACINA-005","VACINA-006","VACINA-007","VACINA-008","VACINA-009","VACINA-010","VACINA-011","VACINA-012","Definition of Done de erro"])
   if(!vaccinesIndex.includes(token))errors.push(`Catálogo de vacinas incompleto: ${token}`);
 
+ for(const token of["Arquitetura em operação","WCAG 2.2 nível AA","Estados obrigatórios","Padrões proibidos","Pipeline obrigatório de UI/UX","Checklist de entrega"])
+  if(!uiUx.includes(token))errors.push(`UI/UX Pro Max incompleta: ${token}`);
+
  for(const token of["18 tabelas","advisory locks","14 testes transacionais","ledger remoto","ROLLBACK"])
   if(!stage17Report.includes(token))errors.push(`Relatório de homologação da Etapa 17 incompleto: ${token}`);
 
@@ -169,6 +177,9 @@ if(errors.length===0){
 
  for(const token of["fluxo unificado","correlation_id","append-only","RLS","alertas","health checks","diagnósticos","Definition of Done"])
   if(!stage19.toLowerCase().includes(token.toLowerCase()))errors.push(`Documento da Etapa 19 incompleto: ${token}`);
+
+ for(const token of["Prontidão de Produção","UI/UX Pro Max","backup e restauração","antimalware","pentest","Definition of Done"])
+  if(!stage20.toLowerCase().includes(token.toLowerCase()))errors.push(`Documento da Etapa 20 incompleto: ${token}`);
 
  for(const token of[
   "WMS avançado","Endereçamento automatizado","RFID em tempo real",
