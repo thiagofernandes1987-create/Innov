@@ -6,10 +6,6 @@ on:
     paths:
       - "scripts/run-stage20-backup-restore-drill.mjs"
       - ".github/workflows/stage20-backup-restore-drill.yml"
-      - "package.json"
-      - ".env.example"
-      - "diretrizes/ESTADO-ATUAL.json"
-      - "docs/ETAPA-20-BACKUP-RESTAURACAO.md"
 
 permissions:
   contents: read
