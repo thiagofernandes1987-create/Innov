@@ -18,6 +18,7 @@ export const FILE_SECURITY_SAC_MIME_TYPES=new Set([
 ]);
 
 export type FileSecurityStatus="LEGACY"|"PENDING"|"SCANNING"|"CLEAN"|"BLOCKED"|"ERROR";
+export type FileSecurityProvider="clamav"|"clamav-http"|"test-clean";
 
 export type FileSecurityInput={
  filename:string;
@@ -27,7 +28,7 @@ export type FileSecurityInput={
 
 export type FileSecurityScanResult={
  status:Exclude<FileSecurityStatus,"LEGACY"|"PENDING"|"SCANNING">;
- provider:"clamav"|"test-clean";
+ provider:FileSecurityProvider;
  signature:string|null;
  rawCode:"OK"|"FOUND"|"ERROR";
 };
