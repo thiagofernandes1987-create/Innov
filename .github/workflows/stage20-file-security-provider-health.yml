@@ -12,14 +12,14 @@ concurrency:
 
 jobs:
   provider-health:
-    name: Check homologation ClamAV provider
+    name: Check homologation scanner through application
     runs-on: ubuntu-latest
     environment: homologation
     timeout-minutes: 10
     env:
-      CLAMAV_HOST: ${{ secrets.CLAMAV_HOST }}
-      CLAMAV_PORT: ${{ secrets.CLAMAV_PORT }}
-      CLAMAV_TIMEOUT_MS: ${{ secrets.CLAMAV_TIMEOUT_MS }}
+      HOMOLOGATION_APP_URL: ${{ secrets.HOMOLOGATION_APP_URL }}
+      FILE_SECURITY_HEALTH_SECRET: ${{ secrets.FILE_SECURITY_HEALTH_SECRET }}
+      FILE_SECURITY_HEALTH_TIMEOUT_MS: "30000"
 
     steps:
       - name: Checkout
@@ -29,32 +29,34 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import fs from "node:fs";
-          fs.writeFileSync("stage20-file-security-report.json",JSON.stringify({
+          fs.writeFileSync("stage20-file-security-provider-report.json",JSON.stringify({
             schemaVersion:1,
             status:"prerequisites_pending",
-            mode:"provider_health",
+            mode:"provider_health_https",
             startedAt:new Date().toISOString()
           },null,2)+"\n");
           NODE
 
-      - name: Validate provider secret
+      - name: Validate provider health secrets
         run: |
-          if [ -z "$CLAMAV_HOST" ]; then
-            node --input-type=module <<'NODE'
+          missing=()
+          test -n "$HOMOLOGATION_APP_URL" || missing+=(HOMOLOGATION_APP_URL)
+          test -n "$FILE_SECURITY_HEALTH_SECRET" || missing+=(FILE_SECURITY_HEALTH_SECRET)
+          if [ ${#missing[@]} -gt 0 ]; then
+            MISSING_NAMES="$(printf '%s\n' "${missing[@]}")" node --input-type=module <<'NODE'
           import fs from "node:fs";
-          fs.writeFileSync("stage20-file-security-report.json",JSON.stringify({
+          const missing=(process.env.MISSING_NAMES??"").split("\n").filter(Boolean);
+          fs.writeFileSync("stage20-file-security-provider-report.json",JSON.stringify({
             schemaVersion:1,
             status:"blocked_missing_secrets",
-            mode:"provider_health",
-            missingNames:["CLAMAV_HOST"],
+            mode:"provider_health_https",
+            missingNames:missing,
             finishedAt:new Date().toISOString()
           },null,2)+"\n");
           NODE
-            echo "Pré-requisito ausente no ambiente homologation: CLAMAV_HOST"
+            printf 'Pré-requisitos ausentes no ambiente homologation: %s\n' "${missing[*]}"
             exit 1
           fi
-          echo "CLAMAV_PORT=${CLAMAV_PORT:-3310}" >> "$GITHUB_ENV"
-          echo "CLAMAV_TIMEOUT_MS=${CLAMAV_TIMEOUT_MS:-15000}" >> "$GITHUB_ENV"
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -62,14 +64,14 @@ jobs:
           node-version: 24
           package-manager-cache: false
 
-      - name: Run provider health check
-        run: node scripts/run-stage20-file-security-e2e.mjs --health-only
+      - name: Run signed HTTPS provider health check
+        run: node scripts/run-stage20-file-security-provider-health.mjs
 
       - name: Upload provider health evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: stage20-file-security-provider-report
-          path: stage20-file-security-report.json
+          path: stage20-file-security-provider-report.json
           if-no-files-found: error
           retention-days: 30
