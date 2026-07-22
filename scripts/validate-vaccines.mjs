@@ -14,7 +14,8 @@ const vaccines=[
  "diretrizes/vacinas/VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md",
  "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md",
  "diretrizes/vacinas/VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md",
- "diretrizes/vacinas/VACINA-012-ESTADO-POS-MERGE.md"
+ "diretrizes/vacinas/VACINA-012-ESTADO-POS-MERGE.md",
+ "diretrizes/vacinas/VACINA-013-FIXTURES-RESPEITAM-FRONTEIRAS-SENSIVEIS.md"
 ];
 const required=["diretrizes/VACINAS.md",...vaccines];
 
@@ -28,7 +29,7 @@ for(const file of required){
 
 if(fs.existsSync("diretrizes/VACINAS.md")){
  const index=read("diretrizes/VACINAS.md");
- for(let id=1;id<=12;id++)if(!index.includes(`VACINA-${String(id).padStart(3,"0")}`))errors.push(`Catálogo sem VACINA-${String(id).padStart(3,"0")}.`);
+ for(let id=1;id<=13;id++)if(!index.includes(`VACINA-${String(id).padStart(3,"0")}`))errors.push(`Catálogo sem VACINA-${String(id).padStart(3,"0")}.`);
 }
 
 // VACINA-001 — relações Supabase variáveis.
@@ -188,6 +189,24 @@ const stalePatterns=[
 for(const file of currentStateDocs){
  const content=read(file);
  for(const pattern of stalePatterns)if(pattern.test(content))errors.push(`${file} reintroduz estado pós-merge obsoleto: ${pattern}`);
+}
+
+// VACINA-013 — fixtures não contornam fronteiras sensíveis.
+const stage20Concurrency="scripts/run-stage20-inventory-concurrency-e2e.mjs";
+if(!fs.existsSync(stage20Concurrency))errors.push(`Fixture de concorrência ausente: ${stage20Concurrency}`);
+else{
+ const fixture=read(stage20Concurrency);
+ if(fixture.includes("reference_unit_cost"))errors.push("Fixture da Etapa 20 voltou a escrever custo de referência diretamente.");
+ for(const token of["unitCost:1","create_inventory_movement","post_inventory_movement","E2E20-CONCURRENCY"])
+  if(!fixture.includes(token))errors.push(`Fixture da Etapa 20 sem fronteira autorizada: ${token}`);
+ if(/service\.from\([^\n]+\)\.update\(\{[^}]*status:/s.test(fixture))errors.push("Fixture da Etapa 20 altera status protegido diretamente com Service Role.");
+}
+const sensitiveGuard="supabase/migrations/20260720160730_stage17_inventory_sensitive_write_guard.sql";
+if(!fs.existsSync(sensitiveGuard))errors.push(`Guard sensível ausente: ${sensitiveGuard}`);
+else{
+ const guard=read(sensitiveGuard);
+ for(const token of["enforce_inventory_sensitive_write","reference_unit_cost","Permissão sensível necessária para definir custo de referência","revoke all on function"])
+  if(!guard.includes(token))errors.push(`Guard sensível incompleto: ${token}`);
 }
 
 if(errors.length){
