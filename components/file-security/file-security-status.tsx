@@ -4,6 +4,7 @@ import{
 }from"@/lib/file-security/domain";
 
 const statusClasses:Record<FileSecurityStatus,string>={
+ LEGACY:"badge badge-warning",
  PENDING:"badge badge-warning",
  SCANNING:"badge",
  CLEAN:"badge badge-success",
