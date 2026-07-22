@@ -27,15 +27,29 @@
     "status": "in_progress",
     "blockingStage": 20,
     "foundationCi": {
-      "runId": 29888338212,
-      "runNumber": 1180,
+      "runId": 29888603943,
+      "runNumber": 1190,
       "conclusion": "success"
     },
     "foundation": {
       "uiUxProMax": "implemented_ci_green",
       "stage20Validator": "implemented_ci_green",
       "shellAndDashboard": "implemented_ci_green",
-      "responsiveHardening": "implemented_pending_final_ci"
-    }
+      "responsiveHardening": "implemented_ci_green"
+    },
+    "inventoryConcurrency": {
+      "runId": 29889168656,
+      "jobId": 88826051387,
+      "artifactId": 8517620520,
+      "status": "passed",
+      "cleanup": "passed",
+      "initialQuantity": 10,
+      "competingQuantity": 6,
+      "successfulPosts": 1,
+      "rejectedPosts": 1,
+      "stockAfterRace": 4,
+      "finalStock": 0
+    },
+    "nextWorkstream": "backup_restore"
   }
 }
