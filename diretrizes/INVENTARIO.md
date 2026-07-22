@@ -18,7 +18,7 @@
 - Supabase Auth, PostgreSQL, RLS e Storage;
 - projeto de homologação: `wyeojufebtwblsubkunr`;
 - CI estável da `main`: run `29885340336`, `success`;
-- CI da fundação da Etapa 20: run `29888603943`, `success`.
+- CI atual da Etapa 20: run `29913636056`, `success`.
 
 ## 2. Estado dos aplicativos
 
@@ -30,7 +30,7 @@
 | `obras` | Obras | operacional | 12 |
 | `planejamento` | Planejamento | operacional | 12 |
 | `tarefas` | Tarefas | operacional | 12 |
-| `diario` | Diário de Obras | operacional | 12 |
+| `diario` | Diário de Obras | operacional; antimalware pendente | 12/20 |
 | `equipes` | Equipes | operacional | 12 |
 | `orcamentos` | Orçamentos | operacional | 9 |
 | `propostas` | Propostas | operacional | 9 |
@@ -38,11 +38,11 @@
 | `aditivos` | Aditivos | operacional | 9 |
 | `assinaturas` | Assinaturas | sandbox; provider jurídico pendente | 9/12.2/20 |
 | `documentos` | Documentos | operacional; antimalware pendente | 12/13/20 |
-| `qualidade` | Qualidade | operacional | 13 |
-| `compras` | Compras e Suprimentos | operacional | 14 |
+| `qualidade` | Qualidade | operacional; antimalware pendente | 13/20 |
+| `compras` | Compras e Suprimentos | operacional; antimalware pendente | 14/20 |
 | `estoque` | Estoque, Inventário e Almoxarifado | homologado; concorrência real aprovada | 17/20 |
-| `financeiro` | Financeiro Operacional | operacional | 15 |
-| `sac` | Pós-venda e SAC | homologado e E2E aprovado | 18 |
+| `financeiro` | Financeiro Operacional | operacional; antimalware pendente | 15/20 |
+| `sac` | Pós-venda e SAC | homologado; quarentena integrada na branch, homologação pendente | 18/20 |
 | `relatorios` | Relatórios e Indicadores | operacional | 16 |
 | `auditoria` | Auditoria e Observabilidade | homologado e incorporado | 19 |
 | `administracao` | Administração | operacional | 12.1 |
@@ -76,6 +76,8 @@ docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md
 docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md
 docs/ETAPA-20-PRONTIDAO-PRODUCAO.md
 docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md
+docs/ETAPA-20-BACKUP-RESTAURACAO.md
+docs/ETAPA-20-PROTECAO-ANEXOS.md
 docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md
 ```
 
@@ -124,10 +126,9 @@ saldo após cleanup: 0
 
 O advisory lock serializou as transações e o banco rejeitou a segunda saída por estoque disponível insuficiente.
 
-### Pendências restantes
+### Pendência restante
 
-- carga e volumetria prolongadas;
-- backup e restauração.
+- carga e volumetria prolongadas.
 
 ## 5. Etapa 18 — CRM, Clientes e SAC
 
@@ -142,6 +143,22 @@ O advisory lock serializou as transações e o banco rejeitou a segunda saída p
 - E2E concorrente run `29883182240` aprovado;
 - `cleanup: passed`;
 - PR `#18` mesclado.
+
+### Hardening de anexos na Etapa 20
+
+- migration `20260722104500_stage20_sac_attachment_security.sql` versionada, ainda não aplicada;
+- upload interno e portal passam por `secureUpload` na branch;
+- validação de MIME, tamanho, nome e assinatura dos bytes;
+- quarentena `file-quarantine` privada;
+- ClamAV `INSTREAM` fail-closed;
+- promoção somente após `CLEAN`;
+- RPC exige `scanId`, provider e instante de análise;
+- anexos antigos permanecem `LEGACY` sem evidência artificial;
+- portal recebe somente anexos `CLEAN`;
+- download assinado por 60 segundos e sem cache;
+- E2E local ClamAV run `29913636268` aprovado;
+- artefato `8526935275`;
+- provider real e E2E de homologação pendentes.
 
 ## 6. Etapa 19 — Auditoria e Observabilidade
 
@@ -191,7 +208,7 @@ app/app/page.tsx
 - dashboard responsivo sem métricas inventadas;
 - forced colors e redução de movimento;
 - prevenção contra rosa/fúcsia;
-- CI completo verde.
+- CI completo run `29913636056` verde.
 
 ### Concorrência real concluída
 
@@ -208,14 +225,47 @@ docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md
 - artefato `8517620520`;
 - `VACINA-013` criada.
 
+### Backup e restauração concluídos no escopo lógico
+
+- run `29911179764` aprovado;
+- artefato `8526039714`;
+- dump custom de `1.812.078` bytes e `2.798` objetos;
+- RTO observado de `201` segundos;
+- snapshots equivalentes e smoke tests aprovados;
+- dump efêmero removido;
+- retenção durável, PITR, buckets e Auth permanecem pendentes.
+
+### Proteção de anexos integrada na branch
+
+```text
+lib/file-security/domain.ts
+lib/file-security/server.ts
+components/file-security/file-security-status.tsx
+scripts/run-stage20-file-security-e2e.mjs
+.github/workflows/stage20-file-security-e2e.yml
+.github/workflows/stage20-file-security-provider-health.yml
+supabase/migrations/20260722104500_stage20_sac_attachment_security.sql
+```
+
+- SAC integrado à quarentena;
+- assinatura dos bytes além do MIME;
+- estados `LEGACY` e `CLEAN` persistidos;
+- UI com estados semânticos e ação `Analisar e enviar`;
+- fixture limpa liberada e EICAR bloqueado;
+- E2E run `29913636268` e artefato `8526935275` aprovados;
+- migration e provider real ainda não ativados em homologação.
+
 ### Próxima frente
 
-`backup_restore`.
+`attachment_provider_homologation`.
 
 ### Escopo pendente
 
-- backup e restauração;
-- antimalware;
+- provider ClamAV real e health check;
+- aplicação coordenada da migration e da aplicação;
+- E2E real do SAC e reanálise de legados;
+- antimalware nos demais módulos;
+- retenção durável, PITR, buckets e Auth;
 - provider jurídico;
 - telemetria e retenção;
 - incidentes;
@@ -239,7 +289,10 @@ quality-form-attachments
 procurement-attachments
 finance-attachments
 crm-sac-attachments
+file-quarantine
 ```
+
+`file-quarantine` deve permanecer privado. Objetos `PENDING`, `SCANNING`, `BLOCKED` ou `ERROR` nunca recebem URL funcional para o usuário.
 
 ## 9. Variáveis conhecidas
 
@@ -253,6 +306,15 @@ SIGNATURE_WEBHOOK_SECRET=
 SIGNATURE_EMAIL_WEBHOOK_URL=
 DEMO_ADMIN_PASSWORD=
 DEMO_CLIENT_PASSWORD=
+SUPABASE_DB_URL=
+SUPABASE_RESTORE_DB_URL=
+SUPABASE_RESTORE_CONFIRMATION=
+FILE_SECURITY_PROVIDER=clamav
+FILE_SECURITY_QUARANTINE_BUCKET=file-quarantine
+CLAMAV_HOST=
+CLAMAV_PORT=3310
+CLAMAV_TIMEOUT_MS=15000
+ALLOW_INSECURE_FILE_SCANNER=false
 ```
 
 Somente nomes e finalidades são versionados.
@@ -272,6 +334,7 @@ pnpm typecheck
 pnpm test
 pnpm test:python
 pnpm build
+pnpm test:e2e:stage20:file-security
 ```
 
 ## 11. Recuperação
