@@ -49,6 +49,7 @@ Não é permitido encerrar um erro recorrente apenas com correção local quando
 | `VACINA-009` | E2E valida pré-requisitos tarde e perde relatório | aplicada | secrets antes da instalação e artefato inicial obrigatório |
 | `VACINA-010` | JSON de workflow montado manualmente em shell | aplicada | `JSON.stringify` e validação de artefato parseável |
 | `VACINA-011` | Script usa identificador reservado `module` | aplicada | nomes semânticos e varredura de `scripts/*.mjs` |
+| `VACINA-012` | Documentação pós-merge diverge do estado real do GitHub | aplicada | `ESTADO-ATUAL.json`, fechamento pós-merge e bloqueio de frases obsoletas |
 
 ## 4. Arquivos
 
@@ -64,7 +65,8 @@ diretrizes/vacinas/
 ├── VACINA-008-INSTALACAO-HOMOLOGACAO.md
 ├── VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md
 ├── VACINA-010-JSON-DE-RELATORIOS.md
-└── VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md
+├── VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md
+└── VACINA-012-ESTADO-POS-MERGE.md
 ```
 
 ## 5. Critérios para nova vacina
