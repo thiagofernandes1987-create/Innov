@@ -1,7 +1,7 @@
 # Roadmap oficial — Innovar Platform
 
 **Versão atual:** 0.19.0  
-**Atualizado em:** 21 de julho de 2026
+**Atualizado em:** 22 de julho de 2026
 
 O roadmap segue o estado real do repositório, dos PRs e do Supabase. Planejamento não é tratado como funcionalidade entregue.
 
@@ -18,12 +18,13 @@ O roadmap segue o estado real do repositório, dos PRs e do Supabase. Planejamen
 - Etapa 15 — financeiro operacional;
 - Etapa 16 — relatórios e indicadores executivos;
 - Etapa 17 — Estoque, Inventário e Almoxarifado;
-- Etapa 18 — CRM, Clientes e SAC.
+- Etapa 18 — CRM, Clientes e SAC;
+- Etapa 19 — Auditoria e observabilidade unificadas.
 
 ## Etapa 17 — Estoque, Inventário e Almoxarifado
 
 **Estado:** incorporada à `main` e homologada tecnicamente.  
-**Produção:** não liberada.
+**Produção:** não liberada; pendências transferidas formalmente à Etapa 20.
 
 ### Entregas
 
@@ -69,7 +70,8 @@ O roadmap segue o estado real do repositório, dos PRs e do Supabase. Planejamen
 ## Etapa 18 — CRM, Clientes e SAC
 
 **Estado funcional:** incorporada à `main`.  
-**E2E concorrente:** PR `#18` em rascunho.
+**E2E concorrente:** concluído e aprovado.  
+**PR:** `#18`, mesclado em 22 de julho de 2026.
 
 ### Entregas
 
@@ -83,25 +85,24 @@ O roadmap segue o estado real do repositório, dos PRs e do Supabase. Planejamen
 - estados críticos alterados somente por RPC;
 - RLS interna e do cliente.
 
-### Bloqueio externo
+### Homologação concorrente concluída
 
-O E2E de administrador e cliente simultâneos está implementado, mas não inicia enquanto estes secrets estiverem ausentes no ambiente GitHub `homologation`:
-
-```text
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-SUPABASE_SERVICE_ROLE_KEY
-DEMO_ADMIN_PASSWORD
-DEMO_CLIENT_PASSWORD
-```
-
-Nenhum valor será hardcodado no repositório ou solicitado na conversa.
+- workflow `29883182240` aprovado;
+- login paralelo de administrador e cliente;
+- abertura idempotente de chamado;
+- mensagem interna invisível ao cliente;
+- mensagens públicas consistentes para ambos;
+- transição protegida e tentativa direta de alteração bloqueada;
+- RLS confirmada;
+- `cleanup: passed`;
+- mensagens, eventos e ticket preservados como histórico imutável;
+- relatório final sem secrets.
 
 ## Etapa 19 — Auditoria e observabilidade unificadas
 
-**Estado técnico:** implementada e homologada no Supabase.  
-**PR:** `#19`, em rascunho e empilhado sobre o PR `#18`.  
-**Merge:** proibido automaticamente.
+**Estado técnico:** implementada, homologada e incorporada à `main`.  
+**PRs:** `#19` e `#20`, mesclados.  
+**CI final:** verde.
 
 ### Entregas
 
@@ -157,18 +158,23 @@ Nenhum valor será hardcodado no repositório ou solicitado na conversa.
 - [x] interface administrativa;
 - [x] teste transacional com `ROLLBACK`;
 - [x] validador estrutural;
-- [x] documentação atualizada no mesmo PR;
+- [x] documentação atualizada;
 - [x] migrations aplicadas e homologadas;
 - [x] ledger remoto alinhado;
 - [x] zero FK sem índice;
 - [x] advisors revisados;
-- [ ] lint, typecheck, testes e build verdes no commit documental final;
-- [ ] PR pronto para revisão após a estabilização do PR `#18`.
+- [x] lint, typecheck, testes e build verdes;
+- [x] PRs mesclados e conteúdo consolidado na `main`.
 
 ## Etapa 20 — Prontidão de produção
 
-- E2E autenticado completo;
-- teste real de concorrência;
+**Estado:** próxima etapa oficial.  
+**Estratégia:** execução incremental, com PR em rascunho, evidências por requisito e sem publicação automática.
+
+### Escopo técnico
+
+- E2E autenticado completo dos fluxos críticos;
+- teste real de concorrência de estoque;
 - provider jurídico real;
 - revisão jurídica, contábil e LGPD;
 - proteção e antimalware de anexos;
@@ -181,6 +187,33 @@ Nenhum valor será hardcodado no repositório ou solicitado na conversa.
 - MFA adicional;
 - publicação controlada.
 
+### UI/UX Pro Max adaptada à Innovar
+
+- direção autoral baseada em arquitetura e precisão de obra;
+- azul profundo, cobre e materiais naturais;
+- interface densa, escaneável e responsiva;
+- estados de loading, vazio, erro, offline, sucesso e acesso negado;
+- WCAG 2.2 AA, foco visível e alvos mínimos de 44 px;
+- status semânticos sem depender apenas de cor;
+- motion discreto e suporte a `prefers-reduced-motion`;
+- proibição do preset SaaS rosa e de cartões genéricos repetitivos;
+- testes de reflow, zoom, teclado e conteúdo real.
+
+### Definition of Done inicial
+
+- [ ] branch e PR de etapa criados;
+- [ ] documento técnico e validador versionados;
+- [ ] design system canônico versionado e validado no CI;
+- [ ] pendências de concorrência da Etapa 17 executadas;
+- [ ] backup e restauração comprovados;
+- [ ] anexos protegidos e analisados;
+- [ ] provider jurídico integrado e homologado;
+- [ ] MFA e proteção de credenciais revisados;
+- [ ] telemetria, retenção e incidentes operacionais;
+- [ ] pentest e revisões externas registrados;
+- [ ] publicação controlada aprovada;
+- [ ] CI verde.
+
 ## Etapa 21 — WMS avançado e Automação Logística
 
 **Estado:** fila aprovada após a Etapa 20.  
@@ -189,12 +222,12 @@ Nenhum valor será hardcodado no repositório ou solicitado na conversa.
 ### Escopo aprovado
 
 - WMS avançado;
-- endereçamento automatizado;
+- Endereçamento automatizado;
 - RFID em tempo real;
-- ressuprimento automático sem aprovação;
-- roteirização logística;
-- integração fiscal de entrada;
-- depreciação contábil oficial.
+- Ressuprimento automático sem aprovação;
+- Roteirização logística;
+- Integração fiscal de entrada;
+- Depreciação contábil oficial.
 
 ### Dependências
 
