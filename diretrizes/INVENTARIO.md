@@ -1,12 +1,13 @@
 # Inventário canônico — Innovar Platform
 
-**Atualizado em:** 21 de julho de 2026  
+**Atualizado em:** 22 de julho de 2026  
 **Base estável:** `main`  
-**Branch atual:** `feature/etapa-19-auditoria-observabilidade`  
-**PR atual:** `#19`, empilhado sobre o PR `#18`, ambos em rascunho  
+**Commit estável analisado:** `55f4d56`  
+**Branch de regularização:** `chore/encerramento-etapa-19`  
+**PRs funcionais ativos:** nenhum  
 **Versão:** 0.19.0
 
-Este documento registra tudo o que é necessário para recuperar, validar e continuar o projeto sem depender do contêiner ou do histórico da conversa.
+Este documento registra o estado necessário para recuperar, validar e continuar o projeto sem depender do contêiner ou do histórico da conversa.
 
 ## 1. Repositório e runtime
 
@@ -17,14 +18,16 @@ Este documento registra tudo o que é necessário para recuperar, validar e cont
 - Python no CI: `3.13`;
 - Next.js 16, React 19 e TypeScript;
 - Supabase Auth, PostgreSQL, RLS e Storage;
-- homologação Supabase: `wyeojufebtwblsubkunr`.
+- homologação Supabase: `wyeojufebtwblsubkunr`;
+- CI da `main`: run `29885340336`, conclusão `success`;
+- Vercel: status do commit estável `success`.
 
 ## 2. Estado dos aplicativos
 
 | Chave | Aplicativo | Estado | Etapa |
 |---|---|---|---|
 | `dashboard` | Início | operacional | 12.1 |
-| `crm` | CRM e Vendas | implementado e homologado | 18 |
+| `crm` | CRM e Vendas | implementado, homologado e incorporado | 18 |
 | `clientes` | Clientes | Cliente 360 multiobra implementado | 18 |
 | `obras` | Obras | operacional | 12 |
 | `planejamento` | Planejamento | operacional | 12 |
@@ -35,15 +38,15 @@ Este documento registra tudo o que é necessário para recuperar, validar e cont
 | `propostas` | Propostas | operacional | 9 |
 | `contratos` | Contratos | operacional | 9 |
 | `aditivos` | Aditivos | operacional | 9 |
-| `assinaturas` | Assinaturas | operacional em sandbox | 9/12.2 |
+| `assinaturas` | Assinaturas | operacional em sandbox; provider jurídico pendente | 9/12.2/20 |
 | `documentos` | Documentos | operacional | 12/13 |
 | `qualidade` | Qualidade | operacional | 13 |
 | `compras` | Compras e Suprimentos | operacional | 14 |
-| `estoque` | Estoque, Inventário e Almoxarifado | incorporado e homologado | 17 |
+| `estoque` | Estoque, Inventário e Almoxarifado | incorporado e homologado; produção pendente | 17/20 |
 | `financeiro` | Financeiro Operacional | operacional | 15 |
-| `sac` | Pós-venda e SAC | implementado e homologado | 18 |
+| `sac` | Pós-venda e SAC | implementado, homologado e E2E aprovado | 18 |
 | `relatorios` | Relatórios e Indicadores | operacional | 16 |
-| `auditoria` | Auditoria e Observabilidade | implementado e homologado tecnicamente; PR #19 em rascunho | 19 |
+| `auditoria` | Auditoria e Observabilidade | implementado, homologado, CI verde e incorporado | 19 |
 | `administracao` | Administração | operacional | 12.1 |
 
 ## 3. Documentação canônica
@@ -52,6 +55,7 @@ Este documento registra tudo o que é necessário para recuperar, validar e cont
 diretrizes/
 ├── README.md
 ├── SPEC.md
+├── ESTADO-ATUAL.json
 ├── INVENTARIO.md
 ├── MODULOS.md
 ├── ARQUITETURA.md
@@ -59,6 +63,7 @@ diretrizes/
 ├── RECUPERACAO.md
 ├── VACINAS.md
 ├── vacinas/
+├── UI-UX-PRO-MAX.md
 ├── PADRAO-DOCUMENTACAO.md
 └── HISTORICO-ETAPAS.md
 ```
@@ -71,6 +76,7 @@ docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md
 docs/ETAPA-18-CRM-CLIENTES-SAC.md
 docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md
 docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md
+docs/ETAPA-20-PRONTIDAO-PRODUCAO.md
 docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md
 ```
 
@@ -91,7 +97,7 @@ scripts/validate-stage17.mjs
 supabase/tests/stage17_inventory_homologation.sql
 ```
 
-### Banco
+### Estado técnico
 
 - 18 tabelas com RLS;
 - seis views `security_invoker=true`;
@@ -100,37 +106,14 @@ supabase/tests/stage17_inventory_homologation.sql
 - reversão vinculada;
 - advisory locks por posição;
 - custos protegidos;
-- 14 testes transacionais com `ROLLBACK`.
+- 14 testes transacionais com `ROLLBACK`;
+- migrations locais alinhadas ao ledger remoto.
 
-### Migrations canônicas
+### Pendências de produção transferidas à Etapa 20
 
-```text
-20260720160000_stage17_inventory_schema.sql
-20260720160100_stage17_inventory_balances.sql
-20260720160200_stage17_inventory_movement_functions.sql
-20260720160300_stage17_inventory_procurement_reservations.sql
-20260720160400_stage17_inventory_assets_stocktakes_01.sql
-20260720160410_stage17_inventory_assets_stocktakes_02.sql
-20260720160420_stage17_inventory_assets_stocktakes_03.sql
-20260720160430_stage17_inventory_assets_stocktakes_04.sql
-20260720160500_stage17_inventory_security.sql
-20260720160510_stage17_inventory_dashboard.sql
-20260720160520_stage17_inventory_movement_detail.sql
-20260720160525_stage17_inventory_item_asset_detail.sql
-20260720160530_stage17_inventory_stocktake_found_items.sql
-20260720160600_stage17_inventory_module.sql
-20260720160650_stage17_inventory_creation_rpcs.sql
-20260720160700_stage17_inventory_hardening.sql
-20260720160720_stage17_inventory_sensitive_columns.sql
-20260720160730_stage17_inventory_sensitive_write_guard.sql
-20260720160740_stage17_inventory_state_guards.sql
-20260720233052_stage17_inventory_concurrency_locks.sql
-20260720233657_stage17_homologation_balance_project_scope.sql
-20260720234333_stage17_inventory_performance_indexes.sql
-20260720234549_stage17_inventory_rpc_privileges.sql
-```
-
-A migration monolítica `20260720160400_stage17_inventory_assets_stocktakes.sql` não existe. A implementação real é `_01` a `_04`, e o validador reconhece exclusivamente essa divisão.
+- duas conexões realmente simultâneas disputando a mesma posição;
+- carga e volumetria;
+- backup e restauração testados.
 
 ## 5. Etapa 18 — CRM, Clientes e SAC
 
@@ -153,63 +136,21 @@ scripts/run-stage18-concurrent-e2e.mjs
 .github/workflows/stage18-concurrent-e2e.yml
 ```
 
-### Tabelas novas
+### Estado concluído
 
-```text
-crm_leads
-client_contacts
-client_consents
-crm_activities
-crm_opportunity_stage_history
-sac_categories
-sac_tickets
-sac_ticket_messages
-sac_ticket_attachments
-sac_ticket_events
-```
-
-### Segurança
-
+- 10 tabelas novas com RLS;
 - pipeline comercial exclusivamente interno;
-- cliente vê somente cadastro e chamados próprios;
-- portal mostra somente obras liberadas;
-- mensagens, anexos e eventos internos não aparecem ao cliente;
-- upload autorizado pela sessão, realizado server-side e armazenado no bucket privado `crm-sac-attachments`;
-- anexos possuem SHA-256;
-- estados críticos são alterados somente por RPC;
-- conversão e comandos externos são idempotentes;
-- zero RPC operacional para `anon`.
-
-### Migrations canônicas
-
-```text
-20260721012434_stage18_relationship_schema.sql
-20260721012505_stage18_relationship_idempotency.sql
-20260721012701_stage18_relationship_security.sql
-20260721013434_stage18_relationship_invariants.sql
-20260721013534_stage18_crm_functions.sql
-20260721013547_stage18_sac_client_actors.sql
-20260721013654_stage18_sac_functions.sql
-20260721013941_stage18_relationship_queries.sql
-20260721014030_stage18_relationship_module.sql
-20260721014621_stage18_relationship_performance.sql
-20260721015350_stage18_sac_portal_release_guard.sql
-20260721020003_stage18_workflow_privilege_hardening.sql
-```
-
-### E2E concorrente
-
-O PR `#18` contém duas sessões Supabase independentes, operações em paralelo, verificação de RLS e cleanup. A execução permanece bloqueada exclusivamente porque o ambiente GitHub `homologation` não possui os cinco secrets obrigatórios:
-
-```text
-NEXT_PUBLIC_SUPABASE_URL
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-SUPABASE_SERVICE_ROLE_KEY
-DEMO_ADMIN_PASSWORD
-DEMO_CLIENT_PASSWORD
-```
-
-Valores nunca são versionados nem enviados em conversa.
+- Cliente 360 multiobra;
+- SAC interno e portal do cliente;
+- mensagens, anexos e eventos internos ocultos do cliente;
+- bucket privado `crm-sac-attachments`;
+- anexos com SHA-256;
+- estados críticos somente por RPC;
+- zero RPC operacional para `anon`;
+- E2E concorrente aprovado no run `29883182240`;
+- relatório final `status: passed` e `cleanup: passed`;
+- históricos imutáveis preservados como `immutable_history`;
+- PR `#18` mesclado na `main`.
 
 ## 6. Etapa 19 — Auditoria e Observabilidade
 
@@ -226,81 +167,23 @@ scripts/validate-stage19.mjs
 supabase/tests/stage19_observability_homologation.sql
 ```
 
-### Rotas
+### Estado concluído
 
-```text
-/app/auditoria
-/app/auditoria/eventos
-/app/auditoria/eventos/[id]
-/app/auditoria/alertas
-/app/auditoria/saude
-/app/auditoria/configuracao
-```
-
-### Banco
-
-Seis tabelas com RLS:
-
-```text
-audit_events
-observability_alert_rules
-observability_alerts
-observability_health_checks
-observability_diagnostics
-observability_retention_policies
-```
-
-`audit_events` recebe módulo, severidade, origem, ator, cliente, hashes, request, deduplicação, ocorrência e retenção.
-
-### RPCs principais
-
-```text
-sanitize_audit_json
-record_audit_event
-write_audit
-acknowledge_observability_alert
-resolve_observability_alert
-run_observability_health_snapshot
-get_observability_dashboard
-get_observability_events
-get_observability_event_detail
-record_observability_diagnostic
-install_observability_defaults
-stage19_can_read_global_diagnostics
-```
-
-### Fontes do fluxo unificado
-
-```text
-audit_events
-permission_change_events
-signature_events
-document_access_logs
-quality_form_events
-procurement_events
-finance_events
-report_events
-inventory_events
-sac_ticket_events
-crm_opportunity_stage_history
-crm_activities
-```
-
-### Segurança
-
-- acesso somente por `auditoria:read`;
-- administração para configuração e transições;
-- perfis padrão: Super Administrador, Direção e Administrador;
-- cliente sem acesso;
-- eventos e health checks append-only;
-- payloads sanitizados recursivamente;
-- IP e user-agent somente como SHA-256;
+- seis tabelas com RLS;
+- 13 políticas e seis gatilhos não internos;
+- 16 FKs e zero FK sem índice líder;
+- fluxo unificado de 12 origens;
+- sanitização recursiva e idempotência;
+- alertas, reconhecimento e resolução;
+- seis health checks;
+- diagnósticos globais protegidos;
 - zero função da Etapa 19 executável por `anon`;
-- payload bruto de assinatura não é exposto;
-- diagnósticos globais visíveis somente para membro interno com acesso ao módulo;
-- sessão autenticada sem membership vê zero diagnóstico global.
+- teste oficial com `ROLLBACK`;
+- advisors revisados;
+- CI final verde;
+- PR `#19` mesclado e conteúdo consolidado na `main` pelo PR `#20`.
 
-### Seis migrations canônicas alinhadas ao ledger
+### Migrations canônicas
 
 ```text
 20260721100108_stage19_observability_schema.sql
@@ -311,33 +194,28 @@ crm_activities
 20260721123305_stage19_observability_hardening.sql
 ```
 
-### Estado de homologação
+## 7. Etapa 20 — Prontidão de Produção
 
-- seis migrations aplicadas no Supabase;
-- arquivos locais alinhados ao ledger remoto;
-- seis tabelas com RLS;
-- 13 políticas e seis gatilhos não internos;
-- 16 FKs e zero FK sem índice líder;
-- sanitização recursiva confirmada;
-- idempotência confirmada;
-- alerta crítico, reconhecimento e resolução confirmados;
-- seis health checks confirmados;
-- fluxo unificado confirmado;
-- append-only bloqueado por privilégio e trigger;
-- isolamento multiempresa confirmado;
-- diagnósticos globais protegidos contra cliente/sessão sem membership;
-- teste oficial termina com `ROLLBACK`;
-- nenhum dado artificial persistido;
-- advisors de segurança e performance revisados;
-- PR `#19` permanece em rascunho por depender do PR `#18`.
+**Estado:** preparação iniciada em branch própria após o fechamento documental da Etapa 19.
 
-### Advisors
+Escopo operacional:
 
-- avisos Stage19 de `SECURITY DEFINER` autenticado são fronteiras intencionais com autorização interna e zero acesso `anon`;
-- índices `unused` foram preservados por ausência de carga representativa;
-- dívidas antigas de FKs, `auth_rls_initplan` e policies permissivas ficam no backlog transversal das Etapas 19/20.
+- E2E autenticado completo;
+- concorrência real de estoque;
+- provider jurídico real;
+- revisão jurídica, contábil e LGPD;
+- proteção e antimalware de anexos;
+- pentest;
+- backup e restauração testados;
+- telemetria externa;
+- worker de retenção com dry-run e preservação legal;
+- plano de incidentes;
+- proteção contra senhas comprometidas;
+- MFA adicional;
+- publicação controlada;
+- consolidação do design system UI/UX Pro Max adaptado à Innovar.
 
-## 7. Storage privado
+## 8. Storage privado
 
 ```text
 commercial-documents
@@ -352,9 +230,9 @@ finance-attachments
 crm-sac-attachments
 ```
 
-A Etapa 19 não cria bucket e não armazena payload bruto ou arquivo de log.
+A Etapa 19 não cria bucket nem armazena payload bruto ou arquivo de log.
 
-## 8. Variáveis conhecidas
+## 9. Variáveis conhecidas
 
 Somente nomes são versionados:
 
@@ -370,7 +248,7 @@ DEMO_ADMIN_PASSWORD=
 DEMO_CLIENT_PASSWORD=
 ```
 
-## 9. CI
+## 10. CI
 
 ```bash
 pnpm validate:docs
@@ -386,7 +264,7 @@ pnpm test:python
 pnpm build
 ```
 
-## 10. Recuperação
+## 11. Recuperação
 
 Procedimento oficial: `diretrizes/RECUPERACAO.md`.
 
