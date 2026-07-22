@@ -83,6 +83,20 @@ Estado: incorporada à `main` e homologada tecnicamente; concorrência real, car
 - documentação e validador atualizados;
 - CI da `main` verde.
 
+## Etapa 20 — Prontidão de Produção
+
+- [`docs/ETAPA-20-PRONTIDAO-PRODUCAO.md`](../docs/ETAPA-20-PRONTIDAO-PRODUCAO.md) — segurança produtiva, concorrência, backup/restauração, antimalware, provider jurídico, telemetria, retenção, incidentes, publicação controlada e UI/UX Pro Max.
+
+### Fundação iniciada
+
+- branch `feature/etapa-20-prontidao-producao` criada;
+- diretriz canônica `diretrizes/UI-UX-PRO-MAX.md` criada;
+- shell interno e central de aplicativos redesenhados;
+- acessibilidade, responsividade e estados-base consolidados;
+- `scripts/validate-stage20.mjs` criado;
+- validação integrada ao CI;
+- demais requisitos produtivos permanecem pendentes até evidência real.
+
 ## Vacinas de engenharia
 
 O catálogo está em [`diretrizes/VACINAS.md`](./VACINAS.md), com documentos individuais em `diretrizes/vacinas/`. Toda correção recorrente deve consultar, aplicar ou ampliar esse catálogo. A Etapa 19 adicionou a `VACINA-011`; o fechamento pós-merge adicionou a `VACINA-012`.
