@@ -1,7 +1,7 @@
 # Contratos dos módulos — Innovar Platform
 
 **Atualizado em:** 21 de julho de 2026  
-**Versão:** 0.18.0  
+**Versão:** 0.19.0  
 **Registro técnico:** `lib/modules/registry.ts`
 
 Cada módulo possui chave estável, rota, estado por organização, dependências, capacidades e escopos. Desabilitar um módulo preserva dados e bloqueia o uso funcional. Perfis personalizados não são sobrescritos por instaladores.
@@ -17,7 +17,7 @@ Cada módulo possui chave estável, rota, estado por organização, dependência
 - rota `/app/crm`;
 - versão `1.0.0`;
 - sensível e habilitado por padrão;
-- estado: implementação e banco homologados; interface no PR da Etapa 18.
+- implementação e banco homologados na Etapa 18.
 
 Escopo:
 
@@ -43,7 +43,7 @@ Segurança:
 - rota `/app/clientes`;
 - versão `1.0.0`;
 - sensível e habilitado por padrão;
-- estado: Cliente 360 implementado e homologado na Etapa 18.
+- Cliente 360 implementado e homologado na Etapa 18.
 
 Escopo:
 
@@ -213,7 +213,7 @@ Definition of Done adicional:
 - rota do cliente `/cliente/ocorrencias`;
 - versão `1.0.0`;
 - sensível e habilitado por padrão;
-- estado: implementação e banco homologados; interface no PR da Etapa 18;
+- implementação e banco homologados na Etapa 18;
 - depende de `clientes`.
 
 Escopo:
@@ -247,12 +247,63 @@ Segurança:
 - valores sensíveis mascarados;
 - snapshots concluídos imutáveis.
 
-## `auditoria` — Auditoria
+## `auditoria` — Auditoria e Observabilidade
 
-- rota `/app/auditoria`;
-- parcial transversal;
-- consolidação prevista na Etapa 19;
-- eventos críticos são append-only e não armazenam secrets.
+- rota-base `/app/auditoria`;
+- versão `1.0.0` na Etapa 19;
+- aplicativo sensível, central e habilitado por padrão;
+- dependência: `administracao`;
+- acesso padrão: `SUPER_ADMIN`, `DIRECAO` e `ADMINISTRADOR`;
+- cliente não possui acesso.
+
+Rotas:
+
+```text
+/app/auditoria
+/app/auditoria/eventos
+/app/auditoria/eventos/[id]
+/app/auditoria/alertas
+/app/auditoria/saude
+/app/auditoria/configuracao
+```
+
+Escopo:
+
+- fluxo unificado de eventos sem duplicar trilhas de domínio;
+- fontes: auditoria, permissões, assinaturas, documentos, qualidade, compras, financeiro, relatórios, estoque, SAC e CRM;
+- pesquisa por módulo, severidade, texto, período e `correlation_id`;
+- correlação por organização, obra, cliente, ator, recurso e request;
+- sanitização recursiva de payloads;
+- idempotência por `deduplication_key`;
+- alertas por severidade, padrão, limite, janela e cooldown;
+- reconhecimento e resolução com motivo obrigatório;
+- health checks de banco, workers, relatórios e SLA;
+- diagnósticos de FKs, RLS, políticas, privilégios e ledger;
+- retenção entre 30 e 3650 dias.
+
+Segurança:
+
+- leitura exige `auditoria:read`;
+- configuração e transições exigem capacidade `administer`;
+- eventos e health checks são append-only;
+- escrita direta em eventos, alertas técnicos, health checks e diagnósticos é bloqueada;
+- RPCs não são executáveis por `anon`;
+- IP e user-agent somente como SHA-256;
+- senhas, tokens, authorization, secrets, cookies e chaves privadas recebem `[REDACTED]`;
+- payload bruto do provider de assinatura não é exposto.
+
+Definition of Done da Etapa 19:
+
+- schema, RLS e privilégios mínimos;
+- fluxo unificado e sanitização;
+- alertas, health checks e diagnósticos;
+- interface administrativa;
+- teste transacional com `ROLLBACK`;
+- documentação atualizada no mesmo PR;
+- migrations aplicadas e homologadas;
+- advisors revisados;
+- lint, typecheck, testes e build;
+- CI verde.
 
 ## `administracao` — Administração
 
