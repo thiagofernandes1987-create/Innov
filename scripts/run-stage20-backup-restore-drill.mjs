@@ -40,8 +40,13 @@ function databaseEnv(parsed){
   PGSSLMODE:sslMode
  };
 }
+function databaseIdentity(parsed){
+ const username=decodeURIComponent(parsed.username);
+ const database=decodeURIComponent(parsed.pathname.slice(1));
+ return`${username}@${parsed.hostname}:${parsed.port||"5432"}/${database}`;
+}
 function endpointFingerprint(parsed){
- return hashText(`${parsed.hostname}:${parsed.port||"5432"}/${decodeURIComponent(parsed.pathname.slice(1))}`).slice(0,16);
+ return hashText(databaseIdentity(parsed)).slice(0,16);
 }
 function run(command,args,{env,input}={}){
  return new Promise((resolve,reject)=>{
@@ -108,9 +113,9 @@ try{
  const source=parseDatabaseUrl(sourceUrl,"SUPABASE_DB_URL");
  const target=parseDatabaseUrl(targetUrl,"SUPABASE_RESTORE_DB_URL");
  assert(confirmation===expectedConfirmation,"Confirmação do destino descartável ausente ou inválida.");
- const sourceEndpoint=`${source.hostname}:${source.port||"5432"}/${source.pathname}`;
- const targetEndpoint=`${target.hostname}:${target.port||"5432"}/${target.pathname}`;
- assert(sourceEndpoint!==targetEndpoint,"Origem e destino de restauração não podem ser o mesmo banco.");
+ const sourceIdentity=databaseIdentity(source);
+ const targetIdentity=databaseIdentity(target);
+ assert(sourceIdentity!==targetIdentity,"Origem e destino de restauração não podem ser o mesmo banco.");
  const sourceEnv=databaseEnv(source);
  const targetEnv=databaseEnv(target);
  const secrets=[sourceUrl,targetUrl,source.password,target.password];
