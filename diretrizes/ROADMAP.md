@@ -144,7 +144,7 @@ Planejamento não é tratado como funcionalidade entregue. O estado deve corresp
 - [x] CI;
 - [x] merge na `main`.
 
-## Etapa 20 — Prontidão de Produção
+## Etapa 20 — Prontidão de produção
 
 **Estado:** em implementação no PR `#23`.  
 **Publicação:** proibida até conclusão e aprovação explícita.
