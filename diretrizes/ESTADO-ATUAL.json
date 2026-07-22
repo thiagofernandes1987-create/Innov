@@ -7,7 +7,7 @@
   "platformVersion": "0.19.0",
   "lastCompletedStage": 19,
   "nextStage": 20,
-  "activeFunctionalBranch": null,
+  "activeFunctionalBranch": "feature/etapa-20-prontidao-producao",
   "activeFunctionalPullRequest": null,
   "mergedPullRequests": [18, 19, 20],
   "ci": {
@@ -24,7 +24,12 @@
   },
   "productionReleased": false,
   "productionReadiness": {
-    "status": "not_started",
-    "blockingStage": 20
+    "status": "in_progress",
+    "blockingStage": 20,
+    "foundation": {
+      "uiUxProMax": "implemented_pending_ci",
+      "stage20Validator": "implemented_pending_ci",
+      "shellAndDashboard": "implemented_pending_ci"
+    }
   }
 }
