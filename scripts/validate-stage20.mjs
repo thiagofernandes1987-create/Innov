@@ -10,7 +10,9 @@ const requiredFiles=[
  "app/stage20.css",
  "app/layout.tsx",
  "app/app/layout.tsx",
- "app/app/page.tsx"
+ "app/app/page.tsx",
+ "scripts/run-stage20-inventory-concurrency-e2e.mjs",
+ ".github/workflows/stage20-inventory-concurrency-e2e.yml"
 ];
 
 for(const file of requiredFiles){
@@ -26,6 +28,8 @@ if(errors.length===0){
  const rootLayout=read("app/layout.tsx");
  const appLayout=read("app/app/layout.tsx");
  const dashboard=read("app/app/page.tsx");
+ const concurrencyScript=read("scripts/run-stage20-inventory-concurrency-e2e.mjs");
+ const concurrencyWorkflow=read(".github/workflows/stage20-inventory-concurrency-e2e.yml");
  const packageJson=JSON.parse(read("package.json"));
  let state;
  try{state=JSON.parse(read("diretrizes/ESTADO-ATUAL.json"));}
@@ -65,9 +69,30 @@ if(errors.length===0){
   'className="empty-state card"','aria-label={`Abrir ${application.name}. ${accessLabel[application.accessLevel]}.`}'
  ])if(!dashboard.includes(token))errors.push(`Dashboard sem composição canônica: ${token}`);
 
+ for(const token of[
+  'const operatorA=createClient','const operatorB=createClient','const initialQuantity=10','const competingQuantity=6',
+  'Promise.all([','post_inventory_movement','advisory_lock_serialized_posts','successful.length===1',
+  'stockAfterRace.physical>=0','cleanup.finalStock','finalStock.physical===0','JSON.stringify(report,null,2)'
+ ])if(!concurrencyScript.includes(token))errors.push(`E2E de concorrência sem contrato obrigatório: ${token}`);
+
+ const initializeIndex=concurrencyWorkflow.indexOf("Initialize inventory concurrency report");
+ const secretsIndex=concurrencyWorkflow.indexOf("Validate required secrets");
+ const installIndex=concurrencyWorkflow.indexOf("Install dependencies");
+ const runIndex=concurrencyWorkflow.indexOf("Run real inventory concurrency E2E");
+ if(initializeIndex<0||secretsIndex<0||installIndex<0||runIndex<0||!(initializeIndex<secretsIndex&&secretsIndex<installIndex&&installIndex<runIndex))
+  errors.push("Workflow de concorrência não segue a ordem segura de pré-requisitos.");
+ for(const token of[
+  "environment: homologation","cancel-in-progress: false","status:\"prerequisites_pending\"",
+  "blocked_missing_secrets","pnpm@11.15.0","pnpm install --no-frozen-lockfile --reporter=append-only",
+  "pnpm test:e2e:stage20:inventory-concurrency","if: always()","actions/upload-artifact@v7",
+  "stage20-inventory-concurrency-report.json"
+ ])if(!concurrencyWorkflow.includes(token))errors.push(`Workflow de concorrência sem prevenção obrigatória: ${token}`);
+
  if(!rootLayout.includes('import "./stage20.css";'))errors.push("Layout raiz não carrega o hardening da Etapa 20.");
  if(!rootLayout.includes('<html lang="pt-BR">'))errors.push("Layout raiz sem locale pt-BR.");
  if(!packageJson.scripts?.["validate:stage20"])errors.push("package.json sem validate:stage20.");
+ if(packageJson.scripts?.["test:e2e:stage20:inventory-concurrency"]!=="node scripts/run-stage20-inventory-concurrency-e2e.mjs")
+  errors.push("package.json sem executor canônico do E2E de concorrência.");
  if(state){
   if(state.nextStage!==20)errors.push("Manifesto não aponta a Etapa 20.");
   if(state.activeFunctionalBranch!=="feature/etapa-20-prontidao-producao")errors.push("Manifesto não registra a branch funcional da Etapa 20.");
@@ -82,6 +107,7 @@ if(errors.length===0){
   if(/style=\{\{/.test(fileContent[1]))errors.push(`${fileContent[0]} mantém estilo inline em componente-base.`);
  if(/outline\s*:\s*none/i.test(css))errors.push("Design system remove outline sem substituição canônica.");
  if(!/button:focus-visible[^\{]*,\s*a:focus-visible/s.test(css))errors.push("Design system não cobre foco visível de botões e links.");
+ if(/SUPABASE_SERVICE_ROLE_KEY[^\n]*(console\.log|JSON\.stringify)/.test(concurrencyScript))errors.push("E2E pode registrar Service Role no relatório.");
 }
 
 if(errors.length){
@@ -90,4 +116,4 @@ if(errors.length){
  process.exit(1);
 }
 
-console.log("Etapa 20 validada: contrato de produção, UI/UX Pro Max, shell acessível, dashboard responsivo e prevenção visual ativos.");
+console.log("Etapa 20 validada: UI/UX Pro Max, shell acessível e E2E concorrente real do estoque ativos.");
