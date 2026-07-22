@@ -8,7 +8,7 @@
   "lastCompletedStage": 19,
   "nextStage": 20,
   "activeFunctionalBranch": "feature/etapa-20-prontidao-producao",
-  "activeFunctionalPullRequest": null,
+  "activeFunctionalPullRequest": 23,
   "mergedPullRequests": [18, 19, 20],
   "ci": {
     "runId": 29885340336,
