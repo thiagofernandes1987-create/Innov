@@ -4,7 +4,7 @@ import{
  FILE_SECURITY_MAX_BYTES,
  parseClamAvResponse,
  sanitizeFileName
-}from"@/lib/file-security/domain";
+}from"../lib/file-security/domain";
 
 describe("file security domain",()=>{
  it("sanitiza caminhos e caracteres perigosos",()=>{
