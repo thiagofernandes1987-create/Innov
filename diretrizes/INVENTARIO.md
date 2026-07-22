@@ -2,32 +2,30 @@
 
 **Atualizado em:** 22 de julho de 2026  
 **Base estável:** `main`  
-**Commit estável analisado:** `55f4d56`  
+**Commit estável:** `55f4d56`  
 **Branch funcional ativa:** `feature/etapa-20-prontidao-producao`  
-**PR-base de regularização:** `#22`  
-**Versão:** 0.19.0
-
-Este documento registra o estado necessário para recuperar, validar e continuar o projeto sem depender do contêiner ou do histórico da conversa.
+**PR funcional:** `#23`, empilhado sobre o PR `#22`  
+**Versão:** 0.19.0  
+**Produção:** não liberada
 
 ## 1. Repositório e runtime
 
 - repositório: `thiagofernandes1987-create/Innov`;
-- branch estável: `main`;
-- gerenciador: `pnpm@11.15.0`;
-- Node.js: `>=24`;
-- Python no CI: `3.13`;
+- pnpm `11.15.0`;
+- Node.js `>=24`;
+- Python `3.13` no CI;
 - Next.js 16, React 19 e TypeScript;
 - Supabase Auth, PostgreSQL, RLS e Storage;
-- homologação Supabase: `wyeojufebtwblsubkunr`;
-- CI estável da `main`: run `29885340336`, conclusão `success`;
-- produção: não liberada.
+- projeto de homologação: `wyeojufebtwblsubkunr`;
+- CI estável da `main`: run `29885340336`, `success`;
+- CI da fundação da Etapa 20: run `29888603943`, `success`.
 
 ## 2. Estado dos aplicativos
 
 | Chave | Aplicativo | Estado | Etapa |
 |---|---|---|---|
-| `dashboard` | Início | operacional; fundação visual revisada na Etapa 20 | 12.1/20 |
-| `crm` | CRM e Vendas | implementado, homologado e incorporado | 18 |
+| `dashboard` | Início | operacional; fundação visual revisada | 12.1/20 |
+| `crm` | CRM e Vendas | implementado e homologado | 18 |
 | `clientes` | Clientes | Cliente 360 multiobra implementado | 18 |
 | `obras` | Obras | operacional | 12 |
 | `planejamento` | Planejamento | operacional | 12 |
@@ -38,15 +36,15 @@ Este documento registra o estado necessário para recuperar, validar e continuar
 | `propostas` | Propostas | operacional | 9 |
 | `contratos` | Contratos | operacional | 9 |
 | `aditivos` | Aditivos | operacional | 9 |
-| `assinaturas` | Assinaturas | operacional em sandbox; provider jurídico pendente | 9/12.2/20 |
-| `documentos` | Documentos | operacional; proteção produtiva pendente | 12/13/20 |
+| `assinaturas` | Assinaturas | sandbox; provider jurídico pendente | 9/12.2/20 |
+| `documentos` | Documentos | operacional; antimalware pendente | 12/13/20 |
 | `qualidade` | Qualidade | operacional | 13 |
 | `compras` | Compras e Suprimentos | operacional | 14 |
-| `estoque` | Estoque, Inventário e Almoxarifado | incorporado e homologado; produção pendente | 17/20 |
+| `estoque` | Estoque, Inventário e Almoxarifado | homologado; concorrência real aprovada | 17/20 |
 | `financeiro` | Financeiro Operacional | operacional | 15 |
-| `sac` | Pós-venda e SAC | implementado, homologado e E2E aprovado | 18 |
+| `sac` | Pós-venda e SAC | homologado e E2E aprovado | 18 |
 | `relatorios` | Relatórios e Indicadores | operacional | 16 |
-| `auditoria` | Auditoria e Observabilidade | implementado, homologado, CI verde e incorporado | 19 |
+| `auditoria` | Auditoria e Observabilidade | homologado e incorporado | 19 |
 | `administracao` | Administração | operacional | 12.1 |
 
 ## 3. Documentação canônica
@@ -77,6 +75,7 @@ docs/ETAPA-18-CRM-CLIENTES-SAC.md
 docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md
 docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md
 docs/ETAPA-20-PRONTIDAO-PRODUCAO.md
+docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md
 docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md
 ```
 
@@ -101,52 +100,64 @@ supabase/tests/stage17_inventory_homologation.sql
 
 - 18 tabelas com RLS;
 - seis views `security_invoker=true`;
-- saldo físico, reservado e disponível derivados;
+- saldos físico, reservado e disponível derivados;
 - movimentos concluídos imutáveis;
 - reversão vinculada;
 - advisory locks por posição;
 - custos protegidos;
 - 14 testes transacionais com `ROLLBACK`;
-- migrations locais alinhadas ao ledger remoto.
+- migrations alinhadas ao ledger.
 
-### Pendências transferidas à Etapa 20
+### Concorrência de produção homologada na Etapa 20
 
-- duas conexões realmente simultâneas disputando a mesma posição;
-- carga e volumetria;
-- backup e restauração testados.
+```text
+workflow: 29889168656
+status: passed
+cleanup: passed
+saldo inicial: 10
+duas saídas concorrentes: 6 + 6
+postagens aprovadas: 1
+postagens rejeitadas: 1
+saldo após disputa: 4
+saldo após cleanup: 0
+```
+
+O advisory lock serializou as transações e o banco rejeitou a segunda saída por estoque disponível insuficiente.
+
+### Pendências restantes
+
+- carga e volumetria prolongadas;
+- backup e restauração.
 
 ## 5. Etapa 18 — CRM, Clientes e SAC
 
-- 10 tabelas novas com RLS;
-- pipeline comercial exclusivamente interno;
+- 10 tabelas com RLS;
+- pipeline interno;
 - Cliente 360 multiobra;
-- SAC interno e portal do cliente;
-- bucket privado `crm-sac-attachments`;
+- SAC interno e portal;
+- bucket `crm-sac-attachments` privado;
 - anexos com SHA-256;
-- estados críticos somente por RPC;
+- estados críticos por RPC;
 - zero RPC operacional para `anon`;
-- E2E concorrente aprovado no run `29883182240`;
-- relatório final `status: passed` e `cleanup: passed`;
-- históricos imutáveis preservados como `immutable_history`;
-- PR `#18` mesclado na `main`.
+- E2E concorrente run `29883182240` aprovado;
+- `cleanup: passed`;
+- PR `#18` mesclado.
 
 ## 6. Etapa 19 — Auditoria e Observabilidade
 
 - seis tabelas com RLS;
 - 13 políticas e seis gatilhos não internos;
-- 16 FKs e zero FK sem índice líder;
+- 16 FKs e zero sem índice líder;
 - fluxo unificado de 12 origens;
-- sanitização recursiva e idempotência;
-- alertas, reconhecimento e resolução;
-- seis health checks;
+- sanitização e idempotência;
+- alertas e seis health checks;
 - diagnósticos globais protegidos;
-- zero função da Etapa 19 executável por `anon`;
-- teste oficial com `ROLLBACK`;
-- advisors revisados;
-- CI final verde;
-- PR `#19` mesclado e conteúdo consolidado na `main` pelo PR `#20`.
+- zero função acessível por `anon`;
+- teste com `ROLLBACK`;
+- CI verde;
+- PRs `#19` e `#20` mesclados.
 
-### Migrations canônicas
+Migrations:
 
 ```text
 20260721100108_stage19_observability_schema.sql
@@ -159,45 +170,60 @@ supabase/tests/stage17_inventory_homologation.sql
 
 ## 7. Etapa 20 — Prontidão de Produção
 
-**Estado:** em implementação na branch funcional ativa.
+**Estado:** em implementação.
 
-### Fundação versionada
+### Fundação UI/UX e CI concluída
 
 ```text
 diretrizes/UI-UX-PRO-MAX.md
 docs/ETAPA-20-PRONTIDAO-PRODUCAO.md
 scripts/validate-stage20.mjs
 app/globals.css
+app/stage20.css
 app/app/layout.tsx
 app/app/page.tsx
 .github/workflows/ci.yml
 ```
 
-### Entregas da primeira fatia
-
-- UI/UX Pro Max instituída como diretriz permanente;
-- identidade visual autoral `Arquitetura em operação`;
-- classes ausentes do dashboard implementadas;
-- shell com link de salto e contexto organizacional;
+- identidade `Arquitetura em operação`;
+- azul profundo, cobre e materiais naturais;
+- link de salto, foco visível e alvos de 44px;
 - dashboard responsivo sem métricas inventadas;
-- foco visível, alvos de 44px e redução de movimento;
-- prevenção contra preset rosa/fúcsia;
-- `validate:stage20` integrado ao preflight e ao pipeline completo.
+- forced colors e redução de movimento;
+- prevenção contra rosa/fúcsia;
+- CI completo verde.
 
-### Escopo ainda pendente
+### Concorrência real concluída
 
-- E2E autenticado completo;
-- concorrência real de estoque;
-- provider jurídico real;
-- revisão jurídica, contábil e LGPD;
-- proteção e antimalware de anexos;
-- pentest;
-- backup e restauração testados;
-- telemetria externa;
-- worker de retenção;
-- plano de incidentes;
+```text
+scripts/run-stage20-inventory-concurrency-e2e.mjs
+.github/workflows/stage20-inventory-concurrency-e2e.yml
+docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md
+```
+
+- duas sessões independentes;
+- uma postagem e uma rejeição;
+- saldo não negativo;
+- cleanup com saldo zero;
+- artefato `8517620520`;
+- `VACINA-013` criada.
+
+### Próxima frente
+
+`backup_restore`.
+
+### Escopo pendente
+
+- backup e restauração;
+- antimalware;
+- provider jurídico;
+- telemetria e retenção;
+- incidentes;
 - proteção contra senhas comprometidas;
 - MFA adicional;
+- carga prolongada;
+- pentest;
+- revisão jurídica, contábil e LGPD;
 - publicação controlada.
 
 ## 8. Storage privado
@@ -217,8 +243,6 @@ crm-sac-attachments
 
 ## 9. Variáveis conhecidas
 
-Somente nomes são versionados:
-
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
@@ -230,6 +254,8 @@ SIGNATURE_EMAIL_WEBHOOK_URL=
 DEMO_ADMIN_PASSWORD=
 DEMO_CLIENT_PASSWORD=
 ```
+
+Somente nomes e finalidades são versionados.
 
 ## 10. CI
 
@@ -252,4 +278,4 @@ pnpm build
 
 Procedimento oficial: `diretrizes/RECUPERACAO.md`.
 
-Git recupera código, migrations, testes, arquitetura, vacinas e documentação. Não recupera valores de secrets, usuários reais, conteúdo de buckets, dados operacionais, DNS ou backups físicos.
+O Git não recupera secrets, usuários reais, dados operacionais, buckets, DNS, credenciais de providers ou backups físicos.
