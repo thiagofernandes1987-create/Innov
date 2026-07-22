@@ -11,13 +11,6 @@ on:
       - ".github/workflows/stage20-inventory-concurrency-e2e.yml"
       - "supabase/migrations/20260720*.sql"
       - "package.json"
-  pull_request:
-    paths:
-      - "scripts/run-stage20-inventory-concurrency-e2e.mjs"
-      - "scripts/provision-homologation-users.mjs"
-      - ".github/workflows/stage20-inventory-concurrency-e2e.yml"
-      - "supabase/migrations/20260720*.sql"
-      - "package.json"
 
 permissions:
   contents: read
@@ -29,7 +22,6 @@ concurrency:
 jobs:
   inventory-position-race:
     name: Two sessions competing for the same stock position
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     environment: homologation
     timeout-minutes: 20
