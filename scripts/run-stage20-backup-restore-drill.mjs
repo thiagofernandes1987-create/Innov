@@ -158,7 +158,7 @@ try{
  const restoreStarted=Date.now();
  await run("psql",[
   "--no-psqlrc","--set","ON_ERROR_STOP=1","--command",
-  "drop schema if exists public cascade; create schema public; drop schema if exists supabase_migrations cascade;"
+  "drop schema if exists public cascade; drop schema if exists supabase_migrations cascade;"
  ],{env:targetEnv});
  await run("pg_restore",[
   "--no-owner",
