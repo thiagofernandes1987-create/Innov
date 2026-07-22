@@ -2,7 +2,9 @@
 
 ## Estado
 
-**Infraestrutura versionada; execução depende de origem e destino Supabase distintos configurados no ambiente `homologation`.**
+**Drill lógico aprovado em ambiente `homologation` com origem e destino Supabase distintos.**
+
+A evidência valida a restauração dos schemas de aplicação e do ledger. A política de retenção durável, PITR, buckets e Supabase Auth continuam pendentes antes de produção.
 
 ## Objetivo
 
@@ -18,7 +20,7 @@ Comprovar que os schemas de aplicação e o ledger de migrations podem ser extra
 - comparação estrutural e de dados-chave;
 - smoke tests de módulos, estoque, auditoria e RLS;
 - medição observada do tempo de restauração;
-- remoção segura do dump efêmero;
+- remoção segura do dump e da lista de restauração;
 - artefato contendo apenas evidência JSON.
 
 ## Fora do escopo
@@ -48,37 +50,43 @@ O terceiro valor deve ser exatamente:
 STAGE20_DISPOSABLE_RESTORE
 ```
 
-Origem e destino não podem apontar para o mesmo host, porta e banco.
+No Session pooler, origem e destino podem compartilhar host, porta e banco `postgres`; a identidade segura inclui também o usuário `postgres.<project-ref>`.
 
 ## Fluxo
 
 ```text
 validar secrets
 → confirmar destino descartável
+→ identificar projetos pelo endpoint e project ref
 → snapshot da origem
-→ pg_dump custom
+→ pg_dump custom com cliente PostgreSQL 17
 → SHA-256 e pg_restore --list
+→ omitir apenas FKs para schemas externos ao escopo
+→ omitir DEFAULT ACLs de roles gerenciadas pelo provider
 → reset dos schemas no destino
 → pg_restore
 → ANALYZE
 → snapshot do destino
 → comparação
 → smoke tests
-→ apagar dump
+→ apagar dump e lista de restauração
 → publicar somente relatório JSON
 ```
 
 ## Segurança
 
 - URLs de banco nunca são gravadas no relatório;
-- fingerprints são hashes truncados dos endpoints;
+- fingerprints são hashes truncados das identidades dos bancos;
 - senhas são fornecidas por variáveis `PG*` e não por argumentos de linha de comando;
-- dump recebe permissão `0600`;
+- dump e lista de restauração recebem permissão `0600`;
 - dump não é enviado ao GitHub;
-- arquivo é sobrescrito e removido no `finally`;
+- arquivos temporários são sobrescritos e removidos no `finally`;
 - o destino precisa ser diferente da origem;
 - restauração destrutiva exige confirmação explícita;
-- workflow executa somente no ambiente protegido.
+- workflow executa somente no ambiente protegido;
+- Auth não é copiado para o projeto descartável;
+- FKs externas omitidas são contabilizadas no relatório;
+- `DEFAULT ACLs` de roles gerenciadas pelo Supabase são contabilizadas e não alteradas.
 
 ## Verificações
 
@@ -100,6 +108,32 @@ Smoke tests:
 - schema de estoque disponível;
 - schema de auditoria disponível;
 - ao menos uma tabela pública com RLS.
+
+## Evidência aprovada
+
+- workflow: `29911179764`;
+- job: `88894215296`;
+- artefato: `8526039714`;
+- status: `passed`;
+- PostgreSQL cliente: `17.10`;
+- origem e destino distintos: aprovado;
+- tabelas públicas: `144` em ambos;
+- tabelas com RLS: `144` em ambos;
+- funções públicas: `196` em ambos;
+- migrations: `143` em ambos;
+- última migration: `20260721221145` em ambos;
+- dump: `1.812.078` bytes;
+- objetos no dump: `2.798`;
+- SHA-256: `c5256ec8018996475dcbb7cf8c52a4eaf9dc5f95c6c0cabc988c2fdc8df2d2b5`;
+- FKs externas ao escopo Auth: `139`, registradas e omitidas;
+- `DEFAULT ACLs` gerenciadas pelo provider: `6`, registradas e omitidas;
+- duração do dump: `38.400 ms`;
+- duração da restauração: `200.950 ms`;
+- RTO observado: `201 segundos`;
+- diferenças entre snapshots: zero;
+- smoke tests: todos aprovados;
+- dump removido: sim;
+- lista de restauração removida: sim.
 
 ## Arquivos
 
@@ -130,20 +164,25 @@ senhas
 
 - [x] script versionado;
 - [x] workflow protegido versionado;
-- [x] relatório inicial resiliente;
+- [x] relatório resiliente;
 - [x] origem e destino iguais são bloqueados;
+- [x] Session pooler diferencia projetos pelo project ref;
 - [x] confirmação destrutiva obrigatória;
+- [x] cliente PostgreSQL compatível com o servidor;
 - [x] dump não é enviado como artefato;
 - [x] remoção do dump implementada;
-- [ ] três secrets configurados;
-- [ ] dump executado;
-- [ ] restauração isolada executada;
-- [ ] snapshots equivalentes;
-- [ ] smoke tests aprovados;
-- [ ] RTO observado registrado;
-- [ ] workflow verde;
-- [ ] estratégia de retenção durável definida antes da produção.
+- [x] três secrets configurados;
+- [x] dump executado;
+- [x] restauração isolada executada;
+- [x] snapshots equivalentes;
+- [x] smoke tests aprovados;
+- [x] RTO observado registrado;
+- [x] workflow verde;
+- [ ] estratégia de retenção durável definida antes da produção;
+- [ ] recuperação de buckets validada;
+- [ ] estratégia de recuperação do Supabase Auth definida;
+- [ ] PITR e política do provider contratualmente definidos.
 
 ## Limitações
 
-Este drill comprova restauração lógica da aplicação em um projeto Supabase descartável. A recuperação completa continua exigindo procedimentos separados para buckets, Auth, DNS, providers e backups gerenciados.
+Este drill comprova restauração lógica da aplicação em um projeto Supabase descartável. A recuperação completa continua exigindo procedimentos separados para buckets, Auth, DNS, providers, retenção durável e backups gerenciados.
