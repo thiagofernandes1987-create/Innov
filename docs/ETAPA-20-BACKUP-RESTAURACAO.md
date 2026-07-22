@@ -14,7 +14,7 @@ Comprovar que os schemas de aplicação e o ledger de migrations podem ser extra
 - schemas `public` e `supabase_migrations`;
 - hash SHA-256 e contagem de objetos;
 - destino destrutivo explicitamente confirmado;
-- restauração em projeto diferente da origem;
+- restauração em ambiente isolado, diferente da origem;
 - comparação estrutural e de dados-chave;
 - smoke tests de módulos, estoque, auditoria e RLS;
 - medição observada do tempo de restauração;
