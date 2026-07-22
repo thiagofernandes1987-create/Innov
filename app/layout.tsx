@@ -9,6 +9,7 @@ import "./reports.css";
 import "./inventory.css";
 import "./relationship.css";
 import "./observability.css";
+import "./stage20.css";
 
 export const metadata: Metadata = {
   title: {
