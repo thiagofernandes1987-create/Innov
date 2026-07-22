@@ -1,10 +1,10 @@
 # Etapa 19 — Auditoria e Observabilidade
 
-**Estado técnico:** implementada, homologada e com CI verde  
+**Estado técnico:** implementada, homologada, CI verde e incorporada à `main`  
 **Versão:** `0.19.0`  
 **Módulo:** `auditoria` versão `1.0.0`  
 **Supabase:** `wyeojufebtwblsubkunr`  
-**PR:** `#19`, em rascunho e empilhado sobre o PR `#18`
+**PRs:** `#19` e `#20`, mesclados em 22 de julho de 2026
 
 ## 1. Objetivo
 
@@ -110,8 +110,6 @@ São registrados achados de:
 - divergência do ledger;
 - outros achados técnicos reproduzíveis.
 
-### Diagnósticos globais
-
 A migration de hardening criou `stage19_can_read_global_diagnostics()`:
 
 - membro interno autorizado vê diagnóstico global;
@@ -133,7 +131,7 @@ Teste homologado: interno `1`, externo `0`.
 
 ## 10. Índices
 
-O hardening adicionou sete índices complementares. Resultado:
+O hardening adicionou sete índices complementares:
 
 ```text
 FKs do domínio: 16
@@ -152,6 +150,8 @@ zero FK sem índice
 /app/auditoria/saude
 /app/auditoria/configuracao
 ```
+
+A revisão visual transversal e a consolidação do design system foram transferidas à Etapa 20, sob a direção UI/UX Pro Max adaptada à identidade Innovar.
 
 ## 12. Seis migrations alinhadas ao ledger
 
@@ -190,15 +190,11 @@ Confirmado:
 
 ## 14. Advisors
 
-### Segurança
-
 Os avisos Stage19 de funções `SECURITY DEFINER` autenticadas representam fronteiras intencionais, com `search_path`, autorização interna e zero acesso `anon`.
 
-### Performance
+A Etapa 19 ficou com zero FK sem índice. Avisos globais antigos de FKs, `auth_rls_initplan` e múltiplas policies foram transferidos ao backlog transversal da Etapa 20.
 
-A Etapa 19 ficou com zero FK sem índice. Avisos globais antigos de FKs, `auth_rls_initplan` e múltiplas policies permanecem no backlog transversal das Etapas 19/20.
-
-## 15. CI
+## 15. CI e merge
 
 A execução final aprovou:
 
@@ -212,12 +208,17 @@ A execução final aprovou:
 - testes Python;
 - build de produção.
 
-## 16. Limitações
+O PR `#19` foi mesclado sobre a branch da Etapa 18 e o PR `#20` consolidou o conteúdo na `main`. O commit estável analisado é `55f4d56`, cujo CI run `29885340336` terminou com `success`.
 
-- não substitui APM externo;
-- não armazena corpo bruto de requisição;
-- purge automático, telemetria externa e carga pertencem à Etapa 20;
-- o E2E concorrente da Etapa 18 continua bloqueado pelos cinco secrets do ambiente GitHub `homologation`.
+## 16. Limitações transferidas à Etapa 20
+
+- APM e telemetria externa;
+- purge automático e retenção operacional;
+- teste de carga e chaos;
+- backup e restauração;
+- provider jurídico;
+- antimalware de anexos;
+- pentest e publicação controlada.
 
 ## 17. Definition of Done
 
@@ -226,7 +227,7 @@ A execução final aprovou:
 - [x] RLS e privilégio mínimo;
 - [x] eventos append-only;
 - [x] alertas e health checks;
-- [x] diagnósticos e retenção;
+- [x] diagnósticos e retenção configurável;
 - [x] diagnósticos globais protegidos;
 - [x] interface administrativa;
 - [x] teste transacional com `ROLLBACK`;
@@ -235,6 +236,4 @@ A execução final aprovou:
 - [x] advisors revisados;
 - [x] validador estrutural;
 - [x] CI final verde;
-- [ ] PR pronto para revisão somente após estabilização do PR `#18`.
-
-O PR `#19` permanece em rascunho e não deve ser mesclado automaticamente.
+- [x] PRs mesclados e conteúdo incorporado à `main`.
