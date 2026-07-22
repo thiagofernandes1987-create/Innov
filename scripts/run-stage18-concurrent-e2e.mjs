@@ -25,9 +25,33 @@ function row(value){return Array.isArray(value)?value[0]??null:value??null;}
 function object(value){return value&&typeof value==="object"&&!Array.isArray(value)?value:{};}
 function list(value){return Array.isArray(value)?value:[];}
 function assert(condition,message){if(!condition)throw new Error(message);}
+function errorMessage(error){return error&&typeof error==="object"&&"message" in error?String(error.message):String(error);}
+function isImmutableHistoryError(error){const normalized=errorMessage(error).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();return normalized.includes("imutavel")||normalized.includes("immutable")||normalized.includes("registro de historico");}
 async function rpc(client,name,args){const{data,error}=await client.rpc(name,args);if(error)throw new Error(`${name}: ${error.message}`);return data;}
 async function signIn(client,email,password){const{data,error}=await client.auth.signInWithPassword({email,password});if(error)throw new Error(`Login ${email}: ${error.message}`);assert(data.user&&data.session,`Sessão não criada para ${email}.`);return data.user;}
-async function cleanup(){if(!ticketId)return;const tables=["sac_ticket_attachments","sac_ticket_messages","sac_ticket_events","crm_activities","sac_tickets"];for(const table of tables){const column=table==="sac_tickets"?"id":"ticket_id";const{error}=await service.from(table).delete().eq(column,ticketId);if(error)throw new Error(`Limpeza ${table}: ${error.message}`);}}
+async function cleanup(){
+ if(!ticketId)return[];
+ const tables=["sac_ticket_attachments","sac_ticket_messages","sac_ticket_events","crm_activities","sac_tickets"];
+ const skipped=[];
+ for(const table of tables){
+  const column=table==="sac_tickets"?"id":"ticket_id";
+  try{
+   const result=await service.from(table).delete().eq(column,ticketId);
+   if(result.error)throw result.error;
+   console.log(`Cleanup ${table}: OK`);
+  }catch(error){
+   const message=errorMessage(error);
+   if(isImmutableHistoryError(error)){
+    console.warn(`Skipping cleanup ${table}: ${message}`);
+    skipped.push({table,reason:"immutable_history"});
+    continue;
+   }
+   console.error(`Cleanup ${table} failed: ${message}`);
+   throw new Error(`Limpeza ${table}: ${message}`,{cause:error});
+  }
+ }
+ return skipped;
+}
 
 const report={runId,status:"running",startedAt:new Date().toISOString(),checks:[]};
 const check=(name,details={})=>report.checks.push({name,ok:true,...details});
@@ -120,7 +144,7 @@ try{
  failure=error instanceof Error?error:new Error(String(error));
  report.status="failed";report.finishedAt=new Date().toISOString();report.error=failure.message;
 }finally{
- try{await cleanup();report.cleanup="passed";}catch(error){report.cleanup="failed";report.cleanupError=error instanceof Error?error.message:String(error);if(!failure)failure=error instanceof Error?error:new Error(String(error));}
+ try{const cleanupSkipped=await cleanup();report.cleanup="passed";if(cleanupSkipped.length)report.cleanupSkipped=cleanupSkipped;}catch(error){report.cleanup="failed";report.cleanupError=error instanceof Error?error.message:String(error);if(!failure)failure=error instanceof Error?error:new Error(String(error));}
  await Promise.allSettled([adminSession.auth.signOut(),clientSession.auth.signOut()]);
  fs.writeFileSync(reportPath,JSON.stringify(report,null,2)+"\n");
  console.log(JSON.stringify(report,null,2));
