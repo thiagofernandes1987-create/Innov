@@ -107,20 +107,25 @@ where constraint_row.contype='f'
 `);
 }
 function createRestoreList(listOutput,dependencies){
- let skipped=0;
+ let skippedExternalFks=0;
+ let skippedDefaultAcls=0;
  const lines=listOutput.split("\n").map(line=>{
   if(!line||line.startsWith(";"))return line;
+  if(line.includes(" DEFAULT ACL ")){
+   skippedDefaultAcls+=1;
+   return`; provider-managed default ACL omitted by Stage 20 restore drill\n;${line}`;
+  }
   const tokens=line.trim().split(/\s+/);
   if(tokens[3]!=="FK"||tokens[4]!=="CONSTRAINT")return line;
   const dependency=dependencies.find(item=>
    item.tableSchema===tokens[5]&&item.tableName===tokens[6]&&item.constraintName===tokens[7]
   );
   if(!dependency)return line;
-  skipped+=1;
+  skippedExternalFks+=1;
   return`; external dependency omitted by Stage 20 restore drill\n;${line}`;
  });
- assert(skipped===dependencies.length,`Lista de restauração não localizou ${dependencies.length-skipped} FK(s) externa(s).`);
- return{content:lines.join("\n"),skipped};
+ assert(skippedExternalFks===dependencies.length,`Lista de restauração não localizou ${dependencies.length-skippedExternalFks} FK(s) externa(s).`);
+ return{content:lines.join("\n"),skippedExternalFks,skippedDefaultAcls};
 }
 function compareSnapshots(source,target){
  const exactKeys=["tables","rlsTables","functions","migrations","latestMigration","appModules","organizations","inventoryItems","auditEvents"];
@@ -197,9 +202,13 @@ try{
  fs.writeFileSync(restoreListPath,restoreList.content,{mode:0o600});
  check("dump_integrity",report.dump);
  check("external_fk_dependencies_omitted",{
-  count:restoreList.skipped,
+  count:restoreList.skippedExternalFks,
   referencedSchemas:report.externalDependencies.referencedSchemas,
   reason:"schemas externos fora do escopo do drill"
+ });
+ check("provider_managed_default_acls_omitted",{
+  count:restoreList.skippedDefaultAcls,
+  reason:"default privileges de roles gerenciadas pelo Supabase"
  });
 
  const restoreStarted=Date.now();
