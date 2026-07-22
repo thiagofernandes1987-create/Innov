@@ -39,6 +39,14 @@ export type SecureUploadResult={
  scannedAt:string;
 };
 
+export type FileSecurityProviderHealth={
+ status:"healthy";
+ provider:"clamav"|"test-clean";
+ fixtureResult:"CLEAN";
+ checkedAt:string;
+ durationMs:number;
+};
+
 type QuarantineManifest={
  schemaVersion:1;
  scanId:string;
@@ -134,6 +142,20 @@ async function scanBuffer(buffer:Buffer):Promise<FileSecurityScanResult>{
  return scanWithClamAv(buffer);
 }
 
+export async function checkFileSecurityProvider():Promise<FileSecurityProviderHealth>{
+ const started=Date.now();
+ const fixture=Buffer.from("%PDF-1.7\nInnov protected provider health fixture\n","utf8");
+ const result=await scanBuffer(fixture);
+ if(result.status!=="CLEAN")throw new FileSecurityError("PROVIDER_HEALTH_FAILED","O provider não liberou a fixture de saúde.");
+ return{
+  status:"healthy",
+  provider:result.provider,
+  fixtureResult:"CLEAN",
+  checkedAt:new Date().toISOString(),
+  durationMs:Date.now()-started
+ };
+}
+
 async function uploadJson(bucket:string,path:string,value:unknown){
  const payload=Buffer.from(JSON.stringify(value,null,2)+"\n","utf8");
  const{error}=await serviceClient().storage.from(bucket).upload(path,payload,{contentType:"application/json",upsert:true});
@@ -168,7 +190,8 @@ export async function secureUpload(input:SecureUploadInput):Promise<SecureUpload
   const result=await scanBuffer(body);
   manifest.provider=result.provider;
   manifest.signature=result.signature;
-  manifest.finishedAt=new Date().toISOString();
+  const scannedAt=new Date().toISOString();
+  manifest.finishedAt=scannedAt;
   if(result.status==="BLOCKED"){
    manifest.status="BLOCKED";
    await uploadJson(quarantineBucket,manifestPath,manifest);
@@ -190,7 +213,7 @@ export async function secureUpload(input:SecureUploadInput):Promise<SecureUpload
   await quarantine.remove([payloadPath,manifestPath]);
   return{
    scanId,status:"CLEAN",targetBucket:input.targetBucket,targetPath:input.targetPath,
-   sha256,sizeBytes:body.length,provider:result.provider,scannedAt:manifest.finishedAt
+   sha256,sizeBytes:body.length,provider:result.provider,scannedAt
   };
  }catch(error){
   if(targetPromoted)await client.storage.from(input.targetBucket).remove([input.targetPath]).catch(()=>undefined);
