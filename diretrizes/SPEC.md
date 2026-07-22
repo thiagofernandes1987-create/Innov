@@ -1,9 +1,9 @@
 # SPEC — Innovar Platform
 
 **Documento canônico:** sim  
-**Revisão documental:** 1.5.1  
+**Revisão documental:** 1.6.0  
 **Versão implementada da plataforma:** 0.19.0  
-**Atualizado em:** 21 de julho de 2026  
+**Atualizado em:** 22 de julho de 2026  
 **Fonte de verdade:** repositório `thiagofernandes1987-create/Innov`
 
 ## 1. Propósito
@@ -25,12 +25,13 @@ GitHub contém código, migrations, testes, documentação, CI e recuperação. 
 Ordem de leitura:
 
 1. `diretrizes/SPEC.md`;
-2. `diretrizes/INVENTARIO.md`;
-3. `diretrizes/MODULOS.md`;
-4. `diretrizes/ARQUITETURA.md`;
-5. `diretrizes/ROADMAP.md`;
-6. `diretrizes/RECUPERACAO.md`;
-7. documentos em `docs/`.
+2. `diretrizes/ESTADO-ATUAL.json`;
+3. `diretrizes/INVENTARIO.md`;
+4. `diretrizes/MODULOS.md`;
+5. `diretrizes/ARQUITETURA.md`;
+6. `diretrizes/ROADMAP.md`;
+7. `diretrizes/RECUPERACAO.md`;
+8. documentos em `docs/`.
 
 ## 3. Princípios inegociáveis
 
@@ -48,7 +49,9 @@ Ordem de leitura:
 12. migrations append-only e alinhadas ao ledger remoto;
 13. privilégios mínimos;
 14. documentação atualizada no mesmo PR;
-15. CI como bloqueio obrigatório.
+15. CI como bloqueio obrigatório;
+16. acessibilidade WCAG 2.2 AA, responsividade e estados completos de interface;
+17. identidade visual autoral da Innovar, sem presets SaaS genéricos.
 
 ## 4. Modelo de autorização
 
@@ -80,7 +83,7 @@ Capacidades incluem criar, ler, editar, excluir, aprovar, liberar, assinar, expo
 
 ## 5. Aplicativos modulares
 
-O catálogo canônico está em `lib/modules/registry.ts` e no banco em `app_modules`. Cada organização habilita aplicativos por `organization_modules`, perfis e overrides. A Etapa 19 consolida auditoria e observabilidade como aplicativo sensível, restrito por padrão a Super Administrador, Direção e Administrador.
+O catálogo canônico está em `lib/modules/registry.ts` e no banco em `app_modules`. Cada organização habilita aplicativos por `organization_modules`, perfis e overrides. A Etapa 19 consolidou auditoria e observabilidade como aplicativo sensível, restrito por padrão a Super Administrador, Direção e Administrador.
 
 ## 6. Estoque, Inventário e Almoxarifado
 
@@ -97,7 +100,19 @@ O módulo de Estoque, Inventário e Almoxarifado permanece consolidado como núc
 
 Saldos não podem ser editados diretamente. Custos sensíveis dependem de capacidade específica e toda operação crítica deve permanecer auditável.
 
-## 7. Auditoria e observabilidade
+## 7. CRM, Cliente 360 e SAC
+
+A Etapa 18 está incorporada à `main`. O E2E concorrente autenticado foi aprovado no workflow `29883182240`, com:
+
+- login paralelo de administrador e cliente;
+- abertura idempotente de chamado;
+- mensagens simultâneas com visibilidade correta;
+- transição protegida por RPC;
+- tentativa direta de alteração de estado bloqueada;
+- RLS confirmada;
+- cleanup aprovado, preservando históricos append-only como `immutable_history`.
+
+## 8. Auditoria e observabilidade
 
 A versão `0.19.0` inclui:
 
@@ -111,11 +126,15 @@ A versão `0.19.0` inclui:
 - diagnósticos de índices, RLS, privilégios e ledger;
 - política configurável de retenção.
 
-## 8. Próxima etapa oficial
+A Etapa 19 foi homologada, teve CI final verde e foi incorporada à `main` pelos PRs `#19` e `#20`.
 
-A Etapa 20 é a prontidão de produção: E2E autenticado completo, concorrência real, provider jurídico, proteção de anexos, pentest, backup/restauração, incidentes, MFA adicional e publicação controlada. O E2E concorrente da Etapa 18 permanece bloqueado até a configuração dos secrets do ambiente GitHub `homologation`.
+## 9. Próxima etapa oficial
 
-## 9. Etapa 21 — WMS avançado
+A Etapa 20 é a **Prontidão de Produção**. Seu escopo inclui E2E autenticado completo, concorrência real de estoque, provider jurídico, proteção e antimalware de anexos, pentest, backup/restauração, telemetria, retenção, incidentes, proteção contra senhas comprometidas, MFA adicional, revisão jurídica/LGPD e publicação controlada.
+
+A direção de UI/UX da Etapa 20 deve seguir a UI/UX Pro Max adaptada à identidade Innovar: arquitetura e precisão de obra, azul profundo, cobre e materiais naturais, interface densa porém escaneável, status semânticos, motion discreto, acessibilidade e responsividade.
+
+## 10. Etapa 21 — WMS avançado
 
 A Etapa 21 permanece planejada e não integra a versão implementada atual. O WMS avançado deverá evoluir o estoque com:
 
