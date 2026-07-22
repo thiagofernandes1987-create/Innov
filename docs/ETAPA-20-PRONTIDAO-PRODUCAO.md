@@ -2,409 +2,267 @@
 
 ## Estado
 
-**Em implementação, com fundação UI/UX e concorrência real de estoque homologadas.**  
+**Em implementação, com UI/UX Pro Max, concorrência de estoque, restauração lógica e integração de anexos protegidos aprovadas na branch.**  
 Branch: `feature/etapa-20-prontidao-producao`  
 PR: `#23`, em rascunho  
-Base empilhada: `chore/encerramento-etapa-19` / PR `#22`  
-Versão atual: `0.19.0`  
 Produção: não liberada
+
+O provider ClamAV real, a migration de anexos e o E2E do SAC ainda não foram homologados.
 
 ## Objetivo
 
-Transformar a plataforma tecnicamente homologada em uma solução operável com segurança, recuperabilidade, experiência consistente e publicação controlada.
-
-```text
-plataforma homologada
-→ riscos produtivos classificados
-→ concorrência e recuperação comprovadas
-→ proteção de arquivos e integrações
-→ observabilidade externa
-→ revisão jurídica/LGPD
-→ publicação controlada
-```
+Preparar a Innovar Platform para uma futura publicação controlada, sem confundir implementação em branch, homologação técnica e liberação produtiva.
 
 ## Escopo incluído
 
-### Governança
-
-- manifesto de estado;
-- checklist de go-live;
-- matriz de bloqueios e evidências;
-- plano de rollback;
-- critérios `GO`, `NO_GO` e `CONDITIONAL_GO`;
-- merge e publicação somente após aprovação explícita.
-
-### Segurança
-
-- revisão de RLS, privilégios e funções `SECURITY DEFINER`;
-- proteção contra senhas comprometidas;
-- MFA adicional para ações críticas;
-- segregação de funções;
-- rate limiting quando aplicável;
-- headers, cookies, sessões e bundle;
-- pentest e remediações;
-- antimalware e quarentena de anexos.
-
-### Concorrência e carga
-
-- duas conexões disputando a mesma posição de estoque;
-- advisory lock e saldo não negativo;
-- carga e volumetria;
-- retry, timeout e falha parcial;
-- limites operacionais documentados.
-
-### Backup e restauração
-
-- backup do PostgreSQL;
-- inventário de buckets privados;
-- restauração isolada;
-- migrations e ledger após restauração;
-- smoke tests;
-- RPO e RTO;
-- contingência para Auth, DNS e providers.
-
-### Assinatura jurídica
-
-- provider real;
-- webhook autenticado e idempotente;
-- evidências e hashes;
-- retry e reconciliação;
-- cópia ao cliente;
-- revisão jurídica;
-- fallback operacional.
-
-### Retenção e telemetria
-
-- APM sem dados sensíveis;
-- correlação por `correlation_id`;
-- alertas de disponibilidade e erro;
-- worker de retenção com dry-run;
-- preservação legal;
-- exportação antes de purge;
-- auditoria técnica.
-
-### Experiência e acessibilidade
-
-- UI/UX Pro Max permanente;
-- design system `Arquitetura em operação`;
-- WCAG 2.2 AA;
-- teclado, foco, zoom e reflow;
-- estados completos;
-- desktop, tablet e mobile;
-- redução de movimento;
-- forced colors;
-- ausência do preset SaaS rosa/fúcsia.
-
-### Jurídico, contábil e LGPD
-
-- bases legais e finalidades;
-- consentimentos;
-- retenção e descarte;
-- atendimento a titulares;
-- contratos e termos;
-- fornecedores;
-- dados sensíveis;
-- integrações fiscais e contábeis aplicáveis.
+- governança pós-merge e manifesto verificável;
+- UI/UX Pro Max como diretriz permanente;
+- concorrência real de estoque;
+- backup e restauração em ambiente isolado;
+- quarentena e antimalware de anexos;
+- provider jurídico;
+- telemetria, retenção e incidentes;
+- hardening de Auth e segurança externa;
+- carga, rollback e decisão formal de go-live.
 
 ## Fora do escopo
 
-- WMS avançado;
-- RFID;
-- roteirização logística;
-- ressuprimento automático sem aprovação;
-- integração fiscal completa de entrada;
-- depreciação contábil oficial;
-- funcionalidades sem relação direta com prontidão.
-
-Esses itens pertencem à Etapa 21 ou a etapas posteriores.
+- publicação automática em produção;
+- declaração de prontidão sem evidências;
+- mistura de dados reais com fixtures;
+- armazenamento de secrets no Git;
+- bypass de segurança para manter funcionalidades disponíveis;
+- WMS avançado, reservado à Etapa 21.
 
 ## Fluxos
 
-### Prontidão
-
 ```text
-requisito → risco → implementação/procedimento → teste → evidência → revisão → decisão
+branch funcional
+→ CI completo
+→ evidência específica
+→ configuração externa protegida
+→ migration e aplicação coordenadas
+→ homologação autenticada
+→ revisão de riscos
+→ decisão GO, NO_GO ou CONDITIONAL_GO
+→ publicação controlada
 ```
 
 ### Anexo protegido
 
 ```text
-sessão autorizada → contexto → tipo/tamanho → hash → quarentena
-→ antimalware → liberação/bloqueio → Storage privado → download autenticado → auditoria
+sessão autorizada
+→ MIME, tamanho, nome e assinatura dos bytes
+→ quarentena privada
+→ ClamAV INSTREAM
+→ CLEAN: promoção e registro com evidência
+→ BLOCKED/ERROR: fail-closed
+→ download autenticado e sem cache
 ```
 
-### Incidente
+## Modelo de dados
+
+A Etapa 20 evita criar estado persistido sem necessidade. As alterações persistentes atuais são:
+
+- manifesto `diretrizes/ESTADO-ATUAL.json`;
+- campos de segurança dos anexos do SAC:
+  - `security_status`;
+  - `security_scan_id`;
+  - `security_provider`;
+  - `security_scanned_at`.
+
+Anexos anteriores são classificados como `LEGACY`, sem atribuir análise antimalware retroativa.
+
+## Rotas
+
+Rotas revisadas nesta etapa:
+
+- `/app` — dashboard e shell UI/UX Pro Max;
+- `/app/ocorrencias/[id]` — anexos internos com estado de segurança;
+- `/cliente/ocorrencias/[id]` — anexos liberados após `CLEAN`;
+- `/api/sac/attachments/[id]` — download autenticado, assinado, sem cache e protegido pelo estado do scan.
+
+## RPCs e integrações
+
+- `post_inventory_movement` — concorrência real homologada;
+- `register_sac_ticket_attachment` — nova assinatura exige evidência antimalware;
+- Supabase Storage — quarentena privada e bucket funcional privado;
+- ClamAV `INSTREAM` — integração implementada na branch;
+- provider ClamAV real — ainda pendente em homologação;
+- provider jurídico — ainda pendente.
+
+Toda integração deve possuir timeout, comportamento fail-closed ou fallback explícito, idempotência, sanitização, health check, auditoria e procedimento de indisponibilidade.
+
+## Segurança e RLS
+
+- autorização permanece no banco e no servidor;
+- nenhuma policy foi flexibilizada;
+- nenhuma RPC operacional é concedida a `anon`;
+- Service Role não é exposta ao cliente;
+- anexos são lidos pelo usuário somente após RLS autorizar o registro;
+- portal recebe somente arquivos `CLEAN`;
+- equipe autorizada pode identificar arquivos `LEGACY` para futura reanálise;
+- scanner indisponível resulta em fail-closed;
+- arquivo detectado não é promovido;
+- falha de registro remove objeto promovido;
+- produção permanece bloqueada.
+
+## Storage
+
+Buckets funcionais privados permanecem preservados. A Etapa 20 adiciona o contrato do bucket:
 
 ```text
-detecção → classificação → contenção → comunicação → recuperação
-→ validação → causa raiz → vacina → post-mortem
+file-quarantine
+```
+
+Prefixos:
+
+```text
+pending/<organization>/<scanId>/
+blocked/<organization>/<scanId>/
+results/<organization>/<scanId>.json
+```
+
+Nenhum payload de quarentena é publicado como artefato de CI.
+
+## UI/UX Pro Max
+
+A direção visual permanente é **Arquitetura em operação**:
+
+- azul profundo, cobre e materiais naturais;
+- densidade operacional com leitura clara;
+- WCAG 2.2 AA como meta;
+- foco visível;
+- alvos mínimos de 44×44 px;
+- reflow e responsividade;
+- forced colors;
+- redução de movimento;
+- estados expressos por texto e semântica, não apenas cor;
+- proibição de presets SaaS genéricos rosa/fúcsia.
+
+No fluxo de anexos, a ação passou a ser **Analisar e enviar**, com estados `Legado não analisado` e `Arquivo liberado` visíveis.
+
+## Migrations
+
+Migration versionada nesta frente:
+
+```text
+20260722104500_stage20_sac_attachment_security.sql
+```
+
+Estado atual:
+
+```text
+versionada na branch
+não aplicada em homologação
+não aplicada em produção
+```
+
+A migration altera a assinatura da RPC do SAC. Por isso, aplicação e código devem ser promovidos de forma coordenada somente depois do provider real estar saudável.
+
+## Testes
+
+### CI completo
+
+```text
+run: 29913636056
+status: passed
+```
+
+Inclui documentação, vacinas, ledger, validadores das Etapas 17–20, lint, typecheck, testes TypeScript/Python e build.
+
+### Concorrência de estoque
+
+```text
+run: 29889168656
+artifact: 8517620520
+status: passed
+cleanup: passed
 ```
 
 ### Backup e restauração
 
 ```text
-snapshot → integridade → armazenamento protegido → restauração isolada
-→ migrations/ledger → smoke tests → RPO/RTO → evidência
-```
-
-### Concorrência de estoque
-
-```text
-saldo 10 → saída A -6 + saída B -6 em paralelo
-→ advisory lock → uma postagem + uma rejeição
-→ saldo 4 → reversões → saldo 0
-```
-
-## Modelo de dados
-
-A fundação e o E2E de concorrência não criam schema novo.
-
-Mudanças futuras exigem migration append-only documentando:
-
-- objetos;
-- RLS;
-- privilégios;
-- índices;
-- lock e backfill;
-- estratégia corretiva;
-- retenção;
-- testes.
-
-A fixture `E2E20-CONCURRENCY` é permanente apenas na homologação e deve permanecer com saldo zero fora da execução.
-
-## Rotas
-
-A fundação não adiciona rota pública.
-
-Superfícies prioritárias:
-
-```text
-/app
-/app/auditoria
-/app/estoque
-/app/assinaturas
-/app/documentos
-/app/qualidade
-/app/ocorrencias
-/cliente
-```
-
-## RPCs e integrações
-
-RPCs exercitadas na concorrência:
-
-```text
-install_inventory_defaults
-create_inventory_movement
-post_inventory_movement
-reverse_inventory_movement
-```
-
-Integrações ainda planejadas:
-
-- provider jurídico;
-- antimalware;
-- telemetria/APM;
-- backup;
-- worker de retenção;
-- canal de incidentes.
-
-Toda integração deve possuir timeout, retry controlado, idempotência, sanitização, health check, auditoria e procedimento de indisponibilidade.
-
-## Segurança e RLS
-
-- nenhuma policy flexibilizada;
-- nenhuma RPC operacional para `anon`;
-- Service Role somente no servidor e no setup técnico autorizado;
-- `SECURITY DEFINER` com `search_path` e autorização interna;
-- logs e artefatos sem secrets;
-- arquivos privados sem URL pública permanente;
-- ações críticas podem exigir MFA, motivo e alçada;
-- fixtures não escrevem colunas sensíveis diretamente;
-- testes negativos obrigatórios.
-
-## Storage
-
-Buckets permanecem privados.
-
-A Etapa 20 deve inventariar:
-
-- tipos e limites;
-- contexto e hash;
-- quarentena e antimalware;
-- retenção;
-- download autenticado;
-- remoção de órfãos;
-- backup ou estratégia de recuperação.
-
-## UI/UX Pro Max
-
-Direção canônica: **Arquitetura em operação**.
-
-### Fundação implantada
-
-```text
-diretrizes/UI-UX-PRO-MAX.md
-app/globals.css
-app/stage20.css
-app/app/layout.tsx
-app/app/page.tsx
-scripts/validate-stage20.mjs
-```
-
-Entregas:
-
-- azul profundo, cobre e materiais naturais;
-- link de salto;
-- foco visível;
-- alvos mínimos de 44px;
-- contexto organizacional;
-- dashboard com dados reais da sessão;
-- classes antes ausentes implementadas;
-- estados e badges semânticos;
-- breakpoints e forced colors;
-- redução de movimento;
-- prevenção automática contra rosa/fúcsia e estilos inline nos componentes-base.
-
-## Migrations
-
-Nenhuma migration criada até esta fatia da Etapa 20.
-
-## Testes
-
-### Estruturais
-
-- documentação;
-- 13 vacinas;
-- ledger;
-- validadores das Etapas 9 a 20;
-- `validate:stage20`.
-
-### Qualidade
-
-- lint;
-- typecheck;
-- testes TypeScript;
-- testes Python;
-- build.
-
-### UI/UX
-
-- tokens;
-- classes implementadas;
-- link de salto;
-- foco;
-- 44px;
-- breakpoints;
-- redução de movimento;
-- forced colors;
-- ausência de preset proibido.
-
-### Concorrência real
-
-Documento de evidência:
-
-```text
-docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md
-```
-
-Resultado:
-
-```text
-workflow run: 29889168656
+run: 29911179764
+artifact: 8526039714
 status: passed
-cleanup: passed
-saldo após disputa: 4
-saldo após cleanup: 0
+RTO observado: 201 segundos
+diferenças: 0
+```
+
+### ClamAV local
+
+```text
+run: 29913636268
+job: 88902223114
+artifact: 8526935275
+status: passed
+PING: passed
+fixture limpa: CLEAN
+EICAR: BLOCKED
 ```
 
 ## Homologação
 
-### Fundação
-
-CI run `29888603943`, número `1190`:
-
-- preflight: success;
-- lint: success;
-- typecheck: success;
-- testes TypeScript: success;
-- testes Python: success;
-- build: success.
-
-### Concorrência de estoque
-
-Workflow `29889168656`:
-
-- duas sessões autenticadas: aprovado;
-- entrada de 10: aprovado;
-- duas saídas de 6: executadas em paralelo;
-- uma postagem: aprovada;
-- uma rejeição por saldo insuficiente: aprovada;
-- saldo não negativo: aprovado;
-- reversões: aprovadas;
-- rascunho rejeitado removido;
-- saldo final zero;
-- artefato `8517620520` preservado.
-
-## Vacinas aplicadas ou criadas
-
-- `VACINA-003` — ledger;
-- `VACINA-004` — privilégios;
-- `VACINA-005` — workflow protegido;
-- `VACINA-006` — GitHub Actions;
-- `VACINA-007` — secrets;
-- `VACINA-008` — instalação;
-- `VACINA-009` — pré-requisitos;
-- `VACINA-010` — JSON;
-- `VACINA-012` — estado canônico;
-- `VACINA-013` — fixtures e fronteiras sensíveis.
-
-## Limitações iniciais
-
 Concluído:
 
-- fundação UI/UX Pro Max;
-- validador da Etapa 20;
-- concorrência real da mesma posição de estoque.
+- concorrência real do estoque;
+- backup e restauração lógica em projeto descartável;
+- protocolo ClamAV local com fixture limpa e EICAR;
+- CI completo da integração de anexos na branch.
 
 Pendente:
 
-- carga e volumetria prolongadas;
-- backup e restauração;
-- antimalware;
-- provider jurídico;
-- telemetria e retenção;
-- MFA e senhas comprometidas;
-- pentest;
-- revisão jurídica/LGPD;
-- publicação controlada.
+- endpoint ClamAV privado acessível ao runtime;
+- health check do provider real;
+- migration e aplicação coordenadas;
+- upload limpo e EICAR pelo fluxo real do SAC;
+- reanálise dos anexos `LEGACY`;
+- integração dos outros módulos.
+
+## Vacinas aplicadas ou criadas
+
+- `VACINA-012` — estado pós-merge;
+- `VACINA-013` — fixtures respeitam fronteiras sensíveis;
+- princípios existentes de fail-closed, menor privilégio, segredo fora do Git e histórico imutável permanecem obrigatórios.
+
+## Limitações iniciais
+
+- o scan é síncrono e pode aumentar a latência do upload;
+- limite inicial de 25 MB;
+- provider real não provisionado;
+- não há interface administrativa de quarentena;
+- não há reprocessamento assíncrono;
+- anexos `LEGACY` não foram analisados;
+- retenção jurídica e remoção programada ainda pendentes;
+- outros módulos ainda usam seus fluxos anteriores.
 
 ## Próximos passos
 
-1. backup e restauração;
-2. proteção e antimalware de anexos;
-3. provider jurídico;
-4. telemetria e retenção;
-5. Auth, MFA e senhas comprometidas;
-6. carga e volumetria;
-7. pentest e revisões externas;
-8. go-live controlado.
+1. provisionar ClamAV privado;
+2. cadastrar `CLAMAV_HOST` no ambiente `homologation`;
+3. executar `Stage 20 File Security Provider Health`;
+4. aplicar migration e aplicação de forma coordenada;
+5. executar E2E real do SAC;
+6. definir reanálise de anexos `LEGACY`;
+7. expandir a proteção aos demais módulos;
+8. seguir para provider jurídico, telemetria, Auth, carga, pentest e go-live.
 
 ## Definition of Done
 
-- [x] branch criada;
-- [x] PR `#23` em rascunho;
-- [x] contrato técnico;
-- [x] UI/UX Pro Max canônica;
-- [x] shell e dashboard consolidados;
-- [x] validador no CI;
-- [x] CI da fundação verde;
+- [x] governança e manifesto;
+- [x] UI/UX Pro Max permanente;
 - [x] concorrência real de estoque;
-- [x] saldo não negativo sob disputa;
-- [x] cleanup com saldo zero;
-- [x] `VACINA-013` criada;
-- [ ] backup e restauração;
-- [ ] antimalware;
+- [x] backup e restauração lógica;
+- [x] fundação de quarentena e antimalware;
+- [x] integração do SAC na branch;
+- [x] E2E local ClamAV limpo/EICAR;
+- [x] CI completo da branch;
+- [ ] provider ClamAV real saudável;
+- [ ] migration e aplicação homologadas;
+- [ ] E2E real do SAC;
+- [ ] anexos legados tratados;
+- [ ] demais módulos protegidos;
 - [ ] provider jurídico;
 - [ ] telemetria e retenção;
 - [ ] MFA e credenciais;
