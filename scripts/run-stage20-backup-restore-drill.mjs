@@ -11,6 +11,7 @@ const confirmation=process.env.SUPABASE_RESTORE_CONFIRMATION;
 const expectedConfirmation="STAGE20_DISPOSABLE_RESTORE";
 const runId=`stage20-restore-${Date.now()}-${randomUUID().slice(0,8)}`;
 const dumpPath=path.join(os.tmpdir(),`${runId}.dump`);
+const restoreListPath=path.join(os.tmpdir(),`${runId}.list`);
 let failure=null;
 
 function assert(condition,message){if(!condition)throw new Error(message);}
@@ -87,6 +88,40 @@ select json_build_object(
 )::text;
 `);
 }
+async function externalForeignKeys(env){
+ return queryJson(env,`
+select coalesce(json_agg(json_build_object(
+ 'tableSchema',source_ns.nspname,
+ 'tableName',source_table.relname,
+ 'constraintName',constraint_row.conname,
+ 'referencedSchema',target_ns.nspname
+) order by source_ns.nspname,source_table.relname,constraint_row.conname),'[]'::json)::text
+from pg_constraint constraint_row
+join pg_class source_table on source_table.oid=constraint_row.conrelid
+join pg_namespace source_ns on source_ns.oid=source_table.relnamespace
+join pg_class target_table on target_table.oid=constraint_row.confrelid
+join pg_namespace target_ns on target_ns.oid=target_table.relnamespace
+where constraint_row.contype='f'
+ and source_ns.nspname in('public','supabase_migrations')
+ and target_ns.nspname not in('public','supabase_migrations');
+`);
+}
+function createRestoreList(listOutput,dependencies){
+ let skipped=0;
+ const lines=listOutput.split("\n").map(line=>{
+  if(!line||line.startsWith(";"))return line;
+  const tokens=line.trim().split(/\s+/);
+  if(tokens[3]!=="FK"||tokens[4]!=="CONSTRAINT")return line;
+  const dependency=dependencies.find(item=>
+   item.tableSchema===tokens[5]&&item.tableName===tokens[6]&&item.constraintName===tokens[7]
+  );
+  if(!dependency)return line;
+  skipped+=1;
+  return`; external dependency omitted by Stage 20 restore drill\n;${line}`;
+ });
+ assert(skipped===dependencies.length,`Lista de restauração não localizou ${dependencies.length-skipped} FK(s) externa(s).`);
+ return{content:lines.join("\n"),skipped};
+}
 function compareSnapshots(source,target){
  const exactKeys=["tables","rlsTables","functions","migrations","latestMigration","appModules","organizations","inventoryItems","auditEvents"];
  const differences=[];
@@ -134,6 +169,11 @@ try{
  const sourceBefore=await snapshot(sourceEnv);
  report.sourceSnapshot=sourceBefore;
  check("source_snapshot",sourceBefore);
+ const externalDependencies=await externalForeignKeys(sourceEnv);
+ report.externalDependencies={
+  foreignKeyCount:externalDependencies.length,
+  referencedSchemas:[...new Set(externalDependencies.map(item=>item.referencedSchema))].sort()
+ };
 
  const dumpStarted=Date.now();
  await run("pg_dump",[
@@ -153,7 +193,14 @@ try{
  const objectCount=listOutput.split("\n").filter(line=>line&&!line.startsWith(";")).length;
  assert(objectCount>20,"Dump não contém objetos suficientes para restauração.");
  report.dump.objectCount=objectCount;
+ const restoreList=createRestoreList(listOutput,externalDependencies);
+ fs.writeFileSync(restoreListPath,restoreList.content,{mode:0o600});
  check("dump_integrity",report.dump);
+ check("external_fk_dependencies_omitted",{
+  count:restoreList.skipped,
+  referencedSchemas:report.externalDependencies.referencedSchemas,
+  reason:"schemas externos fora do escopo do drill"
+ });
 
  const restoreStarted=Date.now();
  await run("psql",[
@@ -163,6 +210,7 @@ try{
  await run("pg_restore",[
   "--no-owner",
   "--exit-on-error",
+  "--use-list",restoreListPath,
   "--dbname",decodeURIComponent(target.pathname.slice(1)),
   dumpPath
  ],{env:targetEnv});
@@ -200,7 +248,9 @@ select json_build_object(
  report.error=sanitize(failure.message,[sourceUrl,targetUrl]);
 }finally{
  await secureRemove(dumpPath);
+ await secureRemove(restoreListPath);
  report.dumpRemoved=!fs.existsSync(dumpPath);
+ report.restoreListRemoved=!fs.existsSync(restoreListPath);
  fs.writeFileSync(reportPath,JSON.stringify(report,null,2)+"\n");
  console.log(JSON.stringify(report,null,2));
 }
