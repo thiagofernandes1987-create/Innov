@@ -3,7 +3,9 @@ import net from"node:net";
 import{createHash,randomUUID}from"node:crypto";
 import{createClient}from"@supabase/supabase-js";
 import{
+ assertFileContentSignature,
  assertFileSecurityInput,
+ FILE_SECURITY_MAX_BYTES,
  FileSecurityError,
  parseClamAvResponse,
  type FileSecurityScanResult
@@ -34,6 +36,7 @@ export type SecureUploadResult={
  sha256:string;
  sizeBytes:number;
  provider:"clamav"|"test-clean";
+ scannedAt:string;
 };
 
 type QuarantineManifest={
@@ -80,7 +83,7 @@ async function ensurePrivateBucket(bucket:string){
   if(data.public)throw new FileSecurityError("PUBLIC_QUARANTINE_BUCKET","O bucket de quarentena não pode ser público.");
   return;
  }
- const created=await supabase.storage.createBucket(bucket,{public:false,fileSizeLimit:"25MB"});
+ const created=await supabase.storage.createBucket(bucket,{public:false,fileSizeLimit:FILE_SECURITY_MAX_BYTES});
  if(created.error&&!/already exists/i.test(created.error.message))
   throw new FileSecurityError("QUARANTINE_BUCKET",`Não foi possível preparar a quarentena: ${created.error.message}`);
 }
@@ -140,6 +143,7 @@ async function uploadJson(bucket:string,path:string,value:unknown){
 export async function secureUpload(input:SecureUploadInput):Promise<SecureUploadResult>{
  const body=toBuffer(input.body);
  const validated=assertFileSecurityInput({filename:input.filename,contentType:input.contentType,sizeBytes:body.length});
+ assertFileContentSignature(validated.contentType,body);
  const quarantineBucket=process.env.FILE_SECURITY_QUARANTINE_BUCKET?.trim()||DEFAULT_QUARANTINE_BUCKET;
  await ensurePrivateBucket(quarantineBucket);
  const scanId=randomUUID();
@@ -152,7 +156,9 @@ export async function secureUpload(input:SecureUploadInput):Promise<SecureUpload
   correlationId:input.correlationId??null,filename:validated.filename,contentType:validated.contentType,sizeBytes:body.length,
   sha256,targetBucket:input.targetBucket,targetPath:input.targetPath,createdAt:new Date().toISOString()
  };
- const quarantine=serviceClient().storage.from(quarantineBucket);
+ const client=serviceClient();
+ const quarantine=client.storage.from(quarantineBucket);
+ let targetPromoted=false;
  const uploaded=await quarantine.upload(payloadPath,body,{contentType:validated.contentType,upsert:false});
  if(uploaded.error)throw new FileSecurityError("QUARANTINE_UPLOAD",`Falha ao enviar arquivo para quarentena: ${uploaded.error.message}`);
  await uploadJson(quarantineBucket,manifestPath,manifest);
@@ -165,21 +171,29 @@ export async function secureUpload(input:SecureUploadInput):Promise<SecureUpload
   manifest.finishedAt=new Date().toISOString();
   if(result.status==="BLOCKED"){
    manifest.status="BLOCKED";
+   await uploadJson(quarantineBucket,manifestPath,manifest);
    const blockedBase=`blocked/${input.organizationId}/${scanId}`;
-   await quarantine.move(payloadPath,`${blockedBase}/payload`);
-   await uploadJson(quarantineBucket,`${blockedBase}/manifest.json`,manifest);
-   await quarantine.remove([manifestPath]);
+   const moved=await quarantine.move(payloadPath,`${blockedBase}/payload`);
+   if(!moved.error){
+    await uploadJson(quarantineBucket,`${blockedBase}/manifest.json`,manifest);
+    await quarantine.remove([manifestPath]);
+   }
    throw new FileSecurityError("MALWARE_DETECTED","O arquivo foi bloqueado pela análise de segurança.");
   }
   if(result.status!=="CLEAN")throw new FileSecurityError("SCAN_FAILED","A análise de segurança não produziu um resultado liberável.");
-  const target=serviceClient().storage.from(input.targetBucket);
+  const target=client.storage.from(input.targetBucket);
   const promoted=await target.upload(input.targetPath,body,{contentType:validated.contentType,upsert:input.upsert??false});
   if(promoted.error)throw new FileSecurityError("PROMOTION_FAILED",`Arquivo limpo não pôde ser promovido: ${promoted.error.message}`);
+  targetPromoted=true;
   manifest.status="CLEAN";
   await uploadJson(quarantineBucket,`results/${input.organizationId}/${scanId}.json`,manifest);
   await quarantine.remove([payloadPath,manifestPath]);
-  return{scanId,status:"CLEAN",targetBucket:input.targetBucket,targetPath:input.targetPath,sha256,sizeBytes:body.length,provider:result.provider};
+  return{
+   scanId,status:"CLEAN",targetBucket:input.targetBucket,targetPath:input.targetPath,
+   sha256,sizeBytes:body.length,provider:result.provider,scannedAt:manifest.finishedAt
+  };
  }catch(error){
+  if(targetPromoted)await client.storage.from(input.targetBucket).remove([input.targetPath]).catch(()=>undefined);
   if(error instanceof FileSecurityError&&error.code==="MALWARE_DETECTED")throw error;
   manifest.status="ERROR";manifest.finishedAt=new Date().toISOString();
   await uploadJson(quarantineBucket,manifestPath,manifest).catch(()=>undefined);
