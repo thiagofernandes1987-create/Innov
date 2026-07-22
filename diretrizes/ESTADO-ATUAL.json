@@ -11,8 +11,8 @@
   "activeFunctionalPullRequest": 23,
   "mergedPullRequests": [18, 19, 20],
   "ci": {
-    "runId": 29911179677,
-    "runNumber": 1260,
+    "runId": 29913636056,
+    "runNumber": 1308,
     "conclusion": "success"
   },
   "stage18ConcurrentE2E": {
@@ -27,8 +27,8 @@
     "status": "in_progress",
     "blockingStage": 20,
     "foundationCi": {
-      "runId": 29911179677,
-      "runNumber": 1260,
+      "runId": 29913636056,
+      "runNumber": 1308,
       "conclusion": "success"
     },
     "foundation": {
@@ -74,6 +74,28 @@
       "bucketRecovery": "pending",
       "pitrPolicy": "pending"
     },
-    "nextWorkstream": "attachment_protection"
+    "attachmentProtection": {
+      "branchIntegration": "implemented_ci_green",
+      "sacUploads": "quarantine_scan_promote_register",
+      "downloadPolicy": "clients_clean_only_internal_legacy_allowed",
+      "legacyPolicy": "explicit_legacy_not_scanned",
+      "migration": "versioned_not_applied",
+      "migrationFile": "20260722104500_stage20_sac_attachment_security.sql",
+      "localClamAvE2E": {
+        "runId": 29913636268,
+        "jobId": 88902223114,
+        "artifactId": 8526935275,
+        "status": "passed",
+        "ping": "passed",
+        "cleanFixture": "clean",
+        "eicarFixture": "blocked"
+      },
+      "realProvider": "pending_configuration",
+      "providerHealth": "pending",
+      "homologationSacE2E": "pending",
+      "legacyRescan": "pending",
+      "otherModuleUploads": "pending"
+    },
+    "nextWorkstream": "attachment_provider_homologation"
   }
 }
