@@ -59,10 +59,10 @@ if(!errors.length){
  if(!test.includes("request.jwt.claims")||!test.includes("set local role authenticated"))errors.push("Homologação da Etapa 18 não simula identidade/RLS autenticada.");
 
  const actions=read("app/actions/relationship.ts");
- requireRegex(actions,[/createHash\("sha256"\)/i,/crm-sac-attachments/i,/createSupabaseAdminClient/i,/register_sac_ticket_attachment/i,/remove\(\[storagePath\]\)/i],"Uploads transacionais");
+ requireRegex(actions,[/secureUpload/i,/FILE_SECURITY_SAC_MIME_TYPES/i,/crm-sac-attachments/i,/createSupabaseAdminClient/i,/register_sac_ticket_attachment/i,/p_security_scan_id/i,/remove\(\[storagePath\]\)/i],"Uploads transacionais");
  if(actions.includes("SUPABASE_SERVICE_ROLE_KEY"))errors.push("Server Action da Etapa 18 referencia o segredo nominalmente.");
  const download=read("app/api/sac/attachments/[id]/route.ts");
- requireRegex(download,[/auth\.getUser/i,/sac_ticket_attachments/i,/createSignedUrl/i,/60/],"Download autenticado");
+ requireRegex(download,[/auth\.getUser/i,/sac_ticket_attachments/i,/security_status/i,/createSignedUrl/i,/X-Innov-File-Security/i,/60/],"Download autenticado");
 
  const registry=read("lib/modules/registry.ts");
  for(const key of["crm","clientes","sac"])if(!new RegExp(`key:\\s*"${key}"`).test(registry))errors.push(`Registry sem módulo ${key}.`);
