@@ -16,7 +16,7 @@ upload autorizado
 → bucket privado file-quarantine
 → manifesto PENDING
 → estado SCANNING
-→ ClamAV INSTREAM
+→ ClamAV INSTREAM em rede privada
 → CLEAN: promoção ao bucket definitivo
 → registro transacional no SAC com scanId/provider/scannedAt
 → BLOCKED: retenção isolada no prefixo blocked
@@ -24,6 +24,8 @@ upload autorizado
 ```
 
 O registro em `sac_ticket_attachments` só ocorre depois da promoção de um arquivo `CLEAN`. Se a RPC de registro falhar, o objeto promovido é removido.
+
+O health check externo não acessa o socket bruto do `clamd`. O GitHub chama uma rota HTTPS da aplicação, autenticada por HMAC com timestamp; a aplicação consulta o scanner dentro da rede privada.
 
 ## Escopo incluído
 
@@ -44,7 +46,9 @@ O registro em `sac_ticket_attachments` só ocorre depois da promoção de um arq
 - downloads do portal limitados a anexos `CLEAN`;
 - arquivos anteriores identificados como `LEGACY` e visíveis apenas à equipe autorizada;
 - estado visual acessível, com texto além da cor;
-- E2E com arquivo limpo e EICAR bloqueado.
+- E2E com arquivo limpo e EICAR bloqueado;
+- rota interna de saúde protegida por HTTPS, HMAC SHA-256 e janela máxima de cinco minutos;
+- cliente de health check que rejeita HTTP e redirecionamentos.
 
 ## Fora do escopo desta fatia
 
@@ -78,6 +82,8 @@ Limite canônico inicial:
 
 ## Variáveis
 
+Runtime da aplicação:
+
 ```env
 FILE_SECURITY_PROVIDER=clamav
 FILE_SECURITY_QUARANTINE_BUCKET=file-quarantine
@@ -85,9 +91,18 @@ CLAMAV_HOST=
 CLAMAV_PORT=3310
 CLAMAV_TIMEOUT_MS=15000
 ALLOW_INSECURE_FILE_SCANNER=false
+FILE_SECURITY_HEALTH_SECRET=
 ```
 
-`ALLOW_INSECURE_FILE_SCANNER=true` é proibida em produção e existe somente para testes controlados.
+Ambiente `homologation` do GitHub:
+
+```env
+HOMOLOGATION_APP_URL=
+FILE_SECURITY_HEALTH_SECRET=
+FILE_SECURITY_HEALTH_TIMEOUT_MS=30000
+```
+
+`FILE_SECURITY_HEALTH_SECRET` deve ser o mesmo valor forte, com ao menos 32 caracteres, no runtime e no ambiente protegido do GitHub. `ALLOW_INSECURE_FILE_SCANNER=true` é proibida em produção e existe somente para testes controlados.
 
 ## Segurança
 
@@ -107,7 +122,13 @@ ALLOW_INSECURE_FILE_SCANNER=false
 - valores de configuração não aparecem no manifesto;
 - falha após promoção remove o objeto do bucket definitivo;
 - portal não recebe anexos `LEGACY`;
-- URL de download é assinada por 60 segundos e usa `Cache-Control: private, no-store`.
+- URL de download é assinada por 60 segundos e usa `Cache-Control: private, no-store`;
+- o socket TCP do `clamd` não deve ser publicado na internet;
+- o health check remoto usa somente HTTPS da aplicação;
+- assinatura HMAC vincula timestamp, método `POST` e rota;
+- timestamp fora da janela de cinco minutos é rejeitado;
+- comparação da assinatura usa `timingSafeEqual`;
+- respostas da rota não revelam host, porta ou erro interno do provider.
 
 ## Modelo de dados
 
@@ -146,16 +167,20 @@ O componente usa `role=status`; `SCANNING` possui `aria-live=polite`. As ações
 ```text
 lib/file-security/domain.ts
 lib/file-security/server.ts
+lib/file-security/health-auth.ts
 components/file-security/file-security-status.tsx
 app/actions/relationship.ts
 app/api/sac/attachments/[id]/route.ts
+app/api/internal/file-security/health/route.ts
 app/app/ocorrencias/[id]/page.tsx
 app/cliente/ocorrencias/[id]/page.tsx
 scripts/run-stage20-file-security-e2e.mjs
+scripts/run-stage20-file-security-provider-health.mjs
 .github/workflows/stage20-file-security-e2e.yml
 .github/workflows/stage20-file-security-provider-health.yml
 supabase/migrations/20260722104500_stage20_sac_attachment_security.sql
 tests/file-security.test.ts
+tests/file-security-health-auth.test.ts
 ```
 
 ## Testes
@@ -170,7 +195,11 @@ tests/file-security.test.ts
 - estrutura mínima DOCX;
 - resposta ClamAV `OK`;
 - resposta ClamAV `FOUND`;
-- resposta desconhecida fail-closed.
+- resposta desconhecida fail-closed;
+- assinatura HMAC recente;
+- assinatura HMAC alterada;
+- timestamp expirado;
+- vínculo entre método, rota e assinatura.
 
 ### E2E local do scanner
 
@@ -188,18 +217,27 @@ O E2E usa EICAR apenas como arquivo-padrão inofensivo de validação antimalwar
 
 ### Provider real
 
-O workflow manual `Stage 20 File Security Provider Health` executa `PING` e scan limpo no ambiente protegido `homologation`. Sem `CLAMAV_HOST`, registra `blocked_missing_secrets` e encerra sem alterar dados.
+O workflow manual `Stage 20 File Security Provider Health` chama:
+
+```text
+POST <HOMOLOGATION_APP_URL>/api/internal/file-security/health
+```
+
+A chamada exige `X-Innov-Timestamp` e `X-Innov-Signature`, usa HTTPS, rejeita redirecionamentos e nunca acessa `CLAMAV_HOST` diretamente. A aplicação executa uma fixture limpa contra o provider privado e devolve somente `healthy` ou `unavailable`.
+
+Sem `HOMOLOGATION_APP_URL` ou `FILE_SECURITY_HEALTH_SECRET`, o workflow registra `blocked_missing_secrets` e encerra sem alterar dados.
 
 ## Próximos passos
 
 1. provisionar endpoint ClamAV privado e acessível ao runtime server-side;
-2. cadastrar `CLAMAV_HOST` no ambiente `homologation`;
-3. executar e aprovar o health check do provider real;
-4. aplicar a migration em homologação em conjunto com a aplicação;
-5. executar upload limpo e EICAR pelo fluxo real do SAC;
-6. implementar reanálise dos anexos `LEGACY`;
-7. expandir o pipeline aos demais módulos;
-8. adicionar métricas, alertas, retenção e interface administrativa.
+2. configurar `CLAMAV_HOST` e `FILE_SECURITY_HEALTH_SECRET` no runtime de homologação;
+3. cadastrar `HOMOLOGATION_APP_URL` e o mesmo `FILE_SECURITY_HEALTH_SECRET` no ambiente `homologation` do GitHub;
+4. executar e aprovar o health check HTTPS do provider real;
+5. aplicar a migration em homologação em conjunto com a aplicação;
+6. executar upload limpo e EICAR pelo fluxo real do SAC;
+7. implementar reanálise dos anexos `LEGACY`;
+8. expandir o pipeline aos demais módulos;
+9. adicionar métricas, alertas, retenção e interface administrativa.
 
 ## Critério de conclusão
 
@@ -216,6 +254,7 @@ O workflow manual `Stage 20 File Security Provider Health` executa `PING` e scan
 - [x] integração do SAC na branch;
 - [x] downloads revisados na branch;
 - [x] E2E local limpo/EICAR;
+- [x] health check HTTPS autenticado por HMAC implementado;
 - [x] CI completo `29913636056`;
 - [ ] provider real configurado;
 - [ ] health check do provider real aprovado;
