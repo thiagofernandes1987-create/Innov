@@ -62,7 +62,7 @@ export default async function ApplicationDashboard() {
         const sectionId = `categoria-${category.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 
         return (
-          <section key={category} aria-labelledby={sectionId} style={{ marginTop: 38 }}>
+          <section className="category-section" key={category} aria-labelledby={sectionId}>
             <div className="section-heading">
               <div>
                 <span className="eyebrow">{category}</span>
