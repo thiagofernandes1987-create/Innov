@@ -73,7 +73,7 @@ Planejamento não é tratado como funcionalidade entregue. O estado deve corresp
 - [x] isolamento multiempresa e multiobra;
 - [x] CI verde;
 - [ ] carga e volumetria prolongadas;
-- [ ] backup e restauração testados.
+- [x] backup e restauração testados.
 
 ## Etapa 18 — CRM, Clientes e SAC
 
@@ -183,24 +183,32 @@ Planejamento não é tratado como funcionalidade entregue. O estado deve corresp
 
 ### Fase 20.4 — Backup e restauração
 
-- [ ] estratégia e scripts versionados;
-- [ ] secret de conexão dedicado configurado;
-- [ ] dump íntegro;
-- [ ] armazenamento protegido;
-- [ ] restauração em ambiente isolado;
-- [ ] ledger e smoke tests após restauração;
-- [ ] RPO e RTO medidos;
-- [ ] evidência preservada.
+- [x] estratégia e scripts versionados;
+- [x] secrets de conexão dedicados configurados;
+- [x] Session pooler com project refs distintos;
+- [x] cliente PostgreSQL 17 compatível;
+- [x] dump íntegro com SHA-256 e 2.798 objetos;
+- [x] dump efêmero protegido e removido;
+- [x] restauração em ambiente isolado;
+- [x] ledger e smoke tests após restauração;
+- [x] equivalência dos snapshots;
+- [x] RTO observado de 201 segundos;
+- [x] evidência `8526039714` preservada;
+- [ ] retenção durável e PITR definidos;
+- [ ] recuperação de buckets e Auth definida.
 
 ### Fase 20.5 — Anexos protegidos
 
-- [ ] quarentena;
-- [ ] antimalware;
-- [ ] liberação/bloqueio;
-- [ ] tipos e limites;
-- [ ] download autenticado;
+- [x] fundação de domínio e servidor;
+- [x] tipos, limites, sanitização e fail-closed;
+- [x] quarentena privada modelada;
+- [x] integração ClamAV INSTREAM implementada;
+- [ ] provider ClamAV configurado e health check aprovado;
+- [ ] integração nos fluxos reais de upload;
+- [ ] liberação/bloqueio E2E;
+- [ ] download autenticado revisado;
 - [ ] remoção de órfãos;
-- [ ] health check e incidentes.
+- [ ] incidentes e observabilidade.
 
 ### Fase 20.6 — Assinatura jurídica
 
