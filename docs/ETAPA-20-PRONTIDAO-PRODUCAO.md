@@ -2,37 +2,37 @@
 
 ## Estado
 
-**Em implementação, com fundação documental, visual e de CI homologada.**  
+**Em implementação, com fundação UI/UX e concorrência real de estoque homologadas.**  
 Branch: `feature/etapa-20-prontidao-producao`  
 PR: `#23`, em rascunho  
 Base empilhada: `chore/encerramento-etapa-19` / PR `#22`  
-Versão implementada atual: `0.19.0`  
+Versão atual: `0.19.0`  
 Produção: não liberada
 
 ## Objetivo
 
-Transformar a plataforma tecnicamente homologada em uma solução operável com segurança, recuperabilidade, evidência, experiência consistente e publicação controlada.
+Transformar a plataforma tecnicamente homologada em uma solução operável com segurança, recuperabilidade, experiência consistente e publicação controlada.
 
 ```text
 plataforma homologada
 → riscos produtivos classificados
-→ segurança e recuperação comprovadas
-→ experiência consolidada
+→ concorrência e recuperação comprovadas
+→ proteção de arquivos e integrações
 → observabilidade externa
-→ validação jurídica/LGPD
+→ revisão jurídica/LGPD
 → publicação controlada
 ```
 
 ## Escopo incluído
 
-### Governança de produção
+### Governança
 
-- manifesto de estado legível por máquina;
+- manifesto de estado;
 - checklist de go-live;
-- matriz de bloqueios, responsáveis e evidências;
+- matriz de bloqueios e evidências;
 - plano de rollback;
 - critérios `GO`, `NO_GO` e `CONDITIONAL_GO`;
-- proibição de publicação automática.
+- merge e publicação somente após aprovação explícita.
 
 ### Segurança
 
@@ -41,26 +41,26 @@ plataforma homologada
 - MFA adicional para ações críticas;
 - segregação de funções;
 - rate limiting quando aplicável;
+- headers, cookies, sessões e bundle;
 - pentest e remediações;
-- revisão de headers, cookies, sessões e bundle;
 - antimalware e quarentena de anexos.
 
 ### Concorrência e carga
 
-- múltiplas conexões disputando a mesma posição de estoque;
-- validação de advisory locks;
-- testes de carga representativos;
+- duas conexões disputando a mesma posição de estoque;
+- advisory lock e saldo não negativo;
+- carga e volumetria;
 - retry, timeout e falha parcial;
-- limites documentados;
-- dados artificiais revertidos.
+- limites operacionais documentados.
 
-### Backup e recuperação
+### Backup e restauração
 
 - backup do PostgreSQL;
 - inventário de buckets privados;
 - restauração isolada;
-- ledger e migrations após restauração;
-- medição de RPO e RTO;
+- migrations e ledger após restauração;
+- smoke tests;
+- RPO e RTO;
 - contingência para Auth, DNS e providers.
 
 ### Assinatura jurídica
@@ -70,7 +70,8 @@ plataforma homologada
 - evidências e hashes;
 - retry e reconciliação;
 - cópia ao cliente;
-- revisão jurídica e fallback operacional.
+- revisão jurídica;
+- fallback operacional.
 
 ### Retenção e telemetria
 
@@ -84,16 +85,15 @@ plataforma homologada
 
 ### Experiência e acessibilidade
 
-- adoção permanente de `diretrizes/UI-UX-PRO-MAX.md`;
-- tokens e componentes-base;
-- classes do dashboard implementadas;
-- navegação interna revisada;
-- estados de loading, vazio, erro, indisponibilidade e acesso negado;
+- UI/UX Pro Max permanente;
+- design system `Arquitetura em operação`;
 - WCAG 2.2 AA;
 - teclado, foco, zoom e reflow;
+- estados completos;
 - desktop, tablet e mobile;
-- motion discreto e redução de movimento;
-- forced colors e fallback sem backdrop-filter.
+- redução de movimento;
+- forced colors;
+- ausência do preset SaaS rosa/fúcsia.
 
 ### Jurídico, contábil e LGPD
 
@@ -114,8 +114,7 @@ plataforma homologada
 - ressuprimento automático sem aprovação;
 - integração fiscal completa de entrada;
 - depreciação contábil oficial;
-- expansão funcional sem relação com prontidão;
-- publicação sem evidência e aprovação explícita.
+- funcionalidades sem relação direta com prontidão.
 
 Esses itens pertencem à Etapa 21 ou a etapas posteriores.
 
@@ -130,7 +129,7 @@ requisito → risco → implementação/procedimento → teste → evidência �
 ### Anexo protegido
 
 ```text
-sessão autorizada → módulo/contexto → tipo/tamanho → hash → quarentena
+sessão autorizada → contexto → tipo/tamanho → hash → quarentena
 → antimalware → liberação/bloqueio → Storage privado → download autenticado → auditoria
 ```
 
@@ -148,13 +147,36 @@ snapshot → integridade → armazenamento protegido → restauração isolada
 → migrations/ledger → smoke tests → RPO/RTO → evidência
 ```
 
+### Concorrência de estoque
+
+```text
+saldo 10 → saída A -6 + saída B -6 em paralelo
+→ advisory lock → uma postagem + uma rejeição
+→ saldo 4 → reversões → saldo 0
+```
+
 ## Modelo de dados
 
-A fundação não cria schema novo. Mudança posterior exige migration append-only com objetos, RLS, privilégios, índices, lock, backfill, estratégia corretiva, retenção e testes documentados.
+A fundação e o E2E de concorrência não criam schema novo.
+
+Mudanças futuras exigem migration append-only documentando:
+
+- objetos;
+- RLS;
+- privilégios;
+- índices;
+- lock e backfill;
+- estratégia corretiva;
+- retenção;
+- testes.
+
+A fixture `E2E20-CONCURRENCY` é permanente apenas na homologação e deve permanecer com saldo zero fora da execução.
 
 ## Rotas
 
-A fundação não adiciona rota pública. Superfícies prioritárias:
+A fundação não adiciona rota pública.
+
+Superfícies prioritárias:
 
 ```text
 /app
@@ -169,7 +191,16 @@ A fundação não adiciona rota pública. Superfícies prioritárias:
 
 ## RPCs e integrações
 
-Planejadas:
+RPCs exercitadas na concorrência:
+
+```text
+install_inventory_defaults
+create_inventory_movement
+post_inventory_movement
+reverse_inventory_movement
+```
+
+Integrações ainda planejadas:
 
 - provider jurídico;
 - antimalware;
@@ -182,34 +213,33 @@ Toda integração deve possuir timeout, retry controlado, idempotência, sanitiz
 
 ## Segurança e RLS
 
-- nenhuma policy flexibilizada para produção;
+- nenhuma policy flexibilizada;
 - nenhuma RPC operacional para `anon`;
-- Service Role somente no servidor;
+- Service Role somente no servidor e no setup técnico autorizado;
 - `SECURITY DEFINER` com `search_path` e autorização interna;
-- logs sem dados sensíveis;
+- logs e artefatos sem secrets;
 - arquivos privados sem URL pública permanente;
 - ações críticas podem exigir MFA, motivo e alçada;
+- fixtures não escrevem colunas sensíveis diretamente;
 - testes negativos obrigatórios.
 
 ## Storage
 
-Buckets permanecem privados. A etapa deve inventariar tipos, limites, contexto, hash, quarentena, antimalware, retenção, download autenticado, remoção de órfãos e recuperação.
+Buckets permanecem privados.
+
+A Etapa 20 deve inventariar:
+
+- tipos e limites;
+- contexto e hash;
+- quarentena e antimalware;
+- retenção;
+- download autenticado;
+- remoção de órfãos;
+- backup ou estratégia de recuperação.
 
 ## UI/UX Pro Max
 
 Direção canônica: **Arquitetura em operação**.
-
-- azul profundo, cobre e materiais naturais;
-- densidade controlada;
-- hierarquia estrutural;
-- cards somente para agrupamentos reais;
-- status semânticos com texto;
-- navegação clara e autorizada;
-- foco visível e alvos de 44px;
-- sem preset SaaS rosa/fúcsia;
-- sem métricas inventadas;
-- sem depender de hover ou cor;
-- estados completos e responsividade real.
 
 ### Fundação implantada
 
@@ -222,20 +252,33 @@ app/app/page.tsx
 scripts/validate-stage20.mjs
 ```
 
-O shell possui link de salto, contexto organizacional e navegação semântica. A central de aplicativos usa somente módulos retornados por `getEffectiveApplications` e dados reais da sessão.
+Entregas:
+
+- azul profundo, cobre e materiais naturais;
+- link de salto;
+- foco visível;
+- alvos mínimos de 44px;
+- contexto organizacional;
+- dashboard com dados reais da sessão;
+- classes antes ausentes implementadas;
+- estados e badges semânticos;
+- breakpoints e forced colors;
+- redução de movimento;
+- prevenção automática contra rosa/fúcsia e estilos inline nos componentes-base.
 
 ## Migrations
 
-Nenhuma migration criada na fundação inicial.
+Nenhuma migration criada até esta fatia da Etapa 20.
 
 ## Testes
 
 ### Estruturais
 
-- `pnpm validate:docs`;
-- `pnpm validate:vaccines`;
-- `pnpm validate:migrations`;
-- validadores das Etapas 9 a 20.
+- documentação;
+- 13 vacinas;
+- ledger;
+- validadores das Etapas 9 a 20;
+- `validate:stage20`.
 
 ### Qualidade
 
@@ -243,49 +286,65 @@ Nenhuma migration criada na fundação inicial.
 - typecheck;
 - testes TypeScript;
 - testes Python;
-- build de produção.
+- build.
 
 ### UI/UX
 
-- tokens canônicos;
-- classes usadas possuem CSS;
+- tokens;
+- classes implementadas;
 - link de salto;
-- foco visível;
-- alvo mínimo de 44px;
-- redução de movimento;
+- foco;
+- 44px;
 - breakpoints;
+- redução de movimento;
 - forced colors;
-- ausência de rosa/fúcsia;
-- ausência de estilo inline nos componentes-base.
+- ausência de preset proibido.
 
-### Produção pendente
+### Concorrência real
 
-- E2E transversal;
-- concorrência de estoque;
-- carga;
-- backup/restauração;
-- provider jurídico;
-- antimalware;
-- retenção;
-- incidentes;
-- pentest.
+Documento de evidência:
+
+```text
+docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md
+```
+
+Resultado:
+
+```text
+workflow run: 29889168656
+status: passed
+cleanup: passed
+saldo após disputa: 4
+saldo após cleanup: 0
+```
 
 ## Homologação
 
-A fundação foi aprovada no CI run `29888338212`, número `1180`:
+### Fundação
 
-- preflight: `success`;
-- documentação: `success`;
-- 12 vacinas: `success`;
-- ledger: `success`;
-- validadores das Etapas 17 a 20: `success`;
-- lint: `success`;
-- typecheck: `success`;
-- testes TypeScript: `success`;
-- testes Python: `success`;
-- build: `success`.
+CI run `29888603943`, número `1190`:
 
-O hardening posterior adicionou fallback sem `backdrop-filter`, correção da marca no breakpoint compacto e suporte a forced colors; o CI do commit documental final deve reconfirmar o conjunto.
+- preflight: success;
+- lint: success;
+- typecheck: success;
+- testes TypeScript: success;
+- testes Python: success;
+- build: success.
+
+### Concorrência de estoque
+
+Workflow `29889168656`:
+
+- duas sessões autenticadas: aprovado;
+- entrada de 10: aprovado;
+- duas saídas de 6: executadas em paralelo;
+- uma postagem: aprovada;
+- uma rejeição por saldo insuficiente: aprovada;
+- saldo não negativo: aprovado;
+- reversões: aprovadas;
+- rascunho rejeitado removido;
+- saldo final zero;
+- artefato `8517620520` preservado.
 
 ## Vacinas aplicadas ou criadas
 
@@ -295,30 +354,39 @@ O hardening posterior adicionou fallback sem `backdrop-filter`, correção da ma
 - `VACINA-006` — GitHub Actions;
 - `VACINA-007` — secrets;
 - `VACINA-008` — instalação;
-- `VACINA-009` — pré-requisitos E2E;
+- `VACINA-009` — pré-requisitos;
 - `VACINA-010` — JSON;
-- `VACINA-012` — estado pós-merge e etapa ativa.
+- `VACINA-012` — estado canônico;
+- `VACINA-013` — fixtures e fronteiras sensíveis.
 
 ## Limitações iniciais
 
-- produção não liberada;
-- provider jurídico não selecionado;
-- antimalware não integrado;
-- backup/restauração não comprovados;
-- pentest externo não realizado;
-- telemetria não conectada;
-- retenção automática não executada;
-- revisão jurídica/LGPD pendente;
-- concorrência real de estoque pendente.
+Concluído:
+
+- fundação UI/UX Pro Max;
+- validador da Etapa 20;
+- concorrência real da mesma posição de estoque.
+
+Pendente:
+
+- carga e volumetria prolongadas;
+- backup e restauração;
+- antimalware;
+- provider jurídico;
+- telemetria e retenção;
+- MFA e senhas comprometidas;
+- pentest;
+- revisão jurídica/LGPD;
+- publicação controlada.
 
 ## Próximos passos
 
-1. concorrência real do estoque;
-2. backup e restauração;
-3. proteção de anexos;
-4. provider jurídico;
-5. telemetria e retenção;
-6. Auth, MFA e senhas comprometidas;
+1. backup e restauração;
+2. proteção e antimalware de anexos;
+3. provider jurídico;
+4. telemetria e retenção;
+5. Auth, MFA e senhas comprometidas;
+6. carga e volumetria;
 7. pentest e revisões externas;
 8. go-live controlado.
 
@@ -326,18 +394,21 @@ O hardening posterior adicionou fallback sem `backdrop-filter`, correção da ma
 
 - [x] branch criada;
 - [x] PR `#23` em rascunho;
-- [x] contrato técnico criado;
+- [x] contrato técnico;
 - [x] UI/UX Pro Max canônica;
-- [x] validador da Etapa 20 no CI;
 - [x] shell e dashboard consolidados;
+- [x] validador no CI;
 - [x] CI da fundação verde;
-- [x] documentação canônica atualizada no mesmo PR;
-- [ ] concorrência real de estoque;
+- [x] concorrência real de estoque;
+- [x] saldo não negativo sob disputa;
+- [x] cleanup com saldo zero;
+- [x] `VACINA-013` criada;
 - [ ] backup e restauração;
 - [ ] antimalware;
 - [ ] provider jurídico;
 - [ ] telemetria e retenção;
 - [ ] MFA e credenciais;
+- [ ] carga prolongada;
 - [ ] pentest e revisões externas;
 - [ ] decisão de publicação;
 - [ ] CI final de toda a Etapa 20;
