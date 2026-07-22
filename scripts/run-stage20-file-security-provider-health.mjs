@@ -45,7 +45,13 @@ try{
   }
  });
  const body=await response.json().catch(()=>({status:"invalid_response"}));
- assert(response.status===200,`Health check retornou HTTP ${response.status}.`);
+ report.response={
+  httpStatus:response.status,
+  status:String(body?.status??"unknown"),
+  reason:typeof body?.reason==="string"?body.reason:null,
+  code:typeof body?.code==="string"?body.code:null
+ };
+ assert(response.status===200,`Health check retornou HTTP ${response.status} (${report.response.reason??"sem motivo"}/${report.response.code??"sem código"}).`);
  assert(body&&body.status==="healthy"&&body.fixtureResult==="CLEAN","Provider não retornou estado saudável e CLEAN.");
  report.checks.push({name:"deployment_protection_bypass",ok:true});
  report.checks.push({name:"https_hmac",ok:true});
