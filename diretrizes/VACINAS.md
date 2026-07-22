@@ -50,6 +50,7 @@ Não é permitido encerrar um erro recorrente apenas com correção local quando
 | `VACINA-010` | JSON de workflow montado manualmente em shell | aplicada | `JSON.stringify` e validação de artefato parseável |
 | `VACINA-011` | Script usa identificador reservado `module` | aplicada | nomes semânticos e varredura de `scripts/*.mjs` |
 | `VACINA-012` | Documentação pós-merge diverge do estado real do GitHub | aplicada | `ESTADO-ATUAL.json`, fechamento pós-merge e bloqueio de frases obsoletas |
+| `VACINA-013` | Fixture técnica tenta escrever coluna sensível diretamente | aplicada | fixture mínima, guards preservados e valores sensíveis somente por RPC autorizada |
 
 ## 4. Arquivos
 
@@ -66,7 +67,8 @@ diretrizes/vacinas/
 ├── VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md
 ├── VACINA-010-JSON-DE-RELATORIOS.md
 ├── VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md
-└── VACINA-012-ESTADO-POS-MERGE.md
+├── VACINA-012-ESTADO-POS-MERGE.md
+└── VACINA-013-FIXTURES-RESPEITAM-FRONTEIRAS-SENSIVEIS.md
 ```
 
 ## 5. Critérios para nova vacina
