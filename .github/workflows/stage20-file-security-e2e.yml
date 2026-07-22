@@ -1,0 +1,56 @@
+name: Stage 20 File Security E2E
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "lib/file-security/**"
+      - "components/file-security/**"
+      - "scripts/run-stage20-file-security-e2e.mjs"
+      - ".github/workflows/stage20-file-security-e2e.yml"
+      - "tests/file-security.test.ts"
+      - "package.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage20-file-security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  clamav-protocol:
+    name: Quarantine scanner protocol
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      clamav:
+        image: clamav/clamav:1.4
+        ports:
+          - 3310:3310
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Run clean and EICAR scan E2E
+        env:
+          CLAMAV_HOST: 127.0.0.1
+          CLAMAV_PORT: "3310"
+          CLAMAV_TIMEOUT_MS: "15000"
+        run: node scripts/run-stage20-file-security-e2e.mjs
+
+      - name: Upload file security evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: stage20-file-security-report
+          path: stage20-file-security-report.json
+          if-no-files-found: error
+          retention-days: 30
