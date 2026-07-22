@@ -10,32 +10,54 @@ export default async function AppLayout({ children }: Readonly<{ children: React
 
   return (
     <div className="shell">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark" aria-hidden="true">I</div>
-          <div><strong>INNOVAR</strong><small>Gestão integrada</small></div>
-        </div>
+      <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
+
+      <aside className="sidebar" aria-label="Navegação principal">
+        <Link className="brand" href="/app" aria-label="Innovar — Central de aplicativos">
+          <span className="brand-mark" aria-hidden="true">IN</span>
+          <span>
+            <strong className="brand-name">INNOVAR</strong>
+            <small>Gestão integrada</small>
+          </span>
+        </Link>
+
         <nav className="nav" aria-label="Aplicativos autorizados">
-          <Link href="/app"><span>Início</span></Link>
+          <Link href="/app">
+            <span className="nav-icon" aria-hidden="true">⌂</span>
+            <span>Início</span>
+          </Link>
           {navigation.map(application => (
             <Link key={application.applicationKey} href={application.routePrefix}>
-              <span aria-hidden="true" style={{ width: 20, textAlign: "center" }}>{application.icon}</span>
+              <span className="nav-icon" aria-hidden="true">{application.icon}</span>
               <span>{application.name}</span>
             </Link>
           ))}
         </nav>
+
         <div className="sidebar-footer">
           <small>{context.role}</small>
-          <p style={{ overflowWrap: "anywhere" }}>{context.email}</p>
-          <form action={signOut}><button className="button button-secondary" type="submit">Sair</button></form>
+          <p>{context.email}</p>
+          <form action={signOut}>
+            <button className="button button-secondary" type="submit">Encerrar sessão</button>
+          </form>
         </div>
       </aside>
+
       <div className="main">
         <header className="topbar">
-          <div><strong>Organização ativa</strong><small style={{ display:"block", color:"var(--muted)" }}>Aplicativos conforme seu perfil de acesso</small></div>
-          <span className="mono" style={{ fontSize: 12 }}>{context.organizationId.slice(0, 8)}</span>
+          <div className="topbar-context">
+            <strong>Organização ativa</strong>
+            <small>Aplicativos exibidos conforme perfil, capacidade e escopo</small>
+          </div>
+          <div className="topbar-meta">
+            <span className="organization-chip mono" title={context.organizationId}>
+              {context.organizationId.slice(0, 8)}
+            </span>
+          </div>
         </header>
-        {children}
+        <div id="conteudo-principal" className="main-content-anchor" tabIndex={-1}>
+          {children}
+        </div>
       </div>
     </div>
   );
