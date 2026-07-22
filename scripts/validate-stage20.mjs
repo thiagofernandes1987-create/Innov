@@ -2,9 +2,11 @@ import fs from "node:fs";
 
 const errors=[];
 const read=file=>fs.readFileSync(file,"utf8");
+const attachmentMigration="supabase/migrations/20260722104500_stage20_sac_attachment_security.sql";
 const requiredFiles=[
  "diretrizes/UI-UX-PRO-MAX.md",
  "docs/ETAPA-20-PRONTIDAO-PRODUCAO.md",
+ "docs/ETAPA-20-PROTECAO-ANEXOS.md",
  "diretrizes/ESTADO-ATUAL.json",
  "app/globals.css",
  "app/stage20.css",
@@ -12,7 +14,19 @@ const requiredFiles=[
  "app/app/layout.tsx",
  "app/app/page.tsx",
  "scripts/run-stage20-inventory-concurrency-e2e.mjs",
- ".github/workflows/stage20-inventory-concurrency-e2e.yml"
+ ".github/workflows/stage20-inventory-concurrency-e2e.yml",
+ "lib/file-security/domain.ts",
+ "lib/file-security/server.ts",
+ "components/file-security/file-security-status.tsx",
+ "tests/file-security.test.ts",
+ "scripts/run-stage20-file-security-e2e.mjs",
+ ".github/workflows/stage20-file-security-e2e.yml",
+ ".github/workflows/stage20-file-security-provider-health.yml",
+ "app/actions/relationship.ts",
+ "app/api/sac/attachments/[id]/route.ts",
+ "app/app/ocorrencias/[id]/page.tsx",
+ "app/cliente/ocorrencias/[id]/page.tsx",
+ attachmentMigration
 ];
 
 for(const file of requiredFiles){
@@ -23,6 +37,7 @@ for(const file of requiredFiles){
 if(errors.length===0){
  const design=read("diretrizes/UI-UX-PRO-MAX.md");
  const stage20=read("docs/ETAPA-20-PRONTIDAO-PRODUCAO.md");
+ const attachmentDocs=read("docs/ETAPA-20-PROTECAO-ANEXOS.md");
  const css=read("app/globals.css");
  const hardeningCss=read("app/stage20.css");
  const rootLayout=read("app/layout.tsx");
@@ -30,6 +45,18 @@ if(errors.length===0){
  const dashboard=read("app/app/page.tsx");
  const concurrencyScript=read("scripts/run-stage20-inventory-concurrency-e2e.mjs");
  const concurrencyWorkflow=read(".github/workflows/stage20-inventory-concurrency-e2e.yml");
+ const fileDomain=read("lib/file-security/domain.ts");
+ const fileServer=read("lib/file-security/server.ts");
+ const fileComponent=read("components/file-security/file-security-status.tsx");
+ const fileTests=read("tests/file-security.test.ts");
+ const fileE2E=read("scripts/run-stage20-file-security-e2e.mjs");
+ const fileWorkflow=read(".github/workflows/stage20-file-security-e2e.yml");
+ const providerWorkflow=read(".github/workflows/stage20-file-security-provider-health.yml");
+ const relationshipActions=read("app/actions/relationship.ts");
+ const attachmentRoute=read("app/api/sac/attachments/[id]/route.ts");
+ const internalTicket=read("app/app/ocorrencias/[id]/page.tsx");
+ const clientTicket=read("app/cliente/ocorrencias/[id]/page.tsx");
+ const migration=read(attachmentMigration);
  const packageJson=JSON.parse(read("package.json"));
  let state;
  try{state=JSON.parse(read("diretrizes/ESTADO-ATUAL.json"));}
@@ -55,7 +82,7 @@ if(errors.length===0){
   "@media (max-width: 960px)", "@media (max-width: 720px)"
  ])if(!css.includes(token))errors.push(`Design system sem implementação obrigatória: ${token}`);
 
- for(const token of["@supports not (backdrop-filter: blur(1px))",".brand > span:last-child","@media (forced-colors: active)"])
+ for(const token of["@supports not (backdrop-filter: blur(1px))",".brand > span:last-child","@media (forced-colors: active)",".relationship-row-status"])
   if(!hardeningCss.includes(token))errors.push(`Hardening responsivo sem prevenção: ${token}`);
 
  for(const token of[
@@ -88,11 +115,45 @@ if(errors.length===0){
   "stage20-inventory-concurrency-report.json"
  ])if(!concurrencyWorkflow.includes(token))errors.push(`Workflow de concorrência sem prevenção obrigatória: ${token}`);
 
+ for(const token of[
+  "FILE_SECURITY_SAC_MIME_TYPES","assertFileContentSignature","FILE_SIGNATURE_MISMATCH",
+  '"LEGACY"|"PENDING"','LEGACY:"Legado não analisado"'
+ ])if(!fileDomain.includes(token))errors.push(`Domínio de anexos sem proteção obrigatória: ${token}`);
+ for(const token of[
+  "secureUpload","pending/","blocked/","results/","MALWARE_DETECTED","targetPromoted",
+  "FILE_SECURITY_PROVIDER","FILE_SECURITY_QUARANTINE_BUCKET","assertFileContentSignature"
+ ])if(!fileServer.includes(token))errors.push(`Pipeline de quarentena sem prevenção obrigatória: ${token}`);
+ for(const token of["LEGACY:\"badge badge-warning\"","FILE_SECURITY_STATUS_LABELS"])
+  if(!fileComponent.includes(token))errors.push(`Componente de segurança sem estado obrigatório: ${token}`);
+ for(const token of["confirma assinatura PDF","bloqueia MIME divergente","confirma estrutura mínima DOCX","Eicar-Signature"])
+  if(!fileTests.includes(token))errors.push(`Testes de anexos sem cenário obrigatório: ${token}`);
+ for(const token of["zPING\\0","zINSTREAM\\0","EICAR-STANDARD-ANTIVIRUS-TEST-FILE","eicar_blocked","clean_file","endpointFingerprint"])
+  if(!fileE2E.includes(token))errors.push(`E2E antimalware sem contrato obrigatório: ${token}`);
+ for(const token of["clamav/clamav:1.4","3310:3310","Run clean and EICAR scan E2E","stage20-file-security-report.json","if: always()"])
+  if(!fileWorkflow.includes(token))errors.push(`Workflow antimalware local sem requisito: ${token}`);
+ for(const token of["workflow_dispatch","environment: homologation","CLAMAV_HOST","blocked_missing_secrets","--health-only"])
+  if(!providerWorkflow.includes(token))errors.push(`Health check do provider sem requisito: ${token}`);
+ for(const token of["secureUpload","p_security_scan_id","p_security_provider","p_security_scanned_at","FILE_SECURITY_SAC_MIME_TYPES"])
+  if(!relationshipActions.includes(token))errors.push(`Upload SAC não usa pipeline protegido: ${token}`);
+ if(/from\("crm-sac-attachments"\)\.upload/.test(relationshipActions))errors.push("Upload SAC ainda publica diretamente no bucket final.");
+ for(const token of["security_status","securityStatus!==\"CLEAN\"","status:423","X-Innov-File-Security","Cache-Control"])
+  if(!attachmentRoute.includes(token))errors.push(`Download SAC não protege estado do scan: ${token}`);
+ for(const page of[["interno",internalTicket],["cliente",clientTicket]])
+  if(!page[1].includes("FileSecurityStatus")||!page[1].includes("Analisar e enviar"))errors.push(`Tela ${page[0]} não expõe estado/ação segura de anexos.`);
+ for(const token of[
+  "security_status text not null default 'LEGACY'","security_scan_id uuid","security_provider text","security_scanned_at timestamptz",
+  "Evidência antimalware obrigatória ausente","p_security_scan_id","attachment.security_status='CLEAN'"
+ ])if(!migration.includes(token))errors.push(`Migration de anexos sem invariável: ${token}`);
+ for(const token of["quarentena","ClamAV","fail-closed","LEGACY","EICAR","provider real"])
+  if(!attachmentDocs.includes(token))errors.push(`Documento de anexos sem contrato: ${token}`);
+
  if(!rootLayout.includes('import "./stage20.css";'))errors.push("Layout raiz não carrega o hardening da Etapa 20.");
  if(!rootLayout.includes('<html lang="pt-BR">'))errors.push("Layout raiz sem locale pt-BR.");
  if(!packageJson.scripts?.["validate:stage20"])errors.push("package.json sem validate:stage20.");
  if(packageJson.scripts?.["test:e2e:stage20:inventory-concurrency"]!=="node scripts/run-stage20-inventory-concurrency-e2e.mjs")
   errors.push("package.json sem executor canônico do E2E de concorrência.");
+ if(packageJson.scripts?.["test:e2e:stage20:file-security"]!=="node scripts/run-stage20-file-security-e2e.mjs")
+  errors.push("package.json sem executor canônico do E2E antimalware.");
  if(state){
   if(state.nextStage!==20)errors.push("Manifesto não aponta a Etapa 20.");
   if(state.activeFunctionalBranch!=="feature/etapa-20-prontidao-producao")errors.push("Manifesto não registra a branch funcional da Etapa 20.");
@@ -116,4 +177,4 @@ if(errors.length){
  process.exit(1);
 }
 
-console.log("Etapa 20 validada: UI/UX Pro Max, shell acessível e E2E concorrente real do estoque ativos.");
+console.log("Etapa 20 validada: UI/UX Pro Max, concorrência, restauração e anexos protegidos com ClamAV ativos.");
