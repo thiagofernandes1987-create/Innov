@@ -1,0 +1,189 @@
+import"server-only";
+import net from"node:net";
+import{createHash,randomUUID}from"node:crypto";
+import{createClient}from"@supabase/supabase-js";
+import{
+ assertFileSecurityInput,
+ FileSecurityError,
+ parseClamAvResponse,
+ type FileSecurityScanResult
+}from"@/lib/file-security/domain";
+
+const DEFAULT_QUARANTINE_BUCKET="file-quarantine";
+const DEFAULT_CLAMAV_PORT=3310;
+const DEFAULT_TIMEOUT_MS=15_000;
+const CHUNK_SIZE=64*1024;
+
+type SecureUploadInput={
+ targetBucket:string;
+ targetPath:string;
+ body:ArrayBuffer|Uint8Array|Buffer;
+ filename:string;
+ contentType:string;
+ organizationId:string;
+ actorUserId:string;
+ correlationId?:string|null;
+ upsert?:boolean;
+};
+
+export type SecureUploadResult={
+ scanId:string;
+ status:"CLEAN";
+ targetBucket:string;
+ targetPath:string;
+ sha256:string;
+ sizeBytes:number;
+ provider:"clamav"|"test-clean";
+};
+
+type QuarantineManifest={
+ schemaVersion:1;
+ scanId:string;
+ status:"PENDING"|"SCANNING"|"CLEAN"|"BLOCKED"|"ERROR";
+ organizationId:string;
+ actorUserId:string;
+ correlationId:string|null;
+ filename:string;
+ contentType:string;
+ sizeBytes:number;
+ sha256:string;
+ targetBucket:string;
+ targetPath:string;
+ createdAt:string;
+ finishedAt?:string;
+ provider?:string;
+ signature?:string|null;
+};
+
+function requiredEnv(name:string){
+ const value=process.env[name]?.trim();
+ if(!value)throw new FileSecurityError("FILE_SECURITY_CONFIGURATION",`Configuração obrigatória ausente: ${name}.`);
+ return value;
+}
+
+function serviceClient(){
+ return createClient(requiredEnv("NEXT_PUBLIC_SUPABASE_URL"),requiredEnv("SUPABASE_SERVICE_ROLE_KEY"),{
+  auth:{autoRefreshToken:false,persistSession:false,detectSessionInUrl:false}
+ });
+}
+
+function toBuffer(value:SecureUploadInput["body"]){
+ if(Buffer.isBuffer(value))return value;
+ if(value instanceof Uint8Array)return Buffer.from(value.buffer,value.byteOffset,value.byteLength);
+ return Buffer.from(value);
+}
+
+async function ensurePrivateBucket(bucket:string){
+ const supabase=serviceClient();
+ const{data,error}=await supabase.storage.getBucket(bucket);
+ if(!error&&data){
+  if(data.public)throw new FileSecurityError("PUBLIC_QUARANTINE_BUCKET","O bucket de quarentena não pode ser público.");
+  return;
+ }
+ const created=await supabase.storage.createBucket(bucket,{public:false,fileSizeLimit:"25MB"});
+ if(created.error&&!/already exists/i.test(created.error.message))
+  throw new FileSecurityError("QUARANTINE_BUCKET",`Não foi possível preparar a quarentena: ${created.error.message}`);
+}
+
+function scanWithClamAv(buffer:Buffer):Promise<FileSecurityScanResult>{
+ const host=requiredEnv("CLAMAV_HOST");
+ const port=Number(process.env.CLAMAV_PORT??DEFAULT_CLAMAV_PORT);
+ const timeout=Number(process.env.CLAMAV_TIMEOUT_MS??DEFAULT_TIMEOUT_MS);
+ if(!Number.isInteger(port)||port<1||port>65535)throw new FileSecurityError("CLAMAV_PORT","Porta ClamAV inválida.");
+ if(!Number.isFinite(timeout)||timeout<1000)throw new FileSecurityError("CLAMAV_TIMEOUT","Timeout ClamAV inválido.");
+ return new Promise((resolve,reject)=>{
+  const socket=net.createConnection({host,port});
+  const response:Buffer[]=[];
+  let settled=false;
+  const finish=(error?:Error)=>{
+   if(settled)return;
+   settled=true;
+   socket.destroy();
+   if(error)return reject(error);
+   const parsed=parseClamAvResponse(Buffer.concat(response).toString("utf8"));
+   if(parsed.status==="ERROR")return reject(new FileSecurityError("CLAMAV_RESPONSE","Resposta inválida do ClamAV."));
+   resolve(parsed);
+  };
+  socket.setTimeout(timeout,()=>finish(new FileSecurityError("CLAMAV_TIMEOUT","A análise antimalware excedeu o tempo limite.")));
+  socket.on("error",error=>finish(new FileSecurityError("CLAMAV_UNAVAILABLE",`ClamAV indisponível: ${error.message}`)));
+  socket.on("data",chunk=>response.push(Buffer.from(chunk)));
+  socket.on("end",()=>finish());
+  socket.on("connect",()=>{
+   socket.write(Buffer.from("zINSTREAM\0","utf8"));
+   for(let offset=0;offset<buffer.length;offset+=CHUNK_SIZE){
+    const chunk=buffer.subarray(offset,Math.min(offset+CHUNK_SIZE,buffer.length));
+    const size=Buffer.allocUnsafe(4);size.writeUInt32BE(chunk.length,0);
+    socket.write(size);socket.write(chunk);
+   }
+   socket.write(Buffer.alloc(4));
+  });
+ });
+}
+
+async function scanBuffer(buffer:Buffer):Promise<FileSecurityScanResult>{
+ const provider=(process.env.FILE_SECURITY_PROVIDER??"clamav").trim().toLowerCase();
+ if(provider==="test-clean"){
+  if(process.env.NODE_ENV!=="test"&&process.env.ALLOW_INSECURE_FILE_SCANNER!=="true")
+   throw new FileSecurityError("INSECURE_SCANNER_DISABLED","Provider de teste não permitido neste ambiente.");
+  return{status:"CLEAN",provider:"test-clean",signature:null,rawCode:"OK"};
+ }
+ if(provider!=="clamav")throw new FileSecurityError("FILE_SECURITY_PROVIDER",`Provider de análise não suportado: ${provider}.`);
+ return scanWithClamAv(buffer);
+}
+
+async function uploadJson(bucket:string,path:string,value:unknown){
+ const payload=Buffer.from(JSON.stringify(value,null,2)+"\n","utf8");
+ const{error}=await serviceClient().storage.from(bucket).upload(path,payload,{contentType:"application/json",upsert:true});
+ if(error)throw new FileSecurityError("QUARANTINE_MANIFEST",`Falha ao gravar manifesto de segurança: ${error.message}`);
+}
+
+export async function secureUpload(input:SecureUploadInput):Promise<SecureUploadResult>{
+ const body=toBuffer(input.body);
+ const validated=assertFileSecurityInput({filename:input.filename,contentType:input.contentType,sizeBytes:body.length});
+ const quarantineBucket=process.env.FILE_SECURITY_QUARANTINE_BUCKET?.trim()||DEFAULT_QUARANTINE_BUCKET;
+ await ensurePrivateBucket(quarantineBucket);
+ const scanId=randomUUID();
+ const base=`pending/${input.organizationId}/${scanId}`;
+ const payloadPath=`${base}/payload`;
+ const manifestPath=`${base}/manifest.json`;
+ const sha256=createHash("sha256").update(body).digest("hex");
+ const manifest:QuarantineManifest={
+  schemaVersion:1,scanId,status:"PENDING",organizationId:input.organizationId,actorUserId:input.actorUserId,
+  correlationId:input.correlationId??null,filename:validated.filename,contentType:validated.contentType,sizeBytes:body.length,
+  sha256,targetBucket:input.targetBucket,targetPath:input.targetPath,createdAt:new Date().toISOString()
+ };
+ const quarantine=serviceClient().storage.from(quarantineBucket);
+ const uploaded=await quarantine.upload(payloadPath,body,{contentType:validated.contentType,upsert:false});
+ if(uploaded.error)throw new FileSecurityError("QUARANTINE_UPLOAD",`Falha ao enviar arquivo para quarentena: ${uploaded.error.message}`);
+ await uploadJson(quarantineBucket,manifestPath,manifest);
+ try{
+  manifest.status="SCANNING";
+  await uploadJson(quarantineBucket,manifestPath,manifest);
+  const result=await scanBuffer(body);
+  manifest.provider=result.provider;
+  manifest.signature=result.signature;
+  manifest.finishedAt=new Date().toISOString();
+  if(result.status==="BLOCKED"){
+   manifest.status="BLOCKED";
+   const blockedBase=`blocked/${input.organizationId}/${scanId}`;
+   await quarantine.move(payloadPath,`${blockedBase}/payload`);
+   await uploadJson(quarantineBucket,`${blockedBase}/manifest.json`,manifest);
+   await quarantine.remove([manifestPath]);
+   throw new FileSecurityError("MALWARE_DETECTED","O arquivo foi bloqueado pela análise de segurança.");
+  }
+  if(result.status!=="CLEAN")throw new FileSecurityError("SCAN_FAILED","A análise de segurança não produziu um resultado liberável.");
+  const target=serviceClient().storage.from(input.targetBucket);
+  const promoted=await target.upload(input.targetPath,body,{contentType:validated.contentType,upsert:input.upsert??false});
+  if(promoted.error)throw new FileSecurityError("PROMOTION_FAILED",`Arquivo limpo não pôde ser promovido: ${promoted.error.message}`);
+  manifest.status="CLEAN";
+  await uploadJson(quarantineBucket,`results/${input.organizationId}/${scanId}.json`,manifest);
+  await quarantine.remove([payloadPath,manifestPath]);
+  return{scanId,status:"CLEAN",targetBucket:input.targetBucket,targetPath:input.targetPath,sha256,sizeBytes:body.length,provider:result.provider};
+ }catch(error){
+  if(error instanceof FileSecurityError&&error.code==="MALWARE_DETECTED")throw error;
+  manifest.status="ERROR";manifest.finishedAt=new Date().toISOString();
+  await uploadJson(quarantineBucket,manifestPath,manifest).catch(()=>undefined);
+  if(error instanceof FileSecurityError)throw error;
+  throw new FileSecurityError("SCAN_FAILED",error instanceof Error?error.message:String(error));
+ }
+}
