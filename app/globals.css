@@ -249,6 +249,7 @@ h3 { margin: 0; font-size: 19px; line-height: 1.25; }
 .eyebrow::before { content: ""; width: 24px; height: 2px; background: var(--copper); }
 .section-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
 .section-heading h2 { margin-top: 5px; }
+.category-section { margin-top: 38px; }
 
 .card {
   background: var(--surface);
