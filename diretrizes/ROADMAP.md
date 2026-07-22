@@ -199,16 +199,24 @@ Planejamento não é tratado como funcionalidade entregue. O estado deve corresp
 
 ### Fase 20.5 — Anexos protegidos
 
-- [x] fundação de domínio e servidor;
-- [x] tipos, limites, sanitização e fail-closed;
-- [x] quarentena privada modelada;
-- [x] integração ClamAV INSTREAM implementada;
-- [ ] provider ClamAV configurado e health check aprovado;
-- [ ] integração nos fluxos reais de upload;
-- [ ] liberação/bloqueio E2E;
-- [ ] download autenticado revisado;
-- [ ] remoção de órfãos;
-- [ ] incidentes e observabilidade.
+- [x] domínio, servidor e estados semânticos;
+- [x] tipos, limite de 25 MB, sanitização e assinatura dos bytes;
+- [x] quarentena privada e promoção somente após `CLEAN`;
+- [x] integração ClamAV `INSTREAM` com fail-closed;
+- [x] integração dos uploads internos e do portal do SAC na branch;
+- [x] persistência de `scanId`, provider e instante de análise;
+- [x] anexos anteriores classificados como `LEGACY`, sem falsa evidência de scan;
+- [x] download autenticado revisado e portal limitado a arquivos `CLEAN`;
+- [x] interface UI/UX Pro Max com estados textuais e ação `Analisar e enviar`;
+- [x] E2E local com `PING`, fixture limpa e EICAR bloqueado;
+- [x] workflow `29913636268` e artefato `8526935275` aprovados;
+- [x] CI completo `29913636056` aprovado;
+- [ ] provider ClamAV real configurado e health check aprovado;
+- [ ] migration aplicada em homologação em conjunto com a aplicação;
+- [ ] E2E pelo fluxo real do SAC em homologação;
+- [ ] reanálise dos anexos `LEGACY`;
+- [ ] integração dos demais módulos;
+- [ ] remoção programada de órfãos, retenção e incidentes.
 
 ### Fase 20.6 — Assinatura jurídica
 
