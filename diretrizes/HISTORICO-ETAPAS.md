@@ -36,7 +36,7 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 - [`docs/ETAPA-18-CRM-CLIENTES-SAC.md`](../docs/ETAPA-18-CRM-CLIENTES-SAC.md) — lead, oportunidade, Cliente 360, múltiplas obras, atendimento e portal.
 - [`docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md`](../docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md) — administrador e cliente autenticados acessando simultaneamente o mesmo chamado no Supabase.
 
-### Evidências registradas
+### Evidências
 
 - Etapa 18 incorporada à `main` pelo PR `#17`;
 - 10 tabelas novas com RLS;
@@ -44,17 +44,47 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 - portal restrito às obras liberadas;
 - workflow de estados protegido;
 - bucket privado e anexos com SHA-256;
-- E2E concorrente usa duas sessões reais, operações em `Promise.all`, verificação de RLS e cleanup obrigatório;
-- catálogo canônico de vacinas criado para impedir repetição das causas-raiz encontradas.
+- E2E concorrente implementado com duas sessões, `Promise.all`, RLS e cleanup;
+- execução do E2E ainda bloqueada pelos secrets ausentes no ambiente GitHub `homologation`.
+
+## Etapa 19 — Auditoria e Observabilidade
+
+- [`docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md`](../docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md) — fluxo unificado, correlação, sanitização, alertas, health checks, diagnósticos, retenção, RLS e interface administrativa.
+
+### Linha do tempo
+
+1. PR `#19` criado como branch empilhada sobre o PR `#18`.
+2. Versão `0.19.0` sincronizada entre `package.json` e SPEC.
+3. Seis migrations aplicadas no Supabase e renomeadas para os timestamps exatos do ledger remoto.
+4. Fluxo unificado de 12 origens homologado sem copiar as trilhas dos módulos.
+5. Sanitização recursiva confirmou `[REDACTED]` em senha, token, authorization e secret.
+6. Evento idempotente, alerta crítico, reconhecimento, resolução e seis health checks passaram.
+7. Append-only foi bloqueado por privilégio e trigger.
+8. Isolamento multiempresa foi confirmado.
+9. Hardening protegeu diagnósticos globais: interno autorizado vê; sessão sem membership não vê.
+10. Sete índices complementares eliminaram todas as FKs sem índice do novo domínio.
+11. Advisors foram revisados; avisos globais antigos permanecem no backlog das Etapas 19/20.
+12. Todos os dados artificiais foram revertidos.
+13. PR `#19` permanece em rascunho por depender do PR `#18`.
+
+### Estado atual
+
+- seis tabelas com RLS;
+- 13 políticas e seis gatilhos não internos;
+- zero função da Etapa 19 acessível por `anon`;
+- 16 FKs, zero sem índice líder;
+- seis migrations alinhadas ao ledger;
+- teste transacional oficial com `ROLLBACK`;
+- documentação e validador atualizados;
+- CI final do commit documental ainda precisa ser confirmado.
 
 ## Vacinas de engenharia
 
-O catálogo atual está em [`diretrizes/VACINAS.md`](./VACINAS.md), com documentos individuais em `diretrizes/vacinas/`. Toda correção recorrente deve consultar, aplicar ou ampliar esse catálogo.
+O catálogo está em [`diretrizes/VACINAS.md`](./VACINAS.md), com documentos individuais em `diretrizes/vacinas/`. Toda correção recorrente deve consultar, aplicar ou ampliar esse catálogo. A Etapa 19 adicionou a `VACINA-011` para identificadores reservados do Node/Next.
 
 ## Planejamento posterior
 
-- Etapa 19 — auditoria e observabilidade;
-- Etapa 20 — prontidão de produção e teste de carga ampliado;
+- Etapa 20 — prontidão de produção, retenção automatizada e teste de carga ampliado;
 - Etapa 21 — WMS avançado, RFID, automação logística, fiscal e patrimonial.
 
 ## Regra histórica
