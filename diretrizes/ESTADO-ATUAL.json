@@ -26,10 +26,16 @@
   "productionReadiness": {
     "status": "in_progress",
     "blockingStage": 20,
+    "foundationCi": {
+      "runId": 29888338212,
+      "runNumber": 1180,
+      "conclusion": "success"
+    },
     "foundation": {
-      "uiUxProMax": "implemented_pending_ci",
-      "stage20Validator": "implemented_pending_ci",
-      "shellAndDashboard": "implemented_pending_ci"
+      "uiUxProMax": "implemented_ci_green",
+      "stage20Validator": "implemented_ci_green",
+      "shellAndDashboard": "implemented_ci_green",
+      "responsiveHardening": "implemented_pending_final_ci"
     }
   }
 }
