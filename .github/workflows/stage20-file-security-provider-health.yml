@@ -2,6 +2,14 @@ name: Stage 20 File Security Provider Health
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/etapa-20-prontidao-producao
+    paths:
+      - ".github/workflows/stage20-file-security-provider-health.yml"
+      - "scripts/run-stage20-file-security-provider-health.mjs"
+      - "app/api/internal/file-security/health/route.ts"
+      - "lib/file-security/**"
 
 permissions:
   contents: read
