@@ -2,8 +2,9 @@
 
 ## Estado
 
-**Em implementação.**  
+**Em implementação, com fundação documental, visual e de CI homologada.**  
 Branch: `feature/etapa-20-prontidao-producao`  
+PR: `#23`, em rascunho  
 Base empilhada: `chore/encerramento-etapa-19` / PR `#22`  
 Versão implementada atual: `0.19.0`  
 Produção: não liberada
@@ -24,87 +25,86 @@ plataforma homologada
 
 ## Escopo incluído
 
-### 1. Governança de produção
+### Governança de produção
 
 - manifesto de estado legível por máquina;
 - checklist de go-live;
 - matriz de bloqueios, responsáveis e evidências;
 - plano de rollback;
-- critérios explícitos de `GO`, `NO_GO` e `CONDITIONAL_GO`;
+- critérios `GO`, `NO_GO` e `CONDITIONAL_GO`;
 - proibição de publicação automática.
 
-### 2. Segurança
+### Segurança
 
 - revisão de RLS, privilégios e funções `SECURITY DEFINER`;
 - proteção contra senhas comprometidas;
 - MFA adicional para ações críticas;
 - segregação de funções;
-- rate limiting e proteção de endpoints quando aplicável;
-- pentest e registro de remediações;
-- revisão de headers, cookies, sessões e exposição no bundle;
+- rate limiting quando aplicável;
+- pentest e remediações;
+- revisão de headers, cookies, sessões e bundle;
 - antimalware e quarentena de anexos.
 
-### 3. Concorrência e carga
+### Concorrência e carga
 
-- duas ou mais conexões disputando a mesma posição de estoque;
+- múltiplas conexões disputando a mesma posição de estoque;
 - validação de advisory locks;
 - testes de carga representativos;
-- comportamento sob retry, timeout e falha parcial;
+- retry, timeout e falha parcial;
 - limites documentados;
-- dados artificiais isolados e revertidos.
+- dados artificiais revertidos.
 
-### 4. Backup e recuperação
+### Backup e recuperação
 
 - backup do PostgreSQL;
 - inventário de buckets privados;
-- restauração em ambiente isolado;
-- validação de migrations e ledger após restauração;
+- restauração isolada;
+- ledger e migrations após restauração;
 - medição de RPO e RTO;
-- evidência reproduzível;
-- plano de contingência para Auth, DNS e providers.
+- contingência para Auth, DNS e providers.
 
-### 5. Assinatura jurídica
+### Assinatura jurídica
 
-- seleção de provider real;
+- provider real;
 - webhook autenticado e idempotente;
 - evidências e hashes;
-- política de retry e reconciliação;
+- retry e reconciliação;
 - cópia ao cliente;
-- revisão jurídica do fluxo e dos termos;
-- fallback operacional.
+- revisão jurídica e fallback operacional.
 
-### 6. Retenção e telemetria
+### Retenção e telemetria
 
-- APM/telemetria externa sem dados sensíveis;
-- correlação com `correlation_id`;
+- APM sem dados sensíveis;
+- correlação por `correlation_id`;
 - alertas de disponibilidade e erro;
 - worker de retenção com dry-run;
 - preservação legal;
-- exportação antes de purge quando aplicável;
-- auditoria da execução técnica.
+- exportação antes de purge;
+- auditoria técnica.
 
-### 7. Experiência e acessibilidade
+### Experiência e acessibilidade
 
 - adoção permanente de `diretrizes/UI-UX-PRO-MAX.md`;
-- consolidação dos tokens e componentes-base;
-- correção de classes sem implementação visual;
-- revisão da navegação interna e do dashboard;
+- tokens e componentes-base;
+- classes do dashboard implementadas;
+- navegação interna revisada;
 - estados de loading, vazio, erro, indisponibilidade e acesso negado;
 - WCAG 2.2 AA;
 - teclado, foco, zoom e reflow;
-- revisão desktop, tablet e mobile;
-- motion discreto e redução de movimento.
+- desktop, tablet e mobile;
+- motion discreto e redução de movimento;
+- forced colors e fallback sem backdrop-filter.
 
-### 8. Jurídico, contábil e LGPD
+### Jurídico, contábil e LGPD
 
 - bases legais e finalidades;
-- consentimentos e registros;
+- consentimentos;
 - retenção e descarte;
 - atendimento a titulares;
 - contratos e termos;
-- responsabilidades de fornecedores;
-- classificação de dados sensíveis;
-- validação de integrações fiscais e contábeis aplicáveis.
+- fornecedores;
+- dados sensíveis;
+- integrações fiscais e contábeis aplicáveis.
 
 ## Fora do escopo
 
@@ -114,86 +114,47 @@ plataforma homologada
 - ressuprimento automático sem aprovação;
 - integração fiscal completa de entrada;
 - depreciação contábil oficial;
-- expansão funcional não relacionada à prontidão;
+- expansão funcional sem relação com prontidão;
 - publicação sem evidência e aprovação explícita.
 
 Esses itens pertencem à Etapa 21 ou a etapas posteriores.
 
 ## Fluxos
 
-### Fluxo de prontidão
+### Prontidão
 
 ```text
-requisito
-→ risco
-→ implementação ou procedimento
-→ teste
-→ evidência
-→ revisão
-→ decisão de go-live
+requisito → risco → implementação/procedimento → teste → evidência → revisão → decisão
 ```
 
-### Fluxo de anexo protegido
+### Anexo protegido
 
 ```text
-sessão autorizada
-→ validação de módulo e contexto
-→ tipo e tamanho
-→ hash
-→ quarentena
-→ análise antimalware
-→ liberação ou bloqueio
-→ armazenamento privado
-→ download autenticado
-→ auditoria
+sessão autorizada → módulo/contexto → tipo/tamanho → hash → quarentena
+→ antimalware → liberação/bloqueio → Storage privado → download autenticado → auditoria
 ```
 
-### Fluxo de incidente
+### Incidente
 
 ```text
-detecção
-→ classificação
-→ contenção
-→ comunicação
-→ recuperação
-→ validação
-→ causa raiz
-→ vacina
-→ post-mortem
+detecção → classificação → contenção → comunicação → recuperação
+→ validação → causa raiz → vacina → post-mortem
 ```
 
-### Fluxo de backup e restauração
+### Backup e restauração
 
 ```text
-snapshot
-→ verificação de integridade
-→ armazenamento protegido
-→ restauração isolada
-→ migrations/ledger
-→ smoke tests
-→ RPO/RTO
-→ evidência
+snapshot → integridade → armazenamento protegido → restauração isolada
+→ migrations/ledger → smoke tests → RPO/RTO → evidência
 ```
 
 ## Modelo de dados
 
-A primeira fatia da Etapa 20 não cria schema novo. Qualquer necessidade posterior de banco deve usar migration append-only e documentar:
-
-- objeto criado ou alterado;
-- RLS;
-- privilégios;
-- índices;
-- impacto em lock;
-- backfill;
-- estratégia corretiva;
-- retenção;
-- teste de integridade.
+A fundação não cria schema novo. Mudança posterior exige migration append-only com objetos, RLS, privilégios, índices, lock, backfill, estratégia corretiva, retenção e testes documentados.
 
 ## Rotas
 
-A fundação inicial não adiciona rota pública. Rotas futuras da etapa devem ser internas e autorizadas, salvo fluxo explicitamente destinado ao cliente.
-
-Superfícies prioritárias de revisão:
+A fundação não adiciona rota pública. Superfícies prioritárias:
 
 ```text
 /app
@@ -208,12 +169,12 @@ Superfícies prioritárias de revisão:
 
 ## RPCs e integrações
 
-Integrações planejadas:
+Planejadas:
 
-- provider jurídico de assinatura;
-- serviço antimalware;
+- provider jurídico;
+- antimalware;
 - telemetria/APM;
-- rotina de backup;
+- backup;
 - worker de retenção;
 - canal de incidentes.
 
@@ -221,37 +182,26 @@ Toda integração deve possuir timeout, retry controlado, idempotência, sanitiz
 
 ## Segurança e RLS
 
-- nenhuma política é flexibilizada para produção;
+- nenhuma policy flexibilizada para produção;
 - nenhuma RPC operacional para `anon`;
 - Service Role somente no servidor;
-- `SECURITY DEFINER` com `search_path` explícito e autorização interna;
-- dados sensíveis sem exposição em logs;
+- `SECURITY DEFINER` com `search_path` e autorização interna;
+- logs sem dados sensíveis;
 - arquivos privados sem URL pública permanente;
 - ações críticas podem exigir MFA, motivo e alçada;
 - testes negativos obrigatórios.
 
 ## Storage
 
-Buckets existentes permanecem privados. A etapa deve inventariar:
-
-- tipos permitidos;
-- limites de tamanho;
-- contexto de organização e recurso;
-- hash;
-- quarentena;
-- análise antimalware;
-- política de retenção;
-- download autenticado;
-- remoção de órfãos;
-- backup ou estratégia de recuperação.
+Buckets permanecem privados. A etapa deve inventariar tipos, limites, contexto, hash, quarentena, antimalware, retenção, download autenticado, remoção de órfãos e recuperação.
 
 ## UI/UX Pro Max
 
-A direção visual canônica é **Arquitetura em operação**:
+Direção canônica: **Arquitetura em operação**.
 
 - azul profundo, cobre e materiais naturais;
 - densidade controlada;
-- hierarquia por estrutura, não por decoração;
+- hierarquia estrutural;
 - cards somente para agrupamentos reais;
 - status semânticos com texto;
 - navegação clara e autorizada;
@@ -261,13 +211,22 @@ A direção visual canônica é **Arquitetura em operação**:
 - sem depender de hover ou cor;
 - estados completos e responsividade real.
 
-A primeira implantação cobre o shell interno e a central de aplicativos, criando base reutilizável para os módulos seguintes.
+### Fundação implantada
+
+```text
+diretrizes/UI-UX-PRO-MAX.md
+app/globals.css
+app/stage20.css
+app/app/layout.tsx
+app/app/page.tsx
+scripts/validate-stage20.mjs
+```
+
+O shell possui link de salto, contexto organizacional e navegação semântica. A central de aplicativos usa somente módulos retornados por `getEffectiveApplications` e dados reais da sessão.
 
 ## Migrations
 
 Nenhuma migration criada na fundação inicial.
-
-Migrations futuras devem ser listadas aqui em ordem lexical e alinhadas ao ledger remoto.
 
 ## Testes
 
@@ -276,8 +235,7 @@ Migrations futuras devem ser listadas aqui em ordem lexical e alinhadas ao ledge
 - `pnpm validate:docs`;
 - `pnpm validate:vaccines`;
 - `pnpm validate:migrations`;
-- `pnpm validate:stage20`;
-- validadores das Etapas 9 a 19.
+- validadores das Etapas 9 a 20.
 
 ### Qualidade
 
@@ -289,21 +247,20 @@ Migrations futuras devem ser listadas aqui em ordem lexical e alinhadas ao ledge
 
 ### UI/UX
 
-- presença dos tokens canônicos;
-- classes usadas pelo dashboard possuem implementação;
+- tokens canônicos;
+- classes usadas possuem CSS;
 - link de salto;
 - foco visível;
-- alvos mínimos;
+- alvo mínimo de 44px;
 - redução de movimento;
-- breakpoints de tablet e mobile;
-- ausência do preset rosa/fúcsia;
-- estados vazio e acesso negado preservados.
+- breakpoints;
+- forced colors;
+- ausência de rosa/fúcsia;
+- ausência de estilo inline nos componentes-base.
 
-### Produção
+### Produção pendente
 
-Serão adicionados progressivamente:
-
-- E2E autenticado transversal;
+- E2E transversal;
 - concorrência de estoque;
 - carga;
 - backup/restauração;
@@ -315,65 +272,73 @@ Serão adicionados progressivamente:
 
 ## Homologação
 
-A fundação é considerada homologada somente após CI verde no PR da Etapa 20.
+A fundação foi aprovada no CI run `29888338212`, número `1180`:
 
-Requisitos externos serão marcados como pendentes com evidência objetiva; não serão declarados concluídos por inferência.
+- preflight: `success`;
+- documentação: `success`;
+- 12 vacinas: `success`;
+- ledger: `success`;
+- validadores das Etapas 17 a 20: `success`;
+- lint: `success`;
+- typecheck: `success`;
+- testes TypeScript: `success`;
+- testes Python: `success`;
+- build: `success`.
+
+O hardening posterior adicionou fallback sem `backdrop-filter`, correção da marca no breakpoint compacto e suporte a forced colors; o CI do commit documental final deve reconfirmar o conjunto.
 
 ## Vacinas aplicadas ou criadas
 
-- `VACINA-003` — ledger de migrations;
-- `VACINA-004` — privilégios de RPC;
+- `VACINA-003` — ledger;
+- `VACINA-004` — privilégios;
 - `VACINA-005` — workflow protegido;
-- `VACINA-006` — runtimes de GitHub Actions;
-- `VACINA-007` — scanner de secrets;
-- `VACINA-008` — instalação consistente;
-- `VACINA-009` — pré-requisitos de E2E;
-- `VACINA-010` — relatórios JSON;
-- `VACINA-012` — estado pós-merge.
-
-Nova vacina será criada quando surgir causa raiz reutilizável durante a etapa.
+- `VACINA-006` — GitHub Actions;
+- `VACINA-007` — secrets;
+- `VACINA-008` — instalação;
+- `VACINA-009` — pré-requisitos E2E;
+- `VACINA-010` — JSON;
+- `VACINA-012` — estado pós-merge e etapa ativa.
 
 ## Limitações iniciais
 
-- produção ainda não liberada;
+- produção não liberada;
 - provider jurídico não selecionado;
 - antimalware não integrado;
-- backup/restauração produtivos não comprovados;
+- backup/restauração não comprovados;
 - pentest externo não realizado;
-- telemetria externa não conectada;
+- telemetria não conectada;
 - retenção automática não executada;
 - revisão jurídica/LGPD pendente;
 - concorrência real de estoque pendente.
 
 ## Próximos passos
 
-1. validar a fundação documental e visual no CI;
-2. fechar pendências de concorrência do estoque;
-3. implementar backup e restauração;
-4. proteger anexos;
-5. integrar provider jurídico;
-6. implementar telemetria e retenção;
-7. revisar Auth, MFA e senhas comprometidas;
-8. realizar pentest e revisões externas;
-9. executar go-live controlado.
+1. concorrência real do estoque;
+2. backup e restauração;
+3. proteção de anexos;
+4. provider jurídico;
+5. telemetria e retenção;
+6. Auth, MFA e senhas comprometidas;
+7. pentest e revisões externas;
+8. go-live controlado.
 
 ## Definition of Done
 
-- [x] branch da etapa criada;
-- [x] contrato técnico inicial criado;
-- [x] UI/UX Pro Max instituída como diretriz canônica;
-- [ ] PR em rascunho criado;
-- [ ] validador da Etapa 20 ativo no CI;
-- [ ] shell interno e dashboard consolidados;
-- [ ] CI da fundação verde;
-- [ ] concorrência real de estoque comprovada;
-- [ ] backup e restauração comprovados;
-- [ ] anexos protegidos por antimalware;
-- [ ] provider jurídico homologado;
-- [ ] telemetria e retenção operacionais;
-- [ ] MFA e proteção de credenciais revisados;
-- [ ] pentest e revisões externas concluídos;
-- [ ] decisão de publicação registrada;
-- [ ] documentação canônica atualizada no mesmo PR;
-- [ ] CI verde;
+- [x] branch criada;
+- [x] PR `#23` em rascunho;
+- [x] contrato técnico criado;
+- [x] UI/UX Pro Max canônica;
+- [x] validador da Etapa 20 no CI;
+- [x] shell e dashboard consolidados;
+- [x] CI da fundação verde;
+- [x] documentação canônica atualizada no mesmo PR;
+- [ ] concorrência real de estoque;
+- [ ] backup e restauração;
+- [ ] antimalware;
+- [ ] provider jurídico;
+- [ ] telemetria e retenção;
+- [ ] MFA e credenciais;
+- [ ] pentest e revisões externas;
+- [ ] decisão de publicação;
+- [ ] CI final de toda a Etapa 20;
 - [ ] merge somente após aprovação explícita.
