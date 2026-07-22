@@ -19,6 +19,7 @@ jobs:
     env:
       HOMOLOGATION_APP_URL: ${{ secrets.HOMOLOGATION_APP_URL }}
       FILE_SECURITY_HEALTH_SECRET: ${{ secrets.FILE_SECURITY_HEALTH_SECRET }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
       FILE_SECURITY_HEALTH_TIMEOUT_MS: "30000"
 
     steps:
@@ -42,6 +43,7 @@ jobs:
           missing=()
           test -n "$HOMOLOGATION_APP_URL" || missing+=(HOMOLOGATION_APP_URL)
           test -n "$FILE_SECURITY_HEALTH_SECRET" || missing+=(FILE_SECURITY_HEALTH_SECRET)
+          test -n "$VERCEL_AUTOMATION_BYPASS_SECRET" || missing+=(VERCEL_AUTOMATION_BYPASS_SECRET)
           if [ ${#missing[@]} -gt 0 ]; then
             MISSING_NAMES="$(printf '%s\n' "${missing[@]}")" node --input-type=module <<'NODE'
           import fs from "node:fs";
