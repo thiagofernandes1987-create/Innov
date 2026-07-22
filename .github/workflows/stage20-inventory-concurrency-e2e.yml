@@ -1,0 +1,112 @@
+name: Stage 20 Inventory Concurrency E2E
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/etapa-20-prontidao-producao
+    paths:
+      - "scripts/run-stage20-inventory-concurrency-e2e.mjs"
+      - "scripts/provision-homologation-users.mjs"
+      - ".github/workflows/stage20-inventory-concurrency-e2e.yml"
+      - "supabase/migrations/20260720*.sql"
+      - "package.json"
+  pull_request:
+    paths:
+      - "scripts/run-stage20-inventory-concurrency-e2e.mjs"
+      - "scripts/provision-homologation-users.mjs"
+      - ".github/workflows/stage20-inventory-concurrency-e2e.yml"
+      - "supabase/migrations/20260720*.sql"
+      - "package.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage20-inventory-concurrency-homologation
+  cancel-in-progress: false
+
+jobs:
+  inventory-position-race:
+    name: Two sessions competing for the same stock position
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
+      DEMO_CLIENT_PASSWORD: ${{ secrets.DEMO_CLIENT_PASSWORD }}
+      ALLOW_INSECURE_DEMO_USERS: "true"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Initialize inventory concurrency report
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const payload={
+            status:"prerequisites_pending",
+            workflowRunId:process.env.GITHUB_RUN_ID,
+            event:process.env.GITHUB_EVENT_NAME,
+            startedAt:new Date().toISOString()
+          };
+          fs.writeFileSync("stage20-inventory-concurrency-report.json",JSON.stringify(payload,null,2)+"\n");
+          NODE
+
+      - name: Validate required secrets
+        run: |
+          missing=()
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || missing+=(NEXT_PUBLIC_SUPABASE_URL)
+          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || missing+=(NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || missing+=(SUPABASE_SERVICE_ROLE_KEY)
+          test -n "$DEMO_ADMIN_PASSWORD" || missing+=(DEMO_ADMIN_PASSWORD)
+          test -n "$DEMO_CLIENT_PASSWORD" || missing+=(DEMO_CLIENT_PASSWORD)
+          if [ ${#missing[@]} -gt 0 ]; then
+            MISSING_NAMES="$(printf '%s\n' "${missing[@]}")" node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const missing=(process.env.MISSING_NAMES??"").split("\n").filter(Boolean);
+          const payload={
+            status:"blocked_missing_secrets",
+            workflowRunId:process.env.GITHUB_RUN_ID,
+            missingNames:missing,
+            finishedAt:new Date().toISOString()
+          };
+          fs.writeFileSync("stage20-inventory-concurrency-report.json",JSON.stringify(payload,null,2)+"\n");
+          NODE
+            printf 'Secrets ausentes no ambiente homologation: %s\n' "${missing[*]}"
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
+
+      - name: Provision homologation identities
+        run: pnpm provision:homologation
+
+      - name: Run real inventory concurrency E2E
+        run: pnpm test:e2e:stage20:inventory-concurrency
+
+      - name: Upload inventory concurrency report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: stage20-inventory-concurrency-report
+          path: stage20-inventory-concurrency-report.json
+          if-no-files-found: error
+          retention-days: 30
