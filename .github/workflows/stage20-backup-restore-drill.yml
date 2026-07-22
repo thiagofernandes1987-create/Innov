@@ -2,13 +2,12 @@ name: Stage 20 Backup Restore Drill
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - feature/etapa-20-prontidao-producao
+  pull_request:
     paths:
       - "scripts/run-stage20-backup-restore-drill.mjs"
       - ".github/workflows/stage20-backup-restore-drill.yml"
       - "package.json"
+      - ".env.example"
       - "diretrizes/ESTADO-ATUAL.json"
       - "docs/ETAPA-20-BACKUP-RESTAURACAO.md"
 
@@ -22,6 +21,7 @@ concurrency:
 jobs:
   isolated-restore:
     name: Dump source and restore into disposable Supabase target
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     environment: homologation
     timeout-minutes: 35
