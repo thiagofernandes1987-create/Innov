@@ -31,7 +31,7 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 - [`docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md`](../docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md) — recuperação, auditoria Supabase, correções e testes transacionais.
 - [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — evolução futura para WMS avançado.
 
-Estado: incorporada à `main`, homologada tecnicamente e com concorrência real aprovada na Etapa 20. Permanecem carga prolongada, backup e restauração.
+Estado: incorporada à `main`, homologada tecnicamente e com concorrência real aprovada na Etapa 20. Permanecem carga prolongada e prontidão produtiva global.
 
 ## Etapa 18 — CRM, Clientes e SAC
 
@@ -77,7 +77,8 @@ Estado: incorporada à `main`, homologada tecnicamente e com concorrência real 
 
 - [`docs/ETAPA-20-PRONTIDAO-PRODUCAO.md`](../docs/ETAPA-20-PRONTIDAO-PRODUCAO.md) — contrato geral de segurança produtiva, recuperação, anexos, provider, telemetria, retenção, incidentes, publicação e UI/UX Pro Max.
 - [`docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md`](../docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md) — prova real de duas sessões disputando a mesma posição de estoque.
-- [`docs/ETAPA-20-BACKUP-RESTAURACAO.md`](../docs/ETAPA-20-BACKUP-RESTAURACAO.md) — drill protegido de dump lógico, restauração isolada, comparação e smoke tests.
+- [`docs/ETAPA-20-BACKUP-RESTAURACAO.md`](../docs/ETAPA-20-BACKUP-RESTAURACAO.md) — dump lógico, restauração isolada, equivalência, RTO e limitações externas.
+- [`docs/ETAPA-20-PROTECAO-ANEXOS.md`](../docs/ETAPA-20-PROTECAO-ANEXOS.md) — fundação fail-closed para quarentena e antimalware.
 
 ### Fundação UI/UX e CI
 
@@ -87,7 +88,7 @@ Estado: incorporada à `main`, homologada tecnicamente e com concorrência real 
 - shell e dashboard redesenhados;
 - acessibilidade e responsividade consolidadas;
 - `validate:stage20` integrado ao CI;
-- run `29888603943`: lint, typecheck, testes e build aprovados.
+- CI completo verde.
 
 ### Concorrência de estoque
 
@@ -103,10 +104,25 @@ Estado: incorporada à `main`, homologada tecnicamente e com concorrência real 
 - execuções duplicadas removidas;
 - `VACINA-013` criada após o guard de custo sensível bloquear corretamente a primeira fixture.
 
+### Backup e restauração
+
+- Session pooler configurado para origem e destino distintos;
+- projetos diferenciados pelo usuário `postgres.<project-ref>`;
+- cliente PostgreSQL `17.10` compatível com servidor `17.6`;
+- dump custom com `1.812.078` bytes e `2.798` objetos;
+- 139 FKs externas para `auth` registradas e omitidas, sem copiar usuários;
+- seis `DEFAULT ACLs` de roles gerenciadas registradas e omitidas;
+- 144 tabelas, 144 tabelas com RLS, 196 funções e 143 migrations equivalentes;
+- RTO observado de `201` segundos;
+- smoke tests de módulos, estoque, auditoria e RLS aprovados;
+- run `29911179764`: `passed`;
+- artefato `8526039714`;
+- dump e lista temporária removidos.
+
 ### Próxima frente
 
-- backup e restauração;
-- depois antimalware, provider jurídico, telemetria, retenção, Auth/MFA, pentest e publicação controlada.
+- proteção real de anexos com provider ClamAV e integração nos uploads;
+- depois provider jurídico, telemetria, retenção, Auth/MFA, pentest, carga e publicação controlada.
 
 ## Vacinas de engenharia
 
