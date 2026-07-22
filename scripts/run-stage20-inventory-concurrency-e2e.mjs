@@ -163,7 +163,6 @@ async function prepareFixture(adminUserId){
   specification:"Saldo deve permanecer zero fora da execução E2E.",
   kind:"MATERIAL",
   minimum_stock:0,
-  reference_unit_cost:1,
   controls_lot:false,
   controls_expiry:false,
   controls_individual_asset:false,
