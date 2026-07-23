@@ -6,6 +6,7 @@ const files=[
   "supabase/migrations/20260720103200_stage14_procurement_module.sql",
   "supabase/migrations/20260720103300_stage14_procurement_hardening.sql",
   "supabase/migrations/20260720103400_stage14_procurement_performance.sql",
+  "supabase/migrations/20260723062000_r2_stage14_procurement_parent_chain.sql",
   "app/actions/procurement.ts",
   "lib/procurement/comparison.ts",
   "lib/procurement/comparison.test.ts",
@@ -25,22 +26,26 @@ const files=[
 ];
 const errors=[];
 for(const file of files)if(!fs.existsSync(file))errors.push(`Arquivo ausente: ${file}`);
-const schema=fs.readFileSync(files[0],"utf8");
-for(const table of ["procurement_suppliers","procurement_requests","procurement_request_items","procurement_rfqs","procurement_supplier_invitations","procurement_quotes","procurement_quote_items","procurement_approvals","procurement_orders","procurement_order_items","procurement_receipts","procurement_receipt_items","procurement_receipt_quality","procurement_events"]){if(!schema.includes(`public.${table}`))errors.push(`Tabela ausente: ${table}`);}
-for(const token of ["procurement-attachments","token_sha256","quality_form_assignments","quality_form_responses"])if(!schema.includes(token))errors.push(`Schema incompleto: ${token}`);
-const security=fs.readFileSync(files[1],"utf8");
-for(const token of ["enable row level security","submit_procurement_request","open_procurement_rfq","finalize_procurement_quote","select_procurement_quote","decide_procurement_approval","finalize_procurement_receipt","has_module_permission","service_role"])if(!security.includes(token))errors.push(`Segurança/transação incompleta: ${token}`);
-const moduleSeed=fs.readFileSync(files[2],"utf8");
-for(const token of ["app_modules","organization_modules","profile_module_permissions","supplierPublicSignup","inventoryEnabled","default_enabled=false"])if(!moduleSeed.includes(token))errors.push(`Módulo incompleto: ${token}`);
-const hardening=fs.readFileSync(files[3],"utf8");
-for(const token of ["procurement_active_invitation_supplier_idx","get_procurement_invitation_by_token","Inclua ao menos um item recebido","install_procurement_defaults","organizations_install_procurement_defaults","service_role"])if(!hardening.includes(token))errors.push(`Hardening incompleto: ${token}`);
-const performance=fs.readFileSync(files[4],"utf8");
-for(const token of ["procurement_orders_request_idx","procurement_receipt_quality_assignment_idx","procurement_events_project_idx","procurement_events_receipt_idx"])if(!performance.includes(token))errors.push(`Índice ausente: ${token}`);
-const actions=fs.readFileSync(files[5],"utf8");
-for(const action of ["createProcurementSupplier","createProcurementRequest","submitProcurementRequest","createProcurementRfq","inviteProcurementSupplier","openProcurementRfq","submitSupplierProcurementQuote","selectProcurementQuote","decideProcurementApproval","createProcurementReceipt"])if(!actions.includes(`function ${action}`))errors.push(`Ação ausente: ${action}`);
-const comparison=fs.readFileSync(files[6],"utf8");
-for(const token of ["compareProcurementQuotes","priceScore","leadTimeScore","coverageScore","finalScore"])if(!comparison.includes(token))errors.push(`Mapa comparativo incompleto: ${token}`);
-const publicPage=fs.readFileSync("app/fornecedores/cotacoes/[token]/page.tsx","utf8");
-if(!publicPage.includes("get_procurement_invitation_by_token"))errors.push("Página externa não usa a validação segura de token.");
+if(!errors.length){
+ const schema=fs.readFileSync(files[0],"utf8");
+ for(const table of ["procurement_suppliers","procurement_requests","procurement_request_items","procurement_rfqs","procurement_supplier_invitations","procurement_quotes","procurement_quote_items","procurement_approvals","procurement_orders","procurement_order_items","procurement_receipts","procurement_receipt_items","procurement_receipt_quality","procurement_events"]){if(!schema.includes(`public.${table}`))errors.push(`Tabela ausente: ${table}`);}
+ for(const token of ["procurement-attachments","token_sha256","quality_form_assignments","quality_form_responses"])if(!schema.includes(token))errors.push(`Schema incompleto: ${token}`);
+ const security=fs.readFileSync(files[1],"utf8");
+ for(const token of ["enable row level security","submit_procurement_request","open_procurement_rfq","finalize_procurement_quote","select_procurement_quote","decide_procurement_approval","finalize_procurement_receipt","has_module_permission","service_role"])if(!security.includes(token))errors.push(`Segurança/transação incompleta: ${token}`);
+ const moduleSeed=fs.readFileSync(files[2],"utf8");
+ for(const token of ["app_modules","organization_modules","profile_module_permissions","supplierPublicSignup","inventoryEnabled","default_enabled=false"])if(!moduleSeed.includes(token))errors.push(`Módulo incompleto: ${token}`);
+ const hardening=fs.readFileSync(files[3],"utf8");
+ for(const token of ["procurement_active_invitation_supplier_idx","get_procurement_invitation_by_token","Inclua ao menos um item recebido","install_procurement_defaults","organizations_install_procurement_defaults","service_role"])if(!hardening.includes(token))errors.push(`Hardening incompleto: ${token}`);
+ const performance=fs.readFileSync(files[4],"utf8");
+ for(const token of ["procurement_orders_request_idx","procurement_receipt_quality_assignment_idx","procurement_events_project_idx","procurement_events_receipt_idx"])if(!performance.includes(token))errors.push(`Índice ausente: ${token}`);
+ const parentChain=fs.readFileSync(files[5],"utf8");
+ for(const token of ["assert_procurement_quote_item_parent_chain","assert_procurement_receipt_item_parent_chain","for key share","23514","procurement_quote_items_parent_chain_guard","procurement_receipt_items_parent_chain_guard"])if(!parentChain.toLowerCase().includes(token.toLowerCase()))errors.push(`Invariante pai-filho ausente: ${token}`);
+ const actions=fs.readFileSync(files[6],"utf8");
+ for(const action of ["createProcurementSupplier","createProcurementRequest","submitProcurementRequest","createProcurementRfq","inviteProcurementSupplier","openProcurementRfq","submitSupplierProcurementQuote","selectProcurementQuote","decideProcurementApproval","createProcurementReceipt"])if(!actions.includes(`function ${action}`))errors.push(`Ação ausente: ${action}`);
+ const comparison=fs.readFileSync(files[7],"utf8");
+ for(const token of ["compareProcurementQuotes","priceScore","leadTimeScore","coverageScore","finalScore"])if(!comparison.includes(token))errors.push(`Mapa comparativo incompleto: ${token}`);
+ const publicPage=fs.readFileSync("app/fornecedores/cotacoes/[token]/page.tsx","utf8");
+ if(!publicPage.includes("get_procurement_invitation_by_token"))errors.push("Página externa não usa a validação segura de token.");
+}
 if(errors.length){console.error(`Etapa 14 inválida (${errors.length} falha(s)):`);for(const error of errors)console.error(`- ${error}`);process.exit(1);}
-console.log(`Etapa 14 validada: ${files.length} arquivos críticos, 14 tabelas, RLS, hardening, índices, bootstrap automático, fornecedores por convite, mapa comparativo, aprovação, pedido, recebimento e FVM.`);
+console.log(`Etapa 14 validada: ${files.length} arquivos críticos, 14 tabelas, RLS, invariantes pai-filho, hardening, índices, bootstrap automático, fornecedores por convite, mapa comparativo, aprovação, pedido, recebimento e FVM.`);
