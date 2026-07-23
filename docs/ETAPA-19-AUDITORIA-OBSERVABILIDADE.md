@@ -110,12 +110,11 @@ São registrados achados de:
 - divergência do ledger;
 - outros achados técnicos reproduzíveis.
 
-A migration de hardening criou `stage19_can_read_global_diagnostics()`:
+O hardening R3B restringe diagnósticos globais à operação de plataforma:
 
-- membro interno autorizado vê diagnóstico global;
-- cliente ou sessão autenticada sem membership vê zero.
-
-Teste homologado: interno `1`, externo `0`.
+- sessões `authenticated` visualizam apenas diagnósticos da própria organização, mediante permissão no módulo `auditoria`;
+- linhas com `organization_id` nulo não entram em dashboards ou snapshots de tenant;
+- acesso global fica reservado ao `service_role`.
 
 ## 9. RLS, append-only e privilégios
 
@@ -127,7 +126,8 @@ Teste homologado: interno `1`, externo `0`.
 - eventos e health checks append-only;
 - escrita direta bloqueada por privilégios e triggers;
 - nenhuma função da Etapa 19 executável por `anon`;
-- RPC `SECURITY DEFINER` autenticada valida organização, módulo, capacidade e escopo internamente.
+- RPCs genéricas `record_audit_event` e `write_audit` executáveis somente por `service_role`;
+- RPCs autenticadas permanecem estreitas por operação e validam organização, módulo, capacidade e escopo internamente.
 
 ## 10. Índices
 
@@ -153,7 +153,7 @@ zero FK sem índice
 
 A revisão visual transversal e a consolidação do design system foram transferidas à Etapa 20, sob a direção UI/UX Pro Max adaptada à identidade Innovar.
 
-## 12. Seis migrations alinhadas ao ledger
+## 12. Sete migrations alinhadas ao ledger
 
 ```text
 20260721100108_stage19_observability_schema.sql
@@ -162,6 +162,7 @@ A revisão visual transversal e a consolidação do design system foram transfer
 20260721122355_stage19_observability_unified_stream.sql
 20260721122436_stage19_observability_module_performance.sql
 20260721123305_stage19_observability_hardening.sql
+20260723104500_r3b_observability_security_hardening.sql
 ```
 
 ## 13. Homologação
@@ -185,7 +186,7 @@ Confirmado:
 - alerta reconhecido e resolvido;
 - seis health checks;
 - isolamento multiempresa;
-- diagnósticos globais protegidos;
+- diagnósticos globais restritos à plataforma;
 - nenhum dado artificial persistido.
 
 ## 14. Advisors
@@ -228,10 +229,10 @@ O PR `#19` foi mesclado sobre a branch da Etapa 18 e o PR `#20` consolidou o con
 - [x] eventos append-only;
 - [x] alertas e health checks;
 - [x] diagnósticos e retenção configurável;
-- [x] diagnósticos globais protegidos;
+- [x] diagnósticos globais restritos à plataforma;
 - [x] interface administrativa;
 - [x] teste transacional com `ROLLBACK`;
-- [x] seis migrations aplicadas e alinhadas ao ledger;
+- [x] sete migrations versionadas e alinhadas ao ledger;
 - [x] zero FK sem índice;
 - [x] advisors revisados;
 - [x] validador estrutural;
