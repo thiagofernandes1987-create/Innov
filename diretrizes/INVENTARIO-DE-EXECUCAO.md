@@ -1,0 +1,288 @@
+# Inventário de execução — marcos, sprints e tarefas
+
+**Documento canônico:** sim
+**Atualizado em:** 25 de julho de 2026
+**Verificado por:** `pnpm validate:inventory`
+
+Este arquivo é o **estado vivo do trabalho**. `INVENTARIO.md` inventaria o que a plataforma **é**; este inventaria o que está sendo **feito**.
+
+---
+
+## Regras de operação — obrigatórias
+
+**R1 — Leitura no início.** Toda sessão assistida lê este arquivo antes de propor ou executar qualquer coisa. Reinício de serviço, contêiner novo, chat novo: lê de novo. Não existe "eu já sei o que estava fazendo" — a memória é este arquivo.
+
+**R2 — Check imediato.** Ao concluir uma tarefa ou subtarefa, marcar `[x]` **no mesmo momento**, com a evidência que prova a conclusão. Não acumular checks para o fim da sessão: sessão interrompida com check pendente perde o progresso.
+
+**R3 — Uma sprint por vez.** Não se inicia sprint nova antes de concluir a atual. **No máximo uma sprint em `em andamento`**, e o validador reprova o contrário.
+
+**R4 — O que é novo vai para o fim.** Sprint nova, oportunidade de melhoria ou lacuna descoberta entra **no final do inventário**, com as tarefas e subtarefas dela. Nunca no meio, nunca empurrando a sprint atual.
+
+**R5 — A ordem pode mudar, mas só na virada.** Ao **iniciar** uma sprint nova — nunca no meio de uma — a ordem de execução das sprints pendentes pode ser reordenada. Dois casos legítimos:
+
+- **Pré-requisito descoberto.** Ia começar um aplicativo e percebeu que falta um módulo ou objeto não previsto e necessário: a sprint do pré-requisito passa à frente.
+- **Base reaproveitável.** Uma sprint serve de base para reprodução em massa das seguintes: passa à frente porque otimiza todo o trabalho restante.
+
+**R6 — Reordenar exige registro.** Toda reordenação vira linha na tabela da seção "Registro de reordenação", com data, o que mudou e **por quê**. Reordenação sem justificativa registrada é a forma de o plano virar improviso.
+
+**R7 — Sprint concluída não tem tarefa em aberto.** Marcar sprint como `concluída` com tarefa `[ ]` reprova no validador. Se sobrou tarefa, ou a sprint não está concluída, ou a tarefa vira sprint nova no fim (R4).
+
+---
+
+## Estados
+
+| Estado | Significado |
+|---|---|
+| `pendente` | ainda não iniciada |
+| `em andamento` | em execução — no máximo uma por vez |
+| `concluída` | todas as tarefas marcadas e evidência registrada |
+| `bloqueada` | não pode avançar; o bloqueio está descrito na sprint |
+
+---
+
+# Marco M-0 — Governança e memória de sessão
+
+Objetivo: nenhuma decisão desta plataforma depende de conversa. Um chat novo recupera tudo do repositório.
+
+## Sprint S-01 — Skills versionadas e regras de sessão
+**Estado:** concluída
+**Marco:** M-0
+
+- [x] T-01.1 — Copiar as skills dos cinco repositórios de origem para `.claude/skills` (45 skills)
+- [x] T-01.2 — Registrar procedência, licenças e o que ficou de fora em `.claude/skills/README.md`
+- [x] T-01.3 — Excluir `.claude/skills` do `eslint` e do `tsc` — conteúdo de terceiros não é código da plataforma
+- [x] T-01.4 — Fixar em `CLAUDE.md` a tabela de skills de acionamento automático
+- [x] T-01.5 — Fixar a precedência de `UI-UX-PRO-MAX.md` sobre a skill em caso de divergência
+- [x] T-01.6 — Registrar o que não pôde ser instalado e por quê (CLI do Composio, sessão do NotebookLM)
+
+## Sprint S-02 — Método de trabalho e protocolo de vacinas
+**Estado:** concluída
+**Marco:** M-0
+
+- [x] T-02.1 — Escrever `METODO-DE-TRABALHO.md` com a regra de decomposição em micro-problemas
+- [x] T-02.2 — Registrar PoT e paralelismo como execução, não narração
+- [x] T-02.3 — Escrever o protocolo de consulta ao catálogo antes de resolver
+- [x] T-02.4 — Escrever o protocolo de registro com as cinco perguntas e o modelo de arquivo
+- [x] T-02.5 — Escrever o protocolo de substituição de vacina com os dois portões
+  - [x] T-02.5.1 — Portão 1, eliminatório: garantia preservada
+  - [x] T-02.5.2 — Portão 2: retorno material, com limiar contra troca marginal
+  - [x] T-02.5.3 — Prova executável e tipo de evidência declarado (`medida`, `negativa`, `argumento`)
+  - [x] T-02.5.4 — Proibição de substituir no mesmo PR da correção barrada
+  - [x] T-02.5.5 — Estados `substituída` e `revogada`, nunca apagadas
+- [x] T-02.6 — Replicar o protocolo em `VACINAS.md`, que é onde se olha ao resolver erro
+- [x] T-02.7 — Fixar a regra de método em `CLAUDE.md`
+
+## Sprint S-03 — Diretriz do Object Runtime
+**Estado:** concluída
+**Marco:** M-0
+
+- [x] T-03.1 — Decompor o problema em cinco subsistemas e validar o corte com o responsável
+- [x] T-03.2 — Estabelecer os parâmetros: centenas de empresas, ≤1000 objetos por empresa, milhões de registros nos livros
+- [x] T-03.3 — Descartar geração de código e registrar as quatro razões
+- [x] T-03.4 — Escrever `OBJECT-RUNTIME.md` com as 13 seções
+  - [x] T-03.4.1 — Modelo conceitual: tipo, característica, classe, objeto, registro
+  - [x] T-03.4.2 — Catálogo e versionamento imutável
+  - [x] T-03.4.3 — Duas camadas de armazenamento e o resolver
+  - [x] T-03.4.4 — Colunas-slot, índices parciais fixos e advisor
+  - [x] T-03.4.5 — Política única de RLS reusando `has_module_permission`
+  - [x] T-03.4.6 — Extensão dos aplicativos padrão por anexo
+  - [x] T-03.4.7 — Ciclo de vida plug-and-play sem `DROP`
+  - [x] T-03.4.8 — Contratos de performance verificáveis
+  - [x] T-03.4.9 — Escada de escala e as três costuras
+  - [x] T-03.4.10 — Mapa de reaproveitamento do que já existe
+  - [x] T-03.4.11 — Riscos, limites declarados e primeira fatia
+- [x] T-03.5 — Registrar que nada foi executado e que os números são estimativas não calibradas
+
+## Sprint S-04 — Ponto de entrada e inventário de execução
+**Estado:** em andamento
+**Marco:** M-0
+
+- [x] T-04.1 — Escrever `LEIA-PRIMEIRO.md` mapeando skills, vacinas, blueprint, executable spec, Object Runtime e ordem de leitura
+- [x] T-04.2 — Escrever este inventário com marcos, sprints, tarefas e as regras R1 a R7
+- [x] T-04.3 — Escrever `scripts/validate-inventory.mjs` que reprova violação das regras estruturais
+  - [x] T-04.3.1 — No máximo uma sprint `em andamento`
+  - [x] T-04.3.2 — Sprint `concluída` sem tarefa em aberto
+  - [x] T-04.3.3 — Toda sprint com estado válido e ao menos uma tarefa
+  - [x] T-04.3.4 — Identificadores de sprint únicos
+- [x] T-04.4 — Registrar `LEIA-PRIMEIRO.md` e este arquivo no validador de documentação e no `README.md` de `diretrizes/`
+- [x] T-04.5 — Apontar `CLAUDE.md` para `LEIA-PRIMEIRO.md` como primeira leitura obrigatória e fixar as regras do inventário
+- [ ] T-04.6 — **Publicar no GitHub.** Até que isto seja feito, tudo de M-0 existe apenas no contêiner desta sessão e some com ele
+- [ ] T-04.7 — Incorporar ao repositório o blueprint e a executable spec recebidos por ZIP, com os defeitos verificados anotados
+
+---
+
+# Marco M-1 — Fundação do Object Runtime
+
+Objetivo: a fundação que aguenta virar prédio. Nenhuma funcionalidade de estúdio antes de a fundação estar medida.
+
+## Sprint S-05 — Catálogo de definições
+**Estado:** pendente
+**Marco:** M-1
+
+- [ ] T-05.1 — Migration de `object_definitions`, `object_definition_versions` e `object_field_slots`
+- [ ] T-05.2 — Imutabilidade da versão publicada, com `checksum` do `spec`
+- [ ] T-05.3 — RLS do catálogo por `organization_id` e permissão de administração
+- [ ] T-05.4 — Validador de CI: projeção de slots coerente com o `spec`
+- [ ] T-05.5 — Testes: publicar, republicar, tentar alterar versão publicada
+
+## Sprint S-06 — Camada compartilhada, RLS e índices de slot
+**Estado:** pendente
+**Marco:** M-1
+
+- [ ] T-06.1 — `object_records` particionada por `HASH(organization_id)` em 64 partições
+- [ ] T-06.2 — Colunas-slot e os índices parciais fixos com predicado `IS NOT NULL`
+- [ ] T-06.3 — Política única de RLS chamando `has_module_permission`
+- [ ] T-06.4 — Validador de CI: nenhuma tabela de objeto sem RLS e sem a política do template
+- [ ] T-06.5 — Testes negativos: leitura entre empresas, leitura sem permissão de módulo, leitura por obra sem acesso à obra
+
+## Sprint S-07 — Escrita por RPC e revogação de escrita direta
+**Estado:** pendente
+**Marco:** M-1
+
+- [ ] T-07.1 — RPC `object_record_upsert` com preenchimento de slot e validação de payload
+- [ ] T-07.2 — Revogar `insert`/`update`/`delete` diretos de `anon` e `authenticated`
+- [ ] T-07.3 — Limites duros: 64 KB de payload, 200 campos, 14 slots
+- [ ] T-07.4 — Validador de CI para a revogação, no padrão da VACINA-004
+- [ ] T-07.5 — Testes negativos de escrita direta e de estouro de limite
+
+## Sprint S-08 — Leitura, paginação keyset e recusa de filtro sem índice
+**Estado:** pendente
+**Marco:** M-1
+
+- [ ] T-08.1 — Camada de consulta com paginação keyset; `OFFSET` recusado
+- [ ] T-08.2 — Recusa de filtro por campo não indexado, com mensagem que orienta
+- [ ] T-08.3 — Resolver de armazenamento, com leitura separada de escrita desde o início (costura 2)
+- [ ] T-08.4 — Validador: nenhuma consulta do runtime cruza `organization_id` (costura 3)
+- [ ] T-08.5 — Testes de contrato de performance com dado sintético
+
+## Sprint S-09 — Classes `Cadastro` e `Extensão`
+**Estado:** pendente
+**Marco:** M-1
+
+- [ ] T-09.1 — Características `auditavel`, `arquivavel` e `extensao_de`
+- [ ] T-09.2 — Vínculo `(parent_kind, parent_id)` com validação na RPC
+- [ ] T-09.3 — Rotina de reconciliação de órfãos, arquivando sem apagar
+- [ ] T-09.4 — Testes de extensão sobre um aplicativo padrão real
+
+## Sprint S-10 — Estúdio mínimo
+**Estado:** pendente
+**Marco:** M-1
+
+- [ ] T-10.1 — Telas de criar, publicar e listar objeto, sob `UI-UX-PRO-MAX.md`
+- [ ] T-10.2 — Renderização do objeto publicado: lista, detalhe e formulário
+- [ ] T-10.3 — Região reservada nas telas padrão para campos de extensão
+- [ ] T-10.4 — Testes de componente e de navegação
+
+## Sprint S-11 — POC de carga com milhões de registros
+**Estado:** pendente
+**Marco:** M-1
+
+- [ ] T-11.1 — Gerador de carga: centenas de empresas, milhares de objetos, milhões de registros no objeto pesado
+- [ ] T-11.2 — Medir os contratos da seção 9 do `OBJECT-RUNTIME.md`
+- [ ] T-11.3 — Calibrar os números estimados: 64 partições, 14 slots, 64 KB, 200 campos
+- [ ] T-11.4 — Registrar o resultado no `OBJECT-RUNTIME.md`, corrigindo o que a medição contrariar
+
+---
+
+# Marco M-2 — Customização completa
+
+## Sprint S-12 — Camada dedicada e promoção sem downtime
+**Estado:** pendente
+**Marco:** M-2
+
+- [ ] T-12.1 — Template de `CREATE TABLE` dedicada com RLS aplicada na criação
+- [ ] T-12.2 — Particionamento por tempo para objeto temporal
+- [ ] T-12.3 — Promoção em seis passos, reversível até a virada do resolver
+- [ ] T-12.4 — Testes de promoção com verificação de contagem e amostragem
+
+## Sprint S-13 — Advisor de varredura e otimização de índice
+**Estado:** pendente
+**Marco:** M-2
+
+- [ ] T-13.1 — Registro de uso por objeto: campos filtrados, ordenados e latência
+- [ ] T-13.2 — Propostas de promoção de campo a slot, liberação de slot ocioso e promoção de camada
+- [ ] T-13.3 — Tela de administração com custo estimado — propõe, nunca executa
+
+## Sprint S-14 — Demais características
+**Estado:** pendente
+**Marco:** M-2
+
+- [ ] T-14.1 — `versionavel` e `aprovavel`
+- [ ] T-14.2 — `anexavel` reusando `secureUpload` e o pipeline de quarentena
+- [ ] T-14.3 — `georreferenciado`, `numerado`, `comentavel`
+- [ ] T-14.4 — `importavel` e `exportavel`, sujeitas à permissão de exportação
+- [ ] T-14.5 — Classes `Documento`, `Registro de campo` e `Lançamento`
+
+## Sprint S-15 — Migração entre versões de definição
+**Estado:** pendente
+**Marco:** M-2
+
+- [ ] T-15.1 — Classificar mudança compatível e incompatível
+- [ ] T-15.2 — Pré-visualização obrigatória do efeito sobre N registros antes de aplicar
+- [ ] T-15.3 — Recusar publicação de mudança incompatível sem plano
+- [ ] T-15.4 — Registro em auditoria
+
+---
+
+# Marco M-3 — Escala e produto público
+
+## Sprint S-16 — Réplica de leitura
+**Estado:** pendente
+**Marco:** M-3
+
+- [ ] T-16.1 — Apontar a leitura do resolver para réplica
+- [ ] T-16.2 — Política de consistência para leitura logo após escrita
+- [ ] T-16.3 — Medir o efeito sobre os relatórios pesados
+
+## Sprint S-17 — Roteamento multi-banco
+**Estado:** pendente
+**Marco:** M-3
+
+- [ ] T-17.1 — Verificar que nenhuma consulta cruza `organization_id`
+- [ ] T-17.2 — Roteamento por empresa no resolver
+- [ ] T-17.3 — Procedimento de mudança de empresa entre bancos
+
+## Sprint S-18 — Exportar, importar e catálogo compartilhado
+**Estado:** pendente
+**Marco:** M-3
+
+- [ ] T-18.1 — Exportar definição publicada como JSON com checksum
+- [ ] T-18.2 — Importar definição em outra empresa, recriando definição e nunca dado
+- [ ] T-18.3 — Catálogo compartilhado de objetos entre empresas
+
+---
+
+# Pendências herdadas
+
+Vindas da auditoria APEX da Etapa 20. Entram no fim conforme R4; sobem de posição quando bloquearem algo.
+
+## Sprint S-19 — Fechamento dos riscos residuais da Etapa 20
+**Estado:** pendente
+**Marco:** M-0
+
+- [ ] T-19.1 — RSK-0002: verificar a CSP aplicada em navegador, nas telas de assinatura, documentos e diário
+- [ ] T-19.2 — RSK-0003: aplicar em homologação a migration `20260725120000_stage20_atomic_access_counters_and_cleanup.sql`
+- [ ] T-19.3 — RSK-0001: dimensionar `clamd` para 150 MB (`StreamMaxLength`, `MaxScanSize`) antes do go-live
+- [ ] T-19.4 — RSK-0004 e FND-0001: decidir o fim da política transitória da VACINA-008
+- [ ] T-19.5 — FND-0011 e RSK-0005: fixar ações de CI por SHA, junto com a atualização da VACINA-006 e do validador
+
+---
+
+## Registro de reordenação
+
+Toda mudança na ordem de execução das sprints, conforme R5 e R6.
+
+| Data | O que mudou | Por quê |
+|---|---|---|
+| — | — | ordem inicial, sem reordenação |
+
+---
+
+## Como uma sessão usa este arquivo
+
+1. Lê no início, sempre (R1).
+2. Localiza a sprint `em andamento` e a primeira tarefa `[ ]` dela.
+3. Executa aplicando a decomposição em micro-problemas.
+4. Marca `[x]` ao concluir, com evidência (R2).
+5. Ao terminar a sprint, marca `concluída`, e só então escolhe a próxima — podendo reordenar as pendentes, com registro (R5, R6).
+6. Descobriu algo novo? Vai para o fim (R4), nunca no meio.

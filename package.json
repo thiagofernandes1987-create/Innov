@@ -14,6 +14,7 @@
     "test:python": "PYTHONPATH=python python3 -m unittest discover -s python/tests -v",
     "validate:docs": "node scripts/validate-documentation.mjs",
     "validate:vaccines": "node scripts/validate-vaccines.mjs",
+    "validate:inventory": "node scripts/validate-inventory.mjs",
     "validate:migrations": "node scripts/validate-supabase-migrations.mjs",
     "validate:stage9": "node scripts/validate-stage9.mjs",
     "validate:stage12": "node scripts/validate-stage12.mjs",

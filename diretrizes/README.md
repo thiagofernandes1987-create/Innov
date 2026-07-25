@@ -10,6 +10,8 @@ A regra é inegociável:
 
 | Documento | Finalidade |
 |---|---|
+| [`LEIA-PRIMEIRO.md`](./LEIA-PRIMEIRO.md) | **Primeira leitura de toda sessão.** Mapa de skills, vacinas, blueprint, executable spec, Object Runtime e ordem de leitura. |
+| [`INVENTARIO-DE-EXECUCAO.md`](./INVENTARIO-DE-EXECUCAO.md) | Marcos, sprints, tarefas e subtarefas, com as regras de execução e reordenação. |
 | [`METODO-DE-TRABALHO.md`](./METODO-DE-TRABALHO.md) | Como se trabalha: decomposição em micro-problemas, evidência antes de afirmação e protocolo de vacinas. |
 | [`SPEC.md`](./SPEC.md) | Especificação mestra do produto, regras e limites. |
 | [`ESTADO-ATUAL.json`](./ESTADO-ATUAL.json) | Manifesto legível por máquina com versão, etapa, branch, PR, CI e próxima etapa. |
@@ -28,18 +30,19 @@ A regra é inegociável:
 
 Em caso de divergência, vale a seguinte ordem:
 
-1. `diretrizes/METODO-DE-TRABALHO.md` para questões de método;
-2. `diretrizes/SPEC.md`;
-3. `diretrizes/ESTADO-ATUAL.json` para estado operacional verificável;
-4. `diretrizes/ARQUITETURA.md`;
-5. `diretrizes/MODULOS.md`;
-6. `diretrizes/UI-UX-PRO-MAX.md` para interfaces e experiências;
-7. `diretrizes/OBJECT-RUNTIME.md` para objetos dinâmicos e customização por empresa;
-8. `diretrizes/INVENTARIO.md`;
-9. `diretrizes/VACINAS.md` para causas-raiz já catalogadas;
-10. migrations e código da `main`;
-11. documentos históricos em `docs/ETAPA-*`;
-12. descrições antigas de PRs ou conversas.
+1. `diretrizes/LEIA-PRIMEIRO.md` como ponto de entrada e `diretrizes/INVENTARIO-DE-EXECUCAO.md` para o que está em execução;
+2. `diretrizes/METODO-DE-TRABALHO.md` para questões de método;
+3. `diretrizes/SPEC.md`;
+4. `diretrizes/ESTADO-ATUAL.json` para estado operacional verificável;
+5. `diretrizes/ARQUITETURA.md`;
+6. `diretrizes/MODULOS.md`;
+7. `diretrizes/UI-UX-PRO-MAX.md` para interfaces e experiências;
+8. `diretrizes/OBJECT-RUNTIME.md` para objetos dinâmicos e customização por empresa;
+9. `diretrizes/INVENTARIO.md`;
+10. `diretrizes/VACINAS.md` para causas-raiz já catalogadas;
+11. migrations e código da `main`;
+12. documentos históricos em `docs/ETAPA-*`;
+13. descrições antigas de PRs ou conversas.
 
 Uma divergência entre documentação canônica, manifesto e código deve bloquear a entrega. O responsável pela etapa precisa corrigir a documentação ou registrar explicitamente a decisão arquitetural.
 

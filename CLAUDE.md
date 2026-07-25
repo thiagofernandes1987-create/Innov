@@ -2,6 +2,15 @@
 
 Este arquivo é lido no início de toda sessão assistida neste repositório. As skills citadas estão versionadas em `.claude/skills` (procedência e licenças no README de lá).
 
+## Antes de responder qualquer coisa
+
+Leia, nesta ordem, **antes** de propor ou executar:
+
+1. [`diretrizes/LEIA-PRIMEIRO.md`](diretrizes/LEIA-PRIMEIRO.md) — mapa de tudo: skills, vacinas, blueprint, executable spec, Object Runtime e ordem de leitura.
+2. [`diretrizes/INVENTARIO-DE-EXECUCAO.md`](diretrizes/INVENTARIO-DE-EXECUCAO.md) — marcos, sprints e tarefas. É onde está **o que fazer agora**.
+
+Isto não é sugestão de cortesia. Nenhuma decisão desta plataforma vive em conversa: contêiner é reciclado e chat novo começa sem memória. Quem não lê esses dois arquivos trabalha sem contexto e refaz o que já foi decidido.
+
 ## Regra de método — antecede tudo
 
 > **Sempre decomponha o problema em problemas micro. Procure soluções simples para resolver cada problema individualmente. Depois construa a solução completa baseada nesse conjunto de soluções simples.**
@@ -14,7 +23,19 @@ O procedimento completo, o protocolo de vacinas e a ordem de leitura para um cha
 
 ## Memória entre sessões
 
-Nenhuma decisão vive em conversa. Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md`.
+Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md`.
+
+## Regras do inventário de execução
+
+`diretrizes/INVENTARIO-DE-EXECUCAO.md` governa a sequência do trabalho, e as regras são obrigatórias:
+
+- **ler no início** de toda sessão e a cada reinício de serviço;
+- **marcar `[x]` no momento** em que a tarefa ou subtarefa termina, com evidência — não acumular checks para o fim;
+- **uma sprint por vez**: não iniciar sprint nova antes de concluir a atual;
+- **o que é novo vai para o fim**: sprint, oportunidade ou lacuna descoberta entra no final do inventário, nunca no meio;
+- **a ordem pode mudar apenas na virada de sprint**, e toda reordenação é registrada com justificativa — pré-requisito descoberto ou sprint que vira base reaproveitável para as seguintes.
+
+`pnpm validate:inventory` reprova sprint concluída com tarefa em aberto e mais de uma sprint em andamento.
 
 Antes de resolver qualquer erro, consultar `diretrizes/VACINAS.md`: se a causa raiz já foi catalogada, aplicar a solução registrada. Se for inédita, resolver e registrar respondendo às cinco perguntas — qual foi o problema, como ocorreu, por que aconteceu, como foi detectado e qual foi a solução.
 
