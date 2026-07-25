@@ -46,6 +46,8 @@ O PDF assinado e o JSON de trilha gerados pela própria aplicação em `finalize
 
 **Limitação:** não há navegador neste ambiente. A política foi derivada de leitura do código, não de execução. Recomenda-se uma passagem em homologação pelas telas de assinatura, documentos e diário antes do go-live.
 
+**Verificação contínua:** o workflow `stage20-security-headers.yml` sonda a aplicação publicada com o segredo de bypass já armazenado no ambiente `homologation` e reprova se a CSP voltar a `Report-Only`, se perder qualquer diretiva de base, se `frame-src`, `connect-src`, `img-src` ou `media-src` deixarem de cobrir o storage do Supabase, ou se `nosniff`, `X-Frame-Options`, `Referrer-Policy` e HSTS divergirem. O verificador foi exercitado contra um servidor HTTPS local em três estados: cabeçalho correto aprova; regressão para `Report-Only` reprova; ausência de `frame-src` reprova com a mensagem que aponta o visualizador de assinatura. Isso cobre a entrega do cabeçalho, não o comportamento das telas — a passagem manual continua necessária uma vez.
+
 ### FND-0007 — regressão de estado no webhook de assinatura
 
 A decisão de aplicar ou não o status saiu do manipulador para `lib/signatures/webhook-state.ts`, com escala de progresso (`SENT` → `VIEWED` → `PARTIALLY_SIGNED` → `COMPLETED`) e desfechos terminais congelados (`COMPLETED`, `DECLINED`, `EXPIRED`, `CANCELED`).
@@ -74,7 +76,11 @@ Migration: `20260725120000_stage20_atomic_access_counters_and_cleanup.sql`. **Ai
 
 ### FND-0011 — ações de CI por tag mutável
 
-Não corrigido. Fixar por SHA exige resolver o commit de `actions/checkout`, `actions/setup-node`, `actions/setup-python` e `actions/upload-artifact`, e o acesso a repositórios fora de `thiagofernandes1987-create/innov` é negado nesta sessão. Fixar por um valor não verificado quebraria todos os workflows.
+Não corrigido, por dois motivos independentes.
+
+O primeiro é de ambiente: resolver o commit de `actions/checkout`, `actions/setup-node`, `actions/setup-python` e `actions/upload-artifact` exige ler repositórios fora de `thiagofernandes1987-create/innov`, e esse acesso é negado nesta sessão. Fixar por um valor não verificado quebraria todos os workflows.
+
+O segundo é de governança, e é o mais relevante: `scripts/validate-vaccines.mjs` exige que `ci.yml`, `stage11-homologation.yml` e `stage18-concurrent-e2e.yml` contenham literalmente `actions/checkout@v6`, `actions/setup-node@v6`, `actions/setup-python@v6` e `actions/upload-artifact@v7`, conforme a VACINA-006. Trocar a tag pelo SHA reprova `pnpm validate:vaccines` — o mesmo padrão que barrou o congelamento da instalação. Fechar este achado exige atualizar a VACINA-006 e seu validador junto com os workflows, de forma transversal, o que é decisão do responsável.
 
 Comando para quem tiver acesso:
 
