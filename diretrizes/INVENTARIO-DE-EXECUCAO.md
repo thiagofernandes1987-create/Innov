@@ -279,6 +279,44 @@ Vindas da auditoria APEX da Etapa 20. Entram no fim conforme R4; sobem de posiç
 
 ---
 
+# Marco M-4 — Generalização do produto
+
+Descoberto durante a S-05, ao decidir que o objeto dinâmico aceita escopo por projeto. Entra no fim conforme a regra R4.
+
+A plataforma nasceu com vocabulário de construção civil. Para servir a qualquer tipo de empresa — prestação de serviços, indústria, manutenção — o vocabulário precisa deixar de ser premissa. **O diário de obras passa a ser um módulo entre outros**, não o eixo do produto.
+
+## Sprint S-20 — Biblioteca de vocabulário e presets de segmento
+**Estado:** pendente
+**Marco:** M-4
+
+Medição feita antes de planejar, em 25 de julho de 2026: 186 ocorrências de "obra" em `.tsx`, 78 em `.ts`, 16 tabelas com nome de domínio e 22 chaves de módulo.
+
+O número que decide o desenho é outro: **os nomes físicos já são neutros.** `projects`, `project_tasks`, `project_milestones`, `daily_logs` são termos genéricos; só `work_breakdown_items` carrega jargão. O que é específico de construção é o **texto exibido** e alguns módulos — não o schema. Isso transforma a sprint de reescrita em camada de tradução.
+
+- [ ] T-20.1 — **Não renomear tabela, coluna nem rota.** Registrar a decisão e o motivo: renomear 136 tabelas e as rotas publicadas é risco alto com ganho funcional zero; URL é identificador, não texto de interface
+- [ ] T-20.2 — Biblioteca de vocabulário: catálogo de termos por organização
+  - [ ] T-20.2.1 — Tabela de termos com chave, singular, plural e gênero
+  - [ ] T-20.2.2 — Resolução com precedência: termo da empresa → termo do preset → termo padrão
+  - [ ] T-20.2.3 — Hook e utilitário de servidor para consumir termo, sem consulta por componente
+- [ ] T-20.3 — Presets de segmento
+  - [ ] T-20.3.1 — Preset é conjunto de termos mais módulos habilitados por padrão
+  - [ ] T-20.3.2 — Construção civil como preset, não como padrão implícito
+  - [ ] T-20.3.3 — Prestação de serviços e manutenção como segundo e terceiro presets
+  - [ ] T-20.3.4 — Preset aplicado na criação da empresa, reusando `app_modules.default_enabled` e `organization_modules`
+- [ ] T-20.4 — Migrar os textos exibidos para a biblioteca
+  - [ ] T-20.4.1 — Nome e descrição dos módulos em `app_modules` passam a vir do preset
+  - [ ] T-20.4.2 — Rótulos de navegação e cabeçalho de tela
+  - [ ] T-20.4.3 — Textos de formulário, tabela, estado vazio e mensagem de erro
+- [ ] T-20.5 — Módulos específicos de segmento continuam existindo, como opcionais
+  - [ ] T-20.5.1 — `diario` publicado como diário de campo, com rótulo do preset
+  - [ ] T-20.5.2 — Termos próprios da qualidade da construção (PO, FVS, FVM) tratados como vocabulário do preset, não como conceito do núcleo
+- [ ] T-20.6 — Regra permanente: nenhum termo de segmento em `lib/object-runtime`
+  - [ ] T-20.6.1 — Conferir que a biblioteca de tipos e características já é neutra
+  - [ ] T-20.6.2 — Validador de CI que reprova jargão de segmento em código de núcleo
+- [ ] T-20.7 — Atualizar `SPEC.md`, `MODULOS.md` e `UI-UX-PRO-MAX.md`: a plataforma deixa de se definir por construção civil
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.
