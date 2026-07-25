@@ -1,0 +1,26 @@
+round: R4
+count: 3
+candidates:
+- candidate_id: CGC-0001
+  title: Contexto de modelo fisicamente novo indisponível
+  source_outcome: BLOCKED_EXTERNAL
+  evidence_ids:
+  - EVD-0026
+  statement: A rodada cega foi garantida por detectores determinísticos em processo
+    isolado e por ausência comprovada de ledgers no pacote, não por um segundo modelo
+    sem memória.
+- candidate_id: CGC-0002
+  title: Ambiente de execução Supabase/navegador indisponível
+  source_outcome: BLOCKED_EXTERNAL
+  evidence_ids:
+  - EVD-0026
+  statement: 'Sem banco, navegador ou carga, nenhuma afirmação de runtime foi produzida:
+    RLS, CSP e concorrência foram avaliadas por código-fonte e por execução local
+    de testes, não por comportamento observado.'
+- candidate_id: CGC-0003
+  title: Detector estático insuficiente para função SQL órfã
+  source_outcome: DETECTOR_LIMITATION
+  evidence_ids:
+  - EVD-0023
+  statement: Um detector confiável precisa cruzar chamadas RPC da aplicação com definições
+    SQL; a versão estática produziu falsos positivos em massa e não sustenta achado.

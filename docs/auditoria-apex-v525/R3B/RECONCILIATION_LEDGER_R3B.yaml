@@ -1,0 +1,131 @@
+round: R3B
+count: 11
+classes:
+  MISSED_BY_R1:
+  - FND-0012
+  PERSISTENT:
+  - FND-0001
+  - FND-0002
+  - FND-0004
+  - FND-0005
+  - FND-0007
+  - FND-0008
+  - FND-0011
+  RESOLVED:
+  - FND-0003
+  - FND-0009
+  CORRECTED:
+  - FND-0002
+  - FND-0006
+  REGRESSED: []
+reconciliations:
+- reconciliation_id: REC-0001
+  finding_id: FND-0001
+  detector_id: D01
+  relation: PERSISTENT_PARTIALLY_REMEDIATED
+  blind_detector_pass: false
+  note: O lockfile passou a existir e é versionável (CHG-0001). A instalação congelada
+    permanece desligada porque VACINA-008 fixa a política transitória --no-frozen-lockfile
+    em todos os workflows até que a Etapa 20 conclua a regeneração e verificação integral
+    do lockfile, exigindo mudança transversal e atualização da própria vacina. A tentativa
+    de congelar foi revertida com evidência de reprovação.
+- reconciliation_id: REC-0002
+  finding_id: FND-0002
+  detector_id: D02
+  relation: PERSISTENT_CORRECTED
+  blind_detector_pass: false
+  note: 'Correção do R1: a afirmação de lacuna sem registro estava incompleta. diretrizes/ROADMAP.md,
+    Fase 20.8, lista ''headers e cookies'' como item pendente e não concluído da etapa
+    em curso. O fato técnico (CSP somente em Report-Only, sem coletor) permanece confirmado;
+    a classificação passa a pendência planejada.'
+- reconciliation_id: REC-0003
+  finding_id: FND-0003
+  detector_id: D03
+  relation: RESOLVED_BY_R2
+  blind_detector_pass: true
+  note: O detector cego confirma, sobre a árvore remediada, que a verificação de pré-condições
+    ocorre antes da leitura do corpo. Cinco testes de integração novos exercitam cabeçalho
+    ausente, formato inválido, timestamp fora da janela, tamanho declarado acima do
+    limite e assinatura inválida.
+- reconciliation_id: REC-0004
+  finding_id: FND-0004
+  detector_id: D12
+  relation: PERSISTENT_PARTIALLY_REMEDIATED
+  blind_detector_pass: false
+  note: safeInternalReturnPath e mapPublicOperationError passaram a ter teste (48
+    → 64 testes). safeFileName continua sem cobertura porque lib/signatures/crypto.ts
+    importa 'server-only', que lança fora do ambiente de servidor; testá-lo exige
+    extrair o utilitário puro ou configurar a condição react-server no vitest.
+- reconciliation_id: REC-0005
+  finding_id: FND-0005
+  detector_id: D04
+  relation: PERSISTENT_BY_DECLARED_SCOPE
+  blind_detector_pass: false
+  note: Sete pontos de upload seguem sem análise antimalware, dois deles não autenticados.
+    A lacuna está declarada em docs/ETAPA-20-PROTECAO-ANEXOS.md, registrada como pendente
+    em ESTADO-ATUAL.json e listada na Fase 20.5 do roadmap. Ampliar o escopo é decisão
+    do responsável.
+- reconciliation_id: REC-0006
+  finding_id: FND-0006
+  detector_id: D05
+  relation: CORRECTED_BY_BLIND_ROUND
+  blind_detector_pass: true
+  note: 'Correção do R1: a rodada cega encontrou ''rate limiting'' como item pendente
+    da Fase 20.8 em diretrizes/ROADMAP.md:243. A afirmação original de que nenhum
+    documento canônico registrava a decisão estava errada. O fato técnico (ausência
+    de implementação) permanece confirmado.'
+- reconciliation_id: REC-0007
+  finding_id: FND-0007
+  detector_id: D13
+  relation: PERSISTENT
+  blind_detector_pass: false
+  note: Nenhuma guarda de monotonicidade no manipulador de webhook. A Fase 20.6 do
+    roadmap prevê 'webhook autenticado e idempotente' e 'retry e reconciliação' como
+    pendências, o que enquadra o item.
+- reconciliation_id: REC-0008
+  finding_id: FND-0008
+  detector_id: D09
+  relation: PERSISTENT
+  blind_detector_pass: false
+  note: Dois contadores de acesso seguem em leitura-modificação-escrita. Corrigir
+    com segurança exige função de banco e migration homologada, fora do alcance de
+    uma mudança mínima local.
+- reconciliation_id: REC-0009
+  finding_id: FND-0009
+  detector_id: D08
+  relation: REMEDIATED_WITH_DETECTOR_LIMITATION
+  blind_detector_pass: false
+  note: 'As três variáveis passaram a ser marcadas explicitamente como reservadas
+    em .env.example. O detector cego continua sinalizando porque sua heurística de
+    anotação procura a palavra ''não'' no comentário imediatamente anterior; é limitação
+    do detector, não do artefato. Evidência direta: bloco de comentário ''Reservadas
+    para provedores externos ainda não integrados'' acima das três variáveis.'
+- reconciliation_id: REC-0010
+  finding_id: FND-0010
+  detector_id: null
+  relation: NOT_DETECTED_BY_BLIND_ROUND
+  blind_detector_pass: null
+  note: 'Nenhum detector determinístico confiável foi construído para função SQL órfã:
+    D14 produziu falsos positivos em massa por não enxergar chamadas via RPC da aplicação.
+    O achado do R1 permanece válido por evidência direta de leitura da migration de
+    hardening, com confiança reduzida a MEDIUM.'
+- reconciliation_id: REC-0011
+  finding_id: FND-0011
+  detector_id: D10
+  relation: PERSISTENT
+  blind_detector_pass: false
+  note: Todas as ações de CI seguem referenciadas por tag mutável; 26 ocorrências
+    confirmadas pelo detector.
+detector_limitations:
+- detector_id: D08
+  limitation: FALSE_POSITIVE
+  statement: A heurística de anotação não reconhece o comentário de reserva efetivamente
+    presente em .env.example.
+- detector_id: D14
+  limitation: FALSE_POSITIVE_MASS
+  statement: Considera órfã toda função sem chamada dentro do próprio SQL, ignorando
+    invocação por RPC a partir da aplicação. Não sustenta achado.
+- detector_id: D02
+  limitation: STATIC_ONLY
+  statement: Detecta o modo do cabeçalho no código, não o comportamento observado
+    no navegador.

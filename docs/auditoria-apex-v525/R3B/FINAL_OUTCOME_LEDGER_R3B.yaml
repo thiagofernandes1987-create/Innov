@@ -1,0 +1,61 @@
+round: R3B
+outcomes:
+  PARTIALLY_REMEDIATED:
+  - FND-0001
+  - FND-0004
+  REMEDIATED:
+  - FND-0003
+  - FND-0009
+  REPORTED_NOT_REMEDIATED:
+  - FND-0007
+  - FND-0008
+  - FND-0010
+  - FND-0011
+  - FND-0012
+  REPORTED_OUT_OF_SLICE_SCOPE:
+  - FND-0005
+  REPORTED_PLANNED_PENDING:
+  - FND-0002
+  - FND-0006
+residual_risks:
+- risk_id: RSK-0001
+  related_findings:
+  - FND-0005
+  severity: HIGH
+  statement: Uploads não autenticados de assinatura externa e portal de fornecedor
+    permanecem sem análise antimalware.
+  owner_decision_required: true
+  roadmap_reference: Fase 20.5 — integração dos demais módulos
+- risk_id: RSK-0002
+  related_findings:
+  - FND-0002
+  - FND-0006
+  severity: MEDIUM
+  statement: Borda sem CSP aplicada e sem controle de vazão até a conclusão da Fase
+    20.8.
+  owner_decision_required: true
+  roadmap_reference: Fase 20.8 — Auth e segurança externa
+- risk_id: RSK-0003
+  related_findings:
+  - FND-0001
+  severity: MEDIUM
+  statement: Instalação continua não congelada em todos os workflows; o lockfile agora
+    existe, mas a política só pode ser fechada transversalmente com atualização de
+    VACINA-008.
+  owner_decision_required: true
+  roadmap_reference: VACINA-008 — critério de encerramento
+- risk_id: RSK-0004
+  related_findings:
+  - FND-0004
+  severity: LOW
+  statement: safeFileName segue sem teste por restrição de importação de 'server-only'
+    no ambiente de teste.
+  owner_decision_required: false
+  roadmap_reference: null
+- risk_id: RSK-0005
+  related_findings: []
+  severity: MEDIUM
+  statement: 'Nenhuma afirmação de runtime foi produzida: sem ambiente Supabase, navegador
+    ou carga, as dimensões DIM-14, DIM-15 e DIM-16 permanecem NOT_ASSESSED ou BLOCKED_EXTERNAL.'
+  owner_decision_required: false
+  roadmap_reference: null

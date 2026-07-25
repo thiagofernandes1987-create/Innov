@@ -1,0 +1,33 @@
+round: R4
+count: 4
+candidates:
+- candidate_id: SPC-0001
+  title: RLS habilitada por laço declarativo com lista explícita de tabelas
+  source_outcome: CONFIRMED_STRENGTH
+  evidence_ids:
+  - EVD-0025
+  statement: As 136 tabelas têm RLS habilitada, boa parte por laços `foreach ... execute
+    format` com a lista de tabelas explícita na migration. O padrão evita esquecimento
+    tabela a tabela e mantém a auditoria possível por leitura estática, desde que
+    o auditor expanda os laços.
+- candidate_id: SPC-0002
+  title: security definer sempre com search_path fixo e sem concessão a anon
+  source_outcome: CONFIRMED_STRENGTH
+  evidence_ids:
+  - EVD-0027
+  statement: 159 de 159 funções security definer declaram set search_path; nenhuma
+    concede execução a anon.
+- candidate_id: SPC-0003
+  title: Lock advisory ordenado por posição de estoque
+  source_outcome: CONFIRMED_STRENGTH
+  evidence_ids:
+  - EVD-0026
+  statement: post_inventory_movement adquire pg_advisory_xact_lock por chave de posição
+    em ordem determinística, o que serializa concorrência sem abrir espaço para deadlock.
+- candidate_id: SPC-0004
+  title: Idempotência monetária verificada antes de aplicar aditivo
+  source_outcome: CONFIRMED_STRENGTH
+  evidence_ids:
+  - EVD-0022
+  statement: apply_signed_amendment retorna cedo quando applied_at não é nulo, o que
+    impede reaplicação de valor.

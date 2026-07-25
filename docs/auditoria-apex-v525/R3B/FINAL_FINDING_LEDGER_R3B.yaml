@@ -1,0 +1,286 @@
+round: R3B
+count: 12
+findings:
+- finding_id: FND-0001
+  title: Ausência de lockfile versionado com CI instalando dependências flutuantes
+  dimension: DIM-11
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0001
+  - EVD-0002
+  - EVD-0003
+  - EVD-0004
+  description: O repositório declara packageManager pnpm@11.15.0, porém não versiona
+    pnpm-lock.yaml e todos os workflows instalam com --no-frozen-lockfile. Todas as
+    dependências usam faixas ^, incluindo next, @supabase/*, zod e vitest. Cada execução
+    de CI e cada build podem resolver versões diferentes das auditadas, o que impede
+    reprodutibilidade e amplia a exposição a comprometimento de dependências.
+  impact: Build e CI não reprodutíveis; resultado verde não garante que o artefato
+    publicado use as versões auditadas.
+  executability: EXECUTABLE_LOCALLY
+  status: CLOSED_WITH_OUTCOME
+  round: R1
+  final_outcome: PARTIALLY_REMEDIATED
+  reconciliation_note: O lockfile passou a existir e é versionável (CHG-0001). A instalação
+    congelada permanece desligada porque VACINA-008 fixa a política transitória --no-frozen-lockfile
+    em todos os workflows até que a Etapa 20 conclua a regeneração e verificação integral
+    do lockfile, exigindo mudança transversal e atualização da própria vacina. A tentativa
+    de congelar foi revertida com evidência de reprovação.
+  blind_detector: D01
+- finding_id: FND-0002
+  title: CSP entregue apenas em modo Report-Only e sem coletor de relatórios
+  dimension: DIM-08
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0005
+  description: A política de segurança de conteúdo é emitida como Content-Security-Policy-Report-Only
+    e nenhuma diretiva report-uri/report-to é definida. O navegador não bloqueia nada
+    e não há destino para violações, de modo que a política não protege nem gera telemetria
+    em uma etapa de prontidão de produção.
+  impact: Nenhuma mitigação efetiva de injeção de script e nenhuma evidência de violações.
+  executability: REQUIRES_RUNTIME_VALIDATION
+  status: CLOSED_WITH_OUTCOME
+  round: R1
+  final_outcome: REPORTED_PLANNED_PENDING
+  reconciliation_note: 'Correção do R1: a afirmação de lacuna sem registro estava
+    incompleta. diretrizes/ROADMAP.md, Fase 20.8, lista ''headers e cookies'' como
+    item pendente e não concluído da etapa em curso. O fato técnico (CSP somente em
+    Report-Only, sem coletor) permanece confirmado; a classificação passa a pendência
+    planejada.'
+  blind_detector: D02
+- finding_id: FND-0003
+  title: Gateway de antimalware bufferiza corpo de até 25 MB antes de autenticar
+  dimension: DIM-04
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0006
+  - EVD-0007
+  description: O serviço exposto publicamente lê integralmente o corpo da requisição
+    antes de verificar a assinatura HMAC, porque a assinatura cobre o SHA-256 do conteúdo.
+    Cabeçalhos obrigatórios, formato da assinatura, janela de tempo e Content-Length
+    podem ser rejeitados antes da leitura, mas não são.
+  impact: Consumo de memória e banda por requisições anônimas; superfície de exaustão
+    de recursos no host gratuito.
+  executability: EXECUTABLE_LOCALLY
+  status: CLOSED_WITH_OUTCOME
+  round: R1
+  final_outcome: REMEDIATED
+  reconciliation_note: O detector cego confirma, sobre a árvore remediada, que a verificação
+    de pré-condições ocorre antes da leitura do corpo. Cinco testes de integração
+    novos exercitam cabeçalho ausente, formato inválido, timestamp fora da janela,
+    tamanho declarado acima do limite e assinatura inválida.
+  blind_detector: D03
+- finding_id: FND-0004
+  title: Controles de segurança sem cobertura de teste automatizado
+  dimension: DIM-10
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0008
+  - EVD-0009
+  - EVD-0010
+  description: safeInternalReturnPath é a única defesa contra open redirect nos fluxos
+    de login e seleção de organização e não possui teste. O mesmo vale para safeFileName
+    e canonicalJson, usados na trilha de assinatura, e para mapPublicOperationError,
+    responsável por impedir vazamento de mensagens internas.
+  impact: Regressão silenciosa em controles de segurança já implementados.
+  executability: EXECUTABLE_LOCALLY
+  status: CLOSED_WITH_OUTCOME
+  round: R1
+  final_outcome: PARTIALLY_REMEDIATED
+  reconciliation_note: safeInternalReturnPath e mapPublicOperationError passaram a
+    ter teste (48 → 64 testes). safeFileName continua sem cobertura porque lib/signatures/crypto.ts
+    importa 'server-only', que lança fora do ambiente de servidor; testá-lo exige
+    extrair o utilitário puro ou configurar a condição react-server no vitest.
+  blind_detector: D12
+- finding_id: FND-0005
+  title: Antimalware cobre apenas o SAC; demais uploads, inclusive não autenticados,
+    seguem sem análise
+  dimension: DIM-06
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0011
+  - EVD-0012
+  - EVD-0013
+  - EVD-0014
+  - EVD-0015
+  description: 'secureUpload é chamado somente no fluxo de anexos do SAC. Os demais
+    sete caminhos de upload gravam direto no bucket definitivo, incluindo dois fluxos
+    sem autenticação: evidência do signatário externo e anexo de cotação do portal
+    do fornecedor. A lacuna está explicitamente declarada como fora do escopo da fatia
+    e registrada como pendente no estado canônico, portanto é risco residual conhecido
+    e não defeito oculto.'
+  impact: Arquivos potencialmente maliciosos ficam disponíveis para download interno
+    a partir de origens anônimas.
+  executability: OUT_OF_SLICE_SCOPE_OWNER_DECISION
+  status: CLOSED_WITH_OUTCOME
+  round: R1
+  final_outcome: REPORTED_OUT_OF_SLICE_SCOPE
+  reconciliation_note: Sete pontos de upload seguem sem análise antimalware, dois
+    deles não autenticados. A lacuna está declarada em docs/ETAPA-20-PROTECAO-ANEXOS.md,
+    registrada como pendente em ESTADO-ATUAL.json e listada na Fase 20.5 do roadmap.
+    Ampliar o escopo é decisão do responsável.
+  blind_detector: D04
+- finding_id: FND-0006
+  title: Ausência de controle de vazão em superfícies não autenticadas, sem decisão
+    documentada
+  dimension: DIM-04
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0020
+  - EVD-0013
+  - EVD-0014
+  description: Nenhum controle de vazão existe no código, nas migrations ou na borda,
+    e nenhum documento canônico registra a decisão de não implementá-lo. Os endpoints
+    de assinatura pública, portal de fornecedor, formulário público, webhook e gateway
+    aceitam requisições anônimas ilimitadas, várias com upload.
+  impact: Abuso de recursos e custo em uma etapa cujo escopo declarado inclui hardening
+    de segurança externa.
+  executability: REQUIRES_ARCHITECTURE_DECISION
+  status: CLOSED_WITH_OUTCOME
+  round: R1
+  final_outcome: REPORTED_PLANNED_PENDING
+  reconciliation_note: 'Correção do R1: a rodada cega encontrou ''rate limiting''
+    como item pendente da Fase 20.8 em diretrizes/ROADMAP.md:243. A afirmação original
+    de que nenhum documento canônico registrava a decisão estava errada. O fato técnico
+    (ausência de implementação) permanece confirmado.'
+  blind_detector: D05
+- finding_id: FND-0007
+  title: Webhook de assinatura aceita transição de estado regressiva
+  dimension: DIM-05
+  severity: LOW
+  confidence: HIGH
+  statement_type: TECHNICAL_INFERENCE
+  evidence_ids:
+  - EVD-0021
+  - EVD-0022
+  description: O manipulador aplica o status do evento sem verificar a ordem ou a
+    monotonicidade. Um evento válido, com identificador distinto e entregue fora de
+    ordem, pode reverter um envelope COMPLETED para VIEWED ou SENT e sobrescrever
+    contracts.status='AMENDED' com 'SIGNED'. A aplicação monetária do aditivo permanece
+    idempotente, o que limita o impacto ao estado exibido e à trilha.
+  impact: Estado contratual exibido e auditado pode divergir do estado real do provedor.
+  executability: REQUIRES_PROVIDER_SEMANTICS_DECISION
+  status: CLOSED_WITH_OUTCOME
+  round: R1
+  final_outcome: REPORTED_NOT_REMEDIATED
+  reconciliation_note: Nenhuma guarda de monotonicidade no manipulador de webhook.
+    A Fase 20.6 do roadmap prevê 'webhook autenticado e idempotente' e 'retry e reconciliação'
+    como pendências, o que enquadra o item.
+  blind_detector: D13
+- finding_id: FND-0008
+  title: Contadores de acesso atualizados por leitura-modificação-escrita
+  dimension: DIM-05
+  severity: LOW
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0018
+  - EVD-0019
+  description: access_count do link público de formulário e do convite de fornecedor
+    é lido na aplicação e regravado somado de um. Sob acessos concorrentes o incremento
+    se perde. O campo é métrica de uso e não controla acesso.
+  impact: Subcontagem de acessos em métricas de portal.
+  executability: REQUIRES_DATABASE_FUNCTION
+  status: CLOSED_WITH_OUTCOME
+  round: R1
+  final_outcome: REPORTED_NOT_REMEDIATED
+  reconciliation_note: Dois contadores de acesso seguem em leitura-modificação-escrita.
+    Corrigir com segurança exige função de banco e migration homologada, fora do alcance
+    de uma mudança mínima local.
+  blind_detector: D09
+- finding_id: FND-0009
+  title: Variáveis de provedores de assinatura declaradas e nunca consumidas
+  dimension: DIM-07
+  severity: LOW
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0016
+  - EVD-0017
+  description: Três segredos de provedores de assinatura constam do .env.example sem
+    nenhum consumidor no código. O operador é induzido a provisionar e rotacionar
+    segredos que o sistema não utiliza.
+  impact: Superfície de segredo desnecessária e ruído operacional.
+  executability: EXECUTABLE_LOCALLY
+  status: CLOSED_WITH_OUTCOME
+  round: R1
+  final_outcome: REMEDIATED
+  reconciliation_note: 'As três variáveis passaram a ser marcadas explicitamente como
+    reservadas em .env.example. O detector cego continua sinalizando porque sua heurística
+    de anotação procura a palavra ''não'' no comentário imediatamente anterior; é
+    limitação do detector, não do artefato. Evidência direta: bloco de comentário
+    ''Reservadas para provedores externos ainda não integrados'' acima das três variáveis.'
+  blind_detector: D08
+- finding_id: FND-0010
+  title: Função de diagnóstico global permanece sem referência após o hardening R3B
+  dimension: DIM-09
+  severity: LOW
+  confidence: MEDIUM
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0023
+  description: A migration de hardening substituiu a policy que consumia stage19_can_read_global_diagnostics()
+    e revogou a execução para authenticated, mas manteve a função criada. Ela não
+    é referenciada por nenhuma policy ou função remanescente.
+  impact: Superfície residual sem consumidor; risco de reintrodução silenciosa em
+    revisões futuras.
+  executability: REQUIRES_MIGRATION_DECISION
+  status: CLOSED_WITH_OUTCOME
+  round: R1
+  final_outcome: REPORTED_NOT_REMEDIATED
+  reconciliation_note: 'Nenhum detector determinístico confiável foi construído para
+    função SQL órfã: D14 produziu falsos positivos em massa por não enxergar chamadas
+    via RPC da aplicação. O achado do R1 permanece válido por evidência direta de
+    leitura da migration de hardening, com confiança reduzida a MEDIUM.'
+  blind_detector: null
+- finding_id: FND-0011
+  title: Ações de CI referenciadas por tag mutável
+  dimension: DIM-11
+  severity: LOW
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0024
+  description: Todos os workflows usam actions/checkout@v6, actions/setup-node@v6
+    e actions/upload-artifact@v7. Tags são mutáveis e podem ser reapontadas pelo mantenedor
+    da ação, o que altera o código executado no CI sem alteração no repositório.
+  impact: Execução de código de terceiros não fixado no pipeline que valida a plataforma.
+  executability: REQUIRES_SUPPLY_CHAIN_POLICY
+  status: CLOSED_WITH_OUTCOME
+  round: R1
+  final_outcome: REPORTED_NOT_REMEDIATED
+  reconciliation_note: Todas as ações de CI seguem referenciadas por tag mutável;
+    26 ocorrências confirmadas pelo detector.
+  blind_detector: D10
+- finding_id: FND-0012
+  title: Artefatos gerados não ignorados pelo versionamento
+  dimension: DIM-11
+  severity: LOW
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  origin: R3A_BLIND_DETECTOR_D11
+  evidence_ids:
+  - EVD-R3A-D11
+  description: O .gitignore cobre node_modules, .next, out, coverage, .env*, logs,
+    .vercel e supabase/.temp, mas não cobre tsconfig.tsbuildinfo nem __pycache__.
+    Ambos são gerados por comandos do próprio CI (pnpm typecheck e pnpm test:python)
+    e aparecem como não rastreados após uma execução local.
+  impact: Risco de commit acidental de artefato de build e ruído em revisões.
+  status: OPEN
+  final_outcome: REPORTED_NOT_REMEDIATED
+  note: 'Descoberto após o congelamento do R1 e registrado como novo, sem retroalimentar
+    a rodada congelada (invariante NO_CROSS_PROMPT_BACKFLOW_WITHIN_SAME_CYCLE). Não
+    remediado nesta rodada: alterar .gitignore fora de uma decisão do responsável
+    poderia mascarar arquivos que o projeto queira inspecionar.'

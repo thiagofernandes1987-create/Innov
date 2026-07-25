@@ -1,0 +1,227 @@
+round: R1
+count: 11
+by_severity:
+  HIGH: 2
+  MEDIUM: 4
+  LOW: 5
+findings:
+- finding_id: FND-0001
+  title: Ausência de lockfile versionado com CI instalando dependências flutuantes
+  dimension: DIM-11
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0001
+  - EVD-0002
+  - EVD-0003
+  - EVD-0004
+  description: O repositório declara packageManager pnpm@11.15.0, porém não versiona
+    pnpm-lock.yaml e todos os workflows instalam com --no-frozen-lockfile. Todas as
+    dependências usam faixas ^, incluindo next, @supabase/*, zod e vitest. Cada execução
+    de CI e cada build podem resolver versões diferentes das auditadas, o que impede
+    reprodutibilidade e amplia a exposição a comprometimento de dependências.
+  impact: Build e CI não reprodutíveis; resultado verde não garante que o artefato
+    publicado use as versões auditadas.
+  executability: EXECUTABLE_LOCALLY
+  status: OPEN
+  round: R1
+- finding_id: FND-0002
+  title: CSP entregue apenas em modo Report-Only e sem coletor de relatórios
+  dimension: DIM-08
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0005
+  description: A política de segurança de conteúdo é emitida como Content-Security-Policy-Report-Only
+    e nenhuma diretiva report-uri/report-to é definida. O navegador não bloqueia nada
+    e não há destino para violações, de modo que a política não protege nem gera telemetria
+    em uma etapa de prontidão de produção.
+  impact: Nenhuma mitigação efetiva de injeção de script e nenhuma evidência de violações.
+  executability: REQUIRES_RUNTIME_VALIDATION
+  status: OPEN
+  round: R1
+- finding_id: FND-0003
+  title: Gateway de antimalware bufferiza corpo de até 25 MB antes de autenticar
+  dimension: DIM-04
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0006
+  - EVD-0007
+  description: O serviço exposto publicamente lê integralmente o corpo da requisição
+    antes de verificar a assinatura HMAC, porque a assinatura cobre o SHA-256 do conteúdo.
+    Cabeçalhos obrigatórios, formato da assinatura, janela de tempo e Content-Length
+    podem ser rejeitados antes da leitura, mas não são.
+  impact: Consumo de memória e banda por requisições anônimas; superfície de exaustão
+    de recursos no host gratuito.
+  executability: EXECUTABLE_LOCALLY
+  status: OPEN
+  round: R1
+- finding_id: FND-0004
+  title: Controles de segurança sem cobertura de teste automatizado
+  dimension: DIM-10
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0008
+  - EVD-0009
+  - EVD-0010
+  description: safeInternalReturnPath é a única defesa contra open redirect nos fluxos
+    de login e seleção de organização e não possui teste. O mesmo vale para safeFileName
+    e canonicalJson, usados na trilha de assinatura, e para mapPublicOperationError,
+    responsável por impedir vazamento de mensagens internas.
+  impact: Regressão silenciosa em controles de segurança já implementados.
+  executability: EXECUTABLE_LOCALLY
+  status: OPEN
+  round: R1
+- finding_id: FND-0005
+  title: Antimalware cobre apenas o SAC; demais uploads, inclusive não autenticados,
+    seguem sem análise
+  dimension: DIM-06
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0011
+  - EVD-0012
+  - EVD-0013
+  - EVD-0014
+  - EVD-0015
+  description: 'secureUpload é chamado somente no fluxo de anexos do SAC. Os demais
+    sete caminhos de upload gravam direto no bucket definitivo, incluindo dois fluxos
+    sem autenticação: evidência do signatário externo e anexo de cotação do portal
+    do fornecedor. A lacuna está explicitamente declarada como fora do escopo da fatia
+    e registrada como pendente no estado canônico, portanto é risco residual conhecido
+    e não defeito oculto.'
+  impact: Arquivos potencialmente maliciosos ficam disponíveis para download interno
+    a partir de origens anônimas.
+  executability: OUT_OF_SLICE_SCOPE_OWNER_DECISION
+  status: OPEN
+  round: R1
+- finding_id: FND-0006
+  title: Ausência de controle de vazão em superfícies não autenticadas, sem decisão
+    documentada
+  dimension: DIM-04
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0020
+  - EVD-0013
+  - EVD-0014
+  description: Nenhum controle de vazão existe no código, nas migrations ou na borda,
+    e nenhum documento canônico registra a decisão de não implementá-lo. Os endpoints
+    de assinatura pública, portal de fornecedor, formulário público, webhook e gateway
+    aceitam requisições anônimas ilimitadas, várias com upload.
+  impact: Abuso de recursos e custo em uma etapa cujo escopo declarado inclui hardening
+    de segurança externa.
+  executability: REQUIRES_ARCHITECTURE_DECISION
+  status: OPEN
+  round: R1
+- finding_id: FND-0007
+  title: Webhook de assinatura aceita transição de estado regressiva
+  dimension: DIM-05
+  severity: LOW
+  confidence: HIGH
+  statement_type: TECHNICAL_INFERENCE
+  evidence_ids:
+  - EVD-0021
+  - EVD-0022
+  description: O manipulador aplica o status do evento sem verificar a ordem ou a
+    monotonicidade. Um evento válido, com identificador distinto e entregue fora de
+    ordem, pode reverter um envelope COMPLETED para VIEWED ou SENT e sobrescrever
+    contracts.status='AMENDED' com 'SIGNED'. A aplicação monetária do aditivo permanece
+    idempotente, o que limita o impacto ao estado exibido e à trilha.
+  impact: Estado contratual exibido e auditado pode divergir do estado real do provedor.
+  executability: REQUIRES_PROVIDER_SEMANTICS_DECISION
+  status: OPEN
+  round: R1
+- finding_id: FND-0008
+  title: Contadores de acesso atualizados por leitura-modificação-escrita
+  dimension: DIM-05
+  severity: LOW
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0018
+  - EVD-0019
+  description: access_count do link público de formulário e do convite de fornecedor
+    é lido na aplicação e regravado somado de um. Sob acessos concorrentes o incremento
+    se perde. O campo é métrica de uso e não controla acesso.
+  impact: Subcontagem de acessos em métricas de portal.
+  executability: REQUIRES_DATABASE_FUNCTION
+  status: OPEN
+  round: R1
+- finding_id: FND-0009
+  title: Variáveis de provedores de assinatura declaradas e nunca consumidas
+  dimension: DIM-07
+  severity: LOW
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0016
+  - EVD-0017
+  description: Três segredos de provedores de assinatura constam do .env.example sem
+    nenhum consumidor no código. O operador é induzido a provisionar e rotacionar
+    segredos que o sistema não utiliza.
+  impact: Superfície de segredo desnecessária e ruído operacional.
+  executability: EXECUTABLE_LOCALLY
+  status: OPEN
+  round: R1
+- finding_id: FND-0010
+  title: Função de diagnóstico global permanece sem referência após o hardening R3B
+  dimension: DIM-09
+  severity: LOW
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0023
+  description: A migration de hardening substituiu a policy que consumia stage19_can_read_global_diagnostics()
+    e revogou a execução para authenticated, mas manteve a função criada. Ela não
+    é referenciada por nenhuma policy ou função remanescente.
+  impact: Superfície residual sem consumidor; risco de reintrodução silenciosa em
+    revisões futuras.
+  executability: REQUIRES_MIGRATION_DECISION
+  status: OPEN
+  round: R1
+- finding_id: FND-0011
+  title: Ações de CI referenciadas por tag mutável
+  dimension: DIM-11
+  severity: LOW
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  evidence_ids:
+  - EVD-0024
+  description: Todos os workflows usam actions/checkout@v6, actions/setup-node@v6
+    e actions/upload-artifact@v7. Tags são mutáveis e podem ser reapontadas pelo mantenedor
+    da ação, o que altera o código executado no CI sem alteração no repositório.
+  impact: Execução de código de terceiros não fixado no pipeline que valida a plataforma.
+  executability: REQUIRES_SUPPLY_CHAIN_POLICY
+  status: OPEN
+  round: R1
+strengths:
+- id: STR-01
+  title: Cobertura de RLS
+  evidence_ids:
+  - EVD-0025
+  note: 136/136 tabelas com RLS habilitada, incluindo os laços dinâmicos por módulo.
+- id: STR-02
+  title: Higiene de funções security definer
+  evidence_ids:
+  - EVD-0027
+  note: 159 funções security definer, todas com set search_path e nenhuma concedida
+    a anon.
+- id: STR-03
+  title: Baseline de verificação verde
+  evidence_ids:
+  - EVD-0026
+  note: 19/19 verificações do próprio repositório aprovadas no commit auditado.
+- id: STR-04
+  title: Idempotência monetária do aditivo
+  evidence_ids:
+  - EVD-0022
+  note: apply_signed_amendment não reaplica valores.

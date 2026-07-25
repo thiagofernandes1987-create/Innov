@@ -1,0 +1,199 @@
+round: R3A
+package_file_count: 444
+prohibited_files_present: []
+isolated_prefixed_subset:
+- .github/workflows/ci.yml
+- .github/workflows/stage11-homologation.yml
+- .github/workflows/stage18-concurrent-e2e.yml
+- .github/workflows/stage20-backup-restore-drill.yml
+- .github/workflows/stage20-file-security-e2e.yml
+- .github/workflows/stage20-file-security-gateway-e2e.yml
+- .github/workflows/stage20-file-security-provider-health.yml
+- .github/workflows/stage20-inventory-concurrency-e2e.yml
+- app/actions/access-control.ts
+- app/actions/advanced-signatures.ts
+- app/actions/auth.ts
+- app/actions/budgets.ts
+- app/actions/create-budget.ts
+- app/actions/inventory-extra.ts
+- app/actions/inventory-stocktake.ts
+- app/actions/inventory.ts
+- app/actions/observability.ts
+- app/actions/operational-finance.ts
+- app/actions/organization-context.ts
+- app/actions/procurement.ts
+- app/actions/projects.ts
+- app/actions/public-signing.ts
+- app/actions/quality.ts
+- app/actions/relationship.ts
+allowed_input_index:
+- artifact_id: ART-8B2AAD61E11DF235451490E3
+  name: 0R3A_00_ci.yml
+  relative_path: 0R3A_00_ci.yml
+  payload_relative_path: 0R3A_00_ci.yml
+  sha256: 19be7c6b4e7d6dc3e01a13df10a4986acfaedaa377bed77fb085c137b66261c1
+  bytes: 5251
+  status: ALLOWED
+- artifact_id: ART-C1F59E75FEB0EC49D7634CC6
+  name: 0R3A_01_stage11-homologation.yml
+  relative_path: 0R3A_01_stage11-homologation.yml
+  payload_relative_path: 0R3A_01_stage11-homologation.yml
+  sha256: 7473bb9a21a1440dfb5a0996679289a80f439eafdb6034a3e7fb49caf018adfd
+  bytes: 1864
+  status: ALLOWED
+- artifact_id: ART-F999337B6DC7FC57CDC2DC8F
+  name: 0R3A_02_stage18-concurrent-e2e.yml
+  relative_path: 0R3A_02_stage18-concurrent-e2e.yml
+  payload_relative_path: 0R3A_02_stage18-concurrent-e2e.yml
+  sha256: 9d1d3f4a95337be2007b277b420c940b35a6c4ef06a3224d44b065054b3b8af1
+  bytes: 4052
+  status: ALLOWED
+- artifact_id: ART-5F5BF92CC705F9DE043383C3
+  name: 0R3A_03_stage20-backup-restore-drill.yml
+  relative_path: 0R3A_03_stage20-backup-restore-drill.yml
+  payload_relative_path: 0R3A_03_stage20-backup-restore-drill.yml
+  sha256: d112450b4136b13dd3b96eb8f2d8b5e31826b1b0751e05d5ead852a184448535
+  bytes: 3989
+  status: ALLOWED
+- artifact_id: ART-C59E401086D68E0D6D0F2E9B
+  name: 0R3A_04_stage20-file-security-e2e.yml
+  relative_path: 0R3A_04_stage20-file-security-e2e.yml
+  payload_relative_path: 0R3A_04_stage20-file-security-e2e.yml
+  sha256: 2c8dffd95cc5891ab38bd9aa7fba72ded2ecdeba9241bbe7b6a603c1ea05996e
+  bytes: 1371
+  status: ALLOWED
+- artifact_id: ART-FDA49B5F5440A0D5F1ADE653
+  name: 0R3A_05_stage20-file-security-gateway-e2e.yml
+  relative_path: 0R3A_05_stage20-file-security-gateway-e2e.yml
+  payload_relative_path: 0R3A_05_stage20-file-security-gateway-e2e.yml
+  sha256: 5a87da71adb8ee9a271499c8b7906b35e3bb209be6de1054ed8dc8eac1906ce0
+  bytes: 3352
+  status: ALLOWED
+- artifact_id: ART-F767F6BBF6661673F785D87E
+  name: 0R3A_06_stage20-file-security-provider-health.yml
+  relative_path: 0R3A_06_stage20-file-security-provider-health.yml
+  payload_relative_path: 0R3A_06_stage20-file-security-provider-health.yml
+  sha256: f0e58ba2149278084b7f753a37244bcb8e3fb5c3cd6ec46f0103cccfa2876da2
+  bytes: 3080
+  status: ALLOWED
+- artifact_id: ART-0378BB1D84824D64AFC78EB7
+  name: 0R3A_07_stage20-inventory-concurrency-e2e.yml
+  relative_path: 0R3A_07_stage20-inventory-concurrency-e2e.yml
+  payload_relative_path: 0R3A_07_stage20-inventory-concurrency-e2e.yml
+  sha256: 720d83beaf964d575c24859a0a7dfa5684247737cc71332dbc18d2630b89f3a4
+  bytes: 3781
+  status: ALLOWED
+- artifact_id: ART-2618CE1F88646F1A14FE55FD
+  name: 0R3A_08_access-control.ts
+  relative_path: 0R3A_08_access-control.ts
+  payload_relative_path: 0R3A_08_access-control.ts
+  sha256: 1a299153d3334a5b80a150f8bce59940f371381a66e619d097a4fec239f38965
+  bytes: 5460
+  status: ALLOWED
+- artifact_id: ART-51BBE951D781CECD5A1A63C3
+  name: 0R3A_09_advanced-signatures.ts
+  relative_path: 0R3A_09_advanced-signatures.ts
+  payload_relative_path: 0R3A_09_advanced-signatures.ts
+  sha256: 713a624d5bfd56583388f080877ae8445c53c3bd258c5be247983cb9377564ad
+  bytes: 14530
+  status: ALLOWED
+- artifact_id: ART-E813E2CB03C0CF5F5C70EFB3
+  name: 0R3A_10_auth.ts
+  relative_path: 0R3A_10_auth.ts
+  payload_relative_path: 0R3A_10_auth.ts
+  sha256: cccd95a2073c2985f53727a846352ce187ef8346cc1678b17c879b806323bbeb
+  bytes: 935
+  status: ALLOWED
+- artifact_id: ART-B4F548ADD25BD7DE77BA1E9B
+  name: 0R3A_11_budgets.ts
+  relative_path: 0R3A_11_budgets.ts
+  payload_relative_path: 0R3A_11_budgets.ts
+  sha256: 5139669401a56aed42cc6ab6d402fa408efe96a7e2292eb318e3b5529b4c0a9d
+  bytes: 2048
+  status: ALLOWED
+- artifact_id: ART-19AB86066D5636F5339438F9
+  name: 0R3A_12_create-budget.ts
+  relative_path: 0R3A_12_create-budget.ts
+  payload_relative_path: 0R3A_12_create-budget.ts
+  sha256: b319e3553db4e108388acb0ded7448a307b52e212a3a79dd1294250384753a2b
+  bytes: 1032
+  status: ALLOWED
+- artifact_id: ART-E845E6AC9D1DB1511B1E77A3
+  name: 0R3A_13_inventory-extra.ts
+  relative_path: 0R3A_13_inventory-extra.ts
+  payload_relative_path: 0R3A_13_inventory-extra.ts
+  sha256: 649086cfa61c99ac9d578b2623e369a2eadc8859136a87aa51f2d028507ee67e
+  bytes: 3130
+  status: ALLOWED
+- artifact_id: ART-3701A0147081787E876435EE
+  name: 0R3A_14_inventory-stocktake.ts
+  relative_path: 0R3A_14_inventory-stocktake.ts
+  payload_relative_path: 0R3A_14_inventory-stocktake.ts
+  sha256: c8b1db1f4b59bc9409ea56e4028d10349540b3507e63f13307b4effa3e36d75f
+  bytes: 1013
+  status: ALLOWED
+- artifact_id: ART-A340F6566985D726A3A390B9
+  name: 0R3A_15_inventory.ts
+  relative_path: 0R3A_15_inventory.ts
+  payload_relative_path: 0R3A_15_inventory.ts
+  sha256: dd204d500465716b89bd9833830ad8b70195bb356fce66a360737487b1309395
+  bytes: 15050
+  status: ALLOWED
+- artifact_id: ART-D0571C0A1BAB6930A54D7AD8
+  name: 0R3A_16_observability.ts
+  relative_path: 0R3A_16_observability.ts
+  payload_relative_path: 0R3A_16_observability.ts
+  sha256: 0c7bc27301fc7b19d225340e7c7318671a3660d6455ae722b35382d184021fdd
+  bytes: 3133
+  status: ALLOWED
+- artifact_id: ART-424A805B18F35D95875EAA91
+  name: 0R3A_17_operational-finance.ts
+  relative_path: 0R3A_17_operational-finance.ts
+  payload_relative_path: 0R3A_17_operational-finance.ts
+  sha256: e4c576a7367d85ea53fa4121ccce864792a7d892f72fed2a0507aebb73d9475d
+  bytes: 13819
+  status: ALLOWED
+- artifact_id: ART-8C0645F4FB4966D31E596DF8
+  name: 0R3A_18_organization-context.ts
+  relative_path: 0R3A_18_organization-context.ts
+  payload_relative_path: 0R3A_18_organization-context.ts
+  sha256: 477548bd6cacaab1b525533b30324ea37fefb9d7d7337d41097980499c31db62
+  bytes: 1067
+  status: ALLOWED
+- artifact_id: ART-88DAA5B0EFD2AFADB918DACA
+  name: 0R3A_19_procurement.ts
+  relative_path: 0R3A_19_procurement.ts
+  payload_relative_path: 0R3A_19_procurement.ts
+  sha256: c9c39389829b1c1af8855bee2e863e354ad3e739525dd85530404b98056a8ce9
+  bytes: 15927
+  status: ALLOWED
+- artifact_id: ART-D589F0F0596DADAD22A3ACF0
+  name: 0R3A_20_projects.ts
+  relative_path: 0R3A_20_projects.ts
+  payload_relative_path: 0R3A_20_projects.ts
+  sha256: 988f23b454850cee92e54fa373a89c62fd40368c1d7da52cde9d0d750569466d
+  bytes: 19091
+  status: ALLOWED
+- artifact_id: ART-7BFA1D4C0478B4E9DA709C47
+  name: 0R3A_21_public-signing.ts
+  relative_path: 0R3A_21_public-signing.ts
+  payload_relative_path: 0R3A_21_public-signing.ts
+  sha256: 253d4bedeb219498a5a19bdb5837c62028cc844046494075b5998aa12418f711
+  bytes: 5782
+  status: ALLOWED
+- artifact_id: ART-DE775263DE9A57B2401ED0F3
+  name: 0R3A_22_quality.ts
+  relative_path: 0R3A_22_quality.ts
+  payload_relative_path: 0R3A_22_quality.ts
+  sha256: db3b818d501831d27c2b2283658e52b468b30f46903b774ace2ae69fc87844b2
+  bytes: 17006
+  status: ALLOWED
+- artifact_id: ART-67091355C87EA537BA88CFA5
+  name: 0R3A_23_relationship.ts
+  relative_path: 0R3A_23_relationship.ts
+  payload_relative_path: 0R3A_23_relationship.ts
+  sha256: 4a9fc1d6e3771fe88943ff0aeeaee2e02c6edfaa5a172b0e6b7cbca34d1c7a64
+  bytes: 15173
+  status: ALLOWED
+package_build_pass: true
+package_prefixes_valid: true

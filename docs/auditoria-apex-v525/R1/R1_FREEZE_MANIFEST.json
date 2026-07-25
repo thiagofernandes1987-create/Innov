@@ -1,0 +1,24 @@
+{
+  "files": [
+    {
+      "bytes": 177973,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R1/ARTIFACT_INDEX_R1.yaml",
+      "sha256": "71d72b4a170be299d43faf79996da446cbcca4bf3e4ff01a85c048aa5fdb952a"
+    },
+    {
+      "bytes": 13028,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R1/EVIDENCE_LEDGER_R1.yaml",
+      "sha256": "630fe80dca74448006d54ff35799675fcd1bc9f0be342eaf9eb25b6428c58787"
+    },
+    {
+      "bytes": 8901,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R1/FINDING_LEDGER_R1.yaml",
+      "sha256": "b4f8661c128a47bc69fc85a16ac6861ec506669064af187f194e2fe727d41a35"
+    },
+    {
+      "bytes": 2766,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R1/DIMENSION_LEDGER_R1.yaml",
+      "sha256": "7372238ed600dba0f629b5750fd2346773da3faabc0736f80352047393e2b60d"
+    }
+  ]
+}
