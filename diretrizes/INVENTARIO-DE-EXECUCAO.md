@@ -328,6 +328,38 @@ O número que decide o desenho é outro: **os nomes físicos já são neutros.**
 
 ---
 
+## Sprint S-21 — Reconciliação do ledger de migrations com a homologação
+**Estado:** pendente
+**Marco:** M-0
+
+Descoberto em 25 de julho de 2026, ao testar a conexão com o Supabase. Entra no fim conforme a regra R4.
+
+**Três migrations estão aplicadas em homologação e não existem no repositório:**
+
+| Versão | Nome |
+|---|---|
+| `20260721220507` | `stage19_1_module_dependency_reconciliation` |
+| `20260721220509` | `stage19_1_observability_detail_parity` |
+| `20260721221145` | `stage19_1_audit_rls_policy_consolidation` |
+
+A divergência é na direção perigosa: existe mudança de esquema no banco sem fonte no repositório. Um ambiente reconstruído a partir da `main`, seguindo `RECUPERACAO.md`, **não teria essas três** — e a política de recuperação do projeto afirma que o projeto pode ser recuperado sem depender de nada fora do repositório.
+
+Na outra direção, três migrations do repositório não estão aplicadas em homologação: `20260722104500`, `20260723062000` e `20260723104500`. Essa parte já era conhecida pela auditoria da Etapa 20 (RSK-0003).
+
+Consulta ao catálogo antes de resolver, conforme o protocolo: a causa raiz **já está catalogada** como `VACINA-003` — "ledger local de migrations diverge do Supabase remoto". A prevenção registrada, porém, não cobre este caso: `scripts/validate-supabase-migrations.mjs` compara o diretório local contra uma **lista fixa de quatro arquivos da Etapa 17**, congelada quando a vacina foi escrita. É um retrato, não uma comparação. O remoto andou depois disso e o validador não tem como perceber.
+
+- [ ] T-21.1 — Obter o conteúdo real das três migrations aplicadas, a partir do esquema em homologação
+- [ ] T-21.2 — Trazê-las para `supabase/migrations` com o mesmo carimbo de versão, sem reescrever histórico aplicado
+- [ ] T-21.3 — Confirmar que aplicar o repositório inteiro em base limpa produz o mesmo esquema da homologação
+- [ ] T-21.4 — Propor substituição da prevenção da VACINA-003: comparação viva contra o ledger remoto, no lugar da lista fixa
+  - [ ] T-21.4.1 — Portão 1, eliminatório: a prevenção nova cobre a mesma causa raiz com garantia maior — detecta divergência em qualquer direção, não só nos quatro arquivos listados
+  - [ ] T-21.4.2 — Portão 2: retorno material — hoje a detecção é zero para migrations criadas depois da vacina
+  - [ ] T-21.4.3 — Tipo de evidência: `negativa` — teste que prova que a divergência atual seria detectada
+  - [ ] T-21.4.4 — **PR próprio**, separado da correção que a motivou, decidido pelo responsável
+- [ ] T-21.5 — Aplicar em homologação as migrations pendentes do repositório, incluindo as do Object Runtime
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.

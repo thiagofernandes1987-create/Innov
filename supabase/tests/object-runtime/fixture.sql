@@ -34,11 +34,24 @@ create table if not exists public.organizations (
   name text not null
 );
 
+-- Nível de acesso é enum na plataforma, não texto. A fixture espelha a
+-- assinatura real, verificada em 25/07/2026 contra o projeto de homologação:
+-- has_module_permission(uuid, text, app_access_level, uuid, text). Fixture com
+-- assinatura diferente da real deixa passar justamente o erro que ela deveria
+-- pegar — uma chamada que não resolve em produção.
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'app_access_level') then
+    create type public.app_access_level as enum ('NONE', 'READ', 'EDIT', 'DELETE');
+  end if;
+end;
+$$;
+
 -- Permissão controlável pelo teste: `test.permission_granted` decide.
 create or replace function public.has_module_permission(
   p_organization_id uuid,
   p_module_key text,
-  p_level text,
+  p_required_level public.app_access_level,
   p_project_id uuid,
   p_action text
 )
