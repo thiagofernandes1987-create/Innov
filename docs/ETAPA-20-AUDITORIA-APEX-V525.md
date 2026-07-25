@@ -50,7 +50,7 @@ Dimensões avaliadas: 16. Treze `APPLICABLE`, duas `NOT_ASSESSED` (acessibilidad
 | FND-0009 | Variáveis de provedor declaradas e nunca consumidas | LOW | REMEDIADO |
 | FND-0010 | Função de diagnóstico global sem referência | LOW | REPORTADO, NÃO REMEDIADO |
 | FND-0011 | Ações de CI fixadas por tag mutável | LOW | REPORTADO, NÃO REMEDIADO |
-| FND-0012 | `tsconfig.tsbuildinfo` e `__pycache__` fora do `.gitignore` | LOW | REPORTADO, NÃO REMEDIADO |
+| FND-0012 | `tsconfig.tsbuildinfo` e `__pycache__` fora do `.gitignore` | LOW | REMEDIADO APÓS O CONGELAMENTO (ver adendo) |
 
 `FND-0012` foi descoberto pela rodada cega, depois do congelamento do R1, e entrou como achado novo em vez de retroalimentar uma rodada congelada.
 
@@ -97,6 +97,16 @@ Testes: 48 → 64, com 10 → 12 arquivos. Verificações do repositório: 19/19
 - **VAC-0001** — autenticar antes de alocar recurso em serviço público: separar as pré-condições verificáveis sem corpo e rejeitar cedo, mantendo a verificação de assinatura. Teste preventivo: `tests/file-security-gateway-preconditions.test.ts`.
 - **VAC-0002 recusado pelo runtime** (`outcome_not_closed_or_remediated`): a lição sobre precedência de decisão registrada sobre remediação automática fica documentada aqui, sem status de vacina, porque o desfecho do achado é parcial.
 - Padrões de sucesso confirmados: RLS por laço declarativo, `security definer` com `search_path`, lock advisory ordenado, idempotência do aditivo.
+
+## Adendo pós-congelamento — FND-0012
+
+Registrado depois do freeze do R3B, sem reescrever ledger congelado (`FreezePolicy.after_freeze.silent_rewrite: false`).
+
+O `.gitignore` passou a cobrir `tsconfig.tsbuildinfo` e `__pycache__/`, e os artefatos correspondentes foram removidos da árvore de trabalho. O desfecho de `FND-0012` no `FINAL_OUTCOME_LEDGER_R3B.yaml` permanece `REPORTED_NOT_REMEDIATED`, que era verdade no instante do congelamento; este adendo é a correção posterior, com evidência própria.
+
+Motivo da mudança de posição: no R3B a remediação foi adiada por ser decisão do responsável. A execução local de `pnpm typecheck` e `pnpm test:python` produz exatamente esses artefatos, que reapareceram como não rastreados e obrigariam a escolher entre versionar saída de build ou conviver com ruído permanente. Ignorá-los é o que o próprio `.gitignore` já faz com `node_modules`, `.next` e `coverage`.
+
+Validação após o adendo: 19/19 verificações do repositório.
 
 ## Como reproduzir
 
