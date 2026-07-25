@@ -148,7 +148,7 @@ Objetivo: a fundação que aguenta virar prédio. Nenhuma funcionalidade de est�
   - [x] T-05.5.5 — Três sabotagens confirmam que a bateria reprova: imutabilidade desativada, republicação não idempotente e mapa de tipos alterado
 
 ## Sprint S-06 — Camada compartilhada, RLS e índices de slot
-**Estado:** em andamento
+**Estado:** pendente
 **Marco:** M-1
 
 - [ ] T-06.1 — `object_records` particionada por `HASH(organization_id)` em 64 partições
@@ -329,7 +329,7 @@ O número que decide o desenho é outro: **os nomes físicos já são neutros.**
 ---
 
 ## Sprint S-21 — Reconciliação do ledger de migrations com a homologação
-**Estado:** pendente
+**Estado:** em andamento
 **Marco:** M-0
 
 Descoberto em 25 de julho de 2026, ao testar a conexão com o Supabase. Entra no fim conforme a regra R4.
@@ -348,9 +348,15 @@ Na outra direção, três migrations do repositório não estão aplicadas em ho
 
 Consulta ao catálogo antes de resolver, conforme o protocolo: a causa raiz **já está catalogada** como `VACINA-003` — "ledger local de migrations diverge do Supabase remoto". A prevenção registrada, porém, não cobre este caso: `scripts/validate-supabase-migrations.mjs` compara o diretório local contra uma **lista fixa de quatro arquivos da Etapa 17**, congelada quando a vacina foi escrita. É um retrato, não uma comparação. O remoto andou depois disso e o validador não tem como perceber.
 
-- [ ] T-21.1 — Obter o conteúdo real das três migrations aplicadas, a partir do esquema em homologação
-- [ ] T-21.2 — Trazê-las para `supabase/migrations` com o mesmo carimbo de versão, sem reescrever histórico aplicado
+- [x] T-21.1 — Obter o conteúdo real das três migrations aplicadas
+  - [x] T-21.1.1 — `supabase_migrations.schema_migrations` guarda a coluna `statements`: o SQL original foi recuperado, não reconstruído por engenharia reversa
+- [x] T-21.2 — Trazê-las para `supabase/migrations` com o mesmo carimbo de versão, sem reescrever histórico aplicado
+  - [x] T-21.2.1 — Conferência por `sha256` em vez de leitura: os três arquivos batem byte a byte com o que está aplicado (`9f3435ee…`, `ce2bf7af…`, `516a8458…`)
 - [ ] T-21.3 — Confirmar que aplicar o repositório inteiro em base limpa produz o mesmo esquema da homologação
+  - [x] T-21.3.1 — Comparação por objeto para os três casos: a homologação tem 12 ramos em `get_observability_event_detail`, 21 dependências de módulo e 1 policy em `audit_events`; os arquivos importados produzem exatamente isso
+  - [x] T-21.3.2 — Provado que a importação era necessária: sem ela o repositório reconstrói a função com **3 ramos em vez de 12** — nove origens do fluxo unificado passariam a responder "Origem de evento inválida" — e cria **14 das 21** dependências de módulo
+  - [ ] T-21.3.3 — Replay completo das 111 migrations em base limpa. Exige fixture com os esquemas `auth` e `storage`, papéis e extensões do Supabase; não executado
+- [ ] T-21.6 — **Correção de escopo do achado.** A divergência é maior do que "três migrations ausentes": apenas **41 das 143** versões remotas correspondem a nome de arquivo do repositório. 102 versões remotas não têm arquivo e 70 arquivos não constam do ledger remoto. O padrão indica renumeração histórica das migrations, e não 102 ausências reais — a VACINA-003 já registra um caso desses na Etapa 17. Confirmar objeto a objeto, sem presumir nenhuma das duas hipóteses
 - [ ] T-21.4 — Propor substituição da prevenção da VACINA-003: comparação viva contra o ledger remoto, no lugar da lista fixa
   - [ ] T-21.4.1 — Portão 1, eliminatório: a prevenção nova cobre a mesma causa raiz com garantia maior — detecta divergência em qualquer direção, não só nos quatro arquivos listados
   - [ ] T-21.4.2 — Portão 2: retorno material — hoje a detecção é zero para migrations criadas depois da vacina
@@ -366,6 +372,7 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
+| 2026-07-25 | S-21 passa à frente da S-06 | Pré-requisito descoberto, caso previsto na R5. A S-06 cria a camada compartilhada sobre o esquema da homologação; enquanto o repositório não reproduz esse esquema, qualquer migration nova é aplicada sobre chão que ninguém consegue recriar. Reconciliar o ledger primeiro é o que torna a S-06 verificável. |
 | 2026-07-25 | Virada S-05 → S-06, sem reordenação | Avaliadas as pendentes na virada, conforme R5. S-06 continua a próxima: a camada compartilhada consome a projeção de slots que a S-05 acabou de produzir, e S-07 e S-08 dependem da tabela existir. A S-20, descoberta durante a S-05, não passa à frente por ser vocabulário de interface, sem bloquear nada da fundação. |
 | 2026-07-25 | Virada S-04 → S-05, sem reordenação | Avaliadas as pendentes na virada, conforme R5. S-05 continua primeira: o catálogo de definições é pré-requisito físico de todas as demais sprints do M-1 — sem ele não há o que armazenar, indexar ou proteger. Nenhuma sprint pendente é pré-requisito descoberto nem base reaproveitável que justifique passar à frente. |
 
