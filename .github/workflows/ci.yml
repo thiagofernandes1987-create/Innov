@@ -133,6 +133,10 @@ jobs:
         run: pnpm validate:stage19
       - name: Validate Stage 20 production readiness
         run: pnpm validate:stage20
+      - name: Validate execution inventory
+        run: pnpm validate:inventory
+      - name: Validate Object Runtime invariants
+        run: pnpm validate:object-runtime
       - name: Lint
         run: |
           set -o pipefail

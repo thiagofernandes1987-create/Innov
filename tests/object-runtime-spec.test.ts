@@ -5,7 +5,7 @@ import {
   allocateSlots,
   canonicalSpecJson,
   slotFamilyFor,
-  specChecksum,
+  specFingerprint,
   validateSpec,
   type ObjectFieldSpec,
   type ObjectSpec
@@ -44,21 +44,21 @@ describe("canonicalSpecJson", () => {
   });
 });
 
-describe("specChecksum", () => {
+describe("specFingerprint", () => {
   it("é estável para a mesma definição escrita em ordem diferente", () => {
     const um = spec();
     const outro = { ...spec(), name: "Checklist de vistoria" };
-    expect(specChecksum(um)).toBe(specChecksum(outro));
+    expect(specFingerprint(um)).toBe(specFingerprint(outro));
   });
 
   it("muda quando qualquer campo da definição muda", () => {
-    const base = specChecksum(spec());
-    expect(specChecksum(spec({ name: "Outro nome" }))).not.toBe(base);
-    expect(specChecksum(spec({ fields: [field({ key: "titulo", required: true })] }))).not.toBe(base);
+    const base = specFingerprint(spec());
+    expect(specFingerprint(spec({ name: "Outro nome" }))).not.toBe(base);
+    expect(specFingerprint(spec({ fields: [field({ key: "titulo", required: true })] }))).not.toBe(base);
   });
 
   it("devolve hexadecimal de 64 caracteres", () => {
-    expect(specChecksum(spec())).toMatch(/^[0-9a-f]{64}$/);
+    expect(specFingerprint(spec())).toMatch(/^[0-9a-f]{64}$/);
   });
 });
 

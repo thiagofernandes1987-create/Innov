@@ -15,6 +15,8 @@
     "validate:docs": "node scripts/validate-documentation.mjs",
     "validate:vaccines": "node scripts/validate-vaccines.mjs",
     "validate:inventory": "node scripts/validate-inventory.mjs",
+    "validate:object-runtime": "node scripts/validate-object-runtime.mjs",
+    "test:db:object-runtime": "node scripts/run-object-runtime-db-tests.mjs",
     "validate:migrations": "node scripts/validate-supabase-migrations.mjs",
     "validate:stage9": "node scripts/validate-stage9.mjs",
     "validate:stage12": "node scripts/validate-stage12.mjs",

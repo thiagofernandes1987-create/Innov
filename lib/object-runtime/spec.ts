@@ -29,8 +29,9 @@ export const OBJECT_CLASSES = ["cadastro", "extensao"] as const;
 export type ObjectClass = (typeof OBJECT_CLASSES)[number];
 
 // Escopo do objeto. `projeto` liga o registro a um `project_id` e faz a
-// permissão ser resolvida também pela obra, contrato ou frente de serviço —
-// o mesmo argumento que `has_module_permission` já recebe hoje.
+// permissão ser resolvida também por esse recorte — o mesmo argumento que
+// `has_module_permission` já recebe hoje. O termo que a empresa usa para o
+// recorte é vocabulário do segmento e não pertence a este módulo.
 export const OBJECT_SCOPES = ["organizacao", "projeto"] as const;
 export type ObjectScope = (typeof OBJECT_SCOPES)[number];
 
@@ -114,8 +115,19 @@ export function canonicalSpecJson(value: unknown): string {
   return `{${entries.map(([key, item]) => `${JSON.stringify(key)}:${canonicalSpecJson(item)}`).join(",")}}`;
 }
 
-/** Impressão digital da versão publicada. Prova que a definição não mudou depois. */
-export function specChecksum(spec: ObjectSpec): string {
+/**
+ * Impressão digital local do rascunho, para detectar que a definição mudou
+ * entre duas edições.
+ *
+ * **Não é o checksum da versão publicada.** Aquele é calculado no banco por
+ * `object_runtime_spec_checksum(jsonb)`, sobre a forma canônica do próprio
+ * `jsonb`, e é o único que vale como prova de que a versão não foi alterada
+ * depois de publicada. Os dois valores são diferentes por construção, porque
+ * as formas canônicas são diferentes — reproduzir em TypeScript a
+ * serialização textual do `jsonb` do PostgreSQL seria frágil e impossível de
+ * verificar sem banco. Nomes distintos para que ninguém compare os dois.
+ */
+export function specFingerprint(spec: ObjectSpec): string {
   return createHash("sha256").update(canonicalSpecJson(spec), "utf8").digest("hex");
 }
 

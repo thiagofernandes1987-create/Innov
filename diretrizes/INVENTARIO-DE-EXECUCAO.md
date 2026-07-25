@@ -120,24 +120,35 @@ Objetivo: nenhuma decisão desta plataforma depende de conversa. Um chat novo re
 Objetivo: a fundação que aguenta virar prédio. Nenhuma funcionalidade de estúdio antes de a fundação estar medida.
 
 ## Sprint S-05 — Catálogo de definições
-**Estado:** em andamento
+**Estado:** concluída
 **Marco:** M-1
 
 - [x] T-05.1 — Migration de `object_definitions`, `object_definition_versions` e `object_field_slots`
   - [x] T-05.1.1 — `scope` com `organizacao` e `projeto`, para a plataforma servir a qualquer tipo de empresa
   - [x] T-05.1.2 — Índices de catálogo e verificação embutida na própria migration
-- [ ] T-05.2 — Imutabilidade da versão publicada, com `checksum` do `spec`
+- [x] T-05.2 — Imutabilidade da versão publicada, com `checksum` do `spec`
   - [x] T-05.2.1 — Guarda no banco: `update` e `delete` em versão publicada levantam exceção
-  - [x] T-05.2.2 — Lógica pura de serialização canônica, checksum, alocação de slot e validação (`lib/object-runtime/spec.ts`), com 24 testes
-  - [ ] T-05.2.3 — RPC de publicação que calcula o checksum, grava a versão e projeta os slots numa transação
+  - [x] T-05.2.2 — Lógica pura de serialização canônica, impressão digital, alocação de slot e validação (`lib/object-runtime/spec.ts`), com 24 testes
+  - [x] T-05.2.3 — RPC `publish_object_definition`: calcula o checksum, grava a versão e projeta os slots numa transação
+  - [x] T-05.2.4 — Republicar a mesma especificação não cria versão nova
+  - [x] T-05.2.5 — Nomes distintos para os dois valores: `specFingerprint` é local, `object_runtime_spec_checksum` é o da versão publicada. Formas canônicas diferentes, para ninguém comparar os dois
 - [x] T-05.3 — RLS do catálogo por `organization_id` e permissão de administração
   - [x] T-05.3.1 — Política única por operação reusando `has_module_permission`
   - [x] T-05.3.2 — `revoke` de escrita direta de `anon` e `authenticated`, no padrão da VACINA-004
-- [ ] T-05.4 — Validador de CI: projeção de slots coerente com o `spec`
-- [ ] T-05.5 — Testes: publicar, republicar, tentar alterar versão publicada
+- [x] T-05.4 — Validador de CI: projeção de slots coerente com o `spec`
+  - [x] T-05.4.1 — A projeção é derivada pelo banco a partir do `spec`, nunca recebida pronta — não existe caminho em que os dois divirjam
+  - [x] T-05.4.2 — `validate:object-runtime` compara orçamento e mapa de tipos entre SQL e TypeScript
+  - [x] T-05.4.3 — Verifica RLS forçada, revogação de escrita direta, guarda de imutabilidade e `search_path` fixo
+  - [x] T-05.4.4 — Exercitado em seis estados: cinco sabotagens reprovadas, íntegro aprovado
+- [x] T-05.5 — Testes: publicar, republicar, tentar alterar versão publicada
+  - [x] T-05.5.1 — Fixture mínima com os pré-requisitos de fronteira (`supabase/tests/object-runtime/fixture.sql`)
+  - [x] T-05.5.2 — 14 testes de comportamento mais o de privilégio, executados contra PostgreSQL 16 real
+  - [x] T-05.5.3 — O executor exige confirmação explícita dos testes: sem banco ele declara que não rodou, em vez de passar calado
+  - [x] T-05.5.4 — Workflow `object-runtime-db.yml` com serviço PostgreSQL, para o teste rodar no CI
+  - [x] T-05.5.5 — Três sabotagens confirmam que a bateria reprova: imutabilidade desativada, republicação não idempotente e mapa de tipos alterado
 
 ## Sprint S-06 — Camada compartilhada, RLS e índices de slot
-**Estado:** pendente
+**Estado:** em andamento
 **Marco:** M-1
 
 - [ ] T-06.1 — `object_records` particionada por `HASH(organization_id)` em 64 partições
@@ -323,6 +334,7 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
+| 2026-07-25 | Virada S-05 → S-06, sem reordenação | Avaliadas as pendentes na virada, conforme R5. S-06 continua a próxima: a camada compartilhada consome a projeção de slots que a S-05 acabou de produzir, e S-07 e S-08 dependem da tabela existir. A S-20, descoberta durante a S-05, não passa à frente por ser vocabulário de interface, sem bloquear nada da fundação. |
 | 2026-07-25 | Virada S-04 → S-05, sem reordenação | Avaliadas as pendentes na virada, conforme R5. S-05 continua primeira: o catálogo de definições é pré-requisito físico de todas as demais sprints do M-1 — sem ele não há o que armazenar, indexar ou proteger. Nenhuma sprint pendente é pré-requisito descoberto nem base reaproveitável que justifique passar à frente. |
 
 ---
