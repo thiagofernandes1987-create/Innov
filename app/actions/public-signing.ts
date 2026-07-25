@@ -3,6 +3,8 @@
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { fileSecurityMessage } from "@/lib/file-security/domain";
+import { secureUpload } from "@/lib/file-security/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { hashCanonical, safeFileName, sha256 } from "@/lib/signatures/crypto";
 
@@ -72,8 +74,21 @@ export async function completePublicSignatureField(formData:FormData){
 
     fileSize=bytes.byteLength;fileSha=sha256(bytes);
     filePath=`${signing.envelope_id}/external/${signing.signer_id}/${fieldId}/${randomUUID()}-${safeFileName(fileName)}`;
-    const{error:uploadError}=await admin.storage.from("signature-artifacts").upload(filePath,bytes,{contentType:fileMime,upsert:false});
-    if(uploadError)fail(token,uploadError.message);
+    // O contexto de assinatura não expõe a organização; a quarentena precisa dela
+    // para isolar o arquivo por organização antes de qualquer promoção.
+    const{data:envelope}=await admin.from("signature_envelopes").select("organization_id").eq("id",signing.envelope_id).maybeSingle();
+    if(!envelope?.organization_id)fail(token,"Envelope indisponível para receber evidência.");
+    try{
+      await secureUpload({
+        targetBucket:"signature-artifacts",targetPath:filePath,body:bytes,
+        filename:fileName,contentType:fileMime,
+        organizationId:envelope.organization_id,actorUserId:signing.signer_id,
+        correlationId:signing.envelope_id,
+        // Signatário externo não autenticado: HEIC é aceito pelo fluxo e não tem
+        // assinatura de conteúdo conhecida, mas a análise antimalware é obrigatória.
+        policy:{allowedMimeTypes:new Set(ALLOWED_EVIDENCE),maxBytes:MAX_EVIDENCE_SIZE,requireContentSignature:false}
+      });
+    }catch(error){fail(token,fileSecurityMessage(error,{maxBytesLabel:"20 MB",allowedLabel:"PDF, DOCX, JPG, PNG, WebP ou HEIC"}));}
   }
 
   const valueHash=hashCanonical({fieldId,type:field.field_type,textValue,booleanValue,fileSha});

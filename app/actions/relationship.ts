@@ -7,7 +7,7 @@ import{requireClientContext}from"@/lib/auth";
 import{requireCapability}from"@/lib/authorization";
 import{
  FILE_SECURITY_SAC_MIME_TYPES,
- FileSecurityError,
+ fileSecurityMessage,
  sanitizeFileName
 }from"@/lib/file-security/domain";
 import{secureUpload}from"@/lib/file-security/server";
@@ -19,15 +19,6 @@ function numberOrNull(value:unknown){if(value===null||value===undefined||String(
 function boolean(data:FormData,key:string){return data.get(key)!==null;}
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}
 function resultRow<T extends Record<string,unknown>>(value:T|T[]|null){return Array.isArray(value)?value[0]??null:value;}
-function fileSecurityMessage(error:unknown){
- if(!(error instanceof FileSecurityError))return"O arquivo não pôde ser analisado com segurança. Tente novamente mais tarde.";
- if(error.code==="MALWARE_DETECTED")return"O arquivo foi bloqueado pela análise de segurança.";
- if(error.code==="FILE_TOO_LARGE")return"O arquivo excede 25 MB.";
- if(error.code==="UNSUPPORTED_MEDIA_TYPE")return"Formato não permitido. Envie PDF, DOCX, JPG, PNG ou WebP.";
- if(error.code==="FILE_SIGNATURE_MISMATCH")return"O conteúdo do arquivo não corresponde ao formato informado.";
- if(error.code==="EMPTY_FILE"||error.code==="INVALID_FILENAME")return"Selecione um arquivo válido.";
- return"O arquivo não pôde ser analisado com segurança. Tente novamente mais tarde.";
-}
 
 export async function createCrmLead(data:FormData){
  const context=await requireCapability("crm","create");const path="/app/crm/leads/novo";

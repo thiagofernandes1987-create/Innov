@@ -4,6 +4,8 @@ import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { fileSecurityMessage } from "@/lib/file-security/domain";
+import { secureUpload } from "@/lib/file-security/server";
 
 const managementRoles = [
   "SUPER_ADMIN",
@@ -314,11 +316,24 @@ export async function uploadDailyLogMedia(formData: FormData) {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
   const storagePath = `${organizationId}/${projectId}/${dailyLogId}/${randomUUID()}-${safeName}`;
 
-  const { error: uploadError } = await supabase.storage.from("daily-log-media").upload(storagePath, bytes, {
-    contentType: file.type || "application/octet-stream",
-    upsert: false
-  });
-  if (uploadError) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, uploadError.message);
+  try {
+    await secureUpload({
+      targetBucket: "daily-log-media",
+      targetPath: storagePath,
+      body: bytes,
+      filename: file.name,
+      contentType: file.type || "application/octet-stream",
+      organizationId,
+      actorUserId: userId,
+      correlationId: dailyLogId,
+      // O diário de obra sempre aceitou qualquer tipo até 150 MB. A política é
+      // preservada; o que muda é que o arquivo passa pela quarentena e só é
+      // promovido depois de liberado pela análise antimalware.
+      policy: { allowedMimeTypes: null, maxBytes: 150 * 1024 * 1024, requireContentSignature: false }
+    });
+  } catch (error) {
+    fail(`/app/obras/${projectId}/diario/${dailyLogId}`, fileSecurityMessage(error, { maxBytesLabel: "150 MB" }));
+  }
 
   const { error } = await supabase.from("daily_log_media").insert({
     organization_id: organizationId,
@@ -407,11 +422,23 @@ export async function uploadProjectDocument(formData: FormData) {
     .eq("document_id", documentId);
   const versionNumber = (count ?? 0) + 1;
 
-  const { error: uploadError } = await supabase.storage.from("project-documents").upload(storagePath, bytes, {
-    contentType: file.type || "application/octet-stream",
-    upsert: false
-  });
-  if (uploadError) fail(`/app/obras/${projectId}/documentos`, uploadError.message);
+  try {
+    await secureUpload({
+      targetBucket: "project-documents",
+      targetPath: storagePath,
+      body: bytes,
+      filename: file.name,
+      contentType: file.type || "application/octet-stream",
+      organizationId,
+      actorUserId: userId,
+      correlationId: documentId,
+      // Projeto executivo aceita formatos técnicos além da allowlist transversal;
+      // o limite de 50 MB e os tipos permanecem como estavam.
+      policy: { allowedMimeTypes: null, maxBytes: 50 * 1024 * 1024, requireContentSignature: false }
+    });
+  } catch (error) {
+    fail(`/app/obras/${projectId}/documentos`, fileSecurityMessage(error, { maxBytesLabel: "50 MB" }));
+  }
 
   const { error } = await supabase.from("project_document_versions").insert({
     organization_id: organizationId,

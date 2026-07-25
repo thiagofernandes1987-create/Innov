@@ -1,19 +1,9 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { SIGNATURE_STATUS_BY_EVENT, shouldApplySignatureStatus } from "@/lib/signatures/webhook-state";
 
 const MAX_CLOCK_SKEW_SECONDS = 300;
-
-const statusByEvent: Record<string, string> = {
-  SENT: "SENT",
-  VIEWED: "VIEWED",
-  SIGNED: "PARTIALLY_SIGNED",
-  COMPLETED: "COMPLETED",
-  DECLINED: "DECLINED",
-  EXPIRED: "EXPIRED",
-  CANCELED: "CANCELED",
-  ERROR: "ERROR"
-};
 
 function verifySignature(body: string, timestamp: string, receivedSignature: string, secret: string) {
   const normalized = receivedSignature.replace(/^sha256=/i, "").trim().toLowerCase();
@@ -59,7 +49,7 @@ export async function POST(request: Request) {
   const envelopeId = payload.envelopeId;
   const providerEventId = payload.eventId;
   const eventType = String(payload.eventType ?? "").toUpperCase();
-  const nextStatus = statusByEvent[eventType];
+  const nextStatus = SIGNATURE_STATUS_BY_EVENT[eventType];
 
   if (!envelopeId || !providerEventId || !nextStatus) {
     return NextResponse.json({ error: "Evento incompleto ou não suportado." }, { status: 400 });
@@ -97,12 +87,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: eventError.message }, { status: 500 });
   }
 
+  const applyStatus = shouldApplySignatureStatus(envelope.status, nextStatus);
+
   const envelopeUpdate: Record<string, unknown> = {
-    status: nextStatus,
     external_id: payload.externalId ?? undefined
   };
-  if (nextStatus === "SENT") envelopeUpdate.sent_at = new Date().toISOString();
-  if (nextStatus === "COMPLETED") envelopeUpdate.completed_at = new Date().toISOString();
+  if (applyStatus) {
+    envelopeUpdate.status = nextStatus;
+    if (nextStatus === "SENT") envelopeUpdate.sent_at = new Date().toISOString();
+    if (nextStatus === "COMPLETED") envelopeUpdate.completed_at = new Date().toISOString();
+  }
 
   const { error: updateError } = await admin
     .from("signature_envelopes")
@@ -113,7 +107,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
-  if (payload.signerEmail) {
+  if (applyStatus && payload.signerEmail) {
     await admin
       .from("signature_signers")
       .update({
@@ -125,7 +119,7 @@ export async function POST(request: Request) {
       .eq("email", payload.signerEmail);
   }
 
-  if (nextStatus === "COMPLETED" && envelope.contract_version_id) {
+  if (applyStatus && nextStatus === "COMPLETED" && envelope.contract_version_id) {
     const { data: version } = await admin
       .from("contract_versions")
       .select("contract_id")
@@ -137,7 +131,7 @@ export async function POST(request: Request) {
     }
   }
 
-  if (nextStatus === "COMPLETED" && envelope.amendment_version_id) {
+  if (applyStatus && nextStatus === "COMPLETED" && envelope.amendment_version_id) {
     const { data: version } = await admin
       .from("amendment_versions")
       .select("amendment_id")
@@ -164,8 +158,16 @@ export async function POST(request: Request) {
     resource_id: envelope.id,
     action: eventType,
     result: "SUCCESS",
-    after_data: { status: nextStatus, provider_event_id: providerEventId, payload_hash: payloadHash }
+    after_data: {
+      status: applyStatus ? nextStatus : envelope.status,
+      event_status: nextStatus,
+      applied: applyStatus,
+      provider_event_id: providerEventId,
+      payload_hash: payloadHash
+    }
   });
 
-  return NextResponse.json({ data: { idempotent: false, status: nextStatus } });
+  return NextResponse.json({
+    data: { idempotent: false, applied: applyStatus, status: applyStatus ? nextStatus : envelope.status }
+  });
 }

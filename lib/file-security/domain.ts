@@ -26,6 +26,18 @@ export type FileSecurityInput={
  sizeBytes:number;
 };
 
+/**
+ * Política por fluxo. A análise antimalware é obrigatória em todos os casos; o
+ * que varia é o que cada bucket aceita. `allowedMimeTypes:null` significa que o
+ * fluxo já aceitava qualquer tipo antes da quarentena e continua aceitando, sem
+ * estreitar comportamento existente.
+ */
+export type FileSecurityPolicy={
+ allowedMimeTypes?:ReadonlySet<string>|null;
+ maxBytes?:number;
+ requireContentSignature?:boolean;
+};
+
 export type FileSecurityScanResult={
  status:Exclude<FileSecurityStatus,"LEGACY"|"PENDING"|"SCANNING">;
  provider:FileSecurityProvider;
@@ -45,15 +57,19 @@ export function sanitizeFileName(value:string){
  return safe||"arquivo";
 }
 
-export function assertFileSecurityInput(input:FileSecurityInput){
+export function assertFileSecurityInput(input:FileSecurityInput,policy?:FileSecurityPolicy){
+ const allowed=policy?.allowedMimeTypes===undefined?FILE_SECURITY_ALLOWED_MIME_TYPES:policy.allowedMimeTypes;
+ const maxBytes=policy?.maxBytes??FILE_SECURITY_MAX_BYTES;
  const filename=sanitizeFileName(input.filename);
  if(!filename)throw new FileSecurityError("INVALID_FILENAME","Nome de arquivo inválido.");
- if(!FILE_SECURITY_ALLOWED_MIME_TYPES.has(input.contentType))
+ if(allowed&&!allowed.has(input.contentType))
   throw new FileSecurityError("UNSUPPORTED_MEDIA_TYPE",`Tipo de arquivo não permitido: ${input.contentType||"desconhecido"}.`);
  if(!Number.isFinite(input.sizeBytes)||input.sizeBytes<=0)
   throw new FileSecurityError("EMPTY_FILE","O arquivo está vazio ou possui tamanho inválido.");
- if(input.sizeBytes>FILE_SECURITY_MAX_BYTES)
-  throw new FileSecurityError("FILE_TOO_LARGE",`O arquivo excede o limite de ${FILE_SECURITY_MAX_BYTES} bytes.`);
+ if(!Number.isFinite(maxBytes)||maxBytes<=0)
+  throw new FileSecurityError("FILE_SECURITY_CONFIGURATION","Limite de tamanho inválido para o fluxo.");
+ if(input.sizeBytes>maxBytes)
+  throw new FileSecurityError("FILE_TOO_LARGE",`O arquivo excede o limite de ${maxBytes} bytes.`);
  return{...input,filename};
 }
 
@@ -69,6 +85,24 @@ function containsAscii(bytes:Uint8Array,value:string){
   return true;
  }
  return false;
+}
+
+const CONTENT_SIGNATURE_TYPES=new Set([
+ "application/pdf",
+ "image/jpeg",
+ "image/png",
+ "image/webp",
+ "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+ "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+]);
+
+/**
+ * Só existe assinatura de conteúdo conhecida para os formatos acima. Fluxos que
+ * aceitam outros tipos (mídia de diário de obra, por exemplo) seguem para a
+ * análise antimalware sem esta verificação, em vez de ficarem sem análise.
+ */
+export function hasKnownContentSignature(contentType:string){
+ return CONTENT_SIGNATURE_TYPES.has(contentType);
 }
 
 export function assertFileContentSignature(contentType:string,bytes:Uint8Array){
@@ -102,6 +136,24 @@ export function parseClamAvResponse(value:string):FileSecurityScanResult{
  const found=response.match(/:\s*(.+?)\s+FOUND$/i);
  if(found)return{status:"BLOCKED",provider:"clamav",signature:found[1]?.trim()||"malware",rawCode:"FOUND"};
  return{status:"ERROR",provider:"clamav",signature:null,rawCode:"ERROR"};
+}
+
+/**
+ * Mensagem pública para falha de upload analisado. Não vaza detalhe interno do
+ * scanner nem do provedor de armazenamento.
+ */
+export function fileSecurityMessage(error:unknown,options?:{maxBytesLabel?:string;allowedLabel?:string}){
+ const generic="O arquivo não pôde ser analisado com segurança. Tente novamente mais tarde.";
+ if(!(error instanceof FileSecurityError))return generic;
+ if(error.code==="MALWARE_DETECTED")return"O arquivo foi bloqueado pela análise de segurança.";
+ if(error.code==="FILE_TOO_LARGE")return`O arquivo excede ${options?.maxBytesLabel??"25 MB"}.`;
+ if(error.code==="UNSUPPORTED_MEDIA_TYPE")
+  return options?.allowedLabel
+   ? `Formato não permitido. Envie ${options.allowedLabel}.`
+   : "Formato não permitido. Envie PDF, DOCX, JPG, PNG ou WebP.";
+ if(error.code==="FILE_SIGNATURE_MISMATCH")return"O conteúdo do arquivo não corresponde ao formato informado.";
+ if(error.code==="EMPTY_FILE"||error.code==="INVALID_FILENAME")return"Selecione um arquivo válido.";
+ return generic;
 }
 
 export const FILE_SECURITY_STATUS_LABELS:Record<FileSecurityStatus,string>={
