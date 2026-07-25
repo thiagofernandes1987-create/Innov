@@ -106,7 +106,7 @@ Objetivo: nenhuma decisão desta plataforma depende de conversa. Um chat novo re
   - [x] T-04.3.4 — Identificadores de sprint únicos
 - [x] T-04.4 — Registrar `LEIA-PRIMEIRO.md` e este arquivo no validador de documentação e no `README.md` de `diretrizes/`
 - [x] T-04.5 — Apontar `CLAUDE.md` para `LEIA-PRIMEIRO.md` como primeira leitura obrigatória e fixar as regras do inventário
-- [ ] T-04.6 — **Publicar no GitHub.** Até que isto seja feito, tudo de M-0 existe apenas no contêiner desta sessão e some com ele
+- [x] T-04.6 — **Publicar no GitHub.** As diretrizes estão em `claude/diretrizes-object-runtime`, sobre `feature/etapa-20-prontidao-producao`. As 45 skills de `.claude/skills` seguem fora deste ramo, em entrega separada ainda não publicada
 - [ ] T-04.7 — Incorporar ao repositório o blueprint e a executable spec recebidos por ZIP, com os defeitos verificados anotados
 
 ---
