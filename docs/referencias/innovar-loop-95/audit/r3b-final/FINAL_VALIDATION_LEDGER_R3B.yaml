@@ -1,0 +1,384 @@
+schema_version: UTA-R3B-final-validation-v1
+round_id: R3B
+ledger_status: FROZEN_PENDING_MANIFEST
+generated_at: '2026-07-23T10:30:00Z'
+validation_count: 34
+counts_by_status:
+  PASS: 20
+  FAIL: 6
+  PARTIAL: 1
+  BLOCKED_EXTERNAL: 7
+validations:
+- validation_id: FVAL-R3B-0001
+  name: R1_FREEZE_HASHES
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: HASH_VERIFICATION
+  execution_level: STATICALLY_VALIDATED
+  exit_code: null
+  observed_result: 3/3 ledger hashes match
+  evidence_locator: R1_FREEZE_MANIFEST.json
+- validation_id: FVAL-R3B-0002
+  name: R2_FREEZE_HASHES
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: HASH_VERIFICATION
+  execution_level: STATICALLY_VALIDATED
+  exit_code: null
+  observed_result: 4/4 ledger hashes match
+  evidence_locator: R2_FREEZE_MANIFEST.json
+- validation_id: FVAL-R3B-0003
+  name: R3A_FREEZE_HASHES
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: HASH_VERIFICATION
+  execution_level: STATICALLY_VALIDATED
+  exit_code: null
+  observed_result: 3/3 canonical hashes match
+  evidence_locator: R3A_FREEZE_MANIFEST.json
+- validation_id: FVAL-R3B-0004
+  name: LOOSE_R3A_ATTACHMENTS
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: STRUCTURAL_ANALYSIS
+  execution_level: STATICALLY_VALIDATED
+  exit_code: null
+  observed_result: 5 loose files self-declare INVALIDATED/failed prefix gate and were rejected; frozen clean R3A package remains
+    canonical
+  evidence_locator: uploaded *-1.yaml
+- validation_id: FVAL-R3B-0005
+  name: UPDATED_SHA256_MANIFEST
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: HASH_VERIFICATION
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: 'SHA256_MANIFEST_RESULT: PASS files=577'
+  evidence_locator: fresh extraction before execution
+- validation_id: FVAL-R3B-0006
+  name: UPDATED_RELEASE_MANIFEST
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: HASH_VERIFICATION
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: 'RELEASE_FILE_MANIFEST_RESULT: PASS files=574'
+  evidence_locator: fresh extraction before execution
+- validation_id: FVAL-R3B-0007
+  name: UPDATED_PACKAGE_HYGIENE
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: STATIC_ANALYSIS
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: 'PACKAGE_HYGIENE_RESULT: PASS on fresh extraction'
+  evidence_locator: fresh extraction before execution
+- validation_id: FVAL-R3B-0008
+  name: PYTEST_AGGREGATE
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: TEST_EXECUTION
+  execution_level: LOCAL_INTEGRATION_EXECUTED
+  exit_code: 0
+  observed_result: 94 passed in 16.22s
+  evidence_locator: logs/pytest.log
+- validation_id: FVAL-R3B-0009
+  name: UNITTEST_TESTS
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: TEST_EXECUTION
+  execution_level: UNIT_EXECUTED
+  exit_code: 0
+  observed_result: 78 tests PASS
+  evidence_locator: logs/unittest.log
+- validation_id: FVAL-R3B-0010
+  name: BDD_STEP_TESTS
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: TEST_EXECUTION
+  execution_level: UNIT_EXECUTED
+  exit_code: 0
+  observed_result: 16 tests PASS
+  evidence_locator: logs/bdd_unittest.log
+- validation_id: FVAL-R3B-0011
+  name: TYPESCRIPT_COMPILE
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: COMPILATION
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: tsc --noEmit PASS
+  evidence_locator: logs/tsc.log
+- validation_id: FVAL-R3B-0012
+  name: SDK_DRIFT
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: TEST_EXECUTION
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: 'SDK_DRIFT_GATE: PASS generated dist matches committed dist'
+  evidence_locator: logs/sdk_drift.log
+- validation_id: FVAL-R3B-0013
+  name: OPENAPI_CONTRACT
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: STATIC_ANALYSIS
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: 'OPENAPI_CONTRACT_RESULT: PASS operations=13'
+  evidence_locator: logs/openapi.log
+- validation_id: FVAL-R3B-0014
+  name: ASYNCAPI_OPERATIONS
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: STATIC_ANALYSIS
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: 'ASYNCAPI_OPERATIONS_RESULT: PASS channels=7 operations=14'
+  evidence_locator: logs/asyncapi.log
+- validation_id: FVAL-R3B-0015
+  name: EVENT_COMPATIBILITY
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: TEST_EXECUTION
+  execution_level: UNIT_EXECUTED
+  exit_code: 0
+  observed_result: 'EVENT_COMPATIBILITY: PASS including nested negative fixture'
+  evidence_locator: logs/event_compat.log
+- validation_id: FVAL-R3B-0016
+  name: REQUIREMENT_TRACEABILITY
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: STATIC_ANALYSIS
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: 19/19 canonical requirements mapped
+  evidence_locator: logs/requirements.log
+- validation_id: FVAL-R3B-0017
+  name: TRACEABILITY_MATRIX
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: STATIC_ANALYSIS
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: TRACEABILITY_FACETS_CHECKED 36; PASS
+  evidence_locator: logs/traceability.log
+- validation_id: FVAL-R3B-0018
+  name: BDD_REGISTRY
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: STATIC_ANALYSIS
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: 'BDD_REGISTRY_RESULT: PASS scenarios=38 unique_step_bodies=38'
+  evidence_locator: logs/bdd_registry.log
+- validation_id: FVAL-R3B-0019
+  name: STATECHART_REGISTRY
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: STATIC_ANALYSIS
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: 'STATECHART_REGISTRY_RESULT: PASS machines=5'
+  evidence_locator: logs/statecharts.log
+- validation_id: FVAL-R3B-0020
+  name: WORKFLOW_SECURITY
+  scope: UPDATED_MATERIAL
+  status: PASS
+  verification_method: STATIC_ANALYSIS
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 0
+  observed_result: 'WORKFLOW_SECURITY_RESULT: PASS approved_pins=4'
+  evidence_locator: logs/workflow_security.log
+- validation_id: FVAL-R3B-0021
+  name: REMEDIATION_REGISTER
+  scope: UPDATED_MATERIAL
+  status: FAIL
+  verification_method: STATIC_ANALYSIS
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 1
+  observed_result: Two MISSING_IMPLEMENTATION references to 06-sdk/generated/openapi-operations.json
+  evidence_locator: logs/remediation_register.log
+- validation_id: FVAL-R3B-0022
+  name: VALIDATE_ALL_ORCHESTRATOR
+  scope: UPDATED_MATERIAL
+  status: PARTIAL
+  verification_method: TEST_EXECUTION
+  execution_level: LOCAL_INTEGRATION_EXECUTED
+  exit_code: 0
+  observed_result: Returns rc=0 with PARTIAL_BLOCKED; omits PostgreSQL, Redpanda, XState, Kubernetes, remediation-register
+    and release/hash gates
+  evidence_locator: logs/validate_all.log
+- validation_id: FVAL-R3B-0023
+  name: POSTGRES_RUNTIME
+  scope: UPDATED_MATERIAL
+  status: BLOCKED_EXTERNAL
+  verification_method: TEST_EXECUTION
+  execution_level: NOT_EXECUTED
+  exit_code: 77
+  observed_result: TEST_DATABASE_URL not set
+  evidence_locator: logs/postgres.log
+- validation_id: FVAL-R3B-0024
+  name: REDPANDA_RUNTIME
+  scope: UPDATED_MATERIAL
+  status: BLOCKED_EXTERNAL
+  verification_method: TEST_EXECUTION
+  execution_level: NOT_EXECUTED
+  exit_code: 77
+  observed_result: Missing REDPANDA_BROKERS and rpk
+  evidence_locator: logs/redpanda.log
+- validation_id: FVAL-R3B-0025
+  name: XSTATE_OFFICIAL_RUNTIME
+  scope: UPDATED_MATERIAL
+  status: BLOCKED_EXTERNAL
+  verification_method: TEST_EXECUTION
+  execution_level: NOT_EXECUTED
+  exit_code: 77
+  observed_result: Verified package-lock.json missing
+  evidence_locator: logs/xstate.log
+- validation_id: FVAL-R3B-0026
+  name: KUBERNETES_NETWORKPOLICY
+  scope: UPDATED_MATERIAL
+  status: BLOCKED_EXTERNAL
+  verification_method: TEST_EXECUTION
+  execution_level: NOT_EXECUTED
+  exit_code: 77
+  observed_result: kubectl missing; no cluster
+  evidence_locator: logs/networkpolicy.log
+- validation_id: FVAL-R3B-0027
+  name: EXTERNAL_PREREQUISITES
+  scope: UPDATED_MATERIAL
+  status: BLOCKED_EXTERNAL
+  verification_method: ENVIRONMENT_DISCOVERY
+  execution_level: NOT_EXECUTED
+  exit_code: 77
+  observed_result: PostgreSQL/Redpanda/Kubernetes official prerequisites unavailable
+  evidence_locator: logs/runtime_prereq.log
+- validation_id: FVAL-R3B-0028
+  name: DEPENDENCY_LOCKFILES
+  scope: UPDATED_MATERIAL
+  status: BLOCKED_EXTERNAL
+  verification_method: STATIC_ANALYSIS
+  execution_level: NOT_EXECUTED
+  exit_code: 77
+  observed_result: Missing verified npm and Python lockfiles
+  evidence_locator: logs/dep_locks.log
+- validation_id: FVAL-R3B-0029
+  name: OCI_IMAGE_DIGESTS
+  scope: UPDATED_MATERIAL
+  status: BLOCKED_EXTERNAL
+  verification_method: STATIC_ANALYSIS
+  execution_level: NOT_EXECUTED
+  exit_code: 77
+  observed_result: Mutable tags and digest placeholders remain
+  evidence_locator: logs/image_refs.log
+- validation_id: FVAL-R3B-0030
+  name: HMAC_REQUEST_BINDING_PROBE
+  scope: UPDATED_MATERIAL
+  status: FAIL
+  verification_method: TARGETED_PROBE
+  execution_level: UNIT_EXECUTED
+  exit_code: 0
+  observed_result: Signature function contains no method/path/body/idempotency/nonce inputs; same context signature reusable
+  evidence_locator: logs/probe_r3a_findings.json
+- validation_id: FVAL-R3B-0031
+  name: DLQ_RESOURCE_IDEMPOTENCY_PROBE
+  scope: UPDATED_MATERIAL
+  status: FAIL
+  verification_method: TARGETED_PROBE
+  execution_level: UNIT_EXECUTED
+  exit_code: 0
+  observed_result: Same key used for two DLQ IDs returns first resource and leaves second OPEN
+  evidence_locator: logs/probe_r3a_findings.json
+- validation_id: FVAL-R3B-0032
+  name: ADMIN_HANDLER_GLOBAL_STATE_PROBE
+  scope: UPDATED_MATERIAL
+  status: FAIL
+  verification_method: TARGETED_PROBE
+  execution_level: UNIT_EXECUTED
+  exit_code: 0
+  observed_result: Second server overwrites class-level store, publisher and secret used by first server
+  evidence_locator: logs/probe_r3a_findings.json
+- validation_id: FVAL-R3B-0033
+  name: TOPIC_URL_INTERPOLATION_PROBE
+  scope: UPDATED_MATERIAL
+  status: FAIL
+  verification_method: TARGETED_PROBE
+  execution_level: UNIT_EXECUTED
+  exit_code: 0
+  observed_result: Topic ../admin?x=1 becomes raw URL /topics/../admin?x=1 without validation or quoting
+  evidence_locator: logs/probe_r3a_findings.json
+- validation_id: FVAL-R3B-0034
+  name: AUTH_CONTRACT_ALIGNMENT
+  scope: UPDATED_MATERIAL
+  status: FAIL
+  verification_method: CROSS_ARTIFACT_ANALYSIS
+  execution_level: STATICALLY_VALIDATED
+  exit_code: 1
+  observed_result: OpenAPI declares OAuth2 bearer semantics; runtime validates only proxy HMAC context headers
+  evidence_locator: 01-api/openapi.yaml + event_admin/server.py
+freeze_verification:
+  R1:
+  - file: ARTIFACT_INDEX_R1.yaml
+    expected: e0d352bc15af08eee3bdb619d16ce1853c12999b491cc688c9f525f24ce0d456
+    actual: e0d352bc15af08eee3bdb619d16ce1853c12999b491cc688c9f525f24ce0d456
+    status: PASS
+  - file: EVIDENCE_LEDGER_R1.yaml
+    expected: f276504b82f5b44f226bfe284e3e108d7916f5f41fa10d80272d76fe0e80b9b6
+    actual: f276504b82f5b44f226bfe284e3e108d7916f5f41fa10d80272d76fe0e80b9b6
+    status: PASS
+  - file: FINDING_LEDGER_R1.yaml
+    expected: 56abe3e6108dce5a6cbd03f6cb65050b72b7c54ff26ced2214e76466f51e735d
+    actual: 56abe3e6108dce5a6cbd03f6cb65050b72b7c54ff26ced2214e76466f51e735d
+    status: PASS
+  R2:
+  - file: ARTIFACT_INDEX_R2.yaml
+    expected: 53083ba9f8b58f31a62b630e62d8a11be8a5d1655e6a39566a33936719493a67
+    actual: 53083ba9f8b58f31a62b630e62d8a11be8a5d1655e6a39566a33936719493a67
+    status: PASS
+  - file: REMEDIATION_LEDGER_R2.yaml
+    expected: 7cd8820e9c10877f81a2764e5656379a603830568835c333d1f4ff3f523b00c2
+    actual: 7cd8820e9c10877f81a2764e5656379a603830568835c333d1f4ff3f523b00c2
+    status: PASS
+  - file: CHANGE_TRANSACTION_LEDGER_R2.yaml
+    expected: 1d422fefc0360feddd7b79866e7130e41d3bae383aeb2baae725fea96fc1a672
+    actual: 1d422fefc0360feddd7b79866e7130e41d3bae383aeb2baae725fea96fc1a672
+    status: PASS
+  - file: VALIDATION_LEDGER_R2.yaml
+    expected: df6e8eab6bbd3e095be220c9a80899efbc0a4901d34ae25178382b08f178f43c
+    actual: df6e8eab6bbd3e095be220c9a80899efbc0a4901d34ae25178382b08f178f43c
+    status: PASS
+  R3A:
+  - file: ARTIFACT_INDEX_R3A.yaml
+    expected: 95fa51b54e7c048de1185d0f80c2434144f3de2a03b7be7b57dc9d9477d69cb0
+    actual: 95fa51b54e7c048de1185d0f80c2434144f3de2a03b7be7b57dc9d9477d69cb0
+    status: PASS
+  - file: BLIND_EVIDENCE_LEDGER_R3A.yaml
+    expected: 4b05684c07d26afe75e3ac69cbd63ce64c9e64cc5d03edac7dd80f5c1c0eb755
+    actual: 4b05684c07d26afe75e3ac69cbd63ce64c9e64cc5d03edac7dd80f5c1c0eb755
+    status: PASS
+  - file: PROVISIONAL_FINDING_LEDGER_R3A.yaml
+    expected: e651d388b3a937632016147a7c5710a02fa1b04617e9192694c3c16a765f0eea
+    actual: e651d388b3a937632016147a7c5710a02fa1b04617e9192694c3c16a765f0eea
+    status: PASS
+rejected_stale_r3a_attachments:
+- filename: ARTIFACT_INDEX_R3A-1.yaml
+  sha256: 487958ced12e4325b732f2eb3026a3a5de5d9e848c728f96c79a4b7f2000f3ad
+  self_declared_status: INVALIDATED
+  integration_disposition: REJECTED_STALE_INVALIDATED
+- filename: BLIND_EVIDENCE_LEDGER_R3A-1.yaml
+  sha256: eb5952ac7e7cf10562a7bb0948773533691aa97c194396d4ab4bda0384de6350
+  self_declared_status: INVALIDATED
+  integration_disposition: REJECTED_STALE_INVALIDATED
+- filename: PROVISIONAL_FINDING_LEDGER_R3A-1.yaml
+  sha256: 453c8befd8f4de201c15acba111bd7fbc5cddf864020572c22e7ea0e6f631b2f
+  self_declared_status: INVALIDATED
+  integration_disposition: REJECTED_STALE_INVALIDATED
+- filename: BLIND_MANIFEST_CHECKS-1.yaml
+  sha256: b39eab0313e0b4e6c104c37736f75e4bc7b5540813f1dc7fa998fe5545f28de4
+  self_declared_status: STOP_R3A_INVALIDATE_CONTEXT_REQUIRE_CLEAN_RESTART
+  integration_disposition: REJECTED_STALE_INVALIDATED
+- filename: BLIND_HASH_CHECKS-1.yaml
+  sha256: b70f9d305bd16c55cc5e042c0d29c01041351d731051b2cfd680df82dc96e68c
+  self_declared_status: null
+  integration_disposition: REJECTED_STALE_INVALIDATED

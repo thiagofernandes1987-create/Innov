@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.innovar.app/events/metadata.object.transitioned.v1.json",
+  "allOf": [
+    {
+      "$ref": "../envelope.v1.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "event_type": {
+          "const": "metadata.object.transitioned"
+        },
+        "event_version": {
+          "const": 1
+        },
+        "payload": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "object_key",
+            "from_state",
+            "to_state",
+            "version"
+          ],
+          "properties": {
+            "object_key": {
+              "type": "string"
+            },
+            "from_state": {
+              "type": "string"
+            },
+            "to_state": {
+              "type": "string"
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    }
+  ]
+}

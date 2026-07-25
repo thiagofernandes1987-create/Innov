@@ -1,0 +1,41 @@
+JSON_SCHEMA_OK 05-config/config.schema.json
+JSON_SCHEMA_OK 01-api/schemas/transition-request.schema.json
+JSON_SCHEMA_OK 06-sdk/typescript/package.json
+JSON_SCHEMA_OK 06-sdk/typescript/tsconfig.json
+JSON_SCHEMA_OK 02-events/schemas/envelope.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.record.created.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.object.published.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.object.transitioned.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.object.created.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/platform/platform.quota.exceeded.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/platform/work.item.projected.v1.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/create-object.command.v1.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/publish-object.command.v1.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/update-record.command.v1.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/create-record.command.v1.schema.json
+YAML_PARSE_OK 02-events/asyncapi.yaml
+YAML_PARSE_OK 03-statecharts/STATE-MIGRATION-REGISTRY.yaml
+YAML_PARSE_OK 01-api/openapi.yaml
+YAML_PARSE_OK 00-decisions/error-catalog.yaml
+YAML_PARSE_OK 00-decisions/INVARIANTS.yaml
+YAML_PARSE_OK 00-decisions/NFR-SLO-CATALOG.yaml
+YAML_PARSE_OK 00-decisions/requirements.yaml
+YAML_PARSE_OK 05-infra/helm/values.yaml
+YAML_PARSE_OK 05-infra/helm/Chart.yaml
+test_all_json_schemas_are_valid_draft_2020_12 (test_contracts.ContractTests.test_all_json_schemas_are_valid_draft_2020_12) ... ok
+test_dlq_dedupe_is_tenant_scoped (test_contracts.ContractTests.test_dlq_dedupe_is_tenant_scoped) ... ok
+test_local_refs_exist (test_contracts.ContractTests.test_local_refs_exist) ... ok
+test_only_executable_storage_strategy_is_exposed (test_contracts.ContractTests.test_only_executable_storage_strategy_is_exposed) ... ok
+test_openapi_uses_strong_etags (test_contracts.ContractTests.test_openapi_uses_strong_etags) ... ok
+test_published_version_immutability_has_database_enforcement (test_contracts.ContractTests.test_published_version_immutability_has_database_enforcement) ... ok
+test_runtime_rls_has_policies (test_contracts.ContractTests.test_runtime_rls_has_policies) ... ok
+test_transition_schema_is_closed_and_reasoned (test_contracts.ContractTests.test_transition_schema_is_closed_and_reasoned) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.040s
+
+OK
+
+GHERKIN_FEATURE_FILES 9
+GHERKIN_SCENARIOS_DESCRIPTIVE_ONLY 136
+VALIDATION_RESULT: PASS

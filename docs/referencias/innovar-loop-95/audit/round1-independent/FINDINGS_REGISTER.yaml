@@ -1,0 +1,571 @@
+audit_id: INNOVAR-AUTO12-R1
+audit_type: independent-engineering-audit
+source_zip: INNOVAR_EXECUTABLE_SPEC_AUTO12_100_RODADAS_2026-07-22.zip
+source_zip_sha256: a38dfbac3ff539c1adc1aa4b1a692f4fc2661b5b0ffa0056faaefe73d03b0fb7
+generated_at: '2026-07-22T21:00:00-03:00'
+methodology:
+  facts_only: true
+  no_source_modification: true
+  result_levels:
+  - DOCUMENTED
+  - STATICALLY_VALIDATED
+  - UNIT_EXECUTED
+  - LOCAL_INTEGRATION_EXECUTED
+  - EXTERNAL_INTEGRATION_EXECUTED
+  - OPERATIONALLY_PROVEN
+  result_statuses:
+  - PASS
+  - FAIL
+  - BLOCKED
+  - NOT_APPLICABLE
+  - OPEN
+findings:
+- id: AUD-CAN-001
+  title: STATUS.md canônico permanece no ciclo AUTO6
+  domain: governance
+  severity: CRITICAL
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 'STATUS.md: título "Status canônico — AUTO6"'
+  - 'audit/AUTO12-100-ROUND-CAMPAIGN.json: campanha AUTO12 presente'
+  impact: Consumidores automatizados e humanos podem tomar AUTO6 como verdade atual e ignorar evidências AUTO12.
+  recommended_remediation: Regenerar STATUS.md a partir de manifesto/ciclo único e criar gate que compare ciclo, versão, hashes
+    e artefatos canônicos.
+  validation: Validador deve falhar quando STATUS, manifesto, nome do pacote e auditoria corrente divergirem.
+  external_dependency: null
+- id: AUD-CAN-002
+  title: Narrativa do README não identifica inequivocamente o ciclo AUTO12
+  domain: governance
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 'README.md: "ciclo de quatro loops"'
+  - 'STATUS.md: AUTO6'
+  - artefatos audit/AUTO12-*
+  impact: A fonte de verdade do ciclo é ambígua e permite coexistência de nomenclaturas incompatíveis.
+  recommended_remediation: Substituir o cabeçalho por metadados estruturados de release e marcar documentos históricos como
+    SUPERSEDED/HISTORICAL.
+  validation: Uma única fonte CANONICAL por domínio; documentos históricos não podem ser referenciados como CURRENT.
+  external_dependency: null
+- id: AUD-INT-001
+  title: SHA256SUMS.txt não representa o pacote entregue
+  domain: integrity
+  severity: CRITICAL
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 331 entradas para 354 arquivos verificáveis (excluído o próprio manifesto)
+  - 23 arquivos ausentes do manifesto
+  - 5 hashes divergentes
+  - scan_pristine.json.sha256_manifest
+  impact: A integridade do ZIP não pode ser comprovada pelo manifesto interno; arquivos podem ter sido adicionados ou alterados
+    após sua geração.
+  recommended_remediation: Regenerar SHA256SUMS sobre árvore limpa e implementar verificação fail-closed antes do empacotamento.
+  validation: sha256sum -c SHA256SUMS.txt deve retornar 0 e a contagem deve cobrir todos os arquivos, exceto o próprio manifesto.
+  external_dependency: null
+- id: AUD-HYG-001
+  title: Artefatos de cache/temporários foram incluídos no ZIP
+  domain: package-hygiene
+  severity: MEDIUM
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 19 arquivos .pyc
+  - tests/test_contracts.py.tmp
+  impact: Introduz ruído, hashes dependentes de ambiente e risco de confundir fonte com produto derivado.
+  recommended_remediation: Excluir __pycache__, *.pyc e *.tmp; adicionar gate de higiene e política de empacotamento.
+  validation: Inventário final deve conter zero .pyc, zero __pycache__ e zero .tmp.
+  external_dependency: null
+- id: AUD-EVD-001
+  title: Arquivos de evidência vazios coexistem com referências formais
+  domain: evidence
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 15 arquivos .txt de auditoria com 0 byte
+  - traceability/CAPABILITY-FACET-MATRIX.yaml referencia audit/EVIDENCE-CAMPAIGN-XSTATE-RUNTIME.txt, que está vazio
+  impact: A simples existência do caminho pode ser interpretada como evidência apesar de não conter comando, resultado ou
+    contexto.
+  recommended_remediation: Marcar evidência vazia como INVALID, substituir por registro estruturado BLOCKED com comando, motivo,
+    ambiente e timestamp.
+  validation: Gate deve rejeitar evidence_path inexistente, vazio ou sem status/command/tool_versions/hash.
+  external_dependency: null
+- id: AUD-EVD-002
+  title: Campanha de 100 rodadas mistura presença estática com execução
+  domain: evidence
+  severity: CRITICAL
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 90 PASS, 10 BLOCKED
+  - 58 PASS sem evidence_path
+  - 40 PASS baseados em token/static/verified/checked
+  - scripts/run_100_round_evidence_campaign.py
+  impact: O número de PASS pode ser interpretado como 90 comportamentos executados, quando grande parte apenas procura strings,
+    arquivos ou ferramentas.
+  recommended_remediation: 'Separar nível de evidência de resultado: STATICALLY_VALIDATED, UNIT_EXECUTED, LOCAL_INTEGRATION,
+    EXTERNAL_INTEGRATION e OPERATIONAL.'
+  validation: Nenhum PASS deve existir sem evidence_path válido e execution_level explícito; token presence não pode receber
+    status de runtime.
+  external_dependency: null
+- id: AUD-TST-001
+  title: pytest não consegue coletar a suíte completa
+  domain: testing
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - python -m pytest -q retorna código 3
+  - scripts/test_postgres_event_transport.py executa sys.exit(77) durante importação
+  impact: Ferramentas padrão de teste falham antes de executar testes, prejudicando CI, IDEs e auditorias independentes.
+  recommended_remediation: Mover a saída BLOCKED para main() e proteger com if __name__ == "__main__"; separar scripts executáveis
+    de módulos testáveis.
+  validation: pytest -q deve concluir com resultado explícito, sem INTERNALERROR.
+  external_dependency: null
+- id: AUD-TST-002
+  title: Validador rotula JSON comum como JSON_SCHEMA_OK
+  domain: testing
+  severity: MEDIUM
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - scripts/validate_all.py adiciona JSON_SCHEMA_OK para todo *.json
+  - package-lock.json e relatórios de auditoria aparecem como JSON_SCHEMA_OK
+  impact: A saída superestima validação semântica; documentos JSON apenas parseados parecem ter sido validados como schemas.
+  recommended_remediation: Usar rótulos JSON_PARSE_OK e JSON_SCHEMA_META_VALID separadamente; validar instâncias contra schemas
+    designados.
+  validation: Relatório deve distinguir parse, meta-schema e instance validation.
+  external_dependency: null
+- id: AUD-BDD-001
+  title: Cenários BDD são massivamente duplicados
+  domain: bdd
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 152 cenários, apenas 38 corpos de passos únicos
+  - 133 cenários pertencem a grupos duplicados
+  - 19 grupos de duplicidade
+  impact: A contagem de cenários infla cobertura sem ampliar comportamento testado e dificulta manutenção.
+  recommended_remediation: Consolidar variantes idênticas, usar Scenario Outline somente quando exemplos alterarem dados/resultado
+    e registrar comportamento único.
+  validation: Gate de duplicidade semântica deve impedir cenários com passos idênticos e IDs diferentes sem justificativa.
+  external_dependency: null
+- id: AUD-BDD-002
+  title: Tags de requisitos BDD não correspondem ao catálogo canônico
+  domain: traceability
+  severity: CRITICAL
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 133 tags REQ-* nos features
+  - 0 correspondências com os 19 IDs canônicos
+  - 133 IDs BDD não canônicos
+  impact: Não existe cadeia confiável requisito → cenário; métricas de cobertura por requisito não são demonstráveis.
+  recommended_remediation: Normalizar tags para os IDs de 00-decisions/requirements.yaml ou criar catálogo formal de requisitos
+    filhos com parent_id.
+  validation: Todo @REQ-* deve existir no catálogo e todo requisito aplicável deve apontar para pelo menos um cenário não
+    duplicado.
+  external_dependency: null
+- id: AUD-BDD-003
+  title: Binding registry não contém mapeamento por cenário
+  domain: bdd
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 04-bdd/BINDING-REGISTRY.yaml possui apenas versão, política, status e source_of_truth
+  - 'auditoria local: 123 unmapped/descriptive, 2 executed PASS, 2 BLOCKED'
+  impact: O registro não prova qual step definition executa cada cenário nem o nível de execução.
+  recommended_remediation: Criar registro por scenario_id com feature, linha, requisito, step_definition, execution_level,
+    status e evidence_path.
+  validation: Validador deve falhar para cenário sem registro ou para evidence_path inválido.
+  external_dependency: null
+- id: AUD-SQL-001
+  title: Dois modelos de contexto tenant coexistem nas RLS
+  domain: database-security
+  severity: CRITICAL
+  confidence: CONFIRMED
+  execution_class: LOCAL_PARTIAL
+  status: OPEN
+  evidence:
+  - CONVENTIONS.md e 01-db/rls/0001_rls.sql usam organization_id/app.current_organization_id
+  - migrations 0010 e 0012 usam tenant_id/app.tenant_id
+  - event_admin/postgres_store.py configura apenas app.current_organization_id
+  impact: execution_evidence e runtime_configuration_audit podem não enxergar o mesmo contexto das demais tabelas; há risco
+    de bloqueio indevido ou isolamento inconsistente.
+  recommended_remediation: Escolher um único identificador/contexto, migrar tabelas/policies e atualizar adapters/testes.
+    Recomenda-se organization_id/app.current_organization_id para aderência ao restante.
+  validation: Executar migrations em PostgreSQL e provar leitura/escrita A, negação B e fail-closed sem contexto.
+  external_dependency: PostgreSQL real necessário para prova final.
+- id: AUD-SQL-002
+  title: PostgreSQL, concorrência e RLS permanecem não executados
+  domain: database
+  severity: CRITICAL
+  confidence: CONFIRMED
+  execution_class: EXTERNAL
+  status: OPEN
+  evidence:
+  - scripts/test_postgres_event_transport.py retorna BLOCKED sem TEST_DATABASE_URL
+  - audit/AUTO12-POSTGRES-RUNTIME.txt
+  - REQUIREMENT-EVIDENCE-MAP mantém gaps explícitos
+  impact: SQL válido estaticamente não prova migrations, locks, trigger behavior, rollback, performance ou isolamento real.
+  recommended_remediation: Preparar harness limpo com roles NOBYPASSRLS, migrations do zero/upgrade, concorrência, rollback
+    e restore.
+  validation: Execução deve gerar logs, versões, hashes e resultados em PostgreSQL 16.x.
+  external_dependency: Requer PostgreSQL acessível e credenciais de teste.
+- id: AUD-API-001
+  title: Operação de leitura individual de record não existe
+  domain: openapi
+  severity: MEDIUM
+  confidence: CONFIRMED
+  execution_class: LOCAL_PARTIAL
+  status: OPEN
+  evidence:
+  - OpenAPI possui PATCH /v1/objects/{objectKey}/records/{recordId}
+  - não possui GET no mesmo path
+  - CAPABILITY-FACET-MATRIX declara o gap
+  impact: Consumidores não têm contrato direto para recuperar um record por ID e validar ETag/versão.
+  recommended_remediation: Definir semântica e adicionar GET individual, responses, ETag, autorização e exemplos; alinhar
+    runtime e SDK.
+  validation: Lint OpenAPI + contract test + teste contra API implantada.
+  external_dependency: Semântica final e prova de runtime dependem do serviço.
+- id: AUD-API-002
+  title: Catálogo de erros não está fechado no contrato OpenAPI
+  domain: openapi
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 00-decisions/error-catalog.yaml define códigos
+  - components.schemas.Problem.code é string sem enum/$ref
+  - não há gate catálogo ↔ OpenAPI ↔ SDK
+  impact: Códigos e status podem divergir silenciosamente entre contrato, runtime, SDK e runbooks.
+  recommended_remediation: Criar schema canônico de erros gerado do catálogo e gate de consistência bidirecional.
+  validation: Todo código usado deve existir uma vez, com status idêntico em todas as superfícies.
+  external_dependency: null
+- id: AUD-API-003
+  title: Respostas 401/403 são inconsistentes entre operações protegidas
+  domain: openapi
+  severity: MEDIUM
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 8 operações protegidas omitem 401 e/ou 403
+  - '[{''operationId'': ''createObjectDefinition'', ''missing'': [''401'', ''403'']}, {''operationId'': ''listObjectDefinitions'',
+    ''missing'': [''401'', ''403'']}, {''operationId'': ''createRecord'', ''missing'': [''401'', ''403'']}, {''operationId'':
+    ''listRecords'', ''missing'': [''401'', ''403'']}, {''operationId'': ''getWorkInbox'', ''missing'': [''401'', ''403'']},
+    {''operationId'': ''replayDeadLetter'', ''missing'': [''401'', ''403'']}, {''operationId'': ''resolveDeadLetter'', ''missing'':
+    [''401'', ''403'']}, {''operationId'': ''recordExecutionEvidence'', ''missing'': [''401'', ''403'']}]'
+  impact: Clientes recebem contrato incompleto de falhas de autenticação/autorização.
+  recommended_remediation: Padronizar responses de segurança por operação ou regra global documentada.
+  validation: Validador deve exigir 401/403 em toda operação com OAuth2, salvo exceção justificada.
+  external_dependency: null
+- id: AUD-EVT-001
+  title: AsyncAPI 3 possui cobertura operacional incompleta
+  domain: asyncapi
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL_PARTIAL
+  status: OPEN
+  evidence:
+  - 7 channels
+  - 6 operations cobrindo 3 channels
+  - '4 channels sem operation: metadataObjectPublished, metadataRecordCreated, quotaExceeded, workItemProjected'
+  - servers ausente
+  impact: Produtores/consumidores e ambientes de broker não são identificáveis para quatro contratos.
+  recommended_remediation: Adicionar operations send/receive conforme AsyncAPI 3.0, servers e bindings; não usar modelo publish/subscribe
+    de AsyncAPI 2.x.
+  validation: Validação AsyncAPI 3 + gate que exige ao menos uma operação por canal aplicável.
+  external_dependency: null
+- id: AUD-EVT-002
+  title: Broker Redpanda não foi executado
+  domain: event-runtime
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: EXTERNAL
+  status: OPEN
+  evidence:
+  - 'campanha: rpk available BLOCKED'
+  - Docker/Podman não disponível nesta execução
+  - REQUIREMENT-EVIDENCE-MAP mantém deduplicação/replay não provados
+  impact: Entrega, ordenação, retry, DLQ, lag e replay permanecem hipóteses contratuais.
+  recommended_remediation: Executar compose/cluster efêmero com producer/consumer reais, falhas e replay.
+  validation: Evidence deve incluir broker version, topic config, offsets, payload hashes e resultados.
+  external_dependency: Requer Redpanda/Kafka runtime e engine de containers ou cluster.
+- id: AUD-STATE-001
+  title: Registry de migração cobre apenas 2 das 5 máquinas
+  domain: statecharts
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 'machine files: [''approval.machine.ts'', ''event-transport.machine.ts'', ''object-definition.machine.ts'', ''sla.machine.ts'',
+    ''workflow.machine.ts'']'
+  - 'registry: [''event-transport'', ''metadata.object-definition'']'
+  impact: approval, SLA e workflow não possuem política formal de versão/snapshot no registry.
+  recommended_remediation: Registrar todas as máquinas ou marcar explicitamente NOT_PERSISTED/NOT_APPLICABLE com justificativa.
+  validation: Gate deve comparar arquivos *.machine.ts com registry e rejeitar omissões.
+  external_dependency: null
+- id: AUD-STATE-002
+  title: Execução oficial XState não foi reproduzida nesta auditoria
+  domain: statecharts
+  severity: MEDIUM
+  confidence: CONFIRMED
+  execution_class: EXTERNAL
+  status: OPEN
+  evidence:
+  - tools/xstate-runtime/package.json fixa versões, mas não possui package-lock
+  - instalação npm não concluiu no ambiente
+  - evidência XState referenciada está vazia
+  impact: Comportamento pode divergir da inspeção estática e não há resolução reproduzível de dependências.
+  recommended_remediation: Adicionar lockfile, npm ci e teste oficial createActor; registrar BLOCKED quando dependências não
+    puderem ser resolvidas.
+  validation: npm ci && npm test com log e hash do lockfile.
+  external_dependency: Requer acesso ao registry npm ou cache confiável.
+- id: AUD-SDK-001
+  title: SDK não possui lockfile e usa instalação não determinística no CI
+  domain: sdk
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL_PARTIAL
+  status: OPEN
+  evidence:
+  - 06-sdk/typescript/package.json possui ranges ^5.7.0 e ^2.0.0
+  - não existe package-lock no diretório
+  - workflow usa npm install
+  impact: Builds futuros podem resolver versões diferentes e produzir resultados divergentes.
+  recommended_remediation: Gerar lockfile revisado e usar npm ci; separar dependências de geração/compile/test.
+  validation: npm ci, tsc --noEmit e testes devem passar sem alterar lockfile.
+  external_dependency: Geração inicial do lockfile requer resolução confiável de pacotes.
+- id: AUD-SDK-002
+  title: SDK compila e drift gate passa, mas cobertura herda lacunas do OpenAPI
+  domain: sdk
+  severity: MEDIUM
+  confidence: CONFIRMED
+  execution_class: LOCAL_PARTIAL
+  status: OPEN
+  evidence:
+  - 'tsc global 5.8.3: PASS'
+  - 'scripts/check_sdk_drift.sh: PASS'
+  - 06-sdk/generated/openapi-operations.json contém 12 operações
+  - GET individual ausente no OpenAPI
+  impact: Drift zero prova consistência com o contrato atual, não completude funcional.
+  recommended_remediation: Corrigir contrato primeiro, regenerar SDK e adicionar testes de uso por operação.
+  validation: Cobertura SDK deve ser 1:1 com operationId e exemplos de sucesso/erro.
+  external_dependency: null
+- id: AUD-CI-001
+  title: Workflow não aplica hardening mínimo de supply chain
+  domain: ci-cd
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL_PARTIAL
+  status: OPEN
+  evidence:
+  - 8 uses sem SHA imutável
+  - permissions raiz ausente
+  - concurrency ausente
+  - timeout-minutes ausente
+  - 2 npm install
+  - pip install sem versões/hashes
+  impact: Actions, pacotes e imagens mutáveis podem alterar o resultado ou ampliar privilégios.
+  recommended_remediation: Fixar actions por commit SHA verificado, permissions mínimas, timeouts, concurrency, npm ci e dependências
+    Python com hashes.
+  validation: Validador estático + execução real em GitHub Actions.
+  external_dependency: SHAs atuais, OIDC e branch protection exigem GitHub/repositórios oficiais.
+- id: AUD-SUP-001
+  title: Imagens de container não estão fixadas por digest
+  domain: supply-chain
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL_PARTIAL
+  status: OPEN
+  evidence:
+  - postgres:16-alpine
+  - redis:7-alpine
+  - redpanda:v24.2.18
+  - innovar/*:1.0.0/local
+  - ghcr.io/innovar/execution-evidence:sha256-required é placeholder, não digest
+  impact: A mesma configuração pode executar bytes diferentes; provenance e SBOM não podem ser vinculados ao artefato.
+  recommended_remediation: Substituir tags por repository@sha256:<digest>, gerar SBOM, assinatura e attestation.
+  validation: Gate deve rejeitar imagens sem @sha256 e verificar assinatura/provenance.
+  external_dependency: Digests/assinaturas exigem registry OCI e OIDC/chaves.
+- id: AUD-INF-001
+  title: Helm foi validado apenas por validador estático próprio
+  domain: infrastructure
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: EXTERNAL
+  status: OPEN
+  evidence:
+  - 'scripts/validate_helm_static.py: PASS'
+  - helm, kubeconform e kubectl indisponíveis
+  - 9 templates Go não são YAML puro antes de renderização
+  impact: Não há prova de helm lint/template, schema Kubernetes, install, selectors, policies ou tráfego real.
+  recommended_remediation: Executar helm lint, helm template, kubeconform strict e instalação em cluster efêmero.
+  validation: Salvar rendered.yaml, versões das ferramentas, eventos do cluster e smoke tests.
+  external_dependency: Requer Helm, kubeconform e Kubernetes.
+- id: AUD-INF-002
+  title: Não existe Terraform/OpenTofu
+  domain: infrastructure
+  severity: MEDIUM
+  confidence: CONFIRMED
+  execution_class: LOCAL_PARTIAL
+  status: OPEN
+  evidence:
+  - 0 arquivos .tf/.tofu
+  - COVERAGE-CHECKLIST inclui infrastructure_as_code
+  impact: A topologia externa não é reprodutível por código; Helm cobre workloads, não provisionamento de infraestrutura.
+  recommended_remediation: Primeiro decidir provider/topologia; então criar módulos e ambientes. Não criar scaffold genérico
+    como prova de completude.
+  validation: tofu fmt/validate/plan e policy checks; apply somente em ambiente autorizado.
+  external_dependency: Provider, credenciais, backend e decisões de cloud são externos.
+- id: AUD-OBS-001
+  title: SLOs são metas declaradas, não medições operacionais
+  domain: observability
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: EXTERNAL
+  status: OPEN
+  evidence:
+  - NFR-SLO-CATALOG.yaml
+  - REQ-NFR-001 permanece PARTIAL
+  - distributed game day e load execution BLOCKED
+  impact: Não é possível afirmar disponibilidade, latência, RTO/RPO ou burn rate reais.
+  recommended_remediation: Definir SLIs computáveis, telemetria, alertas e executar campanha de carga/game day.
+  validation: Relatórios devem conter janela, população, percentis, erros e fonte de métricas.
+  external_dependency: Requer serviços implantados e backend de observabilidade.
+- id: AUD-SEC-001
+  title: Threat model formal não está presente
+  domain: security-governance
+  severity: MEDIUM
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - nenhum THREAT-MODEL.md/ABUSE-CASES.yaml no inventário
+  - controles estão dispersos em ADRs, RLS e runbooks
+  impact: A cobertura de ameaças, trust boundaries e abuse cases não é verificável como conjunto.
+  recommended_remediation: Criar threat model versionado ligado a requisitos e testes; não afirmar pentest.
+  validation: Checklist STRIDE/abuse cases deve apontar controles, owners e evidências.
+  external_dependency: null
+- id: AUD-DATA-001
+  title: Governança de dados pessoais não está formalizada como inventário executável
+  domain: data-governance
+  severity: MEDIUM
+  confidence: CONFIRMED
+  execution_class: LOCAL_PARTIAL
+  status: OPEN
+  evidence:
+  - retention_class existe no OpenAPI
+  - não há DATA-INVENTORY, DSAR workflow ou política canônica de retenção no inventário
+  impact: Retenção, exclusão, legal hold e propagação para eventos/backups não são auditáveis.
+  recommended_remediation: Criar inventário/classificação/retention/DSAR ligados a schemas e eventos; submeter a validação
+    jurídica.
+  validation: Gate documental e testes de retenção; aprovação jurídica/organizacional externa.
+  external_dependency: Base legal, responsáveis e processo operacional dependem da organização.
+- id: AUD-MET-001
+  title: Matriz de métricas contém contradição de escopo
+  domain: metrics
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - CAPABILITY-FACET-MATRIX possui object_definitions e event_transport com SCI
+  - portfolio_sci.reason afirma "somente uma capability foi avaliada"
+  impact: Leitores não conseguem determinar se uma ou duas capabilities integram o denominador.
+  recommended_remediation: Definir status por capability e fórmula de portfolio; corrigir razão sem calcular score global
+    indevido.
+  validation: Validador deve contar capabilities elegíveis e confrontar a justificativa.
+  external_dependency: null
+- id: AUD-MET-002
+  title: Matriz contém chave YAML textual acidental
+  domain: metrics
+  severity: MEDIUM
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - 'traceability/CAPABILITY-FACET-MATRIX.yaml: "mas não criação/listagem/leitura: null"'
+  impact: Schemas permissivos aceitam corrupção semântica e cálculos podem ignorá-la silenciosamente.
+  recommended_remediation: Remover chave e aplicar JSON Schema com additionalProperties:false aos objetos controlados.
+  validation: Validação de schema deve falhar para qualquer campo não previsto.
+  external_dependency: null
+- id: AUD-DOC-001
+  title: Consolidado interpreta AsyncAPI 3 como publish/subscribe de canal
+  domain: documentation
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - DOCUMENTACAO_TECNICA_FINAL capítulo 5 marca Publish/Subscribe = não em 7 canais
+  - AsyncAPI 3 define send/receive em operations top-level para 3 canais
+  impact: A documentação transmite ausência total de operações, embora existam seis operações válidas no modelo 3.0.
+  recommended_remediation: Refazer parser/documentação com semântica AsyncAPI 3.0 e listar canais sem operações separadamente.
+  validation: Tabela deve mostrar action send/receive e operationId por channel.
+  external_dependency: null
+- id: AUD-DOC-002
+  title: Consolidado não é inventário completo para auditoria
+  domain: documentation
+  severity: MEDIUM
+  confidence: CONFIRMED
+  execution_class: LOCAL
+  status: OPEN
+  evidence:
+  - documentação consolidada cobre 189/189 extensões selecionadas
+  - ZIP possui 355 arquivos
+  - scripts Python, features, shell, evidências txt e caches ficam fora do apêndice canônico
+  impact: Uma auditoria séria precisa considerar também executores, testes, logs e artefatos omitidos.
+  recommended_remediation: Manter catálogo técnico detalhado, mas adicionar inventário de 355 arquivos e apêndices por categoria
+    de auditoria.
+  validation: Manifesto de auditoria deve cobrir 355/355 com hash e classificação.
+  external_dependency: null
+- id: AUD-LOCK-001
+  title: Lockfile raiz é vazio e não protege dependências
+  domain: dependencies
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: LOCAL_PARTIAL
+  status: OPEN
+  evidence:
+  - package-lock.json packages = {}
+  - pip install no workflow sem requirements lock
+  - xstate e SDK sem lockfile
+  impact: Reprodutibilidade global é inexistente apesar da presença nominal de package-lock.
+  recommended_remediation: Remover lockfile enganoso ou convertê-lo em workspace real; criar locks por ecossistema e política
+    de atualização.
+  validation: Instalações clean devem ser byte-reprodutíveis e não modificar locks.
+  external_dependency: Resolução inicial depende dos registries confiáveis.
+- id: AUD-RUN-001
+  title: Evidências de execução externa permanecem BLOCKED e precisam de runbook único
+  domain: operations
+  severity: HIGH
+  confidence: CONFIRMED
+  execution_class: EXTERNAL
+  status: OPEN
+  evidence:
+  - PostgreSQL, Redpanda, Helm/Kubernetes, load e distributed game day BLOCKED
+  - gaps distribuídos em vários relatórios históricos
+  impact: A prova externa pode ser executada de forma inconsistente ou deixar de registrar dados mínimos.
+  recommended_remediation: Consolidar runbook de prova externa com pré-requisitos, comandos, critérios, evidências e rollback.
+  validation: Cada gate externo deve gerar registro assinado/hasheado com PASS/FAIL/BLOCKED.
+  external_dependency: Requer ambientes externos correspondentes.

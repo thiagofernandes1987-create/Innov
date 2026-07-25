@@ -1,0 +1,8 @@
+FROM python:3.13-slim
+WORKDIR /app
+RUN useradd --create-home --uid 10001 innovar
+COPY event_admin /app/event_admin
+USER 10001
+ENV PORT=3000 EVENT_ADMIN_HOST=0.0.0.0 EVENT_ADMIN_SQLITE_PATH=/data/event-admin.sqlite3
+EXPOSE 3000
+CMD ["python","-m","event_admin"]

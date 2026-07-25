@@ -1,0 +1,50 @@
+schema_version: UTA-R3B-new-cycle-request-v1
+status: REQUIRED
+request_count: 4
+requests:
+- request_id: NCR-R3B-0001
+  source_final_finding_id: FFND-R3B-0025
+  priority: P0
+  title: Orquestrador validate_all omite gates críticos e não representa o estado final
+  required_action: Transformar validate_round2/final validator em gate canônico único, incluir todos os controles e retornar
+    código não zero quando houver FAIL local.
+  acceptance_criteria:
+  - Implementação aplicada em nova working copy
+  - Teste negativo direcionado adicionado
+  - Gate canônico atualizado
+  - Todos os testes locais e manifestos íntegros após a mudança
+  backflow_prohibited: true
+- request_id: NCR-R3B-0002
+  source_final_finding_id: FFND-R3B-0026
+  priority: P1
+  title: Estado do AdminHandler é global entre instâncias
+  required_action: Criar handler factory/subclasse por servidor ou injetar dependências na instância/request handler.
+  acceptance_criteria:
+  - Implementação aplicada em nova working copy
+  - Teste negativo direcionado adicionado
+  - Gate canônico atualizado
+  - Todos os testes locais e manifestos íntegros após a mudança
+  backflow_prohibited: true
+- request_id: NCR-R3B-0003
+  source_final_finding_id: FFND-R3B-0027
+  priority: P1
+  title: Tópico do REST Proxy é interpolado sem validação ou encoding
+  required_action: Aplicar allowlist de tópico e percent-encoding de segmento; rejeitar slash, dot segments, query e fragment.
+  acceptance_criteria:
+  - Implementação aplicada em nova working copy
+  - Teste negativo direcionado adicionado
+  - Gate canônico atualizado
+  - Todos os testes locais e manifestos íntegros após a mudança
+  backflow_prohibited: true
+- request_id: NCR-R3B-0004
+  source_final_finding_id: FFND-R3B-0028
+  priority: P0
+  title: Registro de remediação aponta para artefato SDK removido
+  required_action: Atualizar as duas referências, revisar evidências históricas e tornar validate_remediation_register obrigatório
+    no orquestrador canônico.
+  acceptance_criteria:
+  - Implementação aplicada em nova working copy
+  - Teste negativo direcionado adicionado
+  - Gate canônico atualizado
+  - Todos os testes locais e manifestos íntegros após a mudança
+  backflow_prohibited: true

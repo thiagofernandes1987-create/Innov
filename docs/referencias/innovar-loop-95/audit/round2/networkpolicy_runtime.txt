@@ -1,0 +1,1 @@
+NETWORKPOLICY_TARGETS: BLOCKED - kubectl missing

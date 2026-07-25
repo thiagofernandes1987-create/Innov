@@ -1,0 +1,1 @@
+BDD_REGISTRY_RESULT: PASS scenarios=38 unique_step_bodies=38

@@ -1,0 +1,237 @@
+{
+  "features": 11,
+  "scenarios": 38,
+  "binding_hints": 11,
+  "unmapped_or_descriptive": 27,
+  "method": "conservative lexical hint; not proof of executable binding",
+  "items": [
+    {
+      "file": "04-bdd/features/object-lifecycle.feature",
+      "line": 3,
+      "name": "Publish an object under the expected version",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/object-lifecycle.feature",
+      "line": 9,
+      "name": "Reject a stale transition",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/object-lifecycle.feature",
+      "line": 15,
+      "name": "Reject mutation of a published version",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/events.feature",
+      "line": 4,
+      "name": "Aggregate and outbox are atomic",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/events.feature",
+      "line": 10,
+      "name": "Duplicate consumer delivery applies one effect",
+      "binding_hint": true
+    },
+    {
+      "file": "04-bdd/features/event-transport-executable.feature",
+      "line": 3,
+      "name": "rollback do agregado também remove evento e outbox",
+      "binding_hint": true
+    },
+    {
+      "file": "04-bdd/features/event-transport-executable.feature",
+      "line": 9,
+      "name": "dois publishers não reivindicam a mesma mensagem",
+      "binding_hint": true
+    },
+    {
+      "file": "04-bdd/features/event-transport-executable.feature",
+      "line": 15,
+      "name": "replay de DLQ exige escopo administrativo, motivo e idempotência",
+      "binding_hint": true
+    },
+    {
+      "file": "04-bdd/features/event-transport-executable.feature",
+      "line": 21,
+      "name": "consumidor duplicado não reaplica efeito",
+      "binding_hint": true
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 5,
+      "name": "Record a passing gate with artifact checksum",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 10,
+      "name": "Reject an invalid checksum",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 15,
+      "name": "Reject mutation of recorded evidence",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 20,
+      "name": "Reject deletion of recorded evidence",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 25,
+      "name": "Hide evidence from another tenant",
+      "binding_hint": true
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 31,
+      "name": "Accept a complete development configuration",
+      "binding_hint": true
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 36,
+      "name": "Reject a pool with maximum below minimum",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 41,
+      "name": "Reject retry maximum below retry base",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 47,
+      "name": "PostgreSQL unavailable is blocked",
+      "binding_hint": true
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 52,
+      "name": "Kubernetes unavailable is blocked",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 57,
+      "name": "XState package unavailable is blocked",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/execution-evidence.feature",
+      "line": 62,
+      "name": "SDK generation is deterministic",
+      "binding_hint": true
+    },
+    {
+      "file": "04-bdd/features/metadata.feature",
+      "line": 4,
+      "name": "Published object versions are immutable",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/metadata.feature",
+      "line": 10,
+      "name": "Object creation beyond quota is rejected",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/metadata.feature",
+      "line": 16,
+      "name": "Invalid object key is rejected",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/concurrency.feature",
+      "line": 4,
+      "name": "Only one optimistic update wins",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/concurrency.feature",
+      "line": 10,
+      "name": "Quota reservation is atomic",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/tenancy.feature",
+      "line": 4,
+      "name": "Cross-tenant read is denied",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/tenancy.feature",
+      "line": 10,
+      "name": "Organization context is derived server-side",
+      "binding_hint": true
+    },
+    {
+      "file": "04-bdd/features/cache.feature",
+      "line": 4,
+      "name": "Metadata invalidation removes stale entries",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/cache.feature",
+      "line": 10,
+      "name": "Redis unavailable does not fabricate a successful invalidation",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/sla.feature",
+      "line": 4,
+      "name": "Paused time is excluded",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/sla.feature",
+      "line": 10,
+      "name": "Holidays are excluded",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/idempotency.feature",
+      "line": 4,
+      "name": "Same key and payload replays the original response",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/idempotency.feature",
+      "line": 10,
+      "name": "Same key with a different payload is rejected",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/idempotency.feature",
+      "line": 16,
+      "name": "Concurrent command with the same key reports operation in progress",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/workflow.feature",
+      "line": 4,
+      "name": "Complete draft can be submitted",
+      "binding_hint": false
+    },
+    {
+      "file": "04-bdd/features/workflow.feature",
+      "line": 10,
+      "name": "Rejection without a reason is denied",
+      "binding_hint": true
+    },
+    {
+      "file": "04-bdd/features/workflow.feature",
+      "line": 16,
+      "name": "Approval over limit requires approval path",
+      "binding_hint": false
+    }
+  ]
+}

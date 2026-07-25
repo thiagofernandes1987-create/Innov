@@ -1,0 +1,39 @@
+version: 2
+status: BLOCKED_EXTERNAL
+reason: Trusted dependency resolution is unavailable in this environment; offline
+  attempts found no complete cache. No lockfile was invented.
+attempt_policy:
+  max_attempts_per_finding: 3
+  attempts_used: 1
+  stopped_early_reason: ROOT_CAUSE_CONFIRMED_EXTERNAL_NO_CACHE_OR_REGISTRY
+ecosystems:
+  python:
+    manifest: requirements-ci.txt
+    lockfile: requirements-ci.lock
+    status: BLOCKED_EXTERNAL
+    attempt_command: 'python -m pip download --no-index --only-binary=:all: -r requirements-ci.txt
+      -d /tmp/innovar-r2-wheels'
+    evidence: audit/r2-uta/attempts/python_hash_lock_attempt1.log
+    exit_code: 1
+    required_external_action: Resolve packages from a trusted Python registry and
+      generate a hash-pinned lock with pip-compile --generate-hashes.
+  sdk_npm:
+    manifest: 06-sdk/typescript/package.json
+    lockfile: 06-sdk/typescript/package-lock.json
+    status: BLOCKED_EXTERNAL
+    attempt_command: cd 06-sdk/typescript && npm install --package-lock-only --ignore-scripts
+      --offline
+    evidence: audit/r2-uta/attempts/sdk_npm_lock_attempt1.log
+    exit_code: 1
+    required_external_action: Resolve the exact dependency graph from a trusted npm
+      registry, review integrity fields, then commit package-lock.json.
+  xstate_npm:
+    manifest: tools/xstate-runtime/package.json
+    lockfile: tools/xstate-runtime/package-lock.json
+    status: BLOCKED_EXTERNAL
+    attempt_command: cd tools/xstate-runtime && npm install --package-lock-only --ignore-scripts
+      --offline
+    evidence: audit/r2-uta/attempts/xstate_npm_lock_attempt1.log
+    exit_code: 1
+    required_external_action: Resolve the exact XState/tsx/TypeScript graph from a
+      trusted npm registry, then execute the official runtime tests.

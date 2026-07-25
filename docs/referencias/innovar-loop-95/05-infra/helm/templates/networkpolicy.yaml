@@ -1,0 +1,49 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-default-deny
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-event-publisher-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: event-publisher
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.dependencies.dns.namespace | quote }}
+          podSelector:
+            matchLabels:
+{{ toYaml .Values.networkPolicy.dependencies.dns.labels | indent 14 }}
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.dependencies.postgresql.namespace | quote }}
+          podSelector:
+            matchLabels:
+{{ toYaml .Values.networkPolicy.dependencies.postgresql.labels | indent 14 }}
+      ports:
+        - {protocol: TCP, port: {{ .Values.networkPolicy.dependencies.postgresql.port }}}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: {{ .Values.networkPolicy.dependencies.redpanda.namespace | quote }}
+          podSelector:
+            matchLabels:
+{{ toYaml .Values.networkPolicy.dependencies.redpanda.labels | indent 14 }}
+      ports:
+        - {protocol: TCP, port: {{ .Values.networkPolicy.dependencies.redpanda.restPort }}}
+        - {protocol: TCP, port: {{ .Values.networkPolicy.dependencies.redpanda.kafkaPort }}}
+{{- end }}

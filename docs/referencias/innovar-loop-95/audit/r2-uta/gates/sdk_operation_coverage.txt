@@ -1,0 +1,1 @@
+SDK_SEMANTIC_CONTRACT_RESULT: PASS operations=13 source_hash=3f4e494a5362f4edbed19a30a0d5eebb51971eba947fcf560fa61d6f29b3d141

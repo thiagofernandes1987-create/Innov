@@ -1,0 +1,148 @@
+{
+  "source_sha256": "4a310b65df2b050bbe9a5246acc5617189eb09a8dfb59c256ce28e5b5d8d43ae",
+  "generated_types": "06-sdk/typescript/src/generated-contract.ts",
+  "operations": [
+    {
+      "method": "POST",
+      "path": "/v1/objects",
+      "operationId": "createObjectDefinition",
+      "success_status": "201",
+      "response_type": "ObjectDefinition",
+      "required_headers": [
+        "X-Idempotency-Key"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/v1/objects/{objectKey}/records",
+      "operationId": "createRecord",
+      "success_status": "201",
+      "response_type": "Record",
+      "required_headers": [
+        "X-Idempotency-Key"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/objects/{objectKey}/records/{recordId}",
+      "operationId": "getRecord",
+      "success_status": "200",
+      "response_type": "Record",
+      "required_headers": []
+    },
+    {
+      "method": "GET",
+      "path": "/v1/work-inbox",
+      "operationId": "getWorkInbox",
+      "success_status": "200",
+      "response_type": "WorkItemPage",
+      "required_headers": []
+    },
+    {
+      "method": "GET",
+      "path": "/v1/admin/events/dlq",
+      "operationId": "listDeadLetters",
+      "success_status": "200",
+      "response_type": "DeadLetterPage",
+      "required_headers": [
+        "X-Actor-Id",
+        "X-Context-Audience",
+        "X-Context-Nonce",
+        "X-Context-Timestamp",
+        "X-Context-Version",
+        "X-OAuth-Scopes",
+        "X-Organization-Id"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/v1/admin/execution-evidence",
+      "operationId": "listExecutionEvidence",
+      "success_status": "200",
+      "response_type": "ExecutionEvidenceList",
+      "required_headers": []
+    },
+    {
+      "method": "GET",
+      "path": "/v1/objects",
+      "operationId": "listObjectDefinitions",
+      "success_status": "200",
+      "response_type": "ObjectDefinitionPage",
+      "required_headers": []
+    },
+    {
+      "method": "GET",
+      "path": "/v1/objects/{objectKey}/records",
+      "operationId": "listRecords",
+      "success_status": "200",
+      "response_type": "RecordPage",
+      "required_headers": []
+    },
+    {
+      "method": "POST",
+      "path": "/v1/admin/execution-evidence",
+      "operationId": "recordExecutionEvidence",
+      "success_status": "201",
+      "response_type": "ExecutionEvidence",
+      "required_headers": [
+        "X-Idempotency-Key"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/v1/admin/events/dlq/{deadLetterId}/replay",
+      "operationId": "replayDeadLetter",
+      "success_status": "200",
+      "response_type": "DeadLetterReplay",
+      "required_headers": [
+        "X-Actor-Id",
+        "X-Context-Audience",
+        "X-Context-Nonce",
+        "X-Context-Timestamp",
+        "X-Context-Version",
+        "X-Idempotency-Key",
+        "X-OAuth-Scopes",
+        "X-Organization-Id"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/v1/admin/events/dlq/{deadLetterId}/resolution",
+      "operationId": "resolveDeadLetter",
+      "success_status": "200",
+      "response_type": "DeadLetter",
+      "required_headers": [
+        "X-Actor-Id",
+        "X-Context-Audience",
+        "X-Context-Nonce",
+        "X-Context-Timestamp",
+        "X-Context-Version",
+        "X-Idempotency-Key",
+        "X-OAuth-Scopes",
+        "X-Organization-Id"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/v1/objects/{objectKey}/transitions",
+      "operationId": "transitionObjectDefinition",
+      "success_status": "200",
+      "response_type": "ObjectDefinition",
+      "required_headers": [
+        "If-Match",
+        "X-Idempotency-Key"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/v1/objects/{objectKey}/records/{recordId}",
+      "operationId": "updateRecord",
+      "success_status": "200",
+      "response_type": "Record",
+      "required_headers": [
+        "If-Match",
+        "X-Idempotency-Key"
+      ]
+    }
+  ]
+}

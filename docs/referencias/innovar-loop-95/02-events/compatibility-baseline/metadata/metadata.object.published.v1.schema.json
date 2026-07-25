@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://innovar.local/baselines/auto12-r2/metadata/metadata.object.published.v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_definition_id",
+    "published_version",
+    "schema_hash"
+  ],
+  "properties": {
+    "object_definition_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "published_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "schema_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

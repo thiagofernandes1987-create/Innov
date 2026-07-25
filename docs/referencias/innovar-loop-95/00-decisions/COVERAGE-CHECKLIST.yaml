@@ -1,0 +1,37 @@
+version: 1
+scoring:
+  dimensions_are_equally_weighted: true
+  levels:
+    absent: 0
+    described: 25
+    formalized: 50
+    implemented_local: 65
+    tested_local: 75
+    integrated: 90
+    production_evidence: 100
+  rule: "A dimensão pode usar valor intermediário somente com justificativa por item na matriz. Contagem de arquivos ou cenários não é evidência de execução."
+dimensions:
+  - product_vision
+  - logical_architecture
+  - capability_decomposition
+  - physical_architecture
+  - executable_data_model
+  - api_contracts
+  - event_contracts
+  - executable_statecharts
+  - formal_validation
+  - concurrency
+  - idempotency
+  - cache_invalidation
+  - infrastructure_as_code
+  - executable_acceptance_tests
+  - implementable_sdk
+  - operational_runbooks
+mandatory_evidence_for_95:
+  - real_postgresql_migration_and_rls_tests
+  - integrated_http_api_tests
+  - broker_event_delivery_and_replay_tests
+  - executable_bdd_with_unique_behavior_mapping
+  - rendered_and_installed_iac
+  - generated_sdk_drift_check
+  - restore_and_incident_exercises

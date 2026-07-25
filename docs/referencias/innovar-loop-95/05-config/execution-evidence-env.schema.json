@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "APP_ENV",
+    "SERVICE_NAME",
+    "SERVICE_REVISION",
+    "DATABASE_URL",
+    "REDPANDA_BROKERS",
+    "OUTBOX_BATCH_SIZE",
+    "OUTBOX_LEASE_SECONDS",
+    "OUTBOX_MAX_ATTEMPTS",
+    "EVIDENCE_DIR"
+  ],
+  "properties": {
+    "APP_ENV": {
+      "enum": [
+        "development",
+        "test",
+        "staging",
+        "production"
+      ]
+    },
+    "SERVICE_NAME": {
+      "type": "string"
+    },
+    "SERVICE_REVISION": {
+      "type": "string"
+    },
+    "DATABASE_URL": {
+      "type": "string",
+      "pattern": "^postgres(ql)?://"
+    },
+    "DATABASE_POOL_MIN": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "DATABASE_POOL_MAX": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "DATABASE_STATEMENT_TIMEOUT_MS": {
+      "type": "integer",
+      "minimum": 100
+    },
+    "DATABASE_LOCK_TIMEOUT_MS": {
+      "type": "integer",
+      "minimum": 100
+    },
+    "TENANT_CONTEXT_REQUIRED": {
+      "type": "boolean"
+    },
+    "REDPANDA_BROKERS": {
+      "type": "string"
+    },
+    "REDPANDA_TOPIC_PREFIX": {
+      "type": "string"
+    },
+    "REDPANDA_SECURITY_PROTOCOL": {
+      "enum": [
+        "PLAINTEXT",
+        "SASL_PLAINTEXT",
+        "SASL_SSL",
+        "SSL"
+      ]
+    },
+    "OUTBOX_BATCH_SIZE": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000
+    },
+    "OUTBOX_LEASE_SECONDS": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 600
+    },
+    "OUTBOX_MAX_ATTEMPTS": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "OUTBOX_RETRY_BASE_MS": {
+      "type": "integer",
+      "minimum": 10
+    },
+    "OUTBOX_RETRY_MAX_MS": {
+      "type": "integer",
+      "minimum": 100
+    },
+    "DLQ_RETENTION_DAYS": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "EVIDENCE_DIR": {
+      "type": "string",
+      "pattern": "^/"
+    },
+    "EVIDENCE_CAMPAIGN_ID": {
+      "type": "string"
+    },
+    "OTEL_EXPORTER_OTLP_ENDPOINT": {
+      "type": "string"
+    },
+    "LOG_LEVEL": {
+      "enum": [
+        "DEBUG",
+        "INFO",
+        "WARNING",
+        "ERROR"
+      ]
+    }
+  }
+}

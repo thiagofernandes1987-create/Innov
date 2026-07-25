@@ -1,0 +1,1 @@
+{"features": 11, "scenarios": 152, "binding_hints": 29, "unmapped_or_descriptive": 123, "method": "conservative lexical hint; not proof of executable binding"}

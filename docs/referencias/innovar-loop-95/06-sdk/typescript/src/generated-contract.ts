@@ -1,0 +1,22 @@
+/* AUTO-GENERATED. DO NOT EDIT. */
+export const OPENAPI_SOURCE_SHA256 = '4a310b65df2b050bbe9a5246acc5617189eb09a8dfb59c256ce28e5b5d8d43ae' as const;
+export type CreateObjectRequest = { "namespace": string; "object_key": string; "singular_name": string; "plural_name": string; "storage_strategy"?: "JSONB_HYBRID"; "retention_class": "OPERATIONAL" | "FINANCIAL" | "LEGAL" | "AUDIT" | "MARKETING" | "TEMPORARY" | "SENSITIVE"; "api_exposure"?: boolean; "search_exposure"?: boolean };
+export type ObjectDefinition = CreateObjectRequest & { "id": string; "version": number; "lifecycle_state": "DRAFT" | "IN_REVIEW" | "PUBLISHED" | "DEPRECATED" | "ARCHIVED"; "created_at": string };
+export type CreateRecordRequest = { "values": {  } };
+export type UpdateRecordRequest = { "values": {  } };
+export type Record = { "id": string; "object_key": string; "object_version": number; "values": {  }; "version": number; "created_at": string; "updated_at": string };
+export type WorkItem = { "id": string; "source_resource_id": string; "source_kind": "TASK" | "ACTIVITY" | "APPROVAL" | "APPOINTMENT" | "ALERT"; "source_state_version": number; "title": string; "due_at"?: string | null; "priority": number };
+export type ObjectDefinitionPage = { "data": Array<ObjectDefinition>; "page": PageMeta };
+export type RecordPage = { "data": Array<Record>; "page": PageMeta };
+export type WorkItemPage = { "data": Array<WorkItem>; "page": PageMeta };
+export type PageMeta = { "next"?: string | null; "has_more": boolean };
+export type Problem = { "type": string; "title": string; "status": 401 | 403 | 404 | 409 | 422 | 428 | 429 | 500 | 503 | 413; "code": "VALIDATION_FAILED" | "UNAUTHENTICATED" | "FORBIDDEN" | "NOT_FOUND" | "VERSION_CONFLICT" | "IDEMPOTENCY_KEY_REUSED" | "OPERATION_IN_PROGRESS" | "QUOTA_EXCEEDED" | "RATE_LIMITED" | "DEPENDENCY_CONFLICT" | "INVALID_TRANSITION" | "INTERNAL_ERROR" | "SERVICE_UNAVAILABLE" | "PUBLISHED_VERSION_IMMUTABLE" | "PRECONDITION_REQUIRED" | "PAYLOAD_TOO_LARGE"; "detail"?: string; "request_id"?: string };
+export type DeadLetter = { "id": string; "event_id": string; "consumer_name": string; "event_type": string; "attempts": number; "failed_at": string; "last_error"?: string; "resolved_at"?: string | null; "status": "OPEN" | "RESOLVED" };
+export type ExecutionEvidence = { "campaignId": string; "gateKey": string; "status": "PASS" | "FAIL" | "BLOCKED"; "observedAt": string; "artifactSha256"?: string };
+export type DeadLetterPage = { "items": Array<DeadLetter> };
+export type DeadLetterReplay = { "id": string; "dead_letter_id": string; "status": "ACCEPTED"; "dry_run": boolean; "provider_message_id"?: string | null; "created_at": string };
+export type ExecutionEvidenceList = Array<ExecutionEvidence>;
+export type TransitionRequest = unknown;
+export type DlqReplayRequest = { "reason": string; "mode": "SINGLE" | "BATCH"; "dry_run"?: boolean };
+export type DlqResolutionRequest = { "resolution": "REPLAYED" | "DISCARDED" | "SUPERSEDED"; "note": string };
+export type ExecutionEvidenceInput = { "campaignId": string; "gateKey": string; "status": "PASS" | "FAIL" | "BLOCKED"; "observedAt": string; "artifactSha256"?: string; "metadata"?: {  } };

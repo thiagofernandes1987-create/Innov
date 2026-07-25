@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+data:
+  NODE_ENV: {{ .Values.config.nodeEnv | quote }}
+  CACHE_TTL_SECONDS: {{ .Values.config.cacheTtlSeconds | quote }}
+  IDEMPOTENCY_TTL_SECONDS: {{ .Values.config.idempotencyTtlSeconds | quote }}

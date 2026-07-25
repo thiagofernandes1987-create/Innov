@@ -1,0 +1,33 @@
+{
+  "capability": "event_transport",
+  "sci_percent": 82.2,
+  "main_tests": {
+    "passed": 31,
+    "failed": 0
+  },
+  "bdd_step_tests": {
+    "passed": 3,
+    "failed": 0
+  },
+  "event_compatibility": "PASS",
+  "typescript": "PASS",
+  "helm_static": "PASS",
+  "helm_rendered": false,
+  "redpanda_executed": false,
+  "postgres_executed": false,
+  "gameday": {
+    "status": "PASS",
+    "scope": "LOCAL_HTTP_CONTROLLED_BROKER_NOT_REDPANDA",
+    "rto_observed_ms": 2.975,
+    "total_duration_ms": 16.595,
+    "messages_published": 1,
+    "duplicate_effects": 0,
+    "lost_messages": 0,
+    "failure_injection": [
+      "broker_unavailable_observed"
+    ],
+    "postgres_executed": false,
+    "redpanda_executed": false,
+    "helm_executed": false
+  }
+}

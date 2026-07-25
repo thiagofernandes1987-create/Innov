@@ -1,0 +1,18 @@
+{
+  "cycle": "AUTO10_RECONSTRUIDO",
+  "date": "2026-07-22",
+  "event_transport_sci_percent": 84.4,
+  "object_definitions_sci_percent": 78.6,
+  "portfolio_sci": null,
+  "local_tests_passed": 55,
+  "traceability_facets_checked": 36,
+  "validation_result": "PARTIAL",
+  "gherkin": {
+    "features": 10,
+    "scenarios": 140,
+    "binding_hints": 18,
+    "executed_pass": 2,
+    "blocked_external": 2,
+    "unmapped_or_descriptive": 122
+  }
+}

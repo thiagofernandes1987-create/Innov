@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.innovar.app/api/transition-request.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event",
+    "expected_version"
+  ],
+  "properties": {
+    "event": {
+      "type": "string",
+      "enum": [
+        "SUBMIT_REVIEW",
+        "RETURN_DRAFT",
+        "PUBLISH",
+        "DEPRECATE",
+        "ARCHIVE"
+      ]
+    },
+    "expected_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "reason_code": {
+      "type": "string",
+      "maxLength": 120,
+      "minLength": 1
+    },
+    "data": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event": {
+            "enum": [
+              "RETURN_DRAFT",
+              "DEPRECATE",
+              "ARCHIVE"
+            ]
+          }
+        },
+        "required": [
+          "event"
+        ]
+      },
+      "then": {
+        "required": [
+          "reason_code"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+image:
+  repository: innovar/api
+  tag: 1.0.0
+api:
+  replicas: 2
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: '1'
+      memory: 2Gi
+worker:
+  replicas: 2
+  concurrency: 10
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: '1'
+      memory: 2Gi
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+config:
+  nodeEnv: production
+  cacheTtlSeconds: 60
+  idempotencyTtlSeconds: 604800
+eventPublisher:
+  brokerUrl: http://redpanda-rest-proxy:8082
+  enabled: true
+  replicas: 2
+  image:
+    repository: innovar/event-publisher
+    tag: 1.0.0
+  batchSize: 100
+  leaseSeconds: 60
+  terminationGracePeriodSeconds: 30
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 20
+    targetBacklogPerPod: 500
+
+networkPolicy:
+  enabled: true
+  dependencies:
+    postgresql:
+      namespace: innovar-data
+      labels:
+        app.kubernetes.io/name: postgresql
+      port: 5432
+    redpanda:
+      namespace: innovar-events
+      labels:
+        app.kubernetes.io/name: redpanda
+      restPort: 8082
+      kafkaPort: 9092
+    dns:
+      namespace: kube-system
+      labels:
+        k8s-app: kube-dns

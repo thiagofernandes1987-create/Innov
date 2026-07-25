@@ -1,0 +1,16 @@
+policy_version: 1
+subjects:
+  - pattern: "*.v1"
+    compatibility: BACKWARD
+rules:
+  forbidden:
+    - remove_required_property
+    - change_property_type
+    - narrow_enum
+    - set_additionalProperties_false_when_previously_open
+  allowed:
+    - add_optional_property
+    - widen_enum_with_consumer_tolerance_proof
+versioning:
+  breaking_change_requires_new_major_topic: true
+  topic_pattern: "<bounded-context>.<aggregate>.<event>.v<major>"

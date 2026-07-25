@@ -1,0 +1,17 @@
+version: 1
+required_metadata:
+- artifact_id
+- release_id
+- status
+- effective_at
+- sha256
+statuses:
+  CANONICAL: Normative source for the current release.
+  CURRENT_EVIDENCE: Evidence generated for the current release.
+  HISTORICAL: Preserved context; never current evidence.
+  SUPERSEDED: Replaced by a named artifact.
+  DRAFT: Not accepted as evidence.
+  BLOCKED_EXTERNAL: Implementation or harness exists but execution requires external
+    infrastructure.
+supersession_rule: A superseded artifact must name superseded_by; a canonical domain
+  may have exactly one current source.

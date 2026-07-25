@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://innovar.local/baselines/auto12-r2/metadata/metadata.record.created.v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_id",
+    "object_definition_id",
+    "object_version",
+    "values"
+  ],
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "object_definition_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "object_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "values": {
+      "type": "object"
+    }
+  }
+}

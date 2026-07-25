@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.innovar.app/events/platform.quota.exceeded.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "quota_key",
+    "hard_limit",
+    "current_usage",
+    "requested_amount"
+  ],
+  "properties": {
+    "quota_key": {
+      "type": "string"
+    },
+    "hard_limit": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "current_usage": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "requested_amount": {
+      "type": "integer",
+      "minimum": 1
+    }
+  }
+}

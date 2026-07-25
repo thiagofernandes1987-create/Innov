@@ -1,0 +1,63 @@
+JSON_SCHEMA_OK audit/METRICS-SNAPSHOT.json
+JSON_SCHEMA_OK 05-config/config.schema.json
+JSON_SCHEMA_OK 01-api/schemas/transition-request.schema.json
+JSON_SCHEMA_OK 06-sdk/typescript/package.json
+JSON_SCHEMA_OK 06-sdk/typescript/tsconfig.json
+JSON_SCHEMA_OK 02-events/schemas/envelope.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.record.created.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.object.published.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.object.transitioned.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.object.created.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/platform/platform.quota.exceeded.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/platform/work.item.projected.v1.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/create-object.command.v1.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/publish-object.command.v1.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/update-record.command.v1.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/create-record.command.v1.schema.json
+YAML_PARSE_OK traceability/COVERAGE-BASELINE.yaml
+YAML_PARSE_OK traceability/CAPABILITY-FACET-MATRIX.yaml
+YAML_PARSE_OK 02-events/asyncapi.yaml
+YAML_PARSE_OK 03-statecharts/STATE-MIGRATION-REGISTRY.yaml
+YAML_PARSE_OK 01-api/openapi.yaml
+YAML_PARSE_OK 00-decisions/error-catalog.yaml
+YAML_PARSE_OK 00-decisions/COVERAGE-CHECKLIST.yaml
+YAML_PARSE_OK 00-decisions/INVARIANTS.yaml
+YAML_PARSE_OK 00-decisions/NFR-SLO-CATALOG.yaml
+YAML_PARSE_OK 00-decisions/requirements.yaml
+YAML_PARSE_OK 00-decisions/METRICS-AND-ANTI-REGRESSION.yaml
+YAML_PARSE_OK 05-infra/helm/values.yaml
+YAML_PARSE_OK 05-infra/helm/Chart.yaml
+test_cross_tenant_read_discloses_nothing (test_acceptance_runtime.AcceptanceRuntimeTests.test_cross_tenant_read_discloses_nothing) ... ok
+test_idempotency_is_tenant_scoped (test_acceptance_runtime.AcceptanceRuntimeTests.test_idempotency_is_tenant_scoped) ... ok
+test_idempotency_rejects_different_payload (test_acceptance_runtime.AcceptanceRuntimeTests.test_idempotency_rejects_different_payload) ... ok
+test_idempotency_replays_exact_response (test_acceptance_runtime.AcceptanceRuntimeTests.test_idempotency_replays_exact_response) ... ok
+test_publish_expected_version_records_outbox (test_acceptance_runtime.AcceptanceRuntimeTests.test_publish_expected_version_records_outbox) ... ok
+test_published_version_is_immutable (test_acceptance_runtime.AcceptanceRuntimeTests.test_published_version_is_immutable) ... ok
+test_stale_transition_has_no_event (test_acceptance_runtime.AcceptanceRuntimeTests.test_stale_transition_has_no_event) ... ok
+test_all_json_schemas_are_valid_draft_2020_12 (test_contracts.ContractTests.test_all_json_schemas_are_valid_draft_2020_12) ... ok
+test_database_restricts_storage_strategy_to_executable_release (test_contracts.ContractTests.test_database_restricts_storage_strategy_to_executable_release) ... ok
+test_dlq_dedupe_is_tenant_scoped (test_contracts.ContractTests.test_dlq_dedupe_is_tenant_scoped) ... ok
+test_event_storage_strategy_matches_api (test_contracts.ContractTests.test_event_storage_strategy_matches_api) ... ok
+test_event_transport_tables_have_rls (test_contracts.ContractTests.test_event_transport_tables_have_rls) ... ok
+test_helm_service_selector_and_named_port_are_consistent (test_contracts.ContractTests.test_helm_service_selector_and_named_port_are_consistent) ... ok
+test_local_refs_exist (test_contracts.ContractTests.test_local_refs_exist) ... ok
+test_object_definition_capability_has_18_scored_facets (test_contracts.ContractTests.test_object_definition_capability_has_18_scored_facets) ... ok
+test_object_definition_configuration_is_schema_bound (test_contracts.ContractTests.test_object_definition_configuration_is_schema_bound) ... ok
+test_object_definition_runbook_preserves_immutability (test_contracts.ContractTests.test_object_definition_runbook_preserves_immutability) ... ok
+test_only_executable_storage_strategy_is_exposed (test_contracts.ContractTests.test_only_executable_storage_strategy_is_exposed) ... ok
+test_openapi_uses_strong_etags (test_contracts.ContractTests.test_openapi_uses_strong_etags) ... ok
+test_published_version_immutability_has_database_enforcement (test_contracts.ContractTests.test_published_version_immutability_has_database_enforcement) ... ok
+test_quota_function_rejects_invalid_inputs_and_public_execution (test_contracts.ContractTests.test_quota_function_rejects_invalid_inputs_and_public_execution) ... ok
+test_quota_has_single_canonical_signature (test_contracts.ContractTests.test_quota_has_single_canonical_signature) ... ok
+test_runtime_rls_has_policies (test_contracts.ContractTests.test_runtime_rls_has_policies) ... ok
+test_sdk_uses_strong_etag (test_contracts.ContractTests.test_sdk_uses_strong_etag) ... ok
+test_transition_schema_is_closed_and_reasoned (test_contracts.ContractTests.test_transition_schema_is_closed_and_reasoned) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 0.048s
+
+OK
+
+GHERKIN_FEATURE_FILES 9
+GHERKIN_SCENARIOS_DESCRIPTIVE_ONLY 136
+VALIDATION_RESULT: PASS

@@ -1,0 +1,21 @@
+requirements:
+  REQ-TEN-001: Every business row is tenant-scoped.
+  REQ-RLS-001: RLS must deny cross-tenant access by default.
+  REQ-IDEMP-001: POST commands require X-Idempotency-Key.
+  REQ-IDEMP-002: Same key and payload replays original response.
+  REQ-IDEMP-003: Same key with different payload returns 409.
+  REQ-CONC-001: Aggregate updates use expected_version.
+  REQ-EVT-001: Domain changes and outbox persist atomically.
+  REQ-EVT-002: Consumers deduplicate by event_id.
+  REQ-META-001: Published object versions are immutable.
+  REQ-META-002: Metadata objects require capabilities and retention.
+  REQ-QUOTA-001: Tenant quotas are enforced transactionally.
+  REQ-CACHE-001: Metadata cache invalidates on metadata.changed.v1.
+  REQ-WF-001: Invalid workflow transitions are rejected.
+  REQ-APP-001: Approvals revalidate target version before execution.
+  REQ-SLA-001: SLA clocks use explicit business calendar and timezone.
+  REQ-META-003: Object lifecycle transitions are persisted with expected version and
+    event.
+  REQ-STATE-001: Unknown state-machine versions stop processing and alert.
+  REQ-DLQ-001: Terminal consumer failures are retained in a tenant-scoped DLQ.
+  REQ-NFR-001: Production readiness requires measured SLO evidence, not target declarations.

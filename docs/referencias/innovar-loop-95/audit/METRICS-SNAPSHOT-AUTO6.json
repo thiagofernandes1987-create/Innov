@@ -1,0 +1,16 @@
+{
+  "cycle": "AUTO6",
+  "event_transport_sci_percent": 84.4,
+  "portfolio_sci": "NOT_CALCULATED",
+  "local_tests": {"passed": 46, "failed": 0},
+  "bdd": {"passed": 2, "blocked_external": 2, "failed": 0},
+  "event_compatibility": "PASS",
+  "helm_static": "PASS",
+  "sdk_typescript": "PASS",
+  "external_integration_preflight": "BLOCKED",
+  "external_missing": ["docker", "helm", "kubeconform", "kubectl", "TEST_DATABASE_URL"],
+  "postgresql_real": "NOT_EXECUTED",
+  "redpanda_real": "NOT_EXECUTED",
+  "helm_render_install": "NOT_EXECUTED",
+  "distributed_game_day": "NOT_EXECUTED"
+}

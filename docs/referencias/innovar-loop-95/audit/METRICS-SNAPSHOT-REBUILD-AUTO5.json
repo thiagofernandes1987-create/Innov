@@ -1,0 +1,32 @@
+{
+  "cycle": "REBUILD_AUTO5_2026-07-22",
+  "source_package": "INNOVAR_EXECUTABLE_SPEC_EVENT_TRANSPORT_AUTO4_2026-07-22.zip",
+  "event_transport_sci_percent": 84.4,
+  "global_platform_sci": "NOT_CALCULATED",
+  "unit_contract_tests": 41,
+  "unit_contract_failures": 0,
+  "bdd_step_tests": 4,
+  "bdd_step_failures": 0,
+  "event_compatibility": "PASS",
+  "helm_static": "PASS",
+  "typescript": "PASS",
+  "gameday": {
+    "status": "PASS",
+    "scope": "LOCAL_HTTP_CONTROLLED_BROKER_NOT_REDPANDA",
+    "rto_observed_ms": 5.641,
+    "total_duration_ms": 29.157,
+    "messages_published": 1,
+    "messages_consumed": 1,
+    "duplicate_effects": 0,
+    "lost_messages": 0,
+    "failure_injection": [
+      "broker_unavailable_observed"
+    ],
+    "postgres_executed": false,
+    "redpanda_executed": false,
+    "helm_executed": false
+  },
+  "postgres_executed": false,
+  "redpanda_executed": false,
+  "official_helm_executed": false
+}

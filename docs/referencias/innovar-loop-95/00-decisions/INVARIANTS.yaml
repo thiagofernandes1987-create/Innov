@@ -1,0 +1,25 @@
+invariants:
+  INV-TEN-001:
+    statement: A business row belongs to exactly one organization.
+    enforcement: [sql_not_null, rls, command_context]
+  INV-META-001:
+    statement: A published object version is immutable.
+    enforcement: [statechart, sql_trigger, command_guard]
+  INV-META-002:
+    statement: A record references a published object version.
+    enforcement: [foreign_key, command_guard]
+  INV-EVT-001:
+    statement: Aggregate change, domain event and outbox row commit atomically.
+    enforcement: [database_transaction]
+  INV-IDEMP-001:
+    statement: Same idempotency key and request hash replay the exact terminal response.
+    enforcement: [unique_constraint, lease_protocol]
+  INV-IDEMP-002:
+    statement: Same idempotency key with a different hash is rejected.
+    enforcement: [request_hash_comparison]
+  INV-CONC-001:
+    statement: Versioned aggregate mutation must match expected_version.
+    enforcement: [compare_and_swap]
+  INV-PKG-001:
+    statement: Package activation occurs only after dependency, signature and smoke-test validation.
+    enforcement: [package_statechart]

@@ -1,0 +1,18 @@
+version: 1
+status: DOCUMENTED_NOT_OPERATIONALLY_VALIDATED
+data_classes:
+  - id: organization-identifiers
+    examples: [organization_id]
+    classification: INTERNAL
+    retention: follows tenant lifecycle
+  - id: object-record-values
+    examples: [metadata.records.values]
+    classification: BUSINESS_DATA_POTENTIALLY_PERSONAL
+    retention: requires capability-specific schedule
+  - id: audit-and-execution-evidence
+    examples: [execution_evidence, runtime_configuration_audit]
+    classification: AUDIT_DATA
+    retention: immutable during approved retention period
+  - id: logs-and-telemetry
+    classification: OPERATIONAL_POTENTIALLY_PERSONAL
+    retention: minimize and redact identifiers

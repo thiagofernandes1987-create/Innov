@@ -1,0 +1,1 @@
+METRICS_MATRIX_RESULT: PASS capabilities=2 portfolio_sci=NOT_CALCULATED

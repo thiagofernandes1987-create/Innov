@@ -1,0 +1,40 @@
+{
+  "schema_version": "UTA-R3B-freeze-v1",
+  "freeze_id": "FREEZE-R3B-INNOVAR-AUTO12-R2-2026-07-23",
+  "round_id": "R3B",
+  "frozen_at": "2026-07-23T10:30:00Z",
+  "ledger_status": "FROZEN",
+  "source_packages": {
+    "R1": "9770e76b51a93d6a37129993ec989a34d3b803fa73ff3dabeeb756bc02ed59ce",
+    "R2": "c2a3c5f21fab8e37055d123f9038f8ff2c20e1563c36f6ef4e376631ec3188b4",
+    "R3A": "99691fe5cd82e820c523ef9378bacb367949affd403b62cd095a296fd7e71ff2",
+    "base": "fe1c075ab100b377878e20c3ece3cb4da28f2e60a12ec0937a0f4cdf11fa8da3",
+    "original_material": "6b28e125cf7f67b9dd5ee37db057d45be8cf709ff1131ca805135e1906436bc4",
+    "updated_material": "6ab129ab52f215ded92a666080ecb20c7b3552ac8ddb018f38811c29d5cb7d4d",
+    "prompt": "3b809df89085c903e4b9f3c2819890501254649f17e7b14fa15b8fce61b4459e"
+  },
+  "logical_artifact_hashes": {
+    "RECONCILIATION_LEDGER_R3B.yaml": "9c57fa35be6abe2eb2fea621ab2540b536e26d570736248e51fecc50cd80b824",
+    "FINAL_FINDING_LEDGER_R3B.yaml": "0a61e94c54b66888fe5c122c81db972857114030e8dc22ddd8ce40d0e2b77ad8",
+    "FINAL_VALIDATION_LEDGER_R3B.yaml": "b1c8bcffb2b78751302c7db2b6a43f75218cc61d9dab1fc94842a74c912e3e17",
+    "FINAL_OUTCOME_LEDGER_R3B.yaml": "141e7893a46e7a05d59d0e683c25e5c014d724f78e86b28deb1c2c907b630df1",
+    "FINAL_ARTIFACT_INDEX_R3B.yaml": "33605ad60509a7af733e0307b208c9d73e74814e10b3d5df69ed2fcd7e870efa"
+  },
+  "checks": {
+    "integration_gate_pass_or_affected_group_blocked": true,
+    "every_r1_finding_reconciled": true,
+    "every_r3a_provisional_finding_reconciled": true,
+    "every_final_finding_has_outcome": true,
+    "no_closed_without_validation_pass": true,
+    "residual_risks_documented": true,
+    "metrics_not_presented_as_final_score": true,
+    "no_backflow_to_r2_or_r3a": true
+  },
+  "completion_authorized": false,
+  "pending_gates": [
+    "4 OPEN findings require a new remediation cycle",
+    "5 PARTIAL findings retain residual risk",
+    "6 BLOCKED_EXTERNAL findings require external environments"
+  ],
+  "mutable_after_freeze": false
+}

@@ -1,0 +1,439 @@
+version: 2
+scoring_model: METRICS-AND-ANTI-REGRESSION.yaml
+capabilities:
+  object_definitions:
+    status: PARTIAL
+    facets:
+      objective_scope:
+        score: 25
+        evidence: capabilities/object-definitions/SPEC.md
+        execution_level: DOCUMENTED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+        gap: Evidence reaches DOCUMENTED; higher runtime evidence is not recorded.
+      ownership_boundaries:
+        score: 25
+        evidence: capabilities/object-definitions/SPEC.md
+        execution_level: DOCUMENTED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+        gap: Evidence reaches DOCUMENTED; higher runtime evidence is not recorded.
+      invariants:
+        score: 50
+        evidence:
+        - 00-decisions/INVARIANTS.yaml
+        - capabilities/object-definitions/SPEC.md
+        gap: invariantes ainda não possuem IDs vinculados individualmente aos testes
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      data_model:
+        score: 50
+        evidence: 01-db/migrations/0001_core.sql
+        gap: diagrama lógico e cardinalidades não estão formalizados em artefato próprio
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      sql_constraints_indexes_triggers:
+        score: 50
+        evidence:
+        - 01-db/migrations/0001_core.sql
+        - 01-db/migrations/0004_evidence_hardening.sql
+        - 01-db/migrations/0006_tenancy_and_function_signature_hardening.sql
+        gap: migrations não executadas em PostgreSQL
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      commands_queries:
+        score: 25
+        evidence: capabilities/object-definitions/SPEC.md
+        gap: contratos internos de command/query não possuem schema próprio
+        execution_level: DOCUMENTED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      api_contracts:
+        score: 50
+        evidence: 01-api/openapi.yaml
+        gap: endpoint individual de leitura ainda ausente
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      event_contracts:
+        score: 50
+        evidence:
+        - 02-events/asyncapi.yaml
+        - 02-events/schemas/metadata/metadata.object.created.v1.schema.json
+        - 02-events/schemas/metadata/metadata.object.transitioned.v1.schema.json
+        gap: compatibilidade entre versões não automatizada
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      statecharts:
+        score: 50
+        evidence: 03-statecharts/xstate/object-definition.machine.ts
+        gap: sem execução do statechart contra persistência real
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      configuration_variables_secrets:
+        score: 50
+        evidence:
+        - 05-config/.env.example
+        - 05-config/config.schema.json
+        - 05-config/execution-evidence-env.schema.json
+        - scripts/validate_env_contract.py
+        gap: The execution-evidence environment contract is validated locally, but
+          secret injection is not proven in a cluster.
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      security_rls_authorization:
+        score: 50
+        evidence:
+        - 01-db/rls/0001_rls.sql
+        - 01-api/openapi.yaml
+        gap: autorização de domínio além de scopes OAuth não está formalizada
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      concurrency_idempotency:
+        score: 50
+        evidence:
+        - 01-api/openapi.yaml
+        - 01-db/migrations/0001_core.sql
+        - 02-events/RETRY-IDEMPOTENCY.md
+        gap: sem teste integrado concorrente
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      errors_observability:
+        score: 50
+        evidence:
+        - 00-decisions/error-catalog.yaml
+        - capabilities/object-definitions/SPEC.md
+        gap: alertas e dashboards não possuem IaC
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      bdd_acceptance:
+        score: 50.0
+        evidence: 04-bdd/features/object-lifecycle.feature
+        gap: Gherkin sem step definitions
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      sdk_usage:
+        score: 50
+        evidence: 06-sdk/typescript/src/lifecycle.ts
+        gap: SDK covers lifecycle transition but not complete creation, listing and
+          individual-read operations.
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      iac_runtime_topology:
+        score: 50.0
+        evidence: 05-infra/helm
+        gap: topologia não demonstra dependências específicas do Metadata Runtime
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      runbooks_rollback:
+        score: 25
+        evidence: 09-runbooks/object-definitions.md
+        gap: restore e rollback não exercitados
+        execution_level: DOCUMENTED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      traceability:
+        score: 50
+        evidence:
+        - traceability/CAPABILITY-FACET-MATRIX.yaml
+        - traceability/REQUIREMENT-EVIDENCE-MAP.yaml
+        - scripts/validate_requirement_traceability.py
+        gap: Requirement-level evidence is mapped, but most requirements remain PARTIAL
+          or SPECIFIED rather than runtime PROVEN.
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+    sci_percent: 44.4
+    calculation: arithmetic_mean_of_18_evidence_capped_facet_scores_v2
+  event_transport:
+    status: PARTIAL
+    facets:
+      objective_scope:
+        score: 25
+        evidence:
+        - capabilities/event-transport/SPEC.md
+        execution_level: DOCUMENTED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+        gap: Evidence reaches DOCUMENTED; higher runtime evidence is not recorded.
+      ownership_boundaries:
+        score: 25
+        evidence:
+        - capabilities/event-transport/SPEC.md
+        gap: ownership is documented but not enforced by an executable architecture
+          boundary test
+        execution_level: DOCUMENTED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      invariants:
+        score: 50
+        evidence:
+        - 01-db/migrations/0007_event_transport_execution.sql
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+        gap: Evidence reaches STATICALLY_VALIDATED; higher runtime evidence is not
+          recorded.
+      data_model:
+        score: 50
+        evidence:
+        - 01-db/migrations/0001_core.sql
+        - 01-db/migrations/0007_event_transport_execution.sql
+        gap: data model is specified but migrations were not executed on PostgreSQL
+          in this environment
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      sql_constraints_indexes_triggers:
+        score: 50
+        evidence:
+        - 01-db/migrations/0007_event_transport_execution.sql
+        gap: SQL enforcement is statically inspected but not proven against PostgreSQL
+          runtime
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      commands_queries:
+        score: 50
+        evidence:
+        - 01-db/migrations/0007_event_transport_execution.sql
+        gap: database command functions exist but end-to-end command/query behavior
+          is not fully exercised
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      apis:
+        score: 50
+        evidence:
+        - 01-api/openapi.yaml
+        gap: OpenAPI is validated structurally but not exercised against a deployed
+          service
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      events:
+        score: 50
+        evidence:
+        - 02-events/asyncapi.yaml
+        - 02-events/compatibility-policy.yaml
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+        gap: Evidence reaches STATICALLY_VALIDATED; higher runtime evidence is not
+          recorded.
+      statecharts:
+        score: 25
+        evidence:
+        - capabilities/event-transport/SPEC.md
+        gap: statechart semantics are specified but official XState runtime execution
+          remains blocked
+        execution_level: DOCUMENTED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      variables_secrets_flags:
+        score: 50
+        evidence:
+        - 05-config/execution-evidence-env.schema.json
+        - 05-config/.env.execution-evidence.example
+        - scripts/validate_env_contract.py
+        - 05-infra/helm/values.yaml
+        gap: Configuration contract is executable locally, but secret injection and
+          runtime validation were not exercised in cluster.
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      security_authorization_rls:
+        score: 50
+        evidence:
+        - 01-api/openapi.yaml
+        - 01-db/migrations/0006_tenancy_and_function_signature_hardening.sql
+        - 01-db/migrations/0008_event_transport_security_and_retry_hardening.sql
+        - 01-db/migrations/0009_dlq_admin_runtime.sql
+        - event_admin/postgres_store.py
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+        gap: Evidence reaches STATICALLY_VALIDATED; higher runtime evidence is not
+          recorded.
+      concurrency_idempotency:
+        score: 50
+        evidence:
+        - 01-db/migrations/0007_event_transport_execution.sql
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+        gap: Evidence reaches STATICALLY_VALIDATED; higher runtime evidence is not
+          recorded.
+      errors_observability:
+        score: 50
+        evidence:
+        - 09-runbooks/event-transport-game-day.md
+        - audit/GAMEDAY-RESULT-EVENT-TRANSPORT.json
+        gap: local game-day evidence exists but distributed metrics and alert behavior
+          remain unproven
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      bdd_acceptance:
+        score: 70
+        evidence:
+        - 04-bdd/features/event-transport-executable.feature
+        - bdd_steps/test_event_transport_steps.py
+        - audit/BDD-STEPS-RESULT.txt
+        gap: global Gherkin inventory remains only partially bound and partially executed
+        execution_level: UNIT_EXECUTED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      sdk_examples:
+        score: 40.0
+        evidence:
+        - event_publisher/redpanda_http_publisher.py
+        gap: publisher adapter exists but a generated public SDK with complete examples
+          is not yet available
+        execution_level: UNIT_EXECUTED
+        evidence_strength: PRIMARY
+        status: PARTIAL
+      iac_topology:
+        score: 50
+        evidence:
+        - 05-infra/helm/templates/event-publisher-deployment.yaml
+        - 05-infra/helm/templates/event-publisher-hpa.yaml
+        - 05-infra/helm/templates/networkpolicy.yaml
+        - 05-infra/contracts/dependency-label-contract.yaml
+        - .github/workflows/executable-spec-integration.yaml
+        gap: official helm template, kubeconform and cluster install remain BLOCKED
+          in this environment
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+      runbooks_rollback:
+        score: 50
+        evidence:
+        - 09-runbooks/event-transport-game-day.md
+        - audit/GAMEDAY-RESULT-EVENT-TRANSPORT.json
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+        gap: Evidence reaches STATICALLY_VALIDATED; higher runtime evidence is not
+          recorded.
+      traceability:
+        score: 50
+        evidence:
+        - traceability/CAPABILITY-FACET-MATRIX.yaml
+        - traceability/REQUIREMENT-EVIDENCE-MAP.yaml
+        - scripts/validate_requirement_traceability.py
+        - 09-runbooks/integration-evidence-gate.md
+        gap: Requirement and facet mappings are validated locally, while external
+          execution evidence remains incomplete.
+        execution_level: STATICALLY_VALIDATED
+        evidence_strength: CORROBORATED
+        status: PARTIAL
+    sci_percent: 46.4
+    open_gaps:
+    - PostgreSQL migrations 0008 and 0009 were not applied to a real database
+    - PostgreSQL adapter is structurally tested but not executed against the real
+      schema
+    - RLS was not exercised with two real database roles without BYPASSRLS
+    - Redpanda was not started; broker evidence remains local controlled HTTP
+    - Official helm template/kubeconform/install were not executed
+    - NetworkPolicy labels are now configurable and contractually documented, but
+      target matching was not executed against a real cluster
+    - Game day RTO is local controlled-broker evidence, not distributed production
+      evidence
+    calculation: arithmetic_mean_of_18_evidence_capped_facet_scores_v2
+portfolio_sci:
+  status: NOT_CALCULATED
+  eligible_capability_count: 2
+  reason: Duas capabilities possuem avaliações locais, mas o inventário completo de
+    capabilities da plataforma e o denominador canônico ainda não estão fechados;
+    scores locais não são extrapolados para o portfólio.
+execution_evidence_campaign_2026_07_22:
+  status: PARTIAL_BLOCKED
+  local_test_suite:
+    status: PASS
+    evidence: audit/EVIDENCE-CAMPAIGN-FINAL-TESTS.txt
+    tests: 49
+  sdk_drift_gate:
+    status: PASS
+    evidence: audit/EVIDENCE-CAMPAIGN-SDK-DRIFT.txt
+  gherkin_inventory:
+    status: PARTIAL
+    scenarios: 140
+    binding_hints: 18
+    unmapped_or_descriptive: 122
+    evidence: audit/EVIDENCE-CAMPAIGN-GHERKIN-COVERAGE.json
+    note: lexical hints are not proof of executable bindings
+  postgres_migrations_rls_adapter:
+    status: BLOCKED
+    evidence: audit/EVIDENCE-CAMPAIGN-POSTGRES.txt
+    reason: TEST_DATABASE_URL and PostgreSQL runtime unavailable
+  xstate_runtime:
+    status: BLOCKED
+    evidence: audit/EVIDENCE-CAMPAIGN-XSTATE-RUNTIME.txt
+    reason: dependency installation/runtime unavailable
+  redpanda:
+    status: BLOCKED
+    reason: no Docker/Podman or Redpanda runtime
+  helm_kubeconform_kubernetes_networkpolicy:
+    status: BLOCKED
+    evidence: audit/EVIDENCE-CAMPAIGN-PREFLIGHT.json
+  distributed_game_day:
+    status: BLOCKED
+    reason: distributed infrastructure unavailable
+  historical: true
+auto9_evidence_integrity_rebuild_2026_07_22:
+  status: PARTIAL
+  event_transport_sci_percent: 84.4
+  portfolio_sci: NOT_CALCULATED
+  executable_tests:
+    status: PASS
+    count: 51
+    evidence: audit/AUTO9-TESTS-FINAL.txt
+  aggregate_validation:
+    status: PARTIAL
+    evidence: audit/AUTO9-VALIDATE-ALL-FINAL.txt
+  gherkin_global:
+    feature_files: 10
+    scenarios_total: 140
+    binding_hints: 18
+    executed_pass: 2
+    blocked_external: 2
+    unmapped_or_descriptive: 122
+    evidence: audit/EVIDENCE-CAMPAIGN-GHERKIN-COVERAGE.json
+  statechart_registry:
+    status: PASS_STATIC
+    evidence: 03-statecharts/STATE-MIGRATION-REGISTRY.yaml
+  external_runtime:
+    status: BLOCKED
+    evidence: audit/AUTO9-PREFLIGHT.json
+  historical: true
+scoring_scale: 0-100 for every facet and SCI
+auto10_traceability_integrity_2026_07_22:
+  status: PASS_LOCAL
+  changes:
+  - normalized all facet scores to 0-100
+  - recalculated declared SCI values
+  - added evidence existence and gap completeness gate
+  evidence:
+  - audit/AUTO10-TRACEABILITY-MATRIX.txt
+  - audit/AUTO10-TESTS.txt
+  historical: true
+score_cap_policy:
+  DOCUMENTED: 25
+  STATICALLY_VALIDATED: 50
+  UNIT_EXECUTED: 70
+  LOCAL_INTEGRATION_EXECUTED: 85
+  EXTERNAL_INTEGRATION_EXECUTED: 95
+  OPERATIONALLY_PROVEN: 100

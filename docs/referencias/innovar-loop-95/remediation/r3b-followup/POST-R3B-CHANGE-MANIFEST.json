@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "release_id": "INNOVAR-AUTO12-R3B-FOLLOWUP",
+  "source_package": "INNOVAR_EXECUTABLE_SPEC_AUTO12_R2_UTA_R2_DRAFT_2026-07-23.zip",
+  "change_count": 31,
+  "changes": [
+    {
+      "path": "RELEASE-MANIFEST.yaml",
+      "exists": true,
+      "bytes": 1335,
+      "sha256": "3d492ec08b447690afb9188762afeddaad38e43fd5e659a859fa43cf5d4695ab"
+    },
+    {
+      "path": "STATUS.md",
+      "exists": true,
+      "bytes": 2834,
+      "sha256": "b98d0e36af8925be36042c49fa83ab3ba879e77030f12a5ad91b7f16e8324911"
+    },
+    {
+      "path": "README.md",
+      "exists": true,
+      "bytes": 1290,
+      "sha256": "c3a264f80dd948e5c34df2f9b3da3cbbcae0dd00bfc21fcb16da2cd63c068a61"
+    },
+    {
+      "path": "INNOVAR_PLATFORM_BLUEPRINT_EXECUTAVEL.md",
+      "exists": true,
+      "bytes": 49378,
+      "sha256": "a4fc2b93715797373b88a49ebf84f3b234107736c4c97d824fb857b7b8a7a07d"
+    },
+    {
+      "path": "01-api/openapi.yaml",
+      "exists": true,
+      "bytes": 28014,
+      "sha256": "4a310b65df2b050bbe9a5246acc5617189eb09a8dfb59c256ce28e5b5d8d43ae"
+    },
+    {
+      "path": "01-db/migrations/0015_dlq_idempotency_resource_scope.sql",
+      "exists": true,
+      "bytes": 6184,
+      "sha256": "bc50e8304662887ca11c9b81a75e0a816cd265eeccdf7052d2fc5a21da876bd5"
+    },
+    {
+      "path": "event_admin/server.py",
+      "exists": true,
+      "bytes": 18200,
+      "sha256": "5ca1bd41bf246b0599cd6481e75bfe462971d5352433c1b3e2897ca9c2e59aaf"
+    },
+    {
+      "path": "event_admin/postgres_store.py",
+      "exists": true,
+      "bytes": 4704,
+      "sha256": "78d7e60808109f5e3f67840fc609c410d731fbd0ff468d2580d4bfa5f6eed77a"
+    },
+    {
+      "path": "event_publisher/redpanda_http_publisher.py",
+      "exists": true,
+      "bytes": 3281,
+      "sha256": "b9ce88806aa50bdf9f3bbaa1489613e50d348cb25b92bf5b7a19d089eece7dcf"
+    },
+    {
+      "path": "scripts/validate_all.py",
+      "exists": true,
+      "bytes": 6830,
+      "sha256": "c49b1d2245600a7826ee98f35e57337c8db3afc2187d20ee3987757ba6847b9c"
+    },
+    {
+      "path": "scripts/load_event_admin.py",
+      "exists": true,
+      "bytes": 2918,
+      "sha256": "15cf04c1c0f53b2151957ce339764b74df0a1e4741161079767af0d8e1987c1e"
+    },
+    {
+      "path": "scripts/run_event_transport_gameday.py",
+      "exists": true,
+      "bytes": 5116,
+      "sha256": "d906f903b0dbb4615fa9455a635ab2fc9755b6642aff5ed6eae9c451a3343c05"
+    },
+    {
+      "path": "scripts/test_postgres_event_transport.py",
+      "exists": true,
+      "bytes": 3966,
+      "sha256": "25b2f0e914f5639d49c5f8b0df813f16f82aac70006aed32718cf6948e655503"
+    },
+    {
+      "path": "scripts/generate_release_file_manifest.py",
+      "exists": true,
+      "bytes": 1736,
+      "sha256": "d90f7636e211d071ff654c3fb867f8f51d0a8200811416b2abdc00885df0762b"
+    },
+    {
+      "path": "scripts/run_three_phase_campaign.py",
+      "exists": true,
+      "bytes": 5302,
+      "sha256": "644656011123ff7ed571aa9193b4cd1c4679dfb6afcbd82d0fad7eaba7e83e19"
+    },
+    {
+      "path": "remediation/REMEDIATION-REGISTER.yaml",
+      "exists": true,
+      "bytes": 26002,
+      "sha256": "9f656992da91ed735e0e5d7086eab98eb73ba3d8c546065160910d1e08ac75ed"
+    },
+    {
+      "path": "tests/test_event_admin_http.py",
+      "exists": true,
+      "bytes": 8365,
+      "sha256": "0eddffdbd0348fbf314d0cee03ca7176357e69b1a0b941b8484496aa22c0f4f2"
+    },
+    {
+      "path": "tests/test_event_transport_focus.py",
+      "exists": true,
+      "bytes": 2943,
+      "sha256": "f0a508c3156e6c8937eb2548574c334ad1540914050bde0961c34c23e25a484a"
+    },
+    {
+      "path": "tests/test_auto5_rebuild.py",
+      "exists": true,
+      "bytes": 2481,
+      "sha256": "730cdf5997ee4dddc712ce506badacc004d198643ef875efb2602bdf13c60cb8"
+    },
+    {
+      "path": "bdd_steps/test_event_transport_steps.py",
+      "exists": true,
+      "bytes": 4052,
+      "sha256": "1d107ef579c9317c5f303ca9412c19937b8b808846f6a6bc4f7e394d16aafd26"
+    },
+    {
+      "path": "bdd_steps/test_remediation_steps.py",
+      "exists": true,
+      "bytes": 2997,
+      "sha256": "92d4ef8588690cc6a8d3eff359bb622b74e0f645b85e383f806321110ef9cf2b"
+    },
+    {
+      "path": "06-sdk/generated/openapi-operation-inventory.json",
+      "exists": true,
+      "bytes": 3987,
+      "sha256": "24aac2478d5b70d42c707efc569e59e97147ddba9c779974e839a6ae465e7727"
+    },
+    {
+      "path": "06-sdk/typescript/src/generated-contract.ts",
+      "exists": true,
+      "bytes": 3168,
+      "sha256": "29b816397f824227cfd166e8fa74cc1cf8c0e34b62f6bd5c67cb420a393dd416"
+    },
+    {
+      "path": "06-sdk/typescript/dist/generated-contract.js",
+      "exists": true,
+      "bytes": 140,
+      "sha256": "c4c1c2ac7c10f899d33ab3e30e053d15ee340fd6b55071af3227a397abec8691"
+    },
+    {
+      "path": "06-sdk/typescript/dist/generated-contract.d.ts",
+      "exists": true,
+      "bytes": 3437,
+      "sha256": "56c9e5491106237614a230418c743a5f7cfd018ef02e256be4f2e147009dfdde"
+    },
+    {
+      "path": "audit/post-r3b/VALIDATION-SUMMARY.json",
+      "exists": true,
+      "bytes": 2331,
+      "sha256": "d98fdbb97bf77e631b4c4136fd4e4b661e74473d64edd123d602be3e7a649abd"
+    },
+    {
+      "path": "audit/post-r3b/TEST-RESULTS.md",
+      "exists": true,
+      "bytes": 792,
+      "sha256": "722891adb9ffbb6a35fff1531ba25a024d56aff2e5880ee7ac9d801be2a12a28"
+    },
+    {
+      "path": "remediation/r3b-followup/POST-R3B-REMEDIATION-REPORT.md",
+      "exists": true,
+      "bytes": 2293,
+      "sha256": "7cfe5e1a937e2ff86818931abfe676f5eea7eb3645cbb8d1216e597c3235bc80"
+    },
+    {
+      "path": "remediation/r3b-followup/POST-R3B-CHECKLIST.md",
+      "exists": true,
+      "bytes": 789,
+      "sha256": "6d815452071134d3c4303950aafeaa9182cc033c93698f16832974f1c188beb4"
+    },
+    {
+      "path": "remediation/r3b-followup/EXTERNAL-PENDING-PLAN.md",
+      "exists": true,
+      "bytes": 756,
+      "sha256": "0f74ed7aaa2a99259e875525f3d4f703b0b76d4a95de50bd8645cce9ba8ea6bb"
+    },
+    {
+      "path": "audit/post-r3b/VALIDATE-ALL.log",
+      "exists": true,
+      "bytes": 4498,
+      "sha256": "bf899c5ff20e766ef33681f2956ac7c6793523c8d485c53b85574d8e586024ef"
+    }
+  ]
+}

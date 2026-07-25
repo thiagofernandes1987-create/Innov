@@ -1,0 +1,620 @@
+schema_version: 2
+release_id: INNOVAR-AUTO12-R2
+source_audit: audit/round1-independent/FINDINGS_REGISTER.yaml
+findings_total: 35
+status_counts:
+  RESOLVED_LOCAL: 24
+  PARTIAL_EXTERNAL_DEPENDENCY: 4
+  BLOCKED_EXTERNAL: 6
+  DEFERRED_DECISION_REQUIRED: 1
+dispositions:
+- finding_id: AUD-CAN-001
+  severity: CRITICAL
+  domain: governance
+  title: STATUS.md canônico permanece no ciclo AUTO6
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 'STATUS.md: título "Status canônico — AUTO6"'
+  - 'audit/AUTO12-100-ROUND-CAMPAIGN.json: campanha AUTO12 presente'
+  implementation_paths:
+  - STATUS.md
+  - RELEASE-MANIFEST.yaml
+  - 00-decisions/CANONICAL-SOURCE-POLICY.yaml
+  - scripts/validate_canonical_status.py
+  validation_command: python scripts/validate_canonical_status.py
+  validation_evidence:
+  - audit/round2/canonical_status.txt
+  remaining_risk_or_dependency: Organizational adoption is outside the package.
+- finding_id: AUD-CAN-002
+  severity: HIGH
+  domain: governance
+  title: Narrativa do README não identifica inequivocamente o ciclo AUTO12
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 'README.md: "ciclo de quatro loops"'
+  - 'STATUS.md: AUTO6'
+  - artefatos audit/AUTO12-*
+  implementation_paths:
+  - README.md
+  - 00-decisions/DELIVERY-AND-CANONICAL-SOURCE.md
+  - 00-decisions/ARTIFACT-LIFECYCLE.yaml
+  validation_command: python scripts/validate_canonical_status.py
+  validation_evidence:
+  - audit/round2/canonical_status.txt
+  remaining_risk_or_dependency: Historical reports remain preserved and explicitly non-current.
+- finding_id: AUD-INT-001
+  severity: CRITICAL
+  domain: integrity
+  title: SHA256SUMS.txt não representa o pacote entregue
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 331 entradas para 354 arquivos verificáveis (excluído o próprio manifesto)
+  - 23 arquivos ausentes do manifesto
+  - 5 hashes divergentes
+  - scan_pristine.json.sha256_manifest
+  implementation_paths:
+  - scripts/generate_sha256_manifest.py
+  - scripts/verify_sha256_manifest.py
+  - SHA256SUMS.txt
+  validation_command: python scripts/verify_sha256_manifest.py
+  validation_evidence:
+  - audit/round2/sha256_manifest.txt
+  remaining_risk_or_dependency: The outer ZIP checksum is generated separately at delivery.
+- finding_id: AUD-HYG-001
+  severity: MEDIUM
+  domain: package-hygiene
+  title: Artefatos de cache/temporários foram incluídos no ZIP
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 19 arquivos .pyc
+  - tests/test_contracts.py.tmp
+  implementation_paths:
+  - .gitignore
+  - scripts/validate_package_hygiene.py
+  validation_command: python scripts/validate_package_hygiene.py
+  validation_evidence:
+  - audit/round2/package_hygiene_final.txt
+  remaining_risk_or_dependency: Build agents must preserve the same exclusion policy.
+- finding_id: AUD-EVD-001
+  severity: HIGH
+  domain: evidence
+  title: Arquivos de evidência vazios coexistem com referências formais
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 15 arquivos .txt de auditoria com 0 byte
+  - traceability/CAPABILITY-FACET-MATRIX.yaml referencia audit/EVIDENCE-CAMPAIGN-XSTATE-RUNTIME.txt, que está vazio
+  implementation_paths:
+  - schemas/evidence-record.schema.json
+  - scripts/validate_evidence_records.py
+  - audit/evidence-records/postgres-runtime.json
+  - audit/evidence-records/redpanda-runtime.json
+  - audit/evidence-records/kubernetes-runtime.json
+  - audit/evidence-records/xstate-official-runtime.json
+  validation_command: python scripts/validate_evidence_records.py
+  validation_evidence:
+  - audit/round2/evidence_records.txt
+  remaining_risk_or_dependency: Blocked records must be replaced, not overwritten, by signed runtime evidence externally.
+- finding_id: AUD-EVD-002
+  severity: CRITICAL
+  domain: evidence
+  title: Campanha de 100 rodadas mistura presença estática com execução
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 90 PASS, 10 BLOCKED
+  - 58 PASS sem evidence_path
+  - 40 PASS baseados em token/static/verified/checked
+  - scripts/run_100_round_evidence_campaign.py
+  implementation_paths:
+  - scripts/run_100_round_evidence_campaign.py
+  - audit/round2/AUTO12-R2-100-ROUND-CAMPAIGN.json
+  validation_command: python scripts/run_100_round_evidence_campaign.py
+  validation_evidence:
+  - audit/round2/AUTO12-R2-100-ROUND-CAMPAIGN.json
+  - audit/round2/campaign-console.txt
+  remaining_risk_or_dependency: Static PASS remains explicitly separate from runtime proof.
+- finding_id: AUD-TST-001
+  severity: HIGH
+  domain: testing
+  title: pytest não consegue coletar a suíte completa
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - python -m pytest -q retorna código 3
+  - scripts/test_postgres_event_transport.py executa sys.exit(77) durante importação
+  implementation_paths:
+  - scripts/test_postgres_event_transport.py
+  - pytest.ini
+  validation_command: python -m pytest -q -p no:cacheprovider
+  validation_evidence:
+  - audit/round2/pytest.txt
+  remaining_risk_or_dependency: PostgreSQL test still returns 77 when the external database is unavailable.
+- finding_id: AUD-TST-002
+  severity: MEDIUM
+  domain: testing
+  title: Validador rotula JSON comum como JSON_SCHEMA_OK
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - scripts/validate_all.py adiciona JSON_SCHEMA_OK para todo *.json
+  - package-lock.json e relatórios de auditoria aparecem como JSON_SCHEMA_OK
+  implementation_paths:
+  - scripts/validate_all.py
+  validation_command: python scripts/validate_all.py
+  validation_evidence:
+  - audit/round2/validate_all.txt
+  remaining_risk_or_dependency: Instance validation is only claimed where an explicit schema association exists.
+- finding_id: AUD-BDD-001
+  severity: HIGH
+  domain: bdd
+  title: Cenários BDD são massivamente duplicados
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 152 cenários, apenas 38 corpos de passos únicos
+  - 133 cenários pertencem a grupos duplicados
+  - 19 grupos de duplicidade
+  implementation_paths:
+  - 04-bdd/features
+  - scripts/generate_bdd_registry.py
+  - scripts/validate_bdd_registry.py
+  validation_command: python scripts/validate_bdd_registry.py
+  validation_evidence:
+  - audit/round2/bdd_registry.txt
+  - audit/round2/BDD-COVERAGE.json
+  remaining_risk_or_dependency: Most behaviors remain documented/not run; uniqueness is not execution.
+- finding_id: AUD-BDD-002
+  severity: CRITICAL
+  domain: traceability
+  title: Tags de requisitos BDD não correspondem ao catálogo canônico
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 133 tags REQ-* nos features
+  - 0 correspondências com os 19 IDs canônicos
+  - 133 IDs BDD não canônicos
+  implementation_paths:
+  - 00-decisions/requirements.yaml
+  - 04-bdd/features
+  - 04-bdd/BINDING-REGISTRY.yaml
+  validation_command: python scripts/validate_bdd_registry.py
+  validation_evidence:
+  - audit/round2/bdd_registry.txt
+  remaining_risk_or_dependency: Requirements with only documented scenarios are not promoted to runtime evidence.
+- finding_id: AUD-BDD-003
+  severity: HIGH
+  domain: bdd
+  title: Binding registry não contém mapeamento por cenário
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 04-bdd/BINDING-REGISTRY.yaml possui apenas versão, política, status e source_of_truth
+  - 'auditoria local: 123 unmapped/descriptive, 2 executed PASS, 2 BLOCKED'
+  implementation_paths:
+  - 04-bdd/BINDING-REGISTRY.yaml
+  - scripts/generate_bdd_registry.py
+  - scripts/validate_bdd_registry.py
+  validation_command: python scripts/validate_bdd_registry.py
+  validation_evidence:
+  - audit/round2/bdd_registry.txt
+  remaining_risk_or_dependency: Unbound scenarios remain NOT_RUN rather than being counted as covered.
+- finding_id: AUD-SQL-001
+  severity: CRITICAL
+  domain: database-security
+  title: Dois modelos de contexto tenant coexistem nas RLS
+  status: PARTIAL_EXTERNAL_DEPENDENCY
+  original_evidence:
+  - CONVENTIONS.md e 01-db/rls/0001_rls.sql usam organization_id/app.current_organization_id
+  - migrations 0010 e 0012 usam tenant_id/app.tenant_id
+  - event_admin/postgres_store.py configura apenas app.current_organization_id
+  implementation_paths:
+  - 01-db/migrations/0013_unify_execution_tenancy.sql
+  - scripts/validate_tenant_convention.py
+  - scripts/test_postgres_event_transport.py
+  validation_command: python scripts/validate_tenant_convention.py
+  validation_evidence:
+  - audit/round2/tenant_convention.txt
+  - audit/evidence-records/postgres-runtime.json
+  remaining_risk_or_dependency: Static repair is complete; migration execution and two-role RLS proof require PostgreSQL 16.
+- finding_id: AUD-SQL-002
+  severity: CRITICAL
+  domain: database
+  title: PostgreSQL, concorrência e RLS permanecem não executados
+  status: BLOCKED_EXTERNAL
+  original_evidence:
+  - scripts/test_postgres_event_transport.py retorna BLOCKED sem TEST_DATABASE_URL
+  - audit/AUTO12-POSTGRES-RUNTIME.txt
+  - REQUIREMENT-EVIDENCE-MAP mantém gaps explícitos
+  implementation_paths:
+  - scripts/test_postgres_event_transport.py
+  - audit/evidence-records/postgres-runtime.json
+  - remediation/EXTERNAL-DEPENDENCIES.md
+  validation_command: TEST_DATABASE_URL=... python scripts/test_postgres_event_transport.py
+  validation_evidence:
+  - audit/round2/postgres_runtime.txt
+  - audit/evidence-records/postgres-runtime.json
+  remaining_risk_or_dependency: Requires disposable PostgreSQL 16 and authorized bootstrap privileges.
+- finding_id: AUD-API-001
+  severity: MEDIUM
+  domain: openapi
+  title: Operação de leitura individual de record não existe
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - OpenAPI possui PATCH /v1/objects/{objectKey}/records/{recordId}
+  - não possui GET no mesmo path
+  - CAPABILITY-FACET-MATRIX declara o gap
+  implementation_paths:
+  - 01-api/openapi.yaml
+  - 06-sdk/typescript/src/index.ts
+  - 06-sdk/generated/openapi-operation-inventory.json
+  - scripts/validate_openapi_contract.py
+  validation_command: python scripts/validate_openapi_contract.py
+  validation_evidence:
+  - audit/round2/openapi_contract.txt
+  - audit/round2/sdk_operation_coverage.txt
+  remaining_risk_or_dependency: Deployed endpoint behavior remains external.
+- finding_id: AUD-API-002
+  severity: HIGH
+  domain: openapi
+  title: Catálogo de erros não está fechado no contrato OpenAPI
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 00-decisions/error-catalog.yaml define códigos
+  - components.schemas.Problem.code é string sem enum/$ref
+  - não há gate catálogo ↔ OpenAPI ↔ SDK
+  implementation_paths:
+  - 00-decisions/error-catalog.yaml
+  - schemas/error-catalog.schema.json
+  - 01-api/openapi.yaml
+  - scripts/validate_error_catalog.py
+  validation_command: python scripts/validate_error_catalog.py
+  validation_evidence:
+  - audit/round2/error_catalog.txt
+  remaining_risk_or_dependency: Runtime handlers must still be tested against a deployed service.
+- finding_id: AUD-API-003
+  severity: MEDIUM
+  domain: openapi
+  title: Respostas 401/403 são inconsistentes entre operações protegidas
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 8 operações protegidas omitem 401 e/ou 403
+  - '[{''operationId'': ''createObjectDefinition'', ''missing'': [''401'', ''403'']}, {''operationId'': ''listObjectDefinitions'', ''missing'':
+    [''401'', ''403'']}, {''operationId'': ''createRecord'', ''missing'': [''401'', ''403'']}, {''operationId'': ''listRecords'', ''missing'':
+    [''401'', ''403'']}, {''operationId'': ''getWorkInbox'', ''missing'': [''401'', ''403'']}, {''operationId'': ''replayDeadLetter'', ''missing'':
+    [''401'', ''403'']}, {''operationId'': ''resolveDeadLetter'', ''missing'': [''401'', ''403'']}, {''operationId'': ''recordExecutionEvidence'',
+    ''missing'': [''401'', ''403'']}]'
+  implementation_paths:
+  - 01-api/openapi.yaml
+  - scripts/validate_openapi_contract.py
+  validation_command: python scripts/validate_openapi_contract.py
+  validation_evidence:
+  - audit/round2/openapi_contract.txt
+  remaining_risk_or_dependency: Authorization behavior is not operationally proven.
+- finding_id: AUD-EVT-001
+  severity: HIGH
+  domain: asyncapi
+  title: AsyncAPI 3 possui cobertura operacional incompleta
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 7 channels
+  - 6 operations cobrindo 3 channels
+  - '4 channels sem operation: metadataObjectPublished, metadataRecordCreated, quotaExceeded, workItemProjected'
+  - servers ausente
+  implementation_paths:
+  - 02-events/asyncapi.yaml
+  - scripts/validate_asyncapi_operations.py
+  - documentation/ASYNCAPI-3-OPERATIONS.md
+  validation_command: python scripts/validate_asyncapi_operations.py
+  validation_evidence:
+  - audit/round2/asyncapi_operations.txt
+  remaining_risk_or_dependency: Broker traffic is a separate blocked finding.
+- finding_id: AUD-EVT-002
+  severity: HIGH
+  domain: event-runtime
+  title: Broker Redpanda não foi executado
+  status: BLOCKED_EXTERNAL
+  original_evidence:
+  - 'campanha: rpk available BLOCKED'
+  - Docker/Podman não disponível nesta execução
+  - REQUIREMENT-EVIDENCE-MAP mantém deduplicação/replay não provados
+  implementation_paths:
+  - scripts/test_redpanda_runtime.py
+  - audit/evidence-records/redpanda-runtime.json
+  - remediation/EXTERNAL-DEPENDENCIES.md
+  validation_command: REDPANDA_BROKERS=... python scripts/test_redpanda_runtime.py
+  validation_evidence:
+  - audit/round2/redpanda_runtime.txt
+  - audit/evidence-records/redpanda-runtime.json
+  remaining_risk_or_dependency: Requires approved broker, credentials and rpk/client tooling.
+- finding_id: AUD-STATE-001
+  severity: HIGH
+  domain: statecharts
+  title: Registry de migração cobre apenas 2 das 5 máquinas
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 'machine files: [''approval.machine.ts'', ''event-transport.machine.ts'', ''object-definition.machine.ts'', ''sla.machine.ts'', ''workflow.machine.ts'']'
+  - 'registry: [''event-transport'', ''metadata.object-definition'']'
+  implementation_paths:
+  - 03-statecharts/STATE-MIGRATION-REGISTRY.yaml
+  - scripts/validate_statechart_registry.py
+  validation_command: python scripts/validate_statechart_registry.py
+  validation_evidence:
+  - audit/round2/statechart_registry.txt
+  remaining_risk_or_dependency: Persistence/migration runtime remains unproven for several machines.
+- finding_id: AUD-STATE-002
+  severity: MEDIUM
+  domain: statecharts
+  title: Execução oficial XState não foi reproduzida nesta auditoria
+  status: BLOCKED_EXTERNAL
+  original_evidence:
+  - tools/xstate-runtime/package.json fixa versões, mas não possui package-lock
+  - instalação npm não concluiu no ambiente
+  - evidência XState referenciada está vazia
+  implementation_paths:
+  - tools/xstate-runtime/package.json
+  - scripts/test_xstate_official_runtime.py
+  - audit/evidence-records/xstate-official-runtime.json
+  validation_command: python scripts/test_xstate_official_runtime.py
+  validation_evidence:
+  - audit/round2/xstate_official_runtime.txt
+  - audit/evidence-records/xstate-official-runtime.json
+  remaining_risk_or_dependency: Requires verified npm lockfile and trusted package resolution.
+- finding_id: AUD-SDK-001
+  severity: HIGH
+  domain: sdk
+  title: SDK não possui lockfile e usa instalação não determinística no CI
+  status: PARTIAL_EXTERNAL_DEPENDENCY
+  original_evidence:
+  - 06-sdk/typescript/package.json possui ranges ^5.7.0 e ^2.0.0
+  - não existe package-lock no diretório
+  - workflow usa npm install
+  implementation_paths:
+  - 06-sdk/typescript/package.json
+  - DEPENDENCY-LOCK-STATUS.yaml
+  - scripts/validate_dependency_locks.py
+  validation_command: python scripts/validate_dependency_locks.py
+  validation_evidence:
+  - audit/round2/dependency_locks.txt
+  remaining_risk_or_dependency: Exact direct versions are set; a verified package-lock and npm ci remain external.
+- finding_id: AUD-SDK-002
+  severity: MEDIUM
+  domain: sdk
+  title: SDK compila e drift gate passa, mas cobertura herda lacunas do OpenAPI
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 'tsc global 5.8.3: PASS'
+  - 'scripts/check_sdk_drift.sh: PASS'
+  - 06-sdk/generated/openapi-operation-inventory.json contém o inventário vigente de operações
+  - GET individual ausente no OpenAPI
+  implementation_paths:
+  - 06-sdk/typescript/src/index.ts
+  - 06-sdk/generated/openapi-operation-inventory.json
+  - scripts/generate_sdk_contract.py
+  - scripts/validate_sdk_operation_coverage.py
+  validation_command: python scripts/validate_sdk_operation_coverage.py && tsc -p 06-sdk/typescript/tsconfig.json --noEmit
+  validation_evidence:
+  - audit/round2/sdk_operation_coverage.txt
+  - audit/round2/sdk_tsc.txt
+  - audit/round2/sdk_drift.txt
+  remaining_risk_or_dependency: Compatibility with deployed API remains external.
+- finding_id: AUD-CI-001
+  severity: HIGH
+  domain: ci-cd
+  title: Workflow não aplica hardening mínimo de supply chain
+  status: PARTIAL_EXTERNAL_DEPENDENCY
+  original_evidence:
+  - 8 uses sem SHA imutável
+  - permissions raiz ausente
+  - concurrency ausente
+  - timeout-minutes ausente
+  - 2 npm install
+  - pip install sem versões/hashes
+  implementation_paths:
+  - .github/workflows/executable-spec-integration.yaml
+  - .github/dependabot.yml
+  - 00-decisions/SUPPLY-CHAIN-POLICY.yaml
+  - supply-chain/ACTION-PINS.yaml
+  - scripts/validate_workflow_security.py
+  validation_command: python scripts/validate_workflow_security.py
+  validation_evidence:
+  - audit/round2/workflow_security.txt
+  remaining_risk_or_dependency: Workflow execution, rulesets, branch protection, OIDC and environment protection require GitHub.
+- finding_id: AUD-SUP-001
+  severity: HIGH
+  domain: supply-chain
+  title: Imagens de container não estão fixadas por digest
+  status: BLOCKED_EXTERNAL
+  original_evidence:
+  - postgres:16-alpine
+  - redis:7-alpine
+  - redpanda:v24.2.18
+  - innovar/*:1.0.0/local
+  - ghcr.io/innovar/execution-evidence:sha256-required é placeholder, não digest
+  implementation_paths:
+  - 00-decisions/SUPPLY-CHAIN-POLICY.yaml
+  - scripts/validate_image_references.py
+  - remediation/EXTERNAL-DEPENDENCIES.md
+  validation_command: python scripts/validate_image_references.py
+  validation_evidence:
+  - audit/round2/image_digests.txt
+  remaining_risk_or_dependency: Requires OCI registry digests, SBOM, signature and provenance.
+- finding_id: AUD-INF-001
+  severity: HIGH
+  domain: infrastructure
+  title: Helm foi validado apenas por validador estático próprio
+  status: BLOCKED_EXTERNAL
+  original_evidence:
+  - 'scripts/validate_helm_static.py: PASS'
+  - helm, kubeconform e kubectl indisponíveis
+  - 9 templates Go não são YAML puro antes de renderização
+  implementation_paths:
+  - .github/workflows/executable-spec-integration.yaml
+  - scripts/validate_helm_static.py
+  - remediation/EXTERNAL-DEPENDENCIES.md
+  validation_command: helm lint 05-infra/helm && helm template ... && kubeconform -strict ...
+  validation_evidence:
+  - audit/round2/helm_static.txt
+  - audit/round2/networkpolicy_runtime.txt
+  remaining_risk_or_dependency: Helm/kubeconform/Kubernetes are not installed in this environment.
+- finding_id: AUD-INF-002
+  severity: MEDIUM
+  domain: infrastructure
+  title: Não existe Terraform/OpenTofu
+  status: DEFERRED_DECISION_REQUIRED
+  original_evidence:
+  - 0 arquivos .tf/.tofu
+  - COVERAGE-CHECKLIST inclui infrastructure_as_code
+  implementation_paths:
+  - 07-adrs/ADR-011-infrastructure-provisioning.md
+  - remediation/EXTERNAL-DEPENDENCIES.md
+  validation_command: Architecture decision followed by tofu fmt/validate/plan
+  validation_evidence:
+  - 07-adrs/ADR-011-infrastructure-provisioning.md
+  remaining_risk_or_dependency: Provider, topology, IAM, backend and cost decisions are not supplied.
+- finding_id: AUD-OBS-001
+  severity: HIGH
+  domain: observability
+  title: SLOs são metas declaradas, não medições operacionais
+  status: BLOCKED_EXTERNAL
+  original_evidence:
+  - NFR-SLO-CATALOG.yaml
+  - REQ-NFR-001 permanece PARTIAL
+  - distributed game day e load execution BLOCKED
+  implementation_paths:
+  - 00-decisions/NFR-SLO-CATALOG.yaml
+  - 09-runbooks/event-transport-game-day.md
+  - remediation/EXTERNAL-DEPENDENCIES.md
+  validation_command: Execute load/game-day against deployed services and telemetry
+  validation_evidence:
+  - audit/evidence-records/kubernetes-runtime.json
+  remaining_risk_or_dependency: Requires representative deployment, load source and metrics backend.
+- finding_id: AUD-SEC-001
+  severity: MEDIUM
+  domain: security-governance
+  title: Threat model formal não está presente
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - nenhum THREAT-MODEL.md/ABUSE-CASES.yaml no inventário
+  - controles estão dispersos em ADRs, RLS e runbooks
+  implementation_paths:
+  - security/THREAT-MODEL.md
+  - security/ABUSE-CASES.yaml
+  validation_command: Document review against requirements and remediation register
+  validation_evidence:
+  - security/THREAT-MODEL.md
+  - security/ABUSE-CASES.yaml
+  remaining_risk_or_dependency: Pentest and runtime abuse-case execution are not claimed.
+- finding_id: AUD-DATA-001
+  severity: MEDIUM
+  domain: data-governance
+  title: Governança de dados pessoais não está formalizada como inventário executável
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - retention_class existe no OpenAPI
+  - não há DATA-INVENTORY, DSAR workflow ou política canônica de retenção no inventário
+  implementation_paths:
+  - governance/DATA-INVENTORY.yaml
+  - governance/RETENTION-POLICY.yaml
+  - governance/DSAR-WORKFLOW.yaml
+  validation_command: Document/schema review
+  validation_evidence:
+  - governance/DATA-INVENTORY.yaml
+  - governance/RETENTION-POLICY.yaml
+  - governance/DSAR-WORKFLOW.yaml
+  remaining_risk_or_dependency: Legal approval and organizational execution remain external and explicitly documented.
+- finding_id: AUD-MET-001
+  severity: HIGH
+  domain: metrics
+  title: Matriz de métricas contém contradição de escopo
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - CAPABILITY-FACET-MATRIX possui object_definitions e event_transport com SCI
+  - portfolio_sci.reason afirma "somente uma capability foi avaliada"
+  implementation_paths:
+  - traceability/CAPABILITY-FACET-MATRIX.yaml
+  - traceability/COVERAGE-BASELINE.yaml
+  - traceability/COVERAGE-MATRIX-R2.yaml
+  - traceability/MATRIX.md
+  - scripts/measure_spec.py
+  validation_command: python scripts/validate_metrics_matrix.py
+  validation_evidence:
+  - audit/round2/metrics_matrix.txt
+  remaining_risk_or_dependency: Global SCI/EEI remain NOT_CALCULATED.
+- finding_id: AUD-MET-002
+  severity: MEDIUM
+  domain: metrics
+  title: Matriz contém chave YAML textual acidental
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - 'traceability/CAPABILITY-FACET-MATRIX.yaml: "mas não criação/listagem/leitura: null"'
+  implementation_paths:
+  - traceability/CAPABILITY-FACET-MATRIX.yaml
+  - schemas/capability-facet-matrix.schema.json
+  - scripts/validate_metrics_matrix.py
+  validation_command: python scripts/validate_metrics_matrix.py
+  validation_evidence:
+  - audit/round2/metrics_matrix.txt
+  remaining_risk_or_dependency: Schema enforcement must remain a mandatory gate.
+- finding_id: AUD-DOC-001
+  severity: HIGH
+  domain: documentation
+  title: Consolidado interpreta AsyncAPI 3 como publish/subscribe de canal
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - DOCUMENTACAO_TECNICA_FINAL capítulo 5 marca Publish/Subscribe = não em 7 canais
+  - AsyncAPI 3 define send/receive em operations top-level para 3 canais
+  implementation_paths:
+  - documentation/ASYNCAPI-3-OPERATIONS.md
+  - documentation/ROUND2-AUDIT-SUPPLEMENT.md
+  - 02-events/asyncapi.yaml
+  validation_command: python scripts/validate_asyncapi_operations.py
+  validation_evidence:
+  - audit/round2/asyncapi_operations.txt
+  remaining_risk_or_dependency: The original external consolidated document remains historical; this package contains the corrected interpretation.
+- finding_id: AUD-DOC-002
+  severity: MEDIUM
+  domain: documentation
+  title: Consolidado não é inventário completo para auditoria
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - documentação consolidada cobre 189/189 extensões selecionadas
+  - ZIP possui 355 arquivos
+  - scripts Python, features, shell, evidências txt e caches ficam fora do apêndice canônico
+  implementation_paths:
+  - documentation/ROUND2-AUDIT-SUPPLEMENT.md
+  - audit/round2/ROUND2-FILE-INVENTORY.json
+  - remediation/ROUND2-CHANGE-MANIFEST.json
+  validation_command: Verify inventory count and SHA-256 manifest
+  validation_evidence:
+  - audit/round2/ROUND2-FILE-INVENTORY.json
+  - audit/round2/sha256_manifest.txt
+  remaining_risk_or_dependency: The final user-facing consolidated dossier is intentionally produced in Round 3.
+- finding_id: AUD-LOCK-001
+  severity: HIGH
+  domain: dependencies
+  title: Lockfile raiz é vazio e não protege dependências
+  status: PARTIAL_EXTERNAL_DEPENDENCY
+  original_evidence:
+  - package-lock.json packages = {}
+  - pip install no workflow sem requirements lock
+  - xstate e SDK sem lockfile
+  implementation_paths:
+  - DEPENDENCY-LOCK-STATUS.yaml
+  - requirements-ci.txt
+  - 06-sdk/typescript/package.json
+  - tools/xstate-runtime/package.json
+  - scripts/validate_dependency_locks.py
+  validation_command: python scripts/validate_dependency_locks.py
+  validation_evidence:
+  - audit/round2/dependency_locks.txt
+  remaining_risk_or_dependency: Root empty lockfile removed; verified npm locks and Python hash lock require trusted registries/cache.
+- finding_id: AUD-RUN-001
+  severity: HIGH
+  domain: operations
+  title: Evidências de execução externa permanecem BLOCKED e precisam de runbook único
+  status: RESOLVED_LOCAL
+  original_evidence:
+  - PostgreSQL, Redpanda, Helm/Kubernetes, load e distributed game day BLOCKED
+  - gaps distribuídos em vários relatórios históricos
+  implementation_paths:
+  - remediation/EXTERNAL-DEPENDENCIES.md
+  - 09-runbooks/integration-evidence-gate.md
+  - schemas/evidence-record.schema.json
+  validation_command: Review external gate table and evidence schema
+  validation_evidence:
+  - remediation/EXTERNAL-DEPENDENCIES.md
+  remaining_risk_or_dependency: Each external procedure remains open until its evidence record is produced.

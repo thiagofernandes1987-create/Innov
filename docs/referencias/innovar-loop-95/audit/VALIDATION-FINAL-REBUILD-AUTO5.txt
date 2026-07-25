@@ -1,0 +1,103 @@
+JSON_SCHEMA_OK audit/METRICS-SNAPSHOT-REBUILD-AUTO5.json
+JSON_SCHEMA_OK audit/METRICS-SNAPSHOT-EVENT-GAMEDAY.json
+JSON_SCHEMA_OK audit/GAMEDAY-REBUILD-AUTO5.json
+JSON_SCHEMA_OK audit/METRICS-SNAPSHOT.json
+JSON_SCHEMA_OK audit/BDD-GHERKIN-BINDING-RESULT.json
+JSON_SCHEMA_OK audit/GAMEDAY-RESULT-EVENT-TRANSPORT.json
+JSON_SCHEMA_OK audit/METRICS-SNAPSHOT-VERTICAL-1.json
+JSON_SCHEMA_OK audit/METRICS-SNAPSHOT-EVENT-FOCUS.json
+JSON_SCHEMA_OK 05-config/config.schema.json
+JSON_SCHEMA_OK 02-events/schemas/envelope.v1.schema.json
+JSON_SCHEMA_OK 02-events/compatibility-baseline/envelope.v1.schema.json
+JSON_SCHEMA_OK 02-events/compatibility-baseline/metadata/metadata.object.transitioned.v1.schema.json
+JSON_SCHEMA_OK 02-events/compatibility-baseline/metadata/metadata.object.published.v1.schema.json
+JSON_SCHEMA_OK 02-events/compatibility-baseline/metadata/metadata.object.created.v1.schema.json
+JSON_SCHEMA_OK 02-events/compatibility-baseline/metadata/metadata.record.created.v1.schema.json
+JSON_SCHEMA_OK 02-events/compatibility-baseline/platform/platform.quota.exceeded.v1.schema.json
+JSON_SCHEMA_OK 02-events/compatibility-baseline/platform/work.item.projected.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.object.transitioned.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.object.published.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.object.created.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/metadata/metadata.record.created.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/platform/platform.quota.exceeded.v1.schema.json
+JSON_SCHEMA_OK 02-events/schemas/platform/work.item.projected.v1.schema.json
+JSON_SCHEMA_OK 06-sdk/typescript/package.json
+JSON_SCHEMA_OK 06-sdk/typescript/tsconfig.json
+JSON_SCHEMA_OK 01-api/schemas/dlq-replay-request.schema.json
+JSON_SCHEMA_OK 01-api/schemas/dlq-resolution-request.schema.json
+JSON_SCHEMA_OK 01-api/schemas/transition-request.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/publish-object.command.v1.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/create-object.command.v1.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/create-record.command.v1.schema.json
+JSON_SCHEMA_OK 02-commands/schemas/update-record.command.v1.schema.json
+YAML_PARSE_OK traceability/COVERAGE-BASELINE.yaml
+YAML_PARSE_OK traceability/CAPABILITY-FACET-MATRIX.yaml
+YAML_PARSE_OK 01-api/openapi.yaml
+YAML_PARSE_OK 00-decisions/error-catalog.yaml
+YAML_PARSE_OK 00-decisions/INVARIANTS.yaml
+YAML_PARSE_OK 00-decisions/COVERAGE-CHECKLIST.yaml
+YAML_PARSE_OK 00-decisions/requirements.yaml
+YAML_PARSE_OK 00-decisions/NFR-SLO-CATALOG.yaml
+YAML_PARSE_OK 00-decisions/METRICS-AND-ANTI-REGRESSION.yaml
+YAML_PARSE_OK 03-statecharts/STATE-MIGRATION-REGISTRY.yaml
+YAML_PARSE_OK 02-events/asyncapi.yaml
+YAML_PARSE_OK 02-events/compatibility-policy.yaml
+YAML_PARSE_OK 05-infra/helm/values.yaml
+YAML_PARSE_OK 05-infra/helm/Chart.yaml
+EVENT_COMPATIBILITY: PASS
+
+
+test_cross_tenant_read_discloses_nothing (test_acceptance_runtime.AcceptanceRuntimeTests.test_cross_tenant_read_discloses_nothing) ... ok
+test_idempotency_is_tenant_scoped (test_acceptance_runtime.AcceptanceRuntimeTests.test_idempotency_is_tenant_scoped) ... ok
+test_idempotency_rejects_different_payload (test_acceptance_runtime.AcceptanceRuntimeTests.test_idempotency_rejects_different_payload) ... ok
+test_idempotency_replays_exact_response (test_acceptance_runtime.AcceptanceRuntimeTests.test_idempotency_replays_exact_response) ... ok
+test_publish_expected_version_records_outbox (test_acceptance_runtime.AcceptanceRuntimeTests.test_publish_expected_version_records_outbox) ... ok
+test_published_version_is_immutable (test_acceptance_runtime.AcceptanceRuntimeTests.test_published_version_is_immutable) ... ok
+test_stale_transition_has_no_event (test_acceptance_runtime.AcceptanceRuntimeTests.test_stale_transition_has_no_event) ... ok
+test_admin_http_requires_events_admin_scope (test_auto5_rebuild.Auto5RebuildTests.test_admin_http_requires_events_admin_scope) ... ok
+test_dlq_runtime_is_tenant_idempotent_and_rls_protected (test_auto5_rebuild.Auto5RebuildTests.test_dlq_runtime_is_tenant_idempotent_and_rls_protected) ... ok
+test_helm_has_container_hardening_and_probes (test_auto5_rebuild.Auto5RebuildTests.test_helm_has_container_hardening_and_probes) ... ok
+test_network_policy_allows_only_documented_dependencies (test_auto5_rebuild.Auto5RebuildTests.test_network_policy_allows_only_documented_dependencies) ... ok
+test_postgres_adapter_uses_local_tenant_context_and_sql_functions (test_auto5_rebuild.Auto5RebuildTests.test_postgres_adapter_uses_local_tenant_context_and_sql_functions) ... ok
+test_retry_hardening_guards_tenant_lease_and_attempt_cap (test_auto5_rebuild.Auto5RebuildTests.test_retry_hardening_guards_tenant_lease_and_attempt_cap) ... ok
+test_all_json_schemas_are_valid_draft_2020_12 (test_contracts.ContractTests.test_all_json_schemas_are_valid_draft_2020_12) ... ok
+test_database_restricts_storage_strategy_to_executable_release (test_contracts.ContractTests.test_database_restricts_storage_strategy_to_executable_release) ... ok
+test_dlq_dedupe_is_tenant_scoped (test_contracts.ContractTests.test_dlq_dedupe_is_tenant_scoped) ... ok
+test_event_storage_strategy_matches_api (test_contracts.ContractTests.test_event_storage_strategy_matches_api) ... ok
+test_event_transport_tables_have_rls (test_contracts.ContractTests.test_event_transport_tables_have_rls) ... ok
+test_helm_service_selector_and_named_port_are_consistent (test_contracts.ContractTests.test_helm_service_selector_and_named_port_are_consistent) ... ok
+test_local_refs_exist (test_contracts.ContractTests.test_local_refs_exist) ... ok
+test_object_definition_capability_has_18_scored_facets (test_contracts.ContractTests.test_object_definition_capability_has_18_scored_facets) ... ok
+test_object_definition_configuration_is_schema_bound (test_contracts.ContractTests.test_object_definition_configuration_is_schema_bound) ... ok
+test_object_definition_runbook_preserves_immutability (test_contracts.ContractTests.test_object_definition_runbook_preserves_immutability) ... ok
+test_only_executable_storage_strategy_is_exposed (test_contracts.ContractTests.test_only_executable_storage_strategy_is_exposed) ... ok
+test_openapi_uses_strong_etags (test_contracts.ContractTests.test_openapi_uses_strong_etags) ... ok
+test_published_version_immutability_has_database_enforcement (test_contracts.ContractTests.test_published_version_immutability_has_database_enforcement) ... ok
+test_quota_function_rejects_invalid_inputs_and_public_execution (test_contracts.ContractTests.test_quota_function_rejects_invalid_inputs_and_public_execution) ... ok
+test_quota_has_single_canonical_signature (test_contracts.ContractTests.test_quota_has_single_canonical_signature) ... ok
+test_runtime_rls_has_policies (test_contracts.ContractTests.test_runtime_rls_has_policies) ... ok
+test_sdk_uses_strong_etag (test_contracts.ContractTests.test_sdk_uses_strong_etag) ... ok
+test_transition_schema_is_closed_and_reasoned (test_contracts.ContractTests.test_transition_schema_is_closed_and_reasoned) ... ok
+test_events_admin_scope_is_required (test_event_admin_http.EventAdminHttpTests.test_events_admin_scope_is_required) ... ok
+test_idempotency_key_is_required (test_event_admin_http.EventAdminHttpTests.test_idempotency_key_is_required) ... ok
+test_replay_is_idempotent_over_http (test_event_admin_http.EventAdminHttpTests.test_replay_is_idempotent_over_http) ... ok
+test_security_context_is_required (test_event_admin_http.EventAdminHttpTests.test_security_context_is_required) ... ok
+test_admin_api_has_dlq_list_replay_and_resolution (test_event_transport_focus.Tests.test_admin_api_has_dlq_list_replay_and_resolution) ... ok
+test_event_compatibility_gate_passes (test_event_transport_focus.Tests.test_event_compatibility_gate_passes) ... ok
+test_game_day_has_measurable_acceptance (test_event_transport_focus.Tests.test_game_day_has_measurable_acceptance) ... ok
+test_helm_has_dedicated_publisher_and_external_backlog_hpa (test_event_transport_focus.Tests.test_helm_has_dedicated_publisher_and_external_backlog_hpa) ... ok
+test_publisher_executes_against_http_broker_contract (test_event_transport_focus.Tests.test_publisher_executes_against_http_broker_contract) ... ok
+test_sql_has_atomic_append_and_complete_inbox_lifecycle (test_event_transport_focus.Tests.test_sql_has_atomic_append_and_complete_inbox_lifecycle) ... ok
+
+----------------------------------------------------------------------
+Ran 41 tests in 3.672s
+
+OK
+
+GHERKIN_FEATURE_FILES 10
+GHERKIN_SCENARIOS_TOTAL 140
+GHERKIN_BOUND_EXECUTED_PASS 2
+GHERKIN_BOUND_BLOCKED_EXTERNAL 2
+GHERKIN_UNBOUND 0
+GHERKIN_BOUND_FAILED 0
+VALIDATION_RESULT: PASS

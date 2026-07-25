@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: innovar-evidence-egress}
+spec:
+  podSelector: {matchLabels: {app.kubernetes.io/component: evidence}}
+  policyTypes: [Egress]
+  egress:
+  - to:
+    - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: data}}
+      podSelector: {matchLabels: {app.kubernetes.io/name: postgres}}
+    ports: [{protocol: TCP, port: 5432}]
+  - to:
+    - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: streaming}}
+      podSelector: {matchLabels: {app.kubernetes.io/name: redpanda}}
+    ports: [{protocol: TCP, port: 9092}]
+  - to:
+    - namespaceSelector: {matchLabels: {kubernetes.io/metadata.name: kube-system}}
+      podSelector: {matchLabels: {k8s-app: kube-dns}}
+    ports: [{protocol: UDP, port: 53}, {protocol: TCP, port: 53}]

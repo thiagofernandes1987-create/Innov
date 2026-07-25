@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://innovar.local/schemas/evidence-record.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidence_id",
+    "status",
+    "execution_level",
+    "generated_at",
+    "command",
+    "environment",
+    "result_summary",
+    "source_artifacts"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "minLength": 3
+    },
+    "status": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_EXTERNAL",
+        "INVALID",
+        "NOT_RUN"
+      ]
+    },
+    "execution_level": {
+      "enum": [
+        "NOT_EXECUTED",
+        "DOCUMENTED",
+        "STATICALLY_VALIDATED",
+        "UNIT_EXECUTED",
+        "COMPONENT_EXECUTED",
+        "LOCAL_INTEGRATION_EXECUTED",
+        "EXTERNAL_INTEGRATION_EXECUTED",
+        "OPERATIONALLY_PROVEN"
+      ]
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "command": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "environment": {
+      "type": "object"
+    },
+    "result_summary": {
+      "type": "string",
+      "minLength": 3
+    },
+    "source_artifacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "artifact_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "blocked_reason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tool_versions": {
+      "type": "object"
+    },
+    "required_execution_level": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "DOCUMENTED",
+        "STATICALLY_VALIDATED",
+        "UNIT_EXECUTED",
+        "COMPONENT_EXECUTED",
+        "LOCAL_INTEGRATION_EXECUTED",
+        "EXTERNAL_INTEGRATION_EXECUTED",
+        "OPERATIONALLY_PROVEN",
+        null
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "BLOCKED_EXTERNAL"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "blocked_reason",
+          "required_execution_level"
+        ],
+        "properties": {
+          "execution_level": {
+            "const": "NOT_EXECUTED"
+          },
+          "required_execution_level": {
+            "enum": [
+              "DOCUMENTED",
+              "STATICALLY_VALIDATED",
+              "UNIT_EXECUTED",
+              "COMPONENT_EXECUTED",
+              "LOCAL_INTEGRATION_EXECUTED",
+              "EXTERNAL_INTEGRATION_EXECUTED",
+              "OPERATIONALLY_PROVEN"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "PASS"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "execution_level": {
+            "enum": [
+              "DOCUMENTED",
+              "STATICALLY_VALIDATED",
+              "UNIT_EXECUTED",
+              "COMPONENT_EXECUTED",
+              "LOCAL_INTEGRATION_EXECUTED",
+              "EXTERNAL_INTEGRATION_EXECUTED",
+              "OPERATIONALLY_PROVEN"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

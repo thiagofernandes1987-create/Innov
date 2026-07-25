@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "release_id": "INNOVAR-AUTO12-R3B-FOLLOWUP",
+  "overall_status": "PARTIAL_BLOCKED_EXTERNAL",
+  "generated_at_utc": "2026-07-23T11:05:00Z",
+  "local_results": {
+    "unittest_tests": {
+      "status": "PASS",
+      "count": 84
+    },
+    "unittest_bdd_steps": {
+      "status": "PASS",
+      "count": 16
+    },
+    "pytest_aggregated": {
+      "status": "PASS",
+      "count": 100,
+      "note": "Overlaps the unittest collections; not additive coverage."
+    },
+    "local_http_game_day": {
+      "status": "PASS",
+      "scope": "CONTROLLED_IN_PROCESS_BROKER_NOT_REDPANDA",
+      "published": 1,
+      "consumed": 1,
+      "duplicate_effects": 0,
+      "lost_messages": 0
+    },
+    "typescript_compile": {
+      "status": "PASS"
+    },
+    "sdk_drift": {
+      "status": "PASS"
+    },
+    "openapi": {
+      "status": "PASS",
+      "operations": 13
+    },
+    "asyncapi": {
+      "status": "PASS",
+      "channels": 7,
+      "operations": 14
+    },
+    "event_compatibility": {
+      "status": "PASS"
+    },
+    "helm_static": {
+      "status": "PASS"
+    },
+    "canonical_status": {
+      "status": "PASS"
+    },
+    "remediation_register": {
+      "status": "PASS"
+    },
+    "canonical_orchestrator": {
+      "status": "PARTIAL_BLOCKED_EXTERNAL",
+      "observed_exit_code": 77,
+      "local_pass_gates": 22,
+      "external_blocked_gates": 6,
+      "evidence": "audit/post-r3b/VALIDATE-ALL.log"
+    }
+  },
+  "post_r3b_findings": {
+    "implemented_and_locally_validated": [
+      "FFND-R3B-0001",
+      "FFND-R3B-0002",
+      "FFND-R3B-0003",
+      "FFND-R3B-0025",
+      "FFND-R3B-0026",
+      "FFND-R3B-0027",
+      "FFND-R3B-0028"
+    ],
+    "external_proof_still_required": [
+      "PostgreSQL migration 0015 and RLS/concurrency",
+      "Redpanda real",
+      "verified dependency locks",
+      "OCI digests and attestations",
+      "XState official runtime",
+      "Kubernetes and NetworkPolicy runtime"
+    ]
+  },
+  "external_results": {
+    "dependency_locks": "BLOCKED_EXTERNAL",
+    "oci_digests": "BLOCKED_EXTERNAL",
+    "postgresql": "BLOCKED_EXTERNAL",
+    "redpanda": "BLOCKED_EXTERNAL",
+    "xstate_official": "BLOCKED_EXTERNAL",
+    "kubernetes_networkpolicy": "BLOCKED_EXTERNAL"
+  },
+  "interpretation": "Local PASS does not prove external integration or operational readiness."
+}

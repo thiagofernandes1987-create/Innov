@@ -1,0 +1,1 @@
+WORKFLOW_SECURITY_RESULT: PASS approved_pins=4

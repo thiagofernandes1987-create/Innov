@@ -94,7 +94,7 @@ Objetivo: nenhuma decisão desta plataforma depende de conversa. Um chat novo re
 - [x] T-03.5 — Registrar que nada foi executado e que os números são estimativas não calibradas
 
 ## Sprint S-04 — Ponto de entrada e inventário de execução
-**Estado:** em andamento
+**Estado:** concluída
 **Marco:** M-0
 
 - [x] T-04.1 — Escrever `LEIA-PRIMEIRO.md` mapeando skills, vacinas, blueprint, executable spec, Object Runtime e ordem de leitura
@@ -107,7 +107,11 @@ Objetivo: nenhuma decisão desta plataforma depende de conversa. Um chat novo re
 - [x] T-04.4 — Registrar `LEIA-PRIMEIRO.md` e este arquivo no validador de documentação e no `README.md` de `diretrizes/`
 - [x] T-04.5 — Apontar `CLAUDE.md` para `LEIA-PRIMEIRO.md` como primeira leitura obrigatória e fixar as regras do inventário
 - [x] T-04.6 — **Publicar no GitHub.** As diretrizes estão em `claude/diretrizes-object-runtime`, sobre `feature/etapa-20-prontidao-producao`. As 45 skills de `.claude/skills` seguem fora deste ramo, em entrega separada ainda não publicada
-- [ ] T-04.7 — Incorporar ao repositório o blueprint e a executable spec recebidos por ZIP, com os defeitos verificados anotados
+- [x] T-04.7 — Incorporar ao repositório o blueprint e a executable spec recebidos por ZIP, com os defeitos verificados anotados
+  - [x] T-04.7.1 — Varrer o pacote por credencial antes de publicar: três URLs de banco encontradas, todas placeholder (`postgres:postgres@localhost`, `change-me`, `REPLACE_WITH_LOCAL_SECRET`)
+  - [x] T-04.7.2 — Copiar os 605 arquivos para `docs/referencias/innovar-loop-95`
+  - [x] T-04.7.3 — Isolar do `eslint`, do `tsc` e do `vitest` — é referência, não código da plataforma
+  - [x] T-04.7.4 — Reverificar os seis defeitos contra os arquivos e registrar em `ANOTACOES-DE-VERIFICACAO.md` com caminho e linha
 
 ---
 
@@ -116,7 +120,7 @@ Objetivo: nenhuma decisão desta plataforma depende de conversa. Um chat novo re
 Objetivo: a fundação que aguenta virar prédio. Nenhuma funcionalidade de estúdio antes de a fundação estar medida.
 
 ## Sprint S-05 — Catálogo de definições
-**Estado:** pendente
+**Estado:** em andamento
 **Marco:** M-1
 
 - [ ] T-05.1 — Migration de `object_definitions`, `object_definition_versions` e `object_field_slots`
@@ -274,7 +278,7 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
-| — | — | ordem inicial, sem reordenação |
+| 2026-07-25 | Virada S-04 → S-05, sem reordenação | Avaliadas as pendentes na virada, conforme R5. S-05 continua primeira: o catálogo de definições é pré-requisito físico de todas as demais sprints do M-1 — sem ele não há o que armazenar, indexar ou proteger. Nenhuma sprint pendente é pré-requisito descoberto nem base reaproveitável que justifique passar à frente. |
 
 ---
 

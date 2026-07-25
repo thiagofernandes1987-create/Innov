@@ -1,0 +1,9 @@
+test_given_duplicate_delivery_when_consumed_then_one_effect (bdd_steps.test_event_transport_steps.Steps.test_given_duplicate_delivery_when_consumed_then_one_effect) ... ok
+test_given_open_dlq_when_replay_then_exactly_one_effect (bdd_steps.test_event_transport_steps.Steps.test_given_open_dlq_when_replay_then_exactly_one_effect) ... ok
+test_given_replayed_item_when_resolved_then_closed (bdd_steps.test_event_transport_steps.Steps.test_given_replayed_item_when_resolved_then_closed) ... ok
+test_given_tenant_a_dlq_when_tenant_b_lists_then_hidden (bdd_steps.test_event_transport_steps.Steps.test_given_tenant_a_dlq_when_tenant_b_lists_then_hidden) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 2.045s
+
+OK

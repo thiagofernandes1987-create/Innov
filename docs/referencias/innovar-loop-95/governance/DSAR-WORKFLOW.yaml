@@ -1,0 +1,11 @@
+version: 1
+status: DOCUMENTED_NOT_OPERATIONALLY_EXECUTED
+steps:
+  - authenticate_requester
+  - identify_controller_and_scope
+  - locate_primary_and_derived_records
+  - review_legal_hold_and_retention
+  - export_correct_or_delete_as_applicable
+  - propagate_to_projections_events_logs_and_backups_by_policy
+  - record_execution_evidence
+  - notify_requester

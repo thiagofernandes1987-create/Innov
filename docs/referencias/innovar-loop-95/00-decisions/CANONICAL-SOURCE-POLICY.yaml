@@ -1,0 +1,20 @@
+version: 1
+policy_id: INNOVAR-CANONICAL-SOURCE-v1
+rules:
+  single_release_manifest: RELEASE-MANIFEST.yaml is the sole machine-readable release
+    identity.
+  status_generated: STATUS.md must agree with RELEASE-MANIFEST.yaml and current validation
+    evidence.
+  historical_artifacts: Artifacts under audit/history or carrying status HISTORICAL/SUPERSEDED
+    cannot be current evidence.
+  current_pointer: README.md may point only to existing current-cycle artifacts.
+  hash_manifest: SHA256SUMS.txt must cover every regular file except itself.
+  no_implicit_pass: Missing, empty or blocked evidence can never be promoted to PASS.
+lifecycle_statuses:
+- CANONICAL
+- CURRENT_EVIDENCE
+- HISTORICAL
+- SUPERSEDED
+- DRAFT
+- BLOCKED_EXTERNAL
+validation_command: python scripts/validate_canonical_status.py

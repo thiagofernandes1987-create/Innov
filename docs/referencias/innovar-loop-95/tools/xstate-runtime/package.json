@@ -1,0 +1,19 @@
+{
+  "name": "innovar-xstate-evidence",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "tsx test-machines.ts"
+  },
+  "dependencies": {
+    "xstate": "5.19.2"
+  },
+  "devDependencies": {
+    "tsx": "4.19.2",
+    "typescript": "5.7.3"
+  },
+  "engines": {
+    "node": ">=22 <23",
+    "npm": ">=10 <12"
+  }
+}

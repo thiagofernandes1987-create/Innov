@@ -1,0 +1,32 @@
+{
+  "environment": {
+    "KUBECONFIG": false,
+    "TEST_DATABASE_URL": false
+  },
+  "missing": [
+    "docker",
+    "helm",
+    "kubeconform",
+    "kubectl",
+    "TEST_DATABASE_URL"
+  ],
+  "status": "BLOCKED",
+  "tools": {
+    "docker": {
+      "available": false,
+      "path": null
+    },
+    "helm": {
+      "available": false,
+      "path": null
+    },
+    "kubeconform": {
+      "available": false,
+      "path": null
+    },
+    "kubectl": {
+      "available": false,
+      "path": null
+    }
+  }
+}

@@ -1,0 +1,3329 @@
+{
+  "schema_version": 1,
+  "release_id": "INNOVAR-AUTO12-R2",
+  "generated_at_utc": "2026-07-23T02:24:29Z",
+  "scope": "all files except the inventory itself, change manifest, SHA256SUMS and prohibited generated caches",
+  "total_files": 466,
+  "counts_by_suffix": {
+    ".example": 2,
+    ".feature": 11,
+    ".ini": 1,
+    ".js": 2,
+    ".json": 59,
+    ".md": 100,
+    ".puml": 1,
+    ".py": 59,
+    ".sh": 3,
+    ".sql": 14,
+    ".ts": 13,
+    ".txt": 154,
+    ".yaml": 43,
+    ".yml": 3,
+    "[none]": 1
+  },
+  "counts_by_top_level": {
+    ".github": 2,
+    ".gitignore": 1,
+    "00-decisions": 13,
+    "01-api": 5,
+    "01-db": 15,
+    "02-commands": 4,
+    "02-events": 18,
+    "03-statecharts": 7,
+    "04-bdd": 13,
+    "05-config": 5,
+    "05-infra": 20,
+    "06-adapters": 3,
+    "06-sdk": 9,
+    "07-adrs": 11,
+    "09-runbooks": 4,
+    "DEPENDENCY-LOCK-STATUS.yaml": 1,
+    "INNOVAR_PLATFORM_BLUEPRINT_EXECUTAVEL.md": 1,
+    "MANIFEST.json": 1,
+    "README.md": 1,
+    "RELEASE-MANIFEST.yaml": 1,
+    "STATUS.md": 1,
+    "audit": 240,
+    "bdd_steps": 3,
+    "capabilities": 2,
+    "documentation": 2,
+    "event_admin": 2,
+    "event_publisher": 1,
+    "governance": 3,
+    "pytest.ini": 1,
+    "reference_runtime": 1,
+    "remediation": 5,
+    "requirements-ci.txt": 1,
+    "schemas": 4,
+    "scripts": 43,
+    "security": 2,
+    "supply-chain": 1,
+    "tests": 12,
+    "tools": 2,
+    "traceability": 5
+  },
+  "files": [
+    {
+      "path": ".github/dependabot.yml",
+      "bytes": 299,
+      "sha256": "3d3734403c3314e2c22a76c151c8b4de78c28cb28cf5241719e69b658a1f3e66",
+      "suffix": ".yml",
+      "top_level": ".github"
+    },
+    {
+      "path": ".github/workflows/executable-spec-integration.yaml",
+      "bytes": 3017,
+      "sha256": "009b77ac486880ffa755a71c276632bd1ad535036951cdffd0d504d15c6f8f00",
+      "suffix": ".yaml",
+      "top_level": ".github"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 145,
+      "sha256": "4f1a70aff59519863714114612189668cc3a3987c8274b88ae4d19dd89415af0",
+      "suffix": "[none]",
+      "top_level": ".gitignore"
+    },
+    {
+      "path": "00-decisions/ARCHITECTURE-GOVERNANCE.md",
+      "bytes": 698,
+      "sha256": "2b518c1c19be29c3b833c38c02d8c44201a8136ac9f3979cd9ff3168fdcbb7a9",
+      "suffix": ".md",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/ARTIFACT-LIFECYCLE.yaml",
+      "bytes": 584,
+      "sha256": "605cdfafda8f276b02d5da12b849da06f3eee492a91944cf8936a94215d9ff97",
+      "suffix": ".yaml",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/CANONICAL-SOURCE-POLICY.yaml",
+      "bytes": 801,
+      "sha256": "7a840c1132ede34370b7bba4c99c11a72cc939daeabaf1b388668c5a17c5b7ba",
+      "suffix": ".yaml",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/CONTEXT-MAP.md",
+      "bytes": 987,
+      "sha256": "8edfd8c248ebb3e07f525f69551c7a7ca3c16a62762fe12dda11beecf23d9440",
+      "suffix": ".md",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/CONVENTIONS.md",
+      "bytes": 1294,
+      "sha256": "caf94a57bbbadbc1f19eccfe7d732ae678888576e59c37980a0e06d823a84c4a",
+      "suffix": ".md",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/COVERAGE-CHECKLIST.yaml",
+      "bytes": 1056,
+      "sha256": "ddf20dfaf987635b8f7bb018549e7c06bba18be1379b12e22ccdd7407e0f6845",
+      "suffix": ".yaml",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/DELIVERY-AND-CANONICAL-SOURCE.md",
+      "bytes": 746,
+      "sha256": "e6f23f515317dae00fcc8858a594855fc32af7c98a39128b4a868ce41bc8cde4",
+      "suffix": ".md",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/INVARIANTS.yaml",
+      "bytes": 1107,
+      "sha256": "a657f5417db1dc82b87c1b5b9d522786c6430d252af5da0a7a075263da6fa9fa",
+      "suffix": ".yaml",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/METRICS-AND-ANTI-REGRESSION.yaml",
+      "bytes": 2966,
+      "sha256": "f8bfa69ab34db2af2bfebb5bccf14d8fd7181b38c3d478aac3d26bbee6835fec",
+      "suffix": ".yaml",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/NFR-SLO-CATALOG.yaml",
+      "bytes": 612,
+      "sha256": "799c8ed035c010173ec5ffd8e1787274fa035331e8d21a59539962c0b471518f",
+      "suffix": ".yaml",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/SUPPLY-CHAIN-POLICY.yaml",
+      "bytes": 480,
+      "sha256": "b79547789ef42659df6efa9b62a75cce95310c2c197ef6e8fe51e5d534bda9bc",
+      "suffix": ".yaml",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/error-catalog.yaml",
+      "bytes": 870,
+      "sha256": "cd3e5842f03663fd020b3f32c5830397b2444afe6478a11de06d35e52d0b66bb",
+      "suffix": ".yaml",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "00-decisions/requirements.yaml",
+      "bytes": 1274,
+      "sha256": "ba7d6deead5adcc039b50cdc9644f01c4cdc9f4c31006a03519ec84a0adb6aa8",
+      "suffix": ".yaml",
+      "top_level": "00-decisions"
+    },
+    {
+      "path": "01-api/openapi.yaml",
+      "bytes": 22718,
+      "sha256": "d7812815459f16535d847bfbc0adf62b63e4c1f51427e7faece9d99646092085",
+      "suffix": ".yaml",
+      "top_level": "01-api"
+    },
+    {
+      "path": "01-api/schemas/dlq-replay-request.schema.json",
+      "bytes": 451,
+      "sha256": "498ad210ad50f5551a191127601b5ec052ddb4e1a9920b7d6992eea9cd958145",
+      "suffix": ".json",
+      "top_level": "01-api"
+    },
+    {
+      "path": "01-api/schemas/dlq-resolution-request.schema.json",
+      "bytes": 417,
+      "sha256": "5b8cb60c7ae6c1193f73a4589ceaa3b465b58a6af76050abbe8f7feb544d12e1",
+      "suffix": ".json",
+      "top_level": "01-api"
+    },
+    {
+      "path": "01-api/schemas/execution-evidence.schema.json",
+      "bytes": 678,
+      "sha256": "40d89a60bfa58205c4e962b736e318f4677e39b8fcf1657c159257147c44fa5c",
+      "suffix": ".json",
+      "top_level": "01-api"
+    },
+    {
+      "path": "01-api/schemas/transition-request.schema.json",
+      "bytes": 1030,
+      "sha256": "b685c896b152086560525df179689aec6dc12957e31529f51356f1ccb099a498",
+      "suffix": ".json",
+      "top_level": "01-api"
+    },
+    {
+      "path": "01-db/migrations/0001_core.sql",
+      "bytes": 9780,
+      "sha256": "54843efa8ba64a5b7d3456d45122216c1c01584e9f491b787e2fa3b8b1410b58",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0002_functions.sql",
+      "bytes": 1618,
+      "sha256": "07a269b94c3ab4d24557439a77de2320e07c25ee3b59655ce323c48f98c9a06f",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0003_runtime_hardening.sql",
+      "bytes": 1948,
+      "sha256": "0c0fb1664f7f16dfd444d781e2229baeaf32a96ca48752431859c04ef3752dde",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0004_evidence_hardening.sql",
+      "bytes": 2759,
+      "sha256": "12634aeae65c640aa6eb1183e6df6267464e2c8867b798be16f59631735d56ce",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0005_security_contract_hardening.sql",
+      "bytes": 1557,
+      "sha256": "96f8669d4e13cf3afbe28656cf2e475359f6e7ecb7892c7d1aed65822e37986a",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0006_tenancy_and_function_signature_hardening.sql",
+      "bytes": 3366,
+      "sha256": "b17b2e74739ac038964dac3dcb5bc92d08b6524e17734aa78f08a86b490ad919",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0007_event_transport_execution.sql",
+      "bytes": 8482,
+      "sha256": "32dd201966ae0b574379bd3b1b56a0588dca1c97faab7db9752d0c79bca61ce6",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0008_event_transport_security_and_retry_hardening.sql",
+      "bytes": 6143,
+      "sha256": "4c56676f555cbff4eb66ee1ce60cc0dce8b97ce34fcd69718e715ddb228a04d6",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0009_dlq_admin_runtime.sql",
+      "bytes": 5306,
+      "sha256": "2eb641fa40477643dd7d42abf5410c6e70b75b16f4749e76acfa71a79b88bdb2",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0010_execution_evidence_ledger.sql",
+      "bytes": 1228,
+      "sha256": "8b8408d96c63f43c6c76a436a367b3cbc7c2de65342d42fd454cd4b00cb77528",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0011_event_transport_operational_triggers.sql",
+      "bytes": 798,
+      "sha256": "3d0b3dcbd09a2260ad7d63db208b50d7fd038b3500d8133a16c58338985f2a65",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0012_runtime_configuration_audit.sql",
+      "bytes": 771,
+      "sha256": "5c2781344ace8c1e432931892dcf00d19c427a768d58d046a7b311298d1bf7b6",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/0013_unify_execution_tenancy.sql",
+      "bytes": 2242,
+      "sha256": "e568c0b5663d76e2b530757bf2f499a37e5319eaea77124e554a66436306a4ad",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/migrations/EXPAND-CONTRACT-PLAYBOOK.md",
+      "bytes": 911,
+      "sha256": "edabbda3673912a0c07d079d87b3bfce57c7df5ea55acc187d2c8cac3211fbe9",
+      "suffix": ".md",
+      "top_level": "01-db"
+    },
+    {
+      "path": "01-db/rls/0001_rls.sql",
+      "bytes": 3874,
+      "sha256": "d780ea1ace741318f9a14178ace40f59fe8e781276470599be7140bd49dd3c6e",
+      "suffix": ".sql",
+      "top_level": "01-db"
+    },
+    {
+      "path": "02-commands/schemas/create-object.command.v1.schema.json",
+      "bytes": 940,
+      "sha256": "83894d82929115140acc68a4376ce0031857a39587b58bb5297cfd3d8a37c116",
+      "suffix": ".json",
+      "top_level": "02-commands"
+    },
+    {
+      "path": "02-commands/schemas/create-record.command.v1.schema.json",
+      "bytes": 410,
+      "sha256": "089f02b2f69d25f38ffb6529f17b3b21b55d4324cddebcb26fde21877b1a54ad",
+      "suffix": ".json",
+      "top_level": "02-commands"
+    },
+    {
+      "path": "02-commands/schemas/publish-object.command.v1.schema.json",
+      "bytes": 557,
+      "sha256": "f62b73654215b66b89983508245b4c4ffa3a2eec1e556227130014783c3f946d",
+      "suffix": ".json",
+      "top_level": "02-commands"
+    },
+    {
+      "path": "02-commands/schemas/update-record.command.v1.schema.json",
+      "bytes": 489,
+      "sha256": "a2cb6b9478f01d56f230076f9b8ff33df6652ac6a8e0bcaabb071cc1c458c369",
+      "suffix": ".json",
+      "top_level": "02-commands"
+    },
+    {
+      "path": "02-events/RETRY-IDEMPOTENCY.md",
+      "bytes": 941,
+      "sha256": "80ea222483b9f985bd7a8b882caa880fdab24729509d08ba79aab98dba433c71",
+      "suffix": ".md",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/asyncapi.yaml",
+      "bytes": 5777,
+      "sha256": "dcb1c28cdf4d007bb54c06ed1567a91cb153acdb630a2bb135ada0b124ae7953",
+      "suffix": ".yaml",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/compatibility-baseline/envelope.v1.schema.json",
+      "bytes": 2492,
+      "sha256": "4adbbe22143f138ad9b6ca984124c4d94062a1a341db9a7ab2dd476b7694b763",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/compatibility-baseline/metadata/metadata.object.created.v1.schema.json",
+      "bytes": 690,
+      "sha256": "edb73dd1e9359ed1d5ded571dcf980f1cdaf659b8451cd42574890ef5c0a45cf",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/compatibility-baseline/metadata/metadata.object.published.v1.schema.json",
+      "bytes": 560,
+      "sha256": "a146d5bf826bc2495af13f683c4801934372b72b9928960607a14d42c5a8b48a",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/compatibility-baseline/metadata/metadata.object.transitioned.v1.schema.json",
+      "bytes": 1024,
+      "sha256": "90f7a0ce657b71a9938723c64ce30bee6ca8993e448f22fbe51852604bb1e011",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/compatibility-baseline/metadata/metadata.record.created.v1.schema.json",
+      "bytes": 597,
+      "sha256": "ed53832ef5c22a4d05e887ff26fddb977434e45ddc05a61f73ebcfae51ac5838",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/compatibility-baseline/platform/platform.quota.exceeded.v1.schema.json",
+      "bytes": 589,
+      "sha256": "d094e5b541b8de1639e49943ad28d6591491f899c7492f87d5f11cea42edf43e",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/compatibility-baseline/platform/work.item.projected.v1.schema.json",
+      "bytes": 819,
+      "sha256": "3d2471f0fd0d4b8cf9db235473c071fac3a9e7d8eb3aaae3a2d63170d6eaf1ec",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/compatibility-policy.yaml",
+      "bytes": 443,
+      "sha256": "9b0a04fadc86a46597f80433838b560e4e5dc64925a40e0a3e7a21a257aa058e",
+      "suffix": ".yaml",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/schemas/envelope.v1.schema.json",
+      "bytes": 2492,
+      "sha256": "4adbbe22143f138ad9b6ca984124c4d94062a1a341db9a7ab2dd476b7694b763",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/schemas/metadata/metadata.object.created.v1.schema.json",
+      "bytes": 690,
+      "sha256": "edb73dd1e9359ed1d5ded571dcf980f1cdaf659b8451cd42574890ef5c0a45cf",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/schemas/metadata/metadata.object.published.v1.schema.json",
+      "bytes": 560,
+      "sha256": "a146d5bf826bc2495af13f683c4801934372b72b9928960607a14d42c5a8b48a",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/schemas/metadata/metadata.object.transitioned.v1.schema.json",
+      "bytes": 1024,
+      "sha256": "90f7a0ce657b71a9938723c64ce30bee6ca8993e448f22fbe51852604bb1e011",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/schemas/metadata/metadata.record.created.v1.schema.json",
+      "bytes": 597,
+      "sha256": "ed53832ef5c22a4d05e887ff26fddb977434e45ddc05a61f73ebcfae51ac5838",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/schemas/platform/execution.evidence.recorded.v1.schema.json",
+      "bytes": 712,
+      "sha256": "ff21afc2fe83d1568f058fccb5352323a2ec932958fd59597c0e8a1ae71099b6",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/schemas/platform/platform.quota.exceeded.v1.schema.json",
+      "bytes": 589,
+      "sha256": "d094e5b541b8de1639e49943ad28d6591491f899c7492f87d5f11cea42edf43e",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "02-events/schemas/platform/work.item.projected.v1.schema.json",
+      "bytes": 819,
+      "sha256": "3d2471f0fd0d4b8cf9db235473c071fac3a9e7d8eb3aaae3a2d63170d6eaf1ec",
+      "suffix": ".json",
+      "top_level": "02-events"
+    },
+    {
+      "path": "03-statecharts/STATE-MIGRATION-REGISTRY.yaml",
+      "bytes": 1379,
+      "sha256": "44e4a41e4bdb08cd3d2c8003aaa3410ebb65e3521674c954edeadc7fe4d22ccb",
+      "suffix": ".yaml",
+      "top_level": "03-statecharts"
+    },
+    {
+      "path": "03-statecharts/plantuml/workflow.puml",
+      "bytes": 556,
+      "sha256": "39e747fdc5764850b83a1d70644b4a957d270934998df1e2724d9b8f29335a47",
+      "suffix": ".puml",
+      "top_level": "03-statecharts"
+    },
+    {
+      "path": "03-statecharts/xstate/approval.machine.ts",
+      "bytes": 1816,
+      "sha256": "ae0466b439a08d2a87af7d3b9d86a544773d6ec7b2fe8e7b8815b429be2c9655",
+      "suffix": ".ts",
+      "top_level": "03-statecharts"
+    },
+    {
+      "path": "03-statecharts/xstate/event-transport.machine.ts",
+      "bytes": 1728,
+      "sha256": "ac648eefe15e3eceedc6cd14d46b2c7d9dfb3cde0fa3eccce2df6c25175b9fe9",
+      "suffix": ".ts",
+      "top_level": "03-statecharts"
+    },
+    {
+      "path": "03-statecharts/xstate/object-definition.machine.ts",
+      "bytes": 1610,
+      "sha256": "3520beae76dd1808cd09c0cb35334d84d8ad2eb976fafc9814342904d0cb79e1",
+      "suffix": ".ts",
+      "top_level": "03-statecharts"
+    },
+    {
+      "path": "03-statecharts/xstate/sla.machine.ts",
+      "bytes": 1561,
+      "sha256": "066b63c1b247d4e2d54725fdfe389973ee19f31053528f22f05e80893be47b42",
+      "suffix": ".ts",
+      "top_level": "03-statecharts"
+    },
+    {
+      "path": "03-statecharts/xstate/workflow.machine.ts",
+      "bytes": 2083,
+      "sha256": "b2cdc397bfa72745a0c92f728c4c660bdb5d07180ff9caa6634adb967ad1d4fe",
+      "suffix": ".ts",
+      "top_level": "03-statecharts"
+    },
+    {
+      "path": "04-bdd/BINDING-REGISTRY.yaml",
+      "bytes": 13140,
+      "sha256": "48346feb5abd18d38ac171312ccb4266d4776f6468446d74e10cb08da7f0f25a",
+      "suffix": ".yaml",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/README.md",
+      "bytes": 272,
+      "sha256": "55a006d5ef7b7503a6ed54abc226fcd1a7a7ef0987a4ee82aca7f55574664a69",
+      "suffix": ".md",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/features/cache.feature",
+      "bytes": 523,
+      "sha256": "32ab3ccc69c265df44681d1f22d713a390ddf0cab81f6f77ccf7ec5973c08c71",
+      "suffix": ".feature",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/features/concurrency.feature",
+      "bytes": 459,
+      "sha256": "748f3e03e426fc0cdb88987f55af5dc6d08305cf8fb737abfbe522a16df37084",
+      "suffix": ".feature",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/features/event-transport-executable.feature",
+      "bytes": 1023,
+      "sha256": "8abb2fd1ec3774dafb1a166fffcecc835c1b1c6a56f28127f0b2549793bb954e",
+      "suffix": ".feature",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/features/events.feature",
+      "bytes": 506,
+      "sha256": "a3241991a32fb05542f36f155dbe981ca56937cd710a1ffea5cd9e24f7e8351d",
+      "suffix": ".feature",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/features/execution-evidence.feature",
+      "bytes": 2871,
+      "sha256": "5190130c1b8329616c2ea8820a64378ed06816863594774f5c1b1b1c03129418",
+      "suffix": ".feature",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/features/idempotency.feature",
+      "bytes": 838,
+      "sha256": "23e27e9e08c7c33be8f0f38f051bf1eb668cfc14c24c6923de47ab45f7a6ed9d",
+      "suffix": ".feature",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/features/metadata.feature",
+      "bytes": 667,
+      "sha256": "4661769d7dcce96b8188c9313567b6b70468deb6b1cafbeef37668b36b636569",
+      "suffix": ".feature",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/features/object-lifecycle.feature",
+      "bytes": 749,
+      "sha256": "54aef06ab4208688e89720d2ee12f8ea63cb5a4f26b77879d1b33e98c556b98a",
+      "suffix": ".feature",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/features/sla.feature",
+      "bytes": 458,
+      "sha256": "a6f4d0b3c53a79a80da353daeb71fafffa362e022922eeccb97df1e9db5bdd7c",
+      "suffix": ".feature",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/features/tenancy.feature",
+      "bytes": 490,
+      "sha256": "6601a6592976accaba6fc11e3ced114bab62049f6c80d3f1fc33f54bf0f40be7",
+      "suffix": ".feature",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "04-bdd/features/workflow.feature",
+      "bytes": 672,
+      "sha256": "e334447d57b47c088dcb903ca8b59c966f3817502d4607bedc55889c981817cc",
+      "suffix": ".feature",
+      "top_level": "04-bdd"
+    },
+    {
+      "path": "05-config/.env.example",
+      "bytes": 682,
+      "sha256": "7b630d8cc7103060403f0e4416894ca78f7bd45feb478627357748921f719d48",
+      "suffix": ".example",
+      "top_level": "05-config"
+    },
+    {
+      "path": "05-config/.env.execution-evidence.example",
+      "bytes": 664,
+      "sha256": "47172175b5398a9c9a30bc5acfa8c174759963d6f681b8b1a53efb0c1cdae6fc",
+      "suffix": ".example",
+      "top_level": "05-config"
+    },
+    {
+      "path": "05-config/CACHE-POLICY.md",
+      "bytes": 642,
+      "sha256": "e40b1bbe32642a93d0e3db72761e39d994dabc36aa08f7d737983f77a576e2b5",
+      "suffix": ".md",
+      "top_level": "05-config"
+    },
+    {
+      "path": "05-config/config.schema.json",
+      "bytes": 2008,
+      "sha256": "293bd1f1bb6a6ca8a91a35d831ae64af766d663c868c4da92c227cdad6b08066",
+      "suffix": ".json",
+      "top_level": "05-config"
+    },
+    {
+      "path": "05-config/execution-evidence-env.schema.json",
+      "bytes": 2220,
+      "sha256": "26945ba1fb8654f0fa3f008aa370a78ac8304ee75bf38b95d5e4b608102ab4c8",
+      "suffix": ".json",
+      "top_level": "05-config"
+    },
+    {
+      "path": "05-infra/contracts/dependency-label-contract.yaml",
+      "bytes": 719,
+      "sha256": "77ee2d744fdc92560928b226cd238526536d4b9419bf9c26d9f50722167271ec",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/docker/docker-compose.event-transport.yml",
+      "bytes": 870,
+      "sha256": "4b76c7b3b365ff4aa5891c45e49a658ad67cad40204c10b0f5dc279b7b14cd7f",
+      "suffix": ".yml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/docker/docker-compose.yml",
+      "bytes": 1051,
+      "sha256": "7f69a58908d2af8e83087529dd5922382d9c08b4c225efbf6ecf5fe0941c6f6d",
+      "suffix": ".yml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/helm/Chart.yaml",
+      "bytes": 142,
+      "sha256": "8c2660fa98fec649a2f77bf7bcdb8023badc9e66453d575ccbb4bbdc888fce3e",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/helm/templates/configmap.yaml",
+      "bytes": 275,
+      "sha256": "6d3f5baa58c7039013615a5772ed9d1cccf9aab2a81627ab5c7157c0fac34505",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/helm/templates/deployment.yaml",
+      "bytes": 1093,
+      "sha256": "d4d1281248ac92d8a7a534958d3a4bc958b013bfd54b93f0968f57c9032ef659",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/helm/templates/event-publisher-deployment.yaml",
+      "bytes": 2007,
+      "sha256": "05e62b7a91a49f5c3884ee4cdf59ffe9ee0bd764b7f2bc3f56750881edafcdb8",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/helm/templates/event-publisher-hpa.yaml",
+      "bytes": 670,
+      "sha256": "44e7cb264811e6ec70432e7b21489db9b8d2dae1dd4064e17dc5bd025520a445",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/helm/templates/networkpolicy.yaml",
+      "bytes": 1730,
+      "sha256": "77e4c136627cb17d6f919e4e03327e61c42da6ef5e6fbd392e498babc59a05d8",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/helm/templates/pdb.yaml",
+      "bytes": 197,
+      "sha256": "2ebd9cb6e1fde1117ac31bf75d3aa22a2c73d2db12b2033171aefee6c6ae24dd",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/helm/templates/service.yaml",
+      "bytes": 205,
+      "sha256": "036e20eba0b93b78bc2c3367060dc5973da201cfdf41605d19eeba548c1706b5",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/helm/templates/serviceaccount.yaml",
+      "bytes": 110,
+      "sha256": "5e84a1913126b80859e776de38675375bbb2252fb4e55deadb1aa600c5eb49ad",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/helm/templates/worker-deployment.yaml",
+      "bytes": 1036,
+      "sha256": "38969c4f9f9041a04a2b891105bb34940c5e903ec80f96dbe252fc366e299126",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/helm/values.yaml",
+      "bytes": 1335,
+      "sha256": "852371da04c3e22232c8f11b9691652f8588d208bcec23327fd1e8ab82ff2646",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/kubernetes/execution-evidence-job.yaml",
+      "bytes": 1138,
+      "sha256": "fffc31f8e525f13effa953b8842577dde7c6b66f95ce787a3ac0466b0324f990",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/kubernetes/networkpolicy-evidence-default-deny.yaml",
+      "bytes": 210,
+      "sha256": "7b27029ffe8760dfd9a75668d6653c7ae4b5f581b2883a05dba468116c08c163",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/kubernetes/networkpolicy-evidence-egress.yaml",
+      "bytes": 809,
+      "sha256": "549407096f5253ec9b7f07704e58e2472482ae152db6643ea92b5026349d4623",
+      "suffix": ".yaml",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/runbooks/break-glass.md",
+      "bytes": 582,
+      "sha256": "886d37dcec5b0815f70f8a22b67ad08bd8e518145d63f2a468f71d5be3079163",
+      "suffix": ".md",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/runbooks/dlq.md",
+      "bytes": 753,
+      "sha256": "25c47027f4eff71d81ae5873348feb2662f76e15e71e987b6caafd2bf1b8155c",
+      "suffix": ".md",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "05-infra/runbooks/worker-queue-stalled.md",
+      "bytes": 494,
+      "sha256": "35d9a20905c936e9e32088f84373a1c0810d6a52143847be9991fc5f0b1acd17",
+      "suffix": ".md",
+      "top_level": "05-infra"
+    },
+    {
+      "path": "06-adapters/contracts/cache.ts",
+      "bytes": 322,
+      "sha256": "883df8ea663f61412239c98786c7b2931e5149544ba40287b7cefe694535be01",
+      "suffix": ".ts",
+      "top_level": "06-adapters"
+    },
+    {
+      "path": "06-adapters/contracts/event-bus.ts",
+      "bytes": 314,
+      "sha256": "9dae496bbcc7abe5c377ceb03332e2313a1b3144ff31146c76d6603b19f168c2",
+      "suffix": ".ts",
+      "top_level": "06-adapters"
+    },
+    {
+      "path": "06-adapters/contracts/storage.ts",
+      "bytes": 331,
+      "sha256": "7b5af13adfbf4ec84732d2ee9b8fa32d3cdf9a8a16064c5926df93ef79cbe24a",
+      "suffix": ".ts",
+      "top_level": "06-adapters"
+    },
+    {
+      "path": "06-sdk/generated/openapi-operations.json",
+      "bytes": 1732,
+      "sha256": "354ee3ab80976febeb70ba71ea4829dad71d24da5508b85df5b9cecb97516bd3",
+      "suffix": ".json",
+      "top_level": "06-sdk"
+    },
+    {
+      "path": "06-sdk/typescript/dist/index.d.ts",
+      "bytes": 3894,
+      "sha256": "b97cff10e8657433aa03fdab5802b822e177103026a54ea6acafbda00d1eba93",
+      "suffix": ".ts",
+      "top_level": "06-sdk"
+    },
+    {
+      "path": "06-sdk/typescript/dist/index.js",
+      "bytes": 4302,
+      "sha256": "92a10ea3967f6d2ec4a265008889169689f8f2ce2afd41de4b479061e11674e2",
+      "suffix": ".js",
+      "top_level": "06-sdk"
+    },
+    {
+      "path": "06-sdk/typescript/dist/lifecycle.d.ts",
+      "bytes": 420,
+      "sha256": "2fb0eb2243a2685dc14d8753d5c2dfa6455a5712529ea2d2c74ca3817c6a31c4",
+      "suffix": ".ts",
+      "top_level": "06-sdk"
+    },
+    {
+      "path": "06-sdk/typescript/dist/lifecycle.js",
+      "bytes": 583,
+      "sha256": "1d08869afdd56ad17358badc3038aab6b295598e7318cfbe38f66e60aa6d768c",
+      "suffix": ".js",
+      "top_level": "06-sdk"
+    },
+    {
+      "path": "06-sdk/typescript/package.json",
+      "bytes": 382,
+      "sha256": "0f67fa271f9317f98a5b06fad17a939a35f552dbf56626af6c0a1ad90ff7341d",
+      "suffix": ".json",
+      "top_level": "06-sdk"
+    },
+    {
+      "path": "06-sdk/typescript/src/index.ts",
+      "bytes": 7124,
+      "sha256": "6f44af319d01ff22b80f5734df1967faa755ae49969c6b3efd73a46e439b5bee",
+      "suffix": ".ts",
+      "top_level": "06-sdk"
+    },
+    {
+      "path": "06-sdk/typescript/src/lifecycle.ts",
+      "bytes": 820,
+      "sha256": "ec63b59459dc9d936fb2f437b574e0824edb766f348163d522f0f40761c72114",
+      "suffix": ".ts",
+      "top_level": "06-sdk"
+    },
+    {
+      "path": "06-sdk/typescript/tsconfig.json",
+      "bytes": 213,
+      "sha256": "7d3a808dbd8bf72cda3ab79baf65f89b346a06ddfeb8b3cbea10e7e6a5f9c5da",
+      "suffix": ".json",
+      "top_level": "06-sdk"
+    },
+    {
+      "path": "07-adrs/ADR-001-tenancy.md",
+      "bytes": 320,
+      "sha256": "1a45729d1c39e9a65321d9725e8ee3bbaf6a8ad4c1dfe1fc97b158f4f549b5d7",
+      "suffix": ".md",
+      "top_level": "07-adrs"
+    },
+    {
+      "path": "07-adrs/ADR-002-object-storage.md",
+      "bytes": 351,
+      "sha256": "041c9a0a533897b05d6033bcfff63b55eb4263b162358543f0a6ec25f658f1f6",
+      "suffix": ".md",
+      "top_level": "07-adrs"
+    },
+    {
+      "path": "07-adrs/ADR-003-concurrency.md",
+      "bytes": 286,
+      "sha256": "d3905317b2fda6a78e0925feaccbe5751a2628975f7f3a882719c1d87e0dccd5",
+      "suffix": ".md",
+      "top_level": "07-adrs"
+    },
+    {
+      "path": "07-adrs/ADR-004-idempotency.md",
+      "bytes": 268,
+      "sha256": "e4acdc5485c03073678e1dbfedfca8c198e3757fe1cc33d85913989ecc2a60cd",
+      "suffix": ".md",
+      "top_level": "07-adrs"
+    },
+    {
+      "path": "07-adrs/ADR-005-events.md",
+      "bytes": 245,
+      "sha256": "d7cad68ef8f92d4d3edcab621650acd90f5f00d920ebca7a0ac6bc08c39f4315",
+      "suffix": ".md",
+      "top_level": "07-adrs"
+    },
+    {
+      "path": "07-adrs/ADR-006-cache.md",
+      "bytes": 254,
+      "sha256": "ca4b7d1aece77104d70284e854ddd563e77cf8def10dd6d96e28f9cc646dda03",
+      "suffix": ".md",
+      "top_level": "07-adrs"
+    },
+    {
+      "path": "07-adrs/ADR-007-api.md",
+      "bytes": 264,
+      "sha256": "b4f8b0e7bf4b8d7e4fc8cc3bfdc4fbe43dee62b1c31fdc4c3e8c206eee66b630",
+      "suffix": ".md",
+      "top_level": "07-adrs"
+    },
+    {
+      "path": "07-adrs/ADR-008-statecharts.md",
+      "bytes": 256,
+      "sha256": "1ea800d6dc2ac95a65b6671fbc9603e5aa57f6febf90e55fd677ab581e3efd05",
+      "suffix": ".md",
+      "top_level": "07-adrs"
+    },
+    {
+      "path": "07-adrs/ADR-009-migrations.md",
+      "bytes": 270,
+      "sha256": "56db0de2f2081b11f804bf0a0e3614dc4d6842213bf8db0ef1862f5001daebe9",
+      "suffix": ".md",
+      "top_level": "07-adrs"
+    },
+    {
+      "path": "07-adrs/ADR-010-i18n.md",
+      "bytes": 269,
+      "sha256": "04b6d83a900fe107918a299d4c7d3c4be9d360709f9c27ff79037799b0749aa9",
+      "suffix": ".md",
+      "top_level": "07-adrs"
+    },
+    {
+      "path": "07-adrs/ADR-011-infrastructure-provisioning.md",
+      "bytes": 834,
+      "sha256": "f7ffd511ebee67cae01114c6bebb5fc8d02a4b9ebf5c405c8cedc173c98c1a84",
+      "suffix": ".md",
+      "top_level": "07-adrs"
+    },
+    {
+      "path": "09-runbooks/event-transport-game-day.md",
+      "bytes": 1186,
+      "sha256": "874b918ffc29014c511d0d689f3ccfa7fc871c0e7b63846728d447abb762e458",
+      "suffix": ".md",
+      "top_level": "09-runbooks"
+    },
+    {
+      "path": "09-runbooks/execution-evidence-campaign-v2.md",
+      "bytes": 1171,
+      "sha256": "90626a7f6e5cea252caf6db4a0696c00f203857366dac7eea3e9a23badd8f273",
+      "suffix": ".md",
+      "top_level": "09-runbooks"
+    },
+    {
+      "path": "09-runbooks/integration-evidence-gate.md",
+      "bytes": 1645,
+      "sha256": "c2aad52cfcba0f125cc839e39af059b31bbf48727da99a549562ca0ce57a56fc",
+      "suffix": ".md",
+      "top_level": "09-runbooks"
+    },
+    {
+      "path": "09-runbooks/object-definitions.md",
+      "bytes": 1281,
+      "sha256": "a4c806514e46eadac01991ae859651943649e3bdac30b4ac44730aadceb696ec",
+      "suffix": ".md",
+      "top_level": "09-runbooks"
+    },
+    {
+      "path": "DEPENDENCY-LOCK-STATUS.yaml",
+      "bytes": 889,
+      "sha256": "40a4cb01cc44cca347c78c6abec2b1e176a45104970ba6f7ad160127f68ade6a",
+      "suffix": ".yaml",
+      "top_level": "DEPENDENCY-LOCK-STATUS.yaml"
+    },
+    {
+      "path": "INNOVAR_PLATFORM_BLUEPRINT_EXECUTAVEL.md",
+      "bytes": 50330,
+      "sha256": "130254e876a88bd29f5aa90628e5b77d38d3568e7ff3913b9ef8f870777d333e",
+      "suffix": ".md",
+      "top_level": "INNOVAR_PLATFORM_BLUEPRINT_EXECUTAVEL.md"
+    },
+    {
+      "path": "MANIFEST.json",
+      "bytes": 79944,
+      "sha256": "93b47a6314b98b4a61fa36abaac2e14ad446ca636cb9fa85dc3bcb60909c6efc",
+      "suffix": ".json",
+      "top_level": "MANIFEST.json"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1801,
+      "sha256": "d1285481189331eba34197278bfb003b764c25e7612c18f61ddba816ec88f0d4",
+      "suffix": ".md",
+      "top_level": "README.md"
+    },
+    {
+      "path": "RELEASE-MANIFEST.yaml",
+      "bytes": 900,
+      "sha256": "4d94259fc88bdc7cb067c6d4d7798d2873f19be8a7340717c4d1a0c171b28a44",
+      "suffix": ".yaml",
+      "top_level": "RELEASE-MANIFEST.yaml"
+    },
+    {
+      "path": "STATUS.md",
+      "bytes": 1973,
+      "sha256": "cb57f33de5fc02c9d8de6d7be5f4b2e690e9286a03f343763336dbd2636b3e9a",
+      "suffix": ".md",
+      "top_level": "STATUS.md"
+    },
+    {
+      "path": "audit/AUDITORIA-IMPARCIAL-RESTART-4-LOOPS.md",
+      "bytes": 3790,
+      "sha256": "0256dad6f2f3f1758340dfefc7648535bf02fb656e10d29fce3964df13abeaee",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-AUTO10-RECONSTRUIDO.md",
+      "bytes": 1053,
+      "sha256": "e1abb5e32dfdcb5a631a252efa7a11dec4cd4acb1e5b3111cf335f47e63495ca",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-AUTO11.md",
+      "bytes": 1146,
+      "sha256": "0401905e19a23af2b0f6c69587507df58a20adb9f1ac38df4f8de74d7b8951cf",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-AUTO12.md",
+      "bytes": 413,
+      "sha256": "cd93ac3c3e0d3c1590d661d35d6a2ead481471c97a6d1d61444815c08db1a1a3",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-AUTO6.md",
+      "bytes": 1036,
+      "sha256": "5d92fa6d0248afcf4240a7b834ce8578d797e146e27f44d4b166378618fcc9bc",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-AUTO9-RECONSTRUIDO.md",
+      "bytes": 680,
+      "sha256": "ef37d8c3704073b8bd802538209d9bb32a81f62a023e6532f4fd596488b571b4",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-CICLO-ATUAL.md",
+      "bytes": 2248,
+      "sha256": "5da742780709c9588a5e3b3da369cbe7868d293ea57714b73c67dec045b42743",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-CICLO-AUTO4.md",
+      "bytes": 1394,
+      "sha256": "e6ae6eb953d966c4d3de740f096cf8966f98cf0bc01a0e1756f757545a2adeef",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-EVENT-TRANSPORT-FOCUS.md",
+      "bytes": 1131,
+      "sha256": "769acfeebeeb1adc7a8f7fe8f664357010381eab7d0229d5e9b0658b9b5d54ca",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-EVENT-TRANSPORT-GAMEDAY.md",
+      "bytes": 996,
+      "sha256": "e7432df5cbed2162ffd0379ac2588f6c3a6a7d67199f1282ab405d1640fc51ff",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-REAUDITORIA-CIRURGICA.md",
+      "bytes": 2045,
+      "sha256": "49df32c5cac6d623aa71bce35809be11ef9745e91c85853c5ac6ecbbbbd8a76c",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-RECONSTRUCAO-AUTO5.md",
+      "bytes": 1128,
+      "sha256": "71e33e22ed70e2892bb5746beed5b929639c92ffbde1a31ae383907207a24f2b",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-INDEPENDENTE-REINICIO-CIRURGICO.md",
+      "bytes": 1803,
+      "sha256": "50a119a06119e6446703ebd4715bca9baf35a37f5a3406c07cd2827e0034ebcf",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-METRICAS-ANTI-REGRESSAO.md",
+      "bytes": 894,
+      "sha256": "aed01829c411233724685bb71b4b1fc609e30525fdf7f1d1ef3c6d73aa755073",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUDITORIA-VERTICAL-OBJECT-DEFINITIONS.md",
+      "bytes": 1138,
+      "sha256": "111b8d0803e961df1effecfe349a6e9a7542a0771bfc01cb240130aac26f435b",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO10-EVENT-COMPATIBILITY.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO10-HELM-STATIC.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO10-SDK-DRIFT.txt",
+      "bytes": 59,
+      "sha256": "ed4e78d6c7074c0e4b3c717ba9a0676997b452ad82602d4aae7f8135d8ea92f7",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO10-TESTS.txt",
+      "bytes": 7827,
+      "sha256": "7769ccc6facbbc3b72525828145c22303e60ae11e8cfeee3c8786a02816d6405",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO10-TRACEABILITY-MATRIX.txt",
+      "bytes": 64,
+      "sha256": "f7eeeea702cae9b5dc8ef3c74b5bb353335f30a7332a7f980c25791f276b9e19",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO10-VALIDATE-ALL.txt",
+      "bytes": 11668,
+      "sha256": "130a83853239bfe53bab756a65386676e9873442ff68fe154dc1a244ac0d4ba7",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO11-BASELINE-TESTS.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO11-ENV-CONTRACT.txt",
+      "bytes": 48,
+      "sha256": "b56555268148cf92b1eef8e5ba4878a2b41cd16dee322b478a26c9bdd4715aa9",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO11-EVENT-COMPATIBILITY.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO11-EXECUTION-PREFLIGHT.txt",
+      "bytes": 21,
+      "sha256": "7d3c3c852c85bef59dcbb4b86aeb7bc2bdbee280b040c9d0a729bc9f32fcdee6",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO11-GHERKIN-COVERAGE.txt",
+      "bytes": 160,
+      "sha256": "509c981f2fbe58508ca4b7972bcadb9b6b369bcef333b9d5845b20cbf864bb1c",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO11-HELM-STATIC.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO11-REQUIREMENT-TRACEABILITY.txt",
+      "bytes": 87,
+      "sha256": "7651f769e249723bba868d2dbb7d639703f634efd5d13b8607ee577f95bea346",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO11-SDK-DRIFT.txt",
+      "bytes": 763,
+      "sha256": "c03e093f80d9e24188999c05fd2a41f884ee887e79a61c5d49ebecb095d10ae9",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO11-TESTS.txt",
+      "bytes": 48,
+      "sha256": "98ad020670e818182307ffde346382a40d45e6d08f334ff60dbb1bd8b2acda69",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO11-TRACEABILITY.txt",
+      "bytes": 64,
+      "sha256": "f7eeeea702cae9b5dc8ef3c74b5bb353335f30a7332a7f980c25791f276b9e19",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO11-VALIDATE-ALL.txt",
+      "bytes": 14208,
+      "sha256": "5379c2393d423d267a344e2cb4b3cf9c3a59c1508508d004be439685b622c3d1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-100-ROUND-CAMPAIGN.json",
+      "bytes": 25178,
+      "sha256": "8db05f9fa77f33a1457cbc78d3cd39521026fe5ff4f839b45b6f267c0c0e745c",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-BASELINE-TESTS.txt",
+      "bytes": 9642,
+      "sha256": "c03e5ae8ed06587fb7d30abe288b7daf92037c06c46306f829a68b49973b6bd5",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-BASELINE-VALIDATE-ALL.txt",
+      "bytes": 14208,
+      "sha256": "36d6ba46d7d6629ed50598177783c3577f0d38e2e755f0f3ef108f2e0cf8d2bd",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-CAMPAIGN-CONSOLE.txt",
+      "bytes": 39,
+      "sha256": "39de8a4b4745907ba7ace9d158eb9e276b40d33f1903681d3ffc3c9cc31d442e",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-EVENT-COMPATIBILITY.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-FINAL-TESTS.txt",
+      "bytes": 9973,
+      "sha256": "bb3d3145d7264cd0cbe36c3e3901df11f836de08d768974385c01c030187c228",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-GAMEDAY-RUNTIME.txt",
+      "bytes": 37,
+      "sha256": "dc02775abe27fa266a5a08a966333073154736384312eaf3a5bbc3d651262ca6",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-GHERKIN.json",
+      "bytes": 160,
+      "sha256": "509c981f2fbe58508ca4b7972bcadb9b6b369bcef333b9d5845b20cbf864bb1c",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-HELM-STATIC.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-LOAD-RUNTIME.txt",
+      "bytes": 28,
+      "sha256": "d0cd9d1026ea51eb8b02d343e5d13772d9eb459f788fe2082cdaeab76ecea866",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-POSTGRES-RUNTIME.txt",
+      "bytes": 62,
+      "sha256": "7c302b708761658d7641c5ed4a786e835ca199365c861d768dc36a62ceeaf1f1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-SDK-DRIFT.txt",
+      "bytes": 59,
+      "sha256": "ed4e78d6c7074c0e4b3c717ba9a0676997b452ad82602d4aae7f8135d8ea92f7",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO12-TRACEABILITY.txt",
+      "bytes": 64,
+      "sha256": "f7eeeea702cae9b5dc8ef3c74b5bb353335f30a7332a7f980c25791f276b9e19",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO9-EVENT-COMPATIBILITY.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO9-HELM-STATIC.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO9-PREFLIGHT.json",
+      "bytes": 503,
+      "sha256": "0178eca32906afe2209687cadc1835890d5c4d6eed0167fa413cd198282f35dd",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO9-SDK-DRIFT.txt",
+      "bytes": 68,
+      "sha256": "2ed9e3417f7d405a2e5859e5e8c341f5bfc11dadd5105298f6e094a7189f29bc",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO9-TESTS-FINAL.txt",
+      "bytes": 7191,
+      "sha256": "9fbfd0a78b499db2764f192771798d13adaf1a1f0f7361415b07046b43e5dc63",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/AUTO9-VALIDATE-ALL-FINAL.txt",
+      "bytes": 10967,
+      "sha256": "bdeba36d60dc8d726698bc18a60ebf77a03358c74eddf0ea3128eaf1ecb6bf63",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/BDD-BASELINE-AUTO6.txt",
+      "bytes": 1538,
+      "sha256": "420d0c086dc44883c10c93a2dd319b8fc8974596477fc50c8f824f9d1fdb659d",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/BDD-FINAL-AUTO6.txt",
+      "bytes": 1538,
+      "sha256": "cbe29363750938032691323770e4af6e556165859334c6e8819e839d88c970a7",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/BDD-GHERKIN-BINDING-RESULT.json",
+      "bytes": 1538,
+      "sha256": "cbe29363750938032691323770e4af6e556165859334c6e8819e839d88c970a7",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/BDD-GHERKIN-BINDING-RESULT.txt",
+      "bytes": 1538,
+      "sha256": "902f3b708e243b9fb9aeca5b9da64483278d0133476160532bc183970a0d917f",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/BDD-STEPS-REBUILD-AUTO5.txt",
+      "bytes": 752,
+      "sha256": "59294fb5e240017cf0252949a554bf49f0275db636a666870525654245171716",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/BDD-STEPS-RESULT.txt",
+      "bytes": 550,
+      "sha256": "34afbb09e3a1a61729440011ffa0b93064818769f150b82ff08f03b800c9d6a0",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/COMPARATIVO-VERTICAL-1.md",
+      "bytes": 733,
+      "sha256": "4d7e960da7523aed7c32d6f1fe9343d77cabc7baf1167881ba3d7dccb25cc264",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVENT-COMPATIBILITY-AUTO4.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVENT-COMPATIBILITY-BASELINE-AUTO6.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVENT-COMPATIBILITY-FINAL-AUTO6.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVENT-COMPATIBILITY-FINAL-REBUILD-AUTO5.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVENT-COMPATIBILITY-GAMEDAY.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVENT-COMPATIBILITY-REBUILD-AUTO5.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-CAMPAIGN-EVENT-COMPATIBILITY.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-CAMPAIGN-FINAL-TESTS.txt",
+      "bytes": 6813,
+      "sha256": "a19c0f64ea94a5631a3af2d5934e8e99da3468d569cb59b2cab0e2f23e13e1fd",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-CAMPAIGN-GHERKIN-COVERAGE.json",
+      "bytes": 6673,
+      "sha256": "8fb3d821186dd267bede0eac955346d1c9ef6dd7f3b575f09133a22cbedb7bfa",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-CAMPAIGN-GHERKIN-COVERAGE.txt",
+      "bytes": 160,
+      "sha256": "37354ab66c961f81b5a28b92e5ce853a29654dca0a17b0113f085bc6290537ec",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-CAMPAIGN-HELM-STATIC.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-CAMPAIGN-LOCAL-TESTS.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-CAMPAIGN-POSTGRES.txt",
+      "bytes": 75,
+      "sha256": "a54ec810ed4449f8f8ef3517e25796e6a5d13591d4c04b001203c96eb672ae59",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-CAMPAIGN-PREFLIGHT.json",
+      "bytes": 503,
+      "sha256": "0178eca32906afe2209687cadc1835890d5c4d6eed0167fa413cd198282f35dd",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-CAMPAIGN-SDK-DRIFT.txt",
+      "bytes": 59,
+      "sha256": "ed4e78d6c7074c0e4b3c717ba9a0676997b452ad82602d4aae7f8135d8ea92f7",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-CAMPAIGN-SDK-TSC.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-CAMPAIGN-XSTATE-RUNTIME.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EVIDENCE-RUBRIC.md",
+      "bytes": 699,
+      "sha256": "c702946201c2f8547e3d5e81258625c7cbae74f37e429df18197dce0d05f6ab3",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/EXTERNAL-PREFLIGHT-AUTO6.json",
+      "bytes": 503,
+      "sha256": "0178eca32906afe2209687cadc1835890d5c4d6eed0167fa413cd198282f35dd",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/GAMEDAY-CONSOLE-REBUILD-AUTO5.txt",
+      "bytes": 389,
+      "sha256": "72a69a333e47492bc217843cddd216d5bf3909ff3e594db6cd719243ff5ded5c",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/GAMEDAY-CONSOLE.txt",
+      "bytes": 363,
+      "sha256": "658ccb2974b8e46dd9f46a8dd919705cb096ef58cdb495b942cd7cda485309ae",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/GAMEDAY-REBUILD-AUTO5.json",
+      "bytes": 389,
+      "sha256": "72a69a333e47492bc217843cddd216d5bf3909ff3e594db6cd719243ff5ded5c",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/GAMEDAY-RESULT-EVENT-TRANSPORT.json",
+      "bytes": 389,
+      "sha256": "72a69a333e47492bc217843cddd216d5bf3909ff3e594db6cd719243ff5ded5c",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/GAMEDAY-RESULT-EVENT-TRANSPORT.txt",
+      "bytes": 389,
+      "sha256": "c167629bec9238607df68b4b2db7243696621c2436d4cdbcc5527e796fc4f488",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/HELM-STATIC-AUTO4.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/HELM-STATIC-BASELINE-AUTO6.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/HELM-STATIC-FINAL-AUTO6.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/HELM-STATIC-FINAL-REBUILD-AUTO5.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/HELM-STATIC-REBUILD-AUTO5.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/HELM-STATIC-RESULT.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/LOOP-1.md",
+      "bytes": 479,
+      "sha256": "489f36b2e434c3c610395378f2383aa3714bec29d1848026b90d80e1ca3a6905",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/LOOP-2.md",
+      "bytes": 568,
+      "sha256": "078e0e0b8543fb6fe8e615331342b2e25d15c733342ddcf73314b7c96e839ed1",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/LOOP-3.md",
+      "bytes": 542,
+      "sha256": "39b53347e7d4c9820869ef2363c05c8a69c7c9d4297fc85f549d81524bba7675",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/LOOP-4.md",
+      "bytes": 284,
+      "sha256": "054338e67fed440aa6246ba83c38def51872c67c8e496c0b091e05694c725130",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/LOOP-5.md",
+      "bytes": 242,
+      "sha256": "9f321a5c5dcdbf70fe54429aae52c49973d4cb035f48e36dfe91e2623e727af8",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/LOOP-6.md",
+      "bytes": 230,
+      "sha256": "6c2c308eb361da054ae0824a7207197c4c747b7c324aa75e802921c2404b538c",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/LOOP-7.md",
+      "bytes": 211,
+      "sha256": "934b55cf7c0e238f689dc8790c97b871f6ec7619611e5ca84fc94da5beed091b",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/LOOP-8.md",
+      "bytes": 191,
+      "sha256": "7b58345af9609f3eb72e86371c466f8438c24e009971acefaa24bf48ef98e525",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/METRICS-SNAPSHOT-AUTO10-RECONSTRUIDO.json",
+      "bytes": 439,
+      "sha256": "66a7c65b802215d592c40d648f3d645ed97daec098918a99f014aa8e5d443378",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/METRICS-SNAPSHOT-AUTO6.json",
+      "bytes": 582,
+      "sha256": "c63468a1099dee804b588cc594006c34352cbce19ffaf79565b42240c58e3bec",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/METRICS-SNAPSHOT-EVENT-FOCUS.json",
+      "bytes": 558,
+      "sha256": "cbbd669cbf9e6e7904802488f46eeb605f496c8b7d51f6f39f7320132b120fdf",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/METRICS-SNAPSHOT-EVENT-GAMEDAY.json",
+      "bytes": 751,
+      "sha256": "a98c06013f75255cc137a71c13b92de873933405bb2c6c252a5f56a241ca56e7",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/METRICS-SNAPSHOT-REBUILD-AUTO5.json",
+      "bytes": 927,
+      "sha256": "c83b8f794361f4685c1fdc70753ee1767f846f4f5f89798748b8bc1f6098ac5f",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/METRICS-SNAPSHOT-VERTICAL-1.json",
+      "bytes": 574,
+      "sha256": "5353a15937c7648ff47e5314700e103f4c90dd7bb3917f765216141de337112b",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/METRICS-SNAPSHOT.json",
+      "bytes": 900,
+      "sha256": "4f889a729550c6ceda7905332b61537b823e1582c380ba8eeac5b83c94abb603",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-EVENT-TRANSPORT-INTEGRATION.md",
+      "bytes": 559,
+      "sha256": "73cef64ad93d692835a111f96412299b1aee7b37fe6eb5ee1b0bd550adb292f7",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-EVENT-TRANSPORT.md",
+      "bytes": 519,
+      "sha256": "bb4bc70d1c5b7bdef948ddbd17d23a81f37a25b467449af83577618e0ec171f2",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-EXECUTION-EVIDENCE-CAMPAIGN.md",
+      "bytes": 599,
+      "sha256": "0eb5869df85cbb26cf5a6e1a507cd835ca1688ee821232341838c5a4478db25f",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-LOOP-AUTO10-RECONSTRUIDO.md",
+      "bytes": 673,
+      "sha256": "62e3a6f1c1ae3065b2deea1d1d98ece23292b5ca177b84a2b7cb618eda11b8c8",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-LOOP-AUTO11.md",
+      "bytes": 747,
+      "sha256": "8979b5cda08edb5df0ad5939d785a474a0cd6454146f5a824b59eea09c2ae0e3",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-LOOP-AUTO12.md",
+      "bytes": 564,
+      "sha256": "595b1b28741ce8b0931fc5e2b72411ca1d0e105200ba0eb546f52cafdb384686",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-LOOP-AUTO4.md",
+      "bytes": 326,
+      "sha256": "5a39468eaadfe11d87082d6aaf481ab540a4dd8b77b987510c9ff492165d2b7c",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-LOOP-AUTO6.md",
+      "bytes": 629,
+      "sha256": "a4a5a2a89d1acc4d170e1bbcc5d037339e75961b9eb45a8684278cdf5ea63191",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-LOOP-AUTO9-RECONSTRUIDO.md",
+      "bytes": 595,
+      "sha256": "45f64c3ceae0c936397693d0979f56943c22fdf0adde389910bd49020b4103e0",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-LOOP-METRICS.md",
+      "bytes": 454,
+      "sha256": "c8a84aee635012c383763349c406beffaa3baa5001895adcf1eb2475ba3d270b",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-LOOP-REBUILD-AUTO5.md",
+      "bytes": 528,
+      "sha256": "fe0b9083e2ecc6f13cb40a11c4dc83834d19f4cbd4515d75ff72b79b7d3b5207",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-LOOP.md",
+      "bytes": 688,
+      "sha256": "9740e879ddd3e00e476ffdf70a91ca0f14f4ae3fa333f879e86ade6b08c9fd4c",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/PLAN-NEXT-VERTICAL-LOOP.md",
+      "bytes": 403,
+      "sha256": "f12d972ab86ce899b67d46607f60a36ad9a8c34385b44c85ac7d49627249b9e2",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/POSTGRES-INTEGRATION-EVENT-FOCUS.txt",
+      "bytes": 59,
+      "sha256": "38cd64e649d64d5a339cfc17d9e13cc085ebbd5b14bd989d29eb15cb7dc73439",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/POSTGRES-INTEGRATION-REBUILD-AUTO5.txt",
+      "bytes": 59,
+      "sha256": "38cd64e649d64d5a339cfc17d9e13cc085ebbd5b14bd989d29eb15cb7dc73439",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-AUTO12-100-RODADAS.md",
+      "bytes": 1080,
+      "sha256": "745b07ac0dca758c893b7d45566908008e6740d39cf32f08c938a91b815dff2c",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-CICLO-COMPLETO-2026-07-22.md",
+      "bytes": 1058,
+      "sha256": "5362ae19ecb22a95bd6fe469ba7e176b93af86d50009b2727b2752f97edb278e",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-CICLO-COMPLETO-AUTO10-RECONSTRUIDO.md",
+      "bytes": 1949,
+      "sha256": "17f43e4ebbd230cc98af18a1a09b67916789fae419b93d20c5921cb77f316c8d",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-CICLO-COMPLETO-AUTO11.md",
+      "bytes": 2235,
+      "sha256": "a94fb098ebf6bed21a43b90e00b31a57c44f04f0adc1b5703c5c9bfa9479df08",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-CICLO-COMPLETO-AUTO4.md",
+      "bytes": 645,
+      "sha256": "13c3b06589a7eda2b7b9d045fbea921cffef25eff9eb4efbc5851acee7aaf9d2",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-CICLO-COMPLETO-AUTO6.md",
+      "bytes": 1161,
+      "sha256": "d8a6cc75247b54e7fd63ef0f22b5d0ecb03781f51f0518ab1eb02ca69a9bfef2",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-CICLO-COMPLETO-AUTO9-RECONSTRUIDO.md",
+      "bytes": 1450,
+      "sha256": "3d600dd34eeed8e48b8f06bfa6a283fb860d7e71379017f2f35018fdee1fd215",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-CICLO-EVENT-TRANSPORT-FOCUS.md",
+      "bytes": 1872,
+      "sha256": "8bdd4585f2c3584e079f52579d5ec4fc00588857bbca207c27455988b68d7813",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-CICLO-REINICIO-CIRURGICO.md",
+      "bytes": 896,
+      "sha256": "3242dc850c19da6fd9eb40dadcd639f9274a3dcc2c9afb00af98f5d655f97505",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-EVENT-TRANSPORT-GAMEDAY.md",
+      "bytes": 1319,
+      "sha256": "b7b13bd69d4fb67e54b6d98eb20408b9f8564488ac8fcdde2586f0a8e21ff240",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-EXECUTION-EVIDENCE-CAMPAIGN.md",
+      "bytes": 2045,
+      "sha256": "7a688353447268b31cb2dd67f0860f31dbb022e1a322673ddae8e12e2949326f",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-METRICAS-ANTI-REGRESSAO.md",
+      "bytes": 1720,
+      "sha256": "4b8b862baaebcca2924052eabcbc4b29c8cf5431090a5c333088239a673f53ce",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/RELATORIO-RECONSTRUCAO-AUTO5.md",
+      "bytes": 1503,
+      "sha256": "810e3e52d92a9f8dff9f64185f933523343faca37919fe954e63a5376739483d",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-AUTO4.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-BASELINE-AUTO6.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-FINAL-AUTO6.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-FINAL-REBUILD-AUTO5.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-REBUILD-AUTO5.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-RESULT-CURRENT.txt",
+      "bytes": 16,
+      "sha256": "e2f6b6db4c58e2c470b8add601797ce2f6fb6a561672c885a884ecfafbd9d6f5",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-RESULT-EVENT-FOCUS.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-RESULT-GAMEDAY.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-RESULT-METRICS.txt",
+      "bytes": 73,
+      "sha256": "14cb655f33ac4253b88d36ab80cccbf842c74081d807bcb12974fd2498f8559f",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-RESULT-RESTART-3.txt",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-RESULT-RESTART.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-RESULT-SURGICAL-RESTART.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SDK-TSC-RESULT-VERTICAL-1.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/SHA256SUMS-AUTO12.txt",
+      "bytes": 38034,
+      "sha256": "c868d1ee1f4fcb7eafb972c82db4b83daca5df9d7f121160ef5dd21533e6a0f9",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-BASELINE-AUTO6.txt",
+      "bytes": 8692,
+      "sha256": "10defa8eb5e9175c03b8cbd901e0cc2c5c9af5dbf688a035141f4bfeca680440",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-FINAL-AUTO6.txt",
+      "bytes": 9751,
+      "sha256": "6159da04425a967726b0af90b783bc01bcc878df3b5ce2227740dd547cd9df58",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-FINAL-REBUILD-AUTO5.txt",
+      "bytes": 8692,
+      "sha256": "3ce047cfe5e7725eefd0250f259887407d75bdd52d6cbe0ac0c5819437adaeb8",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-RESULT-AUTO4.txt",
+      "bytes": 7540,
+      "sha256": "add704e973341bce23ef2c4136c05d538ed23d10a34b09a136cb4817455c4008",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-RESULT-CURRENT.txt",
+      "bytes": 3543,
+      "sha256": "52159b0f7fcd7e180a235201580e4246b33f751cc963ba02a81fa74fffca737e",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-RESULT-EVENT-FOCUS.txt",
+      "bytes": 6866,
+      "sha256": "39ca95f5177bb24b3368591a24ba7b8b1f23736647d00f1ac42758c689268db8",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-RESULT-GAMEDAY.txt",
+      "bytes": 6978,
+      "sha256": "1f9f280ec727afa2c41425d4de5c253ec22a5efa8215d0e79ed654a3d3e0ad9c",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-RESULT-METRICS.txt",
+      "bytes": 6715,
+      "sha256": "c90e73aa8ab67f1d64656a24e90fafafcab311d22e2bd86b851ca95181187007",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-RESULT-REBUILD-AUTO5.txt",
+      "bytes": 8587,
+      "sha256": "6f3b782ebc89067d2edc101f3d30fae3d40b8019d7b40bea653c2c0799b5bf74",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-RESULT-RESTART-3.txt",
+      "bytes": 4467,
+      "sha256": "4e30de3adcaf0386f2edb8e1e861f337887c80cb64b674a8daf5a4738cdf9135",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-RESULT-RESTART.txt",
+      "bytes": 2551,
+      "sha256": "7366a0ffbac3ff8526a0232083f7e7cc9bf339c40a645d08bd49e658e6306454",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-RESULT-SURGICAL-RESTART.txt",
+      "bytes": 4069,
+      "sha256": "7f061975c679b56f50817c616ddaaaec37e2a418cd450eb9a491b012352ba97a",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/VALIDATION-RESULT-VERTICAL-1.txt",
+      "bytes": 5114,
+      "sha256": "69a1758a037956886dd69c1a986fdc0eeda0a2ce059e560ff8241dbe26e9ec63",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/evidence-records/kubernetes-runtime.json",
+      "bytes": 640,
+      "sha256": "eb7ebf7716f5ea3fed7788f8057336d6f67005d508d21084065cc8126bf51021",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/evidence-records/postgres-runtime.json",
+      "bytes": 726,
+      "sha256": "e3fa16b8d07c0bfcda2cc06271129fe1d0b85110cc60707bf53f3c012c04ce81",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/evidence-records/redpanda-runtime.json",
+      "bytes": 643,
+      "sha256": "3818a4971f20cd2c9d432b8e281942a3a59160f4fc780b86f42684a3c5d02d62",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/evidence-records/xstate-official-runtime.json",
+      "bytes": 664,
+      "sha256": "a85299bf8f79ffc86ba12fa2b24e3022a783740330f5b7fa2e6151549148fd88",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/history/AUDITORIA-FINAL-4-LOOPS.md",
+      "bytes": 1293,
+      "sha256": "d049e2d193a49ebb0e6c3f928dfbb81ed9701ee2fb618fc8a88a9e28e10d1882",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/history/SDK-TSC-RESULT.txt",
+      "bytes": 172,
+      "sha256": "9af6d64d8daef36b3c435f501f4c38ca93e8cddd2a6d0c973763b79a789b1156",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/history/TRACEABILITY-MATRIX-LEGACY-59_3.md",
+      "bytes": 4324,
+      "sha256": "af5663e733870b2c34e2cccfc3124812d226075e9cc16e5a7239b5c98f1353ee",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/history/VALIDATION-RESULT.txt",
+      "bytes": 1708,
+      "sha256": "ffa47a4b9955056babeda172e6ab0a7bee11a79c76a20d75592be20c64198e3f",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round1-independent/AUDIT_EVIDENCE_MANIFEST.json",
+      "bytes": 3884,
+      "sha256": "ac8a11609b6efbdf33c05fc5b631cd541a13e80e0ef8bf074b0c9bf67903412a",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round1-independent/AUDIT_MASTER.md",
+      "bytes": 32415,
+      "sha256": "5199406767d2764b5f414f4458cb96260e69d9250e758844354b48799f109079",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round1-independent/AUDIT_SHA256SUMS.txt",
+      "bytes": 2125,
+      "sha256": "2756739d282c7e43b655846f7528f9fc9c20a715506311b84be33aba71a944d5",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round1-independent/AUDIT_SUMMARY.md",
+      "bytes": 1545,
+      "sha256": "d1cde0665417f430e2e269bfe7da95ddbbfbe9337e89916304448512fb3542f4",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round1-independent/EXECUTION_BOUNDARIES.md",
+      "bytes": 2694,
+      "sha256": "1e0caca6f07739c8dd6b608864ab766ecd2b9149495ec6f15899ba41238a6465",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round1-independent/FINDINGS_REGISTER.yaml",
+      "bytes": 27281,
+      "sha256": "b588bbcd0fd8a6d8dc86e11dab518d650cbf5503c3aa50af1d4104007d43f150",
+      "suffix": ".yaml",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round1-independent/INVENTORY_MASTER.md",
+      "bytes": 50639,
+      "sha256": "abd5ce664dbe85cbfbdc7c3752f14d5ba61307899f66192c9216db0ec3a74d3a",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round1-independent/REMEDIATION_CHECKLIST.md",
+      "bytes": 8548,
+      "sha256": "f809028c6104148f2f35b803389df97fb977144a1b85c7c88f45a3148773220f",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round1-independent/ROUND1_VALIDATION.json",
+      "bytes": 377,
+      "sha256": "a140fb34e989b9ce4347495412779c532c1f6f27acda38a70d53ba661377df45",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round1-independent/TRACEABILITY_MATRIX_AUDIT.md",
+      "bytes": 6519,
+      "sha256": "2f9f5189b04ab29f4195481f46bc930909295b75291d6fbbad14c092d44d1a88",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/AUTO12-R2-100-ROUND-CAMPAIGN.json",
+      "bytes": 39490,
+      "sha256": "406b5bf5ef3f7ee8462dcb2206ce8c07351af4869e53a96b7e0262cc81123b12",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/BDD-COVERAGE.json",
+      "bytes": 16603,
+      "sha256": "8643672e41cac5a16fa381ad4235440bec4e3ebd0a1e7c0fc5cbd07cd7092311",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/RELATORIO-CICLO-COMPLETO-AUTO12-R2.md",
+      "bytes": 1128,
+      "sha256": "b67722db303449d652d48eceffc296f72492bea5558c9e04efe3f25384c947e2",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/ROUND2-VALIDATION-SUMMARY.json",
+      "bytes": 9047,
+      "sha256": "ed4c6cf70262f92b531643b9d8bca06f09d324ea20b3fec96943a050405cd9b2",
+      "suffix": ".json",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/ROUND2-VALIDATION-SUMMARY.md",
+      "bytes": 3361,
+      "sha256": "dd941e4507e2b2da84caad56e22fc268854c35aa129fe3ff51f99b22357dfe2b",
+      "suffix": ".md",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/asyncapi_operations.txt",
+      "bytes": 58,
+      "sha256": "69fb2ad6a5409a475b7858e69c88882dc2fb1241df5d21f06c5bfe0f6180fa81",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/bdd_registry.txt",
+      "bytes": 61,
+      "sha256": "717e68605be3c1744ad41631cf638e4c74d33bfe7dfe27d52085520c2827977e",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/bdd_unit_tests.txt",
+      "bytes": 1366,
+      "sha256": "3dafb54dda215a44c03e34e9cee81aba2764e248249c327df5fca23189ab16ce",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign-console.txt",
+      "bytes": 97,
+      "sha256": "f6a346425a9ad2f6b7604ce1739ee9d25a4c2b9f98b4809a5ec271d7260a96cb",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-013.txt",
+      "bytes": 66,
+      "sha256": "57ab6d49c2004bcf591c12481751a984728ebcd6ae452643fbbd7e2179117352",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-014.txt",
+      "bytes": 29,
+      "sha256": "938652a23c49732e6e65cbb166a7264e986c0e7032170f139394f586bfa29219",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-015.txt",
+      "bytes": 96,
+      "sha256": "a0089c51639010b354d134af0b9d5fb6a1ff7fb77a33847ae9bd25e8be466770",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-016.txt",
+      "bytes": 36,
+      "sha256": "a60cb94886f4ae2df4b7572549dce862d04aae767a37b9e96e5b73ab26b7a2f0",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-017.txt",
+      "bytes": 58,
+      "sha256": "69fb2ad6a5409a475b7858e69c88882dc2fb1241df5d21f06c5bfe0f6180fa81",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-018.txt",
+      "bytes": 61,
+      "sha256": "717e68605be3c1744ad41631cf638e4c74d33bfe7dfe27d52085520c2827977e",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-019.txt",
+      "bytes": 44,
+      "sha256": "1e97b00c4574c051383b90091eff4dc136fa9113c620094482e7b3ed72c34bd4",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-020.txt",
+      "bytes": 72,
+      "sha256": "fd3e9eb9f33f190f889fa31fe3b961b565049137830e5d75347ca4acb0f1fc1a",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-021.txt",
+      "bytes": 47,
+      "sha256": "17ad475b3c55cf5d341322352141038c383557b849f87afbdc294d9134533d67",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-022.txt",
+      "bytes": 50,
+      "sha256": "c268fb2044a5ec3131e231c564055a28eaf8a46cbb4ea95005e99306b6004124",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-023.txt",
+      "bytes": 62,
+      "sha256": "7c302b708761658d7641c5ed4a786e835ca199365c861d768dc36a62ceeaf1f1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-041.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-042.txt",
+      "bytes": 49,
+      "sha256": "227a2eb41480ae8bfd43584b6c3e322abc74eeb5cb04c3d977547597d8428b82",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-066.txt",
+      "bytes": 195,
+      "sha256": "be1c40185e1ffae983286423be8aa0a6431f018cf823f3efd280b45f61059a67",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-078.txt",
+      "bytes": 61,
+      "sha256": "717e68605be3c1744ad41631cf638e4c74d33bfe7dfe27d52085520c2827977e",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-079.txt",
+      "bytes": 1366,
+      "sha256": "be7bed94c35744548d6f2a520def5bbccd588d01a44eef88c4916d6df5f20e34",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-080.txt",
+      "bytes": 10057,
+      "sha256": "99c8a74477f45c380a985cc37ed89583371353baf0d564e5b46d07814afaec88",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-081.txt",
+      "bytes": 24,
+      "sha256": "e743e764a3d549b10efed6e6f84166ab53c39e5ec0db08bf66a43d949fac7d34",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-082.txt",
+      "bytes": 59,
+      "sha256": "ed4e78d6c7074c0e4b3c717ba9a0676997b452ad82602d4aae7f8135d8ea92f7",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-083.txt",
+      "bytes": 50,
+      "sha256": "c268fb2044a5ec3131e231c564055a28eaf8a46cbb4ea95005e99306b6004124",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-084.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-085.txt",
+      "bytes": 64,
+      "sha256": "f7eeeea702cae9b5dc8ef3c74b5bb353335f30a7332a7f980c25791f276b9e19",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-086.txt",
+      "bytes": 87,
+      "sha256": "7651f769e249723bba868d2dbb7d639703f634efd5d13b8607ee577f95bea346",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/campaign/round-087.txt",
+      "bytes": 48,
+      "sha256": "b56555268148cf92b1eef8e5ba4878a2b41cd16dee322b478a26c9bdd4715aa9",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/canonical_status.txt",
+      "bytes": 66,
+      "sha256": "57ab6d49c2004bcf591c12481751a984728ebcd6ae452643fbbd7e2179117352",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/dependency_locks.txt",
+      "bytes": 164,
+      "sha256": "dc61615936ae9759695a9c35e4b3da4a98fc440ca7d2da4a0ace81f99ebfb6a5",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/env_contract.txt",
+      "bytes": 48,
+      "sha256": "b56555268148cf92b1eef8e5ba4878a2b41cd16dee322b478a26c9bdd4715aa9",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/error_catalog.txt",
+      "bytes": 36,
+      "sha256": "a60cb94886f4ae2df4b7572549dce862d04aae767a37b9e96e5b73ab26b7a2f0",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/event_compatibility.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/evidence_records.txt",
+      "bytes": 40,
+      "sha256": "f6c3281867cf03294d90cf46269bfe69bc826523e4c0f20201597c54c9751314",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/external_prerequisites.txt",
+      "bytes": 503,
+      "sha256": "0178eca32906afe2209687cadc1835890d5c4d6eed0167fa413cd198282f35dd",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/helm_static.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/image_digests.txt",
+      "bytes": 707,
+      "sha256": "cdd771c6a72dd2cf6f2f3d8a60d40a28735b43e7b2e4bfc73fcc3b59b79a8d25",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/metrics_matrix.txt",
+      "bytes": 72,
+      "sha256": "fd3e9eb9f33f190f889fa31fe3b961b565049137830e5d75347ca4acb0f1fc1a",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/networkpolicy_runtime.txt",
+      "bytes": 49,
+      "sha256": "227a2eb41480ae8bfd43584b6c3e322abc74eeb5cb04c3d977547597d8428b82",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/openapi_contract.txt",
+      "bytes": 44,
+      "sha256": "2b374c77bace5334e0aa3003a23a3be4effe4a6eb7117afc5e826fa0dc9184ce",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/package_hygiene.txt",
+      "bytes": 29,
+      "sha256": "938652a23c49732e6e65cbb166a7264e986c0e7032170f139394f586bfa29219",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/package_hygiene_final.txt",
+      "bytes": 29,
+      "sha256": "938652a23c49732e6e65cbb166a7264e986c0e7032170f139394f586bfa29219",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/postgres_runtime.txt",
+      "bytes": 62,
+      "sha256": "7c302b708761658d7641c5ed4a786e835ca199365c861d768dc36a62ceeaf1f1",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/pytest.txt",
+      "bytes": 180,
+      "sha256": "946247e37e3c78eac160c45c7f180bbaeb83b5319d71a54c018b0eb41711e44a",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/redpanda_runtime.txt",
+      "bytes": 58,
+      "sha256": "2e6290272c2c525a521f1666d37660a47adad0156ceceae65c6de701f918b5a7",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/release_file_manifest.txt",
+      "bytes": 45,
+      "sha256": "53506481c9651d7279054c70610e41fab2b39f441bf8583598c0548c7431b98f",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/remediation_register.txt",
+      "bytes": 130,
+      "sha256": "4dcceab4872e5b3b0ec6cb0eba7987f256cd86d2bef761757372cbdc9504c953",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/requirements.txt",
+      "bytes": 87,
+      "sha256": "7651f769e249723bba868d2dbb7d639703f634efd5d13b8607ee577f95bea346",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/sdk_drift.txt",
+      "bytes": 59,
+      "sha256": "ed4e78d6c7074c0e4b3c717ba9a0676997b452ad82602d4aae7f8135d8ea92f7",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/sdk_operation_coverage.txt",
+      "bytes": 50,
+      "sha256": "c268fb2044a5ec3131e231c564055a28eaf8a46cbb4ea95005e99306b6004124",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/sdk_tsc.txt",
+      "bytes": 140,
+      "sha256": "e9602b91a81f7eca168072e37204d15e16d317c97caa1db2cfb41ac80a47f659",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/sha256_manifest.txt",
+      "bytes": 39,
+      "sha256": "3311bdfeae751617fdae1ba3b934e4d7e5adaea86c9431a4ccdf82ea739e4b76",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/statechart_registry.txt",
+      "bytes": 44,
+      "sha256": "1e97b00c4574c051383b90091eff4dc136fa9113c620094482e7b3ed72c34bd4",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/tenant_convention.txt",
+      "bytes": 96,
+      "sha256": "a0089c51639010b354d134af0b9d5fb6a1ff7fb77a33847ae9bd25e8be466770",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/traceability.txt",
+      "bytes": 64,
+      "sha256": "f7eeeea702cae9b5dc8ef3c74b5bb353335f30a7332a7f980c25791f276b9e19",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/unit_tests.txt",
+      "bytes": 10057,
+      "sha256": "04f98ab4f6a6a002bda9d102160eea1aeabb8b816eebbf60e6f6ea4d9d0f5dea",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/validate_all.txt",
+      "bytes": 13971,
+      "sha256": "abe8b5f1918be6e993d4f8305985d4f45793c53772becace42cac5ed1520dd3c",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/workflow_security.txt",
+      "bytes": 47,
+      "sha256": "17ad475b3c55cf5d341322352141038c383557b849f87afbdc294d9134533d67",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "audit/round2/xstate_official_runtime.txt",
+      "bytes": 70,
+      "sha256": "bbddfd3a07de118b20c31b61d91521a97f8ceffe35b11f90842176aa33b70478",
+      "suffix": ".txt",
+      "top_level": "audit"
+    },
+    {
+      "path": "bdd_steps/run_event_transport_feature.py",
+      "bytes": 2017,
+      "sha256": "b401eccf2b5cf51c2ffb874d743c9ca6fe2373eca46dca3042dbe129ad850ac6",
+      "suffix": ".py",
+      "top_level": "bdd_steps"
+    },
+    {
+      "path": "bdd_steps/test_event_transport_steps.py",
+      "bytes": 2261,
+      "sha256": "2c6be11f66856de195ab1e2f1262630250e057e4dec4848341b56b0d219ad331",
+      "suffix": ".py",
+      "top_level": "bdd_steps"
+    },
+    {
+      "path": "bdd_steps/test_execution_evidence_steps.py",
+      "bytes": 1462,
+      "sha256": "76f047a67f82ddcab1c663f3bff8cccad4fe2803647a81c817c4915e3c410f15",
+      "suffix": ".py",
+      "top_level": "bdd_steps"
+    },
+    {
+      "path": "capabilities/event-transport/SPEC.md",
+      "bytes": 1123,
+      "sha256": "efb24b406a3b91907991f37cd433d7be28a33a817a059160b8e945d0acfaa0fc",
+      "suffix": ".md",
+      "top_level": "capabilities"
+    },
+    {
+      "path": "capabilities/object-definitions/SPEC.md",
+      "bytes": 2826,
+      "sha256": "69cb029a82769174dd8531510365a3cc8bd5bbf5db0c2dde482a65e5cb1545c4",
+      "suffix": ".md",
+      "top_level": "capabilities"
+    },
+    {
+      "path": "documentation/ASYNCAPI-3-OPERATIONS.md",
+      "bytes": 608,
+      "sha256": "3e70305bb5797b554bc2fa6a389fc4405ca8e53810db88d03f08500ac7aa7c96",
+      "suffix": ".md",
+      "top_level": "documentation"
+    },
+    {
+      "path": "documentation/ROUND2-AUDIT-SUPPLEMENT.md",
+      "bytes": 1522,
+      "sha256": "061399b7875bb0c4053d17c8de2de3ab0be7f237f8fcfea55e601a1c7a7be185",
+      "suffix": ".md",
+      "top_level": "documentation"
+    },
+    {
+      "path": "event_admin/postgres_store.py",
+      "bytes": 2667,
+      "sha256": "64855eef8a83101cccddeb4b6488f7dc99952695587831e9afe3368e83adf13f",
+      "suffix": ".py",
+      "top_level": "event_admin"
+    },
+    {
+      "path": "event_admin/server.py",
+      "bytes": 5270,
+      "sha256": "7011b5a7c82d5de24e5de218ef5a9dfc3389bca7261bab812fea1357a047d760",
+      "suffix": ".py",
+      "top_level": "event_admin"
+    },
+    {
+      "path": "event_publisher/redpanda_http_publisher.py",
+      "bytes": 2140,
+      "sha256": "baaff1db8b9ebbbe2670417b1f1e32e595f8c33ac39751e19ccaf148d68a7aab",
+      "suffix": ".py",
+      "top_level": "event_publisher"
+    },
+    {
+      "path": "governance/DATA-INVENTORY.yaml",
+      "bytes": 700,
+      "sha256": "e3e82402739c4cd412662b777ac3dfba16f402e4b495e207d965585a3e743c9d",
+      "suffix": ".yaml",
+      "top_level": "governance"
+    },
+    {
+      "path": "governance/DSAR-WORKFLOW.yaml",
+      "bytes": 357,
+      "sha256": "6f6f8f6f166efcab1eeb52c70742c765dd9aeb502b87dee91393d8fa5f585ccf",
+      "suffix": ".yaml",
+      "top_level": "governance"
+    },
+    {
+      "path": "governance/RETENTION-POLICY.yaml",
+      "bytes": 434,
+      "sha256": "c15f18d1bc5f38ecff53c426291fb6851cd372dd21faa2e59874a7e5fa9e55de",
+      "suffix": ".yaml",
+      "top_level": "governance"
+    },
+    {
+      "path": "pytest.ini",
+      "bytes": 76,
+      "sha256": "a12bf6738f7406e5377da22966cb582dc54416082067a9614343caab90d98639",
+      "suffix": ".ini",
+      "top_level": "pytest.ini"
+    },
+    {
+      "path": "reference_runtime/runtime.py",
+      "bytes": 2874,
+      "sha256": "f7b2627be1ce7d16385309c1fdb6422faac097ef5807a9845240f9bcd31d4914",
+      "suffix": ".py",
+      "top_level": "reference_runtime"
+    },
+    {
+      "path": "remediation/EXTERNAL-DEPENDENCIES.md",
+      "bytes": 5737,
+      "sha256": "d53a95f463b0cb398fd7d80a45f0772260ca44fb73df448358a4cb19b390ff46",
+      "suffix": ".md",
+      "top_level": "remediation"
+    },
+    {
+      "path": "remediation/REMEDIATION-CHECKLIST.md",
+      "bytes": 9274,
+      "sha256": "38ffd26c403c486a2c8740d21ba755367534106c8fa0e056f434b7a1cddfa5e8",
+      "suffix": ".md",
+      "top_level": "remediation"
+    },
+    {
+      "path": "remediation/REMEDIATION-REGISTER.yaml",
+      "bytes": 25953,
+      "sha256": "ad0dfe1990145fd160bbe4d3f8d046654f45f1bb964e1c6ada543e2d47b3be9a",
+      "suffix": ".yaml",
+      "top_level": "remediation"
+    },
+    {
+      "path": "remediation/ROUND2-CLOSURE-REPORT.md",
+      "bytes": 2411,
+      "sha256": "d4b577e3a117dbb3c68e7847305dbf6dd959e9ee4011d11b215f78fc876c2079",
+      "suffix": ".md",
+      "top_level": "remediation"
+    },
+    {
+      "path": "remediation/ROUND2-REMEDIATION-REPORT.md",
+      "bytes": 7686,
+      "sha256": "afec8d15285ef456475b80cb853c3f72fe0d423cd37498b1fa15c24f4c7b8904",
+      "suffix": ".md",
+      "top_level": "remediation"
+    },
+    {
+      "path": "requirements-ci.txt",
+      "bytes": 56,
+      "sha256": "da7b9ca3c9bd762f289204ae17d733f7061b8ad7db939b3e980fb90703574312",
+      "suffix": ".txt",
+      "top_level": "requirements-ci.txt"
+    },
+    {
+      "path": "schemas/capability-facet-matrix.schema.json",
+      "bytes": 2858,
+      "sha256": "e001781e5ed1dc3b5ff75c620956b59c0689fa081e7ac10b4f9397ef3802f86b",
+      "suffix": ".json",
+      "top_level": "schemas"
+    },
+    {
+      "path": "schemas/error-catalog.schema.json",
+      "bytes": 785,
+      "sha256": "ca4483a8904e3b89452eb5cd38ee41db0367bad495cc3e9a47a96001242ab779",
+      "suffix": ".json",
+      "top_level": "schemas"
+    },
+    {
+      "path": "schemas/evidence-record.schema.json",
+      "bytes": 3297,
+      "sha256": "811b1516c28398547682c4818330841481c907ca9065fe039cd880ebdf1f0da0",
+      "suffix": ".json",
+      "top_level": "schemas"
+    },
+    {
+      "path": "schemas/release-manifest.schema.json",
+      "bytes": 3054,
+      "sha256": "b946324e9f21277bb7a864f8c832f19a5c40f81c0402e82d8d651f87b48168ad",
+      "suffix": ".json",
+      "top_level": "schemas"
+    },
+    {
+      "path": "scripts/audit_gherkin_coverage.py",
+      "bytes": 1689,
+      "sha256": "d42a0e36b34c37c4ed1c4e46a7b8260b2f2c448feb33a31a591091d70d9d3b03",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/check_event_compatibility.py",
+      "bytes": 1098,
+      "sha256": "41cb22a2fd16d021723f6f2479ab2ba874d804565951d64b9e8821d5a4ef27ac",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/check_sdk_drift.sh",
+      "bytes": 453,
+      "sha256": "3cc1ed7628e01b8537e7be72ffad2974408fc6a59d8101aa0ca22967802c9151",
+      "suffix": ".sh",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/generate_bdd_registry.py",
+      "bytes": 2868,
+      "sha256": "4bbc7cc440a5380170af4f35ed29529848a2861858df4c3a62a868a89fbac03e",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/generate_release_file_manifest.py",
+      "bytes": 1661,
+      "sha256": "309adf784550fcac8ca6c9ae8f1a94320071ed3a6e3c55aa4610c59cb760b3ec",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/generate_round2_inventory.py",
+      "bytes": 2673,
+      "sha256": "f177eda64fbdc7b9aa0e40ca11698011927a51d9bfb7f851ea2ef6816a923b3d",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/generate_sdk_contract.py",
+      "bytes": 741,
+      "sha256": "6131e5158317cb5f7a3a898098579d35086ec44143eb656fcde69a0d64e09074",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/generate_sha256_manifest.py",
+      "bytes": 500,
+      "sha256": "4b0591d1eb13ebf7d02ba2b398017dd99196c3579f4697deb0f1ff552d9074dd",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/load_event_admin.py",
+      "bytes": 1117,
+      "sha256": "7a0c93b093d4f7c9d5bf7118122c66e679aa5a7c84dcead6d84612e69fa7d841",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/measure_spec.py",
+      "bytes": 2319,
+      "sha256": "bf64180a057887a482f31c05f4628f8f780d84e76a753cca08b4653b766cf3f4",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/run_100_round_evidence_campaign.py",
+      "bytes": 13487,
+      "sha256": "7b806d4ba3d9a351cded7a291d9def06e43f1c435747ea232a3b3be2ce3624d0",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/run_distributed_gameday.sh",
+      "bytes": 1277,
+      "sha256": "1c3c41cfc3fb98418901d6105b45ee2a982fbb2979d251f57cc7e5b1e1de5d99",
+      "suffix": ".sh",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/run_event_transport_gameday.py",
+      "bytes": 3396,
+      "sha256": "3570ae89d0f4254f1c39f746519e9e2becf52f4c86d1e001ff5115fad1819825",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/run_three_phase_campaign.py",
+      "bytes": 5273,
+      "sha256": "4f45647c4d8bcb6278327fd59e7772f71bcd2579d4b95d34beb3358de2f790ea",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/test_postgres_event_transport.py",
+      "bytes": 3961,
+      "sha256": "98e534ca3bfb846106966d69aa822e1c796e2b30057ccdfbf1bb8c0365df8a1d",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/test_redpanda_runtime.py",
+      "bytes": 536,
+      "sha256": "2a98c33579a1cbaea5c0206aeef07d4d48c1207dd9d8a806b1e630747217681b",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/test_xstate_official_runtime.py",
+      "bytes": 977,
+      "sha256": "e9108dc3d6e766a22a062f258a5eeaf675bed62d01543eda9abd7b53fff8caa6",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_all.py",
+      "bytes": 3963,
+      "sha256": "0e3c21f87a362d8afe1e34a5b0e6797af419335609851ecd8ad4d325670ae8ab",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_asyncapi_operations.py",
+      "bytes": 1584,
+      "sha256": "781c678d20cfad3bfaf2e74d1f4b97a01bf00732a2e89cc1a4c4b17ddb2fcdb9",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_bdd_registry.py",
+      "bytes": 2535,
+      "sha256": "ff43a2301d42937cc1de39056b924ea91d7a3b742b03ecabd35f6a35ed6b0aee",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_canonical_status.py",
+      "bytes": 2007,
+      "sha256": "a8d6830c6d13c379fdf9906a0485f57731e9c273fd7f32e5bbe32e65460bccd8",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_dependency_locks.py",
+      "bytes": 2465,
+      "sha256": "bca7d916a7c4aa6ef4f7933cf430f23b05546508408a209213508595d6bc080e",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_env_contract.py",
+      "bytes": 2160,
+      "sha256": "1baa68158df0806aabff11e91f6060a9425116317181898753012160abff1a5c",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_error_catalog.py",
+      "bytes": 1022,
+      "sha256": "bfd2ac7b3c456a72984f8edfc9f5ee8d894bb02338327bd0251a22f47e22abe3",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_evidence_records.py",
+      "bytes": 1668,
+      "sha256": "a62d622be2a42252d77d1f8811f75f63c27538769eb22ab9092e9db2e06b5ea8",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_execution_env.py",
+      "bytes": 823,
+      "sha256": "d1a1df73776ae99b04813475dcfc6ffddf456c4a278390cd7299cf2a2dfe69a1",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_helm_static.py",
+      "bytes": 1165,
+      "sha256": "573fe7911d2f147b6a2520f6743907aac68dc4c89ff727444ee05fc44e9d3c44",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_image_references.py",
+      "bytes": 773,
+      "sha256": "4ebde2ce55bf4ba2048311028a66f4ca9951b985cee38a430857449c8a08e1d2",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_metrics_matrix.py",
+      "bytes": 1174,
+      "sha256": "c6f20f85febefb53cc4a5e7663eccebc001740e4e4fd68d3e455a4e9f9583dee",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_networkpolicy_targets.sh",
+      "bytes": 911,
+      "sha256": "afea35a6efe1ff146ad3ba38165401e7ac0ad9c12d9a2179c176c871829a5267",
+      "suffix": ".sh",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_openapi_contract.py",
+      "bytes": 2616,
+      "sha256": "6a544822abd9c706f81807248921b0d2a690d092b4b71e03701c6a1e6b293149",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_package_hygiene.py",
+      "bytes": 633,
+      "sha256": "cf931d9f3fa64d57e9cddba41839b5ba405c1a11585c28f9cc5373d62e1f3e48",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_release_file_manifest.py",
+      "bytes": 1886,
+      "sha256": "793d9a328730aaa5971232c0853b2327ad1171f3ee16d34fcca582a89c27e230",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_remediation_register.py",
+      "bytes": 1939,
+      "sha256": "499985475b60d1a5a32ebe8653dc7df9e2ced4990590aa918ddd7c47991d6367",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_requirement_traceability.py",
+      "bytes": 1476,
+      "sha256": "f0e5651d4a93faa6d1e638d7154fddb6a81a928e60ade6a4011aa4bfe0b46423",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_round2.py",
+      "bytes": 6223,
+      "sha256": "9a7fb5fe1eebe53a85f7a62e34738df1fe0d354c134de046e740a7c84789c8a1",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_runtime_prerequisites.py",
+      "bytes": 940,
+      "sha256": "e0d8ba2ea8a233624d1e0dc09a1ddcde60cd49a7e33315e1135f97178bf3c53a",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_sdk_operation_coverage.py",
+      "bytes": 746,
+      "sha256": "00c6a2136e0fd42741ef5acb15f93f1d8674039c876e1ac945d64b5810bb9ff5",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_statechart_registry.py",
+      "bytes": 957,
+      "sha256": "a54eb618b780578386023ead7c50540f075a54911278f48d4469df2dd43b4da8",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_tenant_convention.py",
+      "bytes": 863,
+      "sha256": "2f529c9b4a351c56895b988ebadab82fbea9ec7205a2663a29380a925ffa65c0",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_traceability_matrix.py",
+      "bytes": 2135,
+      "sha256": "cd9530801d50e6a6efeaa89e99f4c2ff208f4fc75cfcebf591fd78d798f66b42",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/validate_workflow_security.py",
+      "bytes": 1947,
+      "sha256": "55bd6d703e9fc5726a9fa41bbcd3b4234e38559be7e7babe201cdb66f93934d8",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "scripts/verify_sha256_manifest.py",
+      "bytes": 1151,
+      "sha256": "7d2f259401f5a8b6479b7d48b9fa1202acf801bd01fee919a62c47888e4b0e03",
+      "suffix": ".py",
+      "top_level": "scripts"
+    },
+    {
+      "path": "security/ABUSE-CASES.yaml",
+      "bytes": 705,
+      "sha256": "e4bdf038c9f7cff14823b9e1199e9fdc489e6f33559e8291cbc7b604dc74db50",
+      "suffix": ".yaml",
+      "top_level": "security"
+    },
+    {
+      "path": "security/THREAT-MODEL.md",
+      "bytes": 1155,
+      "sha256": "0c1a456e61c6ed43e370d1e2c6e2ca6fa1aad8fe798edaca9f56a02f1caafef7",
+      "suffix": ".md",
+      "top_level": "security"
+    },
+    {
+      "path": "supply-chain/ACTION-PINS.yaml",
+      "bytes": 608,
+      "sha256": "134b37b30d8d27e1ab2566b6d37baadc426c3d9515e2f656af09aaa72272e691",
+      "suffix": ".yaml",
+      "top_level": "supply-chain"
+    },
+    {
+      "path": "tests/test_acceptance_runtime.py",
+      "bytes": 2206,
+      "sha256": "96b7e3ecaf1cd4105a181e950fd1c74cc690d86631d76f32c9df541dd77ea987",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tests/test_auto10_traceability_integrity.py",
+      "bytes": 1502,
+      "sha256": "eaa213af4edf0026b4174e25631e95a6aad5f2dd0a3f6ee564768f9ea72193cb",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tests/test_auto11_contract_traceability.py",
+      "bytes": 1641,
+      "sha256": "7b01295b718d3dec538db2ae670800e660436434c846013e0db2018938a78d80",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tests/test_auto11_expansion.py",
+      "bytes": 2370,
+      "sha256": "19423bf01396e0604f90f5252328aac5a309ddd0158742c565a794f185b8237a",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tests/test_auto12_100_round_campaign.py",
+      "bytes": 829,
+      "sha256": "4613c67273cc94e83ad71f7b6102ea7ccafabdb6b887d66926f2e381c47617d1",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tests/test_auto5_rebuild.py",
+      "bytes": 2463,
+      "sha256": "297b8da0d29e0e54c62616bd59990dd53cf6d080693f7adbcd78dc158b7ae5bf",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tests/test_auto6_integration_readiness.py",
+      "bytes": 1802,
+      "sha256": "8b725daaddd7d4960db4ad03fd2384b36cee591535f72727a8c1f483e1b18f9c",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tests/test_auto9_evidence_integrity.py",
+      "bytes": 894,
+      "sha256": "45a0ea150b1ea0425722cbc7c4e4a8e5197b925b4fa653a5fb83a0908cceacc0",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tests/test_contracts.py",
+      "bytes": 6799,
+      "sha256": "14ac3a48277890167d9e91799c2e777aace8a217c36c2cb837f89675b05dc2a7",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tests/test_event_admin_http.py",
+      "bytes": 2082,
+      "sha256": "9275dad104e87ec0bac2a9850e20f8d8213ebd3caa6a2bed40a0c7efdcb70276",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tests/test_event_transport_focus.py",
+      "bytes": 2733,
+      "sha256": "79f3435c927247282e22cc3fa5341fb551bd8ca9ce8e4ed66054ddb88dd7f997",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tests/test_evidence_campaign.py",
+      "bytes": 1145,
+      "sha256": "1e28f7517187dc1ff65835b8e1be446983821ab779201dcc95ebd44ae6564ee6",
+      "suffix": ".py",
+      "top_level": "tests"
+    },
+    {
+      "path": "tools/xstate-runtime/package.json",
+      "bytes": 323,
+      "sha256": "899909db81c1c078c340798b9e5323aa0d1fe9a0cb64771b45a63bf1c41bd7b8",
+      "suffix": ".json",
+      "top_level": "tools"
+    },
+    {
+      "path": "tools/xstate-runtime/test-machines.ts",
+      "bytes": 1034,
+      "sha256": "8a5768d803322eefc496d44d37141b44dc4ce947a23bb39d54f95e083b23a3f1",
+      "suffix": ".ts",
+      "top_level": "tools"
+    },
+    {
+      "path": "traceability/CAPABILITY-FACET-MATRIX.yaml",
+      "bytes": 11586,
+      "sha256": "ce62dbbaa68b64fcb16d574bb7bcfdcf22205c631766ad774ba85aa5af93255e",
+      "suffix": ".yaml",
+      "top_level": "traceability"
+    },
+    {
+      "path": "traceability/COVERAGE-BASELINE.yaml",
+      "bytes": 1067,
+      "sha256": "924a0a0b09fc4f2538cf3d5b4b2164f7747665b0be58dea9c4b50aa868ff85cf",
+      "suffix": ".yaml",
+      "top_level": "traceability"
+    },
+    {
+      "path": "traceability/COVERAGE-MATRIX-R2.yaml",
+      "bytes": 3784,
+      "sha256": "2bb512a5316a4d14aed4f4777ae3059be2b546c6214761a31040279ad2cc6aaf",
+      "suffix": ".yaml",
+      "top_level": "traceability"
+    },
+    {
+      "path": "traceability/MATRIX.md",
+      "bytes": 1077,
+      "sha256": "238a24d648b3c8596cd45a8efd799181f26c36d6ab3cc6053827cddd659ae0c9",
+      "suffix": ".md",
+      "top_level": "traceability"
+    },
+    {
+      "path": "traceability/REQUIREMENT-EVIDENCE-MAP.yaml",
+      "bytes": 3494,
+      "sha256": "106927bc2ea9f9c5803b9db1d655aa3400ab35af13801c0b3ad0946ff98c4b5a",
+      "suffix": ".yaml",
+      "top_level": "traceability"
+    }
+  ]
+}

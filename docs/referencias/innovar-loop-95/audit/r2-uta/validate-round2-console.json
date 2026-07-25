@@ -1,0 +1,251 @@
+{
+  "schema_version": 2,
+  "release_id": "INNOVAR-AUTO12-R2-UTA-R2",
+  "generated_at_utc": "2026-07-23T04:59:13Z",
+  "overall_status": "PARTIAL_BLOCKED",
+  "counts": {
+    "PASS": 22,
+    "FAIL": 0,
+    "BLOCKED_EXTERNAL": 7
+  },
+  "checks": [
+    {
+      "name": "canonical_status",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_canonical_status.py",
+      "evidence": "audit/round2/canonical_status.txt"
+    },
+    {
+      "name": "artifact_lifecycle",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_artifact_lifecycle.py",
+      "evidence": "audit/round2/artifact_lifecycle.txt"
+    },
+    {
+      "name": "openapi_contract",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_openapi_contract.py",
+      "evidence": "audit/round2/openapi_contract.txt"
+    },
+    {
+      "name": "evidence_records",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_evidence_records.py",
+      "evidence": "audit/round2/evidence_records.txt"
+    },
+    {
+      "name": "tenant_convention",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_tenant_convention.py",
+      "evidence": "audit/round2/tenant_convention.txt"
+    },
+    {
+      "name": "error_catalog",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_error_catalog.py",
+      "evidence": "audit/round2/error_catalog.txt"
+    },
+    {
+      "name": "asyncapi_operations",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_asyncapi_operations.py",
+      "evidence": "audit/round2/asyncapi_operations.txt"
+    },
+    {
+      "name": "bdd_registry",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_bdd_registry.py",
+      "evidence": "audit/round2/bdd_registry.txt"
+    },
+    {
+      "name": "statechart_registry",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_statechart_registry.py",
+      "evidence": "audit/round2/statechart_registry.txt"
+    },
+    {
+      "name": "metrics_matrix",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_metrics_matrix.py",
+      "evidence": "audit/round2/metrics_matrix.txt"
+    },
+    {
+      "name": "workflow_security",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_workflow_security.py",
+      "evidence": "audit/round2/workflow_security.txt"
+    },
+    {
+      "name": "sdk_operation_coverage",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_sdk_operation_coverage.py",
+      "evidence": "audit/round2/sdk_operation_coverage.txt"
+    },
+    {
+      "name": "event_compatibility",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/check_event_compatibility.py",
+      "evidence": "audit/round2/event_compatibility.txt"
+    },
+    {
+      "name": "traceability",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_traceability_matrix.py",
+      "evidence": "audit/round2/traceability.txt"
+    },
+    {
+      "name": "requirements",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_requirement_traceability.py",
+      "evidence": "audit/round2/requirements.txt"
+    },
+    {
+      "name": "env_contract",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_env_contract.py",
+      "evidence": "audit/round2/env_contract.txt"
+    },
+    {
+      "name": "helm_static",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_helm_static.py",
+      "evidence": "audit/round2/helm_static.txt"
+    },
+    {
+      "name": "remediation_register",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_remediation_register.py",
+      "evidence": "audit/round2/remediation_register.txt"
+    },
+    {
+      "name": "pytest",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python -m pytest -q -p no:cacheprovider",
+      "evidence": "audit/round2/pytest.txt"
+    },
+    {
+      "name": "sdk_drift",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "bash scripts/check_sdk_drift.sh",
+      "evidence": "audit/round2/sdk_drift.txt"
+    },
+    {
+      "name": "sdk_tsc",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "tsc -p 06-sdk/typescript/tsconfig.json --noEmit",
+      "evidence": "audit/round2/sdk_tsc.txt"
+    },
+    {
+      "name": "dependency_locks",
+      "kind": "EXTERNAL_GATE",
+      "status": "BLOCKED_EXTERNAL",
+      "returncode": 77,
+      "command": "/opt/pyvenv/bin/python scripts/validate_dependency_locks.py",
+      "evidence": "audit/round2/dependency_locks.txt"
+    },
+    {
+      "name": "image_digests",
+      "kind": "EXTERNAL_GATE",
+      "status": "BLOCKED_EXTERNAL",
+      "returncode": 77,
+      "command": "/opt/pyvenv/bin/python scripts/validate_image_references.py",
+      "evidence": "audit/round2/image_digests.txt"
+    },
+    {
+      "name": "postgres_runtime",
+      "kind": "EXTERNAL_GATE",
+      "status": "BLOCKED_EXTERNAL",
+      "returncode": 77,
+      "command": "/opt/pyvenv/bin/python scripts/test_postgres_event_transport.py",
+      "evidence": "audit/round2/postgres_runtime.txt"
+    },
+    {
+      "name": "redpanda_runtime",
+      "kind": "EXTERNAL_GATE",
+      "status": "BLOCKED_EXTERNAL",
+      "returncode": 77,
+      "command": "/opt/pyvenv/bin/python scripts/test_redpanda_runtime.py",
+      "evidence": "audit/round2/redpanda_runtime.txt"
+    },
+    {
+      "name": "xstate_official_runtime",
+      "kind": "EXTERNAL_GATE",
+      "status": "BLOCKED_EXTERNAL",
+      "returncode": 77,
+      "command": "/opt/pyvenv/bin/python scripts/test_xstate_official_runtime.py",
+      "evidence": "audit/round2/xstate_official_runtime.txt"
+    },
+    {
+      "name": "networkpolicy_runtime",
+      "kind": "EXTERNAL_GATE",
+      "status": "BLOCKED_EXTERNAL",
+      "returncode": 77,
+      "command": "bash scripts/validate_networkpolicy_targets.sh",
+      "evidence": "audit/round2/networkpolicy_runtime.txt"
+    },
+    {
+      "name": "external_prerequisites",
+      "kind": "EXTERNAL_GATE",
+      "status": "BLOCKED_EXTERNAL",
+      "returncode": 77,
+      "command": "/opt/pyvenv/bin/python scripts/validate_runtime_prerequisites.py",
+      "evidence": "audit/round2/external_prerequisites.txt"
+    },
+    {
+      "name": "package_hygiene_final",
+      "kind": "LOCAL",
+      "status": "PASS",
+      "returncode": 0,
+      "command": "/opt/pyvenv/bin/python scripts/validate_package_hygiene.py",
+      "evidence": "audit/round2/package_hygiene_final.txt"
+    }
+  ],
+  "global_metrics": {
+    "SCI": "NOT_CALCULATED",
+    "EEI": "NOT_CALCULATED"
+  },
+  "coverage_matrix": "traceability/COVERAGE-MATRIX-R2.yaml",
+  "remediation_register": "remediation/REMEDIATION-REGISTER.yaml"
+}

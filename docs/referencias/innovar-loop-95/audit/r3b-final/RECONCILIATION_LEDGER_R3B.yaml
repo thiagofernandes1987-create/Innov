@@ -1,0 +1,340 @@
+schema_version: UTA-R3B-reconciliation-v1
+round_id: R3B
+ledger_status: FROZEN_PENDING_MANIFEST
+generated_at: '2026-07-23T10:30:00Z'
+source_counts:
+  R1: 23
+  R3A: 13
+reconciliation_count: 28
+reconciliations:
+- reconciliation_id: REC-0001
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-001
+  - round: R3A
+    finding_id: PFND-0004
+  final_finding_id: FFND-R3B-0001
+  reconciliation_status: PARTIALLY_RESOLVED
+  final_outcome: PARTIAL
+  rationale: O isolamento por organização e operação removeu o vazamento cross-tenant, mas a mesma chave em dois dead_letter_id
+    retorna a resposta do primeiro recurso e não resolve o segundo.
+  validation_ids:
+  - FVAL-R3B-0031
+  - FVAL-R3B-0008
+- reconciliation_id: REC-0002
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-002
+  - round: R3A
+    finding_id: PFND-0002
+  final_finding_id: FFND-R3B-0002
+  reconciliation_status: PARTIALLY_RESOLVED
+  final_outcome: PARTIAL
+  rationale: Headers sem assinatura são rejeitados, porém o HMAC cobre apenas organização, ator, scopes e timestamp.
+  validation_ids:
+  - FVAL-R3B-0030
+  - FVAL-R3B-0008
+- reconciliation_id: REC-0003
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-003
+  - round: R3A
+    finding_id: PFND-0003
+  final_finding_id: FFND-R3B-0003
+  reconciliation_status: PARTIALLY_RESOLVED
+  final_outcome: PARTIAL
+  rationale: Códigos e respostas locais foram alinhados, mas o OpenAPI publica OAuth2 enquanto o serviço só aceita contexto
+    HMAC de proxy.
+  validation_ids:
+  - FVAL-R3B-0034
+  - FVAL-R3B-0013
+  - FVAL-R3B-0008
+- reconciliation_id: REC-0004
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-004
+  final_finding_id: FFND-R3B-0004
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A correção está presente e a validação local correspondente foi reproduzida.
+  validation_ids:
+  - FVAL-R3B-0012
+  - FVAL-R3B-0011
+  - FVAL-R3B-0013
+- reconciliation_id: REC-0005
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-005
+  final_finding_id: FFND-R3B-0005
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A correção está presente e a validação local correspondente foi reproduzida.
+  validation_ids:
+  - FVAL-R3B-0012
+  - FVAL-R3B-0011
+- reconciliation_id: REC-0006
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-006
+  final_finding_id: FFND-R3B-0006
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A correção está presente e a validação local correspondente foi reproduzida.
+  validation_ids:
+  - FVAL-R3B-0008
+  - FVAL-R3B-0009
+- reconciliation_id: REC-0007
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-007
+  final_finding_id: FFND-R3B-0007
+  reconciliation_status: PARTIALLY_RESOLVED
+  final_outcome: PARTIAL
+  rationale: Dockerfile/build local foi adicionado e defaults foram endurecidos, porém imagens e dependências não estão fixadas
+    de forma verificável.
+  validation_ids:
+  - FVAL-R3B-0028
+  - FVAL-R3B-0029
+  - FVAL-R3B-0007
+- reconciliation_id: REC-0008
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-008
+  - round: R3A
+    finding_id: PFND-0007
+  final_finding_id: FFND-R3B-0008
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  final_outcome: BLOCKED_EXTERNAL
+  rationale: Os arquivos package-lock e requirements lock com hashes não existem no material.
+  validation_ids:
+  - FVAL-R3B-0028
+- reconciliation_id: REC-0009
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-009
+  - round: R3A
+    finding_id: PFND-0008
+  final_finding_id: FFND-R3B-0009
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  final_outcome: BLOCKED_EXTERNAL
+  rationale: Tags mutáveis e placeholders continuam presentes em Compose, Kubernetes e workflow.
+  validation_ids:
+  - FVAL-R3B-0029
+- reconciliation_id: REC-0010
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-010
+  - round: R3A
+    finding_id: PFND-0006
+  final_finding_id: FFND-R3B-0010
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  final_outcome: BLOCKED_EXTERNAL
+  rationale: Migrations 0013/0014 estão presentes, mas nenhuma execução PostgreSQL real foi fornecida.
+  validation_ids:
+  - FVAL-R3B-0023
+  - FVAL-R3B-0027
+- reconciliation_id: REC-0011
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-011
+  - round: R3A
+    finding_id: PFND-0009
+  final_finding_id: FFND-R3B-0011
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  final_outcome: BLOCKED_EXTERNAL
+  rationale: Broker e rpk não estão disponíveis.
+  validation_ids:
+  - FVAL-R3B-0024
+  - FVAL-R3B-0027
+- reconciliation_id: REC-0012
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-012
+  - round: R3A
+    finding_id: PFND-0011
+  final_finding_id: FFND-R3B-0012
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  final_outcome: BLOCKED_EXTERNAL
+  rationale: Validação Helm estática passa; kubectl/cluster não estão disponíveis.
+  validation_ids:
+  - FVAL-R3B-0026
+  - FVAL-R3B-0027
+- reconciliation_id: REC-0013
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-013
+  - round: R3A
+    finding_id: PFND-0010
+  final_finding_id: FFND-R3B-0013
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  final_outcome: BLOCKED_EXTERNAL
+  rationale: Registro estático cobre cinco máquinas, mas o lockfile verificado do runtime XState está ausente.
+  validation_ids:
+  - FVAL-R3B-0025
+  - FVAL-R3B-0019
+- reconciliation_id: REC-0014
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-014
+  final_finding_id: FFND-R3B-0014
+  reconciliation_status: PARTIALLY_RESOLVED
+  final_outcome: PARTIAL
+  rationale: O registro possui 38 comportamentos únicos; a camada BDD unitária reproduzida tem 16 testes, mas cenários dependentes
+    de infraestrutura continuam sem execução integral.
+  validation_ids:
+  - FVAL-R3B-0010
+  - FVAL-R3B-0018
+  - FVAL-R3B-0023
+  - FVAL-R3B-0024
+  - FVAL-R3B-0026
+- reconciliation_id: REC-0015
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-015
+  final_finding_id: FFND-R3B-0015
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  validation_ids:
+  - FVAL-R3B-0017
+  - FVAL-R3B-0016
+- reconciliation_id: REC-0016
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-016
+  final_finding_id: FFND-R3B-0016
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  validation_ids:
+  - FVAL-R3B-0005
+  - FVAL-R3B-0006
+- reconciliation_id: REC-0017
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-017
+  final_finding_id: FFND-R3B-0017
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  validation_ids:
+  - FVAL-R3B-0015
+- reconciliation_id: REC-0018
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-018
+  final_finding_id: FFND-R3B-0018
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  validation_ids:
+  - FVAL-R3B-0017
+- reconciliation_id: REC-0019
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-019
+  final_finding_id: FFND-R3B-0019
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  validation_ids:
+  - FVAL-R3B-0007
+  - FVAL-R3B-0008
+- reconciliation_id: REC-0020
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-020
+  final_finding_id: FFND-R3B-0020
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  validation_ids:
+  - FVAL-R3B-0017
+- reconciliation_id: REC-0021
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-021
+  final_finding_id: FFND-R3B-0021
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  validation_ids:
+  - FVAL-R3B-0008
+- reconciliation_id: REC-0022
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-022
+  final_finding_id: FFND-R3B-0022
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  validation_ids:
+  - FVAL-R3B-0008
+- reconciliation_id: REC-0023
+  source_findings:
+  - round: R1
+    finding_id: FND-R1-023
+  final_finding_id: FFND-R3B-0023
+  reconciliation_status: RESOLVED_CONFIRMED
+  final_outcome: CLOSED
+  rationale: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  validation_ids:
+  - FVAL-R3B-0015
+- reconciliation_id: REC-0024
+  source_findings:
+  - round: R3A
+    finding_id: PFND-0001
+  final_finding_id: FFND-R3B-0024
+  reconciliation_status: SUPERSEDED_CONFIRMED
+  final_outcome: SUPERSEDED
+  rationale: O achado é válido para o material sanitizado R3A, mas não para o material atualizado integral usado pela R3B,
+    que contém os artefatos requeridos.
+  validation_ids:
+  - FVAL-R3B-0003
+  - FVAL-R3B-0005
+  - FVAL-R3B-0006
+- reconciliation_id: REC-0025
+  source_findings:
+  - round: R3A
+    finding_id: PFND-0005
+  final_finding_id: FFND-R3B-0025
+  reconciliation_status: NEW_FINDING
+  final_outcome: OPEN
+  rationale: validate_all retorna sucesso parcial e não chama PostgreSQL, Redpanda, XState, Kubernetes, remediation register,
+    release manifest nem SHA manifest.
+  validation_ids:
+  - FVAL-R3B-0022
+  - FVAL-R3B-0021
+  - FVAL-R3B-0023
+  - FVAL-R3B-0024
+  - FVAL-R3B-0025
+  - FVAL-R3B-0026
+- reconciliation_id: REC-0026
+  source_findings:
+  - round: R3A
+    finding_id: PFND-0012
+  final_finding_id: FFND-R3B-0026
+  reconciliation_status: NEW_FINDING
+  final_outcome: OPEN
+  rationale: Store, publisher, secret e body limit são atributos de classe; a segunda chamada serve sobrescreve o estado usado
+    pela primeira instância.
+  validation_ids:
+  - FVAL-R3B-0032
+- reconciliation_id: REC-0027
+  source_findings:
+  - round: R3A
+    finding_id: PFND-0013
+  final_finding_id: FFND-R3B-0027
+  reconciliation_status: NEW_FINDING
+  final_outcome: OPEN
+  rationale: O tópico é concatenado diretamente à URL. Prova direcionada construiu /topics/../admin?x=1.
+  validation_ids:
+  - FVAL-R3B-0033
+- reconciliation_id: REC-0028
+  source_findings: []
+  final_finding_id: FFND-R3B-0028
+  reconciliation_status: NEW_FINDING
+  final_outcome: OPEN
+  rationale: Duas entradas ainda referenciam 06-sdk/generated/openapi-operations.json, removido e substituído por openapi-operation-inventory.json.
+  validation_ids:
+  - FVAL-R3B-0021

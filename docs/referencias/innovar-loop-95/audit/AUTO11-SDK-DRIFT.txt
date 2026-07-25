@@ -1,0 +1,16 @@
+diff -ru /mnt/data/innovar_program/innovar_loop_95/06-sdk/typescript/dist/index.d.ts /tmp/tmp.eDTOkSDyG0/sdk/dist/index.d.ts
+--- /mnt/data/innovar_program/innovar_loop_95/06-sdk/typescript/dist/index.d.ts	2026-07-22 19:41:35.000000000 +0000
++++ /tmp/tmp.eDTOkSDyG0/sdk/dist/index.d.ts	2026-07-22 23:05:04.925968161 +0000
+@@ -52,3 +52,11 @@
+ }
+ export declare function createInnovarClient(options: InnovarClientOptions): InnovarClient;
+ export * from './lifecycle.js';
++export type EvidenceStatus = "PASS" | "FAIL" | "BLOCKED";
++export interface ExecutionEvidence {
++    campaignId: string;
++    gateKey: string;
++    status: EvidenceStatus;
++    observedAt: string;
++    artifactSha256?: string;
++}
+SDK_DRIFT_GATE: FAIL committed dist differs from generated dist

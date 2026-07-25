@@ -1,0 +1,86 @@
+version: 1
+purpose: Medir evolução da especificação executável sem confundir completude documental
+  com execução integrada.
+canonical_artifact: INNOVAR_PLATFORM_BLUEPRINT_EXECUTAVEL.md
+indexes:
+  SCI:
+    name: Specification Completeness Index
+    meaning: Cobertura da diretriz técnica necessária para implementar uma capability
+      sem decisões arquitetônicas relevantes adicionais.
+    scoring_levels:
+      absent: 0
+      intent_only: 20
+      contracted: 50
+      implementation_guidance: 70
+      testable_specification: 85
+      complete_traceable_specification: 100
+    required_facets_per_capability:
+    - objective_scope
+    - ownership_boundaries
+    - invariants
+    - data_model
+    - sql_constraints_indexes_triggers
+    - commands_queries
+    - api_contracts
+    - event_contracts
+    - statecharts
+    - configuration_variables_secrets
+    - security_rls_authorization
+    - concurrency_idempotency
+    - errors_observability
+    - bdd_acceptance
+    - sdk_usage
+    - iac_runtime_topology
+    - runbooks_rollback
+    - traceability
+    rule: SCI só pode ser calculado por capability e faceta, com apontador de evidência.
+      Ausência de inventário item a item mantém SCI como NOT_CALCULATED.
+  EEI:
+    name: Execution Evidence Index
+    meaning: Grau de evidência reproduzível de que os contratos e comportamentos foram
+      executados.
+    scoring_levels:
+      described: 10
+      parsed_static: 30
+      unit_tested_local: 50
+      service_integrated: 70
+      environment_integrated: 85
+      operationally_exercised: 100
+    rule: Parsing, compilação e testes em memória não promovem serviços, banco, broker
+      ou infraestrutura a integrados.
+  RQI:
+    name: Regression Quality Index
+    meaning: Indicadores objetivos que devem permanecer iguais ou melhorar entre snapshots.
+    signals:
+    - validator_exit_code
+    - test_total
+    - test_failures
+    - typescript_compile_exit_code
+    - broken_local_references
+    - parse_failures
+    - canonical_source_count
+    - conflicting_current_coverage_values
+    - open_critical_gaps
+    - capabilities_itemized_for_SCI
+    - traceability_items_with_evidence
+    regression_rules:
+    - validator_exit_code must remain 0
+    - test_failures must remain 0
+    - broken_local_references must not increase
+    - parse_failures must not increase
+    - canonical_source_count must equal 1
+    - conflicting_current_coverage_values must equal 0
+    - removal of a contract, test or traceability link requires an approved ADR
+delivery_gate:
+  mandatory_on_every_cycle:
+  - updated canonical blueprint
+  - updated full package zip
+  - metrics snapshot
+  - coverage/traceability matrix
+  - independent audit
+  - next correction plan
+  - validation results
+  prohibited:
+  - claiming a corrected blueprint without attaching it
+  - overwriting historical evidence without marking superseded
+  - publishing a single blended percentage without SCI and EEI interpretation

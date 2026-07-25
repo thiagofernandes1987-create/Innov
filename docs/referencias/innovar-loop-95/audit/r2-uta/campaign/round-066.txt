@@ -1,0 +1,1 @@
+{"features": 11, "scenarios": 38, "unique_scenario_ids": 38, "registered": 38, "executed_pass": 14, "blocked_external": 2, "not_run": 22, "method": "explicit scenario registry; no lexical hints"}
