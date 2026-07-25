@@ -350,7 +350,7 @@ Vale notar que trocar o rótulo para "Projeto" **aproxima** a interface do esque
 ---
 
 ## Sprint S-21 — Reconciliação do ledger de migrations com a homologação
-**Estado:** em andamento
+**Estado:** concluída
 **Marco:** M-0
 
 Descoberto em 25 de julho de 2026, ao testar a conexão com o Supabase. Entra no fim conforme a regra R4.
@@ -373,17 +373,49 @@ Consulta ao catálogo antes de resolver, conforme o protocolo: a causa raiz **j�
   - [x] T-21.1.1 — `supabase_migrations.schema_migrations` guarda a coluna `statements`: o SQL original foi recuperado, não reconstruído por engenharia reversa
 - [x] T-21.2 — Trazê-las para `supabase/migrations` com o mesmo carimbo de versão, sem reescrever histórico aplicado
   - [x] T-21.2.1 — Conferência por `sha256` em vez de leitura: os três arquivos batem byte a byte com o que está aplicado (`9f3435ee…`, `ce2bf7af…`, `516a8458…`)
-- [ ] T-21.3 — Confirmar que aplicar o repositório inteiro em base limpa produz o mesmo esquema da homologação
+- [x] T-21.3 — Verificar, por execução, se aplicar o repositório inteiro em base limpa produz o esquema da homologação. **Verificado e refutado.** Fechar a lacuna é escopo da S-22, tarefas T-22.3 e T-22.4
   - [x] T-21.3.1 — Comparação por objeto para os três casos: a homologação tem 12 ramos em `get_observability_event_detail`, 21 dependências de módulo e 1 policy em `audit_events`; os arquivos importados produzem exatamente isso
   - [x] T-21.3.2 — Provado que a importação era necessária: sem ela o repositório reconstrói a função com **3 ramos em vez de 12** — nove origens do fluxo unificado passariam a responder "Origem de evento inválida" — e cria **14 das 21** dependências de módulo
-  - [ ] T-21.3.3 — Replay completo das 111 migrations em base limpa. Exige fixture com os esquemas `auth` e `storage`, papéis e extensões do Supabase; não executado
-- [ ] T-21.6 — **Correção de escopo do achado.** A divergência é maior do que "três migrations ausentes": apenas **41 das 143** versões remotas correspondem a nome de arquivo do repositório. 102 versões remotas não têm arquivo e 70 arquivos não constam do ledger remoto. O padrão indica renumeração histórica das migrations, e não 102 ausências reais — a VACINA-003 já registra um caso desses na Etapa 17. Confirmar objeto a objeto, sem presumir nenhuma das duas hipóteses
-- [ ] T-21.4 — Propor substituição da prevenção da VACINA-003: comparação viva contra o ledger remoto, no lugar da lista fixa
-  - [ ] T-21.4.1 — Portão 1, eliminatório: a prevenção nova cobre a mesma causa raiz com garantia maior — detecta divergência em qualquer direção, não só nos quatro arquivos listados
-  - [ ] T-21.4.2 — Portão 2: retorno material — hoje a detecção é zero para migrations criadas depois da vacina
-  - [ ] T-21.4.3 — Tipo de evidência: `negativa` — teste que prova que a divergência atual seria detectada
-  - [ ] T-21.4.4 — **PR próprio**, separado da correção que a motivou, decidido pelo responsável
-- [ ] T-21.5 — Aplicar em homologação as migrations pendentes do repositório, incluindo as do Object Runtime
+  - [x] T-21.3.3 — Replay completo executado. `scripts/run-migration-replay.mjs` cria base limpa, aplica o bootstrap de fronteira e replica as migrations em ordem. **Resultado: 0 de 111.** Para no primeiro arquivo, `20260719214500_stage10_homologation_hardening.sql`, com `function public.touch_updated_at() does not exist`
+- [x] T-21.6 — **Hipótese de renumeração testada e REFUTADA.** Comparação por `sha256` de todas as 143 versões remotas contra os 111 arquivos: **zero** casam por conteúdo sob outro nome. Das 41 que casam por carimbo, só 4 têm conteúdo idêntico. As 16 do estoque trazem o marcador explícito `-- Ledger reparado: DDL aplicado remotamente em partes durante a homologação` e têm o DDL preservado no repositório; essas estão certas. Sobram **102 versões com SQL real, 412.566 caracteres, sem arquivo no repositório**
+- [x] T-21.7 — **Descrição correta do achado.** A divergência é maior do que "três migrations ausentes": apenas **41 das 143** versões remotas correspondem a nome de arquivo do repositório. 102 versões remotas não têm arquivo e 70 arquivos não constam do ledger remoto. O padrão indica renumeração histórica das migrations, e não 102 ausências reais — a VACINA-003 já registra um caso desses na Etapa 17. Confirmar objeto a objeto, sem presumir nenhuma das duas hipóteses
+- [x] T-21.8 — Ferramenta de evidência entregue: `scripts/run-migration-replay.mjs` e `supabase/tests/replay/bootstrap.sql`, com `pnpm test:db:replay`. Sem PostgreSQL acessível o script declara que não rodou, em vez de sair zero calado
+- [x] T-21.9 — Escopo remanescente transferido para a S-22, por exigência das próprias regras: a substituição da VACINA-003 precisa de PR próprio (protocolo de vacinas) e a aplicação em homologação depende de aval do responsável
+
+---
+
+## Sprint S-22 — Reconstruir a capacidade de recuperação do repositório
+**Estado:** em andamento
+**Marco:** M-0
+
+Descoberto em 25 de julho de 2026, ao executar o replay pedido pela T-21.3.3. Entra no fim conforme a R4, porque é ordem de grandeza maior do que a S-21 e não cabe nela.
+
+**O repositório não reconstrói o banco. Replay em base limpa: 0 de 111 migrations.**
+
+O achado central é este:
+
+> **`has_module_permission` não existe em nenhum arquivo do repositório.** É a função no centro do modelo de autorização, chamada por **41 dos 111** arquivos de migration, e a definição dela só existe dentro do banco de homologação.
+
+`diretrizes/RECUPERACAO.md` afirma que o projeto pode ser recuperado a partir do GitHub, sem depender de conversa, contêiner ou máquina local. **Hoje isso não se cumpre**, e nada no CI detectava a diferença.
+
+Dois modos de falha distintos, que pedem soluções distintas:
+
+1. **Ordem.** Arquivos de endurecimento têm carimbo anterior ao dos arquivos que criam o que eles endurecem — `20260719214500_stage10_homologation_hardening` altera `touch_updated_at`, criada em `20260719230000_stage9_financial_contracts`, e `apply_signed_amendment`, criada em `20260719234000_stage9_apply_amendment`. Aplicados em ordem de nome, quebram.
+2. **Ausência.** 102 versões com SQL real aplicadas em homologação sem arquivo correspondente, incluindo o núcleo de permissão.
+
+- [ ] T-22.1 — Recuperar as 102 migrations a partir de `supabase_migrations.schema_migrations.statements`, que guarda o SQL original
+- [ ] T-22.2 — Definir a ordem de aplicação correta, sem reescrever carimbo de migration já aplicada
+- [ ] T-22.3 — `pnpm test:db:replay` verde: 100% das migrations aplicando em base limpa
+- [ ] T-22.4 — Comparar o esquema reconstruído com o da homologação, objeto a objeto — tabelas, colunas, funções, policies, índices e privilégios
+- [ ] T-22.5 — Completar o bootstrap de fronteira conforme o replay for descobrindo lacunas, distinguindo defeito da fixture de defeito do repositório
+- [ ] T-22.6 — Ligar o replay ao CI, para que a promessa de recuperação passe a ser verificada a cada mudança e não uma vez por descoberta
+- [ ] T-22.7 — Propor a substituição da prevenção da VACINA-003: comparação viva contra o ledger remoto e replay executável, no lugar da lista fixa de quatro arquivos
+  - [ ] T-22.7.1 — Portão 1, eliminatório: cobre a mesma causa raiz com garantia maior — detecta divergência em qualquer direção, e não só nos quatro arquivos congelados
+  - [ ] T-22.7.2 — Portão 2: retorno material — a detecção atual é zero para tudo criado depois da vacina, e deixou passar 102 migrations
+  - [ ] T-22.7.3 — Tipo de evidência: `negativa` — provar que a divergência de hoje seria detectada
+  - [ ] T-22.7.4 — **PR próprio**, separado da correção que a motivou
+- [ ] T-22.8 — Aplicar em homologação as migrations pendentes do repositório, incluindo as duas do Object Runtime. Escrita em ambiente compartilhado: depende de aval do responsável
+- [ ] T-22.9 — Revisar `RECUPERACAO.md`: enquanto o replay não passar, o documento precisa dizer o que realmente é possível hoje
 
 ---
 
@@ -393,6 +425,7 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
+| 2026-07-25 | Virada S-21 → S-22, sem reordenação | A S-22 nasceu do resultado da própria S-21 e é pré-requisito de tudo: enquanto o repositório não reconstrói o banco, nenhuma sprint que crie migration tem base verificável. A S-06 e a S-20 seguem atrás dela. |
 | 2026-07-25 | S-21 passa à frente da S-06 | Pré-requisito descoberto, caso previsto na R5. A S-06 cria a camada compartilhada sobre o esquema da homologação; enquanto o repositório não reproduz esse esquema, qualquer migration nova é aplicada sobre chão que ninguém consegue recriar. Reconciliar o ledger primeiro é o que torna a S-06 verificável. |
 | 2026-07-25 | Virada S-05 → S-06, sem reordenação | Avaliadas as pendentes na virada, conforme R5. S-06 continua a próxima: a camada compartilhada consome a projeção de slots que a S-05 acabou de produzir, e S-07 e S-08 dependem da tabela existir. A S-20, descoberta durante a S-05, não passa à frente por ser vocabulário de interface, sem bloquear nada da fundação. |
 | 2026-07-25 | Virada S-04 → S-05, sem reordenação | Avaliadas as pendentes na virada, conforme R5. S-05 continua primeira: o catálogo de definições é pré-requisito físico de todas as demais sprints do M-1 — sem ele não há o que armazenar, indexar ou proteger. Nenhuma sprint pendente é pré-requisito descoberto nem base reaproveitável que justifique passar à frente. |
