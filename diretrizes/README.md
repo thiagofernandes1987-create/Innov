@@ -10,6 +10,7 @@ A regra é inegociável:
 
 | Documento | Finalidade |
 |---|---|
+| [`METODO-DE-TRABALHO.md`](./METODO-DE-TRABALHO.md) | Como se trabalha: decomposição em micro-problemas, evidência antes de afirmação e protocolo de vacinas. |
 | [`SPEC.md`](./SPEC.md) | Especificação mestra do produto, regras e limites. |
 | [`ESTADO-ATUAL.json`](./ESTADO-ATUAL.json) | Manifesto legível por máquina com versão, etapa, branch, PR, CI e próxima etapa. |
 | [`INVENTARIO.md`](./INVENTARIO.md) | Inventário atual de módulos, rotas, integrações, dados e estado de implementação. |
@@ -18,6 +19,7 @@ A regra é inegociável:
 | [`ROADMAP.md`](./ROADMAP.md) | Sequência oficial de etapas e escopo planejado. |
 | [`RECUPERACAO.md`](./RECUPERACAO.md) | Procedimento para reconstruir o projeto a partir do GitHub. |
 | [`VACINAS.md`](./VACINAS.md) | Catálogo de causas-raiz, correções canônicas e prevenção automática. |
+| [`OBJECT-RUNTIME.md`](./OBJECT-RUNTIME.md) | Motor de objetos dinâmicos: composição por características, armazenamento, índices, RLS sobre dado dinâmico e escala. |
 | [`UI-UX-PRO-MAX.md`](./UI-UX-PRO-MAX.md) | Design system, acessibilidade, responsividade, estados e pipeline permanente de interface. |
 | [`PADRAO-DOCUMENTACAO.md`](./PADRAO-DOCUMENTACAO.md) | Definition of Done documental e regras de atualização. |
 | [`HISTORICO-ETAPAS.md`](./HISTORICO-ETAPAS.md) | Índice dos documentos técnicos históricos em `docs/`. |
@@ -26,16 +28,18 @@ A regra é inegociável:
 
 Em caso de divergência, vale a seguinte ordem:
 
-1. `diretrizes/SPEC.md`;
-2. `diretrizes/ESTADO-ATUAL.json` para estado operacional verificável;
-3. `diretrizes/ARQUITETURA.md`;
-4. `diretrizes/MODULOS.md`;
-5. `diretrizes/UI-UX-PRO-MAX.md` para interfaces e experiências;
-6. `diretrizes/INVENTARIO.md`;
-7. `diretrizes/VACINAS.md` para causas-raiz já catalogadas;
-8. migrations e código da `main`;
-9. documentos históricos em `docs/ETAPA-*`;
-10. descrições antigas de PRs ou conversas.
+1. `diretrizes/METODO-DE-TRABALHO.md` para questões de método;
+2. `diretrizes/SPEC.md`;
+3. `diretrizes/ESTADO-ATUAL.json` para estado operacional verificável;
+4. `diretrizes/ARQUITETURA.md`;
+5. `diretrizes/MODULOS.md`;
+6. `diretrizes/UI-UX-PRO-MAX.md` para interfaces e experiências;
+7. `diretrizes/OBJECT-RUNTIME.md` para objetos dinâmicos e customização por empresa;
+8. `diretrizes/INVENTARIO.md`;
+9. `diretrizes/VACINAS.md` para causas-raiz já catalogadas;
+10. migrations e código da `main`;
+11. documentos históricos em `docs/ETAPA-*`;
+12. descrições antigas de PRs ou conversas.
 
 Uma divergência entre documentação canônica, manifesto e código deve bloquear a entrega. O responsável pela etapa precisa corrigir a documentação ou registrar explicitamente a decisão arquitetural.
 

@@ -34,6 +34,50 @@ erro detectado
 
 Não é permitido encerrar um erro recorrente apenas com correção local quando existe uma causa raiz reutilizável.
 
+### 2.1 Consulta obrigatória — antes de resolver
+
+Este catálogo é **memória consultável**, não histórico. Diante de qualquer erro, teste quebrado ou comportamento inesperado, antes de propor correção:
+
+1. reproduzir;
+2. separar sintoma de causa raiz;
+3. **consultar este catálogo**: essa causa raiz já apareceu?
+4. se já apareceu, **aplicar a mesma solução registrada** — não inventar outra, não "melhorar" a registrada sem discussão;
+5. se a solução registrada deixou de servir, isso é informação relevante: registrar por que deixou de servir.
+
+Resolver do zero um problema já catalogado gera duas soluções diferentes para a mesma causa raiz, e é assim que a base fica incoerente.
+
+### 2.2 Registro obrigatório — depois de resolver
+
+Problema inédito é resolvido e então registrado. O registro responde **cinco perguntas**, todas obrigatórias:
+
+| Campo | Pergunta |
+|---|---|
+| Qual foi o problema | o que quebrou, em termos observáveis |
+| Como ocorreu | a sequência concreta que levou até a falha |
+| Por que aconteceu | a causa raiz, não o sintoma |
+| Como foi detectado | teste, CI, auditoria, uso ou relato — e por que não foi detectado antes |
+| Qual foi a solução | o que se fez e o que impede a reincidência |
+
+Modelo do arquivo, criado no mesmo PR da correção:
+
+```markdown
+# VACINA-NNN — <assunto>
+
+**Estado:** aplicada | parcial | proposta
+**Detectada em:** <etapa / PR / auditoria>
+
+## Qual foi o problema
+## Como ocorreu
+## Por que aconteceu
+## Como foi detectado
+## Qual foi a solução
+## Varredura e ocorrências equivalentes
+## Prevenção automática
+## Limitações da prevenção
+```
+
+O método de trabalho que envolve este protocolo está em `diretrizes/METODO-DE-TRABALHO.md`.
+
 ## 3. Estado das vacinas
 
 | ID | Causa raiz | Estado | Prevenção principal |
