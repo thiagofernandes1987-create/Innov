@@ -108,7 +108,7 @@ Arquivo novo em `diretrizes/vacinas/VACINA-NNN-<ASSUNTO>.md`, linha nova na tabe
 ```markdown
 # VACINA-NNN — <assunto>
 
-**Estado:** aplicada | parcial | proposta
+**Estado:** vigente | parcial | proposta | substituída | revogada
 **Detectada em:** <etapa / PR / auditoria>
 
 ## Qual foi o problema
@@ -125,9 +125,87 @@ Arquivo novo em `diretrizes/vacinas/VACINA-NNN-<ASSUNTO>.md`, linha nova na tabe
 
 Uma vacina é decisão verificada por CI. Contrariá-la reprova o build **mesmo quando a mudança parece tecnicamente correta**. Isso é deliberado.
 
-Se uma vacina precisa mudar, ela muda de forma transversal — vacina, validador, workflows e documentação no mesmo PR — e a mudança é decisão do responsável, não da sessão assistida.
-
 Precedente registrado: a tentativa de trocar `--no-frozen-lockfile` por `--frozen-lockfile` na Etapa 20 foi revertida porque a VACINA-008 fixa a política transitória. A correção estava tecnicamente certa e mesmo assim foi revertida. Foi a governança funcionando, não falhando.
+
+### 3.5 Substituição de vacina — quando a solução nova é melhor
+
+Catálogo congelado apodrece. Uma vacina pode ter sido a melhor solução com o que se sabia na época e ser a pior hoje. Substituir é permitido — e é assim que se faz.
+
+#### 3.5.1 Os dois portões, nesta ordem
+
+**Portão 1 — garantia preservada. Eliminatório.**
+
+> A solução nova precisa cobrir a **mesma causa raiz** com garantia igual ou maior.
+
+Só quem passa aqui chega ao portão 2. Este portão existe porque o raciocínio de retorno sobre investimento, aplicado a proteção, produz a conclusão errada com aparência de maturidade: *"o risco é baixo, o custo de manter é alto, então vale abrir mão"*. É assim que quase todo incidente evitável nasce. Vacina não é otimização; é a promessa de que uma classe de falha não volta.
+
+**Portão 2 — retorno material.**
+
+Passado o portão 1, decide-se por desempenho, custo, complexidade e manutenção. Com um limiar: **o ganho precisa ser material, não apenas mensurável.** Ordem de grandeza, ou eliminação de uma classe inteira de falha, ou redução real de superfície. Trocar por 5% custa retreino, redocumentação e risco de regressão — a rotatividade tem custo próprio e ele raramente entra na conta de quem propõe a troca.
+
+#### 3.5.2 A prova
+
+Comparar as duas soluções é obrigatório, e o resultado não é um número em documento — é um **script commitado** que qualquer pessoa roda de novo. "Medimos e melhorou 40%" vira folclore em três meses. Mesma cultura dos `validate:*` que já existem no repositório.
+
+O **tipo de evidência** é declarado, porque nem toda vacina é mensurável:
+
+| Tipo | Quando | O que se entrega |
+|---|---|---|
+| **medida** | há métrica comparável (tempo, custo, consumo, taxa de erro) | bancada comparativa executável, com as duas soluções no mesmo cenário |
+| **negativa** | não se pode rodar a versão vulnerável para comparar | teste que prova que a causa raiz continua bloqueada pela solução nova |
+| **argumento** | as duas anteriores são impossíveis | raciocínio explícito e revisado — e o peso da decisão sobe, porque não há prova executável |
+
+Exigir medição onde ela é impossível não aumenta o rigor: ensina a fabricar número.
+
+#### 3.5.3 Quando a substituição **não** pode acontecer
+
+> **Nunca no mesmo PR da correção que motivou a vontade de substituir.**
+
+O valor da vacina está em ela vencer o julgamento do momento. Se ela puder ser substituída por quem está sendo barrado por ela, no instante em que está sendo barrado, o guarda-corpo deixa de existir — não por má-fé, mas porque no meio de uma tarefa, sob pressão de terminar, todo mundo acha que a própria solução é melhor, e a justificativa sai convincente.
+
+Portanto: a correção sai conforme a vacina vigente, e a substituição vai para PR próprio, decidido pelo responsável. Sessão assistida **propõe**; não substitui por conta própria.
+
+#### 3.5.4 O registro da substituição
+
+Arquivo novo, com número novo, referenciando a vacina que substitui. A antiga passa a `substituída` e **permanece no repositório** — quem ler daqui a um ano precisa saber por que a cerca estava ali antes de concluir que podia ser removida.
+
+```markdown
+# VACINA-NNN — <assunto> (substitui VACINA-MMM)
+
+**Estado:** vigente
+**Substitui:** VACINA-MMM — <assunto anterior>
+**Tipo de evidência:** medida | negativa | argumento
+**Decidida por:** <responsável> em <PR>
+
+## Solução vigente e o que ela garante
+## Solução proposta
+## Onde começa e onde termina
+   Fronteira exata do que muda e do que não muda.
+## Como a oportunidade foi detectada
+## Por que é melhor
+   Mecanismo, não opinião: o que a nova faz que a antiga não fazia.
+## Garantia preservada
+   Obrigatório. Como se prova que a mesma causa raiz continua coberta.
+## Comparação executada
+   Script commitado, cenário, dados e resultado das duas soluções.
+## Impacto
+   Desempenho, custo, complexidade, superfície de segurança, esforço de manutenção.
+## O que ela afeta
+   Módulos, migrations, workflows, validadores e outras vacinas.
+## Custo e plano de migração
+## Critério de reversão
+   O que faria voltar atrás.
+## Limitações da prevenção nova
+```
+
+#### 3.5.5 Estados
+
+```text
+proposta → vigente → substituída
+                   → revogada        (causa raiz deixou de existir; exige justificativa)
+```
+
+`substituída` e `revogada` nunca são apagadas. O catálogo é memória, e memória com lacuna é pior do que memória longa.
 
 ---
 

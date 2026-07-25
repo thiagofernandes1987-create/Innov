@@ -76,9 +76,26 @@ Modelo do arquivo, criado no mesmo PR da correção:
 ## Limitações da prevenção
 ```
 
+### 2.3 Substituição — quando a solução nova é melhor que a registrada
+
+Uma vacina pode ser substituída. Catálogo congelado apodrece: a melhor solução de seis meses atrás pode ser a pior de hoje, e sem caminho de substituição a regra ruim passa a ser contornada em silêncio.
+
+A substituição passa por **dois portões, nesta ordem**:
+
+1. **Garantia preservada — eliminatório.** A solução nova cobre a mesma causa raiz com garantia igual ou maior. Retorno sobre investimento aplicado a proteção produz a conclusão errada com cara de maturidade (*"o risco é baixo, o custo é alto, vale abrir mão"*); por isso este portão vem antes e não é negociável.
+2. **Retorno material.** Só entre as soluções que passam no portão 1 é que desempenho, custo, complexidade e manutenção decidem. O ganho precisa ser **material**, não apenas mensurável: ordem de grandeza, eliminação de uma classe de falha ou redução real de superfície. Troca por ganho marginal custa retreino, redocumentação e risco de regressão.
+
+**A comparação é executada e commitada.** Um script que qualquer pessoa roda de novo, não um número no documento. O tipo de evidência é declarado: `medida` (bancada comparativa), `negativa` (teste que prova que a causa raiz continua bloqueada, quando não se pode rodar a versão vulnerável) ou `argumento` (quando as duas anteriores são impossíveis — e aí o peso da decisão sobe).
+
+**Momento proibido:** substituir uma vacina **no mesmo PR da correção que ela barrou**. O valor da vacina é vencer o julgamento do momento; se quem está sendo barrado puder removê-la no instante em que é barrado, a proteção deixa de existir. A correção sai conforme a vacina vigente; a substituição vai para PR próprio, decidida pelo responsável. Sessão assistida propõe, não substitui.
+
+A vacina antiga passa a `substituída` e permanece no repositório. O campo `Substitui:` da nova aponta para ela. Estrutura completa do registro de substituição, com todos os campos obrigatórios, em `diretrizes/METODO-DE-TRABALHO.md`, seção 3.5.
+
 O método de trabalho que envolve este protocolo está em `diretrizes/METODO-DE-TRABALHO.md`.
 
 ## 3. Estado das vacinas
+
+Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `parcial`, `proposta`, `substituída` e `revogada`. Nenhuma vacina é removida da tabela — substituída e revogada permanecem, com o apontamento de quem as sucedeu.
 
 | ID | Causa raiz | Estado | Prevenção principal |
 |---|---|---|---|
