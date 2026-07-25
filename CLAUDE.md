@@ -1,6 +1,8 @@
 # Instruções para desenvolvimento assistido — Innovar Platform
 
-Este arquivo é lido no início de toda sessão assistida neste repositório. As skills citadas estão versionadas em `.claude/skills` (procedência e licenças no README de lá).
+Este arquivo é lido no início de toda sessão assistida neste repositório.
+
+As skills citadas mais abaixo ainda **não estão versionadas neste ramo**: a cópia com procedência e licenças vive em `.claude/skills` e chega por entrega separada. Até lá, a tabela vale como contrato de quando acionar cada skill, não como garantia de que ela está instalada.
 
 ## Antes de responder qualquer coisa
 
