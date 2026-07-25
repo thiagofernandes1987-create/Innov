@@ -415,7 +415,8 @@ Dois modos de falha distintos, que pedem soluções distintas:
   - [ ] T-22.7.3 — Tipo de evidência: `negativa` — provar que a divergência de hoje seria detectada
   - [ ] T-22.7.4 — **PR próprio**, separado da correção que a motivou
 - [ ] T-22.8 — Aplicar em homologação as migrations pendentes do repositório, incluindo as duas do Object Runtime. Escrita em ambiente compartilhado: depende de aval do responsável
-- [ ] T-22.9 — Revisar `RECUPERACAO.md`: enquanto o replay não passar, o documento precisa dizer o que realmente é possível hoje
+- [x] T-22.9 — Revisar `RECUPERACAO.md`: aviso de estado verificado no topo, com o resultado do replay e as duas causas medidas, e `pnpm test:db:replay` acrescentado às regras inegociáveis do passo de reconstrução do banco
+- [ ] T-22.10 — Revisar `README.md`, que afirma na abertura que o repositório basta para recuperar o projeto: enquanto o replay não passar, o documento precisa dizer o que realmente é possível hoje
 
 ---
 

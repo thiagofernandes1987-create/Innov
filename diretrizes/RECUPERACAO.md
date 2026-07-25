@@ -1,5 +1,18 @@
 # Recuperação completa a partir do repositório
 
+> ## ⚠️ Estado verificado em 25 de julho de 2026: este procedimento **não se cumpre hoje**
+>
+> O passo 8 foi executado contra um PostgreSQL limpo, por `pnpm test:db:replay`. Resultado: **0 de 111 migrations aplicaram**. A primeira já falha, com `function public.touch_updated_at() does not exist`.
+>
+> Causa medida, em dois defeitos independentes:
+>
+> 1. **Ausência.** 102 versões com SQL real estão aplicadas em homologação sem arquivo correspondente no repositório. Entre elas está `has_module_permission`, a função no centro do modelo de autorização, chamada por 41 dos 111 arquivos de migration e sem definição em nenhum lugar deste repositório.
+> 2. **Ordem.** Arquivos de endurecimento têm carimbo anterior ao dos arquivos que criam o que eles endurecem — `20260719214500_stage10_homologation_hardening` altera `touch_updated_at`, criada em `20260719230000_stage9_financial_contracts`. Em ordem lexical, quebram.
+>
+> A regra do passo 8 que manda **comparar os arquivos locais com `supabase_migrations.schema_migrations`** já estava escrita aqui. Ela nunca foi executada; se tivesse sido, teria detectado isto.
+>
+> Enquanto o replay não passar, trate este documento como **procedimento pretendido**, não como garantia. Fechar a lacuna é a sprint S-22 do `INVENTARIO-DE-EXECUCAO.md`.
+
 Este procedimento reconstrói a Innovar Platform após perda de contêiner, máquina local, ambiente de desenvolvimento ou histórico de conversa.
 
 ## 1. Princípio
@@ -121,7 +134,8 @@ Regras inegociáveis:
 - não reaplicar manualmente migration registrada;
 - comparar arquivos locais com `supabase_migrations.schema_migrations`;
 - não criar nome lógico duplicado ou SQL duplicado com timestamp diferente;
-- backup obrigatório antes de alteração destrutiva.
+- backup obrigatório antes de alteração destrutiva;
+- **executar `pnpm test:db:replay` e exigir que ele passe.** Comparar ledger detecta divergência de carimbo; só o replay detecta que o conjunto não aplica. Foi essa diferença que deixou 102 migrations sem fonte passarem despercebidas.
 
 ## 9. Confirmar a Etapa 17 — Estoque
 
