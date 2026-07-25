@@ -123,9 +123,16 @@ Objetivo: a fundação que aguenta virar prédio. Nenhuma funcionalidade de est�
 **Estado:** em andamento
 **Marco:** M-1
 
-- [ ] T-05.1 — Migration de `object_definitions`, `object_definition_versions` e `object_field_slots`
+- [x] T-05.1 — Migration de `object_definitions`, `object_definition_versions` e `object_field_slots`
+  - [x] T-05.1.1 — `scope` com `organizacao` e `projeto`, para a plataforma servir a qualquer tipo de empresa
+  - [x] T-05.1.2 — Índices de catálogo e verificação embutida na própria migration
 - [ ] T-05.2 — Imutabilidade da versão publicada, com `checksum` do `spec`
-- [ ] T-05.3 — RLS do catálogo por `organization_id` e permissão de administração
+  - [x] T-05.2.1 — Guarda no banco: `update` e `delete` em versão publicada levantam exceção
+  - [x] T-05.2.2 — Lógica pura de serialização canônica, checksum, alocação de slot e validação (`lib/object-runtime/spec.ts`), com 24 testes
+  - [ ] T-05.2.3 — RPC de publicação que calcula o checksum, grava a versão e projeta os slots numa transação
+- [x] T-05.3 — RLS do catálogo por `organization_id` e permissão de administração
+  - [x] T-05.3.1 — Política única por operação reusando `has_module_permission`
+  - [x] T-05.3.2 — `revoke` de escrita direta de `anon` e `authenticated`, no padrão da VACINA-004
 - [ ] T-05.4 — Validador de CI: projeção de slots coerente com o `spec`
 - [ ] T-05.5 — Testes: publicar, republicar, tentar alterar versão publicada
 
