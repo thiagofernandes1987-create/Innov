@@ -304,7 +304,25 @@ Medição feita antes de planejar, em 25 de julho de 2026: 186 ocorrências de "
 
 O número que decide o desenho é outro: **os nomes físicos já são neutros.** `projects`, `project_tasks`, `project_milestones`, `daily_logs` são termos genéricos; só `work_breakdown_items` carrega jargão. O que é específico de construção é o **texto exibido** e alguns módulos — não o schema. Isso transforma a sprint de reescrita em camada de tradução.
 
-- [ ] T-20.1 — **Não renomear tabela, coluna nem rota.** Registrar a decisão e o motivo: renomear 136 tabelas e as rotas publicadas é risco alto com ganho funcional zero; URL é identificador, não texto de interface
+**Decisão do responsável, 25 de julho de 2026:** o termo **"obra" é substituído por "projeto"**, e a regra vale para todo termo de segmento encontrado — quanto mais genérico e aplicável a áreas diversas, melhor. O padrão da plataforma passa a ser genérico; construção civil deixa de ser a premissa e vira, quando houver preset, uma especialização opcional.
+
+Medição de 25 de julho de 2026, feita antes de planejar. As ocorrências não custam o mesmo, e é isso que separa o que muda do que não muda:
+
+| Onde | Ocorrências | Risco | Decisão |
+|---|---|---|---|
+| Texto exibido em `.tsx` | 186 | baixo | **trocar** — é o que o usuário vê |
+| Sigla `FVS` | 43 | baixo | **trocar** por "verificação de serviço" |
+| Sigla `FVM` | 49 | baixo | **trocar** por "verificação de materiais" |
+| Rótulo "Diário de Obras" | 4 | baixo | **trocar** por "Diário de campo" |
+| `'obras'` como `module_key` em SQL | 30, em 8 arquivos | **alto** | **não trocar** |
+| `"obras"` como chave em TypeScript | 10 | alto | **não trocar** |
+| Rotas `/app/obras`, `/cliente/obras`, `/app/relatorios/obras` | 3 diretórios | médio | **não trocar agora** |
+
+Os 30 literais `'obras'` estão dentro de policies de RLS e RPCs **já aplicadas em produção**. Trocar a chave exigiria reescrever migration aplicada — o que a VACINA-003 proíbe — ou uma migration transversal no núcleo de permissão. É identificador interno: o usuário nunca vê, e trocá-lo tem custo alto e ganho zero para ele. A rota segue a mesma lógica: URL é identificador, e quem tem `/app/obras` salvo não deve perder o link porque a empresa dele é de manutenção predial.
+
+Vale notar que trocar o rótulo para "Projeto" **aproxima** a interface do esquema, que já se chama `projects`, `project_tasks` e `project_milestones`. A troca reduz divergência entre o que o usuário lê e o que o banco guarda; não cria dívida nova.
+
+- [ ] T-20.1 — **Não renomear tabela, coluna, chave de módulo nem rota.** Registrar a decisão com os números acima
 - [ ] T-20.2 — Biblioteca de vocabulário: catálogo de termos por organização
   - [ ] T-20.2.1 — Tabela de termos com chave, singular, plural e gênero
   - [ ] T-20.2.2 — Resolução com precedência: termo da empresa → termo do preset → termo padrão
@@ -314,10 +332,13 @@ O número que decide o desenho é outro: **os nomes físicos já são neutros.**
   - [ ] T-20.3.2 — Construção civil como preset, não como padrão implícito
   - [ ] T-20.3.3 — Prestação de serviços e manutenção como segundo e terceiro presets
   - [ ] T-20.3.4 — Preset aplicado na criação da empresa, reusando `app_modules.default_enabled` e `organization_modules`
-- [ ] T-20.4 — Migrar os textos exibidos para a biblioteca
-  - [ ] T-20.4.1 — Nome e descrição dos módulos em `app_modules` passam a vir do preset
-  - [ ] T-20.4.2 — Rótulos de navegação e cabeçalho de tela
-  - [ ] T-20.4.3 — Textos de formulário, tabela, estado vazio e mensagem de erro
+- [ ] T-20.4 — Substituir o vocabulário exibido pelo genérico
+  - [ ] T-20.4.1 — "Obra" e "Obras" passam a "Projeto" e "Projetos" nos 186 pontos de `.tsx`
+  - [ ] T-20.4.2 — Nome e descrição dos módulos em `app_modules` e em `lib/modules/registry.ts`, sem tocar na chave
+  - [ ] T-20.4.3 — "Diário de Obras" passa a "Diário de campo"
+  - [ ] T-20.4.4 — `FVS` e `FVM` passam a "verificação de serviço" e "verificação de materiais", sem sigla de segmento
+  - [ ] T-20.4.5 — Textos de formulário, tabela, estado vazio e mensagem de erro
+  - [ ] T-20.4.6 — Varredura final por termo de segmento remanescente, com validador de CI
 - [ ] T-20.5 — Módulos específicos de segmento continuam existindo, como opcionais
   - [ ] T-20.5.1 — `diario` publicado como diário de campo, com rótulo do preset
   - [ ] T-20.5.2 — Termos próprios da qualidade da construção (PO, FVS, FVM) tratados como vocabulário do preset, não como conceito do núcleo
