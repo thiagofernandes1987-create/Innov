@@ -29,6 +29,7 @@ Três fontes, todas legítimas e verificáveis:
 1. **Documentação oficial do Odoo 19.0**, lida do repositório `odoo/documentation`, arquivo `content/applications/studio/views.rst`. O site `odoo.com` recusa leitura automatizada com 403; o conteúdo veio do fonte.
 2. **Repositório companheiro oficial** do *Odoo 19 Development Cookbook, 6ª edição* — `PacktPublishing/Odoo-19-Development-Cookbook-6E`, publicado aberto pela editora. As citações de XML abaixo vêm do capítulo 9, que trata de visualizações.
 3. **Cybrosys**, que distribui livros de Odoo gratuitamente.
+4. **261 capturas da instância Odoo do próprio responsável** (`innovar1.odoo.com`), entregues em 26 de julho de 2026. Valem mais que a documentação em um ponto específico: mostram o produto configurado para *este* negócio, com as etapas reais — Medição, Projeto Executivo, Assinatura Executivo — e não o exemplo genérico do manual.
 
 Cópias piratas de livros comerciais não foram usadas como fonte.
 
@@ -164,3 +165,65 @@ Refazer 20 módulos de uma vez é como se perde o controle da qualidade. A ordem
 3. **Os demais**, replicando o molde, com o vocabulário genérico da sprint S-20 aplicado na mesma passagem — para não refazer a mesma tela duas vezes.
 
 Detalhe da execução em `INVENTARIO-DE-EXECUCAO.md`, sprint S-23.
+
+---
+
+## 9. Pipeline: o que as capturas mostram e o que a plataforma copia
+
+Leitura das 261 capturas da instância do responsável. Não é impressão geral: cada item abaixo aparece em captura identificada.
+
+### 9.1 Estrutura da tela
+
+| Faixa | O que tem | Captura |
+|---|---|---|
+| Barra do aplicativo | Nome do app à esquerda e **menus do app ao lado dele** — `Projects · Tasks · Reporting · Configuration`; à direita, atividades, conversas, relógio e usuário | `odoo-project-1-tasks` |
+| Painel de controle | `New` à esquerda, **caminho de navegação** (`Projects / Teste`) com engrenagem de configuração, busca ao centro, **seletor de visualização à direita** | idem |
+| Seletor | Ícones lado a lado — kanban, lista, mapa, calendário, mapa, atividade, pivô, gráfico. Sete a nove por módulo | `odoo-crm` |
+| Painel lateral de busca | No app de Aplicativos, `APPS` e `CATEGORIES` **com contador por categoria** | `odoo-apps` |
+
+### 9.2 Coluna do kanban
+
+- Título, **barra de progresso** e **total da coluna** (`R$ 0` no CRM, contagem no Projeto).
+- `+` no cabeçalho para criar cartão **direto na etapa**, sem sair da tela.
+- Engrenagem da coluna com `Fold · Edit · Automations · Delete` — a etapa é configurável pelo usuário, inclusive **recolhida** (`Fold`).
+- Ao fim das colunas, um campo `Stage…` que **cria etapa nova ali mesmo**.
+
+Consequência para a plataforma: etapa é dado, não esquema. Uma etapa que se cria digitando o nome não pode exigir migration. É por isso que `pipeline_stages` é tabela e as listas do responsável são *preset*, não `CHECK`.
+
+### 9.3 Cartão
+
+Título, subtítulo com o cliente, **estrelas de prioridade (0 a 3)**, relógio de atividade, faixa de cor da etiqueta e avatar do responsável. No Helpdesk, o cartão mostra ainda o **código do chamado** e a **contagem regressiva do prazo** — `In 3 days`, `13d`, `42d`.
+
+É o lugar de DLA e DLE: prazo que só aparece ao abrir o registro é prazo que ninguém cumpre.
+
+### 9.4 Formulário
+
+- **Barra de etapas em galhardetes** no topo, clicável, com o **tempo na etapa corrente** ao lado do nome (`New 9m`).
+- Botões de estatística no topo do cadastro de contato — `Opportunities · Sales · Invoiced · Subscriptions · Meetings · Tasks · Tickets · More` — cada um abre os registros relacionados.
+- Abas para seções longas: `Contacts · Sales & Purchase · Accounting · Notes`.
+- **Conversa como coluna à direita**, não como rodapé: `Send message · Log note · WhatsApp · Activity`, com histórico datado.
+- `Schedule Activity` como diálogo, com tipos `To-Do · Email · Call · Meeting · Document · Request Signature`.
+
+O pedido do responsável — *"ao clicar no card resumido abre o card completo do cliente… uma aba com dados, outra com os projetos, outra com os documentos, e ao clicar abre o objeto referente"* — é exatamente isto: abas para o que é do próprio registro, botões de estatística para o que é de outro objeto.
+
+### 9.5 Datas: dois eixos, não dez colunas
+
+As dez siglas declaradas não são dez campos. São duas dimensões:
+
+| | Início | Término | Entrega | Agendamento | Assistência |
+|---|---|---|---|---|---|
+| **Prevista** | DPI | DPT | DPE | DPA | — |
+| **Efetiva** | DEI | DET | DEE | DEA | — |
+| **Limite** | — | — | DLE | — | DLA |
+
+Guardadas como `(natureza, marco)`, a sigla é derivada e a combinação que ainda não existe — data limite de início, por exemplo — nasce sem migration. O catálogo vive em dois lugares, `lib/pipeline/datas.ts` e a função `pipeline_codigo_data`, e `pnpm validate:pipeline` reprova qualquer divergência entre eles.
+
+Cada etapa declara **que datas exibe e quais exige** (`pipeline_stage_date_codes`). Toda etapa exibe previsto e efetivo de início e término: é dessas quatro que o Gantt é feito.
+
+### 9.6 O que a plataforma faz diferente
+
+| Odoo | Innovar | Por quê |
+|---|---|---|
+| Etapa por app (`crm.stage`, `project.task.type`, `helpdesk.stage`) | Uma tabela, com `trilha` distinguindo cliente, projeto e assistência | Três tabelas quase iguais é três vezes a mesma correção |
+| Cartão *é* o registro | Cartão **aponta** para cliente, projeto ou chamado | Kanban que copia dado envelhece: o cadastro muda e o cartão segue mostrando o telefone antigo |
+| Prazo como campo solto | Prazo como `(natureza, marco, data)` com sigla derivada | Dez colunas fixas exigiriam migration na primeira data nova |

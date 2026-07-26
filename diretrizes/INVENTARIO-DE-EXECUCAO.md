@@ -490,6 +490,14 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
 - [ ] T-23.9 — Aplicar `diretrizes/UI-UX-PRO-MAX.md` e a skill `ui-ux-pro-max` em cada tela refeita
 - [x] T-23.10 — Escrever `diretrizes/PADRAO-DE-INTERFACE.md` com o padrão extraído das fontes oficiais, o catálogo de visualizações, a estrutura de formulário, os componentes de campo e o Definition of Done de módulo
 - [ ] T-23.11 — Ordem de adoção: componentes de campo primeiro, CRM como piloto, demais módulos replicando o molde com o vocabulário da S-20 na mesma passagem
+- [x] T-23.12 — **Fundação de dados do pipeline**: trilha, etapa, cartão, datas, marcadores, observações e histórico — etapa é dado, não esquema
+  - [x] T-23.12.1 — Taxonomia de datas decomposta em dois eixos, natureza × marco, com as dez siglas declaradas derivadas da combinação (`lib/pipeline/datas.ts`, 13 testes)
+  - [x] T-23.12.2 — Esquema com as nove tabelas, chaves compostas que herdam organização e trilha por integridade referencial, e RLS forçada em todas (`supabase/migrations/20260726120000_pipeline_trilhas.sql`)
+  - [x] T-23.12.3 — Presets com as duas listas declaradas pelo responsável — projeto e assistência —, mais a trilha comercial do cliente, instaláveis por RPC (`supabase/migrations/20260726123000_pipeline_presets.sql`)
+  - [x] T-23.12.4 — Cada etapa declara que datas exibe e quais exige; toda etapa exibe previsto e efetivo de início e término, que é o que alimenta o Gantt da T-23.6
+  - [x] T-23.12.5 — Histórico de etapa escrito só por gatilho, com escrita direta revogada — é o que responde "há quanto tempo está parado aqui"
+  - [x] T-23.12.6 — 21 testes de comportamento + RLS + privilégio contra PostgreSQL real, em banco limpo (`pnpm test:db:pipeline`); sabotagem do CHECK de origem reprova o TESTE 8
+  - [x] T-23.12.7 — `pnpm validate:pipeline` cruza as siglas do banco com as do TypeScript e recusa jargão de segmento em CHECK; ligado ao CI
 
 ---
 
