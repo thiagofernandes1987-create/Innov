@@ -227,3 +227,89 @@ Cada etapa declara **que datas exibe e quais exige** (`pipeline_stage_date_codes
 | Etapa por app (`crm.stage`, `project.task.type`, `helpdesk.stage`) | Uma tabela, com `trilha` distinguindo cliente, projeto e assistência | Três tabelas quase iguais é três vezes a mesma correção |
 | Cartão *é* o registro | Cartão **aponta** para cliente, projeto ou chamado | Kanban que copia dado envelhece: o cadastro muda e o cartão segue mostrando o telefone antigo |
 | Prazo como campo solto | Prazo como `(natureza, marco, data)` com sigla derivada | Dez colunas fixas exigiriam migration na primeira data nova |
+
+---
+
+## 10. Anatomia das telas — leitura das 261 capturas
+
+Segunda passagem sobre o material do responsável, agora cobrindo **12 telas de 8 aplicativos**: Aplicativos, Configurações, CRM, Projeto, Helpdesk, Contatos, Compras e Agendamentos. Cada item abaixo tem captura de origem identificada. O que a seção 9 descreveu do pipeline, esta descreve do resto da casca.
+
+### 10.1 Três faixas fixas, sempre na mesma ordem
+
+```
+┌ barra do aplicativo ─ ícone · nome do app · MENUS DO APP · … · notificações · empresa · usuário
+├ painel de controle ─ [Novo] caminho/de/navegação ⚙ · busca · paginação · seletor de visão
+└ conteúdo ─────────── a visualização escolhida
+```
+
+O que muda de app para app é só o conteúdo. **Os menus do aplicativo ficam na barra de cima, ao lado do nome** — `Projects · Tasks · Reporting · Configuration`, `Orders · Products · Reporting · Configuration`, `Overview · Tickets · Reporting · Configuration`. Repare no padrão: **todo app termina com `Reporting` e `Configuration`**. Um app sem esses dois é um app que não se mede nem se ajusta.
+
+A paginação (`1-2 / 2` com setas) fica **à esquerda do seletor de visão**, no mesmo canto. Não no rodapé.
+
+### 10.2 Configurações
+
+Uma tela para todos os aplicativos, não uma tela por aplicativo:
+
+- **Barra lateral esquerda** listando os apps instalados; clicar rola até a seção dele.
+- **Faixas de seção** com o nome do bloco (`CRM`, `Lead Generation`).
+- Cada ajuste é **caixa de seleção + título + descrição em uma frase**. A descrição não é enfeite: é ela que faz o ajuste ser compreensível sem manual.
+- Ajuste ligado **revela sub-opções** logo abaixo (`Enrich leads on demand only` / `Enrich all leads automatically`).
+- **`Salvar` e `Descartar` no painel de controle**, não no fim da página: a tela é longa e a mudança pode estar em qualquer altura.
+
+### 10.3 Painel do módulo (`Overview`)
+
+O Helpdesk abre em painel, não em lista. A estrutura é uma **matriz**: rótulos de linha à esquerda, métricas como colunas.
+
+| | Chamados | Alta prioridade | Urgente |
+|---|---|---|---|
+| **Em aberto** | 10 | 3 | 2 |
+| **Horas médias em aberto** | 30h | 10h | 15h |
+| **Estourados** | 4 | 2 | 1 |
+
+Abaixo, **um cartão por equipe** com nome, e-mail, botão primário e um rodapé de quatro contadores — `Em aberto · Sem responsável · Urgente · Estourado`. **Todo número é um link.** Número que não abre nada é número que ninguém confere.
+
+Detalhe de honestidade que vale copiar: dado de demonstração vem com **faixa diagonal escrito `SAMPLE`** no canto. Ninguém confunde ensaio com operação.
+
+### 10.4 Formulário com linhas — a resposta ao defeito D7
+
+O pedido de cotação de Compras é o molde do que falta no Orçamento:
+
+- **Cabeçalho:** ações primárias à esquerda (`Enviar · Confirmar · Imprimir · Cancelar`), barra de etapas em galhardetes à direita (`RFQ › Purchase Order`).
+- **Título:** rótulo pequeno do tipo de documento, estrela de favorito, e o nome em corpo grande e editável.
+- **Grupo em duas colunas**, com `?` de ajuda ao lado do rótulo do campo.
+- **Grade de linhas editável** com colunas `Produto · Quantidade · Preço unitário · Impostos · Valor`, e **três ações inline logo abaixo do cabeçalho da grade**:
+  - `Adicionar produto` — a linha de item;
+  - `Adicionar seção` — título que agrupa as linhas seguintes;
+  - `Adicionar nota` — texto livre entre as linhas.
+- **Engrenagem no canto da grade** liga e desliga colunas opcionais.
+- **Alternador `Sem imposto` / `Com imposto`** acima da grade.
+- **Totais alinhados à direita**, abaixo da grade; termos e condições à esquerda, na mesma faixa.
+
+Seção e nota dentro da grade são exatamente o que um orçamento precisa — e `budget_sections` já existe no banco desde a etapa 12, sem tela.
+
+### 10.5 Cartões de kanban, por tipo de registro
+
+| Registro | O que o cartão mostra |
+|---|---|
+| Oportunidade | título, cliente, estrelas, relógio de atividade, avatar, **valor por coluna somado no cabeçalho** |
+| Tarefa | título, cliente, estrelas, relógio, faixa de cor da etiqueta, avatar |
+| Chamado | **código do chamado**, cliente, etiquetas, estrelas, **contagem regressiva do prazo** |
+| Projeto | estrela de favorito, responsável, **intervalo de datas com seta** (`Aug 30 → Aug 15`), e-mail, etiqueta, rodapé com contagem de tarefas |
+| Contato | nome, e-mail com ícone, cidade com ícone, contador, logo à direita |
+
+O intervalo com seta no cartão de projeto resolve em uma linha o que uma tabela gastaria duas colunas.
+
+### 10.6 Estado vazio
+
+Ilustração, frase de ação (`No projects found. Let's create one!`) e uma linha explicando para que serve o registro. Ao fundo, **os cartões de exemplo aparecem esmaecidos** — a pessoa vê a forma do que vai criar antes de criar.
+
+### 10.7 O que isto muda no plano da S-23
+
+| Defeito | O que a leitura das capturas define |
+|---|---|
+| D4 — uma visão por módulo | Seletor no canto direito do painel de controle, com paginação à esquerda dele; `Reporting` e `Configuration` em todo menu de app |
+| D5 — pipeline estático | Resolvido em `T-23.13`: coluna com contagem e soma, cartão com prazo, arrastar entre etapas |
+| D6 — planejamento sem cronograma | Intervalo previsto × efetivo já está em `pipeline_card_dates`; o Gantt lê DPI/DPT/DEI/DET |
+| D7 — orçamento não recebe dados | Grade editável com `adicionar item`, `adicionar seção` e `adicionar nota`, totais à direita, colunas opcionais por engrenagem |
+| — | Painel de módulo em matriz, com todo número clicável, antes da lista |
+| — | Tela única de Configurações, com barra lateral de apps e `Salvar`/`Descartar` no topo |

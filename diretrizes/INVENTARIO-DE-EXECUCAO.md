@@ -511,6 +511,12 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.14.4 — Aba de prazos monta os campos a partir do que a etapa declara, com a sigla e o significado por extenso
   - [x] T-23.14.5 — Conversa lateral com observação e histórico de movimentação de etapa
   - [x] T-23.14.6 — Leitura sem embed aninhado, para não repetir o defeito D2: `pipeline_card_dates` tem duas chaves estrangeiras para o cartão e o PostgREST responderia com embed ambíguo
+- [x] T-23.15 — **Segunda passagem sobre as 261 capturas**, cobrindo 12 telas de 8 aplicativos, registrada em `PADRAO-DE-INTERFACE.md` seção 10
+  - [x] T-23.15.1 — Três faixas fixas da tela e a ordem delas; paginação à esquerda do seletor de visão; todo menu de app termina em `Relatórios` e `Configuração`
+  - [x] T-23.15.2 — Tela única de configurações, com barra lateral de aplicativos, ajuste como caixa + título + descrição, sub-opções reveladas e `Salvar`/`Descartar` no topo
+  - [x] T-23.15.3 — Painel de módulo em matriz, com todo número clicável, e cartão por equipe com contadores no rodapé
+  - [x] T-23.15.4 — Grade de linhas editável do pedido de compra como molde do orçamento (D7): `adicionar item`, `adicionar seção`, `adicionar nota`, colunas opcionais e totais à direita
+  - [x] T-23.15.5 — Anatomia do cartão de kanban por tipo de registro, e o estado vazio com exemplos esmaecidos ao fundo
 
 ---
 
