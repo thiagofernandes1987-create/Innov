@@ -420,6 +420,69 @@ Dois modos de falha distintos, que pedem soluções distintas:
 
 ---
 
+# Marco M-5 — Padrão de interface de mercado
+
+Aberto em 26 de julho de 2026, a partir de revisão do responsável sobre telas reais em produção. Entra no fim conforme a R4.
+
+O diagnóstico foi direto: *"os módulos são rascunhos mal feitos, o pipeline é estático, muito amador"*. A verificação confirmou cada ponto — não é impressão.
+
+## Sprint S-23 — Fundação de interface: validação, visualizações e pipeline
+**Estado:** pendente
+**Marco:** M-5
+
+### Defeitos verificados
+
+| # | Defeito | Evidência |
+|---|---|---|
+| D1 | Nenhuma validação de CPF, CNPJ, CEP ou telefone | `app/actions/relationship.ts` grava `optional(data,"taxId")` sem validar; os campos são `<input name="taxId"/>` puro. Aceito em produção: CPF `3332227772` (10 dígitos), telefone `12982#2($($`, CEP `Usushe` |
+| D2 | Erro de banco vazando cru para o usuário | Tela de Documentos exibe `Could not embed because more than one relationship was found for 'project_documents' and 'project_document_versions'` — embed ambíguo do PostgREST sem dica de chave estrangeira |
+| D3 | Mensagem de erro que engana | Falha de configuração aparece como "Credenciais inválidas ou conta não liberada" na tela de login |
+| D4 | Uma única visualização por módulo | Tudo é tabela. Não há kanban, calendário, gantt, pivô nem gráfico em lugar nenhum |
+| D5 | Pipeline estático | Não é possível arrastar cartão entre etapas; a trilha do cliente não é navegável |
+| D6 | Planejamento sem cronograma | Não há Gantt nem linha do tempo, apesar de existirem `project_milestones` e `work_breakdown_items` no banco |
+| D7 | Orçamento não recebe dados | Não há caminho de inserção de item de custo; a tela abre zerada e permanece zerada |
+| D8 | `favicon.ico` retorna 404 | Console do navegador |
+
+### Padrão de mercado — pesquisa de 26 de julho de 2026
+
+Fonte primária: documentação do **Odoo 19.0**, lida do repositório oficial `odoo/documentation`, arquivo `content/applications/studio/views.rst`. O site `odoo.com` recusa leitura automatizada com 403; o conteúdo veio do fonte, não de blog de terceiro.
+
+O Odoo organiza **um mesmo registro em várias visualizações**, e o usuário troca entre elas:
+
+| Categoria | Visualizações | Para quê |
+|---|---|---|
+| Gerais | Formulário, Atividade, Busca | editar um registro; agendar e acompanhar; filtrar e agrupar sobre qualquer outra visão |
+| Múltiplos registros | **Lista**, **Kanban**, Mapa | tabela com edição em massa; cartões por etapa — *"often used to support business flows by moving records across stages"*; geográfico |
+| Linha do tempo | **Calendário**, **Gantt**, Cohort | cronologia; previsão com barras em escala de tempo; ciclo de vida e retenção |
+| Relatório | **Pivô**, **Gráfico** | *"explore and analyze the data contained in records in an interactive manner"*; barras, linhas, pizza |
+
+Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar entre colunas** e na organização por atividade que move a venda — pipeline visual como ferramenta de trabalho, não como relatório.
+
+### O padrão que a plataforma adota
+
+- [ ] T-23.1 — **Validação de dados brasileiros**, com máscara na entrada e verificação de dígito
+  - [ ] T-23.1.1 — CPF e CNPJ com cálculo de dígito verificador, não só formato
+  - [ ] T-23.1.2 — CEP com formato e consulta de endereço
+  - [ ] T-23.1.3 — Telefone e celular com DDD válido
+  - [ ] T-23.1.4 — E-mail verificado no servidor, não apenas `type="email"`
+  - [ ] T-23.1.5 — Validação no servidor além do navegador: a ação recusa, não só o formulário
+  - [ ] T-23.1.6 — Erro inline no campo, não faixa genérica no topo
+- [ ] T-23.2 — **Seletor de visualização** por módulo, no padrão do Odoo
+  - [ ] T-23.2.1 — Lista com ordenação, agrupamento e edição em massa
+  - [ ] T-23.2.2 — Kanban com colunas por etapa e arrastar e soltar
+  - [ ] T-23.2.3 — Calendário para o que tem data
+  - [ ] T-23.2.4 — Gantt para planejamento e cronograma
+  - [ ] T-23.2.5 — Pivô e gráfico para os módulos de análise
+- [ ] T-23.3 — **Painel de controle padrão**: caminho de navegação, seletor de visão, busca com filtros e agrupamentos salvos, ações em massa
+- [ ] T-23.4 — **Formulário padrão**: barra de etapas clicável no topo, ação primária destacada, abas para seções longas, e painel lateral de conversa — mensagens, notas internas, atividades agendadas, anexos e seguidores
+- [ ] T-23.5 — **Pipeline do CRM navegável**: cartão com valor, cliente, responsável, prazo e etiqueta; arrastar muda a etapa; soma e contagem por coluna
+- [ ] T-23.6 — **Planejamento com cronograma**: Gantt sobre `work_breakdown_items` e `project_milestones`, que já existem no banco
+- [ ] T-23.7 — **Orçamento operável**: inserir, editar e remover item de custo, com recálculo de BDI, markup e preço
+- [ ] T-23.8 — Corrigir D2, D3 e D8
+- [ ] T-23.9 — Aplicar `diretrizes/UI-UX-PRO-MAX.md` e a skill `ui-ux-pro-max` em cada tela refeita
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.

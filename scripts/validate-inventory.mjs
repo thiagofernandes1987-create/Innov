@@ -23,7 +23,11 @@ for (const line of lines) {
     sprints.push(current);
     continue;
   }
-  if (/^#{1,6}\s/.test(line)) { current = null; continue; }
+  // Só cabeçalho de nível 1 ou 2 encerra a sprint: `# Marco`, `## Sprint`,
+  // `## Registro de reordenação`. Subseção `###` dentro de uma sprint é
+  // conteúdo legítimo — evidência, pesquisa, tabela de defeitos — e não pode
+  // fazer o validador perder as tarefas que vêm depois dela.
+  if (/^#{1,2}\s/.test(line)) { current = null; continue; }
   if (!current) continue;
 
   const state = line.match(/^\*\*Estado:\*\*\s*(.+?)\s*$/);
