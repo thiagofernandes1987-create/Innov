@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import {
+  somenteDigitos,
   formatarCEP,
   formatarDocumento,
   formatarTelefone,
@@ -38,6 +39,8 @@ type CampoProps = Base & {
   formatar: (valor: string) => string;
   validar: (valor: string) => Resultado;
   inputMode?: "numeric" | "tel" | "email" | "text";
+  /** Chamado ao sair do campo com valor válido. */
+  aoConfirmar?: (valor: string) => void;
   autoComplete?: string;
   maxLength?: number;
 };
@@ -54,7 +57,8 @@ function Campo({
   validar,
   inputMode = "text",
   autoComplete,
-  maxLength
+  maxLength,
+  aoConfirmar
 }: CampoProps) {
   const id = useId();
   const [valor, setValor] = useState(() => formatar(String(defaultValue ?? "")));
@@ -76,6 +80,7 @@ function Campo({
     }
     const resultado = validar(valor);
     setErro(resultado.valido ? null : (resultado.erro ?? "Valor inválido."));
+    if (resultado.valido) aoConfirmar?.(valor);
   }
 
   const invalido = Boolean(erro) && tocado;
@@ -138,17 +143,82 @@ export function CampoTelefone(props: Base) {
   );
 }
 
-export function CampoCEP(props: Base) {
+/**
+ * CEP com preenchimento de endereço.
+ *
+ * A consulta vai para `/api/cep`, que chama o serviço no servidor: a CSP
+ * restringe `connect-src` a `'self'`, então o navegador não fala com o
+ * ViaCEP direto — e afrouxar a política por causa de um campo seria um mau
+ * negócio.
+ *
+ * Preenche apenas campo que estiver **vazio**: sobrescrever o que a pessoa
+ * digitou é a forma mais rápida de fazê-la desconfiar do formulário.
+ */
+export function CampoCEP({
+  camposEndereco,
+  ...props
+}: Base & {
+  /** Nomes dos campos a preencher: `{ logradouro, bairro, cidade, uf }`. */
+  camposEndereco?: { logradouro?: string; bairro?: string; cidade?: string; uf?: string };
+}) {
+  const [aviso, setAviso] = useState<string | null>(null);
+  const [buscando, setBuscando] = useState(false);
+
+  async function preencher(valor: string) {
+    if (!camposEndereco) return;
+    if (!validarCEP(valor).valido) return;
+
+    setBuscando(true);
+    setAviso(null);
+    try {
+      const resposta = await fetch(`/api/cep/${somenteDigitos(valor)}`, { cache: "no-store" });
+      const dados = (await resposta.json()) as {
+        encontrado?: boolean;
+        erro?: string;
+        logradouro?: string;
+        bairro?: string;
+        cidade?: string;
+        uf?: string;
+      };
+      if (!dados.encontrado) {
+        setAviso(dados.erro ?? "Não foi possível consultar o CEP.");
+        return;
+      }
+      const alvo = (nome: string | undefined, conteudo: string | undefined) => {
+        if (!nome || !conteudo) return;
+        const campo = document.querySelector<HTMLInputElement>(`[name="${nome}"]`);
+        if (campo && !campo.value.trim()) {
+          campo.value = conteudo;
+          campo.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      };
+      alvo(camposEndereco.logradouro, dados.logradouro);
+      alvo(camposEndereco.bairro, dados.bairro);
+      alvo(camposEndereco.cidade, dados.cidade);
+      alvo(camposEndereco.uf, dados.uf);
+    } catch {
+      // Serviço fora do ar nunca bloqueia o cadastro.
+      setAviso("Não foi possível consultar o CEP. Preencha o endereço manualmente.");
+    } finally {
+      setBuscando(false);
+    }
+  }
+
   return (
-    <Campo
-      {...props}
-      formatar={formatarCEP}
-      validar={validarCEP}
-      inputMode="numeric"
-      autoComplete="postal-code"
-      maxLength={9}
-      placeholder={props.placeholder ?? "00000-000"}
-    />
+    <div className="campo-br-cep">
+      <Campo
+        {...props}
+        formatar={formatarCEP}
+        validar={validarCEP}
+        inputMode="numeric"
+        autoComplete="postal-code"
+        maxLength={9}
+        placeholder={props.placeholder ?? "00000-000"}
+        aoConfirmar={preencher}
+      />
+      {buscando ? <small className="campo-br-aviso">Buscando endereço…</small> : null}
+      {aviso && !buscando ? <small className="campo-br-aviso">{aviso}</small> : null}
+    </div>
   );
 }
 

@@ -460,15 +460,21 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
 
 ### O padrão que a plataforma adota
 
-- [ ] T-23.1 — **Validação de dados brasileiros**, com máscara na entrada e verificação de dígito
-  - [ ] T-23.1.1 — CPF e CNPJ com cálculo de dígito verificador, não só formato
-  - [ ] T-23.1.2 — CEP com formato e consulta de endereço
-  - [ ] T-23.1.3 — Telefone e celular com DDD válido
-  - [ ] T-23.1.4 — E-mail verificado no servidor, não apenas `type="email"`
-  - [ ] T-23.1.5 — Validação no servidor além do navegador: a ação recusa, não só o formulário
-  - [x] T-23.1.6 — Erro inline no campo, não faixa genérica no topo (`components/campos/campos-br.tsx`, classe `.campo-br-erro`, com `aria-invalid` e `aria-describedby`)
-  - [x] T-23.1.9 — Componentes `CampoDocumento`, `CampoTelefone`, `CampoCEP` e `CampoEmail` substituem `<input>` cru em novo cliente, detalhe do cliente e novo lead
-  - [x] T-23.1.10 — Verificado em navegador: máscara produz `529.982.247-25` e `(12) 98216-7788` enquanto se digita; CPF de 10 dígitos e CEP de 7 dígitos exibem erro no próprio campo, com `aria-invalid`
+- [x] T-23.1 — **Validação de dados brasileiros**, com máscara na entrada e verificação de dígito
+  - [x] T-23.1.1 — CPF e CNPJ com dígito verificador por módulo 11, não só formato (`lib/validacao/br.ts`)
+  - [x] T-23.1.2 — CEP com formato de 8 dígitos
+  - [x] T-23.1.2b — CEP com consulta de endereço por `/api/cep`, executada no servidor por causa da CSP; preenche só campo vazio e nunca bloqueia o cadastro se o serviço cair
+  - [x] T-23.1.3 — Telefone com DDD de lista fechada e nono dígito do celular
+  - [x] T-23.1.4 — E-mail mais estrito que `type="email"`, que aceita `a@b`
+  - [x] T-23.1.5 — Guarda de servidor `checarCamposBR` em `createCrmLead`, `createRelationshipClient` e `updateRelationshipClient`
+  - [x] T-23.1.6 — Erro inline no campo, com `aria-invalid` e `aria-describedby`
+  - [x] T-23.1.7 — Máscara progressiva que nunca descarta dígito
+  - [x] T-23.1.8 — Verificado em navegador com os dados exatos das capturas: recusados, e zero registros gravados
+  - [x] T-23.1.9 — `CampoDocumento`, `CampoTelefone`, `CampoCEP` e `CampoEmail` substituem `<input>` cru em novo cliente, detalhe do cliente e novo lead
+  - [x] T-23.1.10 — Verificado em navegador: máscara produz `529.982.247-25` e `(12) 98216-7788`; CPF de 10 dígitos e CEP de 7 dígitos acendem erro no próprio campo
+  - [x] T-23.1.11 — `validarCPF` conferido contra implementação independente de referência: 4.000 CPFs, zero divergência
+  - [x] T-23.1.12 — Regra de "dígitos iguais" restringida a CPF e CNPJ; no CEP só zeros são barrados, senão a consulta não conseguiria dizer se o CEP existe
+  - [x] T-23.1.13 — Verificado em navegador: CEP `12420010` preencheu `Avenida Nossa Senhora do Bom Sucesso`, `Pindamonhangaba` e `SP`
 - [ ] T-23.2 — **Seletor de visualização** por módulo, no padrão do Odoo
   - [ ] T-23.2.1 — Lista com ordenação, agrupamento e edição em massa
   - [ ] T-23.2.2 — Kanban com colunas por etapa e arrastar e soltar

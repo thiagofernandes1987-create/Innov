@@ -95,7 +95,10 @@ export function validarCEP(valor: string | null | undefined): Resultado {
   const digitos = somenteDigitos(valor);
   if (vazio(valor)) return falha("Informe o CEP.");
   if (digitos.length !== 8) return falha(`CEP precisa ter 8 dígitos; recebeu ${digitos.length}.`);
-  if (todosIguais(digitos)) return falha("CEP inválido.");
+  // Diferente de CPF e CNPJ, "todos os dígitos iguais" não é regra de CEP:
+  // recusar aqui impediria a consulta de dizer se o CEP existe. Só o
+  // preenchimento com zeros é barrado, por ser placeholder evidente.
+  if (/^0+$/.test(digitos)) return falha("CEP inválido.");
   return OK;
 }
 

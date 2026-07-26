@@ -437,3 +437,4 @@ tbody tr:hover { background: #fafcfd; }
   font-weight: 500;
 }
 .campo-br-erro::before { content: "!"; font-weight: 700; }
+.campo-br-aviso { color: var(--muted); font-size: 0.78rem; }
