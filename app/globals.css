@@ -415,3 +415,25 @@ tbody tr:hover { background: #fafcfd; }
   }
   button:hover, .button:hover, .module-card:hover, .module-card:focus-visible, .nav a:hover, .nav a:focus-visible { transform: none; }
 }
+
+/* Campos brasileiros — erro no campo, não em faixa no topo.
+   Contrato em diretrizes/PADRAO-DE-INTERFACE.md, seção 6. */
+.campo-br { display: flex; flex-direction: column; gap: 6px; }
+.campo-br-invalido > input {
+  border-color: #c8404f;
+  background: var(--danger-soft);
+}
+.campo-br-invalido > input:focus-visible {
+  outline: 2px solid #c8404f;
+  outline-offset: 1px;
+}
+.campo-br-erro {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: #812a34;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  font-weight: 500;
+}
+.campo-br-erro::before { content: "!"; font-weight: 700; }

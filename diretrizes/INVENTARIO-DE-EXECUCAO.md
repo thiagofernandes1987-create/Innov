@@ -466,7 +466,9 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [ ] T-23.1.3 — Telefone e celular com DDD válido
   - [ ] T-23.1.4 — E-mail verificado no servidor, não apenas `type="email"`
   - [ ] T-23.1.5 — Validação no servidor além do navegador: a ação recusa, não só o formulário
-  - [ ] T-23.1.6 — Erro inline no campo, não faixa genérica no topo
+  - [x] T-23.1.6 — Erro inline no campo, não faixa genérica no topo (`components/campos/campos-br.tsx`, classe `.campo-br-erro`, com `aria-invalid` e `aria-describedby`)
+  - [x] T-23.1.9 — Componentes `CampoDocumento`, `CampoTelefone`, `CampoCEP` e `CampoEmail` substituem `<input>` cru em novo cliente, detalhe do cliente e novo lead
+  - [x] T-23.1.10 — Verificado em navegador: máscara produz `529.982.247-25` e `(12) 98216-7788` enquanto se digita; CPF de 10 dígitos e CEP de 7 dígitos exibem erro no próprio campo, com `aria-invalid`
 - [ ] T-23.2 — **Seletor de visualização** por módulo, no padrão do Odoo
   - [ ] T-23.2.1 — Lista com ordenação, agrupamento e edição em massa
   - [ ] T-23.2.2 — Kanban com colunas por etapa e arrastar e soltar
