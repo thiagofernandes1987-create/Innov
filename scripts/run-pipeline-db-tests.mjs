@@ -11,6 +11,7 @@ const files = [
   "supabase/tests/pipeline/fixture.sql",
   "supabase/migrations/20260726120000_pipeline_trilhas.sql",
   "supabase/migrations/20260726123000_pipeline_presets.sql",
+  "supabase/migrations/20260726190000_pipeline_endurecimento.sql",
   "supabase/tests/pipeline/pipeline.test.sql"
 ];
 

@@ -59,16 +59,32 @@ if (schema && presets && moduloTs) {
   if (/grant\s+[^;]*\b(insert|update|delete)\b[^;]*on\s+public\.pipeline_card_stage_history/i.test(schema))
     errors.push("pipeline_card_stage_history concede escrita a papel de cliente — o histórico é do gatilho.");
 
-  // 4. Funções privilegiadas com search_path fixo (VACINA-004).
-  for (const source of [schema, presets]) {
-    const definers = [...source.matchAll(/create\s+or\s+replace\s+function\s+public\.(\w+)[\s\S]*?\$\$/gi)];
-    for (const match of definers) {
-      if (/security\s+definer/i.test(match[0]) && !/set\s+search_path\s*=/i.test(match[0]))
-        errors.push(`Função ${match[1]} é security definer e não fixa search_path.`);
+  // 4. search_path fixo em TODA função do pipeline, não só nas security definer.
+  //    O advisor do Supabase apontou quatro invoker sem caminho fixo em
+  //    26/07/2026. A pior era `pipeline_codigo_data`: ela decide o que um CHECK
+  //    aceita e o que uma coluna gerada grava, então um esquema à frente no
+  //    search_path mudaria a regra sem mudar uma linha de migration.
+  const ENDURECIMENTO = "supabase/migrations/20260726190000_pipeline_endurecimento.sql";
+  const endurecimento = fs.existsSync(ENDURECIMENTO) ? fs.readFileSync(ENDURECIMENTO, "utf8") : "";
+  const ultimaDefinicao = new Map();
+  for (const source of [schema, presets, endurecimento]) {
+    for (const match of source.matchAll(/create\s+or\s+replace\s+function\s+public\.(\w+)[\s\S]*?\$\$/gi)) {
+      ultimaDefinicao.set(match[1], match[0]);
     }
   }
+  for (const [nome, corpo] of ultimaDefinicao) {
+    if (!/set\s+search_path\s*=/i.test(corpo))
+      errors.push(`Função ${nome} não fixa search_path.`);
+  }
 
-  // 5. As siglas: SQL e TypeScript precisam declarar exatamente as mesmas.
+  // 5. Auxiliar de política não é API: anon não pode executá-la.
+  for (const auxiliar of ["pipeline_permite", "pipeline_permite_cartao"]) {
+    const revogacao = new RegExp(`revoke\\s+all\\s+on\\s+function\\s+public\\.${auxiliar}\\([^)]*\\)\\s*\\n?\\s*from\\s+public,\\s*anon`, "i");
+    if (!revogacao.test(endurecimento))
+      errors.push(`${auxiliar} não revoga EXECUTE de public e anon — ficaria exposta em /rest/v1/rpc.`);
+  }
+
+  // 6. As siglas: SQL e TypeScript precisam declarar exatamente as mesmas.
   const sqlCodes = new Map();
   for (const match of schema.matchAll(/when\s+'(\w+):(\w+)'\s+then\s+'([A-Z]{3})'/g)) {
     sqlCodes.set(match[3], `${match[1]}:${match[2]}`);
@@ -95,7 +111,7 @@ if (schema && presets && moduloTs) {
     if (!sqlCodes.has(codigo)) errors.push(`Sigla ${codigo} existe em ${MODULE} e não no banco.`);
   }
 
-  // 6. Toda combinação usada pelos presets tem sigla no catálogo do banco.
+  // 7. Toda combinação usada pelos presets tem sigla no catálogo do banco.
   const usadas = new Set();
   for (const match of presets.matchAll(/'(limite|prevista|efetiva):(inicio|termino|entrega|agendamento|assistencia)'/g)) {
     usadas.add(`${match[1]}:${match[2]}`);
@@ -106,7 +122,7 @@ if (schema && presets && moduloTs) {
       errors.push(`Preset usa a combinação ${combinacao}, que não tem sigla declarada.`);
   }
 
-  // 7. Etapa é dado, não esquema. Nome de etapa de segmento dentro de um CHECK
+  // 8. Etapa é dado, não esquema. Nome de etapa de segmento dentro de um CHECK
   //    é o que obrigaria a uma migration só para renomear uma coluna do kanban.
   const jargao = /\b(medicao|fabricacao|montagem|marcenaria|planejados)\b/i;
   for (const linha of schema.split("\n")) {
@@ -114,7 +130,7 @@ if (schema && presets && moduloTs) {
       errors.push(`Jargão de segmento dentro de CHECK no esquema: ${linha.trim()}`);
   }
 
-  // 8. As duas listas declaradas pelo responsável, com nove etapas cada.
+  // 9. As duas listas declaradas pelo responsável, com nove etapas cada.
   for (const preset of ["projeto_moveis_planejados", "assistencia_padrao"]) {
     // A linha de etapa é a que declara categoria; a do catálogo de presets
     // repete a mesma chave e não deve ser contada.

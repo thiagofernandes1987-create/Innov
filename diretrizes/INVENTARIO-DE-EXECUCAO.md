@@ -517,6 +517,16 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.15.3 — Painel de módulo em matriz, com todo número clicável, e cartão por equipe com contadores no rodapé
   - [x] T-23.15.4 — Grade de linhas editável do pedido de compra como molde do orçamento (D7): `adicionar item`, `adicionar seção`, `adicionar nota`, colunas opcionais e totais à direita
   - [x] T-23.15.5 — Anatomia do cartão de kanban por tipo de registro, e o estado vazio com exemplos esmaecidos ao fundo
+- [x] T-23.16 — **Aplicação em homologação**, autorizada pelo responsável em 26 de julho de 2026
+  - [x] T-23.16.1 — Três migrations aplicadas no projeto `wyeojufebtwblsubkunr`: 9 tabelas, 9 com RLS forçada, 21 políticas
+  - [x] T-23.16.2 — Presets instalados pelo caminho real da RPC, sob a identidade do usuário `admin@admin.com`, com a checagem de permissão exercitada — e não contornada
+  - [x] T-23.16.3 — Registros reais colocados nas trilhas: 5 chamados e 2 clientes. DLA derivada do `resolution_due_at` já gravado no chamado; nenhuma data inventada. A trilha do projeto ficou vazia porque a organização não tem projeto cadastrado
+  - [x] T-23.16.4 — Movimentação de etapa exercitada sob o papel `authenticated`: histórico gravado pelo gatilho com autoria correta
+  - [x] T-23.16.5 — **Advisor do Supabase apontou dois defeitos meus**, corrigidos em migration própria (`20260726190000_pipeline_endurecimento.sql`): quatro funções sem `search_path` fixo — a pior é `pipeline_codigo_data`, que decide o que um CHECK aceita e o que a coluna gerada grava — e `pipeline_permite`/`pipeline_permite_cartao` expostas a `anon` em `/rest/v1/rpc`
+  - [x] T-23.16.6 — `validate:pipeline` passou a exigir `search_path` em toda função do pipeline, não só nas `security definer`; sabotagem confirmada
+  - [x] T-23.16.7 — Kanban e lista verificados em navegador real: colunas com contagem e soma, etapa final recolhida, prazo colorido por situação, ordenação por urgência, busca por marcador e alternância de visão sem recarregar
+- [ ] T-23.17 — **Verificar a tela contra a homologação real.** O `fetch` do servidor Next é recusado pelo proxy de egresso do ambiente (`Host not in allowlist: wyeojufebtwblsubkunr.supabase.co`), enquanto `curl` passa por túnel CONNECT. A verificação em navegador foi feita com dados fixos; falta repetir contra o banco depois que o host entrar na lista de egresso do ambiente
+- [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria
 
 ---
 
