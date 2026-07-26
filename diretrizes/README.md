@@ -22,6 +22,7 @@ A regra é inegociável:
 | [`RECUPERACAO.md`](./RECUPERACAO.md) | Procedimento para reconstruir o projeto a partir do GitHub. |
 | [`VACINAS.md`](./VACINAS.md) | Catálogo de causas-raiz, correções canônicas e prevenção automática. |
 | [`OBJECT-RUNTIME.md`](./OBJECT-RUNTIME.md) | Motor de objetos dinâmicos: composição por características, armazenamento, índices, RLS sobre dado dinâmico e escala. |
+| [`PADRAO-DE-INTERFACE.md`](./PADRAO-DE-INTERFACE.md) | Estrutura de interface: catálogo de visualizações, painel de controle, formulário, componentes de campo e Definition of Done de módulo. |
 | [`UI-UX-PRO-MAX.md`](./UI-UX-PRO-MAX.md) | Design system, acessibilidade, responsividade, estados e pipeline permanente de interface. |
 | [`PADRAO-DOCUMENTACAO.md`](./PADRAO-DOCUMENTACAO.md) | Definition of Done documental e regras de atualização. |
 | [`HISTORICO-ETAPAS.md`](./HISTORICO-ETAPAS.md) | Índice dos documentos técnicos históricos em `docs/`. |

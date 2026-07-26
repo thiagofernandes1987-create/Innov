@@ -480,6 +480,8 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
 - [ ] T-23.7 — **Orçamento operável**: inserir, editar e remover item de custo, com recálculo de BDI, markup e preço
 - [ ] T-23.8 — Corrigir D2, D3 e D8
 - [ ] T-23.9 — Aplicar `diretrizes/UI-UX-PRO-MAX.md` e a skill `ui-ux-pro-max` em cada tela refeita
+- [x] T-23.10 — Escrever `diretrizes/PADRAO-DE-INTERFACE.md` com o padrão extraído das fontes oficiais, o catálogo de visualizações, a estrutura de formulário, os componentes de campo e o Definition of Done de módulo
+- [ ] T-23.11 — Ordem de adoção: componentes de campo primeiro, CRM como piloto, demais módulos replicando o molde com o vocabulário da S-20 na mesma passagem
 
 ---
 

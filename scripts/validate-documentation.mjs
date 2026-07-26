@@ -6,7 +6,7 @@ const requiredCanonical=[
  "diretrizes/MODULOS.md","diretrizes/ARQUITETURA.md","diretrizes/ROADMAP.md","diretrizes/RECUPERACAO.md",
  "diretrizes/VACINAS.md","diretrizes/UI-UX-PRO-MAX.md","diretrizes/PADRAO-DOCUMENTACAO.md","diretrizes/HISTORICO-ETAPAS.md",
  "diretrizes/METODO-DE-TRABALHO.md","diretrizes/OBJECT-RUNTIME.md",
- "diretrizes/LEIA-PRIMEIRO.md","diretrizes/INVENTARIO-DE-EXECUCAO.md"
+ "diretrizes/LEIA-PRIMEIRO.md","diretrizes/INVENTARIO-DE-EXECUCAO.md","diretrizes/PADRAO-DE-INTERFACE.md"
 ];
 const requiredVaccines=[
  "diretrizes/vacinas/VACINA-001-RELACOES-SUPABASE.md",
