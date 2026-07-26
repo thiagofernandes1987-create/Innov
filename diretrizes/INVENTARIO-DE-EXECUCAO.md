@@ -526,6 +526,16 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.16.6 — `validate:pipeline` passou a exigir `search_path` em toda função do pipeline, não só nas `security definer`; sabotagem confirmada
   - [x] T-23.16.7 — Kanban e lista verificados em navegador real: colunas com contagem e soma, etapa final recolhida, prazo colorido por situação, ordenação por urgência, busca por marcador e alternância de visão sem recarregar
 - [ ] T-23.17 — **Verificar a tela contra a homologação real.** O `fetch` do servidor Next é recusado pelo proxy de egresso do ambiente (`Host not in allowlist: wyeojufebtwblsubkunr.supabase.co`), enquanto `curl` passa por túnel CONNECT. A verificação em navegador foi feita com dados fixos; falta repetir contra o banco depois que o host entrar na lista de egresso do ambiente
+- [x] T-23.19 — **Casca vertical: grade de aplicativos por permissão, sem menu lateral**
+  - [x] T-23.19.1 — Tela inicial `/app` lista só os aplicativos que o perfil libera, agrupados por categoria, com busca que ignora acento (`components/casca/launcher.tsx`)
+  - [x] T-23.19.2 — Barra superior única: logotipo volta à grade, e o nome do aplicativo corrente responde "onde eu estou" agora que não há item de menu marcado
+  - [x] T-23.19.3 — Menu lateral removido do aplicativo interno; devolveu 278px de largura a tabelas e kanbans. O portal do cliente mantém o dele, por ter poucas telas
+  - [x] T-23.19.4 — Caminho da requisição propagado em `proxy.ts` por `x-pathname`, porque Server Component não enxerga a rota
+  - [x] T-23.19.5 — **Ícones viraram SVG** (`components/casca/icones.tsx`). Antes eram glifos escolhidos por semelhança de forma — `♙` para Clientes, `∑` para Orçamentos, `◌` para SAC. Peão de xadrez não é cliente
+  - [x] T-23.19.6 — Verificado em navegador com três perfis: produção vê 6 aplicativos, financeiro vê 7, administrador vê 21. Busca sem acento encontra "Orçamentos"; foco de teclado chega ao cartão
+  - [x] T-23.19.7 — Alvos de 44px, foco visível, `prefers-reduced-motion` respeitado e nenhum emoji como ícone, conforme a lista de verificação da skill `ui-ux-pro-max`
+- [x] T-23.20 — **Defeito D8 corrigido**: `app/icon.svg` declara o ícone da aba; o 404 de favicon apareceu no console durante a verificação desta sprint
+- [ ] T-23.21 — **Menus por aplicativo na barra superior.** No padrão de mercado, todo aplicativo traz os próprios menus ao lado do nome, e termina em `Relatórios` e `Configuração`. Hoje a barra mostra só o nome do aplicativo corrente
 - [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria
 
 ---

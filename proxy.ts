@@ -25,6 +25,11 @@ function denied(request: NextRequest, reason: string, moduleKey?: string) {
 }
 
 export async function proxy(request: NextRequest) {
+  // O caminho da requisição não chega aos Server Components. A casca precisa
+  // dele para dizer em que aplicativo o usuário está, agora que não há mais
+  // menu lateral marcando o item ativo.
+  request.headers.set("x-pathname", request.nextUrl.pathname);
+
   const isProtected = protectedPrefixes.some(prefix =>
     request.nextUrl.pathname === prefix || request.nextUrl.pathname.startsWith(`${prefix}/`)
   );

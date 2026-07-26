@@ -1,63 +1,33 @@
-import Link from "next/link";
-import { signOut } from "@/app/actions/auth";
+import { headers } from "next/headers";
+import { BarraSuperior, type ModuloAtual } from "@/components/casca/barra-superior";
 import { getEffectiveApplications } from "@/lib/authorization";
 
 export const dynamic = "force-dynamic";
 
+// Casca vertical: barra superior e conteúdo. Sem menu lateral.
+//
+// O menu lateral listava todos os aplicativos autorizados em toda tela, o tempo
+// inteiro, roubando 278px de largura de tabelas e kanbans que precisam dela. A
+// navegação passa a ser: logotipo → grade de aplicativos → aplicativo. Um passo
+// a mais para trocar de módulo, nenhum para trabalhar dentro dele.
+
 export default async function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const { context, applications } = await getEffectiveApplications();
-  const navigation = applications.filter(item => item.applicationKey !== "dashboard");
+
+  // O caminho da requisição diz em que aplicativo se está. O prefixo mais
+  // longo vence, senão `/app` casaria com tudo.
+  const caminho = (await headers()).get("x-pathname") ?? "";
+  const moduloAtual: ModuloAtual = applications
+    .filter(item => item.applicationKey !== "dashboard" && caminho.startsWith(item.routePrefix))
+    .sort((a, b) => b.routePrefix.length - a.routePrefix.length)
+    .map(item => ({ chave: item.applicationKey, nome: item.name }))[0] ?? null;
 
   return (
-    <div className="shell">
+    <div className="casca">
       <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
-
-      <aside className="sidebar" aria-label="Navegação principal">
-        <Link className="brand" href="/app" aria-label="Innovar — Central de aplicativos">
-          <span className="brand-mark" aria-hidden="true">IN</span>
-          <span>
-            <strong className="brand-name">INNOVAR</strong>
-            <small>Gestão integrada</small>
-          </span>
-        </Link>
-
-        <nav className="nav" aria-label="Aplicativos autorizados">
-          <Link href="/app">
-            <span className="nav-icon" aria-hidden="true">⌂</span>
-            <span>Início</span>
-          </Link>
-          {navigation.map(application => (
-            <Link key={application.applicationKey} href={application.routePrefix}>
-              <span className="nav-icon" aria-hidden="true">{application.icon}</span>
-              <span>{application.name}</span>
-            </Link>
-          ))}
-        </nav>
-
-        <div className="sidebar-footer">
-          <small>{context.role}</small>
-          <p>{context.email}</p>
-          <form action={signOut}>
-            <button className="button button-secondary" type="submit">Encerrar sessão</button>
-          </form>
-        </div>
-      </aside>
-
-      <div className="main">
-        <header className="topbar">
-          <div className="topbar-context">
-            <strong>Organização ativa</strong>
-            <small>Aplicativos exibidos conforme perfil, capacidade e escopo</small>
-          </div>
-          <div className="topbar-meta">
-            <span className="organization-chip mono" title={context.organizationId}>
-              {context.organizationId.slice(0, 8)}
-            </span>
-          </div>
-        </header>
-        <div id="conteudo-principal" className="main-content-anchor" tabIndex={-1}>
-          {children}
-        </div>
+      <BarraSuperior moduloAtual={moduloAtual} email={context.email} papel={context.role} />
+      <div id="conteudo-principal" className="casca-conteudo" tabIndex={-1}>
+        {children}
       </div>
     </div>
   );

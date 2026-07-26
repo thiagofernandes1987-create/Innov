@@ -799,3 +799,187 @@ tbody tr:hover { background: #fafcfd; }
   white-space: nowrap;
   border: 0;
 }
+
+/* ── Casca vertical ────────────────────────────────────────────────────────
+   Barra superior e conteúdo. O menu lateral saiu: ele listava todos os
+   aplicativos em toda tela e roubava 278px de largura de tabelas e kanbans
+   que precisam dela.
+
+   Densidade de painel — escala de 8 a 32px —, movimento discreto e nenhum
+   glifo fazendo papel de ícone. */
+
+.casca { min-height: 100vh; display: flex; flex-direction: column; background: var(--page); }
+.casca-conteudo { flex: 1; min-width: 0; }
+.casca-conteudo:focus { outline: 0; }
+
+.barra-superior {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 8px 20px;
+  background: linear-gradient(160deg, var(--ink) 0%, var(--navy) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  color: #fff;
+}
+
+.barra-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 4px 10px 4px 4px;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  text-decoration: none;
+  transition: background var(--transition-fast);
+}
+.barra-logo:hover { background: rgba(255, 255, 255, 0.09); }
+.barra-logo:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.barra-logo-marca {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: linear-gradient(145deg, #245e9a, var(--brand-strong));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font: 800 12px/1 Manrope, Inter, sans-serif;
+  letter-spacing: 0.04em;
+}
+.barra-logo-nome { font: 800 13px/1 Manrope, Inter, sans-serif; letter-spacing: 0.1em; }
+
+.barra-modulo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 16px;
+  border-left: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 0.94rem;
+}
+.barra-modulo-icone { display: grid; place-items: center; opacity: 0.85; }
+.barra-modulo-inicio { color: rgba(255, 255, 255, 0.72); }
+
+.barra-direita { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.barra-usuario { display: none; flex-direction: column; line-height: 1.25; text-align: right; }
+.barra-usuario strong { font-size: 0.82rem; font-weight: 600; }
+.barra-usuario small { font-size: 0.72rem; color: rgba(255, 255, 255, 0.62); }
+@media (min-width: 720px) { .barra-usuario { display: flex; } }
+
+.barra-sair {
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.barra-sair:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.35); }
+.barra-sair:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* ── Grade de aplicativos ────────────────────────────────────────────────── */
+
+.pagina-launcher { padding-top: 28px; }
+.launcher-cabecalho { margin-bottom: 20px; }
+.launcher-cabecalho h1 { margin: 0 0 4px; font-size: 1.7rem; }
+.launcher-cabecalho p { margin: 0; color: var(--muted); }
+
+.launcher-busca {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  max-width: 620px;
+}
+.launcher-busca-icone { position: absolute; left: 12px; color: var(--muted); pointer-events: none; }
+.launcher-busca input {
+  flex: 1;
+  min-height: 44px;
+  padding: 0 12px 0 38px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 0.95rem;
+}
+.launcher-busca input:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.launcher-contagem { color: var(--muted); font-size: 0.84rem; white-space: nowrap; }
+
+.launcher-categoria { margin-bottom: 26px; }
+.launcher-categoria h2 {
+  margin: 0 0 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+}
+
+.launcher-grade {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+}
+
+.launcher-app {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 116px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+.launcher-app:hover {
+  border-color: var(--brand);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+.launcher-app:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.launcher-app strong { font-size: 0.92rem; font-weight: 600; line-height: 1.25; }
+.launcher-app small { font-size: 0.74rem; color: var(--muted); }
+.launcher-app-icone {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 6px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+.launcher-vazio {
+  padding: 22px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  color: var(--muted);
+  background: var(--surface);
+}
+
+/* Movimento é sinal, não enfeite: quem pediu menos movimento recebe menos. */
+@media (prefers-reduced-motion: reduce) {
+  .launcher-app,
+  .barra-logo,
+  .barra-sair { transition: none; }
+  .launcher-app:hover { transform: none; }
+}
