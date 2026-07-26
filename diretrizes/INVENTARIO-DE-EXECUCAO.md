@@ -554,6 +554,12 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.24.4 — **Alvo de toque corrigido**: as estrelas de prioridade tinham menos de 30px. Passaram a 32×32
   - [x] T-23.24.5 — **Defeito encontrado e corrigido**: `revalidatePath` sem `"layout"` não alcançava a rota do cartão, e seguir alguém gravava no banco sem mudar a tela
   - [x] T-23.24.6 — Contorno da verificação registrado: o `fetch` do servidor local passou a atravessar o proxy do ambiente por túnel CONNECT, o mesmo caminho que o `curl` usa. Arquivo de pré-carga fora do repositório; em produção o servidor fala direto
+- [x] T-23.25 — **Publicado no Vercel**, deploy `dpl_6RujGN7CrjLsGQdFeisg1iNMYms6`, estado READY, commit `6cc342f`
+  - [x] T-23.25.1 — O push no ramo dispara o deploy: o projeto `innov` está ligado ao GitHub. Não foi preciso subir árvore de arquivos
+  - [x] T-23.25.2 — Verificado no ar: `/login` responde 200, `<html data-tema="sistema">` sai do servidor, `/icon.svg` está no `<head>` e os cabeçalhos de CSP, HSTS e `x-frame-options` chegam
+  - [x] T-23.25.3 — Alias do ramo: `innov-git-claude-diretrizes-object-runtime-apex-method.vercel.app`
+- [ ] T-23.26 — **Promover para produção.** O deploy atual é de preview. As variáveis de produção seguem sem configurar por decisão do responsável em 26/07, para o endereço público não expor a plataforma com as credenciais fracas de homologação. Promover exige credenciais próprias de produção
+- [ ] T-23.27 — **Verificar o fluxo autenticado no ar.** A proteção de deploy do Vercel intercepta as rotas de `/app` antes da aplicação, então a varredura autenticada foi feita contra o servidor local ligado à mesma homologação. Repetir no ar depende de liberar o acesso ou usar um link de compartilhamento
 - [x] T-23.20 — **Defeito D8 corrigido**: `app/icon.svg` declara o ícone da aba; o 404 de favicon apareceu no console durante a verificação desta sprint
 - [ ] T-23.21 — **Menus por aplicativo na barra superior.** No padrão de mercado, todo aplicativo traz os próprios menus ao lado do nome, e termina em `Relatórios` e `Configuração`. Hoje a barra mostra só o nome do aplicativo corrente
 - [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria
