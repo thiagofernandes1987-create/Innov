@@ -385,7 +385,7 @@ Consulta ao catálogo antes de resolver, conforme o protocolo: a causa raiz **j�
 ---
 
 ## Sprint S-22 — Reconstruir a capacidade de recuperação do repositório
-**Estado:** em andamento
+**Estado:** pendente
 **Marco:** M-0
 
 Descoberto em 25 de julho de 2026, ao executar o replay pedido pela T-21.3.3. Entra no fim conforme a R4, porque é ordem de grandeza maior do que a S-21 e não cabe nela.
@@ -427,7 +427,7 @@ Aberto em 26 de julho de 2026, a partir de revisão do responsável sobre telas 
 O diagnóstico foi direto: *"os módulos são rascunhos mal feitos, o pipeline é estático, muito amador"*. A verificação confirmou cada ponto — não é impressão.
 
 ## Sprint S-23 — Fundação de interface: validação, visualizações e pipeline
-**Estado:** pendente
+**Estado:** em andamento
 **Marco:** M-5
 
 ### Defeitos verificados
@@ -491,6 +491,7 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
+| 2026-07-26 | S-23 passa à frente da S-22 e da S-20 | Caso de **base reaproveitável** previsto na R5. Os componentes de campo da S-23 servem aos 20 módulos e resolvem o defeito mais grave já verificado — dado inválido gravado em produção. A S-22 trata de reconstrução do banco e não bloqueia interface; a S-20 troca vocabulário nas mesmas telas que a S-23 vai refazer, então entra junto, tela por tela, para não refazer duas vezes. |
 | 2026-07-25 | Virada S-21 → S-22, sem reordenação | A S-22 nasceu do resultado da própria S-21 e é pré-requisito de tudo: enquanto o repositório não reconstrói o banco, nenhuma sprint que crie migration tem base verificável. A S-06 e a S-20 seguem atrás dela. |
 | 2026-07-25 | S-21 passa à frente da S-06 | Pré-requisito descoberto, caso previsto na R5. A S-06 cria a camada compartilhada sobre o esquema da homologação; enquanto o repositório não reproduz esse esquema, qualquer migration nova é aplicada sobre chão que ninguém consegue recriar. Reconciliar o ledger primeiro é o que torna a S-06 verificável. |
 | 2026-07-25 | Virada S-05 → S-06, sem reordenação | Avaliadas as pendentes na virada, conforme R5. S-06 continua a próxima: a camada compartilhada consome a projeção de slots que a S-05 acabou de produzir, e S-07 e S-08 dependem da tabela existir. A S-20, descoberta durante a S-05, não passa à frente por ser vocabulário de interface, sem bloquear nada da fundação. |

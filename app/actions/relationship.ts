@@ -12,6 +12,7 @@ import{
 }from"@/lib/file-security/domain";
 import{secureUpload}from"@/lib/file-security/server";
 import{createSupabaseAdminClient}from"@/lib/supabase/admin";
+import{checarCamposBR}from"@/lib/validacao/formulario";
 
 function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
@@ -31,6 +32,12 @@ function fileSecurityMessage(error:unknown){
 
 export async function createCrmLead(data:FormData){
  const context=await requireCapability("crm","create");const path="/app/crm/leads/novo";
+ const invalido=checarCamposBR(data,[
+  {campo:"email",tipo:"email",rotulo:"E-mail"},
+  {campo:"phone",tipo:"telefone",rotulo:"Telefone/WhatsApp"},
+  {campo:"taxId",tipo:"documento",rotulo:"CPF/CNPJ"}
+ ]);
+ if(invalido)fail(path,invalido);
  const{data:lead,error}=await context.supabase.rpc("create_crm_lead",{
   p_organization_id:context.organizationId,p_full_name:text(data,"fullName"),p_company_name:optional(data,"companyName"),
   p_email:optional(data,"email"),p_phone:optional(data,"phone"),p_tax_id:optional(data,"taxId"),p_source:optional(data,"source"),
@@ -72,6 +79,13 @@ export async function moveCrmOpportunityStage(data:FormData){
 
 export async function createRelationshipClient(data:FormData){
  const context=await requireCapability("clientes","create");const path="/app/clientes/novo";
+ const invalido=checarCamposBR(data,[
+  {campo:"email",tipo:"email",rotulo:"E-mail"},
+  {campo:"phone",tipo:"telefone",rotulo:"Telefone"},
+  {campo:"taxId",tipo:"documento",rotulo:"CPF/CNPJ",campoTipoPessoa:"type"},
+  {campo:"postalCode",tipo:"cep",rotulo:"CEP"}
+ ]);
+ if(invalido)fail(path,invalido);
  const{data:client,error}=await context.supabase.from("clients").insert({
   organization_id:context.organizationId,type:text(data,"type")||"PERSON",legal_name:text(data,"legalName"),trade_name:optional(data,"tradeName"),
   tax_id:optional(data,"taxId"),email:optional(data,"email"),phone:optional(data,"phone"),status:"ACTIVE",address_line:optional(data,"addressLine"),
@@ -84,6 +98,13 @@ export async function createRelationshipClient(data:FormData){
 
 export async function updateRelationshipClient(data:FormData){
  const id=text(data,"clientId");const context=await requireCapability("clientes","update");const path=`/app/clientes/${id}`;
+ const invalido=checarCamposBR(data,[
+  {campo:"email",tipo:"email",rotulo:"E-mail"},
+  {campo:"phone",tipo:"telefone",rotulo:"Telefone"},
+  {campo:"taxId",tipo:"documento",rotulo:"CPF/CNPJ",campoTipoPessoa:"type"},
+  {campo:"postalCode",tipo:"cep",rotulo:"CEP"}
+ ]);
+ if(invalido)fail(path,invalido);
  const{error}=await context.supabase.from("clients").update({
   type:text(data,"type"),legal_name:text(data,"legalName"),trade_name:optional(data,"tradeName"),tax_id:optional(data,"taxId"),email:optional(data,"email"),phone:optional(data,"phone"),
   address_line:optional(data,"addressLine"),city:optional(data,"city"),state:optional(data,"state"),postal_code:optional(data,"postalCode"),notes:optional(data,"notes"),source:optional(data,"source"),
