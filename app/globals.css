@@ -1,5 +1,5 @@
 :root {
-  color-scheme: light;
+  color-scheme: light dark;
   --ink: #07151e;
   --navy: #0b2239;
   --navy-soft: #12304d;
@@ -41,6 +41,87 @@
   --content-max: 1320px;
   --transition-fast: 140ms ease;
   --transition-base: 190ms ease;
+}
+
+
+/* ── Tema escuro ───────────────────────────────────────────────────────────
+   Só troca de token. A tela inteira lê `--surface`, `--text`, `--border`, então
+   escurecer é redefinir o vocabulário, não reescrever componente por
+   componente.
+
+   Três regras que a versão escura precisa respeitar e a clara não:
+
+   1. Superfície que sobe, clareia. No claro a hierarquia vem de sombra; no
+      escuro, de luminosidade — sombra preta sobre fundo preto não existe.
+   2. Nada de preto puro. `#0d1117` em vez de `#000`: preto absoluto com texto
+      branco cansa a vista e faz o texto "vibrar" em tela OLED.
+   3. Cor de estado perde saturação e ganha claridade. O mesmo vermelho do tema
+      claro, sobre fundo escuro, vira um borrão que não se lê.
+
+   A paleta clara continua sendo a base; aqui só o que muda. */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    color-scheme: dark;
+    --page: #0d1117;
+    --paper: #0d1117;
+    --surface: #161b25;
+    --surface-muted: #1b212c;
+    --surface-strong: #222936;
+    --text: #e6edf5;
+    --muted: #94a3b4;
+    --border: #2a3240;
+    --border-strong: #3b4552;
+    --brand: #5c9ce0;
+    --brand-strong: #7cb2ea;
+    --brand-soft: #1a2637;
+    --copper: #d19a68;
+    --copper-strong: #e0b183;
+    --copper-soft: #2c2118;
+    --success: #58c295;
+    --success-soft: #14291f;
+    --warning: #e0a662;
+    --warning-soft: #2c2214;
+    --danger: #f0808f;
+    --danger-soft: #2e1519;
+    --info: #6faae6;
+    --info-soft: #14212f;
+    --ring: rgba(124, 178, 234, 0.5);
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.45);
+    --shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
+  }
+}
+
+:root[data-tema="escuro"] {
+  color-scheme: dark;
+  --page: #0d1117;
+  --paper: #0d1117;
+  --surface: #161b25;
+  --surface-muted: #1b212c;
+  --surface-strong: #222936;
+  --text: #e6edf5;
+  --muted: #94a3b4;
+  --border: #2a3240;
+  --border-strong: #3b4552;
+  --brand: #5c9ce0;
+  --brand-strong: #7cb2ea;
+  --brand-soft: #1a2637;
+  --copper: #d19a68;
+  --copper-strong: #e0b183;
+  --copper-soft: #2c2118;
+  --success: #58c295;
+  --success-soft: #14291f;
+  --warning: #e0a662;
+  --warning-soft: #2c2214;
+  --danger: #f0808f;
+  --danger-soft: #2e1519;
+  --info: #6faae6;
+  --info-soft: #14212f;
+  --ring: rgba(124, 178, 234, 0.5);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.45);
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
 }
 
 * { box-sizing: border-box; }
@@ -431,7 +512,7 @@ tbody tr:hover { background: #fafcfd; }
   display: flex;
   align-items: flex-start;
   gap: 6px;
-  color: #812a34;
+  color: var(--danger);
   font-size: 0.78rem;
   line-height: 1.35;
   font-weight: 500;
@@ -885,101 +966,212 @@ tbody tr:hover { background: #fafcfd; }
 .barra-sair:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.35); }
 .barra-sair:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
-/* ── Grade de aplicativos ────────────────────────────────────────────────── */
+/* ── Grade de aplicativos ──────────────────────────────────────────────────
+   Seis por linha, largura igual, altura igual. Categoria virou filtro: como
+   título de seção, uma categoria com um aplicativo só deixava cinco buracos na
+   linha, e a tela parecia bagunçada justamente por estar agrupada. */
 
-.pagina-launcher { padding-top: 28px; }
-.launcher-cabecalho { margin-bottom: 20px; }
-.launcher-cabecalho h1 { margin: 0 0 4px; font-size: 1.7rem; }
-.launcher-cabecalho p { margin: 0; color: var(--muted); }
+.pagina-launcher { padding-top: 30px; }
+.launcher-cabecalho { margin-bottom: 22px; }
+.launcher-cabecalho h1 {
+  margin: 0 0 5px;
+  font-size: clamp(1.5rem, 1.2rem + 1.1vw, 2rem);
+  letter-spacing: -0.02em;
+}
+.launcher-cabecalho p { margin: 0; color: var(--muted); font-size: 0.95rem; }
 
-.launcher-busca {
-  position: relative;
+.launcher-controles {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 24px;
-  max-width: 620px;
+  gap: 12px 16px;
+  margin-bottom: 22px;
 }
-.launcher-busca-icone { position: absolute; left: 12px; color: var(--muted); pointer-events: none; }
+
+.launcher-busca { position: relative; display: flex; align-items: center; flex: 0 1 340px; }
+.launcher-busca-icone { position: absolute; left: 13px; color: var(--muted); pointer-events: none; }
 .launcher-busca input {
-  flex: 1;
-  min-height: 44px;
-  padding: 0 12px 0 38px;
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px 0 39px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: 999px;
   background: var(--surface);
-  font-size: 0.95rem;
+  color: var(--text);
+  font-size: 0.92rem;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-.launcher-busca input:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
-.launcher-contagem { color: var(--muted); font-size: 0.84rem; white-space: nowrap; }
+.launcher-busca input::placeholder { color: var(--muted); }
+.launcher-busca input:hover { border-color: var(--border-strong); }
+.launcher-busca input:focus-visible {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--ring);
+}
 
-.launcher-categoria { margin-bottom: 26px; }
-.launcher-categoria h2 {
-  margin: 0 0 10px;
-  font-size: 0.74rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
+.launcher-filtros { display: flex; flex-wrap: wrap; gap: 6px; }
+.launcher-filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
   color: var(--muted);
+  font-size: 0.83rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+}
+.launcher-filtro span {
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+.launcher-filtro:hover { color: var(--text); border-color: var(--border-strong); }
+.launcher-filtro:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.launcher-filtro.ativo {
+  color: var(--brand-strong);
+  border-color: var(--brand);
+  background: var(--brand-soft);
 }
 
+/* Seis colunas fixas na largura cheia; degrada por faixa, sempre com todas as
+   células do mesmo tamanho — `auto-fill` deixaria a última linha desalinhada. */
 .launcher-grade {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+@media (min-width: 520px)  { .launcher-grade { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 760px)  { .launcher-grade { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1020px) { .launcher-grade { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+@media (min-width: 1240px) { .launcher-grade { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
 
 .launcher-app {
+  position: relative;
   display: flex;
+  height: 100%;
   flex-direction: column;
-  gap: 4px;
-  min-height: 116px;
-  padding: 14px;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 16px 15px 15px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: 15px;
   background: var(--surface);
   color: var(--text);
   text-decoration: none;
   cursor: pointer;
+  overflow: hidden;
   transition:
     border-color var(--transition-fast),
     box-shadow var(--transition-fast),
     transform var(--transition-fast);
 }
-.launcher-app:hover {
+/* Fio de luz no topo: aparece na interação e some depois. É o que dá relevo
+   sem precisar de sombra pesada, que no tema escuro não funcionaria. */
+.launcher-app::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, var(--brand), var(--copper));
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+.launcher-app:hover,
+.launcher-app:focus-visible {
   border-color: var(--brand);
   box-shadow: var(--shadow-sm);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
 }
+.launcher-app:hover::before,
+.launcher-app:focus-visible::before { opacity: 1; }
 .launcher-app:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
-.launcher-app strong { font-size: 0.92rem; font-weight: 600; line-height: 1.25; }
-.launcher-app small { font-size: 0.74rem; color: var(--muted); }
+.launcher-app strong {
+  font-size: 0.9rem;
+  font-weight: 620;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.launcher-app small { font-size: 0.73rem; color: var(--muted); }
 .launcher-app-icone {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 6px;
+  width: 42px;
+  height: 42px;
+  margin-bottom: 11px;
   display: grid;
   place-items: center;
-  border-radius: 11px;
+  border-radius: 12px;
   background: var(--brand-soft);
   color: var(--brand-strong);
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
+.launcher-app:hover .launcher-app-icone { background: var(--brand); color: #fff; }
 
 .launcher-vazio {
-  padding: 22px;
+  padding: 26px;
   border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-md);
+  border-radius: 15px;
   color: var(--muted);
   background: var(--surface);
 }
 
+/* ── Alternador de tema ──────────────────────────────────────────────────── */
+
+.alternador-tema {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.alternador-tema-opcao {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.62);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.alternador-tema-opcao:hover:not(:disabled) { color: #fff; background: rgba(255, 255, 255, 0.12); }
+.alternador-tema-opcao:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.alternador-tema-opcao.ativa { color: var(--ink); background: #fff; }
+.alternador-tema-opcao:disabled { cursor: default; opacity: 0.6; }
+
+/* O reset traz `img, svg { max-width: 100% }`. Dentro de um contêiner de
+   largura fixa que também é grade, essa porcentagem resolve para zero e o
+   ícone some sem erro nenhum no console — o alternador virou uma pílula vazia
+   até estas linhas existirem. Fixar a largura não basta: o `max-width` ainda
+   a corta para zero. Ele precisa ser desligado antes. */
+.alternador-tema-opcao svg,
+.barra-modulo-icone svg,
+.launcher-app-icone svg,
+.launcher-busca-icone { max-width: none; }
+.alternador-tema-opcao svg { width: 17px; height: 17px; }
+.barra-modulo-icone svg { width: 20px; height: 20px; }
+.launcher-app-icone svg { width: 24px; height: 24px; }
+.launcher-busca-icone { width: 18px; height: 18px; }
+
 /* Movimento é sinal, não enfeite: quem pediu menos movimento recebe menos. */
 @media (prefers-reduced-motion: reduce) {
   .launcher-app,
+  .launcher-app::before,
+  .launcher-app-icone,
+  .launcher-filtro,
+  .launcher-busca input,
+  .alternador-tema-opcao,
   .barra-logo,
   .barra-sair { transition: none; }
-  .launcher-app:hover { transform: none; }
+  .launcher-app:hover,
+  .launcher-app:focus-visible { transform: none; }
 }

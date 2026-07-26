@@ -1,5 +1,6 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { BarraSuperior, type ModuloAtual } from "@/components/casca/barra-superior";
+import { COOKIE_TEMA, temaValido } from "@/lib/tema";
 import { getEffectiveApplications } from "@/lib/authorization";
 
 export const dynamic = "force-dynamic";
@@ -22,10 +23,12 @@ export default async function AppLayout({ children }: Readonly<{ children: React
     .sort((a, b) => b.routePrefix.length - a.routePrefix.length)
     .map(item => ({ chave: item.applicationKey, nome: item.name }))[0] ?? null;
 
+  const tema = temaValido((await cookies()).get(COOKIE_TEMA)?.value);
+
   return (
     <div className="casca">
       <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
-      <BarraSuperior moduloAtual={moduloAtual} email={context.email} papel={context.role} />
+      <BarraSuperior moduloAtual={moduloAtual} email={context.email} papel={context.role} tema={tema} />
       <div id="conteudo-principal" className="casca-conteudo" tabIndex={-1}>
         {children}
       </div>

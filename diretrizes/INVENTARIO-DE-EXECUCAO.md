@@ -534,6 +534,14 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.19.5 — **Ícones viraram SVG** (`components/casca/icones.tsx`). Antes eram glifos escolhidos por semelhança de forma — `♙` para Clientes, `∑` para Orçamentos, `◌` para SAC. Peão de xadrez não é cliente
   - [x] T-23.19.6 — Verificado em navegador com três perfis: produção vê 6 aplicativos, financeiro vê 7, administrador vê 21. Busca sem acento encontra "Orçamentos"; foco de teclado chega ao cartão
   - [x] T-23.19.7 — Alvos de 44px, foco visível, `prefers-reduced-motion` respeitado e nenhum emoji como ícone, conforme a lista de verificação da skill `ui-ux-pro-max`
+- [x] T-23.22 — **Grade alinhada e tema claro/escuro**
+  - [x] T-23.22.1 — Seis por linha na largura cheia, degradando 6 → 5 → 4 → 3 → 2. Medido em navegador: uma única largura (210px) e uma única altura (129px) entre todos os cartões
+  - [x] T-23.22.2 — Categoria deixou de ser título de seção e virou filtro com contador. Como seção, uma categoria com um aplicativo só deixava cinco buracos na linha
+  - [x] T-23.22.3 — Tema claro e escuro por token, com terceira opção "seguir o sistema". Preferência em cookie, lida no servidor: o HTML já sai no tema certo e a página não pisca branco antes de escurecer
+  - [x] T-23.22.4 — Regras do escuro registradas no CSS: superfície que sobe clareia, nada de preto puro, cor de estado perde saturação e ganha claridade
+  - [x] T-23.22.5 — `.campo-br-erro` deixou de usar `#812a34` fixo e passou a ler `var(--danger)`
+  - [x] T-23.22.6 — **Defeito encontrado na própria verificação**: `img, svg { max-width: 100% }` do reset zera a largura de um SVG dentro de contêiner de largura indefinida. O alternador de tema renderizou como pílula vazia, sem erro nenhum no console. Fixar `width` não bastava — o `max-width` precisa ser desligado
+  - [x] T-23.22.7 — Verificado em navegador nos dois temas, em 1440, 1024, 760 e 420px, sem erro de console
 - [x] T-23.20 — **Defeito D8 corrigido**: `app/icon.svg` declara o ícone da aba; o 404 de favicon apareceu no console durante a verificação desta sprint
 - [ ] T-23.21 — **Menus por aplicativo na barra superior.** No padrão de mercado, todo aplicativo traz os próprios menus ao lado do nome, e termina em `Relatórios` e `Configuração`. Hoje a barra mostra só o nome do aplicativo corrente
 - [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria

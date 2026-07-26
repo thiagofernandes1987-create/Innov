@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
+import type { Tema } from "@/lib/tema";
+import { AlternadorTema } from "./alternador-tema";
 import { IconeDoModulo } from "./icones";
 
 // Barra superior única, no lugar do menu lateral.
@@ -14,11 +16,13 @@ export type ModuloAtual = { chave: string; nome: string } | null;
 export function BarraSuperior({
   moduloAtual,
   email,
-  papel
+  papel,
+  tema
 }: {
   moduloAtual: ModuloAtual;
   email: string | null;
   papel: string;
+  tema: Tema;
 }) {
   return (
     <header className="barra-superior">
@@ -41,6 +45,7 @@ export function BarraSuperior({
       )}
 
       <div className="barra-direita">
+        <AlternadorTema atual={tema} />
         <span className="barra-usuario">
           <strong>{email ?? "—"}</strong>
           <small>{papel}</small>
