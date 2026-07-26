@@ -798,14 +798,24 @@ tbody tr:hover { background: #fafcfd; }
 
 .cartao-titulo h2 { margin: 0 0 4px; font-size: 1.4rem; }
 .cartao-prioridade { display: inline-flex; gap: 2px; margin-top: 8px; }
+/* 32×32 não é capricho: alvo de toque abaixo disso erra o dedo, e a estrela é
+   um botão que muda dado. O mínimo da WCAG para alvo não embutido em texto é
+   24×24; aqui sobra folga. */
 .cartao-prioridade .estrela {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
   border: 0;
+  border-radius: 8px;
   background: transparent;
   color: var(--border-strong);
   font-size: 1rem;
   cursor: pointer;
-  padding: 0 2px;
+  transition: background var(--transition-fast);
 }
+.cartao-prioridade .estrela:hover:not(:disabled) { background: var(--surface-strong); }
+.cartao-prioridade .estrela:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
 .cartao-prioridade .estrela.cheia { color: var(--copper); }
 
 .cartao-abas { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--border); margin: 18px 0 0; }
@@ -1174,4 +1184,86 @@ tbody tr:hover { background: #fafcfd; }
   .barra-sair { transition: none; }
   .launcher-app:hover,
   .launcher-app:focus-visible { transform: none; }
+}
+
+/* ── Responsável e seguidores ─────────────────────────────────────────────
+   Duas coisas diferentes, lado a lado. Um cartão tem um responsável — quem
+   responde se o prazo estourar — e vários seguidores, que só querem saber
+   quando algo muda. */
+
+.cartao-pessoas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.cartao-rotulo {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.cartao-contagem {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-align: center;
+  letter-spacing: 0;
+}
+.cartao-responsavel select {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.88rem;
+  max-width: 260px;
+}
+.cartao-responsavel select:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.cartao-responsavel strong { font-size: 0.92rem; }
+
+.cartao-seguidores-lista { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.cartao-avatar {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  border: 1px solid var(--border);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: default;
+}
+.cartao-seguir {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 550;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+.cartao-seguir:hover:not(:disabled) { border-color: var(--brand); color: var(--brand-strong); }
+.cartao-seguir:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.cartao-seguir.seguindo { background: var(--brand-soft); border-color: var(--brand); color: var(--brand-strong); }
+.cartao-seguir:disabled { cursor: default; opacity: 0.6; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cartao-seguir { transition: none; }
 }

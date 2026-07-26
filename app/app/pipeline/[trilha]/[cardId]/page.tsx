@@ -23,9 +23,7 @@ export default async function CartaoPage({
     <main className="content pipeline-pagina">
       <section className="page-heading">
         <div>
-          <span className="badge">
-            {ROTULO_TRILHA[trilha as Trilha].toUpperCase()} · {carregado.pipeline.name.toUpperCase()}
-          </span>
+          <span className="badge">{ROTULO_TRILHA[trilha as Trilha].toUpperCase()}</span>
           <h1>{carregado.cartao.titulo}</h1>
           <p>{carregado.cartao.subtitulo ?? "Sem cliente vinculado"}</p>
         </div>
@@ -42,6 +40,10 @@ export default async function CartaoPage({
         chamados={carregado.chamados}
         observacoes={carregado.observacoes}
         historico={carregado.historico}
+        responsavel={carregado.responsavel}
+        seguidores={carregado.seguidores}
+        euSigo={carregado.euSigo}
+        pessoas={carregado.pessoas}
         podeEditar={podeEditar}
       />
     </main>

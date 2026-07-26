@@ -281,21 +281,29 @@ export type CartaoCompleto = {
   chamados: { id: string; code: string; title: string; status: string; created_at: string }[];
   observacoes: { id: string; tipo: string; corpo: string; autor_id: string | null; created_at: string }[];
   historico: { id: string; de_stage_id: string | null; para_stage_id: string; movido_em: string }[];
+  responsavel: Pessoa | null;
+  seguidores: Pessoa[];
+  euSigo: boolean;
+  euSou: string;
+  pessoas: Pessoa[];
 };
 
+/** Quem é quem: `profiles` guarda nome e e-mail; `auth.users` só o id. */
+export type Pessoa = { id: string; nome: string; email: string | null };
+
 export async function carregarCartao(cardId: string): Promise<CartaoCompleto | null> {
-  const { supabase } = await requireOrganizationContext();
+  const { supabase, userId } = await requireOrganizationContext();
 
   const { data: linha, error } = await supabase
     .from("pipeline_cards")
     .select(
-      "id,pipeline_id,stage_id,trilha,titulo,descricao,client_id,project_id,ticket_id,responsavel_id,prioridade,valor,cor,posicao,created_at"
+      "id,organization_id,pipeline_id,stage_id,trilha,titulo,descricao,client_id,project_id,ticket_id,responsavel_id,prioridade,valor,cor,posicao,created_at"
     )
     .eq("id", cardId)
     .maybeSingle();
   if (error || !linha) return null;
 
-  const cartaoLinha = linha as LinhaCartao & { pipeline_id: string };
+  const cartaoLinha = linha as LinhaCartao & { pipeline_id: string; organization_id: string };
 
   const [pipelineResultado, etapasResultado, datasResultado, vinculosResultado, notasResultado, historicoResultado] =
     await Promise.all([
@@ -334,6 +342,12 @@ export async function carregarCartao(cardId: string): Promise<CartaoCompleto | n
     .select("natureza,marco,obrigatoria")
     .eq("stage_id", cartaoLinha.stage_id);
 
+  const seguidoresResultado = await supabase
+    .from("pipeline_card_followers")
+    .select("user_id,adicionado_em")
+    .eq("card_id", cardId)
+    .order("adicionado_em", { ascending: true });
+
   // O que o cliente tem, para as abas e para os botões de estatística. Cada
   // consulta é opcional: falta de permissão em um módulo não pode derrubar a
   // tela inteira do outro.
@@ -359,6 +373,48 @@ export async function carregarCartao(cardId: string): Promise<CartaoCompleto | n
           .limit(50)
       : Promise.resolve({ data: [] })
   ]);
+
+  // Nome de gente: sem isto o cartão mostraria uuid onde deveria mostrar
+  // "quem responde por isto".
+  const idsPessoa = [
+    ...new Set(
+      [
+        cartaoLinha.responsavel_id,
+        ...((seguidoresResultado.data ?? []) as { user_id: string }[]).map(item => item.user_id),
+        ...((notasResultado.data ?? []) as { autor_id: string | null }[]).map(item => item.autor_id)
+      ].filter((id): id is string => Boolean(id))
+    )
+  ];
+  const pessoasResultado = idsPessoa.length
+    ? await supabase.from("profiles").select("id,full_name,email").in("id", idsPessoa)
+    : { data: [] };
+  const pessoaPorId = new Map<string, Pessoa>(
+    ((pessoasResultado.data ?? []) as { id: string; full_name: string | null; email: string | null }[]).map(linha => [
+      linha.id,
+      { id: linha.id, nome: linha.full_name?.trim() || linha.email || "Sem nome", email: linha.email }
+    ])
+  );
+  const pessoa = (id: string | null | undefined): Pessoa | null =>
+    id ? (pessoaPorId.get(id) ?? { id, nome: "Usuário removido", email: null }) : null;
+
+  const seguidores = ((seguidoresResultado.data ?? []) as { user_id: string }[])
+    .map(item => pessoa(item.user_id))
+    .filter((item): item is Pessoa => item !== null);
+
+  // Lista para escolher responsável e inscrever seguidor: quem é da mesma
+  // organização, e ninguém além disso.
+  const membrosResultado = await supabase
+    .from("organization_memberships")
+    .select("user_id")
+    .eq("organization_id", cartaoLinha.organization_id)
+    .eq("active", true);
+  const idsMembro = ((membrosResultado.data ?? []) as { user_id: string }[]).map(item => item.user_id);
+  const membrosPerfil = idsMembro.length
+    ? await supabase.from("profiles").select("id,full_name,email").in("id", idsMembro)
+    : { data: [] };
+  const pessoas: Pessoa[] = ((membrosPerfil.data ?? []) as { id: string; full_name: string | null; email: string | null }[])
+    .map(linha => ({ id: linha.id, nome: linha.full_name?.trim() || linha.email || "Sem nome", email: linha.email }))
+    .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
 
   const cliente = clienteResultado.data as Record<string, unknown> | null;
   const nomeCliente = cliente
@@ -424,6 +480,11 @@ export async function carregarCartao(cardId: string): Promise<CartaoCompleto | n
     documentos: (documentosResultado.data ?? []) as CartaoCompleto["documentos"],
     chamados: (chamadosResultado.data ?? []) as CartaoCompleto["chamados"],
     observacoes: (notasResultado.data ?? []) as CartaoCompleto["observacoes"],
-    historico: (historicoResultado.data ?? []) as CartaoCompleto["historico"]
+    historico: (historicoResultado.data ?? []) as CartaoCompleto["historico"],
+    responsavel: pessoa(cartaoLinha.responsavel_id),
+    seguidores,
+    euSigo: seguidores.some(item => item.id === userId),
+    euSou: userId,
+    pessoas
   };
 }

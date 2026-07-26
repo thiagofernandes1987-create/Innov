@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { definirDataDoCartao, definirPrioridade, moverCartao, registrarObservacao } from "@/app/actions/pipeline";
+import {
+  alternarSeguidor,
+  definirDataDoCartao,
+  definirPrioridade,
+  definirResponsavel,
+  moverCartao,
+  registrarObservacao
+} from "@/app/actions/pipeline";
+import type { Pessoa } from "@/lib/pipeline/server";
 import { descrever, type CodigoData } from "@/lib/pipeline/datas";
 import {
   formatarData,
@@ -33,8 +41,20 @@ type Props = {
   chamados: { id: string; code: string; title: string; status: string; created_at: string }[];
   observacoes: { id: string; tipo: string; corpo: string; autor_id: string | null; created_at: string }[];
   historico: { id: string; de_stage_id: string | null; para_stage_id: string; movido_em: string }[];
+  responsavel: Pessoa | null;
+  seguidores: Pessoa[];
+  euSigo: boolean;
+  pessoas: Pessoa[];
   podeEditar: boolean;
 };
+
+/** Iniciais para o avatar. Duas letras: mais que isso vira sopa de letras. */
+function iniciais(nome: string): string {
+  const partes = nome.trim().split(/\s+/).filter(Boolean);
+  if (partes.length === 0) return "?";
+  if (partes.length === 1) return partes[0].slice(0, 2).toUpperCase();
+  return (partes[0][0] + partes[partes.length - 1][0]).toUpperCase();
+}
 
 function texto(valor: unknown): string {
   const bruto = String(valor ?? "").trim();
@@ -42,8 +62,23 @@ function texto(valor: unknown): string {
 }
 
 export function CartaoCompleto(props: Props) {
-  const { trilha, cartao, etapas, datasDaEtapa, cliente, projetos, documentos, chamados, observacoes, historico, podeEditar } =
-    props;
+  const {
+    trilha,
+    cartao,
+    etapas,
+    datasDaEtapa,
+    cliente,
+    projetos,
+    documentos,
+    chamados,
+    observacoes,
+    historico,
+    responsavel,
+    seguidores,
+    euSigo,
+    pessoas,
+    podeEditar
+  } = props;
 
   const [aba, setAba] = useState<Aba>("dados");
   const [erro, setErro] = useState<string | null>(null);
@@ -147,6 +182,58 @@ export function CartaoCompleto(props: Props) {
                 </button>
               ))}
             </div>
+            <div className="cartao-pessoas">
+              <div className="cartao-responsavel">
+                <span className="cartao-rotulo">Responsável</span>
+                {podeEditar ? (
+                  <select
+                    aria-label="Responsável pelo cartão"
+                    value={responsavel?.id ?? ""}
+                    disabled={pendente}
+                    onChange={event =>
+                      executar(() => definirResponsavel(cartao.id, event.target.value || null))
+                    }
+                  >
+                    <option value="">Sem responsável</option>
+                    {pessoas.map(pessoa => (
+                      <option key={pessoa.id} value={pessoa.id}>
+                        {pessoa.nome}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <strong>{responsavel?.nome ?? "Sem responsável"}</strong>
+                )}
+              </div>
+
+              <div className="cartao-seguidores">
+                <span className="cartao-rotulo">
+                  Seguidores <span className="cartao-contagem">{seguidores.length}</span>
+                </span>
+                <div className="cartao-seguidores-lista">
+                  {seguidores.map(pessoa => (
+                    <span
+                      key={pessoa.id}
+                      className="cartao-avatar"
+                      title={pessoa.email ? `${pessoa.nome} · ${pessoa.email}` : pessoa.nome}
+                    >
+                      {iniciais(pessoa.nome)}
+                    </span>
+                  ))}
+                  {seguidores.length === 0 ? <span className="muted">Ninguém acompanha</span> : null}
+                  <button
+                    type="button"
+                    className={euSigo ? "cartao-seguir seguindo" : "cartao-seguir"}
+                    disabled={pendente}
+                    aria-pressed={euSigo}
+                    onClick={() => executar(() => alternarSeguidor(cartao.id))}
+                  >
+                    {euSigo ? "Deixar de seguir" : "Seguir"}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {cartao.marcadores.length ? (
               <p className="pipeline-cartao-marcadores">
                 {cartao.marcadores.map(marcador => (

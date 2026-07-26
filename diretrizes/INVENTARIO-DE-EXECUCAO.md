@@ -542,6 +542,18 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.22.5 — `.campo-br-erro` deixou de usar `#812a34` fixo e passou a ler `var(--danger)`
   - [x] T-23.22.6 — **Defeito encontrado na própria verificação**: `img, svg { max-width: 100% }` do reset zera a largura de um SVG dentro de contêiner de largura indefinida. O alternador de tema renderizou como pílula vazia, sem erro nenhum no console. Fixar `width` não bastava — o `max-width` precisa ser desligado
   - [x] T-23.22.7 — Verificado em navegador nos dois temas, em 1440, 1024, 760 e 420px, sem erro de console
+- [x] T-23.23 — **Responsável e seguidores no cartão**
+  - [x] T-23.23.1 — `pipeline_card_followers` com RLS: quem enxerga o cartão pode seguir a si mesmo; inscrever outra pessoa exige edição; sair da lista é direito de quem está nela
+  - [x] T-23.23.2 — Sem UPDATE na tabela: seguir ou não seguir são duas linhas de estado, e trocar o `user_id` de uma inscrição burlaria a política de inserção
+  - [x] T-23.23.3 — Responsável exibido por nome, lido de `profiles`, e trocável por quem tem edição. Antes só existia o uuid na coluna
+  - [x] T-23.23.4 — Aplicada em homologação e verificada em navegador: seguir grava, deixar de seguir remove, avatar aparece com as iniciais
+- [x] T-23.24 — **Varredura funcional e de acessibilidade**, com login real contra a homologação
+  - [x] T-23.24.1 — 21 aplicativos do launcher abertos um a um: todos HTTP 200, nenhum erro de console
+  - [x] T-23.24.2 — Cartão do pipeline: barra de etapas move, botões de estatística trocam de aba, cinco abas respondem, observação grava, prazo grava
+  - [x] T-23.24.3 — Nenhum controle sem nome acessível; um `h1` por página; nenhuma imagem sem `alt`; foco de teclado visível com contorno de 3px
+  - [x] T-23.24.4 — **Alvo de toque corrigido**: as estrelas de prioridade tinham menos de 30px. Passaram a 32×32
+  - [x] T-23.24.5 — **Defeito encontrado e corrigido**: `revalidatePath` sem `"layout"` não alcançava a rota do cartão, e seguir alguém gravava no banco sem mudar a tela
+  - [x] T-23.24.6 — Contorno da verificação registrado: o `fetch` do servidor local passou a atravessar o proxy do ambiente por túnel CONNECT, o mesmo caminho que o `curl` usa. Arquivo de pré-carga fora do repositório; em produção o servidor fala direto
 - [x] T-23.20 — **Defeito D8 corrigido**: `app/icon.svg` declara o ícone da aba; o 404 de favicon apareceu no console durante a verificação desta sprint
 - [ ] T-23.21 — **Menus por aplicativo na barra superior.** No padrão de mercado, todo aplicativo traz os próprios menus ao lado do nome, e termina em `Relatórios` e `Configuração`. Hoje a barra mostra só o nome do aplicativo corrente
 - [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria

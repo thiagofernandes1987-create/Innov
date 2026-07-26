@@ -26,7 +26,9 @@ function trilhaValida(valor: string): valor is Trilha {
 }
 
 function revalidar(trilha: Trilha) {
-  revalidatePath(`/app/pipeline/${trilha}`);
+  // `layout` alcança a subárvore: sem isso a rota do cartão continuava servindo
+  // a versão em cache, e seguir alguém gravava no banco sem mudar a tela.
+  revalidatePath(`/app/pipeline/${trilha}`, "layout");
 }
 
 /**
@@ -205,4 +207,73 @@ export async function instalarTrilha(preset: string, nome?: string): Promise<Res
 
 export async function trilhaEhValida(valor: string): Promise<boolean> {
   return trilhaValida(valor);
+}
+
+/**
+ * Seguir ou deixar de seguir o cartão.
+ *
+ * Seguir o que já se pode ler não aumenta acesso nenhum, então qualquer um que
+ * enxergue o cartão pode se inscrever. Inscrever outra pessoa exige permissão
+ * de edição — e quem sai da lista sempre pode ser você mesmo.
+ */
+export async function alternarSeguidor(cardId: string, userId?: string): Promise<ResultadoAcao> {
+  if (!ehUuid(cardId)) return falha("Cartão inválido.");
+  if (userId && !ehUuid(userId)) return falha("Usuário inválido.");
+
+  const { supabase, userId: eu } = await requireOrganizationContext();
+  const alvo = userId ?? eu;
+
+  const { data: cartao, error: erroCartao } = await supabase
+    .from("pipeline_cards")
+    .select("id,organization_id,trilha")
+    .eq("id", cardId)
+    .maybeSingle();
+  if (erroCartao || !cartao) return falha("Cartão não encontrado ou sem permissão de leitura.");
+
+  const { data: existente } = await supabase
+    .from("pipeline_card_followers")
+    .select("user_id")
+    .eq("card_id", cardId)
+    .eq("user_id", alvo)
+    .maybeSingle();
+
+  if (existente) {
+    const { error } = await supabase
+      .from("pipeline_card_followers")
+      .delete()
+      .eq("card_id", cardId)
+      .eq("user_id", alvo);
+    if (error) return falha("Não foi possível remover o seguidor.");
+  } else {
+    const { error } = await supabase.from("pipeline_card_followers").insert({
+      card_id: cardId,
+      user_id: alvo,
+      organization_id: cartao.organization_id,
+      adicionado_por: eu
+    });
+    if (error) return falha("Não foi possível adicionar o seguidor.");
+  }
+
+  revalidar(cartao.trilha as Trilha);
+  return { ok: true };
+}
+
+/** Define quem responde pelo cartão. Passar `null` deixa sem responsável. */
+export async function definirResponsavel(cardId: string, userId: string | null): Promise<ResultadoAcao> {
+  if (!ehUuid(cardId)) return falha("Cartão inválido.");
+  if (userId !== null && !ehUuid(userId)) return falha("Usuário inválido.");
+
+  const { supabase } = await requireOrganizationContext();
+  const { data, error } = await supabase
+    .from("pipeline_cards")
+    .update({ responsavel_id: userId })
+    .eq("id", cardId)
+    .select("trilha")
+    .maybeSingle();
+
+  if (error) return falha("Não foi possível alterar o responsável.");
+  if (!data) return falha("Cartão não encontrado ou sem permissão de edição.");
+
+  revalidar(data.trilha as Trilha);
+  return { ok: true };
 }
