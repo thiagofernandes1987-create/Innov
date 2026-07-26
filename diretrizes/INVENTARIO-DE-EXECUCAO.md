@@ -498,6 +498,19 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.12.5 — Histórico de etapa escrito só por gatilho, com escrita direta revogada — é o que responde "há quanto tempo está parado aqui"
   - [x] T-23.12.6 — 21 testes de comportamento + RLS + privilégio contra PostgreSQL real, em banco limpo (`pnpm test:db:pipeline`); sabotagem do CHECK de origem reprova o TESTE 8
   - [x] T-23.12.7 — `pnpm validate:pipeline` cruza as siglas do banco com as do TypeScript e recusa jargão de segmento em CHECK; ligado ao CI
+- [x] T-23.13 — **Kanban e lista do pipeline**, sobre os mesmos dados e o mesmo filtro
+  - [x] T-23.13.1 — Seletor de visualização kanban ↔ lista sem recarregar a página (`components/pipeline/pipeline-view.tsx`)
+  - [x] T-23.13.2 — Coluna com contagem, soma e barra de proporção; etapa final recolhida em faixa, como o `fold` do padrão de mercado
+  - [x] T-23.13.3 — Arrastar e soltar move o cartão de etapa e grava pela ação de servidor, com erro em português
+  - [x] T-23.13.4 — Cartão com título, cliente, estrelas de prioridade, marcadores e **prazo com contagem regressiva**; ordenação da coluna pelo que aperta primeiro
+  - [x] T-23.13.5 — 17 testes das regras de coluna, prazo e ordenação (`tests/pipeline-domain.test.ts`)
+- [x] T-23.14 — **Cartão completo** na estrutura da seção 5 do padrão de interface
+  - [x] T-23.14.1 — Barra de etapas clicável no topo, que move o cartão
+  - [x] T-23.14.2 — Botões de estatística — projetos, documentos, chamados, prazos — que abrem a aba correspondente
+  - [x] T-23.14.3 — Abas: dados do cliente, projetos, documentos, chamados e prazos, com link para o objeto de cada linha
+  - [x] T-23.14.4 — Aba de prazos monta os campos a partir do que a etapa declara, com a sigla e o significado por extenso
+  - [x] T-23.14.5 — Conversa lateral com observação e histórico de movimentação de etapa
+  - [x] T-23.14.6 — Leitura sem embed aninhado, para não repetir o defeito D2: `pipeline_card_dates` tem duas chaves estrangeiras para o cartão e o PostgREST responderia com embed ambíguo
 
 ---
 

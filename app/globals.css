@@ -438,3 +438,364 @@ tbody tr:hover { background: #fafcfd; }
 }
 .campo-br-erro::before { content: "!"; font-weight: 700; }
 .campo-br-aviso { color: var(--muted); font-size: 0.78rem; }
+
+/* ── Pipeline ──────────────────────────────────────────────────────────────
+   Kanban, lista e cartão completo. Contrato em
+   diretrizes/PADRAO-DE-INTERFACE.md, seção 9.
+
+   A cor do prazo é a única cor semântica forte da tela: o resto é papel,
+   pedra e tinta. Cartão que pisca inteiro não comunica urgência, comunica
+   ruído. */
+
+.pipeline-trilhas {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 18px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.pipeline-trilha {
+  padding: 9px 16px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 550;
+  font-size: 0.9rem;
+  border-bottom: 2px solid transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+.pipeline-trilha:hover { color: var(--text); }
+.pipeline-trilha.ativa { color: var(--brand); border-bottom-color: var(--brand); }
+
+.pipeline-controle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.pipeline-controle-busca { display: flex; align-items: center; gap: 12px; flex: 1 1 320px; }
+.pipeline-busca { flex: 1 1 auto; max-width: 460px; }
+.pipeline-busca input {
+  width: 100%;
+  padding: 9px 13px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 0.9rem;
+}
+.pipeline-busca input:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.pipeline-contagem { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+
+.pipeline-visoes { display: inline-flex; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.pipeline-visao {
+  padding: 8px 16px;
+  border: 0;
+  background: var(--surface);
+  color: var(--muted);
+  font-weight: 550;
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+.pipeline-visao + .pipeline-visao { border-left: 1px solid var(--border); }
+.pipeline-visao.ativa { background: var(--brand); color: #fff; }
+
+.pipeline-erro {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 0.88rem;
+  margin-bottom: 12px;
+}
+.pipeline-aviso {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--warning-soft);
+  color: var(--warning);
+  font-size: 0.88rem;
+  margin-bottom: 12px;
+}
+
+/* Kanban */
+.pipeline-kanban {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 14px;
+}
+.pipeline-coluna {
+  flex: 0 0 274px;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  min-height: 180px;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.pipeline-coluna.alvo { border-color: var(--brand); background: var(--brand-soft); }
+
+/* Etapa final ocupa uma faixa, não uma coluna: é o `fold` do padrão de
+   mercado, e é o que impede a coluna de "finalizados" de dominar a tela. */
+.pipeline-coluna.recolhida { flex-basis: 62px; padding: 12px 8px; }
+.pipeline-coluna.recolhida .pipeline-coluna-cabecalho { writing-mode: vertical-rl; gap: 10px; }
+.pipeline-coluna.recolhida .pipeline-coluna-cartoes { display: none; }
+.pipeline-coluna.recolhida .pipeline-coluna-progresso { display: none; }
+
+.pipeline-coluna-cabecalho {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.pipeline-coluna-cabecalho strong { font-size: 0.9rem; font-weight: 650; }
+.pipeline-coluna-numeros { display: flex; align-items: baseline; gap: 8px; }
+.pipeline-coluna-quantidade {
+  background: var(--surface-strong);
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.pipeline-coluna-valor { font-size: 0.78rem; color: var(--muted); }
+
+.pipeline-coluna-progresso {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--border);
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.pipeline-coluna-progresso::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--preenchimento, 0%);
+  background: var(--brand);
+}
+
+.pipeline-coluna-cartoes { display: flex; flex-direction: column; gap: 8px; }
+.pipeline-coluna-vazia { color: var(--muted); font-size: 0.82rem; padding: 8px 2px; margin: 0; }
+
+.pipeline-cartao {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  box-shadow: var(--shadow-xs);
+  cursor: grab;
+}
+.pipeline-cartao:active { cursor: grabbing; }
+.pipeline-cartao-titulo {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text);
+  text-decoration: none;
+  line-height: 1.3;
+}
+.pipeline-cartao-titulo:hover { color: var(--brand); }
+.pipeline-cartao-cliente { margin: 2px 0 0; font-size: 0.8rem; color: var(--muted); }
+.pipeline-cartao-marcadores { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 4px; }
+.pipeline-cartao-rodape {
+  margin-top: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pipeline-cartao-valor { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.pipeline-estrelas { letter-spacing: 1px; font-size: 0.8rem; }
+.pipeline-estrelas .cheia { color: var(--copper); }
+.pipeline-estrelas .vazia { color: var(--border-strong); }
+
+.pipeline-marcador {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  background: var(--surface-strong);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+.pipeline-marcador.cor-1 { background: var(--info-soft); color: var(--info); border-color: transparent; }
+.pipeline-marcador.cor-2 { background: var(--success-soft); color: var(--success); border-color: transparent; }
+.pipeline-marcador.cor-3 { background: var(--warning-soft); color: var(--warning); border-color: transparent; }
+.pipeline-marcador.cor-4 { background: var(--danger-soft); color: var(--danger); border-color: transparent; }
+.pipeline-marcador.cor-5 { background: var(--copper-soft); color: var(--copper-strong); border-color: transparent; }
+
+/* Prazo: a única cor forte da tela. */
+.pipeline-prazo { font-size: 0.76rem; font-weight: 600; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+.pipeline-prazo.estado-vencido { background: var(--danger-soft); color: var(--danger); }
+.pipeline-prazo.estado-vence_hoje { background: var(--warning-soft); color: var(--warning); }
+.pipeline-prazo.estado-no_prazo { background: var(--surface-strong); color: var(--muted); }
+.pipeline-prazo.estado-concluido_no_prazo { background: var(--success-soft); color: var(--success); }
+.pipeline-prazo.estado-concluido_com_atraso { background: var(--warning-soft); color: var(--warning); }
+.pipeline-prazo.estado-sem_prazo { color: var(--muted); }
+
+/* Lista */
+.pipeline-lista-envelope { overflow-x: auto; }
+.pipeline-lista { width: 100%; border-collapse: collapse; font-size: 0.88rem; background: var(--surface); }
+.pipeline-lista th,
+.pipeline-lista td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+.pipeline-lista th { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); font-weight: 650; }
+.pipeline-lista tbody tr:hover { background: var(--surface-muted); }
+
+.pipeline-etiqueta-etapa {
+  display: inline-block;
+  padding: 1px 9px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  background: var(--surface-strong);
+  color: var(--muted);
+}
+.pipeline-etiqueta-etapa.categoria-ganho { background: var(--success-soft); color: var(--success); }
+.pipeline-etiqueta-etapa.categoria-perdido { background: var(--danger-soft); color: var(--danger); }
+
+.pipeline-sem-trilha { padding: 24px; }
+.pipeline-sem-trilha h2 { margin-top: 0; }
+
+/* Cartão completo */
+.cartao-barra-etapas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 4px;
+  margin-bottom: 16px;
+}
+.cartao-etapa {
+  border: 0;
+  background: transparent;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.83rem;
+  font-weight: 550;
+  color: var(--muted);
+  cursor: pointer;
+}
+.cartao-etapa:hover:not(:disabled) { background: var(--surface-strong); color: var(--text); }
+.cartao-etapa.atual { background: var(--brand); color: #fff; }
+.cartao-etapa.atual.categoria-ganho { background: var(--success); }
+.cartao-etapa.atual.categoria-perdido { background: var(--danger); }
+.cartao-etapa:disabled:not(.atual) { opacity: 0.55; cursor: default; }
+
+.cartao-corpo { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+@media (max-width: 1000px) { .cartao-corpo { grid-template-columns: minmax(0, 1fr); } }
+
+.cartao-folha {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px;
+}
+.cartao-estatisticas { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.cartao-estatistica {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  cursor: pointer;
+  min-width: 92px;
+}
+.cartao-estatistica:hover { border-color: var(--brand); }
+.cartao-estatistica strong { font-size: 1.15rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.cartao-estatistica span { font-size: 0.74rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+.cartao-titulo h2 { margin: 0 0 4px; font-size: 1.4rem; }
+.cartao-prioridade { display: inline-flex; gap: 2px; margin-top: 8px; }
+.cartao-prioridade .estrela {
+  border: 0;
+  background: transparent;
+  color: var(--border-strong);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 2px;
+}
+.cartao-prioridade .estrela.cheia { color: var(--copper); }
+
+.cartao-abas { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 1px solid var(--border); margin: 18px 0 0; }
+.cartao-aba {
+  border: 0;
+  background: transparent;
+  padding: 9px 14px;
+  font-size: 0.86rem;
+  font-weight: 550;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
+.cartao-aba.ativa { color: var(--brand); border-bottom-color: var(--brand); }
+.cartao-aba-conteudo { padding-top: 16px; }
+
+.cartao-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px 20px; margin: 0; }
+.cartao-campos dt { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.cartao-campos dd { margin: 2px 0 0; font-size: 0.92rem; }
+.cartao-campo-largo { grid-column: 1 / -1; }
+
+.cartao-prazos { display: flex; flex-direction: column; gap: 10px; }
+.cartao-prazo { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.cartao-prazo span { font-size: 0.86rem; }
+.cartao-prazo strong { font-variant-numeric: tabular-nums; }
+.cartao-prazo input {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+}
+.cartao-prazos-tabela { margin-top: 14px; }
+
+.cartao-conversa {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+.cartao-nova-nota { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.cartao-nova-nota textarea {
+  width: 100%;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 0.88rem;
+  resize: vertical;
+}
+.cartao-nova-nota label span { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+
+.cartao-linha-do-tempo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.cartao-linha-do-tempo li { border-left: 2px solid var(--border); padding-left: 12px; }
+.cartao-linha-do-tempo li.nota { border-left-color: var(--brand); }
+.cartao-linha-do-tempo li.tipo-mensagem { border-left-color: var(--copper); }
+.cartao-linha-do-tempo time { font-size: 0.74rem; color: var(--muted); }
+.cartao-linha-do-tempo p { margin: 2px 0 0; font-size: 0.87rem; white-space: pre-wrap; }
+
+.cartao-voltar { margin-top: 18px; font-size: 0.88rem; }
+
+/* Texto que só o leitor de tela recebe. Rótulo escondido continua sendo
+   rótulo; campo de busca sem nenhum é campo que o leitor anuncia como "caixa
+   de edição" e nada mais. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
