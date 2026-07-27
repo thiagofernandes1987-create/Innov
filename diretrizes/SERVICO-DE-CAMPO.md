@@ -163,28 +163,43 @@ pontualidade, acabamento, limpeza, identificação, uniforme.
 Nenhum bloqueia o desenho. Os dois mudam o que precisa ser gravado, e sair
 descobrindo depois custa migration.
 
-### 7.1 O check-in é ponto eletrônico de verdade?
+### 7.1 O check-in alimenta a folha de pagamento — decidido
 
-O responsável descreveu como "tipo um ponto eletrônico para o financeiro
-realizar o pagamento das horas trabalhadas". Registro de jornada para fim de
-pagamento é artefato regulado no Brasil — a Portaria 671/2021 do MTP trata dos
-sistemas de registro eletrônico e do REP-P, com exigências próprias de
-integridade, espelho de ponto e não alteração de marcação.
+Decisão do responsável em 27 de julho: *"o check in para folha de pagamento e o
+checkout pode já idealizar."*
 
-Há duas leituras possíveis, e elas geram bancos diferentes:
+Isso fecha a dúvida e **eleva a exigência técnica**. Registro de jornada para
+fim de pagamento é artefato regulado no Brasil — a Portaria 671/2021 do MTP
+trata dos sistemas de registro eletrônico de ponto e do REP-P, com exigências
+próprias de integridade, espelho de ponto e não alteração de marcação.
 
-- **apontamento de produção** — mede tempo em obra para custo e produtividade,
-  e não substitui o controle de jornada da empresa;
-- **registro de jornada** — alimenta folha e precisa atender à regulação.
+O que isso impõe ao banco, desde a primeira linha:
 
-A diferença prática: no segundo caso, marcação **não pode ser editada** — só
-corrigida por ajuste rastreável com autor e justificativa, e o comprovante
-precisa ser entregue ao trabalhador. Isso é imutabilidade, e imutabilidade se
-projeta no início.
+| Exigência | Consequência de projeto |
+|---|---|
+| Marcação não se altera | `UPDATE` e `DELETE` negados na tabela de marcação; correção é **linha nova** de ajuste apontando para a original |
+| Todo ajuste tem autor e motivo | Colunas obrigatórias, sem valor padrão |
+| O trabalhador recebe comprovante | Cada marcação gera um identificador entregável |
+| Espelho de ponto por período | Consulta consolidada por pessoa e competência |
+| Integridade verificável | Encadeamento por hash da marcação anterior, para que adulteração em lote seja detectável |
 
-**Recomendação:** construir como apontamento de produção, com a imutabilidade e
-a trilha de ajuste desde já. Fica correto para custo, e se depois virar registro
-de jornada o caminho está aberto sem refazer.
+**Isto é o oposto de "grava e depois a gente ajusta".** É o mesmo princípio já
+aplicado em `pipeline_card_stage_history`, cuja escrita direta é recusada por
+privilégio e verificada em teste — só que aqui a razão é legal, não só de
+higiene.
+
+**Duas consequências que mudam o que o campo vê:**
+
+1. A tela precisa deixar claro que a marcação é definitiva antes de confirmar.
+   Botão que grava jornada sem confirmação vira pedido de ajuste no dia seguinte.
+2. Marcação fora da janela ou fora do raio da obra **não é bloqueada** — é
+   gravada com a divergência anotada. Bloquear cria a pior consequência
+   possível: a pessoa trabalha e não consegue registrar que trabalhou.
+
+**O que continua fora de escopo, e precisa ser dito:** esta plataforma produz o
+registro e o espelho. Ela não calcula folha, não aplica convenção coletiva, não
+trata banco de horas nem adicional noturno. O financeiro recebe horas apuradas
+com rastro; o cálculo trabalhista permanece onde já está.
 
 ### 7.2 Avaliação por estrelas é dado pessoal de desempenho
 

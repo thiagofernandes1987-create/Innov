@@ -680,7 +680,12 @@ quem está na obra.
 
 ### Tarefas
 
-- [ ] T-25.1 — **Decidir a natureza do check-in** antes de gravar a primeira marcação: apontamento de produção ou registro de jornada. Muda imutabilidade, trilha de ajuste e comprovante. Recomendação registrada na §7.1: construir como apontamento, já com imutabilidade e ajuste rastreável
+- [x] T-25.1 — **Natureza do check-in decidida pelo responsável em 27/07: alimenta a folha de pagamento.** Registro de jornada é artefato regulado (Portaria 671/2021 do MTP), e isso eleva a exigência técnica desde a primeira linha — detalhado na §7.1
+- [ ] T-25.1.1 — Marcação imutável: `UPDATE` e `DELETE` negados; correção é linha nova de ajuste apontando para a original, com autor e motivo obrigatórios
+- [ ] T-25.1.2 — Comprovante por marcação e espelho de ponto por pessoa e competência
+- [ ] T-25.1.3 — Encadeamento por hash, para que adulteração em lote seja detectável
+- [ ] T-25.1.4 — Marcação fora da janela ou do raio **não é bloqueada**, é gravada com a divergência anotada. Bloquear faria a pessoa trabalhar sem conseguir registrar que trabalhou
+- [ ] T-25.1.5 — Deixar explícito o que fica fora: a plataforma produz registro e espelho; não calcula folha, convenção coletiva, banco de horas nem adicional noturno
 - [ ] T-25.2 — **Check-in e check-out com localização**, alimentando horas trabalhadas
 - [ ] T-25.3 — **To-do de campo**: alimentado pelo planejador, atualizado pelo profissional com o número de dias que faltam. Reaproveita `pipeline_card_activities`
 - [ ] T-25.4 — **DPPT e DEPT como naturezas de data**, na taxonomia que já existe. Não é modelo novo: é mais um par na tabela que `pipeline_codigo_data` governa
@@ -718,7 +723,11 @@ completo em [`KPIS.md`](KPIS.md). Vai para o fim conforme R4.
 
 ### Tarefas
 
+- [ ] T-26.0 — **Aplicar o teste da §0 a cada KPI antes de implementar**: se atrasar gera grande impacto? dá para medir o acerto? quem fica abaixo é identificável? só então o geral do setor. Candidato que não passa da primeira pergunta vira relatório, não indicador
 - [ ] T-26.1 — **Camada de cálculo única**, lendo de `pipeline_card_stage_history` e das tabelas de domínio. Um KPI calculado em dois lugares diverge no primeiro ajuste
+- [ ] T-26.1.1 — Janela de 6 meses anteriores + 6 meses atuais, com **desvio padrão amostral (n−1)**. A comparação entre as metades é a tendência; o ano é o retrato
+- [ ] T-26.1.2 — Faixa de alerta derivada do próprio histórico — `média ± 1σ` —, com a média de mercado da §0.2 como segunda régua. Alvo arbitrário reprova quem não merece
+- [ ] T-26.1.3 — Ordenação para escolha de equipe por `média + desvio`, nunca só pela média: calculado, duas equipes com média idêntica de 6 dias diferem em 1,9 dia no pior caso
 - [ ] T-26.2 — **Motivo de perda no CRM**: campo em lista fechada. É o único KPI do módulo hoje marcado 🔴 — o dado não existe
 - [ ] T-26.3 — **Conversões do funil comercial**, depois dos funis por setor da S-24: qualidade de lead, conversão de leads, conversão em projeto, leads ganhos e taxa de conversão, com os dois denominadores convivendo
 - [ ] T-26.4 — **KPIs de campo e do planejador** (aderência, desvio relativo, acerto do plano), depois da S-25

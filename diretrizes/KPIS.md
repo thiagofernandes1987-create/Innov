@@ -7,6 +7,125 @@
 
 ---
 
+## 0. O teste que decide se algo vira KPI
+
+Ditado pelo responsável em 27 de julho:
+
+> "para você saber se uma coisa é um bom kpi ou não, você deve sempre pensar,
+> qual tarefa ou atividade que se atrasar, não for realizada geram um grande
+> impacto, daí você mede o acerto, quem estiver abaixo precisa acender uma bola
+> vermelha de cuidado, depois você mede o geral"
+
+Quatro perguntas, nesta ordem. **Se a primeira falha, não vira KPI** — vira
+relatório, que é outra coisa e não acende nada.
+
+1. **Se esta atividade atrasar ou não acontecer, o impacto é grande?**
+   Se a resposta é "nem tanto", medir isso só gera ruído que ensina a ignorar
+   painel.
+2. **Dá para medir o acerto?** Precisa existir um alvo — prazo, meta, padrão —
+   contra o qual comparar. Sem alvo não há acerto, há contagem.
+3. **Quem fica abaixo é identificável?** Indicador que não aponta responsável não
+   gera ação; gera reunião.
+4. **Só então: qual é o geral do setor?** O agregado vem depois do individual,
+   nunca no lugar dele. Setor bom com uma pessoa afundando é setor que vai piorar
+   no mês seguinte.
+
+O sinal vermelho é do passo 3. O passo 4 é o que se leva à direção.
+
+### Aplicando o teste — o que passa e o que não passa
+
+| Candidato | Passa? | Por quê |
+|---|---|---|
+| Medição não feita na data | **sim** | Atrasa projeto executivo, fabricação e montagem em cascata |
+| Vistoria de finalização atrasada | **sim** | Segura o encerramento e a última parcela |
+| Primeiro contato com lead novo | **sim** | Depois de 24h a conversão despenca |
+| Solicitação de insumo sem resposta | **sim** | Para a obra, e o custo é de todo mundo parado |
+| Diário de campo do dia | **sim** | Sem evidência não há defesa em glosa ou disputa |
+| Quantidade de observações no cartão | não | Escrever muito não é trabalhar bem |
+| Número de acessos ao sistema | não | Mede presença na tela, não resultado |
+| Documentos anexados | não | Volume sem consequência |
+
+---
+
+## 0.1 A janela: 6 meses anteriores + 6 meses atuais
+
+Definida pelo responsável: o KPI se constrói sobre **dois semestres**, com
+desvio padrão. O ano inteiro é o retrato; a comparação entre as metades é a
+tendência.
+
+Exemplo calculado, taxa de conversão mensal de um vendedor:
+
+| Janela | Média | Desvio |
+|---|---|---|
+| Semestre anterior | 24,8% | 4,3 pp |
+| Semestre atual | 32,0% | 2,4 pp |
+| **Ano (12 meses)** | **28,4%** | **5,0 pp** |
+
+Tendência: **+7,2 pp** entre semestres — e o desvio caiu de 4,3 para 2,4, o que
+significa que além de melhor ficou mais **previsível**. Os dois fatos juntos
+valem mais que qualquer um sozinho.
+
+**Desvio padrão amostral (n−1), não populacional.** Seis meses é amostra do
+comportamento da pessoa, não a população inteira dos meses dela.
+
+### As faixas saem do próprio histórico, não de palpite
+
+```
+faixa esperada = média ± 1 desvio        → 23,4% a 33,4%
+bola vermelha  = abaixo de média − 1σ    → menos de 23,4%
+```
+
+Isso resolve o problema do alvo arbitrário: o limite de cada pessoa vem do que
+ela mesma entrega, e a média de mercado da §0.2 entra como segunda régua, para
+o caso de todo mundo estar mal de forma consistente.
+
+### Por que o desvio decide escolha de equipe
+
+Calculado, três equipes na mesma tarefa:
+
+| Equipe | Média | Desvio | Pior caso esperado |
+|---|---|---|---|
+| A | 6,00 d | 0,00 d | 6,00 d |
+| B | 6,00 d | 1,90 d | **7,90 d** |
+| C | 5,33 d | 0,52 d | 5,85 d |
+
+**A e B têm exatamente a mesma média e não servem para a mesma coisa.** B pode
+estourar quase dois dias a mais. Para prazo apertado, ordenar por
+`média + desvio` (menor é melhor) — nunca só pela média.
+
+---
+
+## 0.2 Médias de mercado, para saber se está bom
+
+Pesquisadas em julho de 2026. **São faixas direcionais, não notas de corte:**
+variam por porte, segmento e origem do lead. Servem para responder "estamos
+muito fora?", não para reprovar alguém.
+
+| Indicador | Faixa de mercado | Observação |
+|---|---|---|
+| MQL → SQL | 12% a 21% típico; 20–35% com follow-up rápido; 40% no topo | O responsável estimou ~10% para qualificado ÷ total — abaixo da faixa citada, o que é plausível para lead de origem aberta |
+| SQL → oportunidade | 30% a 50% | Chega a 59% quando prospectado por SDR |
+| Contato em até 1 hora | 53% de conversão, contra 17% após 24h | É a evidência mais forte a favor do KPI de tempo até o primeiro contato |
+| Obra entregue no prazo | 80% a 90% nas construtoras eficazes | 98% dos projetos na América do Norte estouram o cronograma original |
+| Desvio de cronograma | dentro de ±5% do previsto | É o alvo do `TEPr` |
+| Retrabalho | 5% a 12% de média; 3% a 5% nos eficientes | Custa de 2% a 6% do valor da obra |
+| Defeito em item vistoriado | abaixo de 2% | 90%+ de aprovação de primeira |
+| Resolução na primeira visita | acima de 75% é forte; 80%+ nos líderes | Considerado o KPI operacional mais importante de serviço de campo |
+| Utilização do técnico | 70% a 80% | Acima disso é sinal de sobrecarga, não de eficiência |
+| Cumprimento de SLA | 80% de média; 90% nos líderes | — |
+| Prazo médio de recebimento | 60 a 90 dias na construção | O mais alto entre os setores, por retenção e medição |
+
+A taxa de conversão de ~30% que o responsável citou fica dentro da faixa de
+`MQL → SQL` com follow-up rápido, e é meta razoável para o funil pós-briefing.
+
+**Uma ressalva honesta:** essas faixas vêm de mercados majoritariamente
+norte-americanos de B2B e serviço de campo. Móveis planejados no Brasil tem
+ciclo, ticket e sazonalidade próprios. Por isso a régua primária é o **histórico
+da própria empresa** (§0.1) e a de mercado é a segunda opinião — não o
+contrário.
+
+---
+
 ## 1. As cinco regras que todo KPI deste documento obedece
 
 Sem elas, indicador vira número bonito que ninguém sabe de onde veio.
