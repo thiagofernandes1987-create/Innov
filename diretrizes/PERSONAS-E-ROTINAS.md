@@ -94,15 +94,56 @@ I-Término, T-T, T-I, dias programados"; e a lista por cliente com etapa atual,
 **Palavra do responsável:** "um cara da produção só precisa ter acesso ao módulo
 de diário de campo, contatos, tarefas, planejamento, contato, etc."
 
-**É a persona que define o desenho móvel.** Está em obra, de pé, com uma mão
-ocupada, em tela de celular e sinal ruim. Nenhuma outra persona tem essas quatro
-restrições ao mesmo tempo.
+**É a persona que define o desenho móvel** — mas não pelo motivo que a primeira
+versão deste documento supôs. Corrigido pelo responsável em 27 de julho:
 
-**Rotina.** De manhã, vê onde vai e o que leva. Na obra, registra o que fez, com
-foto. Quando falta peça, abre ocorrência ali mesmo. No fim, marca a tarefa.
+> "ele não é para trabalhar com o celular na mão, mas durante o trabalho dele,
+> em caso de necessidade ou 15 minutos antes de parar, ele precisa preencher as
+> informações do aplicativo"
 
-**Precisa em três cliques:** o endereço de hoje; registrar foto com legenda;
-abrir ocorrência.
+**O aplicativo não acompanha o trabalho: ele interrompe o trabalho.** São
+sessões curtas, em três momentos definidos, e em cada uma o profissional parou o
+que estava fazendo para usar o telefone.
+
+A consequência de projeto muda por inteiro. Não é "funcionar com uma mão" — é
+**terminar de primeira**, porque o custo de errar é voltar a parar. Fluxo que
+exige duas tentativas custa duas paradas.
+
+### Os três momentos, e só eles
+
+| Quando | O que faz | Regra |
+|---|---|---|
+| Início do turno | Check-in ao chegar na obra | Marcação de jornada — definitiva, confirmada antes de gravar |
+| **Em caso de necessidade** | Falta material → **para a atividade** e solicita | A parada é obrigatória e é registrada junto com a solicitação |
+| **15 minutos antes de parar** | Diário do dia, to-do com dias que faltam, check-out | Janela conhecida: o sistema avisa, não espera ser lembrado |
+
+### Falta de material é parada, não observação
+
+Quando falta insumo, o montador **não continua trabalhando**. Isso significa que
+a solicitação de insumo não é só um pedido ao almoxarifado: ela **abre uma
+parada**, com início. A parada fecha quando o material chega.
+
+Três consequências que só existem por causa desta regra:
+
+1. o tempo parado é medido, e não estimado depois de memória;
+2. ele entra no `TEP` como causa declarada, separando "o profissional rendeu
+   menos" de "o profissional ficou esperando";
+3. alimenta o KPI **parada de obra por falta de material**, que é o que liga o
+   almoxarifado ao custo real de faltar — hoje compras é avaliada por preço e
+   prazo próprio, e o custo de parar não aparece em lugar nenhum.
+
+Sem a parada explícita, o atraso apareceria como baixa produtividade de quem
+estava de braços cruzados por decisão de outro setor.
+
+### A janela dos 15 minutos é do sistema, não da memória
+
+O preenchimento do fim do dia acontece em horário conhecido. Então quem lembra é
+o aplicativo: notificação na janela, com o que falta preencher já listado. Ficar
+esperando o profissional lembrar produz o resultado previsível — diário em
+branco e `DEPT` desatualizado, que é justamente o dado que sustenta todo o resto.
+
+**Precisa em três cliques, em cada momento:** check-in; parar e pedir material;
+fechar o dia com foto e dias restantes.
 
 **O que a plataforma já faz:** diário de campo com evidência, tarefas, contatos.
 
@@ -183,5 +224,8 @@ outra pessoa sem trocar de sessão.
 1. Tela nova declara a persona, a origem, a pergunta e a contagem de cliques.
 2. Persona sem rotina escrita não vira permissão nem menu.
 3. Quando uma rotina mudar na prática, o documento muda antes do código.
-4. A persona P3 tem poder de veto sobre desenho móvel: se não funciona de pé,
-   com uma mão e sinal ruim, não está pronto.
+4. A persona P3 tem poder de veto sobre desenho móvel, com o critério corrigido:
+   **se não termina de primeira, não está pronto.** O montador parou de
+   trabalhar para usar o aplicativo — fluxo que exige segunda tentativa custa
+   uma segunda parada, e é assim que se ensina alguém a preencher no fim de
+   semana, de cabeça.

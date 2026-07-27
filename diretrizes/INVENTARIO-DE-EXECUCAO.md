@@ -701,8 +701,13 @@ quem está na obra.
 - [ ] T-25.5 — **TEP e TEPr**: `TEP = DPPT − DEPT` no cartão e na notificação; `TEPr = TEP / prazo × 100` para ordenar, acender sinal e comparar equipes. Sem o relativo, o ranking premia quem pega tarefa longa
 - [ ] T-25.6 — **Motivo obrigatório quando TEP fica negativo**, em lista fechada — chuva, material, saúde, tarefa anterior, cliente, outro. Texto livre não vira métrica
 - [ ] T-25.7 — **Notificação para responsável e seguidores** quando o TEP vira negativo, pelo canto direito que já existe
-- [ ] T-25.8 — **Solicitação de insumo pelo aplicativo**, notificando o almoxarifado
+- [ ] T-25.8 — **Solicitação de insumo abre uma parada**, não só um pedido. Regra do responsável: se falta material, o montador obrigatoriamente para
+  - [ ] T-25.8.1 — Parada com início e fim: abre na solicitação, fecha quando o material chega. Tempo medido, não estimado de memória
+  - [ ] T-25.8.2 — Entra no `TEP` como causa declarada, separando "rendeu menos" de "ficou esperando" — problemas de setores diferentes
+  - [ ] T-25.8.3 — Notifica o almoxarifado e alimenta o KPI de parada de obra por falta de material
 - [ ] T-25.9 — **Calendário do dia** para o perfil de execução
+- [ ] T-25.15 — **A janela dos 15 minutos é do sistema**: notificação no horário de fechamento do dia, listando o que falta preencher. Esperar o profissional lembrar produz diário em branco e `DEPT` desatualizado — e `DEPT` desatualizado derruba `TEP`, sinal amarelo, painel e matriz, nessa ordem
+- [ ] T-25.16 — **Três momentos, não uso contínuo.** O aplicativo interrompe o trabalho: chegada, necessidade e 15 minutos antes de sair. O critério de pronto passa a ser **terminar de primeira** — fluxo que exige segunda tentativa custa uma segunda parada
 - [ ] T-25.10 — **Sinal amarelo propagado**: cartão, planner, módulo de projeto e painel
 - [ ] T-25.11 — **Painel de obras**: quantas no prazo, quantas atrasadas, desempenho por equipe e do planejador
 - [ ] T-25.12 — **Matriz de competências**: rendimento por tipo de tarefa, média de 6 meses **com desvio padrão**. Média sozinha esconde a equipe que faz em 4 ou em 8 dias

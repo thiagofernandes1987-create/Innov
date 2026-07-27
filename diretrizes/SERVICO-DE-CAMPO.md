@@ -49,6 +49,51 @@ O to-do **não é escrito pelo profissional**: é alimentado pelo planejador. O
 profissional atualiza um número — dias que faltam — e, quando há atraso, o
 motivo. Escrever a própria lista transformaria o apontamento em redação.
 
+### 2.1 O aplicativo interrompe o trabalho — ele não acompanha
+
+Corrigido pelo responsável em 27 de julho: *"ele não é para trabalhar com o
+celular na mão, mas durante o trabalho dele, em caso de necessidade ou 15
+minutos antes de parar, ele precisa preencher as informações."*
+
+São **três momentos**, e em cada um o profissional parou de trabalhar:
+
+| Momento | O que acontece |
+|---|---|
+| Chegada | Check-in |
+| Necessidade | Falta material → **para a atividade** e solicita |
+| 15 min antes de sair | Diário, dias restantes e check-out |
+
+A consequência de projeto: o critério não é "funcionar com uma mão", é
+**terminar de primeira**. Fluxo que exige duas tentativas custa duas paradas.
+
+### 2.2 Falta de material abre uma parada, não uma observação
+
+Regra do responsável: **se falta material, ele obrigatoriamente para.** Então a
+solicitação de insumo não é só um pedido ao almoxarifado — ela abre uma
+**parada com início**, que fecha quando o material chega.
+
+Isso é o que torna três coisas possíveis:
+
+1. o tempo parado é **medido**, não estimado de memória depois;
+2. entra no `TEP` como causa declarada, separando "rendeu menos" de "ficou
+   esperando" — que são problemas de setores diferentes;
+3. alimenta o KPI **parada de obra por falta de material**, o único que liga o
+   almoxarifado ao custo real de faltar.
+
+Sem a parada explícita, o atraso apareceria como baixa produtividade de quem
+ficou de braços cruzados por decisão de outro setor. É a diferença entre medir e
+culpar.
+
+### 2.3 A janela dos 15 minutos é do sistema
+
+O preenchimento do fim do dia acontece em horário conhecido, então quem lembra é
+o aplicativo: notificação na janela, com o que falta preencher já listado.
+
+Esperar o profissional lembrar produz o resultado previsível — diário em branco e
+`DEPT` desatualizado. E `DEPT` desatualizado derruba o `TEP`, o sinal amarelo, o
+painel e a matriz de competências, nessa ordem. **É o dado mais barato de perder
+e o mais caro de não ter.**
+
 ---
 
 ## 3. As três variáveis
