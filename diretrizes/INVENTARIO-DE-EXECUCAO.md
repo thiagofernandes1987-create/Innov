@@ -831,6 +831,54 @@ sobre esforço:
 
 ---
 
+## Sprint S-28 — O que a dissecação de riscos exige: parada, solicitação e obrigação
+**Estado:** pendente
+**Marco:** M-5
+
+Nasce da crítica de 27 de julho:
+
+> "um fluxo de trabalho otimista, um pessimista (o que pode dar de problema, o
+> que poderia realmente atrapalhar uma atividade, e se atrapalhasse o que eu
+> precisaria ter disponível na ferramenta, quais departamentos isso afetaria e a
+> quem eu precisaria realizar uma solicitação para resolver), isso é dissecar o
+> problema (…) você continua sendo muito superficial"
+
+Dissecação completa em [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md). **Todo
+requisito desta sprint existe porque alguma coisa deu errado** — nenhum deles
+apareceria numa lista de funcionalidades, e é essa a diferença que a crítica
+apontou. Vai para o fim conforme R4.
+
+### As três contas que ordenam a sprint
+
+| Conta | Resultado | O que ela decide |
+|---|---|---|
+| `P(dia de montagem sem imprevisto)` | **52,9%**; em 5 dias, **4,1%** | Desenhar só o caminho feliz atende metade dos dias |
+| Erro de medida por estágio de descoberta | 1× na obra → **300×** na montagem → 700× na assistência | A conferência de medida antes de liberar fabricação é a trava mais barata do sistema |
+| Equipe de quatro parada | **R$ 104,00/hora**, **R$ 942,40** por dia queimado | Dá peso à solicitação de insumo e justifica compra local com teto |
+| Ciclo real de reposição de peça | **9 dias úteis**; conferindo na expedição, **5** | 4 dias economizados por ocorrência |
+
+### Tarefas
+
+- [ ] T-28.0 — **Parada como objeto de primeira classe**: início, fim, motivo em **lista fechada**, evidência, e o campo que ninguém quer gravar e é o mais valioso — **de quem era a obrigação** (cliente, obra, fábrica, expedição, compras, projeto ou clima). Sem ele, espera vira baixa produtividade de quem estava parado por decisão de outro setor
+  - [ ] T-28.0.1 — Abertura em **dois toques**. Se abrir parada der trabalho, ninguém abre, e o dado que sustenta o `TEP` deixa de existir
+  - [ ] T-28.0.2 — Os oito motivos da §0 como ponto de partida da lista fechada. Texto livre não vira indicador
+  - [ ] T-28.0.3 — Separar **improdutivo por clima** de **improdutivo por falha**: misturar destrói a matriz de competências, porque pune quem pegou chuva
+- [ ] T-28.1 — **Solicitação com destinatário nominal, departamento e prazo**. "Avisar o sistema" não é solicitação. Os prazos vieram da dissecação e cada um tem motivo de campo: compra local 1 h, expedição 2 h, coordenação 2 h, projetista 4 h, comercial 4 h
+  - [ ] T-28.1.1 — **Escalonamento por prazo vencido**, senão prazo de resposta é decoração
+  - [ ] T-28.1.2 — Solicitação de insumo **abre parada junto**, porque falta de material é parada obrigatória e não observação
+- [ ] T-28.2 — **Pré-condições de medição** conferidas e assinadas, com **medição condicional** marcada como tal e remedição agendada. É o requisito de maior retorno de todos: previne a maior parte do R3.1, que a 12% de frequência custa 300× quando aparece na montagem
+- [ ] T-28.3 — **Romaneio conferível item a item, com foto de referência**, distinguindo "faltou" de "veio diferente" — causas diferentes, departamentos diferentes. Inclui o campo **em qual conferência o erro deveria ter sido pego**: sem ele a expedição nunca melhora, porque o custo cai sempre na montagem
+- [ ] T-28.4 — **Ficha de acesso do endereço** preenchida **na medição**: horário de carga e descarga, contato de portaria e síndico, exigência de ART, seguro ou aviso prévio. O dado mais barato de coletar meses antes e o mais caro de descobrir na hora
+- [ ] T-28.5 — **Compra local com teto e alçada**: R$ 180 de ferragem na esquina contra R$ 942,40 de dia queimado — **5,2× mais barato**. Precisa de autorização em 1 hora, senão a equipe espera de qualquer forma
+- [ ] T-28.6 — **Pedido do cliente registrado no local**, com foto e assinatura no telefone, e o caminho direto para aditivo. **O montador não pode ter autoridade para aceitar mudança de escopo** — e a ferramenta é que precisa deixar isso óbvio, porque no local a pressão é real
+- [ ] T-28.7 — **Revisão vigente do desenho no telefone**, e liberação de fabricação amarrada à revisão aprovada. `project_documents` já tem os cinco estados e `project_document_versions` já versiona; falta a amarração, que hoje é disciplina — e disciplina falha a 100× de custo
+- [ ] T-28.8 — **Ver quem mais está alocado no mesmo endereço hoje**. Resolve por conversa, no local, em cinco minutos, o conflito de sequenciamento que hoje escala para a coordenação
+- [ ] T-28.9 — **Situação financeira do cliente visível antes de a equipe sair**, não depois. Descobrir depois custa os R$ 942,40 da Lei 2
+- [ ] T-28.10 — **Cobertura de apontamento** como número visível, e detecção do padrão suspeito — progresso monotônico com variância zero é o padrão de quem preenche de cabeça no fim de semana. **Falso é pior que ausente**, porque ausente ao menos se enxerga
+- [ ] T-28.11 — **Gravar `project_progress_snapshots` ao aprovar o diário**, e ler dele em `curvas.ts`. A tabela existe desde a etapa 12 com `snapshot_date`, `planned_progress`, `actual_progress` e `source`, e `daily_log_activities` já tem `progress_before`/`progress_after` datados pelo `log_date` do diário. **Sem migration** — falta só escrever e ler, e a curva de realizado deixa de ser reconstruída para ser medida
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.

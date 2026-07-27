@@ -59,6 +59,85 @@ Subagente só é acionado mediante pedido explícito do responsável.
 
 ---
 
+## 1.5 Dissecação — obrigatória antes de criar qualquer coisa
+
+Ditada pelo responsável em 27 de julho de 2026, com a crítica que a motivou:
+
+> "toda vez que for criar uma coisa se especialize ao máximo que conseguir,
+> levante todas hipóteses, como as coisas funcionam na realidade, como seriam os
+> fluxos, quais seriam os imprevistos, ou seja um fluxo de trabalho otimista, um
+> pessimista (o que pode dar de problema, o que poderia realmente atrapalhar uma
+> atividade, e se atrapalhasse o que eu precisaria ter disponível na ferramenta,
+> quais departamentos isso afetaria e a quem eu precisaria realizar uma
+> solicitação para resolver), isso é dissecar o problema, isso é levantar os
+> riscos, você continua sendo muito superficial"
+
+A crítica está certa e o defeito era de método: eu vinha listando **o que falta**
+em vez de dissecar **o que quebra**. Lista de lacunas descreve a distância até um
+caminho feliz; ela nunca produz o campo que só existe porque alguma coisa deu
+errado — e é esse campo que decide se a ferramenta serve ou não.
+
+A decomposição da §1.2 continua valendo e vem antes. A dissecação é o que se faz
+**dentro de cada micro-problema**, e sem ela a decomposição separa só o caminho
+que dá certo.
+
+### 1.5.1 O procedimento
+
+```text
+1. fluxo otimista: a atividade do começo ao fim, sem nenhum imprevisto,
+   com quem faz, quando, e quanto tempo leva cada passo
+2. levantar TODOS os imprevistos daquela atividade, com frequência
+   estimada — não os prováveis, todos
+3. calcular P(nenhum imprevisto). Se for alta, a lista está incompleta
+4. para CADA imprevisto:
+     a. o que ele trava, e por quanto tempo
+     b. o que a ferramenta precisa ter disponível NAQUELE momento
+     c. qual departamento é afetado
+     d. a quem se faz a solicitação, e qual é o prazo de resposta dela
+     e. o que fica registrado — para quem depois vai perguntar por quê
+5. dos passos 4b, extrair os requisitos de dado e de tela
+6. dos passos 4c e 4d, extrair as integrações entre módulos
+7. declarar o que ficou de fora e por quê
+```
+
+O passo 3 é o teste de honestidade da lista. Calculado para um dia de montagem
+com oito imprevistos independentes de 4% a 12%: **P(dia limpo) = 52,9%**, e uma
+montagem de cinco dias corre sem nenhum imprevisto em **4,1%** das vezes. Quem
+projeta só o caminho feliz projeta para metade dos dias e para uma montagem em
+vinte e cinco.
+
+### 1.5.2 A pergunta que ninguém faz e que decide o desenho
+
+**"E se der errado, a quem eu peço socorro, e o que acontece enquanto espero?"**
+
+As três partes são requisito, e as três costumam faltar:
+
+- **a quem** — a solicitação tem destinatário nominal e departamento, não vai
+  para "o sistema";
+- **o que acontece enquanto espero** — o tempo de espera é medido, não estimado
+  de memória depois. É o que separa "rendeu menos" de "ficou parado por decisão
+  de outro setor";
+- **o que fica registrado** — evidência produzida no momento, porque reconstruir
+  depois é sempre a versão de quem escreve.
+
+### 1.5.3 Sinais de que a dissecação não foi feita
+
+- O documento tem uma seção "o que falta" e nenhuma tabela de imprevisto.
+- Nenhum campo do desenho existe por causa de um erro; todos existem por causa
+  de um acerto.
+- Não há prazo de resposta em nenhuma solicitação.
+- Nenhum departamento além do dono da tela aparece no fluxo.
+- A palavra "então" aparece mais que a palavra "se".
+
+### 1.5.4 Onde o resultado mora
+
+Em [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md), canônico, uma dissecação por
+persona. `PERSONAS-E-ROTINAS.md` diz o que a pessoa **sabe**;
+`FLUXOS-E-RISCOS.md` diz o que acontece quando o dia dela **não** corre como o
+previsto.
+
+---
+
 ## 2. Evidência antes de afirmação
 
 Nenhuma afirmação de "pronto", "corrigido" ou "passando" sem a saída do comando que prova.

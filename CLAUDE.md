@@ -23,9 +23,19 @@ Quando houver aritmética, contagem ou dimensionamento, a decomposição é **ex
 
 O procedimento completo, o protocolo de vacinas e a ordem de leitura para um chat novo estão em [`diretrizes/METODO-DE-TRABALHO.md`](diretrizes/METODO-DE-TRABALHO.md).
 
+## Regra de método — dissecação, dentro de cada micro-problema
+
+> **Antes de criar qualquer coisa: fluxo otimista, todos os imprevistos com frequência, e para cada um — o que trava, o que a ferramenta precisa ter naquele momento, qual departamento é afetado, a quem se solicita e em que prazo, e o que fica registrado.**
+
+Decomposição sem dissecação separa só o caminho que dá certo. Lista de "o que falta" descreve a distância até um caminho feliz; ela nunca produz o campo que só existe porque alguma coisa deu errado — e é esse campo que decide se a ferramenta serve.
+
+Teste de honestidade da lista de imprevistos: calcular `P(nenhum imprevisto)`. Se der alto, a lista está incompleta. Calculado para um dia de montagem: **52,9%**; para uma montagem de cinco dias, **4,1%**.
+
+Procedimento em [`diretrizes/METODO-DE-TRABALHO.md`](diretrizes/METODO-DE-TRABALHO.md) §1.5; resultado por persona em [`diretrizes/FLUXOS-E-RISCOS.md`](diretrizes/FLUXOS-E-RISCOS.md).
+
 ## Memória entre sessões
 
-Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/PADRAO-DE-INTERFACE.md`.
+Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/FLUXOS-E-RISCOS.md` → `diretrizes/PADRAO-DE-INTERFACE.md`.
 
 ## Antes de criar tela
 

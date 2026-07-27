@@ -94,14 +94,24 @@ function acumulado(barras: BarraCronograma[], dia: number, pesoTotal: number): n
 /**
  * O que foi apontado.
  *
- * **Limitação declarada:** a plataforma guarda o progresso de *hoje*, não o
- * histórico dia a dia dele. Então a curva do passado é reconstruída
- * distribuindo o progresso atual ao longo do tempo já decorrido da tarefa.
+ * **Limitação declarada, e a correção do diagnóstico anterior.** Esta função
+ * reconstrói a curva do passado distribuindo o progresso atual ao longo do
+ * tempo já decorrido da tarefa. Isso é aproximação, não medição: uma tarefa que
+ * ficou parada duas semanas e avançou tudo ontem aparece como avanço gradual.
  *
- * Isso é aproximação, não medição. Uma tarefa que ficou parada duas semanas e
- * avançou tudo ontem aparece como avanço gradual. O jeito certo é gravar o
- * apontamento datado — é o que a S-25 faz com o `DEPT` do serviço de campo, e
- * quando essa série existir esta função lê dela em vez de reconstruir.
+ * A versão anterior deste comentário dizia que a série datada "não existe na
+ * plataforma". **Existe, e desde a etapa 12** — o que não existe é a leitura:
+ *
+ *   `project_progress_snapshots` — `snapshot_date`, `planned_progress`,
+ *     `actual_progress`, `source`, com unicidade em (projeto, data, origem).
+ *     É exatamente a série que esta função precisaria;
+ *   `daily_log_activities` — `progress_before` e `progress_after` por tarefa,
+ *     amarrados ao `daily_log_id`, que tem `log_date`. É o apontamento datado
+ *     na origem, tarefa a tarefa.
+ *
+ * Ou seja: o dado é gravável hoje, sem migration. Falta escrever o snapshot ao
+ * aprovar o diário e ler dele aqui. Enquanto isso não acontece, a reconstrução
+ * fica — e continua sendo aproximação.
  *
  * Registrar a limitação aqui é o que impede alguém de usar a curva do passado
  * como prova em discussão de prazo.

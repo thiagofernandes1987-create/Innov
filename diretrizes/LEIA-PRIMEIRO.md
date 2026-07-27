@@ -19,6 +19,8 @@ Vale para desenho, correção, revisão e código. Quando houver aritmética, co
 
 Detalhe completo: [`METODO-DE-TRABALHO.md`](./METODO-DE-TRABALHO.md).
 
+**E dentro de cada micro-problema, dissecar** — §1.5 do método. Fluxo otimista, **todos** os imprevistos com frequência, `P(dia limpo)` calculado, e para cada imprevisto: o que trava, o que a ferramenta precisa ter naquele momento, qual departamento é afetado, a quem se solicita e em que prazo, e o que fica registrado. Decomposição sem dissecação separa só o caminho que dá certo — e calculado, o caminho feliz de um dia de montagem acontece em **52,9%** das vezes.
+
 ### 0.2 Evidência antes de afirmação
 
 Nada é declarado pronto, corrigido ou passando sem a saída do comando que prova. `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:python` e os `pnpm validate:*`. Limitação de ambiente é registrada, não contornada com otimismo.
@@ -34,6 +36,8 @@ Diante de qualquer erro: consultar [`VACINAS.md`](./VACINAS.md) **antes** de pro
 | Assunto | Arquivo | Quando abrir |
 |---|---|---|
 | **Como se trabalha** | [`METODO-DE-TRABALHO.md`](./METODO-DE-TRABALHO.md) | sempre, antes de propor |
+| **Quem usa e o que sabe** | [`PERSONAS-E-ROTINAS.md`](./PERSONAS-E-ROTINAS.md) | antes de criar tela ou permissão |
+| **O que quebra e a quem se pede socorro** | [`FLUXOS-E-RISCOS.md`](./FLUXOS-E-RISCOS.md) | antes de criar qualquer objeto ou fluxo |
 | **O que fazer agora** | [`INVENTARIO-DE-EXECUCAO.md`](./INVENTARIO-DE-EXECUCAO.md) | no início de toda sessão e ao terminar cada tarefa |
 | **O que o produto é** | [`SPEC.md`](./SPEC.md) | ao mexer em regra de negócio |
 | **Onde o projeto está** | [`ESTADO-ATUAL.json`](./ESTADO-ATUAL.json) | ao precisar de estado verificável |
@@ -149,6 +153,7 @@ Não confie neste parágrafo para saber o que fazer agora — confie no inventá
 6. `diretrizes/ARQUITETURA.md`;
 7. `diretrizes/OBJECT-RUNTIME.md` quando o assunto for customização;
 8. `diretrizes/VACINAS.md` antes de resolver erro;
-9. `diretrizes/UI-UX-PRO-MAX.md` quando o assunto for interface.
+9. `diretrizes/UI-UX-PRO-MAX.md` quando o assunto for interface;
+10. `diretrizes/PERSONAS-E-ROTINAS.md` e `diretrizes/FLUXOS-E-RISCOS.md` antes de criar qualquer coisa nova.
 
 Nenhum desses passos depende de memória de conversa, de arquivo temporário de contêiner ou de máquina local. É essa a razão de existir deste diretório.

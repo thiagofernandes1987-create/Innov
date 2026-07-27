@@ -7,7 +7,8 @@ const requiredCanonical=[
  "diretrizes/VACINAS.md","diretrizes/UI-UX-PRO-MAX.md","diretrizes/PADRAO-DOCUMENTACAO.md","diretrizes/HISTORICO-ETAPAS.md",
  "diretrizes/METODO-DE-TRABALHO.md","diretrizes/OBJECT-RUNTIME.md",
  "diretrizes/LEIA-PRIMEIRO.md","diretrizes/INVENTARIO-DE-EXECUCAO.md","diretrizes/PADRAO-DE-INTERFACE.md",
- "diretrizes/PERSONAS-E-ROTINAS.md","diretrizes/SERVICO-DE-CAMPO.md","diretrizes/KPIS.md"
+ "diretrizes/PERSONAS-E-ROTINAS.md","diretrizes/SERVICO-DE-CAMPO.md","diretrizes/KPIS.md",
+ "diretrizes/FLUXOS-E-RISCOS.md"
 ];
 // Vacinas por descoberta, não por lista fixa — VACINA-014. A lista escrita à
 // mão que existia aqui passou verde com duas vacinas novas fora do catálogo:

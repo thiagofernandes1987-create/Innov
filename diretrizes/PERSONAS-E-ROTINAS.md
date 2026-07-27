@@ -365,6 +365,11 @@ Em ordem de retorno pelo esforço:
 8. **T10, nivelamento** e **T4, corrente crítica** — sprints próprias, ambas
    dependem de T2.
 
+**Quando quebra:** [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md) §P2 — apontamento
+que não chega ou chega falso, caminho crítico que mudou de lugar sem ninguém
+ver, pedido de antecipação, recurso que não existe na data, e o replanejamento
+que apaga a prova do desvio.
+
 ---
 
 # P1 — Vendedor / SDR
@@ -373,30 +378,72 @@ Em ordem de retorno pelo esforço:
 venda e outro para venda, depois que esse cliente é ganho ele vai para o pós
 venda."
 
-**Competências.** Qualificação por critério explícito (orçamento, autoridade,
-necessidade, prazo — e no nosso caso também *medida tirada?*); leitura de funil
-como taxa entre etapas, não como total; previsão ponderada por etapa;
-negociação de escopo sem mover preço; disciplina de próximo passo — cartão sem
-data de próxima ação é cartão perdido.
+## P1.1 — Competências
 
-**Ferramentas de mercado.** Pipedrive (funil como objeto central, atividade
-obrigatória), HubSpot (sequência e lembrete), Bitrix24 (funil e comunicação no
-mesmo lugar), WhatsApp — que no Brasil **é** o canal, não um canal.
+| # | Competência | O que significa dominar |
+|---|---|---|
+| C1 | **Qualificação por critério** | Ter uma régua escrita e usá-la. No móvel planejado a régua tem um item que nenhum manual de CRM traz: **o imóvel está em condição de medir?** É a pergunta que evita o R1.4, que é a origem de 12% de retrabalho na montagem |
+| C2 | **Leitura de funil** | Enxergar taxa entre etapas, nunca total. E saber que o denominador muda a resposta: calculado, a mesma venda dá 9,0% ou 20,0% — razão de 2,22× |
+| C3 | **Diagnóstico de necessidade** | Traduzir "quero uma cozinha bonita" em escopo, prazo e faixa de investimento, antes de gastar projeto |
+| C4 | **Leitura de projeto e viabilidade** | Saber o que cabe, o que a fábrica faz e o que não faz. Vender o que não se fabrica é o defeito mais caro do comercial |
+| C5 | **Formação de preço** | Entender BDI, margem e o efeito de desconto sobre a margem, não sobre o preço. 10% de desconto com margem de 25% corta **40% do lucro** |
+| C6 | **Negociação de escopo** | Baixar escopo antes de baixar preço. É a competência que separa vendedor de tirador de pedido |
+| C7 | **Prazo realista** | Saber a carga de fábrica antes de prometer data. Prazo prometido no impulso vira assistência técnica |
+| C8 | **Disciplina de próximo passo** | Todo cartão com data de próxima ação. Cartão sem ela é perda silenciosa |
+| C9 | **Contrato e aditivo** | Saber o que está contratado, e que mudança depois da liberação para fabricação **é aditivo**, não gentileza |
+| C10 | **Previsão** | Valor ponderado por probabilidade de etapa, com histórico próprio, não com otimismo |
 
-**Técnicas.** Taxa de conversão por etapa com denominador declarado (a mesma
-venda dá 9,0% ou 20,0% conforme o denominador — razão de 2,22× entre as duas
-leituras, e discutir meta sem fixar o denominador é discutir nada); tempo médio
-de permanência por etapa, que é onde o funil realmente trava; motivo de perda
-categorizado, sem o qual não se corrige nada; valor ponderado por probabilidade
-de etapa.
+## P1.2 — Ferramentas de mercado
 
+Pipedrive — funil como objeto central e atividade obrigatória em todo negócio;
+HubSpot — sequência, lembrete e histórico de e-mail; Bitrix24 — funil e
+comunicação no mesmo lugar; **WhatsApp**, que no Brasil não é *um* canal, é *o*
+canal, e por isso precisa estar registrado no cartão e não no telefone pessoal
+de quem vendeu.
+
+## P1.3 — Técnicas
+
+**Conversão por etapa com denominador declarado.** A mesma operação lida de duas
+formas dá 9,0% ou 20,0%; discutir meta sem fixar o denominador é discutir nada.
 > **Exige:** `pipeline_card_stage_history` **já grava toda transição** — é a
-> fonte de quase todo KPI de conversão e tempo de ciclo sem tabela nova. Falta
-> motivo de perda como campo estruturado e a probabilidade por etapa.
+> fonte de quase todo indicador de conversão e tempo de ciclo, sem tabela nova.
 
-**Rotina.** Abre o funil cedo, ataca vencido e vencendo hoje, liga, registra,
-agenda o próximo toque, arrasta. Ao ganhar, o cliente nasce no pós-venda sem
-redigitar nada.
+**Tempo de permanência por etapa.** Onde o funil realmente trava. Uma etapa com
+permanência crescente é gargalo antes de virar queda de faturamento.
+> **Exige:** mesma tabela, agregada por etapa. Sem migration.
+
+**Motivo de perda categorizado.** Sem lista fechada não se corrige nada, porque
+texto livre não vira indicador.
+> **Exige:** campo estruturado. **Falta** — é o único indicador do módulo hoje
+> sem dado nenhum.
+
+**Previsão ponderada.** Valor × probabilidade da etapa, com a probabilidade
+saindo do histórico da própria operação.
+> **Exige:** probabilidade por etapa em `pipeline_stages`. **Falta.**
+
+**Pré-condição de medição conferida.** Contrapiso, revestimento definido, ponto
+elétrico e hidráulico, esquadria instalada — e **medição condicional marcada
+como tal**, com remedição agendada.
+> **Exige:** lista de conferência no cartão e sinalizador de condicional.
+> **Falta**, e é o requisito de maior retorno do módulo: previne a maior parte
+> do R3.1, que custa 300× mais quando aparece na montagem.
+
+## P1.4 — Rotina, com a competência exercida em cada momento
+
+| Momento | O que faz | Competência |
+|---|---|---|
+| 08:00 | Atividades vencidas e vencendo hoje, antes de qualquer lead novo | C8 |
+| 08:30 | Primeiro toque nos leads da noite — o relógio de primeira resposta corre desde a entrada | C1, C3 |
+| Manhã | Qualifica: escopo, faixa, prazo e **condição de medir** | C1, C4, C7 |
+| Ao agendar medição | Confere pré-condições com o cliente, por telefone, antes de mandar equipe | C1 |
+| Ao propor | Monta escopo e preço; se pedirem desconto, baixa escopo primeiro | C5, C6 |
+| Antes de prometer data | Consulta carga de fábrica | C7 |
+| Ao ganhar | Confere o contratado e libera para o pós-venda sem redigitar | C9 |
+| Sexta | Revisa previsão do mês e motivo de perda da semana | C2, C10 |
+
+**Quando quebra:** [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md) §P1 — lead que
+esfria, prazo que a fábrica não cumpre, escopo mudado depois de aprovado, e a
+medição feita antes de a obra estar pronta.
 
 ---
 
@@ -413,49 +460,90 @@ versão supôs. Corrigido pelo responsável:
 > informações do aplicativo"
 
 **O aplicativo não acompanha o trabalho: ele interrompe o trabalho.** São
-sessões curtas, em três momentos definidos, e em cada uma o profissional parou
-o que estava fazendo para pegar o telefone. A consequência de projeto não é
+sessões curtas, em três momentos definidos, e em cada uma o profissional parou o
+que estava fazendo para pegar o telefone. A consequência de projeto não é
 "funcionar com uma mão" — é **terminar de primeira**, porque o custo de errar é
-voltar a parar.
+voltar a parar, e a parada custa R$ 104,00 por hora de equipe.
 
-**Competências.** Leitura de projeto executivo e de lista de corte; prumo,
-nível e esquadro; ferramenta elétrica e fixação por tipo de substrato
-(alvenaria, drywall, laje); sequência de montagem — o que entra antes para não
-ter que sair depois; acabamento e regulagem; **estimativa honesta de dias
-restantes**, que é a competência mais valiosa e a mais rara; segurança e uso de
-EPI; conduta na casa do cliente, que vira nota de 0 a 5.
+## P3.1 — Competências
 
-**Ferramentas.** As de trabalho, e o telefone em três momentos. Nada mais.
-
-### Os três momentos, e só eles
-
-| Quando | O que faz | Regra |
+| # | Competência | O que significa dominar |
 |---|---|---|
-| Início do turno | Check-in ao chegar na obra | Marcação de jornada — definitiva, confirmada antes de gravar |
-| **Em caso de necessidade** | Falta material → **para a atividade** e solicita | A parada é obrigatória e registrada junto com a solicitação |
-| **15 minutos antes de parar** | Diário do dia, dias que faltam, check-out | Janela conhecida: o sistema avisa, não espera ser lembrado |
+| C1 | **Leitura de projeto executivo** | Ler vista, corte, detalhe e lista de corte; e conferir se a **revisão** que está na mão é a vigente. Montar pela revisão antiga é a lei de custo em ação |
+| C2 | **Metrologia de obra** | Prumo, nível, esquadro e diagonal. Saber que parede fora de esquadro é regra, não exceção, e onde a tolerância absorve e onde não |
+| C3 | **Sistemas construtivos de móvel** | Corrediça, dobradiça, pistão, perfil, sistema de abertura — e o que cada um exige de folga |
+| C4 | **Fixação por substrato** | Alvenaria, bloco vazado, drywall, laje, gesso. Errar a bucha é o defeito que só aparece quando o armário cai, meses depois |
+| C5 | **Sequência de montagem** | O que entra antes para não ter que sair depois. É o que distingue 4 dias de 7 no mesmo serviço |
+| C6 | **Ferramenta e corte em obra** | Ajuste no local sem estragar acabamento; e saber quando **não** ajustar em obra |
+| C7 | **Acabamento e regulagem** | Alinhamento de frentes, folga uniforme, silicone. É o que o cliente enxerga e por onde ele julga o resto |
+| C8 | **Instalações** | Reconhecer ponto elétrico, hidráulico e de gás; furar sem atingir tubulação — e a regra de parar quando há dúvida |
+| C9 | **Estimativa de dias restantes** | A competência mais valiosa e a mais rara: dizer honestamente quanto falta, inclusive quando a resposta é ruim |
+| C10 | **Segurança** | EPI, trabalho em altura, energia. Não é formalidade: é o que não tem correção depois |
+| C11 | **Conferência de romaneio** | Comparar o que chegou com o que deveria chegar, **antes** de começar. Meia hora aqui evita o dia inteiro perdido |
+| C12 | **Conduta na casa do cliente** | Proteção de piso, limpeza, horário, linguagem. Vira nota de 0 a 5 e entra na matriz |
+| C13 | **Registro de evidência** | Fotografar o que importa: antes, o problema, o depois. É o que sustenta o acompanhamento a distância |
 
-### Falta de material é parada, não observação
+## P3.2 — Ferramentas
 
-Quando falta insumo, o montador **não continua trabalhando**. A solicitação
-**abre uma parada**, com início; a parada fecha quando o material chega. Três
-consequências:
+As de trabalho — e o telefone em três momentos, nada mais. Toda ferramenta
+digital que exija um quarto momento está competindo com a produção.
 
-1. o tempo parado é medido, não estimado depois de memória;
-2. entra no `TEP` como causa declarada, separando "rendeu menos" de "ficou
-   esperando";
-3. alimenta o KPI **parada de obra por falta de material**, que liga o
-   almoxarifado ao custo real de faltar — hoje compras é avaliada por preço e
-   prazo próprio, e o custo de parar não aparece em lugar nenhum.
+## P3.3 — Técnicas
 
-Sem a parada explícita, o atraso aparece como baixa produtividade de quem estava
-de braços cruzados por decisão de outro setor.
+**Check-in e check-out com localização.** Marcação de jornada, definitiva,
+confirmada antes de gravar — é dado de folha de pagamento.
 
-### A janela dos 15 minutos é do sistema, não da memória
+**Conferência de romaneio antes de iniciar.** Item a item, com foto de
+referência. Calculado: detectar na expedição em vez de na montagem economiza
+**4 dias por ocorrência**.
 
-Quem lembra é o aplicativo: notificação na janela, com o que falta preencher já
-listado. Esperar o profissional lembrar produz diário em branco e `DEPT`
-desatualizado — que é justamente o dado que sustenta todo o resto.
+**Diário do dia com evidência.** Executado, quantidade, foto.
+
+**Apontamento de dias restantes (`DEPT`).** Contra o previsto (`DPPT`), gerando
+`TEP = DPPT − DEPT`. Negativo abre campo de motivo — obrigatório, em lista
+fechada.
+
+**Abertura de parada.** Dois toques, motivo fechado, e **de quem era a
+obrigação**. Sem isso, espera vira baixa produtividade de quem estava parado por
+decisão de outro setor.
+
+**Solicitação de insumo, que abre parada junto.** Falta material é **parada
+obrigatória**, não observação. Três consequências: o tempo parado é medido e não
+estimado de memória; entra no `TEP` como causa declarada; e alimenta o indicador
+de parada por falta de material, que liga o almoxarifado ao custo real de faltar
+— hoje compras é avaliada por preço e prazo próprio, e o custo de parar não
+aparece em lugar nenhum.
+
+> **Exige, e boa parte já existe:** `daily_logs` com estado e aprovação,
+> `daily_log_activities` com `progress_before`/`progress_after` por tarefa,
+> `daily_log_media` com `storage_path`, `sha256`, `captured_at` e
+> **`client_visible`** — a foto do campo já nasce com o controle de quem pode
+> ver. **Faltam** parada como objeto, motivo em lista fechada, solicitação com
+> destinatário e prazo, e o romaneio conferível.
+
+## P3.4 — Rotina, com a competência exercida em cada momento
+
+| Hora | O que faz | Competência |
+|---|---|---|
+| 07:20 | Chega, avalia acesso e condição do local | C10 |
+| 07:30 | **Check-in** | — |
+| 07:35 | Abre a tarefa, lê escopo e prazo, confere a **revisão** do desenho | C1, C9 |
+| 07:40 | **Confere o romaneio** contra o que chegou | C11 |
+| 07:50 | Confere medidas críticas antes de furar qualquer coisa | C2, C8 |
+| 08:00 | Monta na sequência planejada | C3, C4, C5 |
+| Ao dar problema | Para, registra com foto, abre solicitação nominal | C13, e §P3 dos riscos |
+| Tarde | Regulagem e acabamento do que já subiu | C6, C7 |
+| Durante o dia | Proteção, limpeza, conduta | C12 |
+| **16:45** | **Janela dos 15 min**: diário, fotos, `DEPT` | C9, C13 |
+| 17:00 | **Check-out** | — |
+
+A janela dos 15 minutos é do sistema, não da memória: quem lembra é o
+aplicativo, com o que falta preencher já listado. Esperar o profissional lembrar
+produz diário em branco e `DEPT` desatualizado — que é justamente o dado que
+sustenta todo o resto.
+
+**Quando quebra:** [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md) §P3 — os oito
+imprevistos dissecados, com prazo de resposta e destinatário de cada solicitação.
 
 ---
 
@@ -464,22 +552,54 @@ desatualizado — que é justamente o dado que sustenta todo o resto.
 **Palavra do responsável:** "o financeiro tem que ter acesso ao financeiro,
 contato, tarefas, orçamentos, etc."
 
-**Competências.** Competência × caixa — saber que medido, faturado e recebido
-são três datas diferentes e que confundi-las é a origem de metade dos sustos;
-conciliação bancária; medição contratual e retenção; DRE por obra, não só da
-empresa; inadimplência por idade de título; tributo sobre a nota do serviço.
+## P4.1 — Competências
 
-**Ferramentas.** ERP contábil, extrato bancário, planilha de fluxo, boleto e
-PIX.
+| # | Competência | O que significa dominar |
+|---|---|---|
+| C1 | **Competência × caixa** | Medido, faturado e recebido são três datas diferentes. Confundi-las é a origem de metade dos sustos de caixa |
+| C2 | **Medição contratual** | O que pode ser medido, com que evidência, e o que é retenção |
+| C3 | **Conciliação bancária** | Fechar extrato contra lançamento, e achar a diferença sem refazer o mês |
+| C4 | **Fluxo projetado** | Projetar por vencimento, com curva de recebimento realista e não com a prometida |
+| C5 | **Aging de recebível** | Faixas de idade, e a régua de cobrança que cada faixa dispara |
+| C6 | **Custo por obra** | DRE por obra, não só da empresa. Empresa lucrativa com obra no prejuízo é o padrão que ninguém enxerga sem isso |
+| C7 | **Orçado × comprado × medido** | Onde a margem vaza, item a item, priorizando a curva A |
+| C8 | **Tributação do serviço** | ISS, retenção, regime, e o efeito no preço |
+| C9 | **Alçada e segregação** | Quem lança não aprova. É controle, não burocracia |
 
-**Técnicas.** Fluxo de caixa projetado por data de vencimento, não por
-competência; *aging* de recebíveis em faixas; margem por obra comparando
-orçado × comprado × medido; ponto de equilíbrio mensal.
+## P4.2 — Ferramentas de mercado
 
-> **Exige:** lançamentos, fluxo, medições e contratos já existem. Falta
-> **calendário como visualização** — pela régua da §12.3 do padrão de interface,
-> o financeiro é o candidato mais forte, porque todo registro dele tem data
+ERP contábil, extrato e conciliação do banco, planilha de fluxo, emissor de nota
+e boleto, PIX.
+
+## P4.3 — Técnicas
+
+**Fluxo por vencimento**, não por competência. **Aging em faixas** com régua de
+cobrança. **Margem por obra** comparando orçado, comprado e medido, com foco nos
+itens de curva A — calculado, **3 de 8 itens concentram 80% do custo**, e
+acompanhar os oito com o mesmo esforço é como se perde a chance de ver o que
+importa. **Ponto de equilíbrio mensal.**
+
+> **Exige:** lançamentos, fluxo, medições e contratos já existem. **Falta**
+> calendário como visualização — pela régua da §12.3 do padrão de interface, o
+> financeiro é o candidato mais forte, porque todo registro dele tem data
 > própria.
+
+## P4.4 — Rotina
+
+| Momento | O que faz | Competência |
+|---|---|---|
+| Diário | Concilia o dia anterior | C3 |
+| Diário | Fila de **medido e não faturado**, com idade | C1, C2 |
+| Semanal | Fluxo das próximas 4 semanas | C4 |
+| Semanal | Aging e disparo da régua de cobrança | C5 |
+| Antes de liberar equipe | Confere situação financeira do cliente | C5, C9 |
+| Mensal | Margem por obra e desvio da curva A | C6, C7 |
+| Mensal | Fechamento e apuração | C8 |
+
+**Quando quebra:** [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md) §P4 — medido e não
+faturado, custo estourado descoberto tarde demais, e o cliente inadimplente
+descoberto **depois** de a equipe sair, que custa os R$ 942,40 de um dia
+queimado.
 
 ---
 
@@ -487,19 +607,50 @@ orçado × comprado × medido; ponto de equilíbrio mensal.
 
 **Palavra do responsável:** "Assistência técnica tem o pipeline próprio."
 
-**Competências.** Diagnóstico por sintoma; separar defeito de fabricação, de
-montagem e de uso — é o que decide quem paga; noção de garantia e prazo legal;
-comunicação com cliente irritado, que é competência técnica e não traço de
-personalidade.
+## P5.1 — Competências
 
-**Técnicas.** Tempo de primeira resposta e tempo de solução, medidos separado;
-taxa de resolução na primeira visita; reincidência por causa raiz — o número que
-transforma assistência em melhoria de processo em vez de bombeiro permanente;
-classificação por responsabilidade, que fecha o ciclo com produção.
+| # | Competência | O que significa dominar |
+|---|---|---|
+| C1 | **Diagnóstico por sintoma** | "Porta desalinhou" pode ser dobradiça, esquadro do móvel, ou piso que assentou. Trocar peça sem diagnóstico é voltar |
+| C2 | **Classificação de responsabilidade** | Defeito de fabricação, de montagem, de projeto ou de uso. Decide quem paga, e é o dado que fecha o ciclo com produção |
+| C3 | **Garantia e prazo legal** | O que é coberto, por quanto tempo, e o que é cobrável |
+| C4 | **Leitura do contratado** | Reclamação sobre o que nunca foi vendido é frequente, e responder isso exige ter o contrato e os aditivos à mão |
+| C5 | **Comunicação sob pressão** | Competência técnica, não traço de personalidade: o cliente irritado tem razão sobre o incômodo mesmo quando não tem sobre o fato |
+| C6 | **Análise de reincidência** | Ver o padrão entre chamados, que é o que transforma assistência em melhoria de processo em vez de bombeiro permanente |
+| C7 | **Prazo real de reposição** | Saber que o ciclo é de **9 dias úteis**, e não prometer 3 |
 
-**Rotina.** Abre o funil, vê o que está em "aguardando" — o preset já separa
-aguardando disponível de indisponível, porque a diferença é quem está travando.
-Agenda vistoria, executa, encerra, classifica a causa.
+## P5.2 — Ferramentas de mercado
+
+Service desk com SLA, funil de chamado, base de conhecimento por sintoma.
+
+## P5.3 — Técnicas
+
+**Tempo de primeira resposta e tempo de solução, medidos separado** — o primeiro
+é atendimento, o segundo é operação, e juntar os dois esconde qual dos dois está
+ruim. **Resolução na primeira visita**, que é o indicador que mais pesa no custo.
+**Reincidência por causa raiz.** **Chamados por obra entregue**, o número que
+liga o pós-venda a quem executou.
+
+> **Exige:** o funil de assistência com as nove etapas já existe, e a RPC
+> `create_sac_ticket` já numera e aplica os prazos de primeira resposta e
+> resolução — inserir direto criaria chamado sem SLA. **Faltam** a classificação
+> de responsabilidade em lista fechada e o rastro até quem mediu, projetou,
+> fabricou e montou.
+
+## P5.4 — Rotina
+
+| Momento | O que faz | Competência |
+|---|---|---|
+| 08:00 | Chamados sem primeira resposta, por idade | C5 |
+| Manhã | Diagnostica por telefone antes de mandar alguém | C1 |
+| Manhã | Separa o que é garantia do que é cobrável | C2, C3, C4 |
+| Ao agendar | Confere se a peça existe, antes de prometer data | C7 |
+| Ao encerrar | Classifica causa raiz — encerramento sem classificação não fecha | C2 |
+| Semanal | Reincidência e devolutiva para produção e projetos | C6 |
+
+**Quando quebra:** [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md) §P5 — escopo nunca
+contratado, impossibilidade de saber quem executou, e o ciclo de 9 dias contra o
+prazo que foi prometido.
 
 ---
 
@@ -508,45 +659,98 @@ Agenda vistoria, executa, encerra, classifica a causa.
 **Palavra do responsável:** "fica mais fácil criar novos perfis, autorizações e
 permissões" e, na revisão, "nem vi a sessão para cadastrar usuários ainda".
 
-**Competências.** Modelo de acesso por papel; segregação de função — quem lança
-não aprova; princípio do menor privilégio; leitura de trilha de auditoria;
-ciclo de vida de acesso, e principalmente o **desligamento**, que é onde todo
-sistema falha.
+## P6.1 — Competências
 
-**Técnicas.** Revisão periódica de acesso; **pré-visualizar o que outra pessoa
-enxerga sem trocar de sessão** — é o que responde "por que ele não vê esse
-módulo?" sem abrir o banco.
+| # | Competência | O que significa dominar |
+|---|---|---|
+| C1 | **Acesso por papel** | Permissão pertence ao papel, não à pessoa. Permissão individual não sobrevive à segunda contratação |
+| C2 | **Segregação de função** | Quem lança não aprova; quem compra não recebe |
+| C3 | **Menor privilégio** | Começar fechado e abrir com motivo, não o contrário |
+| C4 | **Ciclo de vida do acesso** | Entrada, mudança de função e **desligamento**. O terceiro é onde todo sistema falha |
+| C5 | **Leitura de auditoria** | Reconstruir quem fez o quê a partir de `audit_events`, sem abrir o banco |
+| C6 | **Diagnóstico de permissão** | Responder "por que ele não vê esse módulo?" em minutos |
+
+## P6.2 — Técnicas
+
+**Revisão periódica de acesso**, com data da última conferência visível.
+**Pré-visualizar o que outra pessoa enxerga sem trocar de sessão** — é a técnica
+que resolve o C6 sem ninguém pedir senha emprestada, que é como isso costuma
+acabar. **Desligamento como evento que revoga**, não como tarefa que alguém
+lembra.
 
 > **Exige:** usuários, perfis e aplicativos por organização já existem, com RLS
-> no banco e não só na tela. Falta o caminho até a tela (menu criado na T-23.21,
-> tela a conferir na T-24.10) e a pré-visualização de acesso.
+> no banco e não só na tela, e `audit_events` já grava ator, recurso, ação e o
+> antes e depois. **Faltam** a pré-visualização de acesso e o desligamento como
+> evento.
+
+## P6.3 — Rotina
+
+| Momento | O que faz | Competência |
+|---|---|---|
+| Ao contratar | Cria pessoa, atribui papel, confere pela pré-visualização | C1, C3 |
+| Ao mudar de função | Remove o antigo **antes** de dar o novo | C1, C4 |
+| Ao desligar | Revoga no mesmo dia | C4 |
+| Quando reclamam de acesso | Diagnostica pela pré-visualização | C6 |
+| Trimestral | Revisão de acesso e leitura de auditoria | C2, C5 |
+
+**Quando quebra:** [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md) §P6.
 
 ---
 
 # P7 — Projetista / detalhamento executivo
 
 Separado de P2 nesta revisão. Projetista desenha o produto; planejador planeja a
-obra. Juntar os dois foi o que fez a versão anterior descrever um "engenheiro"
-que não existe em nenhuma das duas cadeiras.
+obra. Juntar os dois fez a versão anterior descrever um "engenheiro" que não
+existe em nenhuma das duas cadeiras.
 
-**Competências.** Medição em obra e tolerância de fábrica; sistemas
-construtivos de móvel — ferragem, corrediça, dobradiça, sistema de abertura;
-lista de corte e plano de chapa, com aproveitamento como métrica; compatibilização
-com hidráulica, elétrica e gás, que é onde nasce o retrabalho caro;
-detalhamento suficiente para a fábrica não perguntar nada.
+## P7.1 — Competências
 
-**Ferramentas.** Promob, SketchUp, AutoCAD, e o otimizador de corte.
+| # | Competência | O que significa dominar |
+|---|---|---|
+| C1 | **Medição e tolerância** | Medir com o desvio da obra em mente, e saber onde a folga de fabricação absorve o fora de esquadro |
+| C2 | **Pré-condição de medição** | Reconhecer que a obra **não** está pronta para medir, e ter coragem de dizer isso — evita o erro de 300× |
+| C3 | **Sistemas e ferragens** | Especificar o que existe, com código, e não o que seria bom existir |
+| C4 | **Lista de corte e plano de chapa** | Aproveitamento como métrica, não como consequência |
+| C5 | **Compatibilização** | Hidráulica, elétrica, gás, esquadria, ar. É onde nasce o retrabalho caro |
+| C6 | **Detalhamento suficiente** | A fábrica não pode precisar telefonar. Pergunta da fábrica é falha de detalhamento |
+| C7 | **Controle de revisão** | Revisão sem versão é a origem do móvel fabricado pelo desenho errado |
+| C8 | **Apresentação ao cliente** | Render e explicação que evitam a mudança de ideia no dia da montagem |
+| C9 | **Custo do que se desenha** | Saber que uma decisão de projeto move a curva A do orçamento |
 
-**Técnicas.** Conferência de medida contra o executivo antes de liberar
-fabricação; aproveitamento de chapa em percentual; controle de revisão do
-desenho — revisão sem versão é a origem do móvel fabricado pelo desenho errado.
+## P7.2 — Ferramentas de mercado
 
-> **Exige:** `project_documents` já tem status
-> `DRAFT`/`REVIEW`/`APPROVED`/`RELEASED`/`ARCHIVED`. Falta amarrar liberação de
-> fabricação à revisão aprovada, para que o desenho errado **não possa** virar
-> ordem de produção.
+Promob, SketchUp, AutoCAD, e o otimizador de plano de corte.
+
+## P7.3 — Técnicas
+
+**Conferência de medida antes de liberar fabricação** — calculado, é a trava
+mais barata do sistema: meia hora que evita quarenta. **Aproveitamento de chapa
+em percentual, com histórico** — medir já muda o comportamento. **Controle de
+revisão com liberação amarrada à revisão aprovada**, de modo que desenho
+superado não possa virar ordem de produção.
+
+> **Exige:** `project_documents` já tem `DRAFT`/`REVIEW`/`APPROVED`/`RELEASED`/
+> `ARCHIVED` e `project_document_versions` já versiona. **Falta** a amarração
+> entre liberação de fabricação e revisão aprovada — hoje é disciplina, e
+> disciplina falha a 100× de custo.
+
+## P7.4 — Rotina
+
+| Momento | O que faz | Competência |
+|---|---|---|
+| Antes de ir medir | Confere pré-condições com o comercial | C2 |
+| Na medição | Mede, fotografa, registra o que ainda vai mudar na obra | C1, C5 |
+| Executivo | Detalha até a fábrica não precisar perguntar | C3, C6 |
+| Antes de liberar | Confere medida × projeto, e a revisão vigente | C1, C7 |
+| Plano de corte | Mede aproveitamento e compara com o histórico | C4 |
+| Ao apresentar | Explica o que muda e o que não muda depois de aprovado | C8 |
+| Quando o campo aciona | Responde em até 4 h — a equipe está parada a R$ 104/hora | C1, C5 |
+
+**Quando quebra:** [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md) §P7 — fabricação
+pela revisão errada, e o plano de corte que desperdiça sem ninguém medir.
 
 ---
+
 
 # Matriz de competências — a leitura que o responsável pediu
 
@@ -598,3 +802,12 @@ cronograma.
    parada, e é assim que se ensina alguém a preencher no fim de semana, de
    cabeça.
 6. Quando uma rotina mudar na prática, o documento muda **antes** do código.
+7. **Persona sem dissecação não está pronta.** Competência diz o que a pessoa
+   sabe; só o fluxo pessimista de [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md) diz
+   o que a ferramenta precisa ter quando o que ela sabe não basta. Os dois
+   documentos são um só requisito partido em dois arquivos, e nenhuma persona
+   está descrita enquanto o segundo estiver vazio para ela.
+8. **Toda rotina mapeia competência a momento.** Tabela de rotina que lista
+   passos sem dizer qual habilidade cada passo exige volta a ser caminho de
+   clique com outro nome — que é o defeito que este documento existe para
+   corrigir.
