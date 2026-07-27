@@ -26,6 +26,14 @@ function trilhaValida(valor: string): valor is Trilha {
   return (TRILHAS as readonly string[]).includes(valor);
 }
 
+// O aplicativo dono de cada trilha. O funil pertence ao aplicativo, não o
+// contrário — §13 do padrão de interface.
+const MODULO_DA_TRILHA: Record<Trilha, string> = {
+  cliente: "clientes",
+  projeto: "obras",
+  assistencia: "sac"
+};
+
 function revalidar(trilha: Trilha) {
   // `layout` alcança a subárvore: sem isso a rota do cartão continuava servindo
   // a versão em cache, e seguir alguém gravava no banco sem mudar a tela.
@@ -634,5 +642,192 @@ export async function alternarAtividade(atividadeId: string): Promise<ResultadoA
     .eq("id", atividade.card_id)
     .maybeSingle();
   if (cartao) revalidar(cartao.trilha as Trilha);
+  return { ok: true };
+}
+
+// ── Funis: criar, renomear, arquivar e excluir ──────────────────────────────
+//
+// A pesquisa de campo da §13 do padrão de interface concluiu que "criar um
+// pipeline" é criar um **escopo** dentro do aplicativo dono — no Odoo é o Sales
+// Team no CRM e o próprio projeto em Project. Aqui o escopo é a linha em
+// `pipelines`, e o aplicativo dono sai da trilha.
+//
+// O esquema já aceitava vários por trilha: `pipelines_padrao_unico_idx` é
+// índice parcial e limita só quantos são padrão. Nada disto exigiu migration.
+
+/** Cria funil vazio ou a partir de um modelo pronto. */
+export async function criarFunil(
+  trilha: string,
+  nome: string,
+  preset?: string | null
+): Promise<ResultadoAcao> {
+  if (!trilhaValida(trilha)) return falha("Trilha inválida.");
+
+  const titulo = nome.trim();
+  if (!titulo) return falha("Dê um nome ao funil.");
+  if (titulo.length > 80) return falha("O nome do funil passa de 80 caracteres.");
+
+  const { supabase, organizationId } = await requireOrganizationContext();
+
+  // Com preset, quem cria é a RPC — ela semeia etapas e códigos de data numa
+  // transação só. Preset é atalho, não obrigação: quem cria "SDR" não deve
+  // receber "medição" e "fabricação" dentro.
+  if (preset) {
+    const { error } = await supabase.rpc("pipeline_criar_do_preset", {
+      p_organization_id: organizationId,
+      p_preset: preset,
+      p_nome: titulo,
+      p_key: chave(titulo) || `funil_${Date.now()}`,
+      p_padrao: false
+    });
+    if (error) {
+      if (/permissão/i.test(error.message)) return falha("Sem permissão para criar funil nesta trilha.");
+      if (/desconhecido/i.test(error.message)) return falha("Modelo de funil desconhecido.");
+      if (/duplicate key|unique/i.test(error.message)) return falha("Já existe um funil com esse nome.");
+      return falha("Não foi possível criar o funil.");
+    }
+    revalidar(trilha);
+    return { ok: true };
+  }
+
+  // Sem preset o funil nasce vazio, e a primeira etapa é criada na própria
+  // coluna — o mesmo caminho de quem ajusta um funil existente.
+  const { error } = await supabase.from("pipelines").insert({
+    organization_id: organizationId,
+    key: chave(titulo) || `funil_${Date.now()}`,
+    name: titulo,
+    trilha,
+    module_key: MODULO_DA_TRILHA[trilha],
+    padrao: false,
+    ativo: true
+  });
+
+  if (error) {
+    if (/duplicate key|unique/i.test(error.message)) return falha("Já existe um funil com esse nome.");
+    if (/row-level security|policy/i.test(error.message)) return falha("Sem permissão para criar funil nesta trilha.");
+    return falha("Não foi possível criar o funil.");
+  }
+
+  revalidar(trilha);
+  return { ok: true };
+}
+
+export async function renomearFunil(pipelineId: string, nome: string): Promise<ResultadoAcao> {
+  if (!ehUuid(pipelineId)) return falha("Funil inválido.");
+  const titulo = nome.trim();
+  if (!titulo) return falha("Dê um nome ao funil.");
+  if (titulo.length > 80) return falha("O nome do funil passa de 80 caracteres.");
+
+  const { supabase } = await requireOrganizationContext();
+  const { data, error } = await supabase
+    .from("pipelines")
+    .update({ name: titulo, updated_at: new Date().toISOString() })
+    .eq("id", pipelineId)
+    .select("trilha")
+    .maybeSingle();
+
+  if (error) return falha("Não foi possível renomear o funil.");
+  if (!data) return falha("Funil não encontrado ou sem permissão de edição.");
+
+  revalidar(data.trilha as Trilha);
+  return { ok: true };
+}
+
+/**
+ * Arquivar é o caminho normal; excluir é para o que nasceu errado.
+ *
+ * Funil arquivado some do seletor e mantém o histórico — o que importa quando
+ * um funil de venda de 2025 já tem contrato fechado pendurado nele.
+ */
+export async function arquivarFunil(pipelineId: string, arquivar: boolean): Promise<ResultadoAcao> {
+  if (!ehUuid(pipelineId)) return falha("Funil inválido.");
+
+  const { supabase } = await requireOrganizationContext();
+  const { data: funil } = await supabase
+    .from("pipelines")
+    .select("id,trilha,padrao,name")
+    .eq("id", pipelineId)
+    .maybeSingle();
+  if (!funil) return falha("Funil não encontrado.");
+
+  // O padrão é o que a trilha abre quando ninguém escolhe. Arquivá-lo deixaria
+  // a tela sem funil nenhum para mostrar.
+  if (arquivar && funil.padrao) {
+    return falha(`"${funil.name}" é o funil padrão da trilha. Defina outro como padrão antes de arquivar este.`);
+  }
+
+  const { error } = await supabase.from("pipelines").update({ ativo: !arquivar }).eq("id", pipelineId);
+  if (error) return falha(arquivar ? "Não foi possível arquivar o funil." : "Não foi possível reativar o funil.");
+
+  revalidar(funil.trilha as Trilha);
+  return { ok: true };
+}
+
+/** Qual funil a trilha abre quando ninguém escolhe. */
+export async function definirFunilPadrao(pipelineId: string): Promise<ResultadoAcao> {
+  if (!ehUuid(pipelineId)) return falha("Funil inválido.");
+
+  const { supabase, organizationId } = await requireOrganizationContext();
+  const { data: funil } = await supabase
+    .from("pipelines")
+    .select("id,trilha")
+    .eq("id", pipelineId)
+    .maybeSingle();
+  if (!funil) return falha("Funil não encontrado.");
+
+  // Tira o padrão do anterior antes de pôr no novo: o índice parcial
+  // `pipelines_padrao_unico_idx` recusa dois padrões na mesma trilha, e é ele
+  // que garante que a tela nunca fique sem saber qual abrir.
+  const { error: erroLimpeza } = await supabase
+    .from("pipelines")
+    .update({ padrao: false })
+    .eq("organization_id", organizationId)
+    .eq("trilha", funil.trilha)
+    .eq("padrao", true);
+  if (erroLimpeza) return falha("Não foi possível trocar o funil padrão.");
+
+  const { error } = await supabase.from("pipelines").update({ padrao: true }).eq("id", pipelineId);
+  if (error) return falha("Não foi possível definir o funil padrão.");
+
+  revalidar(funil.trilha as Trilha);
+  return { ok: true };
+}
+
+/** Excluir recusa com frase quando há cartão dentro. Arquivar é o caminho. */
+export async function excluirFunil(pipelineId: string): Promise<ResultadoAcao> {
+  if (!ehUuid(pipelineId)) return falha("Funil inválido.");
+
+  const { supabase } = await requireOrganizationContext();
+  const { data: funil } = await supabase
+    .from("pipelines")
+    .select("id,trilha,name,padrao")
+    .eq("id", pipelineId)
+    .maybeSingle();
+  if (!funil) return falha("Funil não encontrado.");
+
+  if (funil.padrao) {
+    return falha(`"${funil.name}" é o funil padrão da trilha. Defina outro como padrão antes de excluir este.`);
+  }
+
+  const { count } = await supabase
+    .from("pipeline_cards")
+    .select("id", { count: "exact", head: true })
+    .eq("pipeline_id", pipelineId);
+
+  if ((count ?? 0) > 0) {
+    return falha(
+      `"${funil.name}" tem ${count} ${count === 1 ? "cartão" : "cartões"}. Arquive o funil para preservar o histórico, ou mova os cartões antes de excluir.`
+    );
+  }
+
+  const { error } = await supabase.from("pipelines").delete().eq("id", pipelineId);
+  if (error) {
+    if (/foreign key|violates/i.test(error.message)) {
+      return falha("Este funil ainda tem registros ligados a ele. Arquive em vez de excluir.");
+    }
+    return falha("Não foi possível excluir o funil.");
+  }
+
+  revalidar(funil.trilha as Trilha);
   return { ok: true };
 }

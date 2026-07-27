@@ -1830,3 +1830,116 @@ tbody tr:hover { background: #fafcfd; }
 @media (prefers-reduced-motion: reduce) {
   .cartao-seguir { transition: none; }
 }
+
+/* ── Seletor de funil, na barra de controle ─────────────────────────────────
+   Posição da §13 do padrão: no Odoo o escopo do funil aparece no breadcrumb da
+   barra 2, nunca na barra 1 — trocar de funil não troca de aplicativo. */
+
+.funil-seletor { position: relative; display: inline-flex; align-items: center; gap: 2px; min-width: 0; }
+.funil-botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 320px;
+  padding: 5px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 1.02rem;
+  font-weight: 650;
+  letter-spacing: -0.012em;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.funil-botao > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.funil-botao:hover { background: var(--surface-muted); }
+.funil-botao[aria-expanded="true"] { background: var(--surface-muted); border-color: var(--border); }
+.funil-botao svg { flex: 0 0 auto; max-width: none; color: var(--muted); }
+
+/* Engrenagem do funil aparece no hover da barra, como a da coluna. */
+.funil-engrenagem { opacity: 0; }
+.barra-controle:hover .funil-engrenagem,
+.barra-controle:focus-within .funil-engrenagem { opacity: 1; }
+@media (hover: none) { .funil-engrenagem { opacity: 1; } }
+
+.funil-renomear { display: flex; align-items: center; gap: 4px; }
+.funil-renomear input { width: 200px; padding: 5px 8px; font-size: 0.95rem; }
+
+.funil-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 50;
+  width: min(320px, calc(100vw - 32px));
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.funil-menu-titulo {
+  margin: 4px 8px 6px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.funil-menu ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.funil-menu li button {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+}
+.funil-menu li button:hover { background: var(--surface-muted); }
+.funil-menu li button.ativo { background: var(--brand-soft); font-weight: 600; }
+.funil-menu li button small { font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
+
+.funil-menu-acoes { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px; }
+.funil-menu-acoes button {
+  width: 100%;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.83rem;
+  text-align: left;
+  cursor: pointer;
+}
+.funil-menu-acoes button:hover:not(:disabled) { background: var(--surface-muted); }
+.funil-menu-acoes button.perigo { color: var(--danger); }
+.funil-menu-acoes button.perigo:hover:not(:disabled) { background: var(--danger-soft); }
+.funil-menu-acoes button:disabled { opacity: 0.5; cursor: default; }
+
+.funil-menu-novo {
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 0;
+  border-top: 1px solid var(--border);
+  background: transparent;
+  color: var(--brand);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.funil-menu-novo:hover { background: var(--surface-muted); }
+
+.funil-novo { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; padding: 8px; border-top: 1px solid var(--border); }
+.funil-novo input, .funil-novo select { width: 100%; padding: 7px 9px; font-size: 0.86rem; }

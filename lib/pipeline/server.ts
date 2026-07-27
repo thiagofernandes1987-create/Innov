@@ -301,6 +301,33 @@ export async function registrosDisponiveis(
     .map(linha => ({ id: linha.id, rotulo: `${linha.code} · ${linha.title}` }));
 }
 
+/**
+ * Todos os funis de uma trilha, para o seletor da barra de controle.
+ *
+ * O esquema sempre aceitou vários: `pipelines_padrao_unico_idx` é índice
+ * **parcial** (`where padrao`), então limita quantos são padrão e não quantos
+ * existem. O que faltava era esta consulta e o seletor — por isso a T-24.3 não
+ * precisou de migration, ao contrário do que eu teria escrito sem a pesquisa.
+ *
+ * É o que permite ao CRM ter SDR, pré-venda e venda; a Projetos ter projeto e
+ * execução; e à assistência ter o seu.
+ */
+export type FunilDaTrilha = { id: string; key: string; name: string; padrao: boolean };
+
+export async function funisDaTrilha(trilha: Trilha): Promise<FunilDaTrilha[]> {
+  const { supabase, organizationId } = await requireOrganizationContext();
+  const { data, error } = await supabase
+    .from("pipelines")
+    .select("id,key,name,padrao")
+    .eq("organization_id", organizationId)
+    .eq("trilha", trilha)
+    .eq("ativo", true)
+    .order("padrao", { ascending: false })
+    .order("name", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as FunilDaTrilha[];
+}
+
 /** Trilhas que a organização já tem instaladas, para o seletor da tela. */
 export async function trilhasDisponiveis(): Promise<{ trilha: Trilha; key: string; name: string }[]> {
   const { supabase, organizationId } = await requireOrganizationContext();

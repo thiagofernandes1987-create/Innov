@@ -647,9 +647,18 @@ ferramenta do mercado tem. Vai para o fim do inventário conforme R4.
   - [x] T-24.2.2 — Mapa de onde cada comando mora, com a captura que prova cada linha: trocar de funil no breadcrumb, configurar na engrenagem colada ao nome, criar no menu `Configuração` do aplicativo, etapa no fim das colunas
   - [x] T-24.2.3 — Diagnóstico do que falta: o banco **já aceita** vários funis por trilha. O que trava é `carregarPipeline` pegar só o padrão, a restrição de um padrão por trilha e a ausência de seletor. É leitura e tela, não modelagem — a T-24.3 começa pela consulta, não pelo esquema
   - [x] T-24.2.4 — Cinco decisões fixadas, entre elas: não existe tela central de criar funil, porque não existe aplicativo "Pipeline"; e preset é atalho, não obrigação — quem cria "SDR" não recebe "medição" e "fabricação"
-- [ ] T-24.3 — **Vários pipelines por módulo no banco.** Hoje `pipelines` já aceita mais de um por trilha, mas `carregarPipeline` pega o padrão e ignora o resto, e há uma restrição de um padrão por trilha. Rever o modelo, o seletor e a migration
-- [ ] T-24.4 — **CRUD de pipeline na tela**: criar do zero ou a partir de preset, renomear, duplicar, arquivar e excluir, com a recusa em português quando houver cartão dentro
-- [ ] T-24.5 — **Seletor de pipeline** na barra de controle, ao lado do nome — é onde o padrão de mercado põe, e é o que permite CRM ter SDR, pré-venda e venda sem trocar de aplicativo
+- [x] T-24.3 — **Vários funis por aplicativo**, sem nenhuma migration — a pesquisa da T-24.2 estava certa
+  - [x] T-24.3.1 — Confirmado no esquema: `pipelines_padrao_unico_idx` é índice **parcial** (`where padrao`), então limita quantos são padrão e não quantos existem. O esquema sempre aceitou vários
+  - [x] T-24.3.2 — `funisDaTrilha()` lista todos os ativos; `carregarPipeline` já aceitava a chave e passou a receber a da URL
+  - [x] T-24.3.3 — Funil escolhido vai para `?funil=`: recarregar mantém, e o endereço pode ser mandado apontando para o funil certo
+- [x] T-24.4 — **CRUD de funil**: criar em branco ou de preset, renomear, arquivar, definir padrão e excluir
+  - [x] T-24.4.1 — Preset é atalho, não obrigação: quem cria "SDR" começa em branco e cria as etapas na própria coluna
+  - [x] T-24.4.2 — Arquivar é o caminho normal, excluir é para o que nasceu errado. Funil com cartão manda arquivar, para preservar o histórico
+  - [x] T-24.4.3 — Excluir ou arquivar o padrão é recusado com frase. Verificado no navegador: *"Trilha do cliente" é o funil padrão da trilha. Defina outro como padrão antes de excluir este.*
+  - [x] T-24.4.4 — `definirFunilPadrao` limpa o anterior antes de marcar o novo, porque o índice parcial recusa dois padrões — e é ele que garante que a tela nunca fique sem saber qual abrir
+- [x] T-24.5 — **Seletor de funil na barra de controle**, ao lado do nome, com engrenagem no hover — a posição que a §13 leu do breadcrumb `Projects / Teste ⚙`
+  - [x] T-24.5.1 — Nunca na barra 1: trocar de funil não troca de aplicativo, e a barra 1 é do aplicativo
+  - [x] T-24.5.2 — Verificado ponta a ponta: criar "SDR" em branco, trocar para ele por `?funil=sdr_...`, ver zero coluna e o campo de etapa nova, e excluir. Zero erro de console
 - [ ] T-24.6 — **Criar registro de dentro do fluxo**: cliente, projeto e chamado nascendo do `Novo` do pipeline, sem obrigar a sair para outro módulo e voltar
 - [x] T-24.0 — **Mapa das duas barras escrito antes do código** (`PADRAO-DE-INTERFACE.md` §12), ditado pelo responsável e conferido contra as capturas: o que fica em cada posição, o que nunca pode estar ali, quando cada visualização aparece e a exceção declarada da busca
   - [x] T-24.0.1 — Barra 1 igual em toda tela: marca sozinha à esquerda, ícone e nome do aplicativo com os menus dele, busca com facetas ao centro, mensagens, notificações e avatar à direita

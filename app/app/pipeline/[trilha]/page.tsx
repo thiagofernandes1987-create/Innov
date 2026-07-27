@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { PipelineView } from "@/components/pipeline/pipeline-view";
 import { hasCapability } from "@/lib/authorization";
 import { TRILHAS, type Trilha } from "@/lib/pipeline/domain";
-import { carregarPipeline, registrosDisponiveis } from "@/lib/pipeline/server";
+import { carregarPipeline, funisDaTrilha, registrosDisponiveis } from "@/lib/pipeline/server";
 
 export const dynamic = "force-dynamic";
 
@@ -30,13 +30,30 @@ const ROTULO_REGISTRO: Record<Trilha, string> = {
   assistencia: "Chamado"
 };
 
-export default async function PipelinePage({ params }: { params: Promise<{ trilha: string }> }) {
+// Modelos prontos oferecidos ao criar funil. Preset é atalho, não obrigação:
+// quem cria "SDR" não deve receber "medição" e "fabricação" dentro.
+const PRESETS_DA_TRILHA: Record<Trilha, { chave: string; rotulo: string }[]> = {
+  cliente: [{ chave: "cliente_comercial", rotulo: "Comercial (prospecção → ganho)" }],
+  projeto: [{ chave: "projeto_moveis_planejados", rotulo: "Móveis planejados (medição → finalizado)" }],
+  assistencia: [{ chave: "assistencia_padrao", rotulo: "Assistência (abertura → finalizada)" }]
+};
+
+export default async function PipelinePage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ trilha: string }>;
+  searchParams: Promise<{ funil?: string }>;
+}) {
   const { trilha } = await params;
+  const { funil } = await searchParams;
   if (!(TRILHAS as readonly string[]).includes(trilha)) notFound();
   const trilhaValida = trilha as Trilha;
 
-  const carregado = await carregarPipeline(trilhaValida);
+  // O funil escolhido vem da URL; sem escolha, abre o padrão da trilha.
+  const carregado = await carregarPipeline(trilhaValida, funil ?? null);
   const podeEditar = await hasCapability(MODULO_DA_TRILHA[trilhaValida], "update");
+  const funis = carregado ? await funisDaTrilha(trilhaValida) : [];
 
   // Só busca a lista de registros de quem pode criar cartão: para quem lê, a
   // consulta seria trezentas linhas trafegadas para alimentar um botão que não
@@ -68,7 +85,16 @@ export default async function PipelinePage({ params }: { params: Promise<{ trilh
           podeEditar={podeEditar}
           registros={registros}
           rotuloRegistro={ROTULO_REGISTRO[trilhaValida]}
-          nomeDoPipeline={carregado.pipeline.name}
+          funis={funis}
+          funilAtual={
+            funis.find(item => item.id === carregado.pipeline.id) ?? {
+              id: carregado.pipeline.id,
+              key: carregado.pipeline.key,
+              name: carregado.pipeline.name,
+              padrao: true
+            }
+          }
+          presets={PRESETS_DA_TRILHA[trilhaValida]}
         />
       ) : (
         <section className="card pipeline-sem-trilha">

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Suspense, useMemo, useState, useTransition } from "react";
 import { moverCartao } from "@/app/actions/pipeline";
 import { BuscaDaBarra, useBusca } from "@/components/casca/busca-da-barra";
+import { SeletorDeFunil, type FunilDisponivel } from "./seletor-de-funil";
 import {
   BotaoNovoCartao,
   FormularioNovoCartao,
@@ -39,7 +40,9 @@ type Props = {
   podeEditar: boolean;
   registros: RegistroDisponivel[];
   rotuloRegistro: string;
-  nomeDoPipeline: string;
+  funis: FunilDisponivel[];
+  funilAtual: FunilDisponivel;
+  presets: { chave: string; rotulo: string }[];
 };
 
 type Visao = "kanban" | "lista";
@@ -83,7 +86,9 @@ export function PipelineView({
   podeEditar,
   registros,
   rotuloRegistro,
-  nomeDoPipeline
+  funis,
+  funilAtual,
+  presets
 }: Props) {
   const [visao, setVisao] = useState<Visao>("kanban");
   // O termo vem da busca da barra superior. Estado local aqui criaria dois
@@ -153,7 +158,15 @@ export function PipelineView({
               Novo
             </button>
           ) : null}
-          <h1 className="barra-controle-titulo">{nomeDoPipeline}</h1>
+          <h1 className="sr-only">{funilAtual.name}</h1>
+          <SeletorDeFunil
+            trilha={trilha}
+            funis={funis}
+            atual={funilAtual}
+            presets={presets}
+            podeConfigurar={podeEditar}
+            aoFalhar={setErro}
+          />
           <span className="pipeline-contagem">
             {totalCartoes} {totalCartoes === 1 ? "cartão" : "cartões"}
           </span>
