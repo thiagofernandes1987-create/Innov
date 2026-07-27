@@ -637,8 +637,16 @@ ferramenta do mercado tem. Vai para o fim do inventário conforme R4.
 
 ### Tarefas
 
-- [ ] T-24.1 — **Personas e rotinas, antes de desenhar tela nova.** Quem usa, o que faz num dia, por onde entra e o que precisa em três cliques. Baseadas no que as plataformas citadas fazem, não em suposição. Documento canônico em `diretrizes/PERSONAS-E-ROTINAS.md`, com a rotina de cada perfil ligada aos módulos que ela atravessa
-- [ ] T-24.2 — **Pesquisa de campo do CRUD de pipeline**: como Odoo, Bitrix, Pipedrive e Sophia deixam criar, renomear, duplicar, arquivar e excluir um funil, e onde esse comando mora na tela. Registrada em `PADRAO-DE-INTERFACE.md` antes de qualquer código
+- [x] T-24.1 — **Personas e rotinas escritas**, em `diretrizes/PERSONAS-E-ROTINAS.md`, canônico e no validador
+  - [x] T-24.1.1 — Seis personas com fonte citada: as palavras do responsável sobre nível de acesso, as 261 capturas e o fluxo de móveis planejados já modelado nos presets. Nenhuma inventada
+  - [x] T-24.1.2 — Cada uma responde às quatro perguntas: por onde entra, qual a pergunta do dia, o que precisa em três cliques e o que a plataforma ainda não faz
+  - [x] T-24.1.3 — P3, o montador, tem poder de veto sobre desenho móvel: é a única persona que trabalha de pé, com uma mão, em tela pequena e sinal ruim ao mesmo tempo
+  - [x] T-24.1.4 — Regra levada ao `CLAUDE.md`: tela que não declara persona, origem, pergunta e contagem de cliques não é construída
+- [x] T-24.2 — **Pesquisa de campo do CRUD de pipeline** (`PADRAO-DE-INTERFACE.md` §13), lida das capturas antes de qualquer código
+  - [x] T-24.2.1 — Achado que muda o desenho: **o Odoo não tem objeto "pipeline"**. Tem um escopo dono — `Sales Team` no CRM, o próprio projeto em Project — e etapas ligadas a ele. Criar funil é criar escopo, não abrir tela de configuração à parte
+  - [x] T-24.2.2 — Mapa de onde cada comando mora, com a captura que prova cada linha: trocar de funil no breadcrumb, configurar na engrenagem colada ao nome, criar no menu `Configuração` do aplicativo, etapa no fim das colunas
+  - [x] T-24.2.3 — Diagnóstico do que falta: o banco **já aceita** vários funis por trilha. O que trava é `carregarPipeline` pegar só o padrão, a restrição de um padrão por trilha e a ausência de seletor. É leitura e tela, não modelagem — a T-24.3 começa pela consulta, não pelo esquema
+  - [x] T-24.2.4 — Cinco decisões fixadas, entre elas: não existe tela central de criar funil, porque não existe aplicativo "Pipeline"; e preset é atalho, não obrigação — quem cria "SDR" não recebe "medição" e "fabricação"
 - [ ] T-24.3 — **Vários pipelines por módulo no banco.** Hoje `pipelines` já aceita mais de um por trilha, mas `carregarPipeline` pega o padrão e ignora o resto, e há uma restrição de um padrão por trilha. Rever o modelo, o seletor e a migration
 - [ ] T-24.4 — **CRUD de pipeline na tela**: criar do zero ou a partir de preset, renomear, duplicar, arquivar e excluir, com a recusa em português quando houver cartão dentro
 - [ ] T-24.5 — **Seletor de pipeline** na barra de controle, ao lado do nome — é onde o padrão de mercado põe, e é o que permite CRM ter SDR, pré-venda e venda sem trocar de aplicativo

@@ -460,3 +460,75 @@ Das capturas `busca com filtro crm` e `pop pup filtro crm`:
 5. filtro personalizado com "corresponder a todas / qualquer uma das regras", campo, operador, valor, `Nova regra`, e alternância de arquivados.
 
 Os três primeiros são a fundação: sem faceta, o filtro fica invisível e o usuário não entende por que a lista está curta.
+
+---
+
+## 13. CRUD de pipeline — pesquisa de campo antes do código
+
+Tarefa T-24.2. O responsável pediu criar, editar e excluir funis, com vários por
+aplicativo: "CRM pode ser um pipeline para SDR, um para pré venda e outro para
+venda; depois que esse cliente é ganho ele vai para o pós venda, lá você tem o
+pipeline de Projetos e outro de execução."
+
+Antes de decidir onde o comando mora, o que as capturas mostram.
+
+### 13.1 Como o Odoo resolve — lido das 261 capturas
+
+O Odoo **não tem um objeto chamado "pipeline"**. Ele tem duas peças, e o funil é
+o encontro das duas:
+
+1. **Um escopo dono.** No CRM é o *Sales Team* — a captura do formulário mostra
+   `Sales Team: Sales` no bloco `Ownership` de cada oportunidade. Em Project, o
+   escopo é o próprio projeto: a captura de `project/1/tasks` mostra o
+   breadcrumb `Projects / Teste ⚙`, e as colunas Medição, Projeto Executivo,
+   Assinatura Executivo e Fabricação são daquele projeto.
+2. **Etapas ligadas ao escopo.** Criadas na própria coluna, com o campo de nome
+   no fim das colunas e os botões ✓ e ✕ — a captura de `crm 02_21_20` mostra
+   exatamente isso, e é o que a plataforma já copiou na T-23.30.
+
+**A consequência para a Innovar:** "criar um pipeline" é criar um **escopo**, não
+uma tela de configuração à parte. Quem cria o funil de SDR está criando um time
+comercial chamado SDR; quem cria o funil de execução está criando uma carteira
+de execução dentro de Projetos.
+
+### 13.2 Onde o comando mora
+
+| Ação | Onde, no padrão | Evidência |
+|---|---|---|
+| Trocar de funil | Breadcrumb da barra 2, ao lado do nome | `Projects / Teste ⚙` |
+| Configurar o funil aberto | Engrenagem colada no nome, na barra 2 | `Pipeline ⚙` na captura do CRM |
+| Criar funil novo | Menu `Configuração` do aplicativo | Menu do CRM: `Sales · Reporting · Configuration` |
+| Criar etapa | Campo no fim das colunas, com ✓ e ✕ | `crm 02_21_20` |
+| Configurar etapa | Engrenagem no cabeçalho da coluna, no hover | `project/1/tasks`, tooltip `Settings` |
+| Arquivar registro | Alternância "incluir arquivados" na busca | `pop pup filtro crm` |
+
+Nada disso vive em tela de administração separada. É a diferença entre
+configurar trabalhando e abrir um chamado para o administrador — que foi a
+razão de afrouxar a política de etapa na T-23.30.
+
+### 13.3 O que a plataforma tem e o que falta
+
+O banco **já aceita** vários funis por trilha: `pipelines` tem chave
+`(organization_id, key)` e a coluna `trilha`. O que impede hoje são três coisas:
+
+1. `carregarPipeline` pega o primeiro com `padrao = true` e ignora o resto;
+2. há restrição de **um padrão por trilha**, que é certa para o padrão e errada
+   como limite total;
+3. não existe seletor na tela, então um segundo funil seria invisível.
+
+Ou seja: **não é modelagem nova, é leitura e tela.** É o oposto do que uma
+migration grande faria — e por isso a T-24.3 começa revendo a consulta, não o
+esquema.
+
+### 13.4 Decisões que este documento fixa
+
+1. Funil é dado da organização, com dono declarado, nunca constante em código.
+2. Trocar de funil acontece na barra 2, ao lado do nome. Nunca na barra 1: a
+   barra 1 é do aplicativo, e trocar de funil não troca de aplicativo.
+3. Criar funil fica no menu `Configuração` do aplicativo dono. CRM cria funil de
+   venda; Projetos cria funil de obra; Chamados cria o de assistência. Não existe
+   tela central de "criar pipeline", porque não existe aplicativo "Pipeline".
+4. Excluir funil com cartão dentro é recusado com frase, como já acontece com
+   etapa. Arquivar é o caminho normal; excluir é para o que nasceu errado.
+5. O funil nasce de preset ou em branco. Preset é atalho, não obrigação —
+   quem cria "SDR" não deve receber "medição" e "fabricação" dentro.

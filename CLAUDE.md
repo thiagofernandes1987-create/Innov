@@ -25,7 +25,11 @@ O procedimento completo, o protocolo de vacinas e a ordem de leitura para um cha
 
 ## Memória entre sessões
 
-Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md`.
+Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/PADRAO-DE-INTERFACE.md`.
+
+## Antes de criar tela
+
+`diretrizes/PERSONAS-E-ROTINAS.md` e `diretrizes/PADRAO-DE-INTERFACE.md` §12 são pré-requisito, não leitura opcional. Toda tela nova declara **qual persona entra nela, vinda de onde, para resolver o quê e em quantos cliques**; e obedece ao mapa das duas barras, que fixa o que fica em cada posição. Tela que não responde às quatro perguntas não é construída — foi assim que telas passaram a ser decididas por dedução em vez de observação, e é a crítica registrada na virada da S-23.
 
 ## Regras do inventário de execução
 
