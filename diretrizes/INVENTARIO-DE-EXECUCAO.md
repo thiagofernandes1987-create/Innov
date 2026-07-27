@@ -879,6 +879,61 @@ apontou. Vai para o fim conforme R4.
 
 ---
 
+## Sprint S-29 — Acompanhamento a distância: seguir, notificar por exceção e evidenciar
+**Estado:** pendente
+**Marco:** M-5
+
+Ditada pelo responsável em 27 de julho:
+
+> "o montador solicitar material que faltou ou enviar fotos do andamento, assim
+> mesmo sem visitar a montagem, ou obra, os gerentes, diretores, cliente, sabem o
+> que está acontecendo (…) por isso temos notificações e alertas para as pessoas
+> que são responsáveis e seguem o projeto"
+
+Desenho e dissecação em
+[`ACOMPANHAMENTO-A-DISTANCIA.md`](ACOMPANHAMENTO-A-DISTANCIA.md). Vai para o fim
+conforme R4.
+
+### O diagnóstico que ordena a sprint
+
+**Metade do sistema já está construída, e é a metade que se costuma achar que
+falta.** O portal do cliente existe em `app/cliente/` e já lê `client_visible`
+em diário aprovado, mídia, tarefas, marcos e documentos liberados. `daily_logs`
+já tem aprovação com autor e data, e `daily_log_media` já tem `captured_at`,
+`sha256` e `client_visible`. **A lacuna inteira é o empurrão**: hoje tudo é
+*pull* — quem quer saber precisa abrir a tela. Não existe tabela de notificação,
+não existe assinatura ("quem segue o quê") e não existe entrega.
+
+### As contas que fixam os limites
+
+| Conta | Resultado | O que decide |
+|---|---|---|
+| Eventos para 1 gerente com 6 obras | **2.640/mês (120/dia)** bruto → **259/mês (11,8/dia)** por exceção | Notificar por exceção, redução de **90,2%** |
+| Falso positivo tolerável | acima de **20%** o alerta vira ruído | Tipo de alerta acima disso é desligado até corrigir |
+| Evidência remota × visita | R$ 0,94 contra R$ 365,40 — **390×** | Substitui a visita de rotina, não a visita |
+| Foto original × comprimida | 4,20 MB → 0,35 MB, **12×**; upload de 8 s → 0,7 s | Compressão não é economia, é viabilidade dentro da janela de 15 min |
+| Fila offline de 7 dias | 168 registros, 29,4 MB por equipe | Cabe com folga; 7 dias é o teto, acima disso o dado envelheceu |
+
+### Tarefas
+
+- [ ] T-29.0 — **Assinatura: "seguir" como ato explícito e visível**, com inscrição automática por papel (responsável, gerente da obra, planejador) e a lista de seguidores exibida na própria obra. Diretor que "achava que estava vendo" e não estava é a falha mais comum deste tipo de sistema — e sem registro de quem seguia o quê, "ninguém me avisou" não tem resposta
+- [ ] T-29.1 — **Notificação por exceção**, nunca por evento. Normal não avisa
+  - [ ] T-29.1.1 — Faixa derivada do próprio histórico, conforme a janela 6+6 da `KPIS.md`
+  - [ ] T-29.1.2 — Teto diário por pessoa, com excedente virando resumo; e agrupamento por obra — cinco eventos da mesma obra são um aviso, não cinco
+  - [ ] T-29.1.3 — **Falso positivo medido por tipo de alerta**, e tipo acima de 20% desligado até ser corrigido. Alerta que ninguém abre há um mês é alerta que não deveria existir
+  - [ ] T-29.1.4 — Janela de silêncio por perfil, respeitando o regime de trabalho que o calendário já conhece, com classe de urgência estreita e nominal que atravessa
+- [ ] T-29.2 — **Um fato, seis recortes**: montador, coordenador, planejador, gerente, diretor e cliente recebem agregações diferentes do mesmo evento. Mandar o mesmo texto para os seis produz 6× o volume e 1× o valor
+- [ ] T-29.3 — **Foto amarrada à tarefa**, não ao dia, com legenda obrigatória curta — descrever obriga a olhar. Comprimida no dispositivo, e com **hora de captura separada da hora de envio**: divergir não é fraude, é sinal para olhar
+- [ ] T-29.4 — **Fila offline de 7 dias** com estado visível ao montador ("3 registros aguardando envio"), e check-in/check-out gravando hora do dispositivo **e** do servidor, para que sincronizar tarde não vire fraude de ponto nem acusação de fraude
+- [ ] T-29.5 — **Localização só no check-in e no check-out**, nunca contínua, com finalidade declarada, prazo de retenção e acesso restrito a quem processa folha. Rastreamento durante a jornada não é acompanhamento — é outra coisa, e não foi o que se pediu
+- [ ] T-29.6 — **`client_visible` como decisão explícita de quem aprova**, nunca padrão, e o diário aprovado como única porta para o cliente. Foto de instalação pela metade parece defeito para quem não sabe que aquilo é uma etapa
+- [ ] T-29.7 — **Detecção de apontamento inventado**: progresso monotônico com variância zero, sempre redondo, sempre igual ao planejado. E correção que **não sobrescreve o original**, para que revisar para baixo seja barato e honesto. Progresso que nunca desce em obra nenhuma é o indicador mais confiável de que o dado é ficção
+- [ ] T-29.8 — **As cinco regras que separam acompanhamento de vigilância**, implementadas e não só escritas: o próprio profissional vê o número dele primeiro; o indicador aponta a tarefa e não a pessoa; toda queda tem motivo que entra no número; a janela esquece; e **a resposta da gestão às solicitações do campo é medida e publicada do mesmo jeito que o `TEP`**
+  - [ ] T-29.8.1 — Justificativa registrada: na meta-análise clássica de intervenções de feedback, o efeito médio é positivo (**d ≈ 0,41**) mas **mais de um terço das intervenções piorou o desempenho**. A direção confirma a intuição; a variância diz que o **como** decide o sinal. Se o painel cobra o campo em 15 minutos e a gestão responde em três dias, o campo aprende o que o sistema realmente vale
+- [ ] T-29.9 — **Resumo semanal** ao cliente e ao diretor: um e-mail, não trinta
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.

@@ -38,6 +38,7 @@ Diante de qualquer erro: consultar [`VACINAS.md`](./VACINAS.md) **antes** de pro
 | **Como se trabalha** | [`METODO-DE-TRABALHO.md`](./METODO-DE-TRABALHO.md) | sempre, antes de propor |
 | **Quem usa e o que sabe** | [`PERSONAS-E-ROTINAS.md`](./PERSONAS-E-ROTINAS.md) | antes de criar tela ou permissão |
 | **O que quebra e a quem se pede socorro** | [`FLUXOS-E-RISCOS.md`](./FLUXOS-E-RISCOS.md) | antes de criar qualquer objeto ou fluxo |
+| **Quem fica sabendo, e como** | [`ACOMPANHAMENTO-A-DISTANCIA.md`](./ACOMPANHAMENTO-A-DISTANCIA.md) | ao mexer em notificação, alerta, foto de campo ou portal do cliente |
 | **O que fazer agora** | [`INVENTARIO-DE-EXECUCAO.md`](./INVENTARIO-DE-EXECUCAO.md) | no início de toda sessão e ao terminar cada tarefa |
 | **O que o produto é** | [`SPEC.md`](./SPEC.md) | ao mexer em regra de negócio |
 | **Onde o projeto está** | [`ESTADO-ATUAL.json`](./ESTADO-ATUAL.json) | ao precisar de estado verificável |
