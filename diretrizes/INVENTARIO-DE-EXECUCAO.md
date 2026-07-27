@@ -560,6 +560,16 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.25.3 — Alias do ramo: `innov-git-claude-diretrizes-object-runtime-apex-method.vercel.app`
 - [ ] T-23.26 — **Promover para produção.** O deploy atual é de preview. As variáveis de produção seguem sem configurar por decisão do responsável em 26/07, para o endereço público não expor a plataforma com as credenciais fracas de homologação. Promover exige credenciais próprias de produção
 - [ ] T-23.27 — **Verificar o fluxo autenticado no ar.** A proteção de deploy do Vercel intercepta as rotas de `/app` antes da aplicação, então a varredura autenticada foi feita contra o servidor local ligado à mesma homologação. Repetir no ar depende de liberar o acesso ou usar um link de compartilhamento
+- [x] T-23.28 — **Tese do responsável conferida contra as 261 capturas** (`PADRAO-DE-INTERFACE.md` §11)
+  - [x] T-23.28.1 — As 261 enumeradas por aplicativo a partir da rota no nome do arquivo: Helpdesk 46, Sign 39, Project 39, CRM 27, ações diversas 27, Contacts 25, Purchase 19, Settings 12, Appointments/Calendar 13, demais 14
+  - [x] T-23.28.2 — Dezoito abertas e lidas, escolhidas para cobrir cada aplicativo e cada tipo de visualização. **Não foi comparação imagem a imagem das 261**, e o documento diz isso
+  - [x] T-23.28.3 — Dez elementos nomeados pelo responsável conferidos, nenhum desmentido. Appointments e Purchase têm a mesma casca, mudando só o miolo
+  - [x] T-23.28.4 — Exceção encontrada e registrada: `Sign → Green Savings` é relatório de leitura pura, sem conversa, sem seletor e sem barra de etapas. Página onde se trabalha não sai do molde; página de leitura pode
+  - [x] T-23.28.5 — Tabela do que a Innovar já segue e do que falta, item a item
+- [x] T-23.29 — **Cor por aplicativo na grade**, atendendo "olha como é colorida e moderna". Vinte e um ícones da mesma cor obrigam a ler todos os rótulos; a cor é do aplicativo, não da categoria
+- [ ] T-23.30 — **Criar e editar etapa pela própria coluna do kanban**, com `+` para cartão e engrenagem no hover — o item que o responsável marcou em três comentários distintos
+- [ ] T-23.31 — **Completar o canto direito da barra**: mensagens, notificações e configuração, ao lado do tema e do usuário
+- [ ] T-23.32 — **Conversa lateral completa**: mensagem, nota interna, WhatsApp e atividade agendada, como componente único reusado por todos os módulos
 - [x] T-23.20 — **Defeito D8 corrigido**: `app/icon.svg` declara o ícone da aba; o 404 de favicon apareceu no console durante a verificação desta sprint
 - [ ] T-23.21 — **Menus por aplicativo na barra superior.** No padrão de mercado, todo aplicativo traz os próprios menus ao lado do nome, e termina em `Relatórios` e `Configuração`. Hoje a barra mostra só o nome do aplicativo corrente
 - [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria

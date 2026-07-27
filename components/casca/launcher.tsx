@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { IconeDoModulo } from "./icones";
+import { corDoModulo, IconeDoModulo } from "./icones";
 
 // Tela inicial de aplicativos.
 //
@@ -115,7 +115,12 @@ export function Launcher({ aplicativos }: { aplicativos: AplicativoAutorizado[] 
         <ul className="launcher-grade">
           {encontrados.map(app => (
             <li key={app.chave}>
-              <Link href={app.href} className="launcher-app" title={app.descricao}>
+              <Link
+                href={app.href}
+                className="launcher-app"
+                title={app.descricao}
+                style={{ ["--cor-app" as string]: corDoModulo(app.chave) }}
+              >
                 <span className="launcher-app-icone" aria-hidden="true">
                   <IconeDoModulo chave={app.chave} />
                 </span>

@@ -1110,6 +1110,9 @@ tbody tr:hover { background: #fafcfd; }
   letter-spacing: -0.01em;
 }
 .launcher-app small { font-size: 0.73rem; color: var(--muted); }
+/* Cada aplicativo tem a própria cor. O `color-mix` monta a pastilha a partir
+   dela, então acrescentar módulo é acrescentar uma linha no mapa de cores —
+   não escrever CSS novo. */
 .launcher-app-icone {
   width: 42px;
   height: 42px;
@@ -1117,11 +1120,31 @@ tbody tr:hover { background: #fafcfd; }
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: var(--brand-soft);
-  color: var(--brand-strong);
+  background: color-mix(in oklab, var(--cor-app, var(--brand)) 14%, var(--surface));
+  color: var(--cor-app, var(--brand-strong));
   transition: background var(--transition-fast), color var(--transition-fast);
 }
-.launcher-app:hover .launcher-app-icone { background: var(--brand); color: #fff; }
+.launcher-app:hover .launcher-app-icone,
+.launcher-app:focus-visible .launcher-app-icone {
+  background: var(--cor-app, var(--brand));
+  color: #fff;
+}
+.launcher-app:hover,
+.launcher-app:focus-visible { border-color: var(--cor-app, var(--brand)); }
+.launcher-app::before { background: var(--cor-app, var(--brand)); }
+
+/* No escuro a pastilha precisa de mais luz: 14% de cor sobre superfície escura
+   quase desaparece. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .launcher-app-icone {
+    background: color-mix(in oklab, var(--cor-app, var(--brand)) 26%, var(--surface));
+    color: color-mix(in oklab, var(--cor-app, var(--brand)) 70%, white);
+  }
+}
+:root[data-tema="escuro"] .launcher-app-icone {
+  background: color-mix(in oklab, var(--cor-app, var(--brand)) 26%, var(--surface));
+  color: color-mix(in oklab, var(--cor-app, var(--brand)) 70%, white);
+}
 
 .launcher-vazio {
   padding: 26px;

@@ -313,3 +313,82 @@ Ilustração, frase de ação (`No projects found. Let's create one!`) e uma lin
 | D7 — orçamento não recebe dados | Grade editável com `adicionar item`, `adicionar seção` e `adicionar nota`, totais à direita, colunas opcionais por engrenagem |
 | — | Painel de módulo em matriz, com todo número clicável, antes da lista |
 | — | Tela única de Configurações, com barra lateral de apps e `Salvar`/`Descartar` no topo |
+
+---
+
+## 11. A tese do responsável, conferida contra o conjunto
+
+Em 26 de julho de 2026 o responsável renomeou 26 capturas com comentários e enunciou a tese:
+
+> *"repare como tudo é padronizado, todas as visualizações tipo kanban, listas, onde tem pipeline segue o mesmo padrão, **o que você faz para um se aplica a quase todos**"*
+>
+> *"repare os padrões do card, como eles reaproveitam quase tudo do layout e acrescentam alguns objetos, porém tudo é parecido e semelhante, **só mudam algumas coisas conforme a tarefa da pessoa** que realiza a atividade e precisa de campos específicos"*
+
+### 11.1 Como a conferência foi feita — e o que ela não é
+
+As 261 capturas foram **enumeradas por aplicativo a partir da rota no nome do arquivo**, o que cobre o conjunto inteiro:
+
+| Aplicativo | Capturas |
+|---|---|
+| Helpdesk | 46 |
+| Sign | 39 |
+| Project | 39 |
+| CRM | 27 |
+| Ações diversas (`action-N`) | 27 |
+| Contacts | 25 |
+| Purchase | 19 |
+| Settings | 12 |
+| Appointments / Calendar | 13 |
+| Discuss, Users, Companies, Apps, Tasks | 5 |
+| Avulsas | 9 |
+
+**Dezoito** foram abertas e lidas em detalhe, escolhidas para cobrir ao menos uma tela de cada aplicativo e cada tipo de visualização. **Não foi uma comparação imagem a imagem das 261** — dizer o contrário seria inventar rigor. A enumeração é completa; a leitura é por amostra dirigida.
+
+### 11.2 A tese confere
+
+Cada elemento que o responsável nomeou, e em que aplicativo foi confirmado:
+
+| Elemento | Onde foi confirmado | Confere? |
+|---|---|---|
+| Barra do app com menus próprios, terminando em Relatórios e Configuração | CRM, Project, Helpdesk, Purchase, Sign, Calendar, Contacts | **sim**, sem exceção |
+| Canto direito com mensagens, notificações, estúdio e usuário | todos os aplicativos | **sim** |
+| Seletor de visualização à direita, com paginação à esquerda dele | CRM, Project, Helpdesk, Contacts | **sim** |
+| Coluna de kanban com `+` para criar cartão e engrenagem no hover | CRM, Project, Helpdesk | **sim** |
+| Criar etapa digitando o nome no fim das colunas | CRM, Project | **sim** |
+| Barra de etapas em galhardetes, com tempo na etapa | Helpdesk, CRM, Project, Purchase | **sim** |
+| Conversa lateral: mensagem, nota, WhatsApp, atividade | Helpdesk, CRM, Project, Contacts, Appointments | **sim** |
+| Abas para seções longas | Contacts, Purchase, Project, Appointments | **sim** |
+| Botões de estatística que abrem objetos relacionados | Contacts, Project, Appointments | **sim** |
+| Grade de linhas editável com item, seção e nota | Purchase, Appointments (`Add a line`) | **sim** |
+
+Dez elementos, nenhum desmentido. A frase *"o que você faz para um se aplica a quase todos"* é literal: o Appointments, que é um aplicativo de agenda, tem a **mesma** casca do Purchase, que é de compras — muda o miolo do formulário, não a estrutura.
+
+### 11.3 Onde a tese tem exceção
+
+O responsável escreveu "quase todos", e a ressalva dele está certa. Uma tela do conjunto quebra o padrão: **Sign → Green Savings** (`action-479`) é um relatório de fundo claro, sem conversa lateral, sem seletor de visualização e sem barra de etapas — seis cartões de indicador e um link.
+
+O que isso ensina: **página de leitura pura pode sair do molde**; página onde se trabalha, não. A exceção é a confirmação da regra, e vale registrá-la para ninguém usar o Green Savings como argumento para quebrar o padrão em uma tela operacional.
+
+### 11.4 O que a Innovar já segue, e o que falta
+
+| Elemento | Innovar hoje |
+|---|---|
+| Barra do app com logotipo que volta à grade | **feito** |
+| Canto direito com usuário e tema | **parcial** — falta mensagens, notificações e configuração |
+| Grade de aplicativos por permissão | **feito** |
+| Cor por aplicativo na grade | **feito** |
+| Seletor de visualização | **só no pipeline**, e com duas visões das nove |
+| Kanban com contagem, soma e coluna recolhida | **feito** |
+| Criar etapa e cartão pela própria coluna | **falta** |
+| Barra de etapas com tempo na etapa | **parcial** — move, mas não mostra o tempo |
+| Conversa lateral com mensagem, nota, WhatsApp e atividade | **parcial** — só observação e histórico |
+| Botões de estatística | **feito** no cartão do pipeline |
+| Abas | **feito** no cartão do pipeline |
+| Grade de linhas com item, seção e nota | **falta** — é o defeito D7 do orçamento |
+| Menus por aplicativo na barra superior | **falta** (T-23.21) |
+
+### 11.5 A consequência de método
+
+Se o que se faz para um se aplica a quase todos, então **construir por módulo é o erro**. O certo é construir o molde uma vez — casca, painel de controle, seletor de visão, cartão, formulário, conversa — e cada módulo declarar só o que tem de específico.
+
+É a mesma regra do Object Runtime, aplicada à interface: composição de características declaradas, não vinte telas escritas à mão que precisam ser corrigidas vinte vezes.

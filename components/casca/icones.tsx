@@ -224,3 +224,43 @@ export function temIconeProprio(chave: string): boolean {
 }
 
 export const CHAVES_COM_ICONE = Object.keys(DESENHOS);
+
+// ── Cor por aplicativo ──────────────────────────────────────────────────────
+// No padrão de mercado cada aplicativo tem a própria cor, e é isso que faz a
+// grade ser reconhecível de longe: a pessoa não lê "Compras", ela procura o
+// carrinho âmbar. Vinte e um ícones da mesma cor obrigam a ler todos os
+// rótulos, um por um, toda vez.
+//
+// A cor é do aplicativo, não da categoria: dois módulos da mesma categoria
+// vizinhos na grade ficariam indistinguíveis.
+
+export const COR_DO_MODULO: Record<string, string> = {
+  dashboard: "#4f7fb8",
+  crm: "#2f8f6f",
+  clientes: "#2b74b8",
+  obras: "#a1652f",
+  planejamento: "#6a5ec4",
+  tarefas: "#2f8f6f",
+  diario: "#8a6a30",
+  equipes: "#3b7fa8",
+  orcamentos: "#217a68",
+  propostas: "#4a72c0",
+  contratos: "#6b5bb5",
+  aditivos: "#8a5aa8",
+  assinaturas: "#b05a8a",
+  documentos: "#c07a2f",
+  qualidade: "#2f8f8f",
+  compras: "#c06a2f",
+  estoque: "#8f7a2f",
+  financeiro: "#2f7f5f",
+  sac: "#c05a5a",
+  relatorios: "#5a6fb5",
+  auditoria: "#7a7f8a",
+  administracao: "#5f6b7a"
+};
+
+const COR_PADRAO = "#5f6b7a";
+
+export function corDoModulo(chave: string): string {
+  return COR_DO_MODULO[chave] ?? COR_PADRAO;
+}
