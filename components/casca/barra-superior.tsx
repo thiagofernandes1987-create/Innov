@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
+import type { Avisos } from "@/lib/casca/avisos";
 import type { Tema } from "@/lib/tema";
 import { AlternadorTema } from "./alternador-tema";
+import { CantoDireito } from "./canto-direito";
 import { IconeDoModulo } from "./icones";
 
 // Barra superior única, no lugar do menu lateral.
@@ -17,12 +19,16 @@ export function BarraSuperior({
   moduloAtual,
   email,
   papel,
-  tema
+  tema,
+  avisos,
+  podeAdministrar
 }: {
   moduloAtual: ModuloAtual;
   email: string | null;
   papel: string;
   tema: Tema;
+  avisos: Avisos;
+  podeAdministrar: boolean;
 }) {
   return (
     <header className="barra-superior">
@@ -46,6 +52,15 @@ export function BarraSuperior({
 
       <div className="barra-direita">
         <AlternadorTema atual={tema} />
+        <CantoDireito
+          mensagens={avisos.mensagens}
+          atividades={avisos.atividades}
+          naoLidas={avisos.naoLidas}
+          pendentes={avisos.pendentes}
+          podeAdministrar={podeAdministrar}
+          email={email}
+          papel={papel}
+        />
         <span className="barra-usuario">
           <strong>{email ?? "—"}</strong>
           <small>{papel}</small>

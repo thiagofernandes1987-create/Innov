@@ -43,7 +43,16 @@ export default async function Amostra({ searchParams }: { searchParams: Promise<
 
   return (
     <div className="casca">
-      <BarraSuperior moduloAtual={null} email={email} papel={papel} tema={tema} />
+      {/* Amostra não autenticada: sem sessão não há aviso de ninguém, e
+          inventar um número aqui só ensinaria a duvidar do número real. */}
+      <BarraSuperior
+        moduloAtual={null}
+        email={email}
+        papel={papel}
+        tema={tema}
+        avisos={{ mensagens: [], atividades: [], naoLidas: 0, pendentes: 0 }}
+        podeAdministrar={perfil === "admin"}
+      />
       <div className="casca-conteudo">
         <main className="content pagina-launcher">
           <section className="launcher-cabecalho">

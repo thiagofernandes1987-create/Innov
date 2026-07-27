@@ -7,13 +7,24 @@ import fs from "node:fs";
 //
 // Banco alvo: DATABASE_URL, ou um cluster local acessível por psql.
 
-const files = [
-  "supabase/tests/pipeline/fixture.sql",
-  "supabase/migrations/20260726120000_pipeline_trilhas.sql",
-  "supabase/migrations/20260726123000_pipeline_presets.sql",
-  "supabase/migrations/20260726190000_pipeline_endurecimento.sql",
-  "supabase/tests/pipeline/pipeline.test.sql"
-];
+// As migrations do pipeline entram por descoberta, em ordem de nome — que é a
+// ordem cronológica que o Supabase aplica. A lista fixa que existia aqui
+// envelheceu na primeira migration nova: o teste continuou verde exercitando
+// um esquema mais antigo que o do banco de produção, que é a pior forma de
+// teste passando.
+const migracoes = fs
+  .readdirSync("supabase/migrations")
+  .filter(nome => /_pipeline_.*\.sql$/.test(nome))
+  .sort()
+  .map(nome => `supabase/migrations/${nome}`);
+
+if (migracoes.length === 0) {
+  console.error("Nenhuma migration de pipeline encontrada em supabase/migrations.");
+  process.exit(1);
+}
+
+const files = ["supabase/tests/pipeline/fixture.sql", ...migracoes, "supabase/tests/pipeline/pipeline.test.sql"];
+console.log(`Migrations de pipeline no encadeamento: ${migracoes.length}`);
 
 for (const file of files) {
   if (!fs.existsSync(file)) {

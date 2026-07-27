@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PipelineView } from "@/components/pipeline/pipeline-view";
 import { hasCapability } from "@/lib/authorization";
 import { ROTULO_TRILHA, TRILHAS, type Trilha } from "@/lib/pipeline/domain";
-import { carregarPipeline } from "@/lib/pipeline/server";
+import { carregarPipeline, registrosDisponiveis } from "@/lib/pipeline/server";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +19,18 @@ const PRESET_DA_TRILHA: Record<Trilha, string> = {
   assistencia: "assistencia_padrao"
 };
 
+const CAMPO_DE_ORIGEM: Record<Trilha, "clientId" | "projectId" | "ticketId"> = {
+  cliente: "clientId",
+  projeto: "projectId",
+  assistencia: "ticketId"
+};
+
+const ROTULO_REGISTRO: Record<Trilha, string> = {
+  cliente: "Cliente",
+  projeto: "Projeto",
+  assistencia: "Chamado"
+};
+
 export default async function PipelinePage({ params }: { params: Promise<{ trilha: string }> }) {
   const { trilha } = await params;
   if (!(TRILHAS as readonly string[]).includes(trilha)) notFound();
@@ -26,6 +38,20 @@ export default async function PipelinePage({ params }: { params: Promise<{ trilh
 
   const carregado = await carregarPipeline(trilhaValida);
   const podeEditar = await hasCapability(MODULO_DA_TRILHA[trilhaValida], "update");
+
+  // Só busca a lista de registros de quem pode criar cartão: para quem lê, a
+  // consulta seria trezentas linhas trafegadas para alimentar um botão que não
+  // aparece.
+  const campo = CAMPO_DE_ORIGEM[trilhaValida];
+  const registros =
+    carregado && podeEditar
+      ? await registrosDisponiveis(
+          trilhaValida,
+          carregado.colunas.flatMap(coluna =>
+            coluna.cartoes.map(cartao => cartao[campo]).filter((id): id is string => Boolean(id))
+          )
+        )
+      : [];
 
   return (
     <main className="content pipeline-pagina">
@@ -56,9 +82,12 @@ export default async function PipelinePage({ params }: { params: Promise<{ trilh
       {carregado ? (
         <PipelineView
           trilha={trilhaValida}
+          pipelineId={carregado.pipeline.id}
           colunas={carregado.colunas}
           orfaos={carregado.orfaos}
           podeEditar={podeEditar}
+          registros={registros}
+          rotuloRegistro={ROTULO_REGISTRO[trilhaValida]}
         />
       ) : (
         <section className="card pipeline-sem-trilha">

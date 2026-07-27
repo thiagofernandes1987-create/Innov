@@ -112,6 +112,8 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-011` | Script usa identificador reservado `module` | aplicada | nomes semânticos e varredura de `scripts/*.mjs` |
 | `VACINA-012` | Documentação pós-merge diverge do estado real do GitHub | aplicada | `ESTADO-ATUAL.json`, fechamento pós-merge e bloqueio de frases obsoletas |
 | `VACINA-013` | Fixture técnica tenta escrever coluna sensível diretamente | aplicada | fixture mínima, guards preservados e valores sensíveis somente por RPC autorizada |
+| `VACINA-014` | Runner de teste de banco encadeia migrations por lista fixa e envelhece | aplicada | descoberta por padrão de nome, ordem lexicográfica e contagem impressa |
+| `VACINA-015` | Efeito colateral disparado dentro do atualizador de `setState` | aplicada | próximo estado calculado fora do atualizador e verificação em navegador com console tratado como reprovação |
 
 ## 4. Arquivos
 
@@ -129,7 +131,9 @@ diretrizes/vacinas/
 ├── VACINA-010-JSON-DE-RELATORIOS.md
 ├── VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md
 ├── VACINA-012-ESTADO-POS-MERGE.md
-└── VACINA-013-FIXTURES-RESPEITAM-FRONTEIRAS-SENSIVEIS.md
+├── VACINA-013-FIXTURES-RESPEITAM-FRONTEIRAS-SENSIVEIS.md
+├── VACINA-014-LISTA-FIXA-DE-MIGRATIONS-EM-TESTE.md
+└── VACINA-015-EFEITO-DENTRO-DO-ATUALIZADOR-DE-ESTADO.md
 ```
 
 ## 5. Critérios para nova vacina

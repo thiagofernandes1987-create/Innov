@@ -1,7 +1,8 @@
 import { cookies, headers } from "next/headers";
 import { BarraSuperior, type ModuloAtual } from "@/components/casca/barra-superior";
+import { carregarAvisos } from "@/lib/casca/avisos";
 import { COOKIE_TEMA, temaValido } from "@/lib/tema";
-import { getEffectiveApplications } from "@/lib/authorization";
+import { getEffectiveApplications, hasCapability } from "@/lib/authorization";
 
 export const dynamic = "force-dynamic";
 
@@ -25,10 +26,24 @@ export default async function AppLayout({ children }: Readonly<{ children: React
 
   const tema = temaValido((await cookies()).get(COOKIE_TEMA)?.value);
 
+  // Avisos não podem derrubar a casca: uma tabela do pipeline ausente em um
+  // ambiente atrasado deixaria o usuário sem barra, sem logotipo e sem saída.
+  const [avisos, podeAdministrar] = await Promise.all([
+    carregarAvisos().catch(() => ({ mensagens: [], atividades: [], naoLidas: 0, pendentes: 0 })),
+    hasCapability("administracao", "manage", null, context)
+  ]);
+
   return (
     <div className="casca">
       <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
-      <BarraSuperior moduloAtual={moduloAtual} email={context.email} papel={context.role} tema={tema} />
+      <BarraSuperior
+        moduloAtual={moduloAtual}
+        email={context.email}
+        papel={context.role}
+        tema={tema}
+        avisos={avisos}
+        podeAdministrar={podeAdministrar}
+      />
       <div id="conteudo-principal" className="casca-conteudo" tabIndex={-1}>
         {children}
       </div>

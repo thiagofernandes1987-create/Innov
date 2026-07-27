@@ -17,6 +17,7 @@ declare
   v_pipeline_assistencia uuid;
   v_pipeline_cliente uuid;
   v_stage_medicao uuid;
+  v_stage_atual uuid;
   v_stage_entrega uuid;
   v_stage_abertura uuid;
   v_card uuid;
@@ -274,7 +275,89 @@ begin
   end if;
   perform set_config('test.permission_granted', 'true', false);
 
-  raise notice 'Pipeline — 21 testes de comportamento aprovados.';
+  -- TESTE 22: WhatsApp é canal de observação, não tabela paralela.
+  insert into public.pipeline_card_notes(card_id, organization_id, tipo, corpo, destino)
+  values (v_card, v_org, 'whatsapp', 'Bom dia, a medição fica para quinta.', '11988887777');
+
+  v_raised := false;
+  begin
+    insert into public.pipeline_card_notes(card_id, organization_id, tipo, corpo)
+    values (v_card, v_org, 'sms', 'Canal que ninguém declarou.');
+  exception when check_violation then
+    v_raised := true;
+  end;
+  if not v_raised then
+    raise exception 'TESTE 22 falhou: canal de observação não declarado foi aceito.';
+  end if;
+
+  -- TESTE 23: atividade agendada só aceita tipo do vocabulário.
+  insert into public.pipeline_card_activities(card_id, organization_id, tipo, titulo, prazo)
+  values (v_card, v_org, 'ligacao', 'Confirmar a medição com o cliente', current_date + 1);
+
+  v_raised := false;
+  begin
+    insert into public.pipeline_card_activities(card_id, organization_id, tipo, titulo)
+    values (v_card, v_org, 'telepatia', 'Tipo que não existe');
+  exception when check_violation then
+    v_raised := true;
+  end;
+  if not v_raised then
+    raise exception 'TESTE 23 falhou: atividade de tipo desconhecido foi aceita.';
+  end if;
+
+  -- TESTE 24: atividade sem título é atividade que ninguém sabe fazer.
+  v_raised := false;
+  begin
+    insert into public.pipeline_card_activities(card_id, organization_id, tipo, titulo)
+    values (v_card, v_org, 'tarefa', '   ');
+  exception when check_violation then
+    v_raised := true;
+  end;
+  if not v_raised then
+    raise exception 'TESTE 24 falhou: atividade sem título foi aceita.';
+  end if;
+
+  -- TESTE 25: a organização da atividade vem do cartão pela chave composta.
+  -- É o mesmo mecanismo do resto do pipeline: a coerência é garantida por
+  -- integridade referencial, não por disciplina de quem escreve o INSERT.
+  v_raised := false;
+  begin
+    insert into public.pipeline_card_activities(card_id, organization_id, tipo, titulo)
+    values (v_card, v_outra_org, 'tarefa', 'Atividade na organização errada');
+  exception when foreign_key_violation then
+    v_raised := true;
+  end;
+  if not v_raised then
+    raise exception 'TESTE 25 falhou: atividade gravada em organização diferente da do cartão.';
+  end if;
+
+  -- TESTE 26: excluir etapa com cartão dentro é recusado pelo banco.
+  -- A aplicação traduz o erro, mas quem impede é a chave estrangeira: se ela
+  -- afrouxar, o cartão perde a coluna e some da tela sem ter sido arquivado.
+  --
+  -- A etapa é lida do próprio cartão, não fixada no teste: os testes
+  -- anteriores movem o cartão de coluna, e apontar para "medição" aqui
+  -- apagaria uma etapa vazia e daria verde sem exercitar nada.
+  select stage_id into strict v_stage_atual from public.pipeline_cards where id = v_card;
+
+  v_raised := false;
+  begin
+    delete from public.pipeline_stages where id = v_stage_atual;
+  exception when foreign_key_violation then
+    v_raised := true;
+  end;
+  if not v_raised then
+    raise exception 'TESTE 26 falhou: etapa com cartão foi excluída.';
+  end if;
+
+  -- E a etapa vazia, essa sai: sem isso o teste acima passaria por um DELETE
+  -- que não funciona para etapa nenhuma.
+  delete from public.pipeline_stages where id = v_stage_medicao and id <> v_stage_atual;
+  if exists (select 1 from public.pipeline_stages where id = v_stage_medicao and id <> v_stage_atual) then
+    raise exception 'TESTE 26 falhou: etapa sem cartão não pôde ser excluída.';
+  end if;
+
+  raise notice 'Pipeline — 26 testes de comportamento aprovados.';
 end;
 $$;
 

@@ -249,6 +249,58 @@ function siglaDe(natureza: Natureza, marco: Marco): CodigoData {
   return codigo;
 }
 
+/**
+ * Registros que ainda podem virar cartão nesta trilha.
+ *
+ * O CHECK `pipeline_cards_origem_coerente` recusa cartão de cliente sem
+ * cliente, de projeto sem projeto e de assistência sem chamado. Um `+` que só
+ * pergunta o título falharia sempre, então a coluna precisa oferecer o
+ * registro. Quem já tem cartão aberto sai da lista: dois cartões para o mesmo
+ * chamado é o começo de dois históricos do mesmo assunto.
+ */
+export async function registrosDisponiveis(
+  trilha: Trilha,
+  jaUsados: string[]
+): Promise<{ id: string; rotulo: string }[]> {
+  const { supabase, organizationId } = await requireOrganizationContext();
+  const usados = new Set(jaUsados);
+
+  if (trilha === "cliente") {
+    const { data } = await supabase
+      .from("clients")
+      .select("id,legal_name,trade_name")
+      .eq("organization_id", organizationId)
+      .order("legal_name", { ascending: true })
+      .limit(300);
+    return ((data ?? []) as { id: string; legal_name: string; trade_name: string | null }[])
+      .filter(linha => !usados.has(linha.id))
+      .map(linha => ({ id: linha.id, rotulo: linha.trade_name?.trim() || linha.legal_name }));
+  }
+
+  if (trilha === "projeto") {
+    const { data } = await supabase
+      .from("projects")
+      .select("id,code,name")
+      .eq("organization_id", organizationId)
+      .is("archived_at", null)
+      .order("code", { ascending: true })
+      .limit(300);
+    return ((data ?? []) as { id: string; code: string; name: string }[])
+      .filter(linha => !usados.has(linha.id))
+      .map(linha => ({ id: linha.id, rotulo: `${linha.code} · ${linha.name}` }));
+  }
+
+  const { data } = await supabase
+    .from("sac_tickets")
+    .select("id,code,title")
+    .eq("organization_id", organizationId)
+    .order("created_at", { ascending: false })
+    .limit(300);
+  return ((data ?? []) as { id: string; code: string; title: string }[])
+    .filter(linha => !usados.has(linha.id))
+    .map(linha => ({ id: linha.id, rotulo: `${linha.code} · ${linha.title}` }));
+}
+
 /** Trilhas que a organização já tem instaladas, para o seletor da tela. */
 export async function trilhasDisponiveis(): Promise<{ trilha: Trilha; key: string; name: string }[]> {
   const { supabase, organizationId } = await requireOrganizationContext();
@@ -281,12 +333,36 @@ export type CartaoCompleto = {
   chamados: { id: string; code: string; title: string; status: string; created_at: string }[];
   observacoes: { id: string; tipo: string; corpo: string; autor_id: string | null; created_at: string }[];
   historico: { id: string; de_stage_id: string | null; para_stage_id: string; movido_em: string }[];
+  atividades: {
+    id: string;
+    tipo: string;
+    titulo: string;
+    prazo: string | null;
+    responsavel_id: string | null;
+    concluida_em: string | null;
+  }[];
+  autores: Record<string, string>;
+  telefone: string | null;
   responsavel: Pessoa | null;
   seguidores: Pessoa[];
   euSigo: boolean;
   euSou: string;
   pessoas: Pessoa[];
 };
+
+/**
+ * Telefone do cliente, para a conversa por WhatsApp.
+ *
+ * `clients.phone` é texto livre — chega com parêntese, traço e espaço. Quem
+ * valida é a ação de escrita; aqui só o campo é escolhido, e um telefone vazio
+ * vira `null` para a tela poder dizer "sem telefone" em vez de abrir o
+ * WhatsApp para um número em branco.
+ */
+function telefoneDoCliente(cliente: Record<string, unknown> | null): string | null {
+  if (!cliente) return null;
+  const bruto = String(cliente.phone ?? "").trim();
+  return bruto.length > 0 ? bruto : null;
+}
 
 /** Quem é quem: `profiles` guarda nome e e-mail; `auth.users` só o id. */
 export type Pessoa = { id: string; nome: string; email: string | null };
@@ -348,6 +424,13 @@ export async function carregarCartao(cardId: string): Promise<CartaoCompleto | n
     .eq("card_id", cardId)
     .order("adicionado_em", { ascending: true });
 
+  const atividadesResultado = await supabase
+    .from("pipeline_card_activities")
+    .select("id,tipo,titulo,prazo,responsavel_id,concluida_em,criado_em")
+    .eq("card_id", cardId)
+    .order("criado_em", { ascending: false })
+    .limit(100);
+
   // O que o cliente tem, para as abas e para os botões de estatística. Cada
   // consulta é opcional: falta de permissão em um módulo não pode derrubar a
   // tela inteira do outro.
@@ -381,7 +464,8 @@ export async function carregarCartao(cardId: string): Promise<CartaoCompleto | n
       [
         cartaoLinha.responsavel_id,
         ...((seguidoresResultado.data ?? []) as { user_id: string }[]).map(item => item.user_id),
-        ...((notasResultado.data ?? []) as { autor_id: string | null }[]).map(item => item.autor_id)
+        ...((notasResultado.data ?? []) as { autor_id: string | null }[]).map(item => item.autor_id),
+        ...((atividadesResultado.data ?? []) as { responsavel_id: string | null }[]).map(item => item.responsavel_id)
       ].filter((id): id is string => Boolean(id))
     )
   ];
@@ -481,6 +565,11 @@ export async function carregarCartao(cardId: string): Promise<CartaoCompleto | n
     chamados: (chamadosResultado.data ?? []) as CartaoCompleto["chamados"],
     observacoes: (notasResultado.data ?? []) as CartaoCompleto["observacoes"],
     historico: (historicoResultado.data ?? []) as CartaoCompleto["historico"],
+    atividades: (atividadesResultado.data ?? []) as CartaoCompleto["atividades"],
+    // Nome de quem escreveu, indexado por id: a conversa mostra "Ana", não um
+    // uuid, e a tela não tem como consultar o banco de novo por linha.
+    autores: Object.fromEntries([...pessoaPorId].map(([id, quem]) => [id, quem.nome])),
+    telefone: telefoneDoCliente(cliente),
     responsavel: pessoa(cartaoLinha.responsavel_id),
     seguidores,
     euSigo: seguidores.some(item => item.id === userId),

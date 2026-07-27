@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireOrganizationContext } from "@/lib/auth";
+import { ehTipoAtividade } from "@/lib/pipeline/atividades";
 import { CODIGOS_DATA, type CodigoData } from "@/lib/pipeline/datas";
 import { TRILHAS, type Trilha } from "@/lib/pipeline/domain";
 
@@ -275,5 +276,363 @@ export async function definirResponsavel(cardId: string, userId: string | null):
   if (!data) return falha("Cartão não encontrado ou sem permissão de edição.");
 
   revalidar(data.trilha as Trilha);
+  return { ok: true };
+}
+
+// ── Configuração da etapa ───────────────────────────────────────────────────
+// Quem trabalha o kanban nomeia as colunas dele. Exigir administrador para
+// renomear "Medição" transforma um ajuste de dez segundos em um chamado.
+
+function chave(nome: string): string {
+  return nome
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 40);
+}
+
+/** Cria etapa no fim da trilha, como o campo no fim das colunas do kanban. */
+export async function criarEtapa(pipelineId: string, nome: string): Promise<ResultadoAcao> {
+  if (!ehUuid(pipelineId)) return falha("Trilha inválida.");
+  const titulo = nome.trim();
+  if (!titulo) return falha("Dê um nome à etapa.");
+  if (titulo.length > 60) return falha("O nome da etapa passa de 60 caracteres.");
+
+  const { supabase } = await requireOrganizationContext();
+
+  const { data: pipeline } = await supabase
+    .from("pipelines")
+    .select("id,organization_id,trilha")
+    .eq("id", pipelineId)
+    .maybeSingle();
+  if (!pipeline) return falha("Trilha não encontrada.");
+
+  // Nasce no fim, antes de nenhuma: a última posição mais um.
+  const { data: ultima } = await supabase
+    .from("pipeline_stages")
+    .select("posicao")
+    .eq("pipeline_id", pipelineId)
+    .order("posicao", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("pipeline_stages").insert({
+    pipeline_id: pipelineId,
+    organization_id: pipeline.organization_id,
+    key: chave(titulo) || `etapa_${Date.now()}`,
+    name: titulo,
+    posicao: (ultima?.posicao ?? 0) + 1
+  });
+
+  if (error) {
+    if (/duplicate key|unique/i.test(error.message)) return falha("Já existe uma etapa com esse nome.");
+    return falha("Não foi possível criar a etapa. Talvez você não tenha permissão de edição nesta trilha.");
+  }
+
+  revalidar(pipeline.trilha as Trilha);
+  return { ok: true };
+}
+
+/** Renomeia a etapa sem tocar na chave: a chave é o que os presets referenciam. */
+export async function renomearEtapa(stageId: string, nome: string): Promise<ResultadoAcao> {
+  if (!ehUuid(stageId)) return falha("Etapa inválida.");
+  const titulo = nome.trim();
+  if (!titulo) return falha("Dê um nome à etapa.");
+  if (titulo.length > 60) return falha("O nome da etapa passa de 60 caracteres.");
+
+  const { supabase } = await requireOrganizationContext();
+  const { data, error } = await supabase
+    .from("pipeline_stages")
+    .update({ name: titulo, updated_at: new Date().toISOString() })
+    .eq("id", stageId)
+    .select("pipeline_id")
+    .maybeSingle();
+
+  if (error) return falha("Não foi possível renomear a etapa.");
+  if (!data) return falha("Etapa não encontrada ou sem permissão de edição.");
+
+  const { data: pipeline } = await supabase
+    .from("pipelines")
+    .select("trilha")
+    .eq("id", data.pipeline_id)
+    .maybeSingle();
+  if (pipeline) revalidar(pipeline.trilha as Trilha);
+  return { ok: true };
+}
+
+/** Recolhe ou expande a coluna — o `fold` do padrão de mercado. */
+export async function alternarEtapaRecolhida(stageId: string): Promise<ResultadoAcao> {
+  if (!ehUuid(stageId)) return falha("Etapa inválida.");
+
+  const { supabase } = await requireOrganizationContext();
+  const { data: etapa } = await supabase
+    .from("pipeline_stages")
+    .select("id,recolhida,pipeline_id")
+    .eq("id", stageId)
+    .maybeSingle();
+  if (!etapa) return falha("Etapa não encontrada.");
+
+  const { error } = await supabase
+    .from("pipeline_stages")
+    .update({ recolhida: !etapa.recolhida })
+    .eq("id", stageId);
+  if (error) return falha("Não foi possível recolher a etapa.");
+
+  const { data: pipeline } = await supabase
+    .from("pipelines")
+    .select("trilha")
+    .eq("id", etapa.pipeline_id)
+    .maybeSingle();
+  if (pipeline) revalidar(pipeline.trilha as Trilha);
+  return { ok: true };
+}
+
+/**
+ * Exclui a etapa.
+ *
+ * A chave estrangeira do cartão é `on delete restrict`, então o banco já
+ * recusa apagar etapa com cartão dentro. O que falta é a frase: erro de chave
+ * estrangeira não é mensagem que se mostra a ninguém.
+ */
+export async function excluirEtapa(stageId: string): Promise<ResultadoAcao> {
+  if (!ehUuid(stageId)) return falha("Etapa inválida.");
+
+  const { supabase } = await requireOrganizationContext();
+  const { data: etapa } = await supabase
+    .from("pipeline_stages")
+    .select("id,pipeline_id,name")
+    .eq("id", stageId)
+    .maybeSingle();
+  if (!etapa) return falha("Etapa não encontrada.");
+
+  const { count } = await supabase
+    .from("pipeline_cards")
+    .select("id", { count: "exact", head: true })
+    .eq("stage_id", stageId)
+    .is("arquivado_em", null);
+
+  if ((count ?? 0) > 0) {
+    return falha(
+      `“${etapa.name}” tem ${count} ${count === 1 ? "cartão" : "cartões"}. Mova ou arquive antes de excluir a etapa.`
+    );
+  }
+
+  const { error } = await supabase.from("pipeline_stages").delete().eq("id", stageId);
+  if (error) {
+    if (/foreign key|violates/i.test(error.message)) {
+      return falha("Esta etapa ainda tem registros ligados a ela. Mova-os antes de excluir.");
+    }
+    return falha("Não foi possível excluir a etapa.");
+  }
+
+  const { data: pipeline } = await supabase
+    .from("pipelines")
+    .select("trilha")
+    .eq("id", etapa.pipeline_id)
+    .maybeSingle();
+  if (pipeline) revalidar(pipeline.trilha as Trilha);
+  return { ok: true };
+}
+
+/**
+ * Cria cartão direto na coluna, como o `+` do cabeçalho.
+ *
+ * Cada trilha exige o seu registro — o CHECK do banco recusa cartão de
+ * assistência sem chamado. Por isso o formulário rápido pede o registro, não
+ * só o título: aceitar só o título faria o botão falhar sempre.
+ */
+export async function criarCartao(
+  pipelineId: string,
+  stageId: string,
+  titulo: string,
+  registroId: string
+): Promise<ResultadoAcao> {
+  if (!ehUuid(pipelineId) || !ehUuid(stageId)) return falha("Trilha ou etapa inválidas.");
+  if (!ehUuid(registroId)) return falha("Escolha o registro que este cartão acompanha.");
+
+  const nome = titulo.trim();
+  if (!nome) return falha("Dê um título ao cartão.");
+  if (nome.length > 160) return falha("O título passa de 160 caracteres.");
+
+  const { supabase, userId } = await requireOrganizationContext();
+
+  const { data: pipeline } = await supabase
+    .from("pipelines")
+    .select("id,organization_id,trilha")
+    .eq("id", pipelineId)
+    .maybeSingle();
+  if (!pipeline) return falha("Trilha não encontrada.");
+
+  const trilha = pipeline.trilha as Trilha;
+  const vinculo: Record<string, string> = {};
+  if (trilha === "cliente") vinculo.client_id = registroId;
+  if (trilha === "projeto") vinculo.project_id = registroId;
+  if (trilha === "assistencia") vinculo.ticket_id = registroId;
+
+  // O cartão de assistência também guarda o cliente, para o cartão resumido
+  // mostrar de quem é sem uma segunda consulta por linha.
+  if (trilha === "assistencia") {
+    const { data: chamado } = await supabase
+      .from("sac_tickets")
+      .select("client_id")
+      .eq("id", registroId)
+      .maybeSingle();
+    if (chamado?.client_id) vinculo.client_id = chamado.client_id;
+  }
+  if (trilha === "projeto") {
+    const { data: projeto } = await supabase
+      .from("projects")
+      .select("client_id")
+      .eq("id", registroId)
+      .maybeSingle();
+    if (projeto?.client_id) vinculo.client_id = projeto.client_id;
+  }
+
+  const { data: ultimo } = await supabase
+    .from("pipeline_cards")
+    .select("posicao")
+    .eq("stage_id", stageId)
+    .order("posicao", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { error } = await supabase.from("pipeline_cards").insert({
+    organization_id: pipeline.organization_id,
+    pipeline_id: pipelineId,
+    stage_id: stageId,
+    trilha,
+    titulo: nome,
+    posicao: Number(ultimo?.posicao ?? 0) + 1,
+    created_by: userId,
+    responsavel_id: userId,
+    ...vinculo
+  });
+
+  if (error) {
+    if (/pipeline_cards_origem_coerente/i.test(error.message)) {
+      return falha("O registro escolhido não serve para esta trilha.");
+    }
+    return falha("Não foi possível criar o cartão.");
+  }
+
+  revalidar(trilha);
+  return { ok: true };
+}
+
+// ── Conversa ────────────────────────────────────────────────────────────────
+
+/**
+ * Registra a mensagem de WhatsApp e devolve o endereço para abrir a conversa.
+ *
+ * Não existe integração de envio aqui, e fingir que existe seria pior que não
+ * ter: a plataforma **registra** o que foi dito e abre o WhatsApp com o texto
+ * pronto. Quem envia é a pessoa, e o registro fica no cartão de qualquer jeito.
+ */
+export async function registrarWhatsApp(
+  cardId: string,
+  corpo: string,
+  telefone: string
+): Promise<ResultadoAcao & { link?: string }> {
+  if (!ehUuid(cardId)) return falha("Cartão inválido.");
+
+  const texto = corpo.trim();
+  if (!texto) return falha("Escreva a mensagem antes de enviar.");
+
+  const digitos = telefone.replace(/\D/g, "");
+  if (digitos.length < 10) return falha("O cliente não tem telefone válido cadastrado.");
+
+  const { supabase, userId } = await requireOrganizationContext();
+  const { data: cartao } = await supabase
+    .from("pipeline_cards")
+    .select("id,organization_id,trilha")
+    .eq("id", cardId)
+    .maybeSingle();
+  if (!cartao) return falha("Cartão não encontrado ou sem permissão de edição.");
+
+  const { error } = await supabase.from("pipeline_card_notes").insert({
+    card_id: cardId,
+    organization_id: cartao.organization_id,
+    tipo: "whatsapp",
+    corpo: texto,
+    destino: digitos,
+    autor_id: userId
+  });
+  if (error) return falha("Não foi possível registrar a mensagem.");
+
+  revalidar(cartao.trilha as Trilha);
+  const comPais = digitos.length <= 11 ? `55${digitos}` : digitos;
+  return { ok: true, link: `https://wa.me/${comPais}?text=${encodeURIComponent(texto)}` };
+}
+
+/** Agenda o que ainda precisa acontecer. Observação registra o passado. */
+export async function agendarAtividade(
+  cardId: string,
+  tipo: string,
+  titulo: string,
+  prazo: string | null,
+  responsavelId?: string | null
+): Promise<ResultadoAcao> {
+  if (!ehUuid(cardId)) return falha("Cartão inválido.");
+  if (!ehTipoAtividade(tipo)) return falha("Tipo de atividade desconhecido.");
+
+  const nome = titulo.trim();
+  if (!nome) return falha("Diga o que precisa ser feito.");
+  if (nome.length > 160) return falha("O título passa de 160 caracteres.");
+  if (prazo && !/^\d{4}-\d{2}-\d{2}$/.test(prazo)) return falha("Informe o prazo no formato dia/mês/ano.");
+  if (responsavelId && !ehUuid(responsavelId)) return falha("Responsável inválido.");
+
+  const { supabase, userId } = await requireOrganizationContext();
+  const { data: cartao } = await supabase
+    .from("pipeline_cards")
+    .select("id,organization_id,trilha")
+    .eq("id", cardId)
+    .maybeSingle();
+  if (!cartao) return falha("Cartão não encontrado ou sem permissão de edição.");
+
+  const { error } = await supabase.from("pipeline_card_activities").insert({
+    card_id: cardId,
+    organization_id: cartao.organization_id,
+    tipo,
+    titulo: nome,
+    prazo: prazo || null,
+    responsavel_id: responsavelId || userId,
+    criado_por: userId
+  });
+  if (error) return falha("Não foi possível agendar a atividade.");
+
+  revalidar(cartao.trilha as Trilha);
+  return { ok: true };
+}
+
+/** Conclui ou reabre a atividade. Reabrir existe porque errar é comum. */
+export async function alternarAtividade(atividadeId: string): Promise<ResultadoAcao> {
+  if (!ehUuid(atividadeId)) return falha("Atividade inválida.");
+
+  const { supabase, userId } = await requireOrganizationContext();
+  const { data: atividade } = await supabase
+    .from("pipeline_card_activities")
+    .select("id,card_id,concluida_em")
+    .eq("id", atividadeId)
+    .maybeSingle();
+  if (!atividade) return falha("Atividade não encontrada.");
+
+  const concluir = atividade.concluida_em === null;
+  const { error } = await supabase
+    .from("pipeline_card_activities")
+    .update({
+      concluida_em: concluir ? new Date().toISOString() : null,
+      concluida_por: concluir ? userId : null
+    })
+    .eq("id", atividadeId);
+  if (error) return falha("Não foi possível atualizar a atividade.");
+
+  const { data: cartao } = await supabase
+    .from("pipeline_cards")
+    .select("trilha")
+    .eq("id", atividade.card_id)
+    .maybeSingle();
+  if (cartao) revalidar(cartao.trilha as Trilha);
   return { ok: true };
 }

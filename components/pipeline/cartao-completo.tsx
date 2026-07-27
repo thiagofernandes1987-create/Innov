@@ -4,13 +4,18 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
+  agendarAtividade,
+  alternarAtividade,
   alternarSeguidor,
   definirDataDoCartao,
   definirPrioridade,
   definirResponsavel,
   moverCartao,
-  registrarObservacao
+  registrarObservacao,
+  registrarWhatsApp
 } from "@/app/actions/pipeline";
+import { Conversa } from "@/components/conversa/conversa";
+import type { AcoesConversa, AtividadeConversa, EntradaConversa } from "@/components/conversa/tipos";
 import type { Pessoa } from "@/lib/pipeline/server";
 import { descrever, type CodigoData } from "@/lib/pipeline/datas";
 import {
@@ -41,11 +46,31 @@ type Props = {
   chamados: { id: string; code: string; title: string; status: string; created_at: string }[];
   observacoes: { id: string; tipo: string; corpo: string; autor_id: string | null; created_at: string }[];
   historico: { id: string; de_stage_id: string | null; para_stage_id: string; movido_em: string }[];
+  atividades: {
+    id: string;
+    tipo: string;
+    titulo: string;
+    prazo: string | null;
+    responsavel_id: string | null;
+    concluida_em: string | null;
+  }[];
+  autores: Record<string, string>;
+  telefone: string | null;
   responsavel: Pessoa | null;
   seguidores: Pessoa[];
   euSigo: boolean;
   pessoas: Pessoa[];
   podeEditar: boolean;
+};
+
+// As ações do pipeline, na forma que a conversa entende. É este objeto que faz
+// o mesmo componente servir a outro módulo depois: quem grava muda, a tela não.
+const ACOES_DO_PIPELINE: AcoesConversa = {
+  registrarNota: (registroId, corpo) => registrarObservacao(registroId, corpo),
+  registrarWhatsApp: (registroId, corpo, telefone) => registrarWhatsApp(registroId, corpo, telefone),
+  agendarAtividade: (registroId, tipo, titulo, prazo, responsavelId) =>
+    agendarAtividade(registroId, tipo, titulo, prazo, responsavelId),
+  alternarAtividade: atividadeId => alternarAtividade(atividadeId)
 };
 
 /** Iniciais para o avatar. Duas letras: mais que isso vira sopa de letras. */
@@ -73,6 +98,9 @@ export function CartaoCompleto(props: Props) {
     chamados,
     observacoes,
     historico,
+    atividades,
+    autores,
+    telefone,
     responsavel,
     seguidores,
     euSigo,
@@ -82,13 +110,45 @@ export function CartaoCompleto(props: Props) {
 
   const [aba, setAba] = useState<Aba>("dados");
   const [erro, setErro] = useState<string | null>(null);
-  const [nota, setNota] = useState("");
   const [pendente, iniciar] = useTransition();
   const router = useRouter();
 
   const etapaAtual = etapas.find(etapa => etapa.id === cartao.stageId);
   const prazo = prazoPrincipal(cartao);
   const datasPorCodigo = new Map(cartao.datas.map(item => [item.codigo, item.data]));
+
+  // Observação e movimento de etapa viram a mesma lista, ordenada pelo relógio.
+  // Duas listas lado a lado obrigariam quem lê a intercalar de cabeça o que
+  // aconteceu antes do quê.
+  const entradas: EntradaConversa[] = [
+    ...observacoes.map(item => ({
+      id: item.id,
+      tipo: (item.tipo === "mensagem" || item.tipo === "whatsapp" ? item.tipo : "nota") as EntradaConversa["tipo"],
+      corpo: item.corpo,
+      autor: item.autor_id ? (autores[item.autor_id] ?? "Usuário removido") : null,
+      quando: item.created_at
+    })),
+    ...historico.map(evento => {
+      const de = etapas.find(etapa => etapa.id === evento.de_stage_id);
+      const para = etapas.find(etapa => etapa.id === evento.para_stage_id);
+      return {
+        id: evento.id,
+        tipo: "movimento" as const,
+        corpo: de ? `${de.name} → ${para?.name ?? "?"}` : `Cartão criado em ${para?.name ?? "?"}`,
+        autor: null,
+        quando: evento.movido_em
+      };
+    })
+  ].sort((a, b) => Date.parse(b.quando) - Date.parse(a.quando));
+
+  const atividadesDaConversa: AtividadeConversa[] = atividades.map(item => ({
+    id: item.id,
+    tipo: item.tipo,
+    titulo: item.titulo,
+    prazo: item.prazo,
+    responsavel: item.responsavel_id ? (autores[item.responsavel_id] ?? null) : null,
+    concluida: item.concluida_em !== null
+  }));
 
   function executar(acao: () => Promise<{ ok: true } | { ok: false; erro: string }>) {
     setErro(null);
@@ -461,56 +521,15 @@ export function CartaoCompleto(props: Props) {
           </div>
         </section>
 
-        <aside className="cartao-conversa" aria-label="Observações e histórico">
-          <form
-            className="cartao-nova-nota"
-            onSubmit={event => {
-              event.preventDefault();
-              const corpo = nota;
-              executar(async () => {
-                const resultado = await registrarObservacao(cartao.id, corpo);
-                if (resultado.ok) setNota("");
-                return resultado;
-              });
-            }}
-          >
-            <label>
-              <span>Observação</span>
-              <textarea
-                value={nota}
-                onChange={event => setNota(event.target.value)}
-                rows={3}
-                placeholder="O que precisa ficar registrado sobre este cartão…"
-                disabled={!podeEditar || pendente}
-              />
-            </label>
-            <button type="submit" className="button button-primary" disabled={!podeEditar || pendente || !nota.trim()}>
-              Registrar
-            </button>
-          </form>
-
-          <ol className="cartao-linha-do-tempo">
-            {observacoes.map(observacao => (
-              <li key={observacao.id} className={`nota tipo-${observacao.tipo}`}>
-                <time dateTime={observacao.created_at}>{formatarData(observacao.created_at)}</time>
-                <p>{observacao.corpo}</p>
-              </li>
-            ))}
-            {historico.map(evento => {
-              const de = etapas.find(etapa => etapa.id === evento.de_stage_id);
-              const para = etapas.find(etapa => etapa.id === evento.para_stage_id);
-              return (
-                <li key={evento.id} className="movimento">
-                  <time dateTime={evento.movido_em}>{formatarData(evento.movido_em)}</time>
-                  <p>{de ? `${de.name} → ${para?.name ?? "?"}` : `Cartão criado em ${para?.name ?? "?"}`}</p>
-                </li>
-              );
-            })}
-            {observacoes.length === 0 && historico.length === 0 ? (
-              <li className="muted">Sem histórico ainda.</li>
-            ) : null}
-          </ol>
-        </aside>
+        <Conversa
+          registroId={cartao.id}
+          entradas={entradas}
+          atividades={atividadesDaConversa}
+          pessoas={pessoas}
+          telefone={telefone}
+          podeEditar={podeEditar}
+          acoes={ACOES_DO_PIPELINE}
+        />
       </div>
 
       <p className="cartao-voltar">

@@ -40,6 +40,9 @@ export default async function CartaoPage({
         chamados={carregado.chamados}
         observacoes={carregado.observacoes}
         historico={carregado.historico}
+        atividades={carregado.atividades}
+        autores={carregado.autores}
+        telefone={carregado.telefone}
         responsavel={carregado.responsavel}
         seguidores={carregado.seguidores}
         euSigo={carregado.euSigo}

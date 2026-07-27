@@ -259,6 +259,28 @@ export const COR_DO_MODULO: Record<string, string> = {
   administracao: "#5f6b7a"
 };
 
+// ── Engrenagem de configuração ──────────────────────────────────────────────
+// Um círculo com raios retos é o desenho universal de sol — e o alternador de
+// tema claro fica dois botões à esquerda do de configuração. Engrenagem tem
+// dente: 8 dentes trapezoidais, raio de base 8, raio de topo 10,4, dente
+// ocupando 40% do passo angular. O contorno é calculado, não desenhado no
+// olho; à mão o dente sai torto e a peça deixa de ler como engrenagem.
+
+export const DENTES_DA_ENGRENAGEM =
+  "M10.13 4.22L10.37 1.73L13.63 1.73L13.87 4.22L16.18 5.18L18.11 3.59L20.41 5.89L18.82 7.82" +
+  "L19.78 10.13L22.27 10.37L22.27 13.63L19.78 13.87L18.82 16.18L20.41 18.11L18.11 20.41L16.18 18.82" +
+  "L13.87 19.78L13.63 22.27L10.37 22.27L10.13 19.78L7.82 18.82L5.89 20.41L3.59 18.11L5.18 16.18" +
+  "L4.22 13.87L1.73 13.63L1.73 10.37L4.22 10.13L5.18 7.82L3.59 5.89L5.89 3.59L7.82 5.18Z";
+
+export function IconeEngrenagem({ tamanho = 17 }: { tamanho?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={tamanho} height={tamanho} aria-hidden="true" focusable="false">
+      <path d={DENTES_DA_ENGRENAGEM} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="3.3" fill="none" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
 const COR_PADRAO = "#5f6b7a";
 
 export function corDoModulo(chave: string): string {

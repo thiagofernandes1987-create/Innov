@@ -567,9 +567,28 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.28.4 — Exceção encontrada e registrada: `Sign → Green Savings` é relatório de leitura pura, sem conversa, sem seletor e sem barra de etapas. Página onde se trabalha não sai do molde; página de leitura pode
   - [x] T-23.28.5 — Tabela do que a Innovar já segue e do que falta, item a item
 - [x] T-23.29 — **Cor por aplicativo na grade**, atendendo "olha como é colorida e moderna". Vinte e um ícones da mesma cor obrigam a ler todos os rótulos; a cor é do aplicativo, não da categoria
-- [ ] T-23.30 — **Criar e editar etapa pela própria coluna do kanban**, com `+` para cartão e engrenagem no hover — o item que o responsável marcou em três comentários distintos
-- [ ] T-23.31 — **Completar o canto direito da barra**: mensagens, notificações e configuração, ao lado do tema e do usuário
-- [ ] T-23.32 — **Conversa lateral completa**: mensagem, nota interna, WhatsApp e atividade agendada, como componente único reusado por todos os módulos
+- [x] T-23.30 — **Criar e editar etapa pela própria coluna do kanban**, com `+` para cartão e engrenagem no hover — o item que o responsável marcou em três comentários distintos
+  - [x] T-23.30.1 — Política `pipeline_stages_write` afrouxada de `administracao EDIT` para `pipeline_permite(pipeline_id,'EDIT')`: quem trabalha o kanban nomeia as colunas dele (`20260727090000_pipeline_conversa_e_etapas.sql`)
+  - [x] T-23.30.2 — Ações `criarEtapa`, `renomearEtapa`, `alternarEtapaRecolhida`, `excluirEtapa` e `criarCartao` com mensagem em português — nenhum erro de PostgREST na tela
+  - [x] T-23.30.3 — `components/pipeline/coluna-acoes.tsx`: `+` no cabeçalho, engrenagem que só aparece no hover (`opacity`, não `display`, para não sumir do teclado) e campo de etapa nova no fim das colunas
+  - [x] T-23.30.4 — Formulário rápido exige o registro da trilha, porque o CHECK `pipeline_cards_origem_coerente` recusa cartão de assistência sem chamado; `registrosDisponiveis()` exclui quem já tem cartão
+  - [x] T-23.30.5 — Excluir etapa com cartão é recusado com frase, não com erro de chave estrangeira. Verificado no navegador: *"Prospecção" tem 1 cartão. Mova ou arquive antes de excluir a etapa.*
+  - [x] T-23.30.6 — Coluna recolhida mantém a engrenagem visível: girar o cabeçalho inteiro empurrava o controle para fora da faixa de 62px e recolher virava caminho sem volta
+- [x] T-23.31 — **Completar o canto direito da barra**: mensagens, notificações e configuração, ao lado do tema e do usuário
+  - [x] T-23.31.1 — `lib/casca/avisos.ts`: mensagem é observação que outra pessoa escreveu em cartão que eu respondo ou sigo; notificação é atividade em aberto no meu nome. Nenhum contador decorativo
+  - [x] T-23.31.2 — "Não lido" é marco de tempo em cookie `httpOnly`, não tabela de leitura por linha; ler em um aparelho não marca lido no outro, e isso está registrado como limitação
+  - [x] T-23.31.3 — Falha ao carregar avisos não derruba a casca: `catch` devolve painéis vazios em vez de deixar o usuário sem barra e sem saída
+  - [x] T-23.31.4 — Ícone de configuração desenhado como engrenagem com oito dentes calculados, não círculo com raios — que é o mesmo desenho do tema claro, dois botões à esquerda
+  - [x] T-23.31.5 — Defeito de render encontrado e corrigido: `startTransition` dentro do atualizador de `setState` impedia dois dos três painéis de abrir (`VACINA-015`)
+- [x] T-23.32 — **Conversa lateral completa**: mensagem, nota interna, WhatsApp e atividade agendada, como componente único reusado por todos os módulos
+  - [x] T-23.32.1 — `components/conversa/` com contrato `AcoesConversa` injetado: o que muda de módulo para módulo é onde grava, não a tela. As classes CSS não levam o nome do módulo, para não virarem `chamado-conversa` e `obra-conversa` no primeiro reúso
+  - [x] T-23.32.2 — WhatsApp entra como tipo de observação, não como tabela: mesma linha do tempo, só o canal muda (`tipo in ('nota','mensagem','whatsapp')` + coluna `destino`)
+  - [x] T-23.32.3 — Não existe envio: a plataforma registra e abre o WhatsApp com o texto pronto. A janela só abre depois de gravar, para ninguém sair achando que ficou registrado
+  - [x] T-23.32.4 — `pipeline_card_activities` com RLS, chave composta para a organização e três índices — o que está em aberto é o que a tela consulta o tempo todo
+  - [x] T-23.32.5 — Observação e movimento de etapa em uma lista só, ordenada pelo relógio; duas listas obrigariam quem lê a intercalar de cabeça
+  - [x] T-23.32.6 — Telefone sujo do mundo real (`12982#2($($`) é recusado **antes** do envio, com o número mostrado na frase; antes o rodapé prometia abrir e só depois recusava
+  - [x] T-23.32.7 — Seis testes novos contra PostgreSQL 16 real (22 a 26): canal não declarado, tipo de atividade inventado, atividade sem título, organização divergente pela chave composta e exclusão de etapa com e sem cartão
+  - [x] T-23.32.8 — `run-pipeline-db-tests.mjs` passou a descobrir as migrations em vez de listá-las: duas migrations aplicadas ao Supabase estavam fora do encadeamento e a suíte dava verde sobre esquema antigo (`VACINA-014`)
 - [x] T-23.20 — **Defeito D8 corrigido**: `app/icon.svg` declara o ícone da aba; o 404 de favicon apareceu no console durante a verificação desta sprint
 - [ ] T-23.21 — **Menus por aplicativo na barra superior.** No padrão de mercado, todo aplicativo traz os próprios menus ao lado do nome, e termina em `Relatórios` e `Configuração`. Hoje a barra mostra só o nome do aplicativo corrente
 - [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria

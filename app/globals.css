@@ -621,9 +621,30 @@ tbody tr:hover { background: #fafcfd; }
 /* Etapa final ocupa uma faixa, não uma coluna: é o `fold` do padrão de
    mercado, e é o que impede a coluna de "finalizados" de dominar a tela. */
 .pipeline-coluna.recolhida { flex-basis: 62px; padding: 12px 8px; }
-.pipeline-coluna.recolhida .pipeline-coluna-cabecalho { writing-mode: vertical-rl; gap: 10px; }
 .pipeline-coluna.recolhida .pipeline-coluna-cartoes { display: none; }
 .pipeline-coluna.recolhida .pipeline-coluna-progresso { display: none; }
+.pipeline-coluna.recolhida .coluna-novo-cartao { display: none; }
+
+/* O texto gira; os controles não. Girar o cabeçalho inteiro empurrava a
+   engrenagem para fora da faixa de 62px, e sem ela não havia como expandir a
+   coluna de volta — recolher virava caminho sem volta. */
+.pipeline-coluna.recolhida .pipeline-coluna-cabecalho {
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.pipeline-coluna.recolhida .pipeline-coluna-cabecalho strong {
+  writing-mode: vertical-rl;
+  flex: 0 1 auto;
+  max-height: 190px;
+  order: 2;
+}
+.pipeline-coluna.recolhida .pipeline-coluna-numeros { order: 3; }
+.pipeline-coluna.recolhida .pipeline-coluna-acoes { order: 1; }
+/* Na faixa estreita não cabe criar cartão: só a engrenagem, sempre visível. */
+.pipeline-coluna.recolhida .pipeline-coluna-acoes > .coluna-acao { display: none; }
+.pipeline-coluna.recolhida .coluna-engrenagem { opacity: 1; }
+.pipeline-coluna.recolhida .coluna-menu-lista { right: auto; left: 0; }
 
 .pipeline-coluna-cabecalho {
   display: flex;
@@ -632,7 +653,15 @@ tbody tr:hover { background: #fafcfd; }
   gap: 8px;
   margin-bottom: 8px;
 }
-.pipeline-coluna-cabecalho strong { font-size: 0.9rem; font-weight: 650; }
+.pipeline-coluna-cabecalho strong {
+  font-size: 0.9rem;
+  font-weight: 650;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .pipeline-coluna-numeros { display: flex; align-items: baseline; gap: 8px; }
 .pipeline-coluna-quantidade {
   background: var(--surface-strong);
@@ -661,6 +690,123 @@ tbody tr:hover { background: #fafcfd; }
 
 .pipeline-coluna-cartoes { display: flex; flex-direction: column; gap: 8px; }
 .pipeline-coluna-vazia { color: var(--muted); font-size: 0.82rem; padding: 8px 2px; margin: 0; }
+
+/* ── Configuração da etapa pela própria coluna ──────────────────────────────
+   `+` sempre visível, engrenagem ao passar o mouse. A engrenagem oculta usa
+   `opacity`, não `display`, para continuar no fluxo do teclado: controle que
+   some do tab é controle que não existe para quem não usa mouse. */
+
+.pipeline-coluna-acoes {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  align-self: center;
+}
+.coluna-acao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+}
+.coluna-acao:hover { background: var(--surface-strong); color: var(--text); }
+.coluna-acao svg { max-width: none; }
+.coluna-engrenagem { opacity: 0; }
+.pipeline-coluna:hover .coluna-engrenagem,
+.pipeline-coluna:focus-within .coluna-engrenagem { opacity: 1; }
+@media (hover: none) {
+  /* Sem mouse não há hover: no toque a engrenagem fica visível o tempo todo. */
+  .coluna-engrenagem { opacity: 1; }
+}
+
+.coluna-menu { position: relative; display: inline-flex; }
+.coluna-menu-lista {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 40;
+  min-width: 168px;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.coluna-menu-lista button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 7px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.coluna-menu-lista button:hover:not(:disabled) { background: var(--surface-muted); }
+.coluna-menu-lista button.perigo { color: var(--danger); }
+.coluna-menu-lista button.perigo:hover:not(:disabled) { background: var(--danger-soft); }
+.coluna-menu-lista button:disabled { opacity: 0.5; cursor: default; }
+
+.coluna-renomear { display: flex; align-items: center; gap: 4px; }
+.coluna-renomear input { width: 118px; padding: 4px 7px; font-size: 0.85rem; }
+
+.coluna-novo-cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 10px;
+  background: var(--surface);
+  border: 1px solid var(--brand);
+  border-radius: var(--radius-md);
+}
+.coluna-novo-cartao input,
+.coluna-novo-cartao select { width: 100%; font-size: 0.85rem; padding: 6px 8px; }
+.coluna-novo-cartao-acoes { display: flex; align-items: center; gap: 8px; }
+.coluna-novo-cartao-acoes .button { padding: 5px 12px; font-size: 0.82rem; }
+.coluna-cancelar {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 5px 4px;
+}
+.coluna-cancelar:hover { color: var(--text); }
+.coluna-aviso { margin: 0; font-size: 0.8rem; color: var(--muted); line-height: 1.45; }
+
+/* Coluna fantasma no fim: a etapa nasce onde ela vai ficar. */
+.pipeline-coluna-nova {
+  background: transparent;
+  border-style: dashed;
+  min-height: 0;
+  align-self: stretch;
+}
+.pipeline-coluna-nova-abrir {
+  width: 100%;
+  padding: 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.pipeline-coluna-nova-abrir:hover { color: var(--brand); background: var(--surface-muted); }
+.pipeline-coluna-nova input { width: 100%; font-size: 0.85rem; padding: 6px 8px; margin-bottom: 8px; }
 
 .pipeline-cartao {
   background: var(--surface);
@@ -849,30 +995,147 @@ tbody tr:hover { background: #fafcfd; }
 }
 .cartao-prazos-tabela { margin-top: 14px; }
 
-.cartao-conversa {
+/* ── Conversa lateral, componente único de todos os módulos ─────────────────
+   As classes não levam o nome do módulo de propósito: `cartao-conversa` teria
+   virado `chamado-conversa` e `obra-conversa` no primeiro reúso, e três folhas
+   de estilo depois nenhuma conversa se pareceria com a outra. */
+
+.conversa {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 16px;
+  padding: 14px;
 }
-.cartao-nova-nota { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-.cartao-nova-nota textarea {
+
+.conversa-abas {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  margin-bottom: 12px;
+  background: var(--surface-muted);
+  border-radius: var(--radius-sm);
+}
+.conversa-aba {
+  flex: 1 1 0;
+  min-height: 32px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: calc(var(--radius-sm) - 3px);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.conversa-aba:hover { color: var(--text); }
+.conversa-aba.ativa { background: var(--surface); color: var(--text); box-shadow: var(--shadow-xs); }
+
+.conversa-erro {
+  margin: 0 0 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 0.82rem;
+}
+
+.conversa-forma { display: flex; flex-direction: column; gap: 9px; margin-bottom: 16px; }
+.conversa-forma label { display: flex; flex-direction: column; gap: 4px; }
+.conversa-forma label > span:not(.sr-only) {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.conversa-forma textarea,
+.conversa-forma input,
+.conversa-forma select {
   width: 100%;
-  padding: 9px 11px;
+  padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
   font: inherit;
-  font-size: 0.88rem;
-  resize: vertical;
+  font-size: 0.87rem;
 }
-.cartao-nova-nota label span { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+.conversa-forma textarea { resize: vertical; min-height: 74px; }
+.conversa-campos { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.conversa-forma-rodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.conversa-forma-rodape small { font-size: 0.74rem; color: var(--muted); line-height: 1.35; flex: 1 1 130px; }
+.conversa-forma-rodape .conversa-alerta { color: var(--danger); }
+.conversa-forma-rodape .button { padding: 6px 14px; font-size: 0.83rem; }
 
-.cartao-linha-do-tempo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.cartao-linha-do-tempo li { border-left: 2px solid var(--border); padding-left: 12px; }
-.cartao-linha-do-tempo li.nota { border-left-color: var(--brand); }
-.cartao-linha-do-tempo li.tipo-mensagem { border-left-color: var(--copper); }
-.cartao-linha-do-tempo time { font-size: 0.74rem; color: var(--muted); }
-.cartao-linha-do-tempo p { margin: 2px 0 0; font-size: 0.87rem; white-space: pre-wrap; }
+.conversa-pendencias { margin-bottom: 16px; }
+.conversa-pendencias h3 {
+  margin: 0 0 7px;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.conversa-pendencias ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.conversa-pendencias label {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 8px 9px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--copper);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.conversa-pendencias label:hover { background: var(--surface-muted); }
+.conversa-pendencias input { margin-top: 2px; width: 16px; height: 16px; flex: 0 0 auto; }
+.conversa-pendencias span { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.conversa-pendencias strong { font-size: 0.85rem; font-weight: 600; }
+.conversa-pendencias small { font-size: 0.74rem; color: var(--muted); }
+
+.conversa-linha-do-tempo {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.conversa-linha-do-tempo li { border-left: 2px solid var(--border); padding-left: 12px; }
+.conversa-linha-do-tempo li.nota { border-left-color: var(--brand); }
+.conversa-linha-do-tempo li.mensagem,
+.conversa-linha-do-tempo li.whatsapp { border-left-color: var(--copper); }
+.conversa-linha-do-tempo li.atividade-concluida { opacity: 0.72; }
+.conversa-entrada-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.conversa-entrada-topo strong { font-size: 0.8rem; font-weight: 600; }
+.conversa-entrada-topo time { font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
+.conversa-canal {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.conversa-linha-do-tempo p { margin: 3px 0 0; font-size: 0.87rem; line-height: 1.5; white-space: pre-wrap; }
+.conversa-reabrir {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.74rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.conversa-reabrir:hover:not(:disabled) { color: var(--text); }
 
 .cartao-voltar { margin-top: 18px; font-size: 0.88rem; }
 
@@ -975,6 +1238,96 @@ tbody tr:hover { background: #fafcfd; }
 }
 .barra-sair:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.35); }
 .barra-sair:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* ── Canto direito: mensagens, notificações, configuração ───────────────────
+   Os botões vivem sobre a faixa escura da barra e o painel vive sobre a
+   superfície da página. São dois contextos de cor no mesmo componente, e é por
+   isso que o painel não herda nada do botão. */
+
+.canto-direito { position: relative; display: flex; align-items: center; gap: 2px; }
+.canto-botao {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.82);
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+.canto-botao:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
+.canto-botao[aria-expanded="true"] { background: rgba(255, 255, 255, 0.16); color: #fff; }
+.canto-botao:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.canto-botao svg { max-width: none; }
+
+.canto-selo {
+  position: absolute;
+  top: 3px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 0.64rem;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+.canto-selo.alerta { background: var(--danger); }
+
+.canto-painel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 60;
+  width: min(370px, calc(100vw - 24px));
+  max-height: min(460px, 70vh);
+  overflow-y: auto;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+}
+.canto-painel-estreito { width: min(258px, calc(100vw - 24px)); }
+.canto-painel > header {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.canto-painel > header strong { font-size: 0.9rem; font-weight: 650; }
+.canto-painel > header span { font-size: 0.76rem; color: var(--muted); }
+.canto-painel ul { list-style: none; margin: 0; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.canto-painel li a {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+}
+.canto-painel li a:hover { background: var(--surface-muted); }
+.canto-painel li.nova a { border-left-color: var(--brand); }
+.canto-painel li.atrasada a { border-left-color: var(--danger); }
+.canto-linha-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.canto-linha-topo strong { font-size: 0.85rem; font-weight: 600; }
+.canto-linha-topo small { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+.canto-linha-corpo { font-size: 0.82rem; color: var(--text); line-height: 1.45; }
+.canto-linha-origem { font-size: 0.73rem; color: var(--muted); }
+.canto-prazo.atrasado { color: var(--danger); font-weight: 600; }
+.canto-vazio { margin: 0; padding: 18px 14px; font-size: 0.83rem; color: var(--muted); }
+.canto-painel-estreito li a { flex-direction: row; font-size: 0.86rem; }
 
 /* ── Grade de aplicativos ──────────────────────────────────────────────────
    Seis por linha, largura igual, altura igual. Categoria virou filtro: como

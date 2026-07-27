@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { moverCartao } from "@/app/actions/pipeline";
 import {
+  BotaoNovoCartao,
+  FormularioNovoCartao,
+  MenuDaEtapa,
+  NovaEtapa,
+  type RegistroDisponivel
+} from "./coluna-acoes";
+import {
   formatarData,
   formatarMoeda,
   ordenarPorUrgencia,
@@ -25,19 +32,31 @@ import {
 
 type Props = {
   trilha: Trilha;
+  pipelineId: string;
   colunas: ColunaPipeline[];
   orfaos: CartaoPipeline[];
   podeEditar: boolean;
+  registros: RegistroDisponivel[];
+  rotuloRegistro: string;
 };
 
 type Visao = "kanban" | "lista";
 
-export function PipelineView({ trilha, colunas, orfaos, podeEditar }: Props) {
+export function PipelineView({
+  trilha,
+  pipelineId,
+  colunas,
+  orfaos,
+  podeEditar,
+  registros,
+  rotuloRegistro
+}: Props) {
   const [visao, setVisao] = useState<Visao>("kanban");
   const [busca, setBusca] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [arrastando, setArrastando] = useState<string | null>(null);
   const [alvo, setAlvo] = useState<string | null>(null);
+  const [adicionandoEm, setAdicionandoEm] = useState<string | null>(null);
   const [pendente, iniciar] = useTransition();
   const router = useRouter();
 
@@ -160,12 +179,40 @@ export function PipelineView({ trilha, colunas, orfaos, podeEditar }: Props) {
                   <span className="pipeline-coluna-quantidade">{coluna.quantidade}</span>
                   {coluna.valor > 0 ? <span className="pipeline-coluna-valor">{formatarMoeda(coluna.valor)}</span> : null}
                 </span>
+                {podeEditar ? (
+                  <span className="pipeline-coluna-acoes">
+                    <BotaoNovoCartao
+                      etapa={coluna.etapa.name}
+                      aberto={adicionandoEm === coluna.etapa.id}
+                      aoAlternar={() =>
+                        setAdicionandoEm(atual => (atual === coluna.etapa.id ? null : coluna.etapa.id))
+                      }
+                    />
+                    <MenuDaEtapa
+                      stageId={coluna.etapa.id}
+                      nome={coluna.etapa.name}
+                      recolhida={coluna.etapa.recolhida}
+                      aoFalhar={setErro}
+                    />
+                  </span>
+                ) : null}
               </header>
               <div
                 className="pipeline-coluna-progresso"
                 role="presentation"
                 style={{ ["--preenchimento" as string]: `${Math.round((coluna.quantidade / maiorColuna) * 100)}%` }}
               />
+
+              {adicionandoEm === coluna.etapa.id ? (
+                <FormularioNovoCartao
+                  pipelineId={pipelineId}
+                  stageId={coluna.etapa.id}
+                  registros={registros}
+                  rotuloRegistro={rotuloRegistro}
+                  aoFalhar={setErro}
+                  aoFechar={() => setAdicionandoEm(null)}
+                />
+              ) : null}
 
               <div className="pipeline-coluna-cartoes">
                 {ordenarPorUrgencia(coluna.cartoes, agora).map(cartao => (
@@ -183,6 +230,7 @@ export function PipelineView({ trilha, colunas, orfaos, podeEditar }: Props) {
               </div>
             </div>
           ))}
+          {podeEditar ? <NovaEtapa pipelineId={pipelineId} aoFalhar={setErro} /> : null}
         </div>
       ) : (
         <div className="pipeline-lista-envelope">
