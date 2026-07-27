@@ -39,6 +39,7 @@ type Props = {
   orfaos: CartaoPipeline[];
   podeEditar: boolean;
   registros: RegistroDisponivel[];
+  clientes: RegistroDisponivel[];
   rotuloRegistro: string;
   funis: FunilDisponivel[];
   funilAtual: FunilDisponivel;
@@ -85,6 +86,7 @@ export function PipelineView({
   orfaos,
   podeEditar,
   registros,
+  clientes,
   rotuloRegistro,
   funis,
   funilAtual,
@@ -271,6 +273,8 @@ export function PipelineView({
 
               {adicionandoEm === coluna.etapa.id ? (
                 <FormularioNovoCartao
+                  trilha={trilha}
+                  clientes={clientes}
                   pipelineId={pipelineId}
                   stageId={coluna.etapa.id}
                   registros={registros}

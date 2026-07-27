@@ -55,6 +55,11 @@ export default async function PipelinePage({
   const podeEditar = await hasCapability(MODULO_DA_TRILHA[trilhaValida], "update");
   const funis = carregado ? await funisDaTrilha(trilhaValida) : [];
 
+  // Projeto e chamado nascem presos a um cliente, então o formulário de
+  // cadastro precisa da lista mesmo fora da trilha de cliente.
+  const clientes =
+    carregado && podeEditar && trilhaValida !== "cliente" ? await registrosDisponiveis("cliente", []) : [];
+
   // Só busca a lista de registros de quem pode criar cartão: para quem lê, a
   // consulta seria trezentas linhas trafegadas para alimentar um botão que não
   // aparece.
@@ -84,6 +89,7 @@ export default async function PipelinePage({
           orfaos={carregado.orfaos}
           podeEditar={podeEditar}
           registros={registros}
+          clientes={trilhaValida === "cliente" ? registros : clientes}
           rotuloRegistro={ROTULO_REGISTRO[trilhaValida]}
           funis={funis}
           funilAtual={
