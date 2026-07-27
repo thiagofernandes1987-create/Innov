@@ -674,8 +674,19 @@ ferramenta do mercado tem. Vai para o fim do inventário conforme R4.
   - [x] T-24.7.1 — Campo no centro da barra 1, com lupa, faceta removível e Backspace apagando a faceta
   - [x] T-24.7.2 — Filtro aplicado no navegador, não por navegação. A primeira versão escrevia em `router.replace` a cada tecla; como as telas são `force-dynamic`, cada digitação virava ida ao servidor e a lista chegava quase três segundos atrasada. A URL continua espelhada por `history.replaceState`, sem re-render de servidor
   - [x] T-24.7.3 — Exceção declarada na §12.4: o campo só aparece onde a tela sabe consumi-lo. Campo que aceita texto e não filtra ensina que a busca não funciona
-- [ ] T-24.8 — **Planejamento, visão de lista por cliente** com as colunas que o responsável enumerou: início da obra, término previsto, etapa atual, início e término previsto da etapa, % concluída, situação do prazo, dias de folga ou atraso, responsável e próxima tarefa programada
-- [ ] T-24.9 — **Planejamento, visão Gantt** ao abrir o cliente: datas de início e término, dependências II, IT, TT e TI, dias programados e caminho visível de atraso
+- [ ] T-24.8 — **Planejamento, visão de lista por cliente** — parcial
+  - [x] T-24.8.1 — Coluna de situação do prazo em três estados, com a régua de sete dias: é o intervalo em que ainda dá para remanejar equipe ou antecipar material; menos que isso, o aviso chega junto com o problema
+  - [x] T-24.8.2 — O código da obra abre o cronograma, que era o "clicar no nome e abrir o gantt" do print
+  - [ ] T-24.8.3 — Faltam etapa atual, datas da etapa, dias de folga ou atraso, responsável e próxima tarefa programada
+- [x] T-24.9 — **Gantt com dependências**, no lugar da barra por porcentagem que existia na tela de cronograma
+  - [x] T-24.9.1 — Achado que reduziu o trabalho: os quatro tipos **já existiam** como enum desde a etapa 12 — `FS`, `SS`, `FF`, `SF` são exatamente TI, II, TT e IT. `lag_days` e `duration_days` também. Não foi preciso criar modelo de dependência
+  - [x] T-24.9.2 — O que faltava era a única coisa que torna cronograma incalculável: **ciclo**. `A→B→C→A` passava por toda restrição existente, porque nenhuma olha além do par imediato. Gatilho com CTE recursiva, cobrindo INSERT e UPDATE
+  - [x] T-24.9.3 — Chave composta `(tarefa, projeto)` nos dois lados: dependência entre tarefas de projetos diferentes vira erro de integridade, não disciplina de quem escreve
+  - [x] T-24.9.4 — `lib/planejamento/cronograma.ts` com passada para frente, folga positiva e negativa, e a regra de que a data fixada pelo planejador vence quando é mais tarde. **17 testes antes da tela existir**, incluindo virada de mês e de ano
+  - [x] T-24.9.5 — 7 testes contra PostgreSQL real, com `pnpm test:db:planejamento` no CI
+  - [x] T-24.9.6 — Cadeia que empurra a entrega destacada, e nomeada pelo que é: não é caminho crítico do CPM, porque não há passada para trás nem folga total. Vender o nome sem a conta seria prometer o que não se entrega
+  - [x] T-24.9.7 — **Defeito encontrado ao verificar**: a migration estava no repositório e **não no banco**. O formulário aceitou `T5 → T1` e fechou o laço. Aplicada ao Supabase e reverificada: a recusa aparece com a frase certa
+  - [x] T-24.9.8 — Verificado com cenário real de 5 tarefas e 5 dependências: T2 começa no dia seguinte ao término de T1, T3 respeita a folga de 2 dias, e a compra de ferragens fica **fora** da cadeia — o ramo curto não empurra a entrega
 - [ ] T-24.10 — **Conferir a tela de cadastro de usuários** contra o padrão pesquisado, já que o responsável não a encontrou
 - [ ] T-24.11 — **Varredura do texto poluído** nas 84 telas: o cabeçalho encolheu na S-23, mas cada tela ainda precisa ser olhada uma a uma contra o padrão
 

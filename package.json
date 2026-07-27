@@ -20,6 +20,7 @@
     "validate:pipeline": "node scripts/validate-pipeline.mjs",
     "validate:menus": "node scripts/validate-menus.mjs",
     "test:db:pipeline": "node scripts/run-pipeline-db-tests.mjs",
+    "test:db:planejamento": "node scripts/run-planning-db-tests.mjs",
     "test:db:replay": "node scripts/run-migration-replay.mjs",
     "validate:migrations": "node scripts/validate-supabase-migrations.mjs",
     "validate:stage9": "node scripts/validate-stage9.mjs",

@@ -141,6 +141,8 @@ jobs:
         run: pnpm validate:pipeline
       - name: Validate module menu destinations
         run: pnpm validate:menus
+      - name: Schedule dependency database tests
+        run: pnpm test:db:planejamento
       - name: Lint
         run: |
           set -o pipefail

@@ -1943,3 +1943,105 @@ tbody tr:hover { background: #fafcfd; }
 
 .funil-novo { display: flex; flex-direction: column; gap: 7px; margin-top: 6px; padding: 8px; border-top: 1px solid var(--border); }
 .funil-novo input, .funil-novo select { width: 100%; padding: 7px 9px; font-size: 0.86rem; }
+
+/* ── Gantt ──────────────────────────────────────────────────────────────────
+   Barras em escala de tempo com dependência, pedido no print do planejamento.
+   O cálculo mora em `lib/planejamento/cronograma.ts` e é testado antes desta
+   folha existir; aqui é só desenho. */
+
+.gantt { display: flex; flex-direction: column; gap: 10px; }
+.gantt-controles { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.gantt-alternar { display: inline-flex; align-items: center; gap: 8px; font-size: 0.84rem; color: var(--muted); cursor: pointer; }
+.gantt-alternar input { width: 16px; height: 16px; }
+
+.gantt-quadro {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+/* Coluna de nomes fixa: rolar o tempo sem perder de vista de qual tarefa é a
+   barra é o mínimo para um cronograma servir para alguma coisa. */
+.gantt-nomes { flex: 0 0 260px; border-right: 1px solid var(--border); background: var(--surface); }
+.gantt-cabecalho-vazio { height: 38px; border-bottom: 1px solid var(--border); background: var(--surface-muted); }
+.gantt-nome {
+  height: 44px;
+  padding: 5px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+  border-left: 3px solid transparent;
+  min-width: 0;
+}
+.gantt-nome:last-child { border-bottom: 0; }
+.gantt-nome.critica { border-left-color: var(--danger); background: var(--danger-soft); }
+.gantt-nome strong { font-size: 0.84rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gantt-nome small { font-size: 0.72rem; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+.gantt-sigla {
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--surface-strong);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.gantt-rolagem { flex: 1 1 auto; overflow-x: auto; min-width: 0; }
+.gantt-grade { position: relative; }
+
+.gantt-escala { display: flex; height: 38px; border-bottom: 1px solid var(--border); background: var(--surface-muted); }
+.gantt-dia {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border-right: 1px solid var(--border);
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+.gantt-dia.fim-de-semana { background: var(--surface-strong); }
+.gantt-dia small { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+/* A linha de hoje: sem ela, "atrasado" vira conclusão de quem conta no dedo. */
+.gantt-hoje { position: absolute; top: 38px; bottom: 0; width: 2px; background: var(--danger); opacity: 0.7; z-index: 2; }
+
+.gantt-linhas { position: relative; }
+.gantt-linha { position: relative; border-bottom: 1px solid var(--border); }
+.gantt-linha:last-child { border-bottom: 0; }
+
+.gantt-barra {
+  position: absolute;
+  top: 9px;
+  height: 26px;
+  border-radius: 5px;
+  background: var(--brand);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+.gantt-barra.critica { background: var(--danger); }
+.gantt-barra.atrasada { outline: 2px solid var(--danger); outline-offset: 1px; }
+/* Data vinda da dependência, e não fixada por alguém: hachura discreta, para
+   quem olha saber que mover a anterior move esta. */
+.gantt-barra.derivada { background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.14) 0 5px, transparent 5px 10px); }
+.gantt-progresso { position: absolute; inset: 0 auto 0 0; background: rgba(0, 0, 0, 0.28); }
+.gantt-barra-rotulo { position: relative; padding: 0 7px; font-size: 0.7rem; font-weight: 700; }
+
+.gantt-ligacoes { position: absolute; top: 38px; left: 0; pointer-events: none; z-index: 1; }
+.gantt-ligacao { stroke: var(--muted); stroke-width: 1.3; opacity: 0.55; }
+.gantt-ligacao.critica { stroke: var(--danger); stroke-width: 1.8; opacity: 0.9; }
+
+/* Lista do planejamento, por cliente. */
+.planejamento-lista .dentro { color: var(--success); font-weight: 600; }
+.planejamento-lista .atrasado { color: var(--danger); font-weight: 700; }
+.planejamento-barra { display: inline-flex; align-items: center; gap: 8px; min-width: 120px; }
+.planejamento-barra-trilho { flex: 1 1 auto; height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; }
+.planejamento-barra-cheia { display: block; height: 100%; background: var(--brand); }

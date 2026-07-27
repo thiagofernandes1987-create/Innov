@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { createBaseline, createDependency, createMilestone } from "@/app/actions/projects";
+import { Gantt } from "@/components/planejamento/gantt";
 import { ProjectNav } from "@/components/project-nav";
+import type { TipoDependencia } from "@/lib/planejamento/cronograma";
 import { requireOrganizationContext } from "@/lib/auth";
 import { daysBetween, formatDate, formatPercent, statusBadge } from "@/lib/stage12";
 
@@ -25,7 +27,6 @@ export default async function SchedulePage({
   if (!project) notFound();
   const tasks = tasksResult.data ?? [];
   const totalDays = Math.max(daysBetween(project.planned_start, project.planned_end) ?? 1, 1);
-  const projectStart = project.planned_start ? new Date(`${project.planned_start}T12:00:00`) : null;
   const taskById = new Map(tasks.map((task) => [task.id, task]));
   const delayed = tasks.filter((task) => task.planned_end && new Date(`${task.planned_end}T23:59:59`) < new Date() && task.status !== "COMPLETED").length;
 
@@ -44,31 +45,40 @@ export default async function SchedulePage({
       {pageError ? <div className="validation blocking">{pageError}</div> : null}
       {tasksResult.error ? <div className="validation blocking">{tasksResult.error.message}</div> : null}
 
+      {/* Gantt de verdade, no lugar da barra por porcentagem que existia aqui.
+          A anterior desenhava `planned_start` e `planned_end` como estavam
+          gravados: mudar a predecessora não movia a sucessora, então a tela
+          mostrava o que alguem digitou, nao o que as dependencias implicam.
+          E o defeito D6.
+
+          O calculo mora em `lib/planejamento/cronograma.ts`, com 17 casos de
+          teste antes desta tela existir. */}
       <section className="card card-pad">
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 18, flexWrap: "wrap" }}>
-          <div><h2>Linha do tempo</h2><p className="muted">{formatDate(project.planned_start)} → {formatDate(project.planned_end)} · {totalDays} dias</p></div>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 18, flexWrap: "wrap", marginBottom: 14 }}>
+          <div>
+            <h2>Cronograma</h2>
+            <p className="muted">{formatDate(project.planned_start)} - {formatDate(project.planned_end)} - {totalDays} dias programados</p>
+          </div>
           <span className="badge">Progresso {formatPercent(project.progress)}</span>
         </div>
-        <div className="timeline" style={{ marginTop: 18 }}>
-          {tasks.map((task) => {
-            const startOffset = projectStart && task.planned_start
-              ? Math.max(0, Math.round((new Date(`${task.planned_start}T12:00:00`).getTime() - projectStart.getTime()) / 86400000))
-              : 0;
-            const taskDays = Math.max(daysBetween(task.planned_start, task.planned_end) ?? Number(task.duration_days) ?? 1, 1);
-            const left = Math.min(100, (startOffset / totalDays) * 100);
-            const width = Math.max(1.5, Math.min(100 - left, (taskDays / totalDays) * 100));
-            return (
-              <div className="timeline-row" key={task.id}>
-                <div><span className="mono muted">{task.code}</span><br /><strong>{task.title}</strong></div>
-                <div className="timeline-bar" title={`${formatDate(task.planned_start)} a ${formatDate(task.planned_end)}`}>
-                  <span style={{ left: `${left}%`, width: `${width}%`, opacity: task.status === "COMPLETED" ? 1 : .72 }} />
-                </div>
-                <div><span className={statusBadge(task.status)}>{formatPercent(task.progress)}</span></div>
-              </div>
-            );
-          })}
-          {!tasks.length ? <p className="muted">Cadastre tarefas com datas planejadas para montar a linha do tempo.</p> : null}
-        </div>
+
+        <Gantt
+          tarefas={tasks.map((task) => ({
+            id: task.id,
+            titulo: `${task.code} - ${task.title}`,
+            duracaoDias: Number(task.duration_days) || 1,
+            inicioPlanejado: task.planned_start,
+            terminoPlanejado: task.planned_end,
+            progresso: Number(task.progress) || 0
+          }))}
+          dependencias={(dependenciesResult.data ?? []).map((dep) => ({
+            predecessorId: dep.predecessor_task_id,
+            sucessorId: dep.successor_task_id,
+            tipo: dep.dependency_type as TipoDependencia,
+            folgaDias: Number(dep.lag_days) || 0
+          }))}
+          hoje={new Date().toISOString().slice(0, 10)}
+        />
       </section>
 
       <section className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(330px,1fr))", marginTop: 22 }}>
