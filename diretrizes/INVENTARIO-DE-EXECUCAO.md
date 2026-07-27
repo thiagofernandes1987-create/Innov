@@ -612,6 +612,45 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
 
 ---
 
+## Sprint S-24 — Pipelines como objeto do usuário, criação em toda parte e planejamento com Gantt
+**Estado:** pendente
+**Marco:** M-5
+
+Nasceu da revisão do responsável em 27 de julho, sobre a entrega da S-23. O que
+ele apontou não é acabamento: são funções que a plataforma não tem e que toda
+ferramenta do mercado tem. Vai para o fim do inventário conforme R4.
+
+### O que a revisão apontou
+
+| # | Apontamento | Consequência |
+|---|---|---|
+| A1 | "Pipeline" foi tratado como aplicativo, agregando as três trilhas | Corrigido ainda na S-23 (T-23.21): o funil pertence ao aplicativo dono — CRM, Projetos e Chamados |
+| A2 | Não existe criar, editar nem excluir **pipeline** | Só as etapas eram configuráveis. O funil em si é fixo, um por trilha, criado por preset |
+| A3 | Um módulo precisa de **vários** pipelines | CRM tem SDR, pré-venda e venda; pós-venda tem projeto e execução; assistência tem o seu |
+| A4 | "Sempre eu deveria ter a opção de criar coisas: pipelines, cards, clientes" | O `Novo` do pipeline cria cartão para registro **existente**. Não há como cadastrar cliente, projeto ou chamado de dentro do fluxo |
+| A5 | Planejamento não abre Gantt ao clicar no cliente | Não há Gantt, nem dependência de tarefa (II, IT, TT, TI), nem dias programados |
+| A6 | Falta a visão de lista do planejamento, por cliente | Sem início da obra, término previsto, etapa atual e suas datas, % concluída, sinalização de prazo, dias de folga ou atraso, responsável e próxima tarefa |
+| A7 | Cadastro de obra deveria vir do App Projetos ao criar no pipeline | Hoje o pipeline exige que o projeto já exista |
+| A8 | Não há busca no meio da barra superior | Bitrix, Pipedrive e Sophia têm busca global no topo; a busca atual é só do pipeline, na barra de controle |
+| A9 | A seção de cadastrar usuários não foi encontrada | `/app/administracao/usuarios` existe desde a S-12.1 e não tinha caminho de menu. Menu criado na T-23.21; falta conferir a tela contra o padrão |
+| A10 | Personas e rotinas não foram produzidas | Foram pedidas e não entregues. Sem elas, cada tela é decidida no gosto de quem escreve, que é exatamente a crítica |
+
+### Tarefas
+
+- [ ] T-24.1 — **Personas e rotinas, antes de desenhar tela nova.** Quem usa, o que faz num dia, por onde entra e o que precisa em três cliques. Baseadas no que as plataformas citadas fazem, não em suposição. Documento canônico em `diretrizes/PERSONAS-E-ROTINAS.md`, com a rotina de cada perfil ligada aos módulos que ela atravessa
+- [ ] T-24.2 — **Pesquisa de campo do CRUD de pipeline**: como Odoo, Bitrix, Pipedrive e Sophia deixam criar, renomear, duplicar, arquivar e excluir um funil, e onde esse comando mora na tela. Registrada em `PADRAO-DE-INTERFACE.md` antes de qualquer código
+- [ ] T-24.3 — **Vários pipelines por módulo no banco.** Hoje `pipelines` já aceita mais de um por trilha, mas `carregarPipeline` pega o padrão e ignora o resto, e há uma restrição de um padrão por trilha. Rever o modelo, o seletor e a migration
+- [ ] T-24.4 — **CRUD de pipeline na tela**: criar do zero ou a partir de preset, renomear, duplicar, arquivar e excluir, com a recusa em português quando houver cartão dentro
+- [ ] T-24.5 — **Seletor de pipeline** na barra de controle, ao lado do nome — é onde o padrão de mercado põe, e é o que permite CRM ter SDR, pré-venda e venda sem trocar de aplicativo
+- [ ] T-24.6 — **Criar registro de dentro do fluxo**: cliente, projeto e chamado nascendo do `Novo` do pipeline, sem obrigar a sair para outro módulo e voltar
+- [ ] T-24.7 — **Busca global na barra superior**, no padrão de Bitrix e Pipedrive: um campo no centro que procura em cliente, projeto, chamado e cartão, com resultado agrupado por tipo
+- [ ] T-24.8 — **Planejamento, visão de lista por cliente** com as colunas que o responsável enumerou: início da obra, término previsto, etapa atual, início e término previsto da etapa, % concluída, situação do prazo, dias de folga ou atraso, responsável e próxima tarefa programada
+- [ ] T-24.9 — **Planejamento, visão Gantt** ao abrir o cliente: datas de início e término, dependências II, IT, TT e TI, dias programados e caminho visível de atraso
+- [ ] T-24.10 — **Conferir a tela de cadastro de usuários** contra o padrão pesquisado, já que o responsável não a encontrou
+- [ ] T-24.11 — **Varredura do texto poluído** nas 84 telas: o cabeçalho encolheu na S-23, mas cada tela ainda precisa ser olhada uma a uma contra o padrão
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.
