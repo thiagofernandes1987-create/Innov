@@ -697,6 +697,39 @@ quem está na obra.
 
 ---
 
+## Sprint S-26 — KPIs setoriais e individuais
+**Estado:** pendente
+**Marco:** M-5
+
+Pedida pelo responsável em 27 de julho: "quero que você crie kpis por setor e
+individual para todos os módulos, isso é de extrema importância". Catálogo
+completo em [`KPIS.md`](KPIS.md). Vai para o fim conforme R4.
+
+### O que a escrita do catálogo já resolveu
+
+- **A fonte existe.** `pipeline_card_stage_history` grava toda transição com
+  origem, destino e instante. Dela saem toda conversão, todo tempo de ciclo,
+  toda estagnação e todo retrabalho — sem tabela nova.
+- **O erro do denominador foi documentado com a conta feita.** "Leads Ganhos"
+  (contratos ÷ leads) e "Taxa de Conversão" (contratos ÷ briefings) parecem o
+  mesmo indicador e não são: a razão entre eles é exatamente o filtro da
+  entrada. Cobrar o vendedor pelo primeiro quando o marketing mudou a fonte é
+  punir quem não causou.
+
+### Tarefas
+
+- [ ] T-26.1 — **Camada de cálculo única**, lendo de `pipeline_card_stage_history` e das tabelas de domínio. Um KPI calculado em dois lugares diverge no primeiro ajuste
+- [ ] T-26.2 — **Motivo de perda no CRM**: campo em lista fechada. É o único KPI do módulo hoje marcado 🔴 — o dado não existe
+- [ ] T-26.3 — **Conversões do funil comercial**, depois dos funis por setor da S-24: qualidade de lead, conversão de leads, conversão em projeto, leads ganhos e taxa de conversão, com os dois denominadores convivendo
+- [ ] T-26.4 — **KPIs de campo e do planejador** (aderência, desvio relativo, acerto do plano), depois da S-25
+- [ ] T-26.5 — **KPIs de assistência**, com destaque para chamados por obra entregue — o indicador que liga o pós-venda a quem executou
+- [ ] T-26.6 — **KPIs de qualidade, financeiro, compras e estoque**, incluindo parada de obra por falta de material
+- [ ] T-26.7 — **Matriz de competências** por tipo de tarefa, com média **e desvio padrão** de 6 meses. Ordenação por `média − desvio` para escolha de equipe
+- [ ] T-26.8 — **Painel executivo** compondo os anteriores
+- [ ] T-26.9 — **Decidir as quatro regras da §15 antes de publicar qualquer KPI individual**: quem vê o próprio número, janela de esquecimento, caminho de contestação, e nunca publicar contagem absoluta antes do denominador que a normaliza
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.
