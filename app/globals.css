@@ -610,34 +610,12 @@ tbody tr:hover { background: #fafcfd; }
 }
 .pipeline-contagem { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
 
-.barra-controle-busca {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1 1 280px;
-  max-width: 520px;
-  margin-inline: auto;
-  padding: 0 11px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--muted);
-}
-.barra-controle-busca:focus-within { border-color: var(--brand); }
-.barra-controle-busca svg { flex: 0 0 auto; max-width: none; }
-.barra-controle-busca input {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 8px 0;
-  border: 0;
-  background: transparent;
-  color: var(--text);
-  font: inherit;
-  font-size: 0.87rem;
-}
-.barra-controle-busca input:focus-visible { outline: none; }
 
 .barra-controle-visoes {
+  /* Extrema direita da barra 2, conforme a seção 12.2. Antes eram a busca no
+     meio que empurrava; a busca subiu, e sem isto os ícones ficavam colados
+     no título. */
+  margin-left: auto;
   display: inline-flex;
   gap: 2px;
   padding: 2px;
@@ -1251,7 +1229,12 @@ tbody tr:hover { background: #fafcfd; }
   position: sticky;
   top: 0;
   z-index: 20;
-  display: flex;
+  /* Três colunas, não flex: com `margin: auto` a busca centraliza no espaço que
+     sobra, e o espaço que sobra depende do tamanho do nome do aplicativo e da
+     quantidade de menus — a busca dançava de tela para tela. Com as duas
+     laterais em `1fr`, o meio é o meio da janela em qualquer módulo. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
   align-items: center;
   gap: 16px;
   min-height: 56px;
@@ -1285,7 +1268,6 @@ tbody tr:hover { background: #fafcfd; }
   font: 800 12px/1 Manrope, Inter, sans-serif;
   letter-spacing: 0.04em;
 }
-.barra-logo-nome { font: 800 13px/1 Manrope, Inter, sans-serif; letter-spacing: 0.1em; }
 
 .barra-modulo {
   display: inline-flex;
@@ -1319,26 +1301,136 @@ tbody tr:hover { background: #fafcfd; }
 .barra-menu.ativo { background: rgba(255, 255, 255, 0.16); color: #fff; font-weight: 600; }
 .barra-menu:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
-.barra-direita { margin-left: auto; display: flex; align-items: center; gap: 14px; }
-.barra-usuario { display: none; flex-direction: column; line-height: 1.25; text-align: right; }
-.barra-usuario strong { font-size: 0.82rem; font-weight: 600; }
-.barra-usuario small { font-size: 0.72rem; color: rgba(255, 255, 255, 0.62); }
-@media (min-width: 720px) { .barra-usuario { display: flex; } }
-
-.barra-sair {
-  min-height: 36px;
-  padding: 0 14px;
+/* Busca no centro da barra 1, conforme a seção 12 do padrão. `margin: auto`
+   nos dois lados é o que a mantém centrada independente do tamanho do nome do
+   aplicativo e da quantidade de menus. O espaçador vazio ocupa o mesmo lugar
+   quando a tela não implementa busca, para o canto direito não dançar. */
+/* `overflow: hidden` é o que impede a coluna esquerda de invadir a busca:
+   nome de aplicativo é dado da organização e pode ser longo — "Estoque,
+   Inventário e Almoxarifado" tem 34 caracteres. Sem isto o texto passava por
+   baixo do campo de busca. */
+.barra-esquerda { display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden; }
+.barra-modulo strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 22ch;
+}
+/* Os menus cedem espaço antes do nome do aplicativo: "onde estou" tem
+   precedência sobre "para onde vou" quando a tela aperta. */
+.barra-menus { flex: 0 1 auto; overflow: hidden; }
+.barra-modulo { flex: 0 0 auto; }
+.barra-busca,
+/* 400px e não 460: com as laterais em `1fr`, cada pixel dado à busca é tirado
+   dos dois lados. A 460px o último menu do CRM ficava cortado em 1440px de
+   tela. */
+.barra-busca-vazia { width: min(400px, 30vw); min-width: 0; }
+.barra-busca-vazia { visibility: hidden; }
+.barra-busca label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 10px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   background: rgba(255, 255, 255, 0.07);
-  color: #fff;
-  font-size: 0.84rem;
-  font-weight: 550;
-  cursor: pointer;
+  color: rgba(255, 255, 255, 0.62);
   transition: background var(--transition-fast), border-color var(--transition-fast);
 }
-.barra-sair:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.35); }
-.barra-sair:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.barra-busca label:focus-within { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.4); }
+.barra-busca svg { flex: 0 0 auto; max-width: none; }
+.barra-busca input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 6px 0;
+}
+.barra-busca input::placeholder { color: rgba(255, 255, 255, 0.5); }
+.barra-busca input:focus-visible { outline: none; }
+
+/* Faceta: o filtro ativo é visível e removível de dentro do campo. */
+.barra-busca-faceta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: 0 0 auto;
+  max-width: 55%;
+  padding: 2px 3px 2px 8px;
+  border-radius: 5px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+.barra-busca-faceta > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.barra-busca-faceta button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.barra-busca-faceta button:hover { background: rgba(255, 255, 255, 0.25); }
+
+.barra-direita { display: flex; align-items: center; justify-content: flex-end; gap: 4px; min-width: 0; }
+
+/* Avatar do usuário: o menu de conta do padrão de mercado. */
+.canto-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-left: 6px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #2f6ea8, var(--brand-strong));
+  color: #fff;
+  font: 700 11px/1 Manrope, Inter, sans-serif;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+.canto-avatar:hover { border-color: rgba(255, 255, 255, 0.55); }
+.canto-avatar[aria-expanded="true"] { border-color: #fff; }
+.canto-avatar:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+.canto-tema {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+}
+.canto-tema-rotulo { font-size: 0.78rem; color: var(--muted); }
+.canto-sair { padding: 6px; border-top: 1px solid var(--border); }
+.canto-sair button {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+}
+.canto-sair button:hover { background: var(--surface-muted); }
 
 /* ── Canto direito: mensagens, notificações, configuração ───────────────────
    Os botões vivem sobre a faixa escura da barra e o painel vive sobre a
@@ -1658,7 +1750,6 @@ tbody tr:hover { background: #fafcfd; }
   .launcher-busca input,
   .alternador-tema-opcao,
   .barra-logo,
-  .barra-sair { transition: none; }
   .launcher-app:hover,
   .launcher-app:focus-visible { transform: none; }
 }

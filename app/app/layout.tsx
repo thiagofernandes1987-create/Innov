@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { BarraSuperior } from "@/components/casca/barra-superior";
+import { ProvedorDeBusca } from "@/components/casca/busca-da-barra";
 import { carregarAvisos } from "@/lib/casca/avisos";
 import { COOKIE_TEMA, temaValido } from "@/lib/tema";
 import { getEffectiveApplications, hasCapability } from "@/lib/authorization";
@@ -35,6 +36,7 @@ export default async function AppLayout({ children }: Readonly<{ children: React
   ]);
 
   return (
+    <ProvedorDeBusca>
     <div className="casca">
       <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
       <BarraSuperior
@@ -49,5 +51,6 @@ export default async function AppLayout({ children }: Readonly<{ children: React
         {children}
       </div>
     </div>
+    </ProvedorDeBusca>
   );
 }

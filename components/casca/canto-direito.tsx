@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { marcarVisto } from "@/app/actions/avisos";
-import { IconeEngrenagem } from "./icones";
+import { signOut } from "@/app/actions/auth";
+import type { Tema } from "@/lib/tema";
+import { AlternadorTema } from "./alternador-tema";
 import type { AtividadeAviso, MensagemAviso } from "@/lib/casca/avisos";
 import { ROTULO_ATIVIDADE, ROTULO_OBSERVACAO, type TipoAtividade } from "@/lib/pipeline/atividades";
 
@@ -63,7 +65,8 @@ export function CantoDireito({
   pendentes,
   podeAdministrar,
   email,
-  papel
+  papel,
+  tema
 }: {
   mensagens: MensagemAviso[];
   atividades: AtividadeAviso[];
@@ -72,6 +75,7 @@ export function CantoDireito({
   podeAdministrar: boolean;
   email: string | null;
   papel: string;
+  tema: Tema;
 }) {
   const [aberto, setAberto] = useState<Painel | null>(null);
   const [, iniciar] = useTransition();
@@ -137,16 +141,20 @@ export function CantoDireito({
         ) : null}
       </button>
 
+      {/* Avatar, não engrenagem. O nome do usuário por extenso e o botão "Sair"
+          ocupavam a barra o dia inteiro para uma ação que se faz uma vez por
+          dia; as quatro ferramentas do padrão põem tudo isso dentro do avatar,
+          junto com tema e dados da conta. */}
       <button
         type="button"
-        className="canto-botao"
-        aria-label="Configuração"
+        className="canto-avatar"
+        aria-label={`Conta de ${email ?? "usuário"}`}
         aria-expanded={aberto === "configuracao"}
         aria-controls={`${prefixo}-configuracao`}
-        title="Configuração"
+        title={email ?? "Conta"}
         onClick={() => alternar("configuracao")}
       >
-        <IconeEngrenagem tamanho={18} />
+        <span aria-hidden="true">{iniciais(email)}</span>
       </button>
 
       {aberto === "mensagens" ? (
@@ -234,6 +242,11 @@ export function CantoDireito({
                   </Link>
                 </li>
                 <li>
+                  <Link href="/app/administracao/usuarios" onClick={() => setAberto(null)}>
+                    Usuários e permissões
+                  </Link>
+                </li>
+                <li>
                   <Link href="/app/auditoria" onClick={() => setAberto(null)}>
                     Auditoria
                   </Link>
@@ -241,8 +254,26 @@ export function CantoDireito({
               </>
             ) : null}
           </ul>
+
+          <div className="canto-tema">
+            <span className="canto-tema-rotulo">Tema</span>
+            <AlternadorTema atual={tema} />
+          </div>
+
+          <form action={signOut} className="canto-sair">
+            <button type="submit">Sair</button>
+          </form>
         </div>
       ) : null}
     </div>
   );
+}
+
+/** Duas letras do e-mail: `admin@admin.com` vira `AD`. */
+function iniciais(email: string | null): string {
+  const local = (email ?? "").split("@")[0].replace(/[^a-zA-ZÀ-ÿ]/g, " ").trim();
+  if (!local) return "?";
+  const partes = local.split(/\s+/).filter(Boolean);
+  if (partes.length >= 2) return (partes[0][0] + partes[1][0]).toUpperCase();
+  return local.slice(0, 2).toUpperCase();
 }

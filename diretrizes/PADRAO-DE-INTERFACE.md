@@ -392,3 +392,71 @@ O que isso ensina: **página de leitura pura pode sair do molde**; página onde 
 Se o que se faz para um se aplica a quase todos, então **construir por módulo é o erro**. O certo é construir o molde uma vez — casca, painel de controle, seletor de visão, cartão, formulário, conversa — e cada módulo declarar só o que tem de específico.
 
 É a mesma regra do Object Runtime, aplicada à interface: composição de características declaradas, não vinte telas escritas à mão que precisam ser corrigidas vinte vezes.
+
+---
+
+## 12. Mapa das duas barras — o que vai onde, e quando
+
+Ditado pelo responsável em 27 de julho de 2026 e conferido contra as capturas de Odoo, Bitrix, Pipedrive e Sophia:
+
+> "o menu superior geralmente é o mesmo, menu do app do lado esquerdo, pesquisa com filtros no meio e notificação, mensagens, ícone usuário para sair, ver dados, etc, do lado superior direito. Embaixo do menu, à esquerda: Novo, publicar, depende do módulo; do outro lado ficam as visualizações — kanban, lista, gráficos, tabela dinâmica, atividades."
+
+Isto é contrato, não sugestão. Tela nova não escolhe onde põe o botão.
+
+### 12.1 Barra 1 — identidade e navegação. Igual em toda tela
+
+| Posição | O que fica | Muda com a tela? |
+|---|---|---|
+| Extrema esquerda | Marca clicável, sozinha, para a tela inicial de aplicativos | Nunca |
+| Esquerda | Ícone e nome do aplicativo, na cor do aplicativo | Só ao trocar de aplicativo |
+| Esquerda, na sequência | Menus **daquele** aplicativo | Só ao trocar de aplicativo |
+| Centro | Busca com facetas de filtro | Nunca sai do lugar |
+| Direita | Mensagens e notificações, com contador quando houver | Nunca |
+| Extrema direita | Avatar do usuário, que abre tema, dados, administração e sair | Nunca |
+
+O que **não** pode estar na barra 1: título de página, nome do registro aberto, botão de ação de módulo, seletor de visualização. Tudo isso é da barra 2 ou do corpo. A barra 1 responde "quem sou eu, onde estou, para onde vou" e mais nada.
+
+O nome do usuário por extenso e o botão "Sair" soltos saem da barra: são dois elementos permanentes para uma ação que se faz uma vez por dia. Vão para dentro do menu do avatar, que é onde as quatro ferramentas põem.
+
+### 12.2 Barra 2 — trabalho. Muda com o módulo
+
+| Posição | O que fica | Muda com a tela? |
+|---|---|---|
+| Esquerda | Ações do módulo: `Novo`, `Publicar`, `Importar`, `Aprovar` — o que aquele módulo faz | Sempre |
+| Esquerda, ao lado | Nome da tela ou do registro, em corpo de texto, com engrenagem de configuração quando houver | Sempre |
+| Direita | Visualizações em ícone: kanban, lista, calendário, tabela dinâmica, gráfico, mapa, atividades | Conforme o módulo suporte |
+
+A barra 2 **não** repete a busca: ela subiu para a barra 1. Não repete o nome do aplicativo: já está acima. Não carrega descrição de página.
+
+### 12.3 Quando cada visualização aparece
+
+Ícone de visualização que não funciona é pior que ícone ausente — ensina que ícone é enfeite. A régua:
+
+| Visualização | Entra quando | Hoje |
+|---|---|---|
+| Lista | Sempre. É o piso de toda tela de coleção | Todos os módulos |
+| Kanban | O registro tem etapa, e a etapa é dado da organização | Pipeline |
+| Calendário | O registro tem data de agendamento própria | Nenhum |
+| Gantt | O registro tem início, término e dependência entre itens | Nenhum — S-24 |
+| Tabela dinâmica | Há medida numérica que faça sentido somar por dimensão | Nenhum |
+| Gráfico | Idem à tabela dinâmica, da mesma fonte | Nenhum |
+| Mapa | O registro tem endereço geocodificável | Nenhum |
+| Atividades | O registro tem atividade agendada | Pipeline, pela conversa |
+
+### 12.4 A exceção declarada da busca
+
+O contrato diz que a busca fica sempre no centro da barra 1. Hoje ela só aparece onde a tela sabe consumi-la — no pipeline. Um campo que aceita texto e não filtra nada é pior que campo ausente: quem digita conclui que não há resultado, não que a tela ainda não busca.
+
+Enquanto a busca global da `T-24.7` não existir, o campo aparece na tela que implementa e não aparece na que não implementa. **A posição nunca muda; o que varia é existir ou não.** A exceção tem data e dono: some quando a T-24.7 entregar busca por cliente, projeto, chamado e cartão.
+
+### 12.5 Busca com filtros — anatomia a copiar
+
+Das capturas `busca com filtro crm` e `pop pup filtro crm`:
+
+1. lupa à esquerda, dentro do campo;
+2. **facetas** dentro do próprio campo — etiqueta com ícone, rótulo e `×` para remover, uma por filtro ativo;
+3. texto livre depois das facetas, no mesmo campo;
+4. seta à direita que abre o painel de Filtros, Agrupar por e Favoritos;
+5. filtro personalizado com "corresponder a todas / qualquer uma das regras", campo, operador, valor, `Nova regra`, e alternância de arquivados.
+
+Os três primeiros são a fundação: sem faceta, o filtro fica invisível e o usuário não entende por que a lista está curta.

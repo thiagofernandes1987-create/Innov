@@ -643,7 +643,15 @@ ferramenta do mercado tem. Vai para o fim do inventário conforme R4.
 - [ ] T-24.4 — **CRUD de pipeline na tela**: criar do zero ou a partir de preset, renomear, duplicar, arquivar e excluir, com a recusa em português quando houver cartão dentro
 - [ ] T-24.5 — **Seletor de pipeline** na barra de controle, ao lado do nome — é onde o padrão de mercado põe, e é o que permite CRM ter SDR, pré-venda e venda sem trocar de aplicativo
 - [ ] T-24.6 — **Criar registro de dentro do fluxo**: cliente, projeto e chamado nascendo do `Novo` do pipeline, sem obrigar a sair para outro módulo e voltar
-- [ ] T-24.7 — **Busca global na barra superior**, no padrão de Bitrix e Pipedrive: um campo no centro que procura em cliente, projeto, chamado e cartão, com resultado agrupado por tipo
+- [x] T-24.0 — **Mapa das duas barras escrito antes do código** (`PADRAO-DE-INTERFACE.md` §12), ditado pelo responsável e conferido contra as capturas: o que fica em cada posição, o que nunca pode estar ali, quando cada visualização aparece e a exceção declarada da busca
+  - [x] T-24.0.1 — Barra 1 igual em toda tela: marca sozinha à esquerda, ícone e nome do aplicativo com os menus dele, busca com facetas ao centro, mensagens, notificações e avatar à direita
+  - [x] T-24.0.2 — E-mail por extenso e botão "Sair" saíram da barra para dentro do avatar, junto com tema, atalhos e "Usuários e permissões" — dois elementos permanentes para uma ação de uma vez por dia
+  - [x] T-24.0.3 — Barra 2 com ações à esquerda e visualizações à direita, sem repetir a busca nem o nome do aplicativo
+  - [x] T-24.0.4 — Grade de três colunas na barra 1: com `margin: auto` a busca centralizava no espaço que sobrava e dançava conforme o tamanho do nome do módulo. Verificado — centro do campo em 720 de 1440
+- [ ] T-24.7 — **Busca global na barra superior**: hoje o campo existe no centro, com faceta e remoção, e filtra a tela do pipeline. Falta procurar em cliente, projeto, chamado e cartão ao mesmo tempo, com resultado agrupado por tipo, e o painel de Filtros, Agrupar por e Favoritos da §12.5
+  - [x] T-24.7.1 — Campo no centro da barra 1, com lupa, faceta removível e Backspace apagando a faceta
+  - [x] T-24.7.2 — Filtro aplicado no navegador, não por navegação. A primeira versão escrevia em `router.replace` a cada tecla; como as telas são `force-dynamic`, cada digitação virava ida ao servidor e a lista chegava quase três segundos atrasada. A URL continua espelhada por `history.replaceState`, sem re-render de servidor
+  - [x] T-24.7.3 — Exceção declarada na §12.4: o campo só aparece onde a tela sabe consumi-lo. Campo que aceita texto e não filtra ensina que a busca não funciona
 - [ ] T-24.8 — **Planejamento, visão de lista por cliente** com as colunas que o responsável enumerou: início da obra, término previsto, etapa atual, início e término previsto da etapa, % concluída, situação do prazo, dias de folga ou atraso, responsável e próxima tarefa programada
 - [ ] T-24.9 — **Planejamento, visão Gantt** ao abrir o cliente: datas de início e término, dependências II, IT, TT e TI, dias programados e caminho visível de atraso
 - [ ] T-24.10 — **Conferir a tela de cadastro de usuários** contra o padrão pesquisado, já que o responsável não a encontrou

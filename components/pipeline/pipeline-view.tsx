@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { moverCartao } from "@/app/actions/pipeline";
+import { useBusca } from "@/components/casca/busca-da-barra";
 import {
   BotaoNovoCartao,
   FormularioNovoCartao,
@@ -85,7 +86,9 @@ export function PipelineView({
   nomeDoPipeline
 }: Props) {
   const [visao, setVisao] = useState<Visao>("kanban");
-  const [busca, setBusca] = useState("");
+  // O termo vem da busca da barra superior. Estado local aqui criaria dois
+  // donos do mesmo filtro, e um deles sempre desatualizado.
+  const busca = useBusca();
   const [erro, setErro] = useState<string | null>(null);
   const [arrastando, setArrastando] = useState<string | null>(null);
   const [alvo, setAlvo] = useState<string | null>(null);
@@ -156,19 +159,8 @@ export function PipelineView({
           </span>
         </div>
 
-        <label className="barra-controle-busca">
-          <span className="sr-only">Buscar no pipeline</span>
-          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false">
-            <circle cx="10.5" cy="10.5" r="6.2" fill="none" stroke="currentColor" strokeWidth="1.7" />
-            <path d="M15.2 15.2 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-          </svg>
-          <input
-            type="search"
-            value={busca}
-            onChange={event => setBusca(event.target.value)}
-            placeholder="Buscar por título, cliente ou marcador…"
-          />
-        </label>
+        {/* Sem busca aqui: ela subiu para o centro da barra 1, e repetir o
+            campo nas duas faixas é dois lugares para a mesma pergunta. */}
 
         {/* Ícone, não palavra: "Ícones, igual ao Odoo, ocupam menos espaço,
             poluem menos e facilita a leitura do pipeline". O nome continua no

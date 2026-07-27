@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { signOut } from "@/app/actions/auth";
+import { Suspense } from "react";
 import type { Avisos } from "@/lib/casca/avisos";
 import type { Tema } from "@/lib/tema";
-import { AlternadorTema } from "./alternador-tema";
+import { BuscaDaBarra } from "./busca-da-barra";
 import { CantoDireito } from "./canto-direito";
 import { NavegacaoDoModulo, type AplicativoAutorizado } from "./navegacao-do-modulo";
 
@@ -38,14 +38,21 @@ export function BarraSuperior({
           esquerdo é um símbolo clicável que volta para a tela inicial; a
           palavra repetida ali é texto que não responde nenhuma pergunta e
           empurra o nome do aplicativo — o que importa — para a direita. */}
-      <Link className="barra-logo" href="/app" title="Tela inicial" aria-label="Ir para a tela inicial de aplicativos">
-        <span className="barra-logo-marca" aria-hidden="true">IN</span>
-      </Link>
+      <div className="barra-esquerda">
+        <Link className="barra-logo" href="/app" title="Tela inicial" aria-label="Ir para a tela inicial de aplicativos">
+          <span className="barra-logo-marca" aria-hidden="true">IN</span>
+        </Link>
+        <NavegacaoDoModulo aplicativos={aplicativos} />
+      </div>
 
-      <NavegacaoDoModulo aplicativos={aplicativos} />
+      {/* Centro: busca com facetas. Aparece só onde a tela sabe consumi-la —
+          campo que aceita texto e não filtra nada ensina que a busca não
+          funciona. Exceção declarada e datada na seção 12.4 do padrão. */}
+      <Suspense fallback={<div className="barra-busca-vazia" aria-hidden="true" />}>
+        <BuscaDaBarra />
+      </Suspense>
 
       <div className="barra-direita">
-        <AlternadorTema atual={tema} />
         <CantoDireito
           mensagens={avisos.mensagens}
           atividades={avisos.atividades}
@@ -54,16 +61,8 @@ export function BarraSuperior({
           podeAdministrar={podeAdministrar}
           email={email}
           papel={papel}
+          tema={tema}
         />
-        <span className="barra-usuario">
-          <strong>{email ?? "—"}</strong>
-          <small>{papel}</small>
-        </span>
-        <form action={signOut}>
-          <button className="barra-sair" type="submit">
-            Sair
-          </button>
-        </form>
       </div>
     </header>
   );
