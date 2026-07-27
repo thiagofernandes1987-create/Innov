@@ -38,9 +38,41 @@ type Props = {
   podeEditar: boolean;
   registros: RegistroDisponivel[];
   rotuloRegistro: string;
+  nomeDoPipeline: string;
 };
 
 type Visao = "kanban" | "lista";
+
+// As duas visualizações que existem hoje. O padrão de mercado tem sete —
+// kanban, lista, calendário, tabela dinâmica, gráfico, mapa e atividades — e
+// esta faixa é onde elas entram quando existirem. Ícone de visualização que não
+// funciona é pior que ícone ausente, então só entra o que já lê dados.
+const VISOES: { valor: Visao; rotulo: string; desenho: React.ReactElement }[] = [
+  {
+    valor: "kanban",
+    rotulo: "Kanban",
+    desenho: (
+      <>
+        <rect x="3" y="4" width="6" height="16" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.7" />
+        <rect x="11" y="4" width="6" height="10" rx="1.4" fill="none" stroke="currentColor" strokeWidth="1.7" />
+        <rect x="19" y="4" width="2" height="16" rx="1" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      </>
+    )
+  },
+  {
+    valor: "lista",
+    rotulo: "Lista",
+    desenho: (
+      <path
+        d="M4 6.5h16M4 12h16M4 17.5h16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+      />
+    )
+  }
+];
 
 export function PipelineView({
   trilha,
@@ -49,7 +81,8 @@ export function PipelineView({
   orfaos,
   podeEditar,
   registros,
-  rotuloRegistro
+  rotuloRegistro,
+  nomeDoPipeline
 }: Props) {
   const [visao, setVisao] = useState<Visao>("kanban");
   const [busca, setBusca] = useState("");
@@ -102,38 +135,61 @@ export function PipelineView({
 
   return (
     <section className="pipeline" aria-busy={pendente || undefined}>
-      <header className="pipeline-controle">
-        <div className="pipeline-controle-busca">
-          <label className="pipeline-busca">
-            <span className="sr-only">Buscar no pipeline</span>
-            <input
-              type="search"
-              value={busca}
-              onChange={event => setBusca(event.target.value)}
-              placeholder="Buscar por título, cliente ou marcador…"
-            />
-          </label>
+      {/* Barra de controle no padrão de mercado: criar à esquerda, nome da tela
+          ao lado, busca no centro, visualizações em ícone à direita. Uma faixa
+          de 44px no lugar do título de 180px. */}
+      <header className="barra-controle">
+        <div className="barra-controle-esquerda">
+          {podeEditar ? (
+            <button
+              type="button"
+              className="button button-primary barra-controle-novo"
+              onClick={() => setAdicionandoEm(colunasFiltradas[0]?.etapa.id ?? null)}
+              disabled={colunasFiltradas.length === 0}
+            >
+              Novo
+            </button>
+          ) : null}
+          <h1 className="barra-controle-titulo">{nomeDoPipeline}</h1>
           <span className="pipeline-contagem">
             {totalCartoes} {totalCartoes === 1 ? "cartão" : "cartões"}
           </span>
         </div>
-        <div className="pipeline-visoes" role="group" aria-label="Visualização">
-          <button
-            type="button"
-            className={visao === "kanban" ? "pipeline-visao ativa" : "pipeline-visao"}
-            onClick={() => setVisao("kanban")}
-            aria-pressed={visao === "kanban"}
-          >
-            Kanban
-          </button>
-          <button
-            type="button"
-            className={visao === "lista" ? "pipeline-visao ativa" : "pipeline-visao"}
-            onClick={() => setVisao("lista")}
-            aria-pressed={visao === "lista"}
-          >
-            Lista
-          </button>
+
+        <label className="barra-controle-busca">
+          <span className="sr-only">Buscar no pipeline</span>
+          <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false">
+            <circle cx="10.5" cy="10.5" r="6.2" fill="none" stroke="currentColor" strokeWidth="1.7" />
+            <path d="M15.2 15.2 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+          </svg>
+          <input
+            type="search"
+            value={busca}
+            onChange={event => setBusca(event.target.value)}
+            placeholder="Buscar por título, cliente ou marcador…"
+          />
+        </label>
+
+        {/* Ícone, não palavra: "Ícones, igual ao Odoo, ocupam menos espaço,
+            poluem menos e facilita a leitura do pipeline". O nome continua no
+            `aria-label` e no `title`, para quem usa leitor de tela e para quem
+            passa o mouse. */}
+        <div className="barra-controle-visoes" role="group" aria-label="Visualização">
+          {VISOES.map(item => (
+            <button
+              key={item.valor}
+              type="button"
+              className={visao === item.valor ? "barra-visao ativa" : "barra-visao"}
+              onClick={() => setVisao(item.valor)}
+              aria-pressed={visao === item.valor}
+              aria-label={item.rotulo}
+              title={item.rotulo}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                {item.desenho}
+              </svg>
+            </button>
+          ))}
         </div>
       </header>
 
@@ -179,20 +235,21 @@ export function PipelineView({
                   <span className="pipeline-coluna-quantidade">{coluna.quantidade}</span>
                   {coluna.valor > 0 ? <span className="pipeline-coluna-valor">{formatarMoeda(coluna.valor)}</span> : null}
                 </span>
+                {/* Engrenagem antes do `+`, na ordem do padrão de mercado. */}
                 {podeEditar ? (
                   <span className="pipeline-coluna-acoes">
+                    <MenuDaEtapa
+                      stageId={coluna.etapa.id}
+                      nome={coluna.etapa.name}
+                      recolhida={coluna.etapa.recolhida}
+                      aoFalhar={setErro}
+                    />
                     <BotaoNovoCartao
                       etapa={coluna.etapa.name}
                       aberto={adicionandoEm === coluna.etapa.id}
                       aoAlternar={() =>
                         setAdicionandoEm(atual => (atual === coluna.etapa.id ? null : coluna.etapa.id))
                       }
-                    />
-                    <MenuDaEtapa
-                      stageId={coluna.etapa.id}
-                      nome={coluna.etapa.name}
-                      recolhida={coluna.etapa.recolhida}
-                      aoFalhar={setErro}
                     />
                   </span>
                 ) : null}

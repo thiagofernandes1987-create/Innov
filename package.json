@@ -18,6 +18,7 @@
     "validate:object-runtime": "node scripts/validate-object-runtime.mjs",
     "test:db:object-runtime": "node scripts/run-object-runtime-db-tests.mjs",
     "validate:pipeline": "node scripts/validate-pipeline.mjs",
+    "validate:menus": "node scripts/validate-menus.mjs",
     "test:db:pipeline": "node scripts/run-pipeline-db-tests.mjs",
     "test:db:replay": "node scripts/run-migration-replay.mjs",
     "validate:migrations": "node scripts/validate-supabase-migrations.mjs",

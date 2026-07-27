@@ -34,6 +34,15 @@ const DESENHOS: Record<string, ReactElement> = {
       <path d="M3 4h18l-7 8v7l-4 2v-9L3 4Z" {...T} />
     </>
   ),
+  // Pipeline — colunas do funil, não o funil: o funil já é o CRM, e dois
+  // aplicativos com o mesmo desenho voltam a obrigar a ler o rótulo.
+  pipeline: (
+    <>
+      <rect x="3" y="4" width="5" height="16" rx="1.4" {...T} />
+      <rect x="9.5" y="4" width="5" height="11" rx="1.4" {...T} />
+      <rect x="16" y="4" width="5" height="7" rx="1.4" {...T} />
+    </>
+  ),
   // Clientes — pessoas.
   clientes: (
     <>
@@ -237,6 +246,7 @@ export const CHAVES_COM_ICONE = Object.keys(DESENHOS);
 export const COR_DO_MODULO: Record<string, string> = {
   dashboard: "#4f7fb8",
   crm: "#2f8f6f",
+  pipeline: "#3f8fb0",
   clientes: "#2b74b8",
   obras: "#a1652f",
   planejamento: "#6a5ec4",

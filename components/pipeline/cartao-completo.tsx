@@ -215,8 +215,10 @@ export function CartaoCompleto(props: Props) {
             </button>
           </div>
 
+          {/* `h1` e não `h2`: com o cabeçalho de página fora, este é o nome da
+              tela, e é dele que o leitor de tela precisa. */}
           <div className="cartao-titulo">
-            <h2>{cartao.titulo}</h2>
+            <h1>{cartao.titulo}</h1>
             <p className="muted">
               {etapaAtual ? etapaAtual.name : "Etapa desconhecida"}
               {prazo ? (

@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PipelineView } from "@/components/pipeline/pipeline-view";
 import { hasCapability } from "@/lib/authorization";
-import { ROTULO_TRILHA, TRILHAS, type Trilha } from "@/lib/pipeline/domain";
+import { TRILHAS, type Trilha } from "@/lib/pipeline/domain";
 import { carregarPipeline, registrosDisponiveis } from "@/lib/pipeline/server";
 
 export const dynamic = "force-dynamic";
@@ -54,31 +53,12 @@ export default async function PipelinePage({ params }: { params: Promise<{ trilh
       : [];
 
   return (
-    <main className="content pipeline-pagina">
-      <section className="page-heading">
-        <div>
-          <span className="badge">PIPELINE · {ROTULO_TRILHA[trilhaValida].toUpperCase()}</span>
-          <h1>{carregado?.pipeline.name ?? ROTULO_TRILHA[trilhaValida]}</h1>
-          <p>
-            {carregado?.pipeline.descricao ??
-              "Onde cada registro está no fluxo, com prazo, marcador e observação."}
-          </p>
-        </div>
-      </section>
-
-      <nav className="pipeline-trilhas" aria-label="Trilhas">
-        {TRILHAS.map(item => (
-          <Link
-            key={item}
-            href={`/app/pipeline/${item}`}
-            className={item === trilhaValida ? "pipeline-trilha ativa" : "pipeline-trilha"}
-            aria-current={item === trilhaValida ? "page" : undefined}
-          >
-            {ROTULO_TRILHA[item]}
-          </Link>
-        ))}
-      </nav>
-
+    <main className="content-largo pipeline-pagina">
+      {/* Sem título de página. As trilhas viraram os menus do módulo na barra
+          superior e o nome da trilha vive na barra de controle, ao lado do
+          botão de criar — é o que o responsável marcou: "precisa ser mais
+          clean, não precisaria desse título aqui". O `h1` continua existindo
+          como nome acessível da tela, em corpo de texto, dentro da barra. */}
       {carregado ? (
         <PipelineView
           trilha={trilhaValida}
@@ -88,10 +68,11 @@ export default async function PipelinePage({ params }: { params: Promise<{ trilh
           podeEditar={podeEditar}
           registros={registros}
           rotuloRegistro={ROTULO_REGISTRO[trilhaValida]}
+          nomeDoPipeline={carregado.pipeline.name}
         />
       ) : (
         <section className="card pipeline-sem-trilha">
-          <h2>Esta trilha ainda não foi criada</h2>
+          <h1>Esta trilha ainda não foi criada</h1>
           <p>
             As etapas não são fixas no sistema: elas são dados da sua organização, e podem ser renomeadas, reordenadas
             ou removidas depois. Comece por um modelo pronto e ajuste ao seu fluxo.

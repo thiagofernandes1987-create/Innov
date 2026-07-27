@@ -594,7 +594,20 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.32.7 — Seis testes novos contra PostgreSQL 16 real (22 a 26): canal não declarado, tipo de atividade inventado, atividade sem título, organização divergente pela chave composta e exclusão de etapa com e sem cartão
   - [x] T-23.32.8 — `run-pipeline-db-tests.mjs` passou a descobrir as migrations em vez de listá-las: duas migrations aplicadas ao Supabase estavam fora do encadeamento e a suíte dava verde sobre esquema antigo (`VACINA-014`)
 - [x] T-23.20 — **Defeito D8 corrigido**: `app/icon.svg` declara o ícone da aba; o 404 de favicon apareceu no console durante a verificação desta sprint
-- [ ] T-23.21 — **Menus por aplicativo na barra superior.** No padrão de mercado, todo aplicativo traz os próprios menus ao lado do nome, e termina em `Relatórios` e `Configuração`. Hoje a barra mostra só o nome do aplicativo corrente
+- [x] T-23.21 — **Menus por aplicativo na barra superior**, no padrão `CRM · Sales · Reporting · Configuration` das capturas
+  - [x] T-23.21.1 — `lib/casca/menus.ts` declara os menus de 15 módulos. Declarados e não descobertos: nenhuma convenção de pasta expressa que "Leads" vem antes de "Oportunidades"
+  - [x] T-23.21.2 — `pnpm validate:menus` confronta cada destino com o roteador do Next e reprova o que não tem página. Reprovou dois na primeira execução — `/app/qualidade/respostas` e `/app/assinaturas/documentos` só existem por id — e os dois foram corrigidos. No CI
+  - [x] T-23.21.3 — Módulo sem menu declarado fica só com ícone e nome: inventar "Configuração" para preencher a barra criaria destino que não existe
+  - [x] T-23.21.4 — **Defeito encontrado ao verificar**: o layout do Next não re-renderiza em navegação suave, então resolver o módulo pelo `x-pathname` do servidor congelava a barra na primeira tela. O `h1` mudava e o menu ativo continuava marcando a anterior. Passou a `usePathname` em `components/casca/navegacao-do-modulo.tsx`
+- [x] T-23.33 — **Cabeçalho de página reduzido em toda a casca**, atendendo "não precisaria desse título aqui, precisa ser mais clean"
+  - [x] T-23.33.1 — Resolvido na regra que governa as 84 páginas, não em 84 arquivos: dentro de `.casca`, o `h1` cai de `clamp(34px, 4.6vw, 54px)` para 1,06rem, o selo do módulo sai (o módulo agora está na barra, com ícone) e a descrição continua visível em corpo menor
+  - [x] T-23.33.2 — Fora da casca — login, portal do cliente, página de assinatura — o título grande continua: ali ele é conteúdo, não moldura
+  - [x] T-23.33.3 — A descrição foi reduzida, não escondida: `display: none` a tiraria também de quem usa leitor de tela, o que é troca e não economia
+  - [x] T-23.33.4 — Pipeline ganhou a barra de controle do padrão: `Novo` à esquerda, nome da tela ao lado, busca ao centro, visualizações em ícone à direita. As três trilhas viraram os menus do módulo. O kanban começa em y=160 no lugar de y=385
+  - [x] T-23.33.5 — Visualizações em ícone com `aria-label` e `title`: "ícones, igual ao Odoo, ocupam menos espaço, poluem menos e facilita a leitura do pipeline"
+  - [x] T-23.33.6 — Cartão deixou de repetir o nome do registro duas vezes na mesma tela; o `h1` passou para dentro do formulário, onde o nome é conteúdo
+  - [x] T-23.33.7 — Engrenagem antes do `+` no cabeçalho da coluna, na ordem do padrão
+- [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria
 - [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria
 
 ---

@@ -139,6 +139,8 @@ jobs:
         run: pnpm validate:object-runtime
       - name: Validate pipeline invariants
         run: pnpm validate:pipeline
+      - name: Validate module menu destinations
+        run: pnpm validate:menus
       - name: Lint
         run: |
           set -o pipefail

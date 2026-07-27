@@ -4,26 +4,28 @@ import type { Avisos } from "@/lib/casca/avisos";
 import type { Tema } from "@/lib/tema";
 import { AlternadorTema } from "./alternador-tema";
 import { CantoDireito } from "./canto-direito";
-import { IconeDoModulo } from "./icones";
+import { NavegacaoDoModulo, type AplicativoAutorizado } from "./navegacao-do-modulo";
 
 // Barra superior única, no lugar do menu lateral.
 //
-// O logotipo à esquerda volta para a grade de aplicativos — é o caminho de
-// retorno que o padrão de mercado usa, e o único que o usuário precisa
-// decorar. Ao lado dele, o nome do aplicativo em que se está: sem isso, uma
-// tela sem menu lateral deixa de responder "onde eu estou".
-
-export type ModuloAtual = { chave: string; nome: string } | null;
+// Três faixas de conteúdo, na ordem do padrão de mercado: logotipo (que volta
+// para a grade de aplicativos), ícone e nome do aplicativo em que se está com
+// os menus dele, e o canto direito com tema, mensagens, notificações,
+// configuração e usuário.
+//
+// Quem resolve qual é o módulo é `NavegacaoDoModulo`, no cliente: o layout do
+// Next não re-renderiza em navegação suave, e resolver aqui congelava a barra
+// no primeiro caminho visitado.
 
 export function BarraSuperior({
-  moduloAtual,
+  aplicativos,
   email,
   papel,
   tema,
   avisos,
   podeAdministrar
 }: {
-  moduloAtual: ModuloAtual;
+  aplicativos: AplicativoAutorizado[];
   email: string | null;
   papel: string;
   tema: Tema;
@@ -32,23 +34,15 @@ export function BarraSuperior({
 }) {
   return (
     <header className="barra-superior">
-      <Link className="barra-logo" href="/app" aria-label="Voltar para a grade de aplicativos">
+      {/* Só a marca, sem o nome escrito ao lado. No padrão de mercado o canto
+          esquerdo é um símbolo clicável que volta para a tela inicial; a
+          palavra repetida ali é texto que não responde nenhuma pergunta e
+          empurra o nome do aplicativo — o que importa — para a direita. */}
+      <Link className="barra-logo" href="/app" title="Tela inicial" aria-label="Ir para a tela inicial de aplicativos">
         <span className="barra-logo-marca" aria-hidden="true">IN</span>
-        <span className="barra-logo-nome">INNOVAR</span>
       </Link>
 
-      {moduloAtual ? (
-        <span className="barra-modulo">
-          <span className="barra-modulo-icone" aria-hidden="true">
-            <IconeDoModulo chave={moduloAtual.chave} />
-          </span>
-          <strong>{moduloAtual.nome}</strong>
-        </span>
-      ) : (
-        <span className="barra-modulo barra-modulo-inicio">
-          <strong>Aplicativos</strong>
-        </span>
-      )}
+      <NavegacaoDoModulo aplicativos={aplicativos} />
 
       <div className="barra-direita">
         <AlternadorTema atual={tema} />

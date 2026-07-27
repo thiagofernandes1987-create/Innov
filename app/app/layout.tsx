@@ -1,5 +1,5 @@
-import { cookies, headers } from "next/headers";
-import { BarraSuperior, type ModuloAtual } from "@/components/casca/barra-superior";
+import { cookies } from "next/headers";
+import { BarraSuperior } from "@/components/casca/barra-superior";
 import { carregarAvisos } from "@/lib/casca/avisos";
 import { COOKIE_TEMA, temaValido } from "@/lib/tema";
 import { getEffectiveApplications, hasCapability } from "@/lib/authorization";
@@ -16,13 +16,14 @@ export const dynamic = "force-dynamic";
 export default async function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const { context, applications } = await getEffectiveApplications();
 
-  // O caminho da requisição diz em que aplicativo se está. O prefixo mais
-  // longo vence, senão `/app` casaria com tudo.
-  const caminho = (await headers()).get("x-pathname") ?? "";
-  const moduloAtual: ModuloAtual = applications
-    .filter(item => item.applicationKey !== "dashboard" && caminho.startsWith(item.routePrefix))
-    .sort((a, b) => b.routePrefix.length - a.routePrefix.length)
-    .map(item => ({ chave: item.applicationKey, nome: item.name }))[0] ?? null;
+  // Só o que a barra precisa para casar caminho com módulo. Quem casa é o
+  // componente de cliente: o layout não re-renderiza em navegação suave, e
+  // resolver o módulo aqui deixava a barra marcando a tela anterior.
+  const aplicativos = applications.map(item => ({
+    chave: item.applicationKey,
+    nome: item.name,
+    prefixo: item.routePrefix
+  }));
 
   const tema = temaValido((await cookies()).get(COOKIE_TEMA)?.value);
 
@@ -37,7 +38,7 @@ export default async function AppLayout({ children }: Readonly<{ children: React
     <div className="casca">
       <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo</a>
       <BarraSuperior
-        moduloAtual={moduloAtual}
+        aplicativos={aplicativos}
         email={context.email}
         papel={context.role}
         tema={tema}

@@ -46,7 +46,7 @@ export default async function Amostra({ searchParams }: { searchParams: Promise<
       {/* Amostra não autenticada: sem sessão não há aviso de ninguém, e
           inventar um número aqui só ensinaria a duvidar do número real. */}
       <BarraSuperior
-        moduloAtual={null}
+        aplicativos={[]}
         email={email}
         papel={papel}
         tema={tema}
