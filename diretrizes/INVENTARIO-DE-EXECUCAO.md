@@ -558,7 +558,11 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.25.1 — O push no ramo dispara o deploy: o projeto `innov` está ligado ao GitHub. Não foi preciso subir árvore de arquivos
   - [x] T-23.25.2 — Verificado no ar: `/login` responde 200, `<html data-tema="sistema">` sai do servidor, `/icon.svg` está no `<head>` e os cabeçalhos de CSP, HSTS e `x-frame-options` chegam
   - [x] T-23.25.3 — Alias do ramo: `innov-git-claude-diretrizes-object-runtime-apex-method.vercel.app`
-- [ ] T-23.26 — **Promover para produção.** O deploy atual é de preview. As variáveis de produção seguem sem configurar por decisão do responsável em 26/07, para o endereço público não expor a plataforma com as credenciais fracas de homologação. Promover exige credenciais próprias de produção
+- [x] T-23.26 — **Promovido para produção em 27/07**, por decisão explícita do responsável: *"já faz o main para produção, depois de finalizar o projeto trocamos as senhas, são todos dados fictícios de clientes"*
+  - [x] T-23.26.1 — `main` avançou de `55f4d56` (21/07) para `e72d172` por *fast-forward*: os 178 commits do ramo entraram sem merge de conciliação, porque `main` não tinha commit próprio
+  - [x] T-23.26.2 — Portão completo executado **em `main`**, não só no ramo: `lint`, `typecheck`, `test` (149), `test:python` (5), `build`, `validate:docs`, `validate:inventory`, `validate:pipeline`, `validate:migrations` e os 26 testes de banco contra PostgreSQL 16 real
+  - [x] T-23.26.3 — Endereço de produção: `innov-apex-method.vercel.app`
+  - [ ] T-23.26.4 — **Pendência assumida e datada**: `admin321` e `cliente321` continuam valendo. A decisão do responsável foi promover assim porque os dados são fictícios, e trocar as senhas ao fim do projeto. Enquanto não forem trocadas, o endereço público aceita credencial fraca conhecida — isto não é um detalhe resolvido, é uma dívida em aberto com dono e prazo
 - [ ] T-23.27 — **Verificar o fluxo autenticado no ar.** A proteção de deploy do Vercel intercepta as rotas de `/app` antes da aplicação, então a varredura autenticada foi feita contra o servidor local ligado à mesma homologação. Repetir no ar depende de liberar o acesso ou usar um link de compartilhamento
 - [x] T-23.28 — **Tese do responsável conferida contra as 261 capturas** (`PADRAO-DE-INTERFACE.md` §11)
   - [x] T-23.28.1 — As 261 enumeradas por aplicativo a partir da rota no nome do arquivo: Helpdesk 46, Sign 39, Project 39, CRM 27, ações diversas 27, Contacts 25, Purchase 19, Settings 12, Appointments/Calendar 13, demais 14
