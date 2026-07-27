@@ -114,6 +114,7 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-013` | Fixture técnica tenta escrever coluna sensível diretamente | aplicada | fixture mínima, guards preservados e valores sensíveis somente por RPC autorizada |
 | `VACINA-014` | Runner de teste de banco encadeia migrations por lista fixa e envelhece | aplicada | descoberta por padrão de nome, ordem lexicográfica e contagem impressa |
 | `VACINA-015` | Efeito colateral disparado dentro do atualizador de `setState` | aplicada | próximo estado calculado fora do atualizador e verificação em navegador com console tratado como reprovação |
+| `VACINA-016` | Trocar lista fixa por descoberta apagou a citação que outro validador cobrava | aplicada | procedência da vacina citada em comentário junto do código protegido, e `validate:docs` promovido a portão de CI |
 
 ## 4. Arquivos
 
@@ -133,7 +134,8 @@ diretrizes/vacinas/
 ├── VACINA-012-ESTADO-POS-MERGE.md
 ├── VACINA-013-FIXTURES-RESPEITAM-FRONTEIRAS-SENSIVEIS.md
 ├── VACINA-014-LISTA-FIXA-DE-MIGRATIONS-EM-TESTE.md
-└── VACINA-015-EFEITO-DENTRO-DO-ATUALIZADOR-DE-ESTADO.md
+├── VACINA-015-EFEITO-DENTRO-DO-ATUALIZADOR-DE-ESTADO.md
+└── VACINA-016-VALIDADOR-QUE-CITA-OUTRO-VALIDADOR.md
 ```
 
 ## 5. Critérios para nova vacina

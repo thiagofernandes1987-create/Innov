@@ -9,6 +9,8 @@ import {
   type Dependencia,
   type TarefaCronograma
 } from "@/lib/planejamento/cronograma";
+import { feriadosNaFaixa, regimePorChave } from "@/lib/planejamento/calendario";
+import { curvaDeAvanco } from "@/lib/planejamento/curvas";
 
 // Gantt — barras em escala de tempo, com dependência.
 //
@@ -41,19 +43,38 @@ function rotuloDia(dia: number): { texto: string; mes: string; fimDeSemana: bool
 export function Gantt({
   tarefas,
   dependencias,
-  hoje
+  hoje,
+  regime = "seg_sex",
+  feriadosExtras = []
 }: {
   tarefas: TarefaCronograma[];
   dependencias: Dependencia[];
   hoje: string;
+  regime?: string;
+  feriadosExtras?: string[];
 }) {
   const [destacarCadeia, setDestacarCadeia] = useState(true);
+  // Três curvas, ligáveis uma a uma — pedido do responsável: "planejado total,
+  // previsto parcial e realizado parcial, assim a pessoa acompanha previsto x
+  // realizado".
+  const [curvas, setCurvas] = useState({ planejado: true, previsto: true, realizado: true });
 
-  const { barras, ciclo } = useMemo(() => calcular(tarefas, dependencias), [tarefas, dependencias]);
+  const calendario = useMemo(() => {
+    const datas = tarefas.map(t => t.inicioPlanejado).filter((d): d is string => Boolean(d)).sort();
+    const de = datas[0] ?? hoje;
+    const ate = `${Number(de.slice(0, 4)) + 3}-12-31`;
+    return { regime: regimePorChave(regime), feriados: feriadosNaFaixa(de, ate, feriadosExtras) };
+  }, [tarefas, hoje, regime, feriadosExtras]);
+
+  const { barras, ciclo } = useMemo(
+    () => calcular(tarefas, dependencias, calendario),
+    [tarefas, dependencias, calendario]
+  );
   const cadeia = useMemo(
     () => (destacarCadeia ? cadeiaMaisLonga(barras, dependencias) : new Set<string>()),
     [barras, dependencias, destacarCadeia]
   );
+  const pontos = useMemo(() => curvaDeAvanco(barras, hoje), [barras, hoje]);
   const porSucessor = useMemo(() => {
     const mapa = new Map<string, Dependencia[]>();
     for (const dep of dependencias) {
@@ -90,10 +111,26 @@ export function Gantt({
   return (
     <div className="gantt">
       <div className="gantt-controles">
-        <label className="gantt-alternar">
-          <input type="checkbox" checked={destacarCadeia} onChange={e => setDestacarCadeia(e.target.checked)} />
-          <span>Destacar a cadeia que empurra a entrega</span>
-        </label>
+        <div className="gantt-opcoes">
+          <label className="gantt-alternar">
+            <input type="checkbox" checked={destacarCadeia} onChange={e => setDestacarCadeia(e.target.checked)} />
+            <span>Cadeia que empurra a entrega</span>
+          </label>
+          {([
+            ["planejado", "Planejado total"],
+            ["previsto", "Previsto parcial"],
+            ["realizado", "Realizado parcial"]
+          ] as const).map(([chave, rotulo]) => (
+            <label className={`gantt-alternar curva-${chave}`} key={chave}>
+              <input
+                type="checkbox"
+                checked={curvas[chave]}
+                onChange={e => setCurvas(atual => ({ ...atual, [chave]: e.target.checked }))}
+              />
+              <span>{rotulo}</span>
+            </label>
+          ))}
+        </div>
         {/* Duração do cronograma calculado, não a largura da escala — a escala
             estica para incluir a linha de hoje, e mostrar esse número ao lado
             do prazo do projeto colocava dois "dias programados" diferentes na
@@ -132,11 +169,17 @@ export function Gantt({
             <div className="gantt-escala">
               {dias.map(dia => {
                 const { texto, mes, fimDeSemana } = rotuloDia(dia);
+                const feriado = calendario.feriados.has(dia);
                 return (
                   <div
                     key={dia}
-                    className={fimDeSemana ? "gantt-dia fim-de-semana" : "gantt-dia"}
+                    className={[
+                      "gantt-dia",
+                      fimDeSemana ? "fim-de-semana" : "",
+                      feriado ? "feriado" : ""
+                    ].filter(Boolean).join(" ")}
                     style={{ width: LARGURA_DIA }}
+                    title={feriado ? "Feriado" : undefined}
                   >
                     <span>{texto}</span>
                     {texto === "01" ? <small>{mes}</small> : null}
@@ -208,6 +251,69 @@ export function Gantt({
           </div>
         </div>
       </div>
+
+      {/* Curva de avanço, embaixo do Gantt e na mesma escala de dias — as três
+          linhas pedidas, cada uma ligável. Alinhar com o Gantt é o que permite
+          ler "o desvio começou quando a fabricação atrasou". */}
+      {pontos.length > 0 && (curvas.planejado || curvas.previsto || curvas.realizado) ? (
+        <div className="gantt-curva">
+          <div className="gantt-curva-nomes">
+            <strong>Avanço</strong>
+            <small>% acumulado</small>
+          </div>
+          <div className="gantt-curva-rolagem">
+            <svg
+              width={dias.length * LARGURA_DIA}
+              height={140}
+              className="gantt-curva-svg"
+              role="img"
+              aria-label="Curva de avanço: planejado, previsto e realizado"
+            >
+              {[0, 25, 50, 75, 100].map(pct => (
+                <g key={pct}>
+                  <line
+                    x1={0}
+                    x2={dias.length * LARGURA_DIA}
+                    y1={130 - (pct / 100) * 120}
+                    y2={130 - (pct / 100) * 120}
+                    className="gantt-curva-grade"
+                  />
+                  <text x={2} y={126 - (pct / 100) * 120} className="gantt-curva-eixo">{pct}%</text>
+                </g>
+              ))}
+              <line
+                x1={(diaDeHoje - inicioEscala) * LARGURA_DIA}
+                x2={(diaDeHoje - inicioEscala) * LARGURA_DIA}
+                y1={0}
+                y2={130}
+                className="gantt-curva-hoje"
+              />
+              {([
+                ["planejado", "planejado"],
+                ["previsto", "previsto"],
+                ["realizado", "realizado"]
+              ] as const).map(([chave]) =>
+                curvas[chave] ? (
+                  <polyline
+                    key={chave}
+                    className={`gantt-curva-linha ${chave}`}
+                    fill="none"
+                    points={pontos
+                      .map(ponto => {
+                        const valor = ponto[chave];
+                        if (valor === null) return null;
+                        const x = (paraDia(ponto.data) - inicioEscala) * LARGURA_DIA + LARGURA_DIA / 2;
+                        return `${x},${130 - (valor / 100) * 120}`;
+                      })
+                      .filter(Boolean)
+                      .join(" ")}
+                  />
+                ) : null
+              )}
+            </svg>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

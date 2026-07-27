@@ -642,6 +642,11 @@ ferramenta do mercado tem. Vai para o fim do inventário conforme R4.
   - [x] T-24.1.2 — Cada uma responde às quatro perguntas: por onde entra, qual a pergunta do dia, o que precisa em três cliques e o que a plataforma ainda não faz
   - [x] T-24.1.3 — P3, o montador, tem poder de veto sobre desenho móvel: é a única persona que trabalha de pé, com uma mão, em tela pequena e sinal ruim ao mesmo tempo
   - [x] T-24.1.4 — Regra levada ao `CLAUDE.md`: tela que não declara persona, origem, pergunta e contagem de cliques não é construída
+  - [x] T-24.1.5 — **Reescrito no mesmo dia, depois da crítica que invalidou a primeira versão**: *"o cara de planejamento deve saber trabalhar com project (…) quais conhecimentos ele precisa ter? isso que é matriz de competências!!!"*. A primeira versão descrevia **o que cada persona clica**, e caminho de clique é consequência, não causa. Persona escrita por cliques só valida a tela que já existe — nunca aponta o campo que falta, porque não conhece a técnica que precisaria dele
+  - [x] T-24.1.6 — Estrutura nova em quatro camadas, de baixo para cima: **competência → ferramenta → técnica → rotina**, e cada técnica **declara o dado que exige**. É o que faz a persona virar requisito de banco em vez de opinião de tela
+  - [x] T-24.1.7 — P2 separada em duas: **planejador** (rede, prazo e custo do prazo) e **P7 projetista** (detalhamento executivo). Juntar as duas produziu um "engenheiro" que não existe em nenhuma das duas cadeiras
+  - [x] T-24.1.8 — Catálogo de onze técnicas do planejamento com a conta **executada**, e o diagnóstico de esquema de cada uma: PERT três pontos, CPM com folga total, custo marginal de aceleração, corrente crítica com pulmão, linha de base, curva S, curva ABC, DSM, calendário e regime, nivelamento de recurso, referência de preço com data-base
+  - [x] T-24.1.9 — Layout de referência lido de MS Project e Primavera P6, oito características comuns, com o que já existe e o que falta. A mais cara é a que falta: **grade editável ao lado do Gantt**, com predecessora digitável no formato `12TI+3d` — é o gesto mais repetido do dia e nenhum modal ganha dele
 - [x] T-24.2 — **Pesquisa de campo do CRUD de pipeline** (`PADRAO-DE-INTERFACE.md` §13), lida das capturas antes de qualquer código
   - [x] T-24.2.1 — Achado que muda o desenho: **o Odoo não tem objeto "pipeline"**. Tem um escopo dono — `Sales Team` no CRM, o próprio projeto em Project — e etapas ligadas a ele. Criar funil é criar escopo, não abrir tela de configuração à parte
   - [x] T-24.2.2 — Mapa de onde cada comando mora, com a captura que prova cada linha: trocar de funil no breadcrumb, configurar na engrenagem colada ao nome, criar no menu `Configuração` do aplicativo, etapa no fim das colunas
@@ -686,6 +691,9 @@ ferramenta do mercado tem. Vai para o fim do inventário conforme R4.
   - [x] T-24.9.5 — 7 testes contra PostgreSQL real, com `pnpm test:db:planejamento` no CI
   - [x] T-24.9.6 — Cadeia que empurra a entrega destacada, e nomeada pelo que é: não é caminho crítico do CPM, porque não há passada para trás nem folga total. Vender o nome sem a conta seria prometer o que não se entrega
   - [x] T-24.9.7 — **Defeito encontrado ao verificar**: a migration estava no repositório e **não no banco**. O formulário aceitou `T5 → T1` e fechou o laço. Aplicada ao Supabase e reverificada: a recusa aparece com a frase certa
+  - [x] T-24.9.9 — **Calendário de trabalho**, `lib/planejamento/calendario.ts`: quatro regimes, 13 feriados nacionais (9 fixos e 4 móveis **calculados** pela Páscoa, Meeus/Jones/Butcher — tabela ano a ano envelhece em silêncio e erra no ano que ninguém conferiu), e toda a aritmética do cronograma convertida para **dia útil**. A conta do responsável, executada: 20 úteis + 8 de fim de semana + 1 feriado = **29 corridos**; quatro fins de semana são oito dias, e só o total muda
+  - [x] T-24.9.10 — **Três curvas** sob o Gantt, `lib/planejamento/curvas.ts`: planejado total, previsto parcial e realizado parcial, com liga-desliga. Ponderação por dia útil, nunca por contagem de tarefas. Limitação **declarada no arquivo**: a plataforma guarda o progresso de hoje e não a série diária dele, então a curva do passado é reconstruída — o apontamento datado da S-25 substitui a reconstrução. Registrar isso é o que impede alguém de usar a curva como prova em discussão de prazo
+  - [x] T-24.9.11 — Fim de semana e feriado hachurados no quadro, feriado com nome; escala fixa no topo e nomes fixos à esquerda; quadro limitado a `calc(100vh - 320px)` com rolagem própria — o "todos calendários têm que pegar até o final da tela" do print do Odoo
   - [x] T-24.9.8 — Verificado com cenário real de 5 tarefas e 5 dependências: T2 começa no dia seguinte ao término de T1, T3 respeita a folga de 2 dias, e a compra de ferragens fica **fora** da cadeia — o ramo curto não empurra a entrega
 - [ ] T-24.10 — **Conferir a tela de cadastro de usuários** contra o padrão pesquisado, já que o responsável não a encontrou
 - [ ] T-24.11 — **Varredura do texto poluído** nas 84 telas: o cabeçalho encolheu na S-23, mas cada tela ainda precisa ser olhada uma a uma contra o padrão
@@ -766,6 +774,60 @@ completo em [`KPIS.md`](KPIS.md). Vai para o fim conforme R4.
 - [ ] T-26.7 — **Matriz de competências** por tipo de tarefa, com média **e desvio padrão** de 6 meses. Ordenação por `média − desvio` para escolha de equipe
 - [ ] T-26.8 — **Painel executivo** compondo os anteriores
 - [ ] T-26.9 — **Decidir as quatro regras da §15 antes de publicar qualquer KPI individual**: quem vê o próprio número, janela de esquecimento, caminho de contestação, e nunca publicar contagem absoluta antes do denominador que a normaliza
+
+---
+
+## Sprint S-27 — Planejamento profissional: as técnicas que o planejador executa
+**Estado:** pendente
+**Marco:** M-5
+
+Nasceu da crítica de 27 de julho que invalidou a primeira versão das personas:
+
+> "o cara de planejamento deve saber trabalhar com project, como se faz um
+> planejamento, quais ferramentas ele usa, quais conhecimentos ele precisa ter?
+> (…) o que é curva A, ABC, custo marginal, otimista, pessimista e normal,
+> caminho crítico, linha de base, corrente crítica, DSM"
+
+Cada item da lista é uma **técnica com dado exigido**, não um adorno de tela.
+Catálogo completo em [`PERSONAS-E-ROTINAS.md`](PERSONAS-E-ROTINAS.md) §P2.3, com
+a conta de cada uma executada. Vai para o fim conforme R4.
+
+### O diagnóstico que ordena a sprint
+
+Metade das técnicas **não precisa de migration** — o dado já está no banco desde
+a etapa 9 ou 12 e o que falta é leitura e tela. Essas vão primeiro, por retorno
+sobre esforço:
+
+| Técnica | Esquema | Situação |
+|---|---|---|
+| CPM com folga total | nenhuma migration | Função pura sobre `task_dependencies`, que já tem os quatro tipos e `lag_days` |
+| Linha de base | nenhuma migration | `schedule_baselines` e `schedule_baseline_tasks` existem desde a etapa 12; `curvaDeAvanco()` **já aceita** a linha de base |
+| DSM | nenhuma migration | `task_dependencies` **é** a matriz N×N; falta lê-la em N×N |
+| Curva ABC | nenhuma migration | `budget_items` tem `quantity`, `unit_cost`, `loss_rate` e `freight_rate` |
+| Data-base de preço | nenhuma migration | `budget_items.source`, `region` e `base_date` existem desde a etapa 9; falta a importação |
+| Três pontos (PERT) | migration pequena | `project_tasks.duration_days` é um campo só; faltam otimista, provável e pessimista |
+| Aceleração | migration pequena | Falta o par `crash_duration_days` / `crash_cost`; `project_resources.daily_cost` já existe |
+| Corrente crítica | modelo novo | Pulmão como objeto de cronograma; nada existe |
+| Nivelamento | leitura nova | `task_resource_allocations` já tem quantidade e horas, planejadas e reais |
+
+### Tarefas
+
+- [ ] T-27.0 — **Grade editável ao lado do Gantt**, com divisor arrastável: código, nome, duração, início, término, **predecessoras**, responsável, % concluída. Digitar `12TI+3d` na célula de predecessora é o gesto mais repetido do dia do planejador, e nenhum modal ganha dele. Sem migration
+- [ ] T-27.1 — **Passada para trás e folga total**, fechando o CPM. Hoje `cadeiaMaisLonga()` só faz a passada para frente e o próprio comentário da função declara isso. Calculado no exemplo de quatro tarefas: a tarefa fora da cadeia tem **5 dias de folga**, e é esse número que diz onde o planejador **não** precisa correr
+  - [ ] T-27.1.1 — Renomear para caminho crítico só depois de a folga existir. Vender o nome sem a conta é prometer o que não se entrega
+  - [ ] T-27.1.2 — Folga livre além da folga total: a primeira diz quanto atrasa sem mover a entrega, a segunda quanto atrasa sem mover **a sucessora**
+- [ ] T-27.2 — **Linha de base pela tela**: congelar, comparar e desenhar a barra fina abaixo da atual. O banco está pronto e a função de curva também. Replanejar sem linha de base apaga a prova do desvio, e a reunião de prazo vira memória contra memória
+- [ ] T-27.3 — **Matriz DSM** sobre as dependências que já existem. Marca acima da diagonal é realimentação — retrabalho **previsível**, não acidente. É o que o Gantt não mostra e o que explica a obra que "sempre atrasa na aprovação"
+- [ ] T-27.4 — **Curva ABC no orçamento**. Calculado sobre orçamento de R$ 1,1 mi: **3 itens de 8 concentram 80% do custo**. É a régua que decide o que merece três cotações e o que não merece reunião
+- [ ] T-27.5 — **Estimativa de três pontos**: otimista, provável e pessimista por tarefa, com `duration_days` derivada de `TE = (O + 4M + P)/6`
+  - [ ] T-27.5.1 — Desvio do caminho por **raiz da soma das variâncias**, nunca por soma de desvios: calculado, a soma ingênua erra 2,01 dias em três tarefas. Variância soma, desvio padrão não
+  - [ ] T-27.5.2 — Faixa de confiança na negociação de prazo, em vez do número único que ninguém consegue cumprir
+- [ ] T-27.6 — **Custo marginal de aceleração**: duração e custo acelerados por tarefa, e o gradiente em R$/dia ganho. Calculado: comprime-se pela mais barata **do caminho crítico**, e acelerar tarefa com folga é dinheiro jogado fora. Depois da T-27.1, porque sem folga não se sabe onde não gastar
+- [ ] T-27.7 — **Referência de preço com data-base**: importar tabela por praça e reajustar por índice. Orçamento que não guarda data-base e região não pode ser reajustado nem defendido
+- [ ] T-27.8 — **Nivelamento de recurso** com histograma de uso. Duas tarefas paralelas pedindo o mesmo montador não são paralelas — sem nivelar, o cronograma promete uma simultaneidade que a equipe não tem. Depois da T-27.1: nivela-se consumindo folga primeiro
+- [ ] T-27.9 — **Corrente crítica**: pulmão de projeto e de alimentação, com consumo como semáforo. Calculado, o pulmão agregado entrega **3,38 dias antes** da soma das seguranças individuais com a mesma proteção, porque nem todas as tarefas atrasam juntas. É o único indicador de prazo que não depende de alguém julgar se "está no prazo". Depende da T-27.1 e da T-27.5
+- [ ] T-27.10 — **Calendário por equipe no banco**, com feriado municipal e estadual por organização. Hoje o cálculo é em dia útil, mas o regime é escolhido na tela e os feriados são só os nacionais — anunciar feriado municipal que não vale na cidade da obra seria pior que não ter nenhum
+- [ ] T-27.11 — **Painel inferior de detalhe** da linha selecionada, por abas, como em Primavera P6: situação, recursos, relacionamentos e apontamento
 
 ---
 

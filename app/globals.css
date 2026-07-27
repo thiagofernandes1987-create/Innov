@@ -2045,3 +2045,60 @@ tbody tr:hover { background: #fafcfd; }
 .planejamento-barra { display: inline-flex; align-items: center; gap: 8px; min-width: 120px; }
 .planejamento-barra-trilho { flex: 1 1 auto; height: 6px; border-radius: 999px; background: var(--border); overflow: hidden; }
 .planejamento-barra-cheia { display: block; height: 100%; background: var(--brand); }
+
+/* Feriado na escala do Gantt: fim de semana e feriado param a obra pelo mesmo
+   motivo, mas por causas diferentes — quem lê precisa distinguir. */
+.gantt-dia.feriado { background: var(--danger-soft); color: var(--danger); font-weight: 700; }
+
+.gantt-opcoes { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.gantt-alternar.curva-planejado span::before,
+.gantt-alternar.curva-previsto span::before,
+.gantt-alternar.curva-realizado span::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  margin-right: 6px;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+.gantt-alternar.curva-planejado span::before { background: var(--muted); }
+.gantt-alternar.curva-previsto span::before { background: var(--brand); }
+.gantt-alternar.curva-realizado span::before { background: var(--success); }
+
+/* Curva de avanço, na mesma escala do Gantt e logo abaixo dele. */
+.gantt-curva {
+  display: flex;
+  border: 1px solid var(--border);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: var(--surface);
+  overflow: hidden;
+}
+.gantt-curva-nomes {
+  flex: 0 0 260px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 12px;
+  border-right: 1px solid var(--border);
+}
+.gantt-curva-nomes strong { font-size: 0.84rem; }
+.gantt-curva-nomes small { font-size: 0.72rem; color: var(--muted); }
+.gantt-curva-rolagem { flex: 1 1 auto; overflow-x: auto; min-width: 0; }
+.gantt-curva-grade { stroke: var(--border); stroke-width: 1; }
+.gantt-curva-eixo { font-size: 9px; fill: var(--muted); }
+.gantt-curva-hoje { stroke: var(--danger); stroke-width: 2; opacity: 0.7; }
+.gantt-curva-linha { stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.gantt-curva-linha.planejado { stroke: var(--muted); stroke-dasharray: 5 4; }
+.gantt-curva-linha.previsto { stroke: var(--brand); }
+.gantt-curva-linha.realizado { stroke: var(--success); stroke-width: 2.6; }
+
+/* O quadro do Gantt ocupa a altura disponível, em vez de parar na última
+   tarefa e deixar meia tela vazia — foi o que o responsável apontou olhando o
+   Odoo. A rolagem fica dentro do quadro, não na página. */
+.gantt-quadro { max-height: calc(100vh - 320px); }
+.gantt-nomes, .gantt-rolagem { overflow-y: auto; }
+.gantt-escala { position: sticky; top: 0; z-index: 3; }
+.gantt-cabecalho-vazio { position: sticky; top: 0; z-index: 3; }

@@ -8,6 +8,15 @@ import {
   type Dependencia,
   type TarefaCronograma
 } from "../lib/planejamento/cronograma";
+import {
+  feriadosNacionais,
+  feriadosNaFaixa,
+  paraDia,
+  paraIso as paraIsoData,
+  pascoa,
+  regimePorChave,
+  REGIME_PADRAO
+} from "../lib/planejamento/calendario";
 
 // Cálculo de cronograma testado antes da tela.
 //
@@ -94,7 +103,10 @@ describe("data fixada pelo planejador", () => {
       [tarefa("a", 5, "2026-08-03"), tarefa("b", 1, "2026-08-01")],
       [dep("a", "b", "FS")]
     );
-    expect(barra(r, "b").inicio).toBe("2026-08-08");
+    // "a" ocupa seg 03 a sex 07 — cinco dias ÚTEIS. O dia seguinte é sábado,
+    // então "b" só pode começar na segunda 10.
+    expect(barra(r, "a").termino).toBe("2026-08-07");
+    expect(barra(r, "b").inicio).toBe("2026-08-10");
   });
 });
 
@@ -106,8 +118,10 @@ describe("propagação em cadeia", () => {
     const antes = calcular(tarefas("2026-08-03"), deps);
     const depois = calcular(tarefas("2026-08-06"), deps);
 
-    expect(barra(antes, "f").termino).toBe("2026-08-12");
-    expect(barra(depois, "f").termino).toBe("2026-08-15");
+    // Contado em dias úteis: m 03-04, p 05-07, f 10-14 (seg a sex).
+    expect(barra(antes, "f").termino).toBe("2026-08-14");
+    // Começando na quinta 06, tudo escorrega uma semana de trabalho.
+    expect(barra(depois, "f").termino).toBe("2026-08-19");
   });
 });
 
@@ -161,22 +175,26 @@ describe("bordas", () => {
     expect(barra(r, "marco").termino).toBe("2026-08-03");
   });
 
-  it("atravessa a virada de mês sem perder um dia", () => {
+  it("atravessa a virada de mês, e um início no domingo escorrega para segunda", () => {
     const r = calcular(
       [tarefa("a", 3, "2026-08-30"), tarefa("b", 2)],
       [dep("a", "b", "FS")]
     );
-    expect(barra(r, "a").termino).toBe("2026-09-01");
-    expect(barra(r, "b")).toMatchObject({ inicio: "2026-09-02", termino: "2026-09-03" });
+    // 30/08/2026 é domingo: a tarefa começa na segunda 31.
+    expect(barra(r, "a")).toMatchObject({ inicio: "2026-08-31", termino: "2026-09-02" });
+    expect(barra(r, "b")).toMatchObject({ inicio: "2026-09-03", termino: "2026-09-04" });
   });
 
-  it("atravessa a virada de ano", () => {
+  it("atravessa a virada de ano respeitando o feriado de 1º de janeiro", () => {
     const r = calcular(
       [tarefa("a", 2, "2026-12-31"), tarefa("b", 1)],
       [dep("a", "b", "FS")]
     );
-    expect(barra(r, "a").termino).toBe("2027-01-01");
-    expect(barra(r, "b").inicio).toBe("2027-01-02");
+    // 31/12 é quinta e conta; 01/01 é feriado; o segundo dia útil cai na
+    // segunda 04. Sem calendário, o término seria 01/01 — um dia em que
+    // ninguém trabalha.
+    expect(barra(r, "a").termino).toBe("2027-01-04");
+    expect(barra(r, "b").inicio).toBe("2027-01-05");
   });
 
   it("sem dependência nenhuma, cada tarefa fica onde foi marcada", () => {
@@ -184,5 +202,86 @@ describe("bordas", () => {
     expect(barra(r, "a").inicio).toBe("2026-08-03");
     expect(barra(r, "b").inicio).toBe("2026-09-10");
     expect(barra(r, "a").derivada).toBe(false);
+  });
+});
+
+
+// ── Calendário de trabalho ─────────────────────────────────────────────────
+
+describe("regime de trabalho e feriados", () => {
+  it("reproduz o exemplo do responsável: 20 dias úteis com um feriado no meio", () => {
+    // "uma atividade leva 20 dias úteis, a equipe só trabalha de seg a sex, e
+    // tem um feriado no meio da execução."
+    const cal = {
+      regime: REGIME_PADRAO,
+      feriados: new Set([paraDia("2026-08-19")])
+    };
+    const r = calcular([tarefa("brocas", 20, "2026-08-03")], [], cal);
+    const b = barra(r, "brocas");
+
+    expect(b.inicio).toBe("2026-08-03");
+    expect(b.termino).toBe("2026-08-31");
+    expect(b.diasUteis).toBe(20);
+    expect(b.diasParados).toBe(9);      // 8 de fim de semana + 1 feriado
+    expect(b.duracaoDias).toBe(29);     // 20 + 8 + 1
+  });
+
+  it("o feriado empurra o término em um dia de calendário", () => {
+    const semFeriado = { regime: REGIME_PADRAO, feriados: new Set<number>() };
+    const comFeriado = { regime: REGIME_PADRAO, feriados: new Set([paraDia("2026-08-19")]) };
+    const t = [tarefa("brocas", 20, "2026-08-03")];
+
+    expect(barra(calcular(t, [], semFeriado), "brocas").termino).toBe("2026-08-28");
+    expect(barra(calcular(t, [], comFeriado), "brocas").termino).toBe("2026-08-31");
+  });
+
+  it("regime de segunda a sábado encurta o prazo em dias corridos", () => {
+    const segSex = { regime: regimePorChave("seg_sex"), feriados: new Set<number>() };
+    const segSab = { regime: regimePorChave("seg_sab"), feriados: new Set<number>() };
+    const t = [tarefa("alvenaria", 12, "2026-08-03")];
+
+    // 12 dias úteis: seg–sex termina sáb 18/08 (16 corridos); seg–sáb termina
+    // no sábado 15/08 (13 corridos). Trabalhar aos sábados devolve 3 dias de
+    // calendário — que é o argumento de quem propõe o regime.
+    expect(barra(calcular(t, [], segSex), "alvenaria")).toMatchObject({ termino: "2026-08-18", duracaoDias: 16 });
+    expect(barra(calcular(t, [], segSab), "alvenaria")).toMatchObject({ termino: "2026-08-15", duracaoDias: 13 });
+  });
+
+  it("a folga da dependência também é contada em dias úteis", () => {
+    const cal = { regime: REGIME_PADRAO, feriados: new Set<number>() };
+    const r = calcular(
+      [tarefa("a", 5, "2026-08-03"), tarefa("b", 1)],
+      [dep("a", "b", "FS", 2)],
+      cal
+    );
+    // "a" termina sexta 07. Mais 1 dia útil = seg 10, mais 2 de folga = qua 12.
+    expect(barra(r, "b").inicio).toBe("2026-08-12");
+  });
+});
+
+describe("feriados nacionais", () => {
+  it("calcula a Páscoa em vez de manter tabela por ano", () => {
+    expect(paraIsoData(pascoa(2026))).toBe("2026-04-05");
+    expect(paraIsoData(pascoa(2027))).toBe("2027-03-28");
+    expect(paraIsoData(pascoa(2030))).toBe("2030-04-21");
+  });
+
+  it("deriva os móveis da Páscoa, e traz os fixos", () => {
+    const lista = feriadosNacionais(2026);
+    const porNome = new Map(lista.map(f => [f.nome, f.data]));
+
+    expect(porNome.get("Sexta-feira Santa")).toBe("2026-04-03");
+    expect(porNome.get("Carnaval (terça)")).toBe("2026-02-17");
+    expect(porNome.get("Corpus Christi")).toBe("2026-06-04");
+    expect(porNome.get("Natal")).toBe("2026-12-25");
+    expect(porNome.get("Tiradentes")).toBe("2026-04-21");
+    expect(lista).toHaveLength(13);
+  });
+
+  it("cobre a faixa inteira, ano a ano", () => {
+    const feriados = feriadosNaFaixa("2026-12-01", "2027-02-28");
+    expect(feriados.has(paraDia("2026-12-25"))).toBe(true);
+    expect(feriados.has(paraDia("2027-01-01"))).toBe(true);
+    expect(feriados.has(paraDia("2027-02-09"))).toBe(true); // Carnaval de 2027
   });
 });

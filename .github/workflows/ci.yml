@@ -109,6 +109,8 @@ jobs:
         run: pnpm install --no-frozen-lockfile --reporter=append-only
       - name: Validate engineering vaccines
         run: pnpm validate:vaccines
+      - name: Validate canonical documentation
+        run: pnpm validate:docs
       - name: Validate Stage 9 structure
         run: pnpm validate:stage9
       - name: Validate Stage 12 structure

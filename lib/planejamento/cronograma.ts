@@ -15,6 +15,25 @@
 // Este módulo é função pura sobre datas. Nenhuma consulta, nenhum fuso: a data
 // de obra é dia de calendário, e converter para instante introduziria o erro de
 // virada de dia que aparece em toda planilha que alguém já teve de corrigir.
+//
+// **A duração é em dias úteis**, contados pelo regime de trabalho da equipe e
+// pelos feriados — `lib/planejamento/calendario.ts`. A primeira versão deste
+// módulo contava dia corrido, e isso produz uma data que não existe no mundo:
+// nenhuma equipe de obra trabalha vinte dias seguidos. A folga também é em
+// dias úteis, pelo mesmo motivo.
+
+import {
+  avancarDiasUteis,
+  contarDias,
+  diaUtilAnterior,
+  feriadosNaFaixa,
+  paraDia,
+  paraIso,
+  proximoDiaUtil,
+  REGIME_PADRAO,
+  terminoPorDiasUteis,
+  type Calendario
+} from "./calendario";
 
 export const TIPOS_DEPENDENCIA = ["FS", "SS", "FF", "SF"] as const;
 export type TipoDependencia = (typeof TIPOS_DEPENDENCIA)[number];
@@ -55,23 +74,16 @@ export type BarraCronograma = {
   titulo: string;
   inicio: string;
   termino: string;
+  /** Dias corridos entre início e término, inclusive. */
   duracaoDias: number;
+  /** Dias efetivamente trabalhados — o número que o planejador digitou. */
+  diasUteis: number;
+  /** Fins de semana e feriados dentro da barra. */
+  diasParados: number;
   progresso: number;
   /** A data foi calculada a partir de dependência, e não fixada pelo planejador. */
   derivada: boolean;
 };
-
-const DIA = 86_400_000;
-
-/** Data de obra é dia de calendário. `2026-07-27` entra e sai igual. */
-function paraDia(iso: string): number {
-  const [ano, mes, dia] = iso.slice(0, 10).split("-").map(Number);
-  return Date.UTC(ano, mes - 1, dia) / DIA;
-}
-
-function paraIso(dia: number): string {
-  return new Date(dia * DIA).toISOString().slice(0, 10);
-}
 
 /**
  * Ordem topológica das tarefas.
@@ -123,8 +135,16 @@ export function ordenar(
  */
 export function calcular(
   tarefas: TarefaCronograma[],
-  dependencias: Dependencia[]
+  dependencias: Dependencia[],
+  calendario?: Calendario
 ): { barras: BarraCronograma[]; ciclo: boolean } {
+  const cal: Calendario = calendario ?? {
+    regime: REGIME_PADRAO,
+    feriados: feriadosNaFaixa(
+      tarefas.map(t => t.inicioPlanejado).filter(Boolean).sort()[0] ?? `${new Date().getUTCFullYear()}-01-01`,
+      `${new Date().getUTCFullYear() + 3}-12-31`
+    )
+  };
   const ordem = ordenar(tarefas, dependencias);
   if (!ordem) return { barras: [], ciclo: true };
 
@@ -151,13 +171,16 @@ export function calcular(
       if (!anterior) continue;
       const folga = Math.round(dep.folgaDias);
 
-      // Duração 1 significa que a tarefa ocupa o próprio dia de início: por isso
-      // "começa depois que o outro termina" é término + 1 + folga, e não
-      // término + folga — senão as duas dividiriam o mesmo dia.
-      if (dep.tipo === "FS") inicioMinimo = maiorOuNulo(inicioMinimo, anterior.termino + 1 + folga);
-      if (dep.tipo === "SS") inicioMinimo = maiorOuNulo(inicioMinimo, anterior.inicio + folga);
-      if (dep.tipo === "FF") terminoMinimo = maiorOuNulo(terminoMinimo, anterior.termino + folga);
-      if (dep.tipo === "SF") terminoMinimo = maiorOuNulo(terminoMinimo, anterior.inicio + folga);
+      // A folga é em dias **úteis**, e o "dia seguinte" é o próximo dia útil.
+      // Contar corrido faria a sucessora de uma tarefa que termina na sexta
+      // começar no sábado, quando a equipe não trabalha.
+      if (dep.tipo === "FS") {
+        const base = avancarDiasUteis(cal, anterior.termino, 1 + folga);
+        inicioMinimo = maiorOuNulo(inicioMinimo, base);
+      }
+      if (dep.tipo === "SS") inicioMinimo = maiorOuNulo(inicioMinimo, avancarDiasUteis(cal, anterior.inicio, folga));
+      if (dep.tipo === "FF") terminoMinimo = maiorOuNulo(terminoMinimo, avancarDiasUteis(cal, anterior.termino, folga));
+      if (dep.tipo === "SF") terminoMinimo = maiorOuNulo(terminoMinimo, avancarDiasUteis(cal, anterior.inicio, folga));
     }
 
     let inicio: number;
@@ -165,23 +188,27 @@ export function calcular(
     const temDependencia = (porSucessor.get(tarefa.id) ?? []).length > 0;
 
     if (terminoMinimo !== null && inicioMinimo === null) {
-      // Amarrada pelo fim: o início recua a partir do término exigido.
-      termino = fixadoTermino !== null ? Math.max(fixadoTermino, terminoMinimo) : terminoMinimo;
-      inicio = termino - Math.max(0, duracao - 1);
+      // Amarrada pelo fim: o início recua contando dias úteis para trás.
+      const alvo = fixadoTermino !== null ? Math.max(fixadoTermino, terminoMinimo) : terminoMinimo;
+      termino = diaUtilAnterior(cal, alvo);
+      inicio = duracao <= 1 ? termino : avancarDiasUteis(cal, termino, -(duracao - 1));
     } else {
-      const base = inicioMinimo ?? fixadoInicio ?? (fixadoTermino !== null ? fixadoTermino - Math.max(0, duracao - 1) : 0);
-      inicio = fixadoInicio !== null ? Math.max(fixadoInicio, base) : base;
-      termino = inicio + Math.max(0, duracao - 1);
-      if (terminoMinimo !== null && terminoMinimo > termino) termino = terminoMinimo;
+      const base = inicioMinimo ?? fixadoInicio ?? (fixadoTermino !== null ? fixadoTermino : hojeOuZero(tarefas));
+      inicio = proximoDiaUtil(cal, fixadoInicio !== null ? Math.max(fixadoInicio, base) : base);
+      termino = terminoPorDiasUteis(cal, inicio, duracao);
+      if (terminoMinimo !== null && terminoMinimo > termino) termino = diaUtilAnterior(cal, terminoMinimo);
     }
 
+    const contagem = contarDias(cal, inicio, termino);
     calculadas.set(tarefa.id, { inicio, termino });
     barras.push({
       id: tarefa.id,
       titulo: tarefa.titulo,
       inicio: paraIso(inicio),
       termino: paraIso(termino),
-      duracaoDias: termino - inicio + 1,
+      duracaoDias: contagem.corridos,
+      diasUteis: contagem.uteis,
+      diasParados: contagem.naoUteis + contagem.feriados,
       progresso: tarefa.progresso,
       derivada: temDependencia && fixadoInicio === null
     });
@@ -192,6 +219,12 @@ export function calcular(
 
 function maiorOuNulo(atual: number | null, candidato: number): number {
   return atual === null ? candidato : Math.max(atual, candidato);
+}
+
+/** Tarefa sem data nenhuma ancora no primeiro início declarado, ou em hoje. */
+function hojeOuZero(tarefas: TarefaCronograma[]): number {
+  const primeiro = tarefas.map(t => t.inicioPlanejado).filter((d): d is string => Boolean(d)).sort()[0];
+  return primeiro ? paraDia(primeiro) : paraDia(new Date().toISOString().slice(0, 10));
 }
 
 /**
