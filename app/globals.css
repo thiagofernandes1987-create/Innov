@@ -1229,12 +1229,10 @@ tbody tr:hover { background: #fafcfd; }
   position: sticky;
   top: 0;
   z-index: 20;
-  /* Três colunas, não flex: com `margin: auto` a busca centraliza no espaço que
-     sobra, e o espaço que sobra depende do tamanho do nome do aplicativo e da
-     quantidade de menus — a busca dançava de tela para tela. Com as duas
-     laterais em `1fr`, o meio é o meio da janela em qualquer módulo. */
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
+  /* Flex de novo: a grade de três colunas existia para centralizar a busca, e
+     a busca desceu para a barra 2. Sem ela, a coluna direita em `1fr`
+     desperdiçava ~340px que o nome do aplicativo e os menus precisam. */
+  display: flex;
   align-items: center;
   gap: 16px;
   min-height: 56px;
@@ -1281,6 +1279,21 @@ tbody tr:hover { background: #fafcfd; }
 .barra-modulo-icone { display: grid; place-items: center; }
 .barra-modulo-inicio { color: rgba(255, 255, 255, 0.72); }
 
+/* `overflow: hidden` impede a coluna esquerda de invadir o canto direito: nome
+   de aplicativo é dado da organização e pode ser longo — "Estoque, Inventário e
+   Almoxarifado" tem 34 caracteres. */
+.barra-esquerda { display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden; }
+.barra-modulo { flex: 0 0 auto; }
+.barra-modulo strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 24ch;
+}
+/* Os menus cedem espaço antes do nome do aplicativo: "onde estou" tem
+   precedência sobre "para onde vou" quando a tela aperta. */
+.barra-menus { flex: 0 1 auto; overflow: hidden; }
+
 /* Menus do próprio módulo, inline na barra — o padrão de `CRM · Sales ·
    Reporting · Configuration`. Somem antes do nome do módulo em tela estreita:
    o nome responde "onde estou", os menus respondem "para onde vou", e a
@@ -1301,30 +1314,13 @@ tbody tr:hover { background: #fafcfd; }
 .barra-menu.ativo { background: rgba(255, 255, 255, 0.16); color: #fff; font-weight: 600; }
 .barra-menu:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 
-/* Busca no centro da barra 1, conforme a seção 12 do padrão. `margin: auto`
-   nos dois lados é o que a mantém centrada independente do tamanho do nome do
-   aplicativo e da quantidade de menus. O espaçador vazio ocupa o mesmo lugar
-   quando a tela não implementa busca, para o canto direito não dançar. */
-/* `overflow: hidden` é o que impede a coluna esquerda de invadir a busca:
-   nome de aplicativo é dado da organização e pode ser longo — "Estoque,
-   Inventário e Almoxarifado" tem 34 caracteres. Sem isto o texto passava por
-   baixo do campo de busca. */
-.barra-esquerda { display: flex; align-items: center; gap: 10px; min-width: 0; overflow: hidden; }
-.barra-modulo strong {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 22ch;
-}
-/* Os menus cedem espaço antes do nome do aplicativo: "onde estou" tem
-   precedência sobre "para onde vou" quando a tela aperta. */
-.barra-menus { flex: 0 1 auto; overflow: hidden; }
-.barra-modulo { flex: 0 0 auto; }
+/* Busca centralizada na barra 2, um nível abaixo dos menus superiores —
+   decisão do responsável em 27/07 e também onde o Odoo a põe. Vive sobre
+   superfície clara, não sobre a faixa escura, então as cores são de tema.
+   O espaçador ocupa o mesmo lugar quando a tela não implementa busca, para as
+   visualizações não dançarem de lugar. */
 .barra-busca,
-/* 400px e não 460: com as laterais em `1fr`, cada pixel dado à busca é tirado
-   dos dois lados. A 460px o último menu do CRM ficava cortado em 1440px de
-   tela. */
-.barra-busca-vazia { width: min(400px, 30vw); min-width: 0; }
+.barra-busca-vazia { flex: 1 1 240px; max-width: 460px; margin-inline: auto; min-width: 0; }
 .barra-busca-vazia { visibility: hidden; }
 .barra-busca label {
   display: flex;
@@ -1333,24 +1329,23 @@ tbody tr:hover { background: #fafcfd; }
   min-height: 34px;
   padding: 0 10px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.62);
-  transition: background var(--transition-fast), border-color var(--transition-fast);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  transition: border-color var(--transition-fast);
 }
-.barra-busca label:focus-within { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.4); }
+.barra-busca label:focus-within { border-color: var(--brand); }
 .barra-busca svg { flex: 0 0 auto; max-width: none; }
 .barra-busca input {
   flex: 1 1 auto;
   min-width: 0;
   border: 0;
   background: transparent;
-  color: #fff;
+  color: var(--text);
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   padding: 6px 0;
 }
-.barra-busca input::placeholder { color: rgba(255, 255, 255, 0.5); }
 .barra-busca input:focus-visible { outline: none; }
 
 /* Faceta: o filtro ativo é visível e removível de dentro do campo. */
@@ -1384,7 +1379,7 @@ tbody tr:hover { background: #fafcfd; }
 }
 .barra-busca-faceta button:hover { background: rgba(255, 255, 255, 0.25); }
 
-.barra-direita { display: flex; align-items: center; justify-content: flex-end; gap: 4px; min-width: 0; }
+.barra-direita { margin-left: auto; display: flex; align-items: center; gap: 4px; flex: 0 0 auto; }
 
 /* Avatar do usuário: o menu de conta do padrão de mercado. */
 .canto-avatar {

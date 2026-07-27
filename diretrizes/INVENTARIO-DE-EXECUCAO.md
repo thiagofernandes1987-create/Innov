@@ -667,6 +667,36 @@ ferramenta do mercado tem. Vai para o fim do inventário conforme R4.
 
 ---
 
+## Sprint S-25 — Serviço de campo: execução, apontamento e retroalimentação do planejamento
+**Estado:** pendente
+**Marco:** M-5
+
+Ditada pelo responsável em 27 de julho. Desenho completo em
+[`SERVICO-DE-CAMPO.md`](SERVICO-DE-CAMPO.md). Vai para o fim conforme R4.
+
+Não é um módulo a mais: é o fechamento do ciclo. Hoje o planejamento produz uma
+previsão que ninguém confronta com a realidade, e a realidade fica na cabeça de
+quem está na obra.
+
+### Tarefas
+
+- [ ] T-25.1 — **Decidir a natureza do check-in** antes de gravar a primeira marcação: apontamento de produção ou registro de jornada. Muda imutabilidade, trilha de ajuste e comprovante. Recomendação registrada na §7.1: construir como apontamento, já com imutabilidade e ajuste rastreável
+- [ ] T-25.2 — **Check-in e check-out com localização**, alimentando horas trabalhadas
+- [ ] T-25.3 — **To-do de campo**: alimentado pelo planejador, atualizado pelo profissional com o número de dias que faltam. Reaproveita `pipeline_card_activities`
+- [ ] T-25.4 — **DPPT e DEPT como naturezas de data**, na taxonomia que já existe. Não é modelo novo: é mais um par na tabela que `pipeline_codigo_data` governa
+- [ ] T-25.5 — **TEP e TEPr**: `TEP = DPPT − DEPT` no cartão e na notificação; `TEPr = TEP / prazo × 100` para ordenar, acender sinal e comparar equipes. Sem o relativo, o ranking premia quem pega tarefa longa
+- [ ] T-25.6 — **Motivo obrigatório quando TEP fica negativo**, em lista fechada — chuva, material, saúde, tarefa anterior, cliente, outro. Texto livre não vira métrica
+- [ ] T-25.7 — **Notificação para responsável e seguidores** quando o TEP vira negativo, pelo canto direito que já existe
+- [ ] T-25.8 — **Solicitação de insumo pelo aplicativo**, notificando o almoxarifado
+- [ ] T-25.9 — **Calendário do dia** para o perfil de execução
+- [ ] T-25.10 — **Sinal amarelo propagado**: cartão, planner, módulo de projeto e painel
+- [ ] T-25.11 — **Painel de obras**: quantas no prazo, quantas atrasadas, desempenho por equipe e do planejador
+- [ ] T-25.12 — **Matriz de competências**: rendimento por tipo de tarefa, média de 6 meses **com desvio padrão**. Média sozinha esconde a equipe que faz em 4 ou em 8 dias
+- [ ] T-25.13 — **Avaliação do cliente** de 0 a 5 em sete critérios, alimentando a matriz. Antes de gravar, decidir o que a §7.2 levanta: quem vê a nota individual e por quanto tempo ela pesa
+- [ ] T-25.14 — **Conferir tudo com a persona P3**, que tem veto: de pé, uma mão, tela pequena, sinal ruim
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.

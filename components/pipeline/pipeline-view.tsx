@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { Suspense, useMemo, useState, useTransition } from "react";
 import { moverCartao } from "@/app/actions/pipeline";
-import { useBusca } from "@/components/casca/busca-da-barra";
+import { BuscaDaBarra, useBusca } from "@/components/casca/busca-da-barra";
 import {
   BotaoNovoCartao,
   FormularioNovoCartao,
@@ -159,8 +159,12 @@ export function PipelineView({
           </span>
         </div>
 
-        {/* Sem busca aqui: ela subiu para o centro da barra 1, e repetir o
-            campo nas duas faixas é dois lugares para a mesma pergunta. */}
+        {/* Busca centralizada, um nível abaixo dos menus superiores. É onde o
+            responsável pediu e onde o Odoo põe: a barra 1 é identidade e
+            navegação, a busca é trabalho, e trabalho mora na barra 2. */}
+        <Suspense fallback={<div className="barra-busca-vazia" aria-hidden="true" />}>
+          <BuscaDaBarra />
+        </Suspense>
 
         {/* Ícone, não palavra: "Ícones, igual ao Odoo, ocupam menos espaço,
             poluem menos e facilita a leitura do pipeline". O nome continua no

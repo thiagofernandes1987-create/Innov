@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { Suspense } from "react";
 import type { Avisos } from "@/lib/casca/avisos";
 import type { Tema } from "@/lib/tema";
-import { BuscaDaBarra } from "./busca-da-barra";
 import { CantoDireito } from "./canto-direito";
 import { NavegacaoDoModulo, type AplicativoAutorizado } from "./navegacao-do-modulo";
 
@@ -45,13 +43,10 @@ export function BarraSuperior({
         <NavegacaoDoModulo aplicativos={aplicativos} />
       </div>
 
-      {/* Centro: busca com facetas. Aparece só onde a tela sabe consumi-la —
-          campo que aceita texto e não filtra nada ensina que a busca não
-          funciona. Exceção declarada e datada na seção 12.4 do padrão. */}
-      <Suspense fallback={<div className="barra-busca-vazia" aria-hidden="true" />}>
-        <BuscaDaBarra />
-      </Suspense>
-
+      {/* A busca não fica aqui. Decisão do responsável em 27/07: "coloca ela
+          centralizada mais a um nível abaixo dos menus superiores" — ou seja, na
+          barra de controle, que é também onde o Odoo a põe. A barra 1 fica só
+          com identidade e navegação. Registrado na seção 12 do padrão. */}
       <div className="barra-direita">
         <CantoDireito
           mensagens={avisos.mensagens}
