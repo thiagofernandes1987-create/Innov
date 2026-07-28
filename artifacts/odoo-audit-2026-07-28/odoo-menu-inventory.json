@@ -1,0 +1,440 @@
+{
+  "planning": {
+    "app": "Planning",
+    "url": "https://innovar1.odoo.com/odoo/planning",
+    "menus": {
+      "Schedule": [
+        "By Resource",
+        "By Role",
+        "By Sales Order"
+      ],
+      "Maps": [
+        "By Resource"
+      ],
+      "Planning": [
+        "Planning",
+        "Map"
+      ],
+      "Reporting": [
+        "Planning Analysis",
+        "Planning / Attendance Analysis"
+      ],
+      "Configuration": [
+        "Settings",
+        "Employees",
+        "Materials",
+        "Roles",
+        "Shift Templates",
+        "Products",
+        "Activity Types",
+        "Activity Plans"
+      ]
+    }
+  },
+  "groups": [
+    [
+      {
+        "app": "CRM",
+        "url": "https://innovar1.odoo.com/odoo/crm",
+        "menus": {
+          "Sales": [
+            "My Pipeline",
+            "My Activities",
+            "My Quotations",
+            "Teams",
+            "Customers"
+          ],
+          "Reporting": [
+            "Forecast",
+            "Pipeline",
+            "Leads",
+            "Activities"
+          ],
+          "Configuration": [
+            "Settings",
+            "Sales Teams",
+            "Activity Types",
+            "Activity Plans",
+            "Tags",
+            "Lost Reasons",
+            "Lead Mining Requests"
+          ]
+        }
+      },
+      {
+        "app": "Sales",
+        "url": "https://innovar1.odoo.com/odoo/sales",
+        "menus": {
+          "Orders": [
+            "Quotations",
+            "Orders",
+            "Sales Teams",
+            "Customers"
+          ],
+          "To Invoice": [
+            "Orders to Invoice",
+            "Orders to Upsell"
+          ],
+          "Products": [
+            "Products",
+            "Combo Choices",
+            "Categories",
+            "Units & Packagings"
+          ],
+          "Reporting": [
+            "Sales",
+            "Salespersons",
+            "Products",
+            "Customers"
+          ],
+          "Configuration": [
+            "Settings",
+            "Deliveries",
+            "Sales Teams",
+            "Payments",
+            "Templates",
+            "Headers/Footers",
+            "Activity Plans"
+          ]
+        }
+      },
+      {
+        "app": "Project",
+        "url": "https://innovar1.odoo.com/odoo/project",
+        "menus": {
+          "Tasks": [
+            "Projects",
+            "My Tasks",
+            "All Tasks"
+          ],
+          "Reporting": [
+            "Projects",
+            "Tasks Analysis",
+            "Customer Ratings",
+            "Margins"
+          ],
+          "Configuration": [
+            "Projects",
+            "Settings",
+            "Projects",
+            "Project Templates",
+            "Project Roles",
+            "Tags",
+            "Activity Types",
+            "Activity Plans"
+          ]
+        }
+      },
+      {
+        "app": "Timesheets",
+        "url": "https://innovar1.odoo.com/odoo/timesheets",
+        "menus": {
+          "Timesheets": [
+            "Configuration",
+            "My Timesheets",
+            "All Timesheets"
+          ],
+          "To Validate": [
+            "Configuration",
+            "Last Period",
+            "All Timesheets"
+          ],
+          "Reporting": [
+            "Configuration",
+            "By Employee",
+            "By Project",
+            "By Task",
+            "By Billing Type",
+            "Timesheets / Attendance Analysis"
+          ]
+        }
+      }
+    ],
+    [
+      {
+        "app": "Documents",
+        "url": "https://innovar1.odoo.com/odoo/documents/zl3L3HbGTu2smyDDI7mPTAo17",
+        "menus": {
+          "Configuration": [
+            "Documents",
+            "Settings",
+            "Spreadsheet Templates",
+            "Tags",
+            "Groups",
+            "Activity Types",
+            "Activity Plans"
+          ]
+        }
+      },
+      {
+        "app": "Sign",
+        "url": "https://innovar1.odoo.com/odoo/sign-documents",
+        "menus": {
+          "Documents": [
+            "Templates",
+            "My Documents",
+            "All Documents"
+          ],
+          "Reports": [
+            "Templates",
+            "Green Savings"
+          ],
+          "Configuration": [
+            "Templates",
+            "Settings",
+            "Fields",
+            "Tags"
+          ]
+        }
+      },
+      {
+        "app": "Purchase",
+        "url": "https://innovar1.odoo.com/odoo/purchase",
+        "menus": {
+          "Orders": [
+            "Requests for Quotation",
+            "Purchase Orders",
+            "Vendors"
+          ],
+          "Products": [
+            "Products"
+          ],
+          "Reporting": [
+            "Purchase"
+          ],
+          "Configuration": [
+            "Settings",
+            "Vendor Pricelists",
+            "Categories",
+            "Units & Packagings"
+          ]
+        }
+      },
+      {
+        "app": "Inventory",
+        "url": "https://innovar1.odoo.com/odoo/inventory",
+        "menus": {
+          "Operations": [
+            "Overview",
+            "Receipts",
+            "Deliveries",
+            "Manufacturings",
+            "Physical Inventory",
+            "Scrap",
+            "Replenishment"
+          ],
+          "Products": [
+            "Overview",
+            "Products"
+          ],
+          "Reporting": [
+            "Overview",
+            "Stock",
+            "Moves History",
+            "Moves Analysis",
+            "Returns"
+          ],
+          "Configuration": [
+            "Overview",
+            "Settings",
+            "Warehouses",
+            "Operations Types",
+            "Categories",
+            "Units & Packagings"
+          ]
+        }
+      },
+      {
+        "app": "Quality",
+        "url": "https://innovar1.odoo.com/odoo/quality",
+        "menus": {
+          "Quality Control": [
+            "Overview",
+            "Control Points",
+            "Quality Checks",
+            "Quality Alerts"
+          ],
+          "Products": [
+            "Overview",
+            "Products"
+          ],
+          "Reporting": [
+            "Overview",
+            "Quality Check Analysis",
+            "Quality Alerts Analysis"
+          ],
+          "Configuration": [
+            "Overview",
+            "Quality Teams",
+            "Quality Spreadsheet Templates"
+          ]
+        }
+      }
+    ],
+    [
+      {
+        "app": "Contacts",
+        "url": "https://innovar1.odoo.com/odoo/contacts",
+        "menus": {
+          "Configuration": [
+            "Contacts",
+            "Contact Tags",
+            "Industries",
+            "Countries",
+            "Fed. States",
+            "Cities",
+            "Country Group",
+            "Identification Type"
+          ]
+        }
+      },
+      {
+        "app": "Accounting",
+        "url": "https://innovar1.odoo.com/odoo/accounting",
+        "menus": {
+          "Customers": [
+            "Dashboard",
+            "Invoices",
+            "Credit Notes",
+            "Payments",
+            "Products",
+            "Customers"
+          ],
+          "Vendors": [
+            "Dashboard",
+            "Bills",
+            "Refunds",
+            "Payments",
+            "Employee Expenses",
+            "Products",
+            "Vendors"
+          ],
+          "Accounting": [
+            "Dashboard",
+            "Journal Entries",
+            "Assets",
+            "Loans",
+            "Fleet",
+            "Reconcile",
+            "Tax Returns",
+            "Lock Dates…"
+          ],
+          "Review": [
+            "Dashboard",
+            "Journal Items",
+            "Journal Audit",
+            "Working Files",
+            "Annual Report",
+            "Inventory Valuation",
+            "Depreciation Schedule",
+            "Loans Analysis",
+            "Deferred Revenues",
+            "Deferred Expenses",
+            "Bill To Receive",
+            "Billed Not Received",
+            "Invoices To Be Issued",
+            "Invoiced Not Delivered",
+            "Audit Trail"
+          ],
+          "Reporting": [
+            "Dashboard",
+            "Balance Sheet",
+            "Profit and Loss",
+            "Cash Flow Statement",
+            "Trial Balance",
+            "General Ledger",
+            "Partner Ledger",
+            "Aged Receivable",
+            "Aged Payable",
+            "Tax Report",
+            "Fiscal Report",
+            "Invoice Analysis",
+            "Analytic Report",
+            "Executive Summary"
+          ],
+          "Configuration": [
+            "Dashboard",
+            "Settings",
+            "Chart of Accounts",
+            "Taxes",
+            "Journals",
+            "Currencies",
+            "Fiscal Positions",
+            "Multi-Ledger",
+            "Checks",
+            "Depreciation Models",
+            "Return Types",
+            "Document Types",
+            "Payment Terms",
+            "Product Categories",
+            "Payment Providers",
+            "Payment Methods"
+          ]
+        }
+      },
+      {
+        "app": "Helpdesk",
+        "url": "https://innovar1.odoo.com/odoo/helpdesk",
+        "menus": {
+          "Tickets": [
+            "[ambíguo:2]"
+          ],
+          "Reporting": [
+            "Overview",
+            "Tickets Analysis",
+            "SLA Status Analysis"
+          ],
+          "Configuration": [
+            "Overview",
+            "Helpdesk Teams",
+            "SLA Policies",
+            "Canned Responses"
+          ]
+        }
+      },
+      {
+        "app": "Dashboards",
+        "url": "https://innovar1.odoo.com/odoo/dashboards?dashboard_id=7",
+        "menus": {
+          "Configuration": [
+            "Dashboards",
+            "Dashboards",
+            "Sections",
+            "Share links"
+          ]
+        }
+      },
+      {
+        "app": "Settings",
+        "url": "https://innovar1.odoo.com/odoo/settings",
+        "menus": {
+          "Users & Companies": [
+            "General Settings",
+            "Users",
+            "Companies"
+          ]
+        }
+      },
+      {
+        "app": "Approvals",
+        "url": "https://innovar1.odoo.com/odoo/approvals",
+        "menus": {
+          "My Approvals": [
+            "Dashboard",
+            "My Requests"
+          ],
+          "Manager": [
+            "Dashboard",
+            "Approvals to Review",
+            "All Approvals"
+          ],
+          "Configuration": [
+            "Dashboard",
+            "Approval Categories",
+            "Products"
+          ]
+        }
+      }
+    ]
+  ]
+}

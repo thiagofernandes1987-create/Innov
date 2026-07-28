@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
 import { singleRelation } from "@/lib/supabase/relations";
@@ -12,7 +14,8 @@ export default async function ContractsPage() {
 
   return (
     <main className="content">
-      <div className="page-head"><div><span className="badge">CONTRATUAL</span><h1>Contratos</h1><p className="muted">Versões, valores consolidados, aditivos e assinatura eletrônica.</p></div></div>
+      <BarraDeTrabalho title="Contratos" primaryAction={<Link className="button button-primary" href="/app/contratos/novo">Novo contrato</Link>} />
+      <p className="workspace-intro">Versões, valores consolidados, aditivos e assinatura eletrônica a partir de propostas aceitas.</p>
       {error ? <div className="validation blocking">{error.message}</div> : null}
       <section className="card table-wrap">
         <table>

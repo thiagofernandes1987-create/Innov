@@ -1,0 +1,125 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Approvals"
+      - generic: Approvals
+    - menu:
+      - menuitem "Dashboard"
+      - button "My Approvals":
+        - generic: My Approvals
+      - button "Manager":
+        - generic: Manager
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- button "New Request"
+- generic: Dashboard
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - searchbox "Search..." [active]
+  - button ""
+- search:
+  - navigation "Pager":
+    - generic: 1-9
+    - text: / 9
+    - button "Previous" [disabled]:
+      - generic: 
+    - button "Next" [disabled]:
+      - generic: 
+- main:
+  - 'link "Business Trip New Request To Review: 0 "':
+    - complementary:
+      - img "Binary file"
+    - generic: Business Trip
+    - button "New Request"
+    - 'button "To Review: 0"'
+    - button "":
+      - generic: 
+  - 'link "Borrow Items New Request To Review: 0 "':
+    - complementary:
+      - img "Binary file"
+    - generic: Borrow Items
+    - button "New Request"
+    - 'button "To Review: 0"'
+    - button "":
+      - generic: 
+  - 'link "General Approval New Request To Review: 0 "':
+    - complementary:
+      - img "Binary file"
+    - generic: General Approval
+    - button "New Request"
+    - 'button "To Review: 0"'
+    - button "":
+      - generic: 
+  - 'link "Contract Approval New Request To Review: 0 "':
+    - complementary:
+      - img "Binary file"
+    - generic: Contract Approval
+    - button "New Request"
+    - 'button "To Review: 0"'
+    - button "":
+      - generic: 
+  - 'link "Payment Application New Request To Review: 0 "':
+    - complementary:
+      - img "Binary file"
+    - generic: Payment Application
+    - button "New Request"
+    - 'button "To Review: 0"'
+    - button "":
+      - generic: 
+  - 'link "Car Rental Application New Request To Review: 0 "':
+    - complementary:
+      - img "Binary file"
+    - generic: Car Rental Application
+    - button "New Request"
+    - 'button "To Review: 0"'
+    - button "":
+      - generic: 
+  - 'link "Job Referral Award New Request To Review: 0 "':
+    - complementary:
+      - img "Binary file"
+    - generic: Job Referral Award
+    - button "New Request"
+    - 'button "To Review: 0"'
+    - button "":
+      - generic: 
+  - 'link "Procurement New Request To Review: 0 "':
+    - complementary:
+      - img "Binary file"
+    - generic: Procurement
+    - button "New Request"
+    - 'button "To Review: 0"'
+    - button "":
+      - generic: 
+  - 'link "Create RFQ''s New Request To Review: 0 "':
+    - complementary:
+      - img "Binary file"
+    - generic: Create RFQ's
+    - button "New Request"
+    - 'button "To Review: 0"'
+    - button "":
+      - generic: 
+- paragraph: Press esc to exit full screen

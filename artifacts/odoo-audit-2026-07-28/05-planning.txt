@@ -1,0 +1,114 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Planning"
+      - generic: Planning
+    - menu:
+      - button "Schedule":
+        - generic: Schedule
+      - button "Maps":
+        - generic: Maps
+      - button "Planning":
+        - generic: Planning
+      - button "Reporting":
+        - generic: Reporting
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- button "New"
+- button "Publish"
+- button "Actions ":
+  - text: Actions
+  - generic: 
+- generic: Schedule by Resource
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - searchbox "Search..." [active]
+  - button ""
+- navigation:
+  - button "Gantt View":
+    - generic: 
+  - button "Map View":
+    - generic: 
+  - button "Calendar View":
+    - generic: 
+  - button "List View":
+    - generic: 
+  - button "Kanban View":
+    - generic: 
+  - button "Pivot View":
+    - generic: 
+  - button "Graph View":
+    - generic: 
+  - button "Activity View":
+    - generic: 
+- main:
+  - paragraph: No shifts found. Let's create one!
+  - paragraph: Schedule your human and material resources across roles, projects and sales orders.
+  - button "":
+    - generic: 
+  - button "":
+    - generic: 
+  - button "Week "
+  - button "Today"
+  - toolbar:
+    - button ""
+  - generic: Schedule
+  - generic "Week 31, Jul 26 - Aug 1"
+  - generic "Sunday, July 26, 2026":
+    - text:  
+    - generic: Sunday 26
+  - generic "Monday, July 27, 2026":
+    - text:  
+    - generic: Monday 27
+  - generic "Tuesday, July 28, 2026":
+    - text:  
+    - generic: Tuesday 28
+  - generic "Wednesday, July 29, 2026":
+    - text:  
+    - generic: Wednesday 29
+  - generic "Thursday, July 30, 2026":
+    - text:  
+    - generic: Thursday 30
+  - generic "Friday, July 31, 2026":
+    - text:  
+    - generic: Friday 31
+  - generic "Saturday, August 1, 2026":
+    - text:  
+    - generic: Saturday 1
+  - generic "Open Shifts":
+    - generic: Open Shifts
+  - generic "In massa":
+    - generic: In massa
+  - generic "Integer vitae":
+    - generic: Integer vitae
+  - generic "Laoreet id":
+    - generic: Laoreet id
+  - generic "Viverra nam":
+    - generic: Viverra nam
+  - generic "Volutpat blandit":
+    - generic: Volutpat blandit
+- paragraph: Press esc to exit full screen

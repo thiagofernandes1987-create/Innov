@@ -977,6 +977,13 @@ O teste `tests/personas-catalog.test.ts` cruza esta responsabilidade com
 `MODULE_REGISTRY`. Cobertura declarada em prosa e ausente no catálogo, ou o
 contrário, é divergência documental e deve ser corrigida na mesma passagem.
 
+O runner `lib/operations/routines.ts` não escolhe mais um “aplicativo
+representativo” por pessoa. Ele materializa as **111 combinações
+persona × aplicativo operacional** declaradas no catálogo e executa os três
+cenários em cada uma: **333 ensaios determinísticos**. Assim, P14 é testada em
+Propostas, Contratos, Aditivos, Assinaturas e Documentos; não apenas em
+Contratos.
+
 ---
 
 

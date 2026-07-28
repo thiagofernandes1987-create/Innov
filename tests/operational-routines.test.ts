@@ -7,8 +7,12 @@ import {
 } from "../lib/operations/routines";
 
 describe("runner das rotinas profissionais", () => {
-  it("liga todas as 16 profissões a um módulo real que elas utilizam", () => {
-    expect(ROTINAS_OPERACIONAIS).toHaveLength(PERSONAS_OPERACIONAIS.length);
+  it("liga cada profissão a todos os aplicativos que ela utiliza", () => {
+    const expected = PERSONAS_OPERACIONAIS.reduce(
+      (total, persona) => total + persona.modules.filter(module => module !== "dashboard").length,
+      0
+    );
+    expect(ROTINAS_OPERACIONAIS).toHaveLength(expected);
     for (const routine of ROTINAS_OPERACIONAIS) {
       const persona = PERSONAS_OPERACIONAIS.find(item => item.id === routine.persona);
       expect(MODULE_BY_KEY.has(routine.module), routine.persona).toBe(true);
@@ -16,9 +20,12 @@ describe("runner das rotinas profissionais", () => {
     }
   });
 
-  it("executa otimista, normal e pessimista para todas as personas", () => {
+  it("executa otimista, normal e pessimista em todos os aplicativos, sem exceção", () => {
     const results = executarCenariosDasPersonas();
-    expect(results).toHaveLength(16 * 3);
+    expect(results).toHaveLength(ROTINAS_OPERACIONAIS.length * 3);
+    const modulesTested = new Set(results.map(result => result.module));
+    const installedModules = [...MODULE_BY_KEY.keys()].filter(module => module !== "dashboard");
+    expect(modulesTested).toEqual(new Set(installedModules));
     for (const result of results) {
       if (result.scenario === "pessimistic") {
         expect(result.notifications.length, result.persona).toBeGreaterThan(0);

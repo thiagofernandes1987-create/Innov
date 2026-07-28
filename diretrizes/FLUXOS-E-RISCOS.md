@@ -662,6 +662,20 @@ quando o SLA vence. A implementação executável dos destinatários está em
 `lib/personas/catalog.ts`; a camada de entrega da S-29 deverá consumir esse
 contrato em vez de repetir listas por módulo.
 
+## Cobertura executável do loop
+
+O loop não encerra uma persona depois de um único aplicativo. Para cada uma das
+111 combinações persona × aplicativo operacional declaradas, o runner executa:
+
+1. otimista — fluxo sem exceção e sem notificação;
+2. normal — espera e priorização registradas, ainda sem empurrar ruído;
+3. pessimista — fato, objeto, impacto, obrigação, SLA e destinatários
+   intersetoriais.
+
+Resultado esperado: **333 cenários** e cobertura dos 21 aplicativos
+operacionais. A grade inicial (`dashboard`) é ponto de entrada, não rotina de
+domínio, e continua coberta pelo catálogo de permissões e pelos testes visuais.
+
 ---
 
 # O que este documento obriga

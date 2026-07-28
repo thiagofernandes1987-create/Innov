@@ -368,9 +368,12 @@ export async function decideDailyLog(formData: FormData) {
 
 export async function uploadProjectDocument(formData: FormData) {
   const projectId = text(formData, "projectId");
+  const globalUpload = text(formData, "returnPath") === "/app/documentos";
+  const errorPath = globalUpload ? "/app/documentos/novo" : `/app/obras/${projectId}/documentos`;
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) fail(`/app/obras/${projectId}/documentos`, "Selecione um arquivo.");
-  if (file.size > 50 * 1024 * 1024) fail(`/app/obras/${projectId}/documentos`, "O arquivo excede 50 MB.");
+  if (!projectId) fail(errorPath, "Selecione a obra do documento.");
+  if (!(file instanceof File) || file.size === 0) fail(errorPath, "Selecione um arquivo.");
+  if (file.size > 50 * 1024 * 1024) fail(errorPath, "O arquivo excede 50 MB.");
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
   const code = text(formData, "code").toUpperCase();
@@ -397,7 +400,7 @@ export async function uploadProjectDocument(formData: FormData) {
       category: text(formData, "category"),
       created_by: userId
     }).select("id").single();
-    if (error || !data) fail(`/app/obras/${projectId}/documentos`, error?.message ?? "Falha ao criar documento.");
+    if (error || !data) fail(errorPath, error?.message ?? "Falha ao criar documento.");
     documentId = data.id;
   }
 
@@ -411,7 +414,7 @@ export async function uploadProjectDocument(formData: FormData) {
     contentType: file.type || "application/octet-stream",
     upsert: false
   });
-  if (uploadError) fail(`/app/obras/${projectId}/documentos`, uploadError.message);
+  if (uploadError) fail(errorPath, uploadError.message);
 
   const { error } = await supabase.from("project_document_versions").insert({
     organization_id: organizationId,
@@ -428,9 +431,11 @@ export async function uploadProjectDocument(formData: FormData) {
   });
   if (error) {
     await supabase.storage.from("project-documents").remove([storagePath]);
-    fail(`/app/obras/${projectId}/documentos`, error.message);
+    fail(errorPath, error.message);
   }
   revalidatePath(`/app/obras/${projectId}/documentos`);
+  revalidatePath("/app/documentos");
+  if (globalUpload) redirect("/app/documentos");
 }
 
 export async function releaseProjectDocument(formData: FormData) {

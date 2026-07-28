@@ -1,0 +1,76 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Inventory"
+      - generic: Inventory
+    - menu:
+      - menuitem "Overview"
+      - button "Operations":
+        - generic: Operations
+      - button "Products":
+        - generic: Products
+      - button "Reporting":
+        - generic: Reporting
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- generic: Inventory Overview
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - searchbox "Search..." [active]
+  - button ""
+- search:
+  - navigation "Pager":
+    - generic: 1-5
+    - text: / 5
+    - button "Previous" [disabled]:
+      - generic: 
+    - button "Next" [disabled]:
+      - generic: 
+- main:
+  - link "Receipts Open":
+    - link "Receipts":
+      - /url: "#"
+    - button "Open"
+  - link "Delivery Orders Open":
+    - link "Delivery Orders":
+      - /url: "#"
+    - button "Open"
+  - link "Manufacturing Open":
+    - link "Manufacturing":
+      - /url: "#"
+    - button "Open"
+  - link "PoS Orders Open":
+    - link "PoS Orders":
+      - /url: "#"
+    - button "Open"
+  - link "Repairs Open ":
+    - link "Repairs":
+      - /url: "#"
+    - button "Open"
+    - button "":
+      - generic: 
+- paragraph: Press esc to exit full screen

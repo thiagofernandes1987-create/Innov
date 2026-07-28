@@ -1,0 +1,138 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "CRM"
+      - generic: CRM
+    - menu:
+      - button "Sales":
+        - generic: Sales
+      - button "Reporting":
+        - generic: Reporting
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- button "New"
+- button "Generate "
+- text: 
+- generic: Pipeline
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - listitem "search":
+      - button " ":
+        - generic: 
+        - generic: 
+      - generic "My Pipeline"
+      - button "Remove": 
+    - searchbox "Search..." [active]
+  - button ""
+- navigation:
+  - button "Kanban View":
+    - generic: 
+  - button "List View":
+    - generic: 
+  - button "Calendar View":
+    - generic: 
+  - button "Pivot View":
+    - generic: 
+  - button "Graph View":
+    - generic: 
+  - button "Map View":
+    - generic: 
+  - button "Activity View":
+    - generic: 
+- main:
+  - generic: New
+  - button "Quick add":
+    - img "Quick add": 
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - generic: R$ 0
+  - link "ert's opportunity ert Morno Priority Show activities":
+    - generic: ert's opportunity
+    - generic: ert
+    - generic "Morno":
+      - generic: Morno
+    - radiogroup "Priority":
+      - radio "Medium": 
+      - radio "High": 
+      - radio "Very High": 
+    - button "Show activities":
+      - img: 
+  - generic: Qualified
+  - button "Quick add":
+    - img "Quick add": 
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - generic: R$ 0
+  - link "Innovar's opportunity Innovar Priority Show activities":
+    - generic: Innovar's opportunity
+    - generic: Innovar
+    - radiogroup "Priority":
+      - radio "Medium": 
+      - radio "High": 
+      - radio "Very High": 
+    - button "Show activities":
+      - img: 
+  - generic: werwer
+  - button "Quick add":
+    - img "Quick add": 
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - generic: "0"
+  - generic: Proposition
+  - button "Quick add":
+    - img "Quick add": 
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - generic: R$ 0
+  - link "Innovar's opportunity Innovar Priority Show activities":
+    - generic: Innovar's opportunity
+    - generic: Innovar
+    - radiogroup "Priority":
+      - radio "Medium": 
+      - radio "High": 
+      - radio "Very High": 
+    - button "Show activities":
+      - img: 
+  - generic: Won
+  - button "Quick add":
+    - img "Quick add": 
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - progressbar "Progress bar"
+  - generic: "0"
+  - button "Add column":
+    - img "Add column": 
+- paragraph: Press esc to exit full screen

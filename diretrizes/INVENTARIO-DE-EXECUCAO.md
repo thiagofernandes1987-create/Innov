@@ -957,7 +957,7 @@ comprador, almoxarife, qualidade, contratos, diretoria ou auditoria.
 - [x] T-30.2 — **Matriz competência → técnica → dado** para todas as personas, documentada em `PERSONAS-E-ROTINAS.md` e codificada em `lib/personas/catalog.ts`
 - [x] T-30.3 — **Cobertura automática dos 22 aplicativos**: o teste reprova módulo sem profissional, persona com menos de quatro competências, técnica sem dado e destinatário inexistente
 - [x] T-30.4 — **Três cenários para cada persona** — otimista, normal e pessimista — com evento, destinatários intersetoriais e resposta esperada, em `FLUXOS-E-RISCOS.md`
-- [x] T-30.5 — **Runner de cenário funcional**: 48 execuções (16 profissões × otimista, normal e pessimista) ligam persona, módulo real, objeto, decisão e destinatários; PostgreSQL executa gravação, permissão e notificação em 14 testes, incluindo P15 sob identidade de cliente
+- [x] T-30.5 — **Runner de cenário funcional**: 333 execuções (111 combinações persona × aplicativo operacional × otimista, normal e pessimista) ligam profissão, todos os módulos que utiliza, objeto, decisão e destinatários; PostgreSQL executa gravação, permissão e notificação em 14 testes, incluindo P15 sob identidade de cliente
 - [x] T-30.6 — **Evento operacional transversal no domínio**: fato, objeto, impacto, obrigação, destinatário, SLA e evidência; otimista e normal retornam zero notificações (`lib/operations/notifications.ts`, 5 testes)
 - [ ] T-30.7 — **Entrega por recorte**: executor, dono da restrição, gerente, diretoria, financeiro, cliente e auditoria recebem visões diferentes do mesmo fato
   - [x] T-30.7.1 — Planejamento determinístico dos recortes, bloqueio do cliente sem aprovação, escalonamento sem duplicação e agrupamento por objeto
@@ -968,6 +968,9 @@ comprador, almoxarife, qualidade, contratos, diretoria ou auditoria.
   - [x] T-30.8.3 — Aplicada no projeto Supabase `wyeojufebtwblsubkunr`: 16 tipos, 8 políticas, escrita direta e `anon` negados; advisors executados e correção de performance versionada (`VACINA-021`)
 - [ ] T-30.9 — **Aplicar à casca e aos arquétipos de tela**, começando pelo piloto CRM e repetindo coleção, registro, transação, planejamento e campo
 - [ ] T-30.10 — **Homologar em três cenários por persona** e registrar defeito em Vacinas antes de corrigir
+  - [x] T-30.10.1 — Auditoria autenticada de 17 aplicativos do Odoo, inventário de menus e capturas em `artifacts/odoo-audit-2026-07-28/`
+  - [x] T-30.10.2 — Corrigir a primeira classe transversal: capacidade existente sem porta de entrada (`VACINA-028`), com menus reais para todos os aplicativos e criação de proposta, contrato, aditivo e documento
+  - [ ] T-30.10.3 — Repetir o QA autenticado da Innovar nos 333 cenários após aplicar a migration e disponibilizar a branch na homologação
 
 ---
 

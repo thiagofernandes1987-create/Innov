@@ -1,0 +1,336 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Purchase"
+      - generic: Purchase
+    - menu:
+      - button "Orders":
+        - generic: Orders
+      - button "Products":
+        - generic: Products
+      - button "Reporting":
+        - generic: Reporting
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- button "New"
+- button "Upload"
+- generic: Requests for Quotation
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - searchbox "Search..." [active]
+  - button ""
+- navigation:
+  - button "List View":
+    - generic: 
+  - button "Kanban View":
+    - generic: 
+  - button "Pivot View":
+    - generic: 
+  - button "Graph View":
+    - generic: 
+  - button "Calendar View":
+    - generic: 
+  - button "Activity View":
+    - generic: 
+- main:
+  - generic "All Draft RFQs":
+    - link "0 New":
+      - /url: "#"
+      - generic: "0"
+      - text: New
+  - generic "All Sent RFQs":
+    - link "0 RFQ Sent":
+      - /url: "#"
+      - generic: "0"
+      - text: RFQ Sent
+  - generic "All Late RFQs":
+    - link "0 Late RFQ":
+      - /url: "#"
+      - generic: "0"
+      - text: Late RFQ
+  - generic "All Not Acknowledged POs":
+    - link "0 Not Acknowledged":
+      - /url: "#"
+      - generic: "0"
+      - text: Not Acknowledged
+  - generic "All Late Receipt POs":
+    - link "0 Late Receipt":
+      - /url: "#"
+      - generic: "0"
+      - text: Late Receipt
+  - generic "OTD":
+    - generic: 100 %
+    - text: OTD
+  - generic "All Days to Order":
+    - generic: "0.00"
+    - text: Days to Order
+  - paragraph: No request for quotation found. Let's create one!
+  - paragraph: Requests for quotation are documents that will be sent to your suppliers to request prices for different products you consider buying. Once an agreement has been found with the supplier, they will be confirmed and turned into purchase orders.
+  - table:
+    - rowgroup:
+      - row "Reference  Vendor  Buyer  Order Deadline  Activities Total  Status  ":
+        - columnheader:
+          - checkbox [disabled]
+        - columnheader
+        - columnheader "Reference ":
+          - generic: Reference
+          - generic: 
+        - columnheader "Vendor ":
+          - generic: Vendor
+          - generic: 
+        - columnheader "Buyer ":
+          - generic: Buyer
+          - generic: 
+        - columnheader "Order Deadline ":
+          - generic: Order Deadline
+          - generic: 
+        - columnheader "Activities":
+          - generic: Activities
+          - text: 
+        - columnheader "Total ":
+          - generic: Total
+          - generic: 
+        - columnheader "Status ":
+          - generic: Status
+          - generic: 
+        - columnheader "":
+          - button "":
+            - generic: 
+    - rowgroup:
+      - row "Priority REF0001 John Miller John Miller Today Integer vitae 4,779.00 RFQ Sent":
+        - cell:
+          - checkbox [disabled]
+        - cell "Priority":
+          - radiogroup "Priority":
+            - radio "Urgent": 
+        - cell "REF0001"
+        - cell "John Miller"
+        - cell "John Miller":
+          - generic: John Miller
+        - cell "Today":
+          - generic "07/28/2026": Today
+        - cell "Integer vitae":
+          - button "Integer vitae":
+            - img: 
+            - text: Integer vitae
+        - cell "4,779.00":
+          - generic: 4,779.00
+        - cell "RFQ Sent":
+          - generic: RFQ Sent
+        - cell
+      - row "Priority REF0002 Thomas Passot Thomas Passot 6 days ago In massa 44,166.00 To Approve":
+        - cell:
+          - checkbox [disabled]
+        - cell "Priority":
+          - radiogroup "Priority":
+            - radio "Urgent" [checked]: 
+        - cell "REF0002"
+        - cell "Thomas Passot"
+        - cell "Thomas Passot":
+          - generic: Thomas Passot
+        - cell "6 days ago":
+          - generic "07/22/2026": 6 days ago
+        - cell "In massa":
+          - button "In massa":
+            - img: 
+            - text: In massa
+        - cell "44,166.00":
+          - generic: 44,166.00
+        - cell "To Approve":
+          - generic: To Approve
+        - cell
+      - row "Priority REF0003 Wendi Baltz Carrie Helle Viverra nam 93,559.00 Cancelled":
+        - cell:
+          - checkbox [disabled]
+        - cell "Priority":
+          - radiogroup "Priority":
+            - radio "Urgent" [checked]: 
+        - cell "REF0003"
+        - cell "Wendi Baltz"
+        - cell "Carrie Helle":
+          - generic: Carrie Helle
+        - cell
+        - cell "Viverra nam":
+          - button "Viverra nam":
+            - img: 
+            - text: Viverra nam
+        - cell "93,559.00":
+          - generic: 93,559.00
+        - cell "Cancelled":
+          - generic: Cancelled
+        - cell
+      - row "Priority REF0004 John Miller Thomas Passot In 20 days In massa 11,544.00 RFQ Sent":
+        - cell:
+          - checkbox [disabled]
+        - cell "Priority":
+          - radiogroup "Priority":
+            - radio "Urgent" [checked]: 
+        - cell "REF0004"
+        - cell "John Miller"
+        - cell "Thomas Passot":
+          - generic: Thomas Passot
+        - cell "In 20 days":
+          - generic "08/17/2026": In 20 days
+        - cell "In massa":
+          - button "In massa":
+            - img: 
+            - text: In massa
+        - cell "11,544.00":
+          - generic: 11,544.00
+        - cell "RFQ Sent":
+          - generic: RFQ Sent
+        - cell
+      - row "Priority REF0005 Henry Campbell John Miller Volutpat blandit 89,628.00 Cancelled":
+        - cell:
+          - checkbox [disabled]
+        - cell "Priority":
+          - radiogroup "Priority":
+            - radio "Urgent": 
+        - cell "REF0005"
+        - cell "Henry Campbell"
+        - cell "John Miller":
+          - generic: John Miller
+        - cell
+        - cell "Volutpat blandit":
+          - button "Volutpat blandit":
+            - img: 
+            - text: Volutpat blandit
+        - cell "89,628.00":
+          - generic: 89,628.00
+        - cell "Cancelled":
+          - generic: Cancelled
+        - cell
+      - row "Priority REF0006 Carrie Helle John Miller Volutpat blandit 28,204.00 Purchase Order":
+        - cell:
+          - checkbox [disabled]
+        - cell "Priority":
+          - radiogroup "Priority":
+            - radio "Urgent": 
+        - cell "REF0006"
+        - cell "Carrie Helle"
+        - cell "John Miller":
+          - generic: John Miller
+        - cell
+        - cell "Volutpat blandit":
+          - button "Volutpat blandit":
+            - img: 
+            - text: Volutpat blandit
+        - cell "28,204.00":
+          - generic: 28,204.00
+        - cell "Purchase Order":
+          - generic: Purchase Order
+        - cell
+      - row "Priority REF0007 Wendi Baltz Wendi Baltz 26 days ago Laoreet id 17,269.00 RFQ Sent":
+        - cell:
+          - checkbox [disabled]
+        - cell "Priority":
+          - radiogroup "Priority":
+            - radio "Urgent" [checked]: 
+        - cell "REF0007"
+        - cell "Wendi Baltz"
+        - cell "Wendi Baltz":
+          - generic: Wendi Baltz
+        - cell "26 days ago":
+          - generic "07/02/2026": 26 days ago
+        - cell "Laoreet id":
+          - button "Laoreet id":
+            - img: 
+            - text: Laoreet id
+        - cell "17,269.00":
+          - generic: 17,269.00
+        - cell "RFQ Sent":
+          - generic: RFQ Sent
+        - cell
+      - row "Priority REF0008 Thomas Passot Carrie Helle In 22 days Integer vitae 17,630.00 RFQ":
+        - cell:
+          - checkbox [disabled]
+        - cell "Priority":
+          - radiogroup "Priority":
+            - radio "Urgent" [checked]: 
+        - cell "REF0008"
+        - cell "Thomas Passot"
+        - cell "Carrie Helle":
+          - generic: Carrie Helle
+        - cell "In 22 days":
+          - generic "08/19/2026": In 22 days
+        - cell "Integer vitae":
+          - button "Integer vitae":
+            - img: 
+            - text: Integer vitae
+        - cell "17,630.00":
+          - generic: 17,630.00
+        - cell "RFQ":
+          - generic: RFQ
+        - cell
+      - row "Priority REF0009 Henry Campbell John Miller Yesterday Volutpat blandit 46,769.00 RFQ Sent":
+        - cell:
+          - checkbox [disabled]
+        - cell "Priority":
+          - radiogroup "Priority":
+            - radio "Urgent" [checked]: 
+        - cell "REF0009"
+        - cell "Henry Campbell"
+        - cell "John Miller":
+          - generic: John Miller
+        - cell "Yesterday":
+          - generic "07/27/2026": Yesterday
+        - cell "Volutpat blandit":
+          - button "Volutpat blandit":
+            - img: 
+            - text: Volutpat blandit
+        - cell "46,769.00":
+          - generic: 46,769.00
+        - cell "RFQ Sent":
+          - generic: RFQ Sent
+        - cell
+      - row "Priority REF0010 Henry Campbell John Miller In massa 66,230.00 Purchase Order":
+        - cell:
+          - checkbox [disabled]
+        - cell "Priority":
+          - radiogroup "Priority":
+            - radio "Urgent" [checked]: 
+        - cell "REF0010"
+        - cell "Henry Campbell"
+        - cell "John Miller":
+          - generic: John Miller
+        - cell
+        - cell "In massa":
+          - button "In massa":
+            - img: 
+            - text: In massa
+        - cell "66,230.00":
+          - generic: 66,230.00
+        - cell "Purchase Order":
+          - generic: Purchase Order
+        - cell
+    - rowgroup:
+      - row "419,778.00":
+        - cell
+        - cell "419,778.00":
+          - generic: 419,778.00
+        - cell
+- paragraph: Press esc to exit full screen

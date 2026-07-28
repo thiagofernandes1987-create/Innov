@@ -9,38 +9,53 @@ export type OperationalRoutine = {
   obligation: PersonaId;
 };
 
-const ROTINAS = [
-  ["P1", "crm", "client", "P11"],
-  ["P2", "planejamento", "project", "P8"],
-  ["P3", "tarefas", "task", "P8"],
-  ["P4", "financeiro", "financial", "P13"],
-  ["P5", "sac", "ticket", "P9"],
-  ["P6", "administracao", "security", "P16"],
-  ["P7", "documentos", "document", "P8"],
-  ["P8", "obras", "project", "P13"],
-  ["P9", "compras", "purchase", "P8"],
-  ["P10", "estoque", "inventory", "P10"],
-  ["P11", "orcamentos", "financial", "P13"],
-  ["P12", "qualidade", "quality", "P12"],
-  ["P13", "relatorios", "project", "P13"],
-  ["P14", "contratos", "document", "P14"],
-  ["P15", "sac", "ticket", "P1"],
-  ["P16", "auditoria", "security", "P13"]
-] as const satisfies readonly [
-  PersonaId,
-  string,
-  OperationalObjectType,
-  PersonaId
-][];
+const OBJECT_TYPE_BY_MODULE: Record<string, OperationalObjectType> = {
+  crm: "client",
+  clientes: "client",
+  obras: "project",
+  planejamento: "project",
+  tarefas: "task",
+  diario: "project",
+  equipes: "project",
+  orcamentos: "financial",
+  propostas: "document",
+  contratos: "document",
+  aditivos: "document",
+  assinaturas: "document",
+  documentos: "document",
+  qualidade: "quality",
+  compras: "purchase",
+  estoque: "inventory",
+  financeiro: "financial",
+  sac: "ticket",
+  relatorios: "project",
+  auditoria: "security",
+  administracao: "security"
+};
 
-export const ROTINAS_OPERACIONAIS: readonly OperationalRoutine[] = ROTINAS.map(
-  ([persona, module, objectType, obligation]) => ({
-    persona,
-    module,
-    objectType,
-    obligation
-  })
-);
+/**
+ * Matriz executável persona × aplicativo.
+ *
+ * Antes, cada profissional era ensaiado em apenas um aplicativo, embora a
+ * matriz canônica declarasse vários. Isso deixava propostas, aditivos,
+ * assinaturas e equipes fora do loop. Agora cada combinação declarada no
+ * catálogo produz uma rotina e três cenários.
+ */
+export const ROTINAS_OPERACIONAIS: readonly OperationalRoutine[] =
+  PERSONAS_OPERACIONAIS.flatMap(persona =>
+    persona.modules
+      .filter(module => module !== "dashboard")
+      .map(module => {
+        const objectType = OBJECT_TYPE_BY_MODULE[module];
+        if (!objectType) throw new Error(`Tipo operacional ausente para o módulo ${module}.`);
+        return {
+          persona: persona.id,
+          module,
+          objectType,
+          obligation: persona.scenarios.pessimistic.notify[0]
+        };
+      })
+  );
 
 export function executarCenariosDasPersonas() {
   return ROTINAS_OPERACIONAIS.flatMap(routine => {

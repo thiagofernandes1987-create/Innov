@@ -38,6 +38,34 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
     { rotulo: "Planejamento", href: "/app/planejamento" },
     { rotulo: "Relatórios", href: "/app/relatorios/obras" }
   ],
+  planejamento: [
+    { rotulo: "Portfólio", href: "/app/planejamento" },
+    { rotulo: "Tarefas", href: "/app/tarefas" },
+    { rotulo: "Equipes", href: "/app/equipes" },
+    { rotulo: "Diário", href: "/app/diario" },
+    { rotulo: "Relatórios", href: "/app/relatorios/obras" }
+  ],
+  tarefas: [
+    { rotulo: "Tarefas", href: "/app/tarefas" },
+    { rotulo: "Planejamento", href: "/app/planejamento" },
+    { rotulo: "Equipes", href: "/app/equipes" },
+    { rotulo: "Diário", href: "/app/diario" },
+    { rotulo: "Relatórios", href: "/app/relatorios/obras" }
+  ],
+  diario: [
+    { rotulo: "Diários", href: "/app/diario" },
+    { rotulo: "Obras", href: "/app/obras" },
+    { rotulo: "Tarefas", href: "/app/tarefas" },
+    { rotulo: "Qualidade", href: "/app/qualidade" },
+    { rotulo: "Relatórios", href: "/app/relatorios/obras" }
+  ],
+  equipes: [
+    { rotulo: "Equipes", href: "/app/equipes" },
+    { rotulo: "Planejamento", href: "/app/planejamento" },
+    { rotulo: "Tarefas", href: "/app/tarefas" },
+    { rotulo: "Obras", href: "/app/obras" },
+    { rotulo: "Relatórios", href: "/app/relatorios/obras" }
+  ],
   compras: [
     { rotulo: "Solicitações", href: "/app/compras/solicitacoes" },
     { rotulo: "Pedidos", href: "/app/compras/pedidos" },
@@ -93,6 +121,34 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
     { rotulo: "Orçamentos", href: "/app/orcamentos" },
     { rotulo: "Novo orçamento", href: "/app/orcamentos/novo" }
   ],
+  propostas: [
+    { rotulo: "Propostas", href: "/app/propostas" },
+    { rotulo: "Nova proposta", href: "/app/propostas/nova" },
+    { rotulo: "Orçamentos", href: "/app/orcamentos" },
+    { rotulo: "Contratos", href: "/app/contratos" },
+    { rotulo: "Relatórios", href: "/app/relatorios" }
+  ],
+  contratos: [
+    { rotulo: "Contratos", href: "/app/contratos" },
+    { rotulo: "Novo contrato", href: "/app/contratos/novo" },
+    { rotulo: "Aditivos", href: "/app/aditivos" },
+    { rotulo: "Assinaturas", href: "/app/assinaturas" },
+    { rotulo: "Documentos", href: "/app/documentos" }
+  ],
+  aditivos: [
+    { rotulo: "Aditivos", href: "/app/aditivos" },
+    { rotulo: "Novo aditivo", href: "/app/aditivos/novo" },
+    { rotulo: "Contratos", href: "/app/contratos" },
+    { rotulo: "Assinaturas", href: "/app/assinaturas" },
+    { rotulo: "Documentos", href: "/app/documentos" }
+  ],
+  documentos: [
+    { rotulo: "Documentos", href: "/app/documentos" },
+    { rotulo: "Enviar arquivo", href: "/app/documentos/novo" },
+    { rotulo: "Assinaturas", href: "/app/assinaturas" },
+    { rotulo: "Qualidade", href: "/app/qualidade/documentos" },
+    { rotulo: "Relatórios", href: "/app/relatorios" }
+  ],
   ocorrencias: [
     { rotulo: "Ocorrências", href: "/app/ocorrencias" },
     { rotulo: "Nova ocorrência", href: "/app/ocorrencias/novo" }
@@ -105,12 +161,9 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
 };
 
 /**
- * Módulo sem menu declarado não ganha menu falso.
- *
- * Aditivos, contratos, diário, documentos, equipes, planejamento, propostas e
- * tarefas hoje são tela única: inventar "Configuração" para preencher a barra
- * criaria um destino que não existe. A barra fica só com ícone e nome, que é o
- * que o padrão faz nesses casos.
+ * Módulo sem menu declarado não ganha menu falso. O teste de cobertura exige
+ * que todo aplicativo instalável tenha ao menos uma rota real e impede que uma
+ * capacidade volte a existir apenas por URL conhecida.
  */
 export function menusDe(moduloChave: string): ItemDeMenu[] {
   return MENUS_DO_MODULO[moduloChave] ?? [];
