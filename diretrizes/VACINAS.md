@@ -132,6 +132,9 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-031` | Estado mistura token de fundo com primeiro plano fixo | vigente | cores semânticas em texto, fundo e borda, validadas por teste |
 | `VACINA-032` | `SECURITY DEFINER` usa função de extensão sem schema explícito | vigente | `extensions.digest`, varredura das definições finais e portão de CI |
 | `VACINA-033` | Simulador e provedor concluem estados de negócio diferentes | vigente | RPC transacional única chamada por todos os adaptadores |
+| `VACINA-034` | Permissão de aprovação é confundida com independência do aprovador | vigente | bloqueio de solicitante/selecionador e cenário com segundo ator |
+| `VACINA-035` | `CASE` textual alimenta coluna enum sem tipo explícito | vigente | casts enum por ramo e execução real das transições |
+| `VACINA-036` | Consulta presume coluna convencional ausente no schema real | vigente | ordem derivada da linha da solicitação e fluxo até saldo físico |
 
 ## 4. Arquivos
 
@@ -169,7 +172,10 @@ diretrizes/vacinas/
 ├── VACINA-030-MENU-DESKTOP-SEM-CORTE.md
 ├── VACINA-031-ESTADO-SEMPRE-USA-TOKENS-DE-TEMA.md
 ├── VACINA-032-FUNCAO-DE-EXTENSAO-QUALIFICADA.md
-└── VACINA-033-SIMULADOR-E-PROVEDOR-CONCLUEM-O-MESMO-DOMINIO.md
+├── VACINA-033-SIMULADOR-E-PROVEDOR-CONCLUEM-O-MESMO-DOMINIO.md
+├── VACINA-034-APROVACAO-EXIGE-ATOR-INDEPENDENTE.md
+├── VACINA-035-TRANSICAO-ENUM-TIPADA.md
+└── VACINA-036-CONSULTA-SEGUE-CONTRATO-REAL-DA-TABELA.md
 ```
 
 ## 5. Critérios para nova vacina
