@@ -37,6 +37,10 @@ jobs:
         run: |
           set -o pipefail
           node scripts/validate-vaccines.mjs 2>&1 | tee vaccines-validation.txt
+      - name: Validate extension function qualification
+        run: |
+          set -o pipefail
+          node scripts/validate-extension-functions.mjs 2>&1 | tee extension-functions-validation.txt
       - name: Validate Supabase migration ledger
         run: |
           set -o pipefail
@@ -66,6 +70,7 @@ jobs:
             documentation-validation.txt
             personas-audit-validation.txt
             vaccines-validation.txt
+            extension-functions-validation.txt
             migrations-validation.txt
             stage17-validation.txt
             stage18-validation.txt
@@ -82,6 +87,7 @@ jobs:
             supabase/migrations/20260720*.sql
             supabase/migrations/20260721*.sql
             supabase/migrations/20260722*.sql
+            supabase/migrations/20260728*.sql
           if-no-files-found: warn
           retention-days: 7
 
@@ -118,6 +124,8 @@ jobs:
         run: pnpm validate:docs
       - name: Validate auditable persona contracts
         run: pnpm validate:personas-audit
+      - name: Validate extension function qualification
+        run: pnpm validate:extension-functions
       - name: Validate Stage 9 structure
         run: pnpm validate:stage9
       - name: Validate Stage 12 structure
