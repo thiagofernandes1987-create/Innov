@@ -17,6 +17,7 @@
     "validate:inventory": "node scripts/validate-inventory.mjs",
     "validate:personas-audit": "node scripts/validate-personas-audit.mjs",
     "validate:extension-functions": "node scripts/validate-extension-functions.mjs",
+    "validate:operational-qa": "node scripts/validate-operational-qa-guards.mjs",
     "validate:object-runtime": "node scripts/validate-object-runtime.mjs",
     "test:db:object-runtime": "node scripts/run-object-runtime-db-tests.mjs",
     "validate:pipeline": "node scripts/validate-pipeline.mjs",
