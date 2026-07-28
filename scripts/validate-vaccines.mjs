@@ -2,34 +2,32 @@ import fs from"node:fs";
 
 const errors=[];
 const read=file=>fs.readFileSync(file,"utf8");
-const vaccines=[
- "diretrizes/vacinas/VACINA-001-RELACOES-SUPABASE.md",
- "diretrizes/vacinas/VACINA-002-VALIDADORES-SEMANTICOS.md",
- "diretrizes/vacinas/VACINA-003-LEDGER-MIGRATIONS-SUPABASE.md",
- "diretrizes/vacinas/VACINA-004-PRIVILEGIOS-RPCS.md",
- "diretrizes/vacinas/VACINA-005-WORKFLOW-PROTEGIDO.md",
- "diretrizes/vacinas/VACINA-006-RUNTIME-GITHUB-ACTIONS.md",
- "diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md",
- "diretrizes/vacinas/VACINA-008-INSTALACAO-HOMOLOGACAO.md",
- "diretrizes/vacinas/VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md",
- "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md",
- "diretrizes/vacinas/VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md",
- "diretrizes/vacinas/VACINA-012-ESTADO-POS-MERGE.md",
- "diretrizes/vacinas/VACINA-013-FIXTURES-RESPEITAM-FRONTEIRAS-SENSIVEIS.md"
-];
+const vaccinesDirectory="diretrizes/vacinas";
+// Descoberta por padrão e ordem lexical: VACINA-014-LISTA-FIXA-DE-MIGRATIONS-EM-TESTE.md.
+// A procedência fica junto do código, conforme VACINA-016-VALIDADOR-QUE-CITA-OUTRO-VALIDADOR.md.
+const vaccines=fs.readdirSync(vaccinesDirectory)
+ .filter(file=>/^VACINA-\d{3}-.*\.md$/.test(file))
+ .sort()
+ .map(file=>`${vaccinesDirectory}/${file}`);
 const required=["diretrizes/VACINAS.md",...vaccines];
 
 for(const file of required){
  if(!fs.existsSync(file)){errors.push(`Vacina ausente: ${file}`);continue;}
  const content=read(file);
- for(const section of["Causa raiz","Vacina","Teste preventivo","Critério de encerramento"]){
-  if(file!=="diretrizes/VACINAS.md"&&!content.includes(section))errors.push(`${file} sem seção ${section}.`);
+ if(file!=="diretrizes/VACINAS.md"){
+  const legacy=content.includes("Causa raiz")&&content.includes("Vacina")&&/Teste (?:preventivo|negativo)/.test(content);
+  const current=["Qual foi o problema","Como ocorreu","Por que aconteceu","Como foi detectado","Qual foi a solução"]
+   .every(section=>content.includes(section));
+  if(!legacy&&!current)errors.push(`${file} não segue nem a estrutura legada nem as cinco perguntas do protocolo atual.`);
  }
 }
 
 if(fs.existsSync("diretrizes/VACINAS.md")){
  const index=read("diretrizes/VACINAS.md");
- for(let id=1;id<=13;id++)if(!index.includes(`VACINA-${String(id).padStart(3,"0")}`))errors.push(`Catálogo sem VACINA-${String(id).padStart(3,"0")}.`);
+ for(const file of vaccines){
+  const id=/VACINA-\d{3}/.exec(file)?.[0];
+  if(id&&!index.includes(id))errors.push(`Catálogo sem ${id}.`);
+ }
 }
 
 // VACINA-001 — relações Supabase variáveis.

@@ -1,10 +1,13 @@
 "use client";
 
+import { CaretDown, ChatCircleDots, Lightning } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { marcarVisto } from "@/app/actions/avisos";
-import { IconeEngrenagem } from "./icones";
-import type { AtividadeAviso, MensagemAviso } from "@/lib/casca/avisos";
+import { signOut } from "@/app/actions/auth";
+import type { Tema } from "@/lib/tema";
+import { AlternadorTema } from "./alternador-tema";
+import type { AtividadeAviso, MensagemAviso, NotificacaoOperacionalAviso } from "@/lib/casca/avisos";
 import { ROTULO_ATIVIDADE, ROTULO_OBSERVACAO, type TipoAtividade } from "@/lib/pipeline/atividades";
 
 // Canto direito da barra: mensagens, notificações e configuração.
@@ -59,24 +62,35 @@ function formatarPrazo(iso: string | null): string {
 export function CantoDireito({
   mensagens,
   atividades,
+  operacionais,
   naoLidas,
   pendentes,
   podeAdministrar,
   email,
-  papel
+  papel,
+  tema,
+  persistirAvisos = true
 }: {
   mensagens: MensagemAviso[];
   atividades: AtividadeAviso[];
+  operacionais: NotificacaoOperacionalAviso[];
   naoLidas: number;
   pendentes: number;
   podeAdministrar: boolean;
   email: string | null;
   papel: string;
+  tema: Tema;
+  persistirAvisos?: boolean;
 }) {
   const [aberto, setAberto] = useState<Painel | null>(null);
+  const [notificacoesVistas, setNotificacoesVistas] = useState(false);
   const [, iniciar] = useTransition();
   const prefixo = useId();
   const caixa = useForaEEscape(aberto !== null, () => setAberto(null));
+  const pendentesVisiveis = notificacoesVistas
+    ? atividades.length
+    : pendentes;
+  const usuario = nomeExibicao(email);
 
   function alternar(painel: Painel) {
     // O próximo estado é calculado fora do atualizador de propósito: a função
@@ -86,8 +100,13 @@ export function CantoDireito({
     const proximo = aberto === painel ? null : painel;
     setAberto(proximo);
     // Abrir o painel é o ato de ler: é aí que o marco de "visto" avança.
-    if (proximo === "mensagens" && naoLidas > 0) iniciar(() => marcarVisto("mensagens"));
-    if (proximo === "notificacoes" && pendentes > 0) iniciar(() => marcarVisto("atividades"));
+    if (persistirAvisos && proximo === "mensagens" && naoLidas > 0) {
+      iniciar(() => marcarVisto("mensagens"));
+    }
+    if (proximo === "notificacoes" && pendentes > 0) {
+      setNotificacoesVistas(true);
+      if (persistirAvisos) iniciar(() => marcarVisto("atividades"));
+    }
   }
 
   return (
@@ -101,52 +120,50 @@ export function CantoDireito({
         title="Mensagens"
         onClick={() => alternar("mensagens")}
       >
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-          <path
-            d="M4 5h16a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 20 17H9.5L5 20.5V17H4a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 4 5Z"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <ChatCircleDots size={21} weight="regular" aria-hidden="true" />
+        <span className="canto-botao-rotulo">Mensagens</span>
         {naoLidas > 0 ? <span className="canto-selo" aria-hidden="true">{naoLidas > 9 ? "9+" : naoLidas}</span> : null}
       </button>
 
       <button
         type="button"
         className="canto-botao"
-        aria-label={pendentes > 0 ? `Notificações, ${pendentes} atividades em aberto` : "Notificações"}
+        aria-label={pendentesVisiveis > 0 ? `Notificações, ${pendentesVisiveis} itens que pedem atenção` : "Notificações"}
         aria-expanded={aberto === "notificacoes"}
         aria-controls={`${prefixo}-notificacoes`}
         title="Notificações"
         onClick={() => alternar("notificacoes")}
       >
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-          <path
-            d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5c0 4.5-1.7 6-1.7 6h14.4s-1.7-1.5-1.7-6A5.5 5.5 0 0 0 12 3.5Z"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinejoin="round"
-          />
-          <path d="M10.2 18.2a2 2 0 0 0 3.6 0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-        </svg>
-        {pendentes > 0 ? (
-          <span className="canto-selo alerta" aria-hidden="true">{pendentes > 9 ? "9+" : pendentes}</span>
+        <Lightning size={21} weight="regular" aria-hidden="true" />
+        <span className="canto-botao-rotulo">Atividades</span>
+        {pendentesVisiveis > 0 ? (
+          <span className="canto-selo alerta" aria-hidden="true">{pendentesVisiveis > 9 ? "9+" : pendentesVisiveis}</span>
         ) : null}
       </button>
 
+      {/* Avatar, não engrenagem. O nome do usuário por extenso e o botão "Sair"
+          ocupavam a barra o dia inteiro para uma ação que se faz uma vez por
+          dia; as quatro ferramentas do padrão põem tudo isso dentro do avatar,
+          junto com tema e dados da conta. */}
+      <div className="canto-tema-topo">
+        <AlternadorTema atual={tema} />
+      </div>
+
       <button
         type="button"
-        className="canto-botao"
-        aria-label="Configuração"
+        className="canto-avatar"
+        aria-label={`Conta de ${email ?? "usuário"}`}
         aria-expanded={aberto === "configuracao"}
         aria-controls={`${prefixo}-configuracao`}
-        title="Configuração"
+        title={email ?? "Conta"}
         onClick={() => alternar("configuracao")}
       >
-        <IconeEngrenagem tamanho={18} />
+        <span className="canto-avatar-marca" aria-hidden="true">{iniciais(email)}</span>
+        <span className="canto-avatar-texto">
+          <strong>{usuario}</strong>
+          <small>{papel}</small>
+        </span>
+        <CaretDown size={14} weight="bold" aria-hidden="true" />
       </button>
 
       {aberto === "mensagens" ? (
@@ -182,12 +199,32 @@ export function CantoDireito({
         <div className="canto-painel" id={`${prefixo}-notificacoes`} role="dialog" aria-label="Notificações">
           <header>
             <strong>Notificações</strong>
-            <span>o que está no seu nome, sem data ou já no prazo</span>
+            <span>exceções da operação e atividades no seu nome</span>
           </header>
-          {atividades.length === 0 ? (
+          {operacionais.length === 0 && atividades.length === 0 ? (
             <p className="canto-vazio">Nenhuma atividade em aberto para você.</p>
           ) : (
             <ul>
+              {operacionais.map(item => (
+                <li
+                  key={`operacional-${item.id}`}
+                  className={`operacional ${item.escalada ? "escalada" : item.nova ? "nova" : ""}`.trim()}
+                >
+                  <Link href={item.href} onClick={() => setAberto(null)}>
+                    <span className="canto-linha-topo">
+                      <strong>{item.titulo}</strong>
+                      <small className={item.escalada ? "canto-prazo atrasado" : "canto-prazo"}>
+                        {item.escalada ? "escalada · " : ""}
+                        até {formatarPrazo(item.prazoResposta.slice(0, 10))}
+                      </small>
+                    </span>
+                    <span className="canto-linha-corpo">{item.corpo}</span>
+                    <small className="canto-linha-origem">
+                      Exceção operacional · {item.moduloNome}
+                    </small>
+                  </Link>
+                </li>
+              ))}
               {atividades.map(item => (
                 <li key={item.id} className={item.atrasada ? "atrasada" : undefined}>
                   <Link href={`/app/pipeline/${item.trilha}/${item.cardId}`} onClick={() => setAberto(null)}>
@@ -234,6 +271,16 @@ export function CantoDireito({
                   </Link>
                 </li>
                 <li>
+                  <Link href="/app/administracao/usuarios" onClick={() => setAberto(null)}>
+                    Usuários e permissões
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/app/administracao/responsabilidades" onClick={() => setAberto(null)}>
+                    Responsabilidades operacionais
+                  </Link>
+                </li>
+                <li>
                   <Link href="/app/auditoria" onClick={() => setAberto(null)}>
                     Auditoria
                   </Link>
@@ -241,8 +288,30 @@ export function CantoDireito({
               </>
             ) : null}
           </ul>
+
+          <form action={signOut} className="canto-sair">
+            <button type="submit">Sair</button>
+          </form>
         </div>
       ) : null}
     </div>
   );
+}
+
+/** Duas letras do e-mail: `admin@admin.com` vira `AD`. */
+function iniciais(email: string | null): string {
+  const local = (email ?? "").split("@")[0].replace(/[^a-zA-ZÀ-ÿ]/g, " ").trim();
+  if (!local) return "?";
+  const partes = local.split(/\s+/).filter(Boolean);
+  if (partes.length >= 2) return (partes[0][0] + partes[1][0]).toUpperCase();
+  return local.slice(0, 2).toUpperCase();
+}
+
+function nomeExibicao(email: string | null): string {
+  const local = (email ?? "Usuário").split("@")[0].replace(/[._-]+/g, " ").trim();
+  if (!local) return "Usuário";
+  return local
+    .split(/\s+/)
+    .map(parte => parte.charAt(0).toUpperCase() + parte.slice(1))
+    .join(" ");
 }

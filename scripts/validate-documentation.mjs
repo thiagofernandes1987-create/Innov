@@ -6,7 +6,9 @@ const requiredCanonical=[
  "diretrizes/MODULOS.md","diretrizes/ARQUITETURA.md","diretrizes/ROADMAP.md","diretrizes/RECUPERACAO.md",
  "diretrizes/VACINAS.md","diretrizes/UI-UX-PRO-MAX.md","diretrizes/PADRAO-DOCUMENTACAO.md","diretrizes/HISTORICO-ETAPAS.md",
  "diretrizes/METODO-DE-TRABALHO.md","diretrizes/OBJECT-RUNTIME.md",
- "diretrizes/LEIA-PRIMEIRO.md","diretrizes/INVENTARIO-DE-EXECUCAO.md","diretrizes/PADRAO-DE-INTERFACE.md"
+ "diretrizes/LEIA-PRIMEIRO.md","diretrizes/INVENTARIO-DE-EXECUCAO.md","diretrizes/PADRAO-DE-INTERFACE.md",
+ "diretrizes/PERSONAS-E-ROTINAS.md","diretrizes/SERVICO-DE-CAMPO.md","diretrizes/KPIS.md",
+ "diretrizes/FLUXOS-E-RISCOS.md","diretrizes/ACOMPANHAMENTO-A-DISTANCIA.md"
 ];
 // Vacinas por descoberta, não por lista fixa — VACINA-014. A lista escrita à
 // mão que existia aqui passou verde com duas vacinas novas fora do catálogo:
@@ -39,6 +41,15 @@ const requiredHistorical=[
  "docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md"
 ];
 
+// Scanner de segredos — origem: diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md.
+// A vacina proíbe o modelo textual anterior, que casava a palavra e não a
+// atribuição, e reprovava documento que só citava o nome da variável. O que vale
+// é o VALOR atribuído: placeholder passa, segredo de verdade reprova.
+//
+// A citação do arquivo da vacina acima não é enfeite: `validate-vaccines.mjs`
+// procura por ela para provar que esta prevenção continua ligada a quem a pediu.
+// Ela sumiu quando este validador passou a descobrir as vacinas por varredura em
+// vez de lista fixa, e o portão de vacinas ficou vermelho até esta linha voltar.
 function isSafeSecretPlaceholder(rawValue){
  const withoutContinuation=String(rawValue??"").replace(/[ \t]*\\[ \t]*$/,"" ).trim();
  const value=withoutContinuation.replace(/^("|'|`)|("|'|`)$/g,"").trim();

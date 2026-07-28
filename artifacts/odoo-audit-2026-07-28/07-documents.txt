@@ -1,0 +1,188 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Documents"
+      - generic: Documents
+    - menu:
+      - menuitem "Documents"
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- button "New "
+- list:
+  - button "":
+    - generic: 
+  - text: /
+  - generic: Projects
+- generic: Teste
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - searchbox "Search..." [active]
+  - button ""
+- navigation:
+  - button "Kanban View":
+    - generic: 
+  - button "List View":
+    - generic: 
+  - button "Activity View":
+    - generic: 
+- button "":
+  - generic: 
+- main:
+  - list:
+    - listitem "All":
+      - button "":
+        - generic: 
+      - button " All":
+        - generic: 
+        - generic: All
+    - listitem "Company":
+      - button "":
+        - generic: 
+      - button " Company":
+        - generic: 
+        - generic: Company
+        - generic: 
+      - list:
+        - listitem "Inbox":
+          - button "":
+            - generic: 
+          - button "Inbox":
+            - generic: Inbox
+            - generic:  
+        - listitem "Approvals":
+          - button "":
+            - generic: 
+          - button "Approvals":
+            - generic: Approvals
+            - generic:  
+        - listitem "Recruitment":
+          - button "":
+            - generic: 
+          - button "Recruitment":
+            - generic: Recruitment
+            - generic:  
+        - listitem "Products":
+          - button "":
+            - generic: 
+          - button "Products":
+            - generic: Products
+            - generic:  
+        - listitem "Employees - My Company":
+          - button "":
+            - generic: 
+          - button "Employees - My Company":
+            - generic: Employees - My Company
+            - generic:  
+        - listitem "Finance":
+          - button "":
+            - generic: 
+          - button "Finance":
+            - generic: Finance
+            - generic:  
+        - listitem "Fleet":
+          - button "":
+            - generic: 
+          - button "Fleet":
+            - generic: Fleet
+            - generic:  
+        - listitem "Legal":
+          - button "":
+            - generic: 
+          - button "Legal":
+            - generic: Legal
+            - generic:  
+        - listitem "Sign":
+          - button "":
+            - generic: 
+          - button "Sign":
+            - generic: Sign
+            - generic:  
+        - listitem "Projects":
+          - button "":
+            - generic: 
+          - button "Projects":
+            - generic: Projects
+            - generic:  
+          - list:
+            - listitem "Field Service":
+              - button "":
+                - generic: 
+              - button "Field Service":
+                - generic: Field Service
+                - generic:  
+            - listitem "Internal":
+              - button "":
+                - generic: 
+              - button "Internal":
+                - generic: Internal
+                - generic:  
+            - listitem "Teste":
+              - button "":
+                - generic: 
+              - button "Teste":
+                - generic: Teste
+                - generic:  
+        - listitem "Marketing":
+          - button "":
+            - generic: 
+          - button "Marketing":
+            - generic: Marketing
+            - generic:  
+        - listitem "Admin":
+          - button "":
+            - generic: 
+          - button "Admin":
+            - generic: Admin
+            - generic:  
+    - listitem "My Drive":
+      - button "":
+        - generic: 
+      - button " My Drive":
+        - generic: 
+        - generic: My Drive
+        - generic: 
+    - listitem "Shared with me":
+      - button "":
+        - generic: 
+      - button " Shared with me":
+        - generic: 
+        - generic: Shared with me
+    - listitem "Recent":
+      - button "":
+        - generic: 
+      - button " Recent":
+        - generic: 
+        - generic: Recent
+    - listitem "Trash":
+      - button "":
+        - generic: 
+      - button " Trash":
+        - generic: 
+        - generic: Trash
+  - paragraph: Upload a file or drag it here.
+  - paragraph: No alias configured
+- paragraph: Press esc to exit full screen

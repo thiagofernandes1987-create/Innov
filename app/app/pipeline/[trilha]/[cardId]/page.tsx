@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { CartaoCompleto } from "@/components/pipeline/cartao-completo";
 import { hasCapability } from "@/lib/authorization";
-import { ROTULO_TRILHA, TRILHAS, type Trilha } from "@/lib/pipeline/domain";
+import { TRILHAS, type Trilha } from "@/lib/pipeline/domain";
 import { carregarCartao } from "@/lib/pipeline/server";
 
 export const dynamic = "force-dynamic";
@@ -20,15 +20,11 @@ export default async function CartaoPage({
   const podeEditar = await hasCapability(carregado.pipeline.moduleKey, "update");
 
   return (
-    <main className="content pipeline-pagina">
-      <section className="page-heading">
-        <div>
-          <span className="badge">{ROTULO_TRILHA[trilha as Trilha].toUpperCase()}</span>
-          <h1>{carregado.cartao.titulo}</h1>
-          <p>{carregado.cartao.subtitulo ?? "Sem cliente vinculado"}</p>
-        </div>
-      </section>
-
+    <main className="content-largo pipeline-pagina">
+      {/* Sem cabeçalho de página: o formulário já abre com o nome do registro,
+          e repetir o mesmo texto duas vezes na mesma tela era exatamente o
+          "não precisaria desse título aqui" da captura. O `h1` mora dentro do
+          formulário, onde o nome do registro é conteúdo e não moldura. */}
       <CartaoCompleto
         trilha={trilha as Trilha}
         cartao={carregado.cartao}

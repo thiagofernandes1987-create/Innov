@@ -5,6 +5,10 @@
 
 Motivo de existir: em 26 de julho de 2026 a revisão das telas reais concluiu que os módulos são rascunhos. A conclusão foi verificada, não é impressão. Este documento fixa o alvo para que "pronto" pare de ser opinião.
 
+O alvo visual versionado do launcher está em `diretrizes/ALVO-VISUAL.md`.
+Mock aprovado é contrato de implementação: a aceitação exige comparação
+lado a lado no mesmo viewport e registro em `design-qa.md` (`VACINA-027`).
+
 ---
 
 ## 1. O diagnóstico que originou este documento
@@ -392,3 +396,148 @@ O que isso ensina: **página de leitura pura pode sair do molde**; página onde 
 Se o que se faz para um se aplica a quase todos, então **construir por módulo é o erro**. O certo é construir o molde uma vez — casca, painel de controle, seletor de visão, cartão, formulário, conversa — e cada módulo declarar só o que tem de específico.
 
 É a mesma regra do Object Runtime, aplicada à interface: composição de características declaradas, não vinte telas escritas à mão que precisam ser corrigidas vinte vezes.
+
+---
+
+## 12. Mapa das duas barras — o que vai onde, e quando
+
+Ditado pelo responsável em 27 de julho de 2026 e conferido contra as capturas de Odoo, Bitrix, Pipedrive e Sophia:
+
+> "o menu superior geralmente é o mesmo, menu do app do lado esquerdo, pesquisa com filtros no meio e notificação, mensagens, ícone usuário para sair, ver dados, etc, do lado superior direito. Embaixo do menu, à esquerda: Novo, publicar, depende do módulo; do outro lado ficam as visualizações — kanban, lista, gráficos, tabela dinâmica, atividades."
+
+Isto é contrato, não sugestão. Tela nova não escolhe onde põe o botão.
+
+### 12.1 Barra 1 — identidade e navegação. Igual em toda tela
+
+| Posição | O que fica | Muda com a tela? |
+|---|---|---|
+| Extrema esquerda | Marca clicável, sozinha, para a tela inicial de aplicativos | Nunca |
+| Esquerda | Ícone e nome do aplicativo, na cor do aplicativo | Só ao trocar de aplicativo |
+| Esquerda, na sequência | Menus **daquele** aplicativo | Só ao trocar de aplicativo |
+| Direita | Mensagens e notificações, com contador quando houver | Nunca |
+| Extrema direita | Avatar do usuário, que abre tema, dados, administração e sair | Nunca |
+
+O que **não** pode estar na barra 1: título de página, nome do registro aberto, botão de ação de módulo, seletor de visualização. Tudo isso é da barra 2 ou do corpo. A barra 1 responde "quem sou eu, onde estou, para onde vou" e mais nada.
+
+O nome do usuário por extenso e o botão "Sair" soltos saem da barra: são dois elementos permanentes para uma ação que se faz uma vez por dia. Vão para dentro do menu do avatar, que é onde as quatro ferramentas põem.
+
+### 12.2 Barra 2 — trabalho. Muda com o módulo
+
+| Posição | O que fica | Muda com a tela? |
+|---|---|---|
+| Esquerda | Ações do módulo: `Novo`, `Publicar`, `Importar`, `Aprovar` — o que aquele módulo faz | Sempre |
+| Esquerda, ao lado | Nome da tela ou do registro, em corpo de texto, com engrenagem de configuração quando houver | Sempre |
+| Centro | Busca contextual com facetas, filtros, agrupamento e favoritos | Quando a coleção implementa busca |
+| Direita | Visualizações em ícone: kanban, lista, calendário, tabela dinâmica, gráfico, mapa, atividades | Conforme o módulo suporte |
+
+A barra 2 não repete o nome do aplicativo: já está acima. Não carrega descrição
+de página. A busca mora aqui porque filtra a superfície de trabalho e pode
+mudar junto com o arquétipo da coleção.
+
+### 12.3 Quando cada visualização aparece
+
+Ícone de visualização que não funciona é pior que ícone ausente — ensina que ícone é enfeite. A régua:
+
+| Visualização | Entra quando | Hoje |
+|---|---|---|
+| Lista | Sempre. É o piso de toda tela de coleção | Todos os módulos |
+| Kanban | O registro tem etapa, e a etapa é dado da organização | Pipeline |
+| Calendário | O registro tem data de agendamento própria | Nenhum |
+| Gantt | O registro tem início, término e dependência entre itens | Nenhum — S-24 |
+| Tabela dinâmica | Há medida numérica que faça sentido somar por dimensão | Nenhum |
+| Gráfico | Idem à tabela dinâmica, da mesma fonte | Nenhum |
+| Mapa | O registro tem endereço geocodificável | Nenhum |
+| Atividades | O registro tem atividade agendada | Pipeline, pela conversa |
+
+### 12.4 A exceção declarada da busca
+
+O contrato coloca a busca no centro da barra 2. Hoje ela só aparece onde a tela sabe consumi-la — no pipeline. Um campo que aceita texto e não filtra nada é pior que campo ausente: quem digita conclui que não há resultado, não que a tela ainda não busca.
+
+Enquanto a busca global da `T-24.7` não existir, o campo aparece na barra 2 da
+tela que implementa e não aparece na que não implementa. **A posição nunca
+muda; o que varia é existir ou não.** A exceção tem data e dono: some quando a
+T-24.7 entregar busca por cliente, projeto, chamado e cartão.
+
+### 12.5 Busca com filtros — anatomia a copiar
+
+Das capturas `busca com filtro crm` e `pop pup filtro crm`:
+
+1. lupa à esquerda, dentro do campo;
+2. **facetas** dentro do próprio campo — etiqueta com ícone, rótulo e `×` para remover, uma por filtro ativo;
+3. texto livre depois das facetas, no mesmo campo;
+4. seta à direita que abre o painel de Filtros, Agrupar por e Favoritos;
+5. filtro personalizado com "corresponder a todas / qualquer uma das regras", campo, operador, valor, `Nova regra`, e alternância de arquivados.
+
+Os três primeiros são a fundação: sem faceta, o filtro fica invisível e o usuário não entende por que a lista está curta.
+
+---
+
+## 13. CRUD de pipeline — pesquisa de campo antes do código
+
+Tarefa T-24.2. O responsável pediu criar, editar e excluir funis, com vários por
+aplicativo: "CRM pode ser um pipeline para SDR, um para pré venda e outro para
+venda; depois que esse cliente é ganho ele vai para o pós venda, lá você tem o
+pipeline de Projetos e outro de execução."
+
+Antes de decidir onde o comando mora, o que as capturas mostram.
+
+### 13.1 Como o Odoo resolve — lido das 261 capturas
+
+O Odoo **não tem um objeto chamado "pipeline"**. Ele tem duas peças, e o funil é
+o encontro das duas:
+
+1. **Um escopo dono.** No CRM é o *Sales Team* — a captura do formulário mostra
+   `Sales Team: Sales` no bloco `Ownership` de cada oportunidade. Em Project, o
+   escopo é o próprio projeto: a captura de `project/1/tasks` mostra o
+   breadcrumb `Projects / Teste ⚙`, e as colunas Medição, Projeto Executivo,
+   Assinatura Executivo e Fabricação são daquele projeto.
+2. **Etapas ligadas ao escopo.** Criadas na própria coluna, com o campo de nome
+   no fim das colunas e os botões ✓ e ✕ — a captura de `crm 02_21_20` mostra
+   exatamente isso, e é o que a plataforma já copiou na T-23.30.
+
+**A consequência para a Innovar:** "criar um pipeline" é criar um **escopo**, não
+uma tela de configuração à parte. Quem cria o funil de SDR está criando um time
+comercial chamado SDR; quem cria o funil de execução está criando uma carteira
+de execução dentro de Projetos.
+
+### 13.2 Onde o comando mora
+
+| Ação | Onde, no padrão | Evidência |
+|---|---|---|
+| Trocar de funil | Breadcrumb da barra 2, ao lado do nome | `Projects / Teste ⚙` |
+| Configurar o funil aberto | Engrenagem colada no nome, na barra 2 | `Pipeline ⚙` na captura do CRM |
+| Criar funil novo | Menu `Configuração` do aplicativo | Menu do CRM: `Sales · Reporting · Configuration` |
+| Criar etapa | Campo no fim das colunas, com ✓ e ✕ | `crm 02_21_20` |
+| Configurar etapa | Engrenagem no cabeçalho da coluna, no hover | `project/1/tasks`, tooltip `Settings` |
+| Arquivar registro | Alternância "incluir arquivados" na busca | `pop pup filtro crm` |
+
+Nada disso vive em tela de administração separada. É a diferença entre
+configurar trabalhando e abrir um chamado para o administrador — que foi a
+razão de afrouxar a política de etapa na T-23.30.
+
+### 13.3 O que a plataforma tem e o que falta
+
+O banco **já aceita** vários funis por trilha: `pipelines` tem chave
+`(organization_id, key)` e a coluna `trilha`. O que impede hoje são três coisas:
+
+1. `carregarPipeline` pega o primeiro com `padrao = true` e ignora o resto;
+2. há restrição de **um padrão por trilha**, que é certa para o padrão e errada
+   como limite total;
+3. não existe seletor na tela, então um segundo funil seria invisível.
+
+Ou seja: **não é modelagem nova, é leitura e tela.** É o oposto do que uma
+migration grande faria — e por isso a T-24.3 começa revendo a consulta, não o
+esquema.
+
+### 13.4 Decisões que este documento fixa
+
+1. Funil é dado da organização, com dono declarado, nunca constante em código.
+2. Trocar de funil acontece na barra 2, ao lado do nome. Nunca na barra 1: a
+   barra 1 é do aplicativo, e trocar de funil não troca de aplicativo.
+3. Criar funil fica no menu `Configuração` do aplicativo dono. CRM cria funil de
+   venda; Projetos cria funil de obra; Chamados cria o de assistência. Não existe
+   tela central de "criar pipeline", porque não existe aplicativo "Pipeline".
+4. Excluir funil com cartão dentro é recusado com frase, como já acontece com
+   etapa. Arquivar é o caminho normal; excluir é para o que nasceu errado.
+5. O funil nasce de preset ou em branco. Preset é atalho, não obrigação —
+   quem cria "SDR" não deve receber "medição" e "fabricação" dentro.

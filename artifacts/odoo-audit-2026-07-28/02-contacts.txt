@@ -1,0 +1,182 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Contacts"
+      - generic: Contacts
+    - menu:
+      - menuitem "Contacts"
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- button "New"
+- generic: Contacts
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - searchbox "Search..." [active]
+  - button ""
+- search:
+  - navigation "Pager":
+    - generic: 1-5
+    - text: / 5
+    - button "Previous" [disabled]:
+      - generic: 
+    - button "Next" [disabled]:
+      - generic: 
+- navigation:
+  - button "List View":
+    - generic: 
+  - button "Kanban View":
+    - generic: 
+  - button "Map View":
+    - generic: 
+  - button "Hierarchy View":
+    - generic: 
+  - button "Activity View":
+    - generic: 
+- main:
+  - table:
+    - rowgroup:
+      - row "Name Email  Phone  Activities Country  Last Reminder Date ":
+        - columnheader:
+          - checkbox
+        - columnheader
+        - columnheader "Name":
+          - generic: Name
+          - text: 
+        - columnheader "Email ":
+          - generic: Email
+          - generic: 
+        - columnheader "Phone ":
+          - generic: Phone
+          - generic: 
+        - columnheader "Activities":
+          - generic: Activities
+          - text: 
+        - columnheader "Country ":
+          - generic: Country
+          - generic: 
+        - columnheader
+        - columnheader "Last Reminder Date":
+          - generic: Last Reminder Date
+          - text: 
+        - columnheader "":
+          - button "":
+            - generic: 
+    - rowgroup:
+      - row "Binary file Innovar contato.innovar@outlook.com Show activities Brazil Opportunities Sale Orders":
+        - cell:
+          - checkbox
+        - cell "Binary file":
+          - img "Binary file"
+        - cell "Innovar"
+        - cell "contato.innovar@outlook.com"
+        - cell
+        - cell "Show activities":
+          - button "Show activities":
+            - img: 
+        - cell "Brazil"
+        - cell "Opportunities Sale Orders":
+          - generic "Opportunities":
+            - img: 
+            - text: "2"
+          - generic "Sale Orders":
+            - img: 
+            - text: "1"
+        - cell
+        - cell
+      - row "Binary file Innovar Construções e Reformas, Thiago Fernandes da silva contato.innovar@outlook.com Show activities Meetings":
+        - cell:
+          - checkbox
+        - cell "Binary file":
+          - img "Binary file"
+        - cell "Innovar Construções e Reformas, Thiago Fernandes da silva"
+        - cell "contato.innovar@outlook.com"
+        - cell
+        - cell "Show activities":
+          - button "Show activities":
+            - img: 
+        - cell
+        - cell "Meetings":
+          - generic "Meetings":
+            - img: 
+            - text: "1"
+        - cell
+        - cell
+      - row "Binary file Lunch Supplier Show activities":
+        - cell:
+          - checkbox
+        - cell "Binary file":
+          - img "Binary file"
+        - cell "Lunch Supplier"
+        - cell
+        - cell
+        - cell "Show activities":
+          - button "Show activities":
+            - img: 
+        - cell
+        - cell
+        - cell
+        - cell
+      - row "Binary file ert reret@hwegwh.com +55 12 99994-4455 Show activities Opportunities":
+        - cell:
+          - checkbox
+        - cell "Binary file":
+          - img "Binary file"
+        - cell "ert"
+        - cell "reret@hwegwh.com"
+        - cell "+55 12 99994-4455":
+          - generic: +55 12 99994-4455
+        - cell "Show activities":
+          - button "Show activities":
+            - img: 
+        - cell
+        - cell "Opportunities":
+          - generic "Opportunities":
+            - img: 
+            - text: "1"
+        - cell
+        - cell
+      - row "Binary file zxczc Show activities":
+        - cell:
+          - checkbox
+        - cell "Binary file":
+          - img "Binary file"
+        - cell "zxczc"
+        - cell
+        - cell
+        - cell "Show activities":
+          - button "Show activities":
+            - img: 
+        - cell
+        - cell
+        - cell
+        - cell
+    - rowgroup:
+      - row:
+        - cell
+        - cell
+- generic: zxczc
+- paragraph: Press esc to exit full screen

@@ -1,0 +1,158 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Helpdesk"
+      - generic: Helpdesk
+    - menu:
+      - menuitem "Overview"
+      - button "Tickets":
+        - generic: Tickets
+      - button "Reporting":
+        - generic: Reporting
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- generic: Helpdesk Overview
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - searchbox "Search..." [active]
+  - button ""
+- search:
+  - navigation "Pager":
+    - generic: 1-1
+    - text: / 1
+    - button "Previous" [disabled]:
+      - generic: 
+    - button "Next" [disabled]:
+      - generic: 
+- main:
+  - table:
+    - rowgroup:
+      - row "My Tickets Open Tickets 2 Tickets 0 High Priority Two stars, with a maximum of three 0 Urgent Three stars, maximum score":
+        - cell "My Tickets Open Tickets":
+          - heading "My Tickets" [level=3]
+          - text: Open Tickets
+        - cell "2 Tickets":
+          - generic "My Tickets":
+            - generic: "2"
+            - text: Tickets
+        - cell "0 High Priority Two stars, with a maximum of three":
+          - generic "My Tickets":
+            - generic: "0"
+            - text: High Priority
+            - img "Two stars, with a maximum of three":
+              - generic: 
+              - generic: 
+        - cell "0 Urgent Three stars, maximum score":
+          - generic "My Tickets":
+            - generic: "0"
+            - text: Urgent
+            - img "Three stars, maximum score":
+              - generic: 
+              - generic: 
+              - generic: 
+      - row "Avg Open Hours 52h 0h 0h":
+        - cell "Avg Open Hours"
+        - cell "52h":
+          - generic "Tickets Analysis":
+            - generic: 52h
+        - cell "0h":
+          - generic "Tickets Analysis":
+            - generic: 0h
+        - cell "0h":
+          - generic "Tickets Analysis":
+            - generic: 0h
+      - row "Failed Tickets 0 0 0":
+        - cell "Failed Tickets"
+        - cell "0":
+          - generic "My Tickets":
+            - generic: "0"
+        - cell "0":
+          - generic "My Tickets":
+            - generic: "0"
+        - cell "0":
+          - generic "My Tickets":
+            - generic: "0"
+  - table:
+    - rowgroup:
+      - row "My Performance Today 0 Closed Tickets / % SLA Success Rate":
+        - cell "My Performance Today":
+          - heading "My Performance" [level=3]
+          - text: Today
+        - cell "0 Closed Tickets":
+          - generic "My Tickets":
+            - heading "0" [level=2]
+            - text: Closed Tickets
+        - cell "/ % SLA Success Rate":
+          - generic "Percentage of tickets that were closed without failing any SLAs.":
+            - heading "/ %" [level=2]
+            - text: SLA Success Rate
+      - row "Avg Last 7 days 0 / %":
+        - cell "Avg Last 7 days"
+        - cell "0":
+          - generic "Tickets":
+            - generic: "0"
+        - cell "/ %":
+          - generic "Percentage of tickets that were closed without failing any SLAs.":
+            - generic: / %
+      - row "Daily Target 1  85% ":
+        - cell "Daily Target"
+        - cell "1 ":
+          - generic "Click to set":
+            - text: "1"
+            - generic: 
+        - cell "85% ":
+          - generic "Click to set":
+            - text: 85%
+            - generic: 
+  - link "Customer Care Domain alias customer-care@innovar1.odoo.com Tickets Tickets Closed 0 2 Open 0 Unassigned 0 Urgent 0 Failed":
+    - generic: Customer Care
+    - link "Domain alias customer-care@innovar1.odoo.com":
+      - /url: mailto:customer-care@innovar1.odoo.com
+      - img "Domain alias": 
+      - text: customer-care@innovar1.odoo.com
+    - button "Tickets"
+    - link "Tickets Closed 0":
+      - /url: "#"
+      - generic: Tickets Closed
+      - generic: "0"
+    - link "2 Open":
+      - /url: "#"
+      - generic: "2"
+      - generic: Open
+    - link "0 Unassigned":
+      - /url: "#"
+      - generic: "0"
+      - generic: Unassigned
+    - link "0 Urgent":
+      - /url: "#"
+      - generic: "0"
+      - generic: Urgent
+    - link "0 Failed":
+      - /url: "#"
+      - generic: "0"
+      - generic: Failed
+- paragraph: Press esc to exit full screen

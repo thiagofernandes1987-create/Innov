@@ -1,0 +1,138 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Dashboards"
+      - generic: Dashboards
+    - menu:
+      - menuitem "Dashboards"
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- generic: Dashboards
+- button "":
+  - generic: 
+- searchbox "Search..." [active]
+- button ""
+- button " Last 90 Days":
+  - generic: 
+  - text: Last 90 Days
+- button "":
+  - generic: 
+- button "":
+  - generic: 
+- button " Share":
+  - generic: 
+  - text: Share
+- generic "Toggle favorite": 
+- button "Close sidebar":
+  - generic: 
+- generic: Sales
+- list:
+  - listitem "Sales":
+    - generic: Sales
+  - listitem "Product":
+    - generic: Product
+  - listitem "Point of Sale":
+    - generic: Point of Sale
+- generic: Subscriptions
+- list:
+  - listitem "Subscriptions":
+    - generic: Subscriptions
+  - listitem "MRR Evolution":
+    - generic: MRR Evolution
+  - listitem "Retention":
+    - generic: Retention
+  - listitem "Salesperson":
+    - generic: Salesperson
+- generic: CRM
+- list:
+  - listitem "Leads":
+    - generic: Leads
+  - listitem "Pipeline":
+    - generic: Pipeline
+- generic: Finance
+- list:
+  - listitem "Accounting":
+    - generic: Accounting
+  - listitem "Invoicing":
+    - generic: Invoicing
+  - listitem "Benchmark":
+    - generic: Benchmark
+  - listitem "Expenses":
+    - generic: Expenses
+- generic: Logistics
+- list:
+  - listitem "Warehouse Daily Operations":
+    - generic: Warehouse Daily Operations
+  - listitem "Operation analysis":
+    - generic: Operation analysis
+  - listitem "Warehouse Metrics":
+    - generic: Warehouse Metrics
+  - listitem "Purchase & Vendor analysis":
+    - generic: Purchase & Vendor analysis
+  - listitem "Manufacturing":
+    - generic: Manufacturing
+- generic: Services
+- list:
+  - listitem "Project":
+    - generic: Project
+  - listitem "Timesheets":
+    - generic: Timesheets
+  - listitem "Helpdesk":
+    - generic: Helpdesk
+  - listitem "Phone":
+    - generic: Phone
+- generic: Marketing
+- list:
+  - listitem "Email Marketing":
+    - generic: Email Marketing
+- generic: Website
+- list:
+  - listitem "Live Chat":
+    - generic: Live Chat
+  - listitem "Live Chat - Ongoing Sessions":
+    - generic: Live Chat - Ongoing Sessions
+  - listitem "eCommerce":
+    - generic: eCommerce
+- generic: Human Resources
+- list:
+  - listitem "Payroll":
+    - generic: Payroll
+- button "Quotations"
+- button "Orders"
+- button "Revenue"
+- button "Average Order"
+- combobox:
+  - option
+  - option
+  - option [selected]
+  - option
+- generic "Full Screen":
+  - generic: 
+- button ""
+- generic "Go to Monthly Sales"
+- generic "Go to Top Quotations"
+- generic "Open record"
+- generic "Open record"
+- generic "Open record"
+- generic "Go to Top Sales Orders"
+- paragraph: Press esc to exit full screen

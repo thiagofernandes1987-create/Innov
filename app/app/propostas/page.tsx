@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
 import { singleRelation } from "@/lib/supabase/relations";
@@ -16,7 +18,8 @@ export default async function ProposalsPage() {
 
   return (
     <main className="content">
-      <div className="page-head"><div><span className="badge">COMERCIAL</span><h1>Propostas</h1><p className="muted">Documentos versionados derivados de orçamentos aprovados.</p></div></div>
+      <BarraDeTrabalho title="Propostas" primaryAction={<Link className="button button-primary" href="/app/propostas/nova">Nova proposta</Link>} />
+      <p className="workspace-intro">Documentos versionados derivados de orçamentos aprovados, com PDF autenticado e liberação controlada.</p>
       {error ? <div className="validation blocking">{error.message}</div> : null}
       <section className="card table-wrap">
         <table>

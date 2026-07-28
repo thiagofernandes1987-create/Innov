@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { COOKIE_TEMA, temaValido } from "@/lib/tema";
 import { BarraSuperior } from "@/components/casca/barra-superior";
+import { ProvedorDeBusca } from "@/components/casca/busca-da-barra";
 import { Launcher, type AplicativoAutorizado } from "@/components/casca/launcher";
 
 const TODOS: AplicativoAutorizado[] = [
@@ -33,35 +34,72 @@ const PERFIS: Record<string, string[]> = {
   admin: TODOS.map(a => a.chave)
 };
 
-export default async function Amostra({ searchParams }: { searchParams: Promise<{ perfil?: string }> }) {
-  const { perfil = "admin" } = await searchParams;
+export default async function Amostra({ searchParams }: { searchParams: Promise<{ perfil?: string; cenario?: string }> }) {
+  const { perfil = "admin", cenario = "normal" } = await searchParams;
   const permitidos = new Set(PERFIS[perfil] ?? PERFIS.admin);
   const aplicativos = TODOS.filter(a => permitidos.has(a.chave));
   const email = `${perfil}@innovar.com.br`;
   const papel = { producao: "Produção", financeiro: "Financeiro", admin: "Administrador" }[perfil] ?? "Administrador";
   const tema = temaValido((await cookies()).get(COOKIE_TEMA)?.value);
+  const operacionais = cenario === "problema"
+    ? [
+        {
+          id: "demo-operacional-1",
+          eventoId: "demo-evento-1",
+          titulo: "Entrega da marcenaria em risco",
+          corpo: "Sete dias no caminho crítico. Integre as restrições, confirme donos e publique uma única previsão.",
+          modulo: "planejamento",
+          moduloNome: "Planejamento",
+          href: "#planejamento",
+          persona: "P8" as const,
+          prazoResposta: "2026-07-28T14:00:00.000Z",
+          escalada: true,
+          nova: true,
+          criadaEm: "2026-07-28T12:00:00.000Z"
+        },
+        {
+          id: "demo-operacional-2",
+          eventoId: "demo-evento-2",
+          titulo: "Material crítico sem confirmação",
+          corpo: "O fornecedor não confirmou o marco de expedição. Verifique a alternativa e o custo total da parada.",
+          modulo: "compras",
+          moduloNome: "Compras e Suprimentos",
+          href: "#compras",
+          persona: "P9" as const,
+          prazoResposta: "2026-07-29T10:00:00.000Z",
+          escalada: false,
+          nova: true,
+          criadaEm: "2026-07-28T12:20:00.000Z"
+        }
+      ]
+    : [];
 
   return (
+    <ProvedorDeBusca>
     <div className="casca">
-      {/* Amostra não autenticada: sem sessão não há aviso de ninguém, e
-          inventar um número aqui só ensinaria a duvidar do número real. */}
+      {/* O estado normal permanece sem contadores inventados. `cenario=problema`
+          é uma fixture visual explícita para verificar o estado pessimista. */}
       <BarraSuperior
-        moduloAtual={null}
+        aplicativos={[]}
         email={email}
         papel={papel}
         tema={tema}
-        avisos={{ mensagens: [], atividades: [], naoLidas: 0, pendentes: 0 }}
+        avisos={{
+          mensagens: [],
+          atividades: [],
+          operacionais,
+          naoLidas: 0,
+          pendentes: operacionais.length
+        }}
         podeAdministrar={perfil === "admin"}
+        persistirAvisos={false}
       />
       <div className="casca-conteudo">
         <main className="content pagina-launcher">
-          <section className="launcher-cabecalho">
-            <h1>Olá, {perfil}.</h1>
-            <p>Estes são os aplicativos liberados para o seu perfil nesta organização.</p>
-          </section>
-          <Launcher aplicativos={aplicativos} />
+          <Launcher aplicativos={aplicativos} demonstracao />
         </main>
       </div>
     </div>
+    </ProvedorDeBusca>
   );
 }

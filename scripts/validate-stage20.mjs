@@ -13,6 +13,8 @@ const requiredFiles=[
  "app/layout.tsx",
  "app/app/layout.tsx",
  "app/app/page.tsx",
+ "components/casca/barra-superior.tsx",
+ "components/casca/launcher.tsx",
  "scripts/run-stage20-inventory-concurrency-e2e.mjs",
  ".github/workflows/stage20-inventory-concurrency-e2e.yml",
  "lib/file-security/domain.ts",
@@ -47,6 +49,8 @@ if(errors.length===0){
  const rootLayout=read("app/layout.tsx");
  const appLayout=read("app/app/layout.tsx");
  const dashboard=read("app/app/page.tsx");
+ const topBar=read("components/casca/barra-superior.tsx");
+ const launcher=read("components/casca/launcher.tsx");
  const concurrencyScript=read("scripts/run-stage20-inventory-concurrency-e2e.mjs");
  const concurrencyWorkflow=read(".github/workflows/stage20-inventory-concurrency-e2e.yml");
  const fileDomain=read("lib/file-security/domain.ts");
@@ -94,15 +98,18 @@ if(errors.length===0){
   if(!hardeningCss.includes(token))errors.push(`Hardening responsivo sem prevenção: ${token}`);
 
  for(const token of[
-  'className="skip-link"','href="#conteudo-principal"','aria-label="Navegação principal"',
-  'className="nav-icon"','id="conteudo-principal"','tabIndex={-1}','className="organization-chip mono"'
+  'className="skip-link"','href="#conteudo-principal"','id="conteudo-principal"',
+  'tabIndex={-1}','className="casca"','<BarraSuperior'
  ])if(!appLayout.includes(token))errors.push(`Shell interno sem requisito de acessibilidade/UX: ${token}`);
+ for(const token of['className="barra-superior"','aria-label="Ir para a tela inicial de aplicativos"','<CantoDireito'])
+  if(!topBar.includes(token))errors.push(`Barra superior sem contrato de navegação: ${token}`);
 
+ for(const token of['className="content pagina-launcher"','<Launcher aplicativos={aplicativos}'])
+  if(!dashboard.includes(token))errors.push(`Launcher sem composição canônica: ${token}`);
  for(const token of[
-  'className="content dashboard-page"','className="page-heading"','className="stats-grid"',
-  'className="category-section"','className="card-grid"','className="card module-card"',
-  'className="empty-state card"','aria-label={`Abrir ${application.name}. ${accessLabel[application.accessLevel]}.`}'
- ])if(!dashboard.includes(token))errors.push(`Dashboard sem composição canônica: ${token}`);
+  'className="launcher-faixa"','id="launcher-titulo"','aria-label="Filtrar por categoria"','className="launcher-grade"',
+  'className="launcher-app"','className="launcher-vazio"','role="status"'
+ ])if(!launcher.includes(token))errors.push(`Componente Launcher sem contrato funcional: ${token}`);
 
  for(const token of[
   'const operatorA=createClient','const operatorB=createClient','const initialQuantity=10','const competingQuantity=6',
@@ -165,7 +172,7 @@ if(errors.length===0){
   if(!attachmentDocs.includes(token))errors.push(`Documento de anexos sem contrato: ${token}`);
 
  if(!rootLayout.includes('import "./stage20.css";'))errors.push("Layout raiz não carrega o hardening da Etapa 20.");
- if(!rootLayout.includes('<html lang="pt-BR">'))errors.push("Layout raiz sem locale pt-BR.");
+ if(!/<html\b[^>]*\blang=["']pt-BR["'][^>]*>/i.test(rootLayout))errors.push("Layout raiz sem locale pt-BR.");
  if(!packageJson.scripts?.["validate:stage20"])errors.push("package.json sem validate:stage20.");
  if(packageJson.scripts?.["test:e2e:stage20:inventory-concurrency"]!=="node scripts/run-stage20-inventory-concurrency-e2e.mjs")
   errors.push("package.json sem executor canônico do E2E de concorrência.");
@@ -185,8 +192,8 @@ if(errors.length===0){
   if(forbidden.test(uiImplementation))errors.push(`Implementação reintroduz preset visual proibido: ${forbidden}`);
  for(const fileContent of[["app/app/layout.tsx",appLayout],["app/app/page.tsx",dashboard]])
   if(/style=\{\{/.test(fileContent[1]))errors.push(`${fileContent[0]} mantém estilo inline em componente-base.`);
- if(/outline\s*:\s*none/i.test(css))errors.push("Design system remove outline sem substituição canônica.");
  if(!/button:focus-visible[^\{]*,\s*a:focus-visible/s.test(css))errors.push("Design system não cobre foco visível de botões e links.");
+ if(!/input:focus[^\{]*\{[^}]*box-shadow\s*:/s.test(css))errors.push("Design system não cobre foco visível de campos.");
  if(/SUPABASE_SERVICE_ROLE_KEY[^\n]*(console\.log|JSON\.stringify)/.test(concurrencyScript))errors.push("E2E pode registrar Service Role no relatório.");
 }
 

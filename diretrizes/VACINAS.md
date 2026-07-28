@@ -114,6 +114,22 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-013` | Fixture técnica tenta escrever coluna sensível diretamente | aplicada | fixture mínima, guards preservados e valores sensíveis somente por RPC autorizada |
 | `VACINA-014` | Runner de teste de banco encadeia migrations por lista fixa e envelhece | aplicada | descoberta por padrão de nome, ordem lexicográfica e contagem impressa |
 | `VACINA-015` | Efeito colateral disparado dentro do atualizador de `setState` | aplicada | próximo estado calculado fora do atualizador e verificação em navegador com console tratado como reprovação |
+| `VACINA-016` | Trocar lista fixa por descoberta apagou a citação que outro validador cobrava | aplicada | procedência da vacina citada em comentário junto do código protegido, e `validate:docs` promovido a portão de CI |
+| `VACINA-017` | Parser de documento assume LF e falha em checkout CRLF | vigente | normalização `/\r?\n/` na entrada e teste do validador no checkout real |
+| `VACINA-018` | Login atribui falha de infraestrutura às credenciais | vigente | classificação por `code`/`status`, transporte cercado e teste por família de causa |
+| `VACINA-019` | Breakpoint esconde navegação sem oferecer modo equivalente | vigente | menu responsivo com os mesmos destinos, alvo de 44 px e teste de marcação |
+| `VACINA-020` | `pg_isready` aprova o servidor temporário do bootstrap | vigente | marcador de bootstrap concluído antes da sondagem de prontidão |
+| `VACINA-021` | DDL funcional deixa custo de RLS e FKs invisível em teste pequeno | vigente | advisor pós-DDL, initplan de `auth.uid()` e índices de cobertura |
+| `VACINA-022` | Persona documentada não concorda com papel e autorização do ator | vigente | guard persona–papel, evento próprio e teste sob identidade real |
+| `VACINA-023` | Amostra visual herda efeito de produção e exige sessão real | vigente | persistência explícita, ligada por padrão e desligada só na fixture |
+| `VACINA-024` | Conteúdo interno corta sem causar overflow global | vigente | inspeção do card e empilhamento de título/SLA no breakpoint |
+| `VACINA-025` | Lint retorna sucesso mesmo acumulando avisos | vigente | `--max-warnings=0` e correção da lógica denunciada |
+| `VACINA-026` | Runner retorna sucesso quando o teste de banco não executa | vigente | PostgreSQL Docker portátil, confirmação mínima e falha sem pré-requisito |
+| `VACINA-027` | Mock aprovado não chega à implementação por falta de comparação | vigente | fonte visual versionada, captura no mesmo viewport e QA lado a lado |
+| `VACINA-028` | Capacidade existe sem menu, ação primária ou rotina que a exercite | vigente | cobertura módulo–menu–rota–persona e fluxo documental completo |
+| `VACINA-029` | Runner Python usa sintaxe de ambiente específica de POSIX | vigente | wrapper Node define ambiente e interpretador por plataforma |
+| `VACINA-030` | Menu inline é recortado na largura intermediária | vigente | menu compacto em notebooks e teste estrutural de breakpoint |
+| `VACINA-031` | Estado mistura token de fundo com primeiro plano fixo | vigente | cores semânticas em texto, fundo e borda, validadas por teste |
 
 ## 4. Arquivos
 
@@ -133,7 +149,23 @@ diretrizes/vacinas/
 ├── VACINA-012-ESTADO-POS-MERGE.md
 ├── VACINA-013-FIXTURES-RESPEITAM-FRONTEIRAS-SENSIVEIS.md
 ├── VACINA-014-LISTA-FIXA-DE-MIGRATIONS-EM-TESTE.md
-└── VACINA-015-EFEITO-DENTRO-DO-ATUALIZADOR-DE-ESTADO.md
+├── VACINA-015-EFEITO-DENTRO-DO-ATUALIZADOR-DE-ESTADO.md
+├── VACINA-016-VALIDADOR-QUE-CITA-OUTRO-VALIDADOR.md
+├── VACINA-017-VALIDADOR-PORTAVEL-CRLF.md
+├── VACINA-018-ERRO-DE-AUTENTICACAO-POR-CODIGO.md
+├── VACINA-019-NAVEGACAO-RESPONSIVA-SEM-SUMIR.md
+├── VACINA-020-PRONTIDAO-POSTGRES-CONTAINER.md
+├── VACINA-021-DDL-CONFERIDO-PELO-ADVISOR.md
+├── VACINA-022-PERSONA-E-AUTORIZACAO-COERENTES.md
+├── VACINA-023-AMOSTRA-SEM-EFEITO-DE-PRODUCAO.md
+├── VACINA-024-METADADO-RESPONSIVO-SEM-CORTE.md
+├── VACINA-025-LINT-SEM-AVISO-ACEITO.md
+├── VACINA-026-TESTE-NAO-EXECUTADO-NAO-PASSA.md
+├── VACINA-027-MOCK-APROVADO-EXIGE-QA-DE-FIDELIDADE.md
+├── VACINA-028-CAPACIDADE-EXIGE-PORTA-DE-ENTRADA.md
+├── VACINA-029-RUNNER-PYTHON-PORTAVEL.md
+├── VACINA-030-MENU-DESKTOP-SEM-CORTE.md
+└── VACINA-031-ESTADO-SEMPRE-USA-TOKENS-DE-TEMA.md
 ```
 
 ## 5. Critérios para nova vacina

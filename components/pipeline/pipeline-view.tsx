@@ -2,8 +2,21 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { Suspense, useMemo, useState, useTransition } from "react";
+import {
+  CalendarBlank,
+  ChartBar,
+  Kanban,
+  ListBullets,
+  MapPin,
+  Pulse,
+  Table,
+  type Icon
+} from "@phosphor-icons/react";
 import { moverCartao } from "@/app/actions/pipeline";
+import { BuscaDaBarra, useBusca } from "@/components/casca/busca-da-barra";
+import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
+import { SeletorDeFunil, type FunilDisponivel } from "./seletor-de-funil";
 import {
   BotaoNovoCartao,
   FormularioNovoCartao,
@@ -37,10 +50,24 @@ type Props = {
   orfaos: CartaoPipeline[];
   podeEditar: boolean;
   registros: RegistroDisponivel[];
+  clientes: RegistroDisponivel[];
   rotuloRegistro: string;
+  funis: FunilDisponivel[];
+  funilAtual: FunilDisponivel;
+  presets: { chave: string; rotulo: string }[];
 };
 
-type Visao = "kanban" | "lista";
+type Visao = "kanban" | "lista" | "calendario" | "tabela" | "grafico" | "localizacao" | "atividades";
+
+const VISOES: { valor: Visao; rotulo: string; Icone: Icon }[] = [
+  { valor: "kanban", rotulo: "Kanban", Icone: Kanban },
+  { valor: "lista", rotulo: "Lista", Icone: ListBullets },
+  { valor: "calendario", rotulo: "Calendário", Icone: CalendarBlank },
+  { valor: "tabela", rotulo: "Tabela dinâmica", Icone: Table },
+  { valor: "grafico", rotulo: "Gráfico", Icone: ChartBar },
+  { valor: "localizacao", rotulo: "Localização", Icone: MapPin },
+  { valor: "atividades", rotulo: "Atividades", Icone: Pulse }
+];
 
 export function PipelineView({
   trilha,
@@ -49,10 +76,16 @@ export function PipelineView({
   orfaos,
   podeEditar,
   registros,
-  rotuloRegistro
+  clientes,
+  rotuloRegistro,
+  funis,
+  funilAtual,
+  presets
 }: Props) {
   const [visao, setVisao] = useState<Visao>("kanban");
-  const [busca, setBusca] = useState("");
+  // O termo vem da busca da barra superior. Estado local aqui criaria dois
+  // donos do mesmo filtro, e um deles sempre desatualizado.
+  const busca = useBusca();
   const [erro, setErro] = useState<string | null>(null);
   const [arrastando, setArrastando] = useState<string | null>(null);
   const [alvo, setAlvo] = useState<string | null>(null);
@@ -102,40 +135,60 @@ export function PipelineView({
 
   return (
     <section className="pipeline" aria-busy={pendente || undefined}>
-      <header className="pipeline-controle">
-        <div className="pipeline-controle-busca">
-          <label className="pipeline-busca">
-            <span className="sr-only">Buscar no pipeline</span>
-            <input
-              type="search"
-              value={busca}
-              onChange={event => setBusca(event.target.value)}
-              placeholder="Buscar por título, cliente ou marcador…"
-            />
-          </label>
+      {/* Barra de controle no padrão de mercado: criar à esquerda, nome da tela
+          ao lado, busca no centro, visualizações em ícone à direita. Uma faixa
+          de 44px no lugar do título de 180px. A busca é trabalho e por isso
+          mora na barra 2; os nomes dos ícones permanecem no aria-label. */}
+      <BarraDeTrabalho
+        title={funilAtual.name}
+        primaryAction={podeEditar ? (
+            <button
+              type="button"
+              className="button button-primary barra-controle-novo"
+              onClick={() => setAdicionandoEm(colunasFiltradas[0]?.etapa.id ?? null)}
+              disabled={colunasFiltradas.length === 0}
+            >
+              Novo
+            </button>
+          ) : null}
+        identity={
+          <SeletorDeFunil
+            trilha={trilha}
+            funis={funis}
+            atual={funilAtual}
+            presets={presets}
+            podeConfigurar={podeEditar}
+            aoFalhar={setErro}
+          />
+        }
+        meta={
           <span className="pipeline-contagem">
             {totalCartoes} {totalCartoes === 1 ? "cartão" : "cartões"}
           </span>
-        </div>
-        <div className="pipeline-visoes" role="group" aria-label="Visualização">
-          <button
-            type="button"
-            className={visao === "kanban" ? "pipeline-visao ativa" : "pipeline-visao"}
-            onClick={() => setVisao("kanban")}
-            aria-pressed={visao === "kanban"}
-          >
-            Kanban
-          </button>
-          <button
-            type="button"
-            className={visao === "lista" ? "pipeline-visao ativa" : "pipeline-visao"}
-            onClick={() => setVisao("lista")}
-            aria-pressed={visao === "lista"}
-          >
-            Lista
-          </button>
-        </div>
-      </header>
+        }
+        search={
+          <Suspense fallback={<div className="barra-busca-vazia" aria-hidden="true" />}>
+            <BuscaDaBarra />
+          </Suspense>
+        }
+        controls={
+          <div className="barra-controle-visoes" role="group" aria-label="Visualização">
+            {VISOES.map(item => (
+              <button
+                key={item.valor}
+                type="button"
+                className={visao === item.valor ? "barra-visao ativa" : "barra-visao"}
+                onClick={() => setVisao(item.valor)}
+                aria-pressed={visao === item.valor}
+                aria-label={item.rotulo}
+                title={item.rotulo}
+              >
+                <item.Icone size={17} weight={visao === item.valor ? "fill" : "regular"} aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {erro ? (
         <p className="pipeline-erro" role="alert">
@@ -179,20 +232,21 @@ export function PipelineView({
                   <span className="pipeline-coluna-quantidade">{coluna.quantidade}</span>
                   {coluna.valor > 0 ? <span className="pipeline-coluna-valor">{formatarMoeda(coluna.valor)}</span> : null}
                 </span>
+                {/* Engrenagem antes do `+`, na ordem do padrão de mercado. */}
                 {podeEditar ? (
                   <span className="pipeline-coluna-acoes">
+                    <MenuDaEtapa
+                      stageId={coluna.etapa.id}
+                      nome={coluna.etapa.name}
+                      recolhida={coluna.etapa.recolhida}
+                      aoFalhar={setErro}
+                    />
                     <BotaoNovoCartao
                       etapa={coluna.etapa.name}
                       aberto={adicionandoEm === coluna.etapa.id}
                       aoAlternar={() =>
                         setAdicionandoEm(atual => (atual === coluna.etapa.id ? null : coluna.etapa.id))
                       }
-                    />
-                    <MenuDaEtapa
-                      stageId={coluna.etapa.id}
-                      nome={coluna.etapa.name}
-                      recolhida={coluna.etapa.recolhida}
-                      aoFalhar={setErro}
                     />
                   </span>
                 ) : null}
@@ -205,6 +259,8 @@ export function PipelineView({
 
               {adicionandoEm === coluna.etapa.id ? (
                 <FormularioNovoCartao
+                  trilha={trilha}
+                  clientes={clientes}
                   pipelineId={pipelineId}
                   stageId={coluna.etapa.id}
                   registros={registros}
@@ -232,7 +288,7 @@ export function PipelineView({
           ))}
           {podeEditar ? <NovaEtapa pipelineId={pipelineId} aoFalhar={setErro} /> : null}
         </div>
-      ) : (
+      ) : visao === "lista" ? (
         <div className="pipeline-lista-envelope">
           <table className="pipeline-lista">
             <thead>
@@ -295,9 +351,177 @@ export function PipelineView({
             </tbody>
           </table>
         </div>
+      ) : (
+        <VisaoAnalitica visao={visao} colunas={colunasFiltradas} trilha={trilha} agora={agora} />
       )}
     </section>
   );
+}
+
+function VisaoAnalitica({
+  visao,
+  colunas,
+  trilha,
+  agora
+}: {
+  visao: Exclude<Visao, "kanban" | "lista">;
+  colunas: ColunaPipeline[];
+  trilha: Trilha;
+  agora: Date;
+}) {
+  const itens = colunas.flatMap(coluna =>
+    ordenarPorUrgencia(coluna.cartoes, agora).map(cartao => ({
+      cartao,
+      etapa: coluna.etapa,
+      prazo: prazoPrincipal(cartao, agora)
+    }))
+  );
+  const total = Math.max(1, itens.length);
+
+  if (visao === "calendario") {
+    return (
+      <div className="pipeline-painel pipeline-calendario">
+        <CabecalhoDaVisao
+          icone={<CalendarBlank size={22} aria-hidden="true" />}
+          titulo="Calendário de compromissos"
+          descricao="Prazos priorizados por data e urgência."
+        />
+        <div className="pipeline-calendario-grade">
+          {itens.map(({ cartao, etapa, prazo }) => (
+            <Link key={cartao.id} href={`/app/pipeline/${trilha}/${cartao.id}`} className="pipeline-calendario-item">
+              <time dateTime={prazo?.data}>{prazo ? formatarData(prazo.data) : "Sem data"}</time>
+              <strong>{cartao.titulo}</strong>
+              <span>
+                {etapa.name} · {prazo ? rotuloSituacao(prazo.situacao) : "Defina um prazo"}
+              </span>
+            </Link>
+          ))}
+          {itens.length === 0 ? <EstadoVazio texto="Nenhum compromisso para exibir." /> : null}
+        </div>
+      </div>
+    );
+  }
+
+  if (visao === "tabela") {
+    return (
+      <div className="pipeline-painel pipeline-lista-envelope">
+        <table className="pipeline-lista pipeline-tabela-dinamica">
+          <thead>
+            <tr>
+              <th scope="col">Etapa</th>
+              <th scope="col">Cartões</th>
+              <th scope="col">Participação</th>
+              <th scope="col">Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {colunas.map(coluna => (
+              <tr key={coluna.etapa.id}>
+                <td>{coluna.etapa.name}</td>
+                <td>{coluna.quantidade}</td>
+                <td>{Math.round((coluna.quantidade / total) * 100)}%</td>
+                <td>{formatarMoeda(coluna.valor)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  if (visao === "grafico") {
+    const maior = Math.max(1, ...colunas.map(coluna => coluna.quantidade));
+    return (
+      <div className="pipeline-painel pipeline-grafico">
+        <CabecalhoDaVisao
+          icone={<ChartBar size={22} aria-hidden="true" />}
+          titulo="Distribuição por etapa"
+          descricao="Volume e valor corrente do funil."
+        />
+        <div className="pipeline-grafico-grade">
+          {colunas.map(coluna => (
+            <div className="pipeline-grafico-linha" key={coluna.etapa.id}>
+              <strong>{coluna.etapa.name}</strong>
+              <progress max={maior} value={coluna.quantidade} />
+              <span>
+                {coluna.quantidade} · {formatarMoeda(coluna.valor)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (visao === "localizacao") {
+    return (
+      <div className="pipeline-painel pipeline-localizacao">
+        <CabecalhoDaVisao
+          icone={<MapPin size={22} aria-hidden="true" />}
+          titulo="Localização dos cartões"
+          descricao="Somente endereços válidos serão posicionados no mapa."
+        />
+        <EstadoVazio texto="Os cartões deste funil ainda não possuem localização cadastrada." />
+        <ul>
+          {itens.slice(0, 5).map(({ cartao }) => (
+            <li key={cartao.id}>
+              <Link href={`/app/pipeline/${trilha}/${cartao.id}`}>{cartao.titulo}</Link>
+              <span>Localização pendente</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  return (
+    <div className="pipeline-painel pipeline-atividades">
+      <CabecalhoDaVisao
+        icone={<Pulse size={22} aria-hidden="true" />}
+        titulo="Atividades e próximos prazos"
+        descricao="Quem precisa agir e qual compromisso está mais próximo."
+      />
+      <ol>
+        {itens.map(({ cartao, etapa, prazo }) => (
+          <li key={cartao.id}>
+            <span className={`pipeline-atividade-status ${prazo ? `estado-${prazo.situacao.estado}` : ""}`} />
+            <div>
+              <Link href={`/app/pipeline/${trilha}/${cartao.id}`}>{cartao.titulo}</Link>
+              <span>
+                {etapa.name} · {cartao.responsavel ?? "Responsável não definido"}
+              </span>
+            </div>
+            <time dateTime={prazo?.data}>{prazo ? formatarData(prazo.data) : "Sem prazo"}</time>
+          </li>
+        ))}
+      </ol>
+      {itens.length === 0 ? <EstadoVazio texto="Nenhuma atividade para exibir." /> : null}
+    </div>
+  );
+}
+
+function CabecalhoDaVisao({
+  icone,
+  titulo,
+  descricao
+}: {
+  icone: React.ReactNode;
+  titulo: string;
+  descricao: string;
+}) {
+  return (
+    <header className="pipeline-painel-cabecalho">
+      {icone}
+      <div>
+        <strong>{titulo}</strong>
+        <span>{descricao}</span>
+      </div>
+    </header>
+  );
+}
+
+function EstadoVazio({ texto }: { texto: string }) {
+  return <p className="pipeline-visao-vazia">{texto}</p>;
 }
 
 function Cartao({

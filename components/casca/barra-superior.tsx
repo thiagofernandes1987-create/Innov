@@ -1,75 +1,65 @@
+import { CaretDown } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
-import { signOut } from "@/app/actions/auth";
 import type { Avisos } from "@/lib/casca/avisos";
 import type { Tema } from "@/lib/tema";
-import { AlternadorTema } from "./alternador-tema";
+import { BuscaGlobal } from "./busca-da-barra";
 import { CantoDireito } from "./canto-direito";
-import { IconeDoModulo } from "./icones";
-
-// Barra superior única, no lugar do menu lateral.
-//
-// O logotipo à esquerda volta para a grade de aplicativos — é o caminho de
-// retorno que o padrão de mercado usa, e o único que o usuário precisa
-// decorar. Ao lado dele, o nome do aplicativo em que se está: sem isso, uma
-// tela sem menu lateral deixa de responder "onde eu estou".
-
-export type ModuloAtual = { chave: string; nome: string } | null;
+import { NavegacaoDoModulo, type AplicativoAutorizado } from "./navegacao-do-modulo";
 
 export function BarraSuperior({
-  moduloAtual,
+  aplicativos,
   email,
   papel,
   tema,
   avisos,
-  podeAdministrar
+  podeAdministrar,
+  organizationName = "Innovar Construções",
+  persistirAvisos = true
 }: {
-  moduloAtual: ModuloAtual;
+  aplicativos: AplicativoAutorizado[];
   email: string | null;
   papel: string;
   tema: Tema;
   avisos: Avisos;
   podeAdministrar: boolean;
+  organizationName?: string;
+  persistirAvisos?: boolean;
 }) {
   return (
     <header className="barra-superior">
-      <Link className="barra-logo" href="/app" aria-label="Voltar para a grade de aplicativos">
-        <span className="barra-logo-marca" aria-hidden="true">IN</span>
-        <span className="barra-logo-nome">INNOVAR</span>
-      </Link>
+      <div className="barra-esquerda">
+        <Link className="barra-logo" href="/app" title="Tela inicial" aria-label="Ir para a tela inicial de aplicativos">
+          <span className="barra-logo-marca" aria-hidden="true">IN</span>
+          <span className="barra-logo-nome">INNOVAR</span>
+        </Link>
 
-      {moduloAtual ? (
-        <span className="barra-modulo">
-          <span className="barra-modulo-icone" aria-hidden="true">
-            <IconeDoModulo chave={moduloAtual.chave} />
-          </span>
-          <strong>{moduloAtual.nome}</strong>
-        </span>
-      ) : (
-        <span className="barra-modulo barra-modulo-inicio">
-          <strong>Aplicativos</strong>
-        </span>
-      )}
+        <Link
+          className="barra-organizacao"
+          href="/selecionar-organizacao"
+          aria-label={`Trocar organização. Atual: ${organizationName}`}
+        >
+          <span>{organizationName}</span>
+          <CaretDown size={15} weight="bold" aria-hidden="true" />
+        </Link>
+
+        <NavegacaoDoModulo aplicativos={aplicativos} />
+      </div>
+
+      <BuscaGlobal />
 
       <div className="barra-direita">
-        <AlternadorTema atual={tema} />
         <CantoDireito
           mensagens={avisos.mensagens}
           atividades={avisos.atividades}
+          operacionais={avisos.operacionais}
           naoLidas={avisos.naoLidas}
           pendentes={avisos.pendentes}
           podeAdministrar={podeAdministrar}
           email={email}
           papel={papel}
+          tema={tema}
+          persistirAvisos={persistirAvisos}
         />
-        <span className="barra-usuario">
-          <strong>{email ?? "—"}</strong>
-          <small>{papel}</small>
-        </span>
-        <form action={signOut}>
-          <button className="barra-sair" type="submit">
-            Sair
-          </button>
-        </form>
       </div>
     </header>
   );

@@ -594,8 +594,384 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.32.7 — Seis testes novos contra PostgreSQL 16 real (22 a 26): canal não declarado, tipo de atividade inventado, atividade sem título, organização divergente pela chave composta e exclusão de etapa com e sem cartão
   - [x] T-23.32.8 — `run-pipeline-db-tests.mjs` passou a descobrir as migrations em vez de listá-las: duas migrations aplicadas ao Supabase estavam fora do encadeamento e a suíte dava verde sobre esquema antigo (`VACINA-014`)
 - [x] T-23.20 — **Defeito D8 corrigido**: `app/icon.svg` declara o ícone da aba; o 404 de favicon apareceu no console durante a verificação desta sprint
-- [ ] T-23.21 — **Menus por aplicativo na barra superior.** No padrão de mercado, todo aplicativo traz os próprios menus ao lado do nome, e termina em `Relatórios` e `Configuração`. Hoje a barra mostra só o nome do aplicativo corrente
-- [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria
+- [x] T-23.21 — **Menus por aplicativo na barra superior**, no padrão `CRM · Sales · Reporting · Configuration` das capturas
+  - [x] T-23.21.1 — `lib/casca/menus.ts` declara os menus de 15 módulos. Declarados e não descobertos: nenhuma convenção de pasta expressa que "Leads" vem antes de "Oportunidades"
+  - [x] T-23.21.2 — `pnpm validate:menus` confronta cada destino com o roteador do Next e reprova o que não tem página. Reprovou dois na primeira execução — `/app/qualidade/respostas` e `/app/assinaturas/documentos` só existem por id — e os dois foram corrigidos. No CI
+  - [x] T-23.21.3 — Módulo sem menu declarado fica só com ícone e nome: inventar "Configuração" para preencher a barra criaria destino que não existe
+  - [x] T-23.21.4 — **Defeito encontrado ao verificar**: o layout do Next não re-renderiza em navegação suave, então resolver o módulo pelo `x-pathname` do servidor congelava a barra na primeira tela. O `h1` mudava e o menu ativo continuava marcando a anterior. Passou a `usePathname` em `components/casca/navegacao-do-modulo.tsx`
+- [x] T-23.33 — **Cabeçalho de página reduzido em toda a casca**, atendendo "não precisaria desse título aqui, precisa ser mais clean"
+  - [x] T-23.33.1 — Resolvido na regra que governa as 84 páginas, não em 84 arquivos: dentro de `.casca`, o `h1` cai de `clamp(34px, 4.6vw, 54px)` para 1,06rem, o selo do módulo sai (o módulo agora está na barra, com ícone) e a descrição continua visível em corpo menor
+  - [x] T-23.33.2 — Fora da casca — login, portal do cliente, página de assinatura — o título grande continua: ali ele é conteúdo, não moldura
+  - [x] T-23.33.3 — A descrição foi reduzida, não escondida: `display: none` a tiraria também de quem usa leitor de tela, o que é troca e não economia
+  - [x] T-23.33.4 — Pipeline ganhou a barra de controle do padrão: `Novo` à esquerda, nome da tela ao lado, busca ao centro, visualizações em ícone à direita. As três trilhas viraram os menus do módulo. O kanban começa em y=160 no lugar de y=385
+  - [x] T-23.33.5 — Visualizações em ícone com `aria-label` e `title`: "ícones, igual ao Odoo, ocupam menos espaço, poluem menos e facilita a leitura do pipeline"
+  - [x] T-23.33.6 — Cartão deixou de repetir o nome do registro duas vezes na mesma tela; o `h1` passou para dentro do formulário, onde o nome é conteúdo
+  - [x] T-23.33.7 — Engrenagem antes do `+` no cabeçalho da coluna, na ordem do padrão
+- [x] T-23.18 — **Defeito D3 corrigido.** Login classifica o erro pelo `code`/`status` estável do Supabase Auth; credencial inválida, e-mail não confirmado, limite e indisponibilidade recebem mensagens diferentes. Falha de transporte também é cercada, e o log não recebe e-mail, senha nem mensagem interna (`lib/auth-errors.ts`, 5 testes, `VACINA-018`)
+- [x] T-23.34 — **Acessibilidade e navegação responsiva da casca.** Menus do módulo não desaparecem mais abaixo de 900 px: viram menu móvel com os mesmos destinos e estado ativo. Mensagens, notificações, avatar e controles de toque foram alinhados ao alvo mínimo de 44 × 44 px (`VACINA-019`)
+
+---
+
+## Sprint S-24 — Pipelines como objeto do usuário, criação em toda parte e planejamento com Gantt
+**Estado:** pendente
+**Marco:** M-5
+
+Nasceu da revisão do responsável em 27 de julho, sobre a entrega da S-23. O que
+ele apontou não é acabamento: são funções que a plataforma não tem e que toda
+ferramenta do mercado tem. Vai para o fim do inventário conforme R4.
+
+### O que a revisão apontou
+
+| # | Apontamento | Consequência |
+|---|---|---|
+| A1 | "Pipeline" foi tratado como aplicativo, agregando as três trilhas | Corrigido ainda na S-23 (T-23.21): o funil pertence ao aplicativo dono — CRM, Projetos e Chamados |
+| A2 | Não existe criar, editar nem excluir **pipeline** | Só as etapas eram configuráveis. O funil em si é fixo, um por trilha, criado por preset |
+| A3 | Um módulo precisa de **vários** pipelines | CRM tem SDR, pré-venda e venda; pós-venda tem projeto e execução; assistência tem o seu |
+| A4 | "Sempre eu deveria ter a opção de criar coisas: pipelines, cards, clientes" | O `Novo` do pipeline cria cartão para registro **existente**. Não há como cadastrar cliente, projeto ou chamado de dentro do fluxo |
+| A5 | Planejamento não abre Gantt ao clicar no cliente | Não há Gantt, nem dependência de tarefa (II, IT, TT, TI), nem dias programados |
+| A6 | Falta a visão de lista do planejamento, por cliente | Sem início da obra, término previsto, etapa atual e suas datas, % concluída, sinalização de prazo, dias de folga ou atraso, responsável e próxima tarefa |
+| A7 | Cadastro de obra deveria vir do App Projetos ao criar no pipeline | Hoje o pipeline exige que o projeto já exista |
+| A8 | Não há busca no meio da barra superior | Bitrix, Pipedrive e Sophia têm busca global no topo; a busca atual é só do pipeline, na barra de controle |
+| A9 | A seção de cadastrar usuários não foi encontrada | `/app/administracao/usuarios` existe desde a S-12.1 e não tinha caminho de menu. Menu criado na T-23.21; falta conferir a tela contra o padrão |
+| A10 | Personas e rotinas não foram produzidas | Foram pedidas e não entregues. Sem elas, cada tela é decidida no gosto de quem escreve, que é exatamente a crítica |
+
+### Tarefas
+
+- [x] T-24.1 — **Personas e rotinas escritas**, em `diretrizes/PERSONAS-E-ROTINAS.md`, canônico e no validador
+  - [x] T-24.1.1 — Seis personas com fonte citada: as palavras do responsável sobre nível de acesso, as 261 capturas e o fluxo de móveis planejados já modelado nos presets. Nenhuma inventada
+  - [x] T-24.1.2 — Cada uma responde às quatro perguntas: por onde entra, qual a pergunta do dia, o que precisa em três cliques e o que a plataforma ainda não faz
+  - [x] T-24.1.3 — P3, o montador, tem poder de veto sobre desenho móvel: é a única persona que trabalha de pé, com uma mão, em tela pequena e sinal ruim ao mesmo tempo
+  - [x] T-24.1.4 — Regra levada ao `CLAUDE.md`: tela que não declara persona, origem, pergunta e contagem de cliques não é construída
+  - [x] T-24.1.5 — **Reescrito no mesmo dia, depois da crítica que invalidou a primeira versão**: *"o cara de planejamento deve saber trabalhar com project (…) quais conhecimentos ele precisa ter? isso que é matriz de competências!!!"*. A primeira versão descrevia **o que cada persona clica**, e caminho de clique é consequência, não causa. Persona escrita por cliques só valida a tela que já existe — nunca aponta o campo que falta, porque não conhece a técnica que precisaria dele
+  - [x] T-24.1.6 — Estrutura nova em quatro camadas, de baixo para cima: **competência → ferramenta → técnica → rotina**, e cada técnica **declara o dado que exige**. É o que faz a persona virar requisito de banco em vez de opinião de tela
+  - [x] T-24.1.7 — P2 separada em duas: **planejador** (rede, prazo e custo do prazo) e **P7 projetista** (detalhamento executivo). Juntar as duas produziu um "engenheiro" que não existe em nenhuma das duas cadeiras
+  - [x] T-24.1.8 — Catálogo de onze técnicas do planejamento com a conta **executada**, e o diagnóstico de esquema de cada uma: PERT três pontos, CPM com folga total, custo marginal de aceleração, corrente crítica com pulmão, linha de base, curva S, curva ABC, DSM, calendário e regime, nivelamento de recurso, referência de preço com data-base
+  - [x] T-24.1.9 — Layout de referência lido de MS Project e Primavera P6, oito características comuns, com o que já existe e o que falta. A mais cara é a que falta: **grade editável ao lado do Gantt**, com predecessora digitável no formato `12TI+3d` — é o gesto mais repetido do dia e nenhum modal ganha dele
+- [x] T-24.2 — **Pesquisa de campo do CRUD de pipeline** (`PADRAO-DE-INTERFACE.md` §13), lida das capturas antes de qualquer código
+  - [x] T-24.2.1 — Achado que muda o desenho: **o Odoo não tem objeto "pipeline"**. Tem um escopo dono — `Sales Team` no CRM, o próprio projeto em Project — e etapas ligadas a ele. Criar funil é criar escopo, não abrir tela de configuração à parte
+  - [x] T-24.2.2 — Mapa de onde cada comando mora, com a captura que prova cada linha: trocar de funil no breadcrumb, configurar na engrenagem colada ao nome, criar no menu `Configuração` do aplicativo, etapa no fim das colunas
+  - [x] T-24.2.3 — Diagnóstico do que falta: o banco **já aceita** vários funis por trilha. O que trava é `carregarPipeline` pegar só o padrão, a restrição de um padrão por trilha e a ausência de seletor. É leitura e tela, não modelagem — a T-24.3 começa pela consulta, não pelo esquema
+  - [x] T-24.2.4 — Cinco decisões fixadas, entre elas: não existe tela central de criar funil, porque não existe aplicativo "Pipeline"; e preset é atalho, não obrigação — quem cria "SDR" não recebe "medição" e "fabricação"
+- [x] T-24.3 — **Vários funis por aplicativo**, sem nenhuma migration — a pesquisa da T-24.2 estava certa
+  - [x] T-24.3.1 — Confirmado no esquema: `pipelines_padrao_unico_idx` é índice **parcial** (`where padrao`), então limita quantos são padrão e não quantos existem. O esquema sempre aceitou vários
+  - [x] T-24.3.2 — `funisDaTrilha()` lista todos os ativos; `carregarPipeline` já aceitava a chave e passou a receber a da URL
+  - [x] T-24.3.3 — Funil escolhido vai para `?funil=`: recarregar mantém, e o endereço pode ser mandado apontando para o funil certo
+- [x] T-24.4 — **CRUD de funil**: criar em branco ou de preset, renomear, arquivar, definir padrão e excluir
+  - [x] T-24.4.1 — Preset é atalho, não obrigação: quem cria "SDR" começa em branco e cria as etapas na própria coluna
+  - [x] T-24.4.2 — Arquivar é o caminho normal, excluir é para o que nasceu errado. Funil com cartão manda arquivar, para preservar o histórico
+  - [x] T-24.4.3 — Excluir ou arquivar o padrão é recusado com frase. Verificado no navegador: *"Trilha do cliente" é o funil padrão da trilha. Defina outro como padrão antes de excluir este.*
+  - [x] T-24.4.4 — `definirFunilPadrao` limpa o anterior antes de marcar o novo, porque o índice parcial recusa dois padrões — e é ele que garante que a tela nunca fique sem saber qual abrir
+- [x] T-24.5 — **Seletor de funil na barra de controle**, ao lado do nome, com engrenagem no hover — a posição que a §13 leu do breadcrumb `Projects / Teste ⚙`
+  - [x] T-24.5.1 — Nunca na barra 1: trocar de funil não troca de aplicativo, e a barra 1 é do aplicativo
+  - [x] T-24.5.2 — Verificado ponta a ponta: criar "SDR" em branco, trocar para ele por `?funil=sdr_...`, ver zero coluna e o campo de etapa nova, e excluir. Zero erro de console
+- [x] T-24.6 — **Criar registro de dentro do funil**: cliente, projeto e chamado nascem do `+` da coluna, sem sair do fluxo
+  - [x] T-24.6.1 — Duas abas no formulário da coluna: vincular registro existente, ou cadastrar novo. Coluna sem registro livre leva direto ao cadastro
+  - [x] T-24.6.2 — A validação brasileira é a **mesma** `checarCamposBR` do formulário completo, não uma segunda cópia. Verificado no navegador: CPF de 10 dígitos recusado com *"CPF precisa ter 11 dígitos; recebeu 10"* e o telefone sujo `12982#2($($` com *"precisa ter 10 dígitos com DDD; recebeu 6"* — os dois valores que passaram para produção no defeito D1
+  - [x] T-24.6.3 — **Projeto nasce sem contrato**, que era o "como vou planejar algo que nem existe cadastro?" do print do planejamento. `projects.contract_id` é anulável e o índice de unicidade é parcial: o que existia era só o caminho pelo contrato, não uma restrição do banco
+  - [x] T-24.6.4 — Chamado nasce pela RPC `create_sac_ticket`, não por INSERT: é ela que numera e aplica os prazos de primeira resposta e resolução. Inserir direto criaria chamado sem SLA
+  - [x] T-24.6.5 — **Defeito encontrado ao verificar**: eu gravava `lifecycle_stage: "LEAD"`, valor que o CHECK não aceita — os válidos são PROSPECT, CUSTOMER, ACTIVE, INACTIVE e FORMER. Corrigido para `PROSPECT`, e a violação de CHECK passou a ter mensagem própria em vez de cair no "não foi possível", que é o defeito D2 por uma porta nova
+- [x] T-24.0 — **Mapa das duas barras escrito antes do código** (`PADRAO-DE-INTERFACE.md` §12), ditado pelo responsável e conferido contra as capturas: o que fica em cada posição, o que nunca pode estar ali, quando cada visualização aparece e a exceção declarada da busca
+  - [x] T-24.0.1 — Barra 1 igual em toda tela: marca sozinha à esquerda, ícone e nome do aplicativo com os menus dele, mensagens, notificações e avatar à direita; busca reconciliada na barra 2 em 28/07
+  - [x] T-24.0.2 — E-mail por extenso e botão "Sair" saíram da barra para dentro do avatar, junto com tema, atalhos e "Usuários e permissões" — dois elementos permanentes para uma ação de uma vez por dia
+  - [x] T-24.0.3 — Barra 2 com ações à esquerda, busca contextual ao centro e visualizações à direita, sem repetir o nome do aplicativo
+  - [x] T-24.0.4 — `BarraDeTrabalho` extraída como componente transversal e usada no pipeline e na administração de responsabilidades
+- [ ] T-24.7 — **Busca global na barra de trabalho**: hoje o campo existe no centro, com faceta e remoção, e filtra a tela do pipeline. Falta procurar em cliente, projeto, chamado e cartão ao mesmo tempo, com resultado agrupado por tipo, e o painel de Filtros, Agrupar por e Favoritos da §12.5
+  - [x] T-24.7.1 — Campo no centro da barra 2, com lupa, faceta removível e Backspace apagando a faceta
+  - [x] T-24.7.2 — Filtro aplicado no navegador, não por navegação. A primeira versão escrevia em `router.replace` a cada tecla; como as telas são `force-dynamic`, cada digitação virava ida ao servidor e a lista chegava quase três segundos atrasada. A URL continua espelhada por `history.replaceState`, sem re-render de servidor
+  - [x] T-24.7.3 — Exceção declarada na §12.4: o campo só aparece onde a tela sabe consumi-lo. Campo que aceita texto e não filtra ensina que a busca não funciona
+- [ ] T-24.8 — **Planejamento, visão de lista por cliente** — parcial
+  - [x] T-24.8.1 — Coluna de situação do prazo em três estados, com a régua de sete dias: é o intervalo em que ainda dá para remanejar equipe ou antecipar material; menos que isso, o aviso chega junto com o problema
+  - [x] T-24.8.2 — O código da obra abre o cronograma, que era o "clicar no nome e abrir o gantt" do print
+  - [x] T-24.8.3 — Coleção agora mostra etapa atual, datas da etapa, dias de folga ou atraso, responsável e próxima tarefa programada; o código continua abrindo o Gantt
+- [x] T-24.9 — **Gantt com dependências**, no lugar da barra por porcentagem que existia na tela de cronograma
+  - [x] T-24.9.1 — Achado que reduziu o trabalho: os quatro tipos **já existiam** como enum desde a etapa 12 — `FS`, `SS`, `FF`, `SF` são exatamente TI, II, TT e IT. `lag_days` e `duration_days` também. Não foi preciso criar modelo de dependência
+  - [x] T-24.9.2 — O que faltava era a única coisa que torna cronograma incalculável: **ciclo**. `A→B→C→A` passava por toda restrição existente, porque nenhuma olha além do par imediato. Gatilho com CTE recursiva, cobrindo INSERT e UPDATE
+  - [x] T-24.9.3 — Chave composta `(tarefa, projeto)` nos dois lados: dependência entre tarefas de projetos diferentes vira erro de integridade, não disciplina de quem escreve
+  - [x] T-24.9.4 — `lib/planejamento/cronograma.ts` com passada para frente, folga positiva e negativa, e a regra de que a data fixada pelo planejador vence quando é mais tarde. **17 testes antes da tela existir**, incluindo virada de mês e de ano
+  - [x] T-24.9.5 — 7 testes contra PostgreSQL real, com `pnpm test:db:planejamento` no CI
+  - [x] T-24.9.6 — Cadeia que empurra a entrega destacada, e nomeada pelo que é: não é caminho crítico do CPM, porque não há passada para trás nem folga total. Vender o nome sem a conta seria prometer o que não se entrega
+  - [x] T-24.9.7 — **Defeito encontrado ao verificar**: a migration estava no repositório e **não no banco**. O formulário aceitou `T5 → T1` e fechou o laço. Aplicada ao Supabase e reverificada: a recusa aparece com a frase certa
+  - [x] T-24.9.9 — **Calendário de trabalho**, `lib/planejamento/calendario.ts`: quatro regimes, 13 feriados nacionais (9 fixos e 4 móveis **calculados** pela Páscoa, Meeus/Jones/Butcher — tabela ano a ano envelhece em silêncio e erra no ano que ninguém conferiu), e toda a aritmética do cronograma convertida para **dia útil**. A conta do responsável, executada: 20 úteis + 8 de fim de semana + 1 feriado = **29 corridos**; quatro fins de semana são oito dias, e só o total muda
+  - [x] T-24.9.10 — **Três curvas** sob o Gantt, `lib/planejamento/curvas.ts`: planejado total, previsto parcial e realizado parcial, com liga-desliga. Ponderação por dia útil, nunca por contagem de tarefas. Limitação **declarada no arquivo**: a plataforma guarda o progresso de hoje e não a série diária dele, então a curva do passado é reconstruída — o apontamento datado da S-25 substitui a reconstrução. Registrar isso é o que impede alguém de usar a curva como prova em discussão de prazo
+  - [x] T-24.9.11 — Fim de semana e feriado hachurados no quadro, feriado com nome; escala fixa no topo e nomes fixos à esquerda; quadro limitado a `calc(100vh - 320px)` com rolagem própria — o "todos calendários têm que pegar até o final da tela" do print do Odoo
+  - [x] T-24.9.8 — Verificado com cenário real de 5 tarefas e 5 dependências: T2 começa no dia seguinte ao término de T1, T3 respeita a folga de 2 dias, e a compra de ferragens fica **fora** da cadeia — o ramo curto não empurra a entrega
+- [ ] T-24.10 — **Conferir a tela de cadastro de usuários** contra o padrão pesquisado, já que o responsável não a encontrou
+- [ ] T-24.11 — **Varredura do texto poluído** nas 84 telas: o cabeçalho encolheu na S-23, mas cada tela ainda precisa ser olhada uma a uma contra o padrão
+
+---
+
+## Sprint S-25 — Serviço de campo: execução, apontamento e retroalimentação do planejamento
+**Estado:** pendente
+**Marco:** M-5
+
+Ditada pelo responsável em 27 de julho. Desenho completo em
+[`SERVICO-DE-CAMPO.md`](SERVICO-DE-CAMPO.md). Vai para o fim conforme R4.
+
+Não é um módulo a mais: é o fechamento do ciclo. Hoje o planejamento produz uma
+previsão que ninguém confronta com a realidade, e a realidade fica na cabeça de
+quem está na obra.
+
+### Tarefas
+
+- [x] T-25.1 — **Natureza do check-in decidida pelo responsável em 27/07: alimenta a folha de pagamento.** Registro de jornada é artefato regulado (Portaria 671/2021 do MTP), e isso eleva a exigência técnica desde a primeira linha — detalhado na §7.1
+- [ ] T-25.1.1 — Marcação imutável: `UPDATE` e `DELETE` negados; correção é linha nova de ajuste apontando para a original, com autor e motivo obrigatórios
+- [ ] T-25.1.2 — Comprovante por marcação e espelho de ponto por pessoa e competência
+- [ ] T-25.1.3 — Encadeamento por hash, para que adulteração em lote seja detectável
+- [ ] T-25.1.4 — Marcação fora da janela ou do raio **não é bloqueada**, é gravada com a divergência anotada. Bloquear faria a pessoa trabalhar sem conseguir registrar que trabalhou
+- [ ] T-25.1.5 — Deixar explícito o que fica fora: a plataforma produz registro e espelho; não calcula folha, convenção coletiva, banco de horas nem adicional noturno
+- [ ] T-25.2 — **Check-in e check-out com localização**, alimentando horas trabalhadas
+- [ ] T-25.3 — **To-do de campo**: alimentado pelo planejador, atualizado pelo profissional com o número de dias que faltam. Reaproveita `pipeline_card_activities`
+- [ ] T-25.4 — **DPPT e DEPT como naturezas de data**, na taxonomia que já existe. Não é modelo novo: é mais um par na tabela que `pipeline_codigo_data` governa
+- [ ] T-25.5 — **TEP e TEPr**: `TEP = DPPT − DEPT` no cartão e na notificação; `TEPr = TEP / prazo × 100` para ordenar, acender sinal e comparar equipes. Sem o relativo, o ranking premia quem pega tarefa longa
+- [ ] T-25.6 — **Motivo obrigatório quando TEP fica negativo**, em lista fechada — chuva, material, saúde, tarefa anterior, cliente, outro. Texto livre não vira métrica
+- [ ] T-25.7 — **Notificação para responsável e seguidores** quando o TEP vira negativo, pelo canto direito que já existe
+- [ ] T-25.8 — **Solicitação de insumo abre uma parada**, não só um pedido. Regra do responsável: se falta material, o montador obrigatoriamente para
+  - [ ] T-25.8.1 — Parada com início e fim: abre na solicitação, fecha quando o material chega. Tempo medido, não estimado de memória
+  - [ ] T-25.8.2 — Entra no `TEP` como causa declarada, separando "rendeu menos" de "ficou esperando" — problemas de setores diferentes
+  - [ ] T-25.8.3 — Notifica o almoxarifado e alimenta o KPI de parada de obra por falta de material
+- [ ] T-25.9 — **Calendário do dia** para o perfil de execução
+- [ ] T-25.15 — **A janela dos 15 minutos é do sistema**: notificação no horário de fechamento do dia, listando o que falta preencher. Esperar o profissional lembrar produz diário em branco e `DEPT` desatualizado — e `DEPT` desatualizado derruba `TEP`, sinal amarelo, painel e matriz, nessa ordem
+- [ ] T-25.16 — **Três momentos, não uso contínuo.** O aplicativo interrompe o trabalho: chegada, necessidade e 15 minutos antes de sair. O critério de pronto passa a ser **terminar de primeira** — fluxo que exige segunda tentativa custa uma segunda parada
+- [ ] T-25.10 — **Sinal amarelo propagado**: cartão, planner, módulo de projeto e painel
+- [ ] T-25.11 — **Painel de obras**: quantas no prazo, quantas atrasadas, desempenho por equipe e do planejador
+- [ ] T-25.12 — **Matriz de competências**: rendimento por tipo de tarefa, média de 6 meses **com desvio padrão**. Média sozinha esconde a equipe que faz em 4 ou em 8 dias
+- [ ] T-25.13 — **Avaliação do cliente** de 0 a 5 em sete critérios, alimentando a matriz. Antes de gravar, decidir o que a §7.2 levanta: quem vê a nota individual e por quanto tempo ela pesa
+- [ ] T-25.14 — **Conferir tudo com a persona P3**, que tem veto: de pé, uma mão, tela pequena, sinal ruim
+
+---
+
+## Sprint S-26 — KPIs setoriais e individuais
+**Estado:** pendente
+**Marco:** M-5
+
+Pedida pelo responsável em 27 de julho: "quero que você crie kpis por setor e
+individual para todos os módulos, isso é de extrema importância". Catálogo
+completo em [`KPIS.md`](KPIS.md). Vai para o fim conforme R4.
+
+### O que a escrita do catálogo já resolveu
+
+- **A fonte existe.** `pipeline_card_stage_history` grava toda transição com
+  origem, destino e instante. Dela saem toda conversão, todo tempo de ciclo,
+  toda estagnação e todo retrabalho — sem tabela nova.
+- **O erro do denominador foi documentado com a conta feita.** "Leads Ganhos"
+  (contratos ÷ leads) e "Taxa de Conversão" (contratos ÷ briefings) parecem o
+  mesmo indicador e não são: a razão entre eles é exatamente o filtro da
+  entrada. Cobrar o vendedor pelo primeiro quando o marketing mudou a fonte é
+  punir quem não causou.
+
+### Tarefas
+
+- [ ] T-26.0 — **Aplicar o teste da §0 a cada KPI antes de implementar**: se atrasar gera grande impacto? dá para medir o acerto? quem fica abaixo é identificável? só então o geral do setor. Candidato que não passa da primeira pergunta vira relatório, não indicador
+- [ ] T-26.1 — **Camada de cálculo única**, lendo de `pipeline_card_stage_history` e das tabelas de domínio. Um KPI calculado em dois lugares diverge no primeiro ajuste
+- [ ] T-26.1.1 — Janela de 6 meses anteriores + 6 meses atuais, com **desvio padrão amostral (n−1)**. A comparação entre as metades é a tendência; o ano é o retrato
+- [ ] T-26.1.2 — Faixa de alerta derivada do próprio histórico — `média ± 1σ` —, com a média de mercado da §0.2 como segunda régua. Alvo arbitrário reprova quem não merece
+- [ ] T-26.1.3 — Ordenação para escolha de equipe por `média + desvio`, nunca só pela média: calculado, duas equipes com média idêntica de 6 dias diferem em 1,9 dia no pior caso
+- [ ] T-26.2 — **Motivo de perda no CRM**: campo em lista fechada. É o único KPI do módulo hoje marcado 🔴 — o dado não existe
+- [ ] T-26.3 — **Conversões do funil comercial**, depois dos funis por setor da S-24: qualidade de lead, conversão de leads, conversão em projeto, leads ganhos e taxa de conversão, com os dois denominadores convivendo
+- [ ] T-26.4 — **KPIs de campo e do planejador** (aderência, desvio relativo, acerto do plano), depois da S-25
+- [ ] T-26.5 — **KPIs de assistência**, com destaque para chamados por obra entregue — o indicador que liga o pós-venda a quem executou
+- [ ] T-26.6 — **KPIs de qualidade, financeiro, compras e estoque**, incluindo parada de obra por falta de material
+- [ ] T-26.7 — **Matriz de competências** por tipo de tarefa, com média **e desvio padrão** de 6 meses. Ordenação por `média − desvio` para escolha de equipe
+- [ ] T-26.8 — **Painel executivo** compondo os anteriores
+- [ ] T-26.9 — **Decidir as quatro regras da §15 antes de publicar qualquer KPI individual**: quem vê o próprio número, janela de esquecimento, caminho de contestação, e nunca publicar contagem absoluta antes do denominador que a normaliza
+
+---
+
+## Sprint S-27 — Planejamento profissional: as técnicas que o planejador executa
+**Estado:** pendente
+**Marco:** M-5
+
+Nasceu da crítica de 27 de julho que invalidou a primeira versão das personas:
+
+> "o cara de planejamento deve saber trabalhar com project, como se faz um
+> planejamento, quais ferramentas ele usa, quais conhecimentos ele precisa ter?
+> (…) o que é curva A, ABC, custo marginal, otimista, pessimista e normal,
+> caminho crítico, linha de base, corrente crítica, DSM"
+
+Cada item da lista é uma **técnica com dado exigido**, não um adorno de tela.
+Catálogo completo em [`PERSONAS-E-ROTINAS.md`](PERSONAS-E-ROTINAS.md) §P2.3, com
+a conta de cada uma executada. Vai para o fim conforme R4.
+
+### O diagnóstico que ordena a sprint
+
+Metade das técnicas **não precisa de migration** — o dado já está no banco desde
+a etapa 9 ou 12 e o que falta é leitura e tela. Essas vão primeiro, por retorno
+sobre esforço:
+
+| Técnica | Esquema | Situação |
+|---|---|---|
+| CPM com folga total | nenhuma migration | Função pura sobre `task_dependencies`, que já tem os quatro tipos e `lag_days` |
+| Linha de base | nenhuma migration | `schedule_baselines` e `schedule_baseline_tasks` existem desde a etapa 12; `curvaDeAvanco()` **já aceita** a linha de base |
+| DSM | nenhuma migration | `task_dependencies` **é** a matriz N×N; falta lê-la em N×N |
+| Curva ABC | nenhuma migration | `budget_items` tem `quantity`, `unit_cost`, `loss_rate` e `freight_rate` |
+| Data-base de preço | nenhuma migration | `budget_items.source`, `region` e `base_date` existem desde a etapa 9; falta a importação |
+| Três pontos (PERT) | migration pequena | `project_tasks.duration_days` é um campo só; faltam otimista, provável e pessimista |
+| Aceleração | migration pequena | Falta o par `crash_duration_days` / `crash_cost`; `project_resources.daily_cost` já existe |
+| Corrente crítica | modelo novo | Pulmão como objeto de cronograma; nada existe |
+| Nivelamento | leitura nova | `task_resource_allocations` já tem quantidade e horas, planejadas e reais |
+
+### Tarefas
+
+- [ ] T-27.0 — **Grade editável ao lado do Gantt**, com divisor arrastável: código, nome, duração, início, término, **predecessoras**, responsável, % concluída. Digitar `12TI+3d` na célula de predecessora é o gesto mais repetido do dia do planejador, e nenhum modal ganha dele. Sem migration
+- [ ] T-27.1 — **Passada para trás e folga total**, fechando o CPM. Hoje `cadeiaMaisLonga()` só faz a passada para frente e o próprio comentário da função declara isso. Calculado no exemplo de quatro tarefas: a tarefa fora da cadeia tem **5 dias de folga**, e é esse número que diz onde o planejador **não** precisa correr
+  - [ ] T-27.1.1 — Renomear para caminho crítico só depois de a folga existir. Vender o nome sem a conta é prometer o que não se entrega
+  - [ ] T-27.1.2 — Folga livre além da folga total: a primeira diz quanto atrasa sem mover a entrega, a segunda quanto atrasa sem mover **a sucessora**
+- [ ] T-27.2 — **Linha de base pela tela**: congelar, comparar e desenhar a barra fina abaixo da atual. O banco está pronto e a função de curva também. Replanejar sem linha de base apaga a prova do desvio, e a reunião de prazo vira memória contra memória
+- [ ] T-27.3 — **Matriz DSM** sobre as dependências que já existem. Marca acima da diagonal é realimentação — retrabalho **previsível**, não acidente. É o que o Gantt não mostra e o que explica a obra que "sempre atrasa na aprovação"
+- [ ] T-27.4 — **Curva ABC no orçamento**. Calculado sobre orçamento de R$ 1,1 mi: **3 itens de 8 concentram 80% do custo**. É a régua que decide o que merece três cotações e o que não merece reunião
+- [ ] T-27.5 — **Estimativa de três pontos**: otimista, provável e pessimista por tarefa, com `duration_days` derivada de `TE = (O + 4M + P)/6`
+  - [ ] T-27.5.1 — Desvio do caminho por **raiz da soma das variâncias**, nunca por soma de desvios: calculado, a soma ingênua erra 2,01 dias em três tarefas. Variância soma, desvio padrão não
+  - [ ] T-27.5.2 — Faixa de confiança na negociação de prazo, em vez do número único que ninguém consegue cumprir
+- [ ] T-27.6 — **Custo marginal de aceleração**: duração e custo acelerados por tarefa, e o gradiente em R$/dia ganho. Calculado: comprime-se pela mais barata **do caminho crítico**, e acelerar tarefa com folga é dinheiro jogado fora. Depois da T-27.1, porque sem folga não se sabe onde não gastar
+- [ ] T-27.7 — **Referência de preço com data-base**: importar tabela por praça e reajustar por índice. Orçamento que não guarda data-base e região não pode ser reajustado nem defendido
+- [ ] T-27.8 — **Nivelamento de recurso** com histograma de uso. Duas tarefas paralelas pedindo o mesmo montador não são paralelas — sem nivelar, o cronograma promete uma simultaneidade que a equipe não tem. Depois da T-27.1: nivela-se consumindo folga primeiro
+- [ ] T-27.9 — **Corrente crítica**: pulmão de projeto e de alimentação, com consumo como semáforo. Calculado, o pulmão agregado entrega **3,38 dias antes** da soma das seguranças individuais com a mesma proteção, porque nem todas as tarefas atrasam juntas. É o único indicador de prazo que não depende de alguém julgar se "está no prazo". Depende da T-27.1 e da T-27.5
+- [ ] T-27.10 — **Calendário por equipe no banco**, com feriado municipal e estadual por organização. Hoje o cálculo é em dia útil, mas o regime é escolhido na tela e os feriados são só os nacionais — anunciar feriado municipal que não vale na cidade da obra seria pior que não ter nenhum
+- [ ] T-27.11 — **Painel inferior de detalhe** da linha selecionada, por abas, como em Primavera P6: situação, recursos, relacionamentos e apontamento
+
+---
+
+## Sprint S-28 — O que a dissecação de riscos exige: parada, solicitação e obrigação
+**Estado:** pendente
+**Marco:** M-5
+
+Nasce da crítica de 27 de julho:
+
+> "um fluxo de trabalho otimista, um pessimista (o que pode dar de problema, o
+> que poderia realmente atrapalhar uma atividade, e se atrapalhasse o que eu
+> precisaria ter disponível na ferramenta, quais departamentos isso afetaria e a
+> quem eu precisaria realizar uma solicitação para resolver), isso é dissecar o
+> problema (…) você continua sendo muito superficial"
+
+Dissecação completa em [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md). **Todo
+requisito desta sprint existe porque alguma coisa deu errado** — nenhum deles
+apareceria numa lista de funcionalidades, e é essa a diferença que a crítica
+apontou. Vai para o fim conforme R4.
+
+### As três contas que ordenam a sprint
+
+| Conta | Resultado | O que ela decide |
+|---|---|---|
+| `P(dia de montagem sem imprevisto)` | **52,9%**; em 5 dias, **4,1%** | Desenhar só o caminho feliz atende metade dos dias |
+| Erro de medida por estágio de descoberta | 1× na obra → **300×** na montagem → 700× na assistência | A conferência de medida antes de liberar fabricação é a trava mais barata do sistema |
+| Equipe de quatro parada | **R$ 104,00/hora**, **R$ 942,40** por dia queimado | Dá peso à solicitação de insumo e justifica compra local com teto |
+| Ciclo real de reposição de peça | **9 dias úteis**; conferindo na expedição, **5** | 4 dias economizados por ocorrência |
+
+### Tarefas
+
+- [ ] T-28.0 — **Parada como objeto de primeira classe**: início, fim, motivo em **lista fechada**, evidência, e o campo que ninguém quer gravar e é o mais valioso — **de quem era a obrigação** (cliente, obra, fábrica, expedição, compras, projeto ou clima). Sem ele, espera vira baixa produtividade de quem estava parado por decisão de outro setor
+  - [ ] T-28.0.1 — Abertura em **dois toques**. Se abrir parada der trabalho, ninguém abre, e o dado que sustenta o `TEP` deixa de existir
+  - [ ] T-28.0.2 — Os oito motivos da §0 como ponto de partida da lista fechada. Texto livre não vira indicador
+  - [ ] T-28.0.3 — Separar **improdutivo por clima** de **improdutivo por falha**: misturar destrói a matriz de competências, porque pune quem pegou chuva
+- [ ] T-28.1 — **Solicitação com destinatário nominal, departamento e prazo**. "Avisar o sistema" não é solicitação. Os prazos vieram da dissecação e cada um tem motivo de campo: compra local 1 h, expedição 2 h, coordenação 2 h, projetista 4 h, comercial 4 h
+  - [ ] T-28.1.1 — **Escalonamento por prazo vencido**, senão prazo de resposta é decoração
+  - [ ] T-28.1.2 — Solicitação de insumo **abre parada junto**, porque falta de material é parada obrigatória e não observação
+- [ ] T-28.2 — **Pré-condições de medição** conferidas e assinadas, com **medição condicional** marcada como tal e remedição agendada. É o requisito de maior retorno de todos: previne a maior parte do R3.1, que a 12% de frequência custa 300× quando aparece na montagem
+- [ ] T-28.3 — **Romaneio conferível item a item, com foto de referência**, distinguindo "faltou" de "veio diferente" — causas diferentes, departamentos diferentes. Inclui o campo **em qual conferência o erro deveria ter sido pego**: sem ele a expedição nunca melhora, porque o custo cai sempre na montagem
+- [ ] T-28.4 — **Ficha de acesso do endereço** preenchida **na medição**: horário de carga e descarga, contato de portaria e síndico, exigência de ART, seguro ou aviso prévio. O dado mais barato de coletar meses antes e o mais caro de descobrir na hora
+- [ ] T-28.5 — **Compra local com teto e alçada**: R$ 180 de ferragem na esquina contra R$ 942,40 de dia queimado — **5,2× mais barato**. Precisa de autorização em 1 hora, senão a equipe espera de qualquer forma
+- [ ] T-28.6 — **Pedido do cliente registrado no local**, com foto e assinatura no telefone, e o caminho direto para aditivo. **O montador não pode ter autoridade para aceitar mudança de escopo** — e a ferramenta é que precisa deixar isso óbvio, porque no local a pressão é real
+- [ ] T-28.7 — **Revisão vigente do desenho no telefone**, e liberação de fabricação amarrada à revisão aprovada. `project_documents` já tem os cinco estados e `project_document_versions` já versiona; falta a amarração, que hoje é disciplina — e disciplina falha a 100× de custo
+- [ ] T-28.8 — **Ver quem mais está alocado no mesmo endereço hoje**. Resolve por conversa, no local, em cinco minutos, o conflito de sequenciamento que hoje escala para a coordenação
+- [ ] T-28.9 — **Situação financeira do cliente visível antes de a equipe sair**, não depois. Descobrir depois custa os R$ 942,40 da Lei 2
+- [ ] T-28.10 — **Cobertura de apontamento** como número visível, e detecção do padrão suspeito — progresso monotônico com variância zero é o padrão de quem preenche de cabeça no fim de semana. **Falso é pior que ausente**, porque ausente ao menos se enxerga
+- [ ] T-28.11 — **Gravar `project_progress_snapshots` ao aprovar o diário**, e ler dele em `curvas.ts`. A tabela existe desde a etapa 12 com `snapshot_date`, `planned_progress`, `actual_progress` e `source`, e `daily_log_activities` já tem `progress_before`/`progress_after` datados pelo `log_date` do diário. **Sem migration** — falta só escrever e ler, e a curva de realizado deixa de ser reconstruída para ser medida
+
+---
+
+## Sprint S-29 — Acompanhamento a distância: seguir, notificar por exceção e evidenciar
+**Estado:** pendente
+**Marco:** M-5
+
+Ditada pelo responsável em 27 de julho:
+
+> "o montador solicitar material que faltou ou enviar fotos do andamento, assim
+> mesmo sem visitar a montagem, ou obra, os gerentes, diretores, cliente, sabem o
+> que está acontecendo (…) por isso temos notificações e alertas para as pessoas
+> que são responsáveis e seguem o projeto"
+
+Desenho e dissecação em
+[`ACOMPANHAMENTO-A-DISTANCIA.md`](ACOMPANHAMENTO-A-DISTANCIA.md). Vai para o fim
+conforme R4.
+
+### O diagnóstico que ordena a sprint
+
+**Metade do sistema já está construída, e é a metade que se costuma achar que
+falta.** O portal do cliente existe em `app/cliente/` e já lê `client_visible`
+em diário aprovado, mídia, tarefas, marcos e documentos liberados. `daily_logs`
+já tem aprovação com autor e data, e `daily_log_media` já tem `captured_at`,
+`sha256` e `client_visible`. **A lacuna inteira é o empurrão**: hoje tudo é
+*pull* — quem quer saber precisa abrir a tela. Não existe tabela de notificação,
+não existe assinatura ("quem segue o quê") e não existe entrega.
+
+### As contas que fixam os limites
+
+| Conta | Resultado | O que decide |
+|---|---|---|
+| Eventos para 1 gerente com 6 obras | **2.640/mês (120/dia)** bruto → **259/mês (11,8/dia)** por exceção | Notificar por exceção, redução de **90,2%** |
+| Falso positivo tolerável | acima de **20%** o alerta vira ruído | Tipo de alerta acima disso é desligado até corrigir |
+| Evidência remota × visita | R$ 0,94 contra R$ 365,40 — **390×** | Substitui a visita de rotina, não a visita |
+| Foto original × comprimida | 4,20 MB → 0,35 MB, **12×**; upload de 8 s → 0,7 s | Compressão não é economia, é viabilidade dentro da janela de 15 min |
+| Fila offline de 7 dias | 168 registros, 29,4 MB por equipe | Cabe com folga; 7 dias é o teto, acima disso o dado envelheceu |
+
+### Tarefas
+
+- [ ] T-29.0 — **Assinatura: "seguir" como ato explícito e visível**, com inscrição automática por papel (responsável, gerente da obra, planejador) e a lista de seguidores exibida na própria obra. Diretor que "achava que estava vendo" e não estava é a falha mais comum deste tipo de sistema — e sem registro de quem seguia o quê, "ninguém me avisou" não tem resposta
+- [ ] T-29.1 — **Notificação por exceção**, nunca por evento. Normal não avisa
+  - [ ] T-29.1.1 — Faixa derivada do próprio histórico, conforme a janela 6+6 da `KPIS.md`
+  - [ ] T-29.1.2 — Teto diário por pessoa, com excedente virando resumo; e agrupamento por obra — cinco eventos da mesma obra são um aviso, não cinco
+  - [ ] T-29.1.3 — **Falso positivo medido por tipo de alerta**, e tipo acima de 20% desligado até ser corrigido. Alerta que ninguém abre há um mês é alerta que não deveria existir
+  - [ ] T-29.1.4 — Janela de silêncio por perfil, respeitando o regime de trabalho que o calendário já conhece, com classe de urgência estreita e nominal que atravessa
+- [ ] T-29.2 — **Um fato, seis recortes**: montador, coordenador, planejador, gerente, diretor e cliente recebem agregações diferentes do mesmo evento. Mandar o mesmo texto para os seis produz 6× o volume e 1× o valor
+- [ ] T-29.3 — **Foto amarrada à tarefa**, não ao dia, com legenda obrigatória curta — descrever obriga a olhar. Comprimida no dispositivo, e com **hora de captura separada da hora de envio**: divergir não é fraude, é sinal para olhar
+- [ ] T-29.4 — **Fila offline de 7 dias** com estado visível ao montador ("3 registros aguardando envio"), e check-in/check-out gravando hora do dispositivo **e** do servidor, para que sincronizar tarde não vire fraude de ponto nem acusação de fraude
+- [ ] T-29.5 — **Localização só no check-in e no check-out**, nunca contínua, com finalidade declarada, prazo de retenção e acesso restrito a quem processa folha. Rastreamento durante a jornada não é acompanhamento — é outra coisa, e não foi o que se pediu
+- [ ] T-29.6 — **`client_visible` como decisão explícita de quem aprova**, nunca padrão, e o diário aprovado como única porta para o cliente. Foto de instalação pela metade parece defeito para quem não sabe que aquilo é uma etapa
+- [ ] T-29.7 — **Detecção de apontamento inventado**: progresso monotônico com variância zero, sempre redondo, sempre igual ao planejado. E correção que **não sobrescreve o original**, para que revisar para baixo seja barato e honesto. Progresso que nunca desce em obra nenhuma é o indicador mais confiável de que o dado é ficção
+- [ ] T-29.8 — **As cinco regras que separam acompanhamento de vigilância**, implementadas e não só escritas: o próprio profissional vê o número dele primeiro; o indicador aponta a tarefa e não a pessoa; toda queda tem motivo que entra no número; a janela esquece; e **a resposta da gestão às solicitações do campo é medida e publicada do mesmo jeito que o `TEP`**
+  - [ ] T-29.8.1 — Justificativa registrada: na meta-análise clássica de intervenções de feedback, o efeito médio é positivo (**d ≈ 0,41**) mas **mais de um terço das intervenções piorou o desempenho**. A direção confirma a intuição; a variância diz que o **como** decide o sinal. Se o painel cobra o campo em 15 minutos e a gestão responde em três dias, o campo aprende o que o sistema realmente vale
+- [ ] T-29.9 — **Resumo semanal** ao cliente e ao diretor: um e-mail, não trinta
+
+---
+
+## Sprint S-30 — Cobertura profissional integral e cenários intersetoriais
+**Estado:** pendente
+**Marco:** M-5
+
+Nasceu da revisão do responsável em 28 de julho: validar se cada persona é o
+profissional real da cadeira, construir matriz de competências para todas,
+testar rotina otimista, normal e pessimista e definir quem precisa saber quando
+algo quebra. Vai para o fim conforme R4; a S-23 continua sendo a única sprint
+em andamento.
+
+### Diagnóstico
+
+As sete personas existentes aprofundavam Planejamento, Comercial, Campo,
+Financeiro, Assistência, Administração e Projeto, mas deixavam oito famílias de
+aplicativo sem dono profissional específico. “Administrador” não substitui
+comprador, almoxarife, qualidade, contratos, diretoria ou auditoria.
+
+### Tarefas
+
+- [x] T-30.1 — **Dezesseis profissões reais**, com separação de cadeiras que exigem segregação: comprador ≠ almoxarife; orçamentista ≠ financeiro; administrador ≠ auditor; planejador ≠ gerente de obra; projetista ≠ planejador
+- [x] T-30.2 — **Matriz competência → técnica → dado** para todas as personas, documentada em `PERSONAS-E-ROTINAS.md` e codificada em `lib/personas/catalog.ts`
+- [x] T-30.3 — **Cobertura automática dos 22 aplicativos**: o teste reprova módulo sem profissional, persona com menos de quatro competências, técnica sem dado e destinatário inexistente
+- [x] T-30.4 — **Três cenários para cada persona** — otimista, normal e pessimista — com evento, destinatários intersetoriais e resposta esperada, em `FLUXOS-E-RISCOS.md`
+- [x] T-30.5 — **Runner de cenário funcional**: 333 execuções (111 combinações persona × aplicativo operacional × otimista, normal e pessimista) ligam profissão, todos os módulos que utiliza, objeto, decisão e destinatários; PostgreSQL executa gravação, permissão e notificação em 14 testes, incluindo P15 sob identidade de cliente
+- [x] T-30.6 — **Evento operacional transversal no domínio**: fato, objeto, impacto, obrigação, destinatário, SLA e evidência; otimista e normal retornam zero notificações (`lib/operations/notifications.ts`, 5 testes)
+- [ ] T-30.7 — **Entrega por recorte**: executor, dono da restrição, gerente, diretoria, financeiro, cliente e auditoria recebem visões diferentes do mesmo fato
+  - [x] T-30.7.1 — Planejamento determinístico dos recortes, bloqueio do cliente sem aprovação, escalonamento sem duplicação e agrupamento por objeto
+  - [ ] T-30.7.2 — Persistência, inscrição por usuário, quiet hours, fila de entrega e leitura
+- [ ] T-30.8 — **Aplicar ao Supabase** com RLS, idempotência, escalonamento e teste negativo multiempresa antes da interface
+  - [x] T-30.8.1 — Migration local com tipos de evento, responsabilidade nominal, fato imutável, destinatário materializado, cliente só com aprovação, RLS forçada, RPC e privilégios mínimos
+  - [x] T-30.8.2 — PostgreSQL 16 real: 14 testes de idempotência, isolamento multiempresa, persona de origem, cliente aprovado, leitura, autoria externa e proibição de escrita direta (`pnpm test:db:operations`, `VACINA-020`, `VACINA-022`)
+  - [x] T-30.8.3 — Aplicada no projeto Supabase `wyeojufebtwblsubkunr`: 16 tipos, 8 políticas, escrita direta e `anon` negados; advisors executados e correção de performance versionada (`VACINA-021`)
+- [ ] T-30.9 — **Aplicar à casca e aos arquétipos de tela**, começando pelo piloto CRM e repetindo coleção, registro, transação, planejamento e campo
+- [ ] T-30.10 — **Homologar em três cenários por persona** e registrar defeito em Vacinas antes de corrigir
+  - [x] T-30.10.1 — Auditoria autenticada de 17 aplicativos do Odoo, inventário de menus e capturas em `artifacts/odoo-audit-2026-07-28/`
+  - [x] T-30.10.2 — Corrigir a primeira classe transversal: capacidade existente sem porta de entrada (`VACINA-028`), com menus reais para todos os aplicativos e criação de proposta, contrato, aditivo e documento
+  - [x] T-30.10.3 — Branch publicada e QA autenticado do preview percorreu os 21 aplicativos e os seis fluxos críticos; menu recortado e contraste de aviso viraram `VACINA-030` e `VACINA-031`
+  - [ ] T-30.10.4 — Aplicar a migration no Supabase remoto e repetir as mutações autenticadas de proposta → aceite → contrato → aditivo na homologação
 
 ---
 

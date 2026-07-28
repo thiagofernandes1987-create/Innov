@@ -1,9 +1,9 @@
 # UI/UX Pro Max — Diretriz canônica da Innovar Platform
 
 **Documento canônico:** sim  
-**Versão:** 1.0.0  
+**Versão:** 1.1.0
 **Aplicação inicial:** Etapa 20 — Prontidão de Produção  
-**Atualizado em:** 22 de julho de 2026
+**Atualizado em:** 28 de julho de 2026
 
 ## 1. Propósito
 
@@ -25,6 +25,14 @@ A plataforma não deve parecer um template SaaS genérico. A experiência deve c
 **Arquitetura em operação.**
 
 A interface combina a disciplina de uma prancha técnica com a materialidade de uma obra de alto padrão. Estrutura, alinhamento, proporção, hierarquia e informação possuem prioridade sobre decoração.
+
+### Fonte visual aprovada
+
+O launcher escuro versionado em `docs/referencias/visual/launcher-dark-target-2026-07-28.png`
+é a fonte visual de verdade da casca e da tela de aplicativos. Interações
+referenciadas no Odoo devem ser traduzidas para essa identidade, sem copiar sua
+marca. O portão de fidelidade está em `diretrizes/ALVO-VISUAL.md` e na
+`VACINA-027`.
 
 ### Paleta canônica
 
@@ -176,13 +184,13 @@ Meta mínima: **WCAG 2.2 nível AA**.
 
 ### Desktop
 
-- sidebar persistente;
+- casca superior em duas faixas, sem sidebar no aplicativo interno;
 - conteúdo em grid com densidade controlada;
 - rail lateral somente quando agrega contexto contínuo.
 
 ### Tablet
 
-- sidebar compacta ou controlada;
+- menus do aplicativo em seletor compacto, com os mesmos destinos do desktop;
 - grids de quatro colunas reduzem para duas;
 - ações permanecem visíveis e legíveis.
 

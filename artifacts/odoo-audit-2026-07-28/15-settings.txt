@@ -1,0 +1,364 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Settings"
+      - generic: Settings
+    - menu:
+      - menuitem "General Settings"
+      - button "Users & Companies":
+        - generic: Users & Companies
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- button "Save"
+- button "Discard"
+- generic: Settings
+- search:
+  - search:
+    - img "Search...": 
+    - searchbox "Search..." [active]
+- main:
+  - tab "General Settings":
+    - generic: General Settings
+  - tab "CRM":
+    - generic: CRM
+  - tab "Sales":
+    - generic: Sales
+  - tab "Calendar":
+    - generic: Calendar
+  - tab "AI":
+    - generic: AI
+  - tab "Referrals":
+    - generic: Referrals
+  - tab "Website":
+    - generic: Website
+  - tab "eLearning":
+    - generic: eLearning
+  - tab "Purchase":
+    - generic: Purchase
+  - tab "Inventory":
+    - generic: Inventory
+  - tab "Manufacturing":
+    - generic: Manufacturing
+  - tab "Maintenance":
+    - generic: Maintenance
+  - tab "Accounting":
+    - generic: Accounting
+  - tab "Project":
+    - generic: Project
+  - tab "Sign":
+    - generic: Sign
+  - tab "Planning":
+    - generic: Planning
+  - tab "Timesheets":
+    - generic: Timesheets
+  - tab "Email Marketing":
+    - generic: Email Marketing
+  - tab "Employees":
+    - generic: Employees
+  - tab "Appraisal":
+    - generic: Appraisal
+  - tab "Payroll":
+    - generic: Payroll
+  - tab "Documents":
+    - generic: Documents
+  - tab "Recruitment":
+    - generic: Recruitment
+  - tab "Attendances":
+    - generic: Attendances
+  - tab "Expenses":
+    - generic: Expenses
+  - tab "Fleet":
+    - generic: Fleet
+  - tab "Lunch":
+    - generic: Lunch
+  - tab "Point of Sale":
+    - generic: Point of Sale
+  - heading "Users" [level=2]
+  - paragraph: Invite New Users
+  - textbox "Enter an email"
+  - button "Invite":
+    - strong: Invite
+  - generic "Number of active users": 
+  - generic: "1"
+  - text: Active User
+  - link "":
+    - /url: https://www.odoo.com/documentation/saas-19.4/applications/general/users.html
+    - generic: 
+  - button " Manage Users":
+    - generic: 
+    - text: Manage Users
+  - heading "Languages" [level=2]
+  - generic: "1"
+  - text: Language
+  - button " Add Languages":
+    - generic: 
+    - text: Add Languages
+  - heading "Companies" [level=2]
+  - generic: Innovar
+  - generic: Brazil
+  - button " Update Info":
+    - generic: 
+    - text: Update Info
+  - generic: "1"
+  - text: Company
+  - button " Manage Companies":
+    - generic: 
+    - text: Manage Companies
+  - generic: Document Layout
+  - generic: Choose the layout of your documents
+  - button " Configure Document Layout":
+    - generic: 
+    - text: Configure Document Layout
+  - generic: Email Templates
+  - generic: Customize the look and feel of automated emails
+  - generic: Button Text
+  - textbox: "#ffffff"
+  - generic: Button Color
+  - textbox: "#875a7b"
+  - button " Review All Templates":
+    - generic: 
+    - text: Review All Templates
+  - heading "Units of Measure" [level=2]
+  - generic: Weight
+  - generic: Define your weight unit of measure
+  - radiogroup "Weight unit of measure":
+    - radio "Kilograms (kg)" [checked]
+    - generic: Kilograms (kg)
+    - radio "Pounds (lb)"
+    - generic: Pounds (lb)
+  - generic: Volume
+  - generic: Define your volume unit of measure
+  - radiogroup "Volume unit of measure":
+    - radio "Cubic Meters (m³)" [checked]
+    - generic: Cubic Meters (m³)
+    - radio "Cubic Feet (ft³)"
+    - generic: Cubic Feet (ft³)
+  - heading "Emails" [level=2]
+  - checkbox "Use Custom Email Servers"
+  - generic: Use Custom Email Servers
+  - link "":
+    - /url: https://www.odoo.com/documentation/saas-19.4/applications/general/email_communication/email_servers.html
+    - generic: 
+  - generic: Configure your own email servers
+  - generic: Alias Domain
+  - link "":
+    - /url: https://www.odoo.com/documentation/saas-19.4/applications/general/email_communication/email_domain.html#be-spf-compliant
+    - generic: 
+  - generic: Use different domains for your mail aliases
+  - text: "@"
+  - combobox "e.g. mycompany.com": innovar1.odoo.com
+  - button "Internal link":
+    - generic: 
+  - checkbox "Digest Email" [checked]
+  - generic: Digest Email
+  - link "":
+    - /url: https://www.odoo.com/documentation/saas-19.4/applications/general/digest_emails.html
+    - generic: 
+  - generic: Add new users as recipient of a periodic email with key metrics
+  - generic: Digest Email
+  - combobox "Digest Email": Your Odoo Periodic Digest
+  - button "Internal link":
+    - generic: 
+  - button " Configure Digest Emails":
+    - generic: 
+    - text: Configure Digest Emails
+  - checkbox "Restrict Template Rendering" [checked]
+  - generic: Restrict Template Rendering
+  - generic: Restrict mail templates edition and QWEB placeholders usage.
+  - heading "Discuss" [level=2]
+  - generic: Activities
+  - generic: Set up activity types and use activity plans to assign multiple activities
+  - button " Activity Types":
+    - generic: 
+    - text: Activity Types
+  - button " Activity Plans":
+    - generic: 
+    - text: Activity Plans
+  - button " Roles":
+    - generic: 
+    - text: Roles
+  - generic: WhatsApp
+  - link "":
+    - /url: https://www.odoo.com/documentation/saas-19.4/applications/productivity/whatsapp.html
+    - generic: 
+  - generic: Send and receive messages via your WhatsApp Business account
+  - button " Configure WhatsApp Business Accounts":
+    - generic: 
+    - text: Configure WhatsApp Business Accounts
+  - checkbox "Send GIFs"
+  - generic: Send GIFs
+  - link "":
+    - /url: https://docs.klipy.com/getting-started
+    - generic: 
+  - generic: Share GIFs in your conversations using the Klipy API. If you were using a Tenor GIF API key (service shutdown on June 30, 2026), please replace it here with a Klipy GIF API key
+  - checkbox "Translate Messages"
+  - generic: Translate Messages
+  - link "":
+    - /url: https://cloud.google.com/translate/docs/setup
+    - generic: 
+  - generic: Translate customer messages using the Google Translate API
+  - checkbox "Custom Call Servers"
+  - generic: Custom Call Servers
+  - generic: Use your own SFU or ICE servers for video calls
+  - heading "Contacts" [level=2]
+  - generic: Send SMS
+  - link "":
+    - /url: https://www.odoo.com/documentation/saas-19.4/applications/marketing/sms_marketing/pricing/pricing_and_faq.html
+    - generic: 
+  - generic: Send texts to your contacts
+  - button " Manage Service & Buy Credits":
+    - generic: 
+    - text: Manage Service & Buy Credits
+  - checkbox "Partner Autocomplete" [checked]
+  - generic: Partner Autocomplete
+  - generic: Automatically enrich your contact base with company data
+  - button " Manage Service & Buy Credits":
+    - generic: 
+    - text: Manage Service & Buy Credits
+  - generic: Odoo In-App Purchase
+  - link "":
+    - /url: https://www.odoo.com/documentation/saas-19.4/applications/general/in_app_purchase.html
+    - generic: 
+  - generic: View your IAP Services and recharge your credits
+  - button " View My Services":
+    - generic: 
+    - text: View My Services
+  - heading "Permissions" [level=2]
+  - checkbox "Password Reset" [checked]
+  - generic: Password Reset
+  - generic: Enable password reset from Login page
+  - generic: Default Access Rights
+  - generic: Set custom access rights for new users
+  - button " Default Access Rights":
+    - generic: 
+    - text: Default Access Rights
+  - generic: API Keys
+  - generic: API Keys allow your users to access Odoo with external tools when multi-factor authentication is enabled.
+  - button " Manage API Keys":
+    - generic: 
+    - text: Manage API Keys
+  - checkbox "Enforce two-factor authentication"
+  - generic: Enforce two-factor authentication
+  - generic: Enforce the two-factor authentication by email for employees or for all users (including portal users) if they didn't enable any other two-factor authentication method.
+  - heading "Certificates and Keys" [level=2]
+  - generic: Manage your certificates
+  - button " Certificates":
+    - generic: 
+    - text: Certificates
+  - generic: Manage your keys
+  - button " Keys":
+    - generic: 
+    - text: Keys
+  - heading "Integrations" [level=2]
+  - checkbox "OAuth Authentication"
+  - generic: OAuth Authentication
+  - generic: Use external accounts to log in (Google, Facebook, etc.)
+  - checkbox "Barcode Database" [checked]
+  - generic: Barcode Database
+  - link "":
+    - /url: https://www.barcodelookup.com/api-documentation
+    - generic: 
+  - text: Create products by scanning using
+  - link "barcodelookup.com":
+    - /url: https://www.barcodelookup.com
+  - generic: "API Key:"
+  - textbox "API Key:":
+    - /placeholder: e.g. d7vctmiv2rwgenebha8bxq7irooudn
+  - checkbox "LDAP Authentication"
+  - generic: LDAP Authentication
+  - link "":
+    - /url: https://www.odoo.com/documentation/saas-19.4/applications/general/auth/ldap.html
+    - generic: 
+  - generic: Use LDAP credentials to log in
+  - checkbox "Unsplash Image Library" [checked]
+  - generic: Unsplash Image Library
+  - link "":
+    - /url: https://www.odoo.com/documentation/saas-19.4/applications/websites/website/optimize/unsplash.html
+    - generic: 
+  - generic: Find free high-resolution images from Unsplash
+  - checkbox "Geolocation" [checked]
+  - generic: Geolocation
+  - link "":
+    - /url: https://www.odoo.com/documentation/saas-19.4/applications/general/integrations/geolocation.html
+    - generic: 
+  - generic: Geolocate your partners
+  - text: "API:"
+  - combobox: Google Place Map
+  - button "Internal link":
+    - generic: 
+  - text: "Key:"
+  - textbox
+  - generic: Mapbox
+  - generic: Enable the optimal routing features and the map style provided by Mapbox
+  - link " Sign up to MapBox to get a free token":
+    - /url: https://account.mapbox.com/auth/signup/
+    - generic: 
+    - text: Sign up to MapBox to get a free token
+  - generic: Token
+  - textbox "Token"
+  - checkbox "Enable reCAPTCHA" [checked]
+  - generic: Enable reCAPTCHA
+  - generic: Protect your forms from spam and abuse. If no keys are provided, no checks will be done.
+  - generic: Site Key
+  - textbox "Site Key"
+  - generic: Secret Key
+  - textbox "Secret Key"
+  - generic: Minimum score
+  - textbox "Minimum score": "0.70"
+  - link " Generate reCAPTCHA v3 keys":
+    - /url: https://www.google.com/recaptcha/admin/create
+    - generic: 
+    - text: Generate reCAPTCHA v3 keys
+  - checkbox "Cloudflare Turnstile"
+  - generic: Cloudflare Turnstile
+  - generic: Protect your forms with CF Turnstile.
+  - checkbox "Google Address Autocomplete" [checked]
+  - generic: Google Address Autocomplete
+  - generic: Autocomplete partner addresses with Google Places
+  - textbox "Paste your API key"
+  - link " Create a Google Project and get a key":
+    - /url: https://console.cloud.google.com/getting-started
+    - generic: 
+    - text: Create a Google Project and get a key
+  - link " Enable billing on your Google Project":
+    - /url: https://console.cloud.google.com/billing
+    - generic: 
+    - text: Enable billing on your Google Project
+  - checkbox "Phone" [checked]
+  - generic: Phone
+  - generic: Schedule & make calls from your database
+  - button " Manage Providers":
+    - generic: 
+    - text: Manage Providers
+  - heading "Developer Tools" [level=2]
+  - list:
+    - button "Activate the developer mode"
+    - button "Activate the developer mode (with assets)"
+    - button "Activate the developer mode (with tests assets)"
+  - heading "About" [level=2]
+  - heading "Odoo saas~19.4+e (Enterprise Edition)" [level=3]
+  - tabpanel:
+    - text: Copyright © 2004
+    - link "Odoo S.A.":
+      - /url: https://www.odoo.com
+    - link "Odoo Enterprise Edition License V1.0":
+      - /url: https://www.odoo.com/documentation/latest/legal/licenses.html
+- paragraph: Press esc to exit full screen

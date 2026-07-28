@@ -1,6 +1,9 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { requireOrganizationContext } from "@/lib/auth";
+import { MODULE_BY_KEY } from "@/lib/modules/registry";
+import { descreverNotificacaoOperacional } from "@/lib/operations/notifications";
+import type { PersonaId } from "@/lib/personas/catalog";
 import type { Trilha } from "@/lib/pipeline/domain";
 
 // O canto direito da barra: mensagens e notificações.
@@ -45,9 +48,25 @@ export type AtividadeAviso = {
   nova: boolean;
 };
 
+export type NotificacaoOperacionalAviso = {
+  id: string;
+  eventoId: string;
+  titulo: string;
+  corpo: string;
+  modulo: string;
+  moduloNome: string;
+  href: string;
+  persona: PersonaId;
+  prazoResposta: string;
+  escalada: boolean;
+  nova: boolean;
+  criadaEm: string;
+};
+
 export type Avisos = {
   mensagens: MensagemAviso[];
   atividades: AtividadeAviso[];
+  operacionais: NotificacaoOperacionalAviso[];
   naoLidas: number;
   pendentes: number;
 };
@@ -59,7 +78,7 @@ function instanteDoCookie(valor: string | undefined): number {
 }
 
 export async function carregarAvisos(): Promise<Avisos> {
-  const { supabase, userId } = await requireOrganizationContext();
+  const { supabase, userId, organizationId } = await requireOrganizationContext();
   const jar = await cookies();
   const vistoMensagens = instanteDoCookie(jar.get(COOKIE_VISTO_MENSAGENS)?.value);
   const vistoAtividades = instanteDoCookie(jar.get(COOKIE_VISTO_ATIVIDADES)?.value);
@@ -69,7 +88,7 @@ export async function carregarAvisos(): Promise<Avisos> {
 
   // Meus cartões são os que eu respondo mais os que eu sigo. Sem os seguidos,
   // acompanhar um cartão não teria consequência nenhuma na tela.
-  const [meusResultado, seguidosResultado, atividadesResultado] = await Promise.all([
+  const [meusResultado, seguidosResultado, atividadesResultado, notificacoesResultado] = await Promise.all([
     supabase.from("pipeline_cards").select("id").eq("responsavel_id", userId).is("arquivado_em", null).limit(300),
     supabase.from("pipeline_card_followers").select("card_id").eq("user_id", userId).limit(300),
     // Atividade sem prazo entra: é compromisso no nome de alguém, e filtrar
@@ -82,6 +101,13 @@ export async function carregarAvisos(): Promise<Avisos> {
       .is("concluida_em", null)
       .or(`prazo.is.null,prazo.lte.${hoje}`)
       .order("prazo", { ascending: true, nullsFirst: false })
+      .limit(20),
+    supabase
+      .from("operational_notifications")
+      .select("id,event_id,recipient_persona,escalated,read_at,created_at")
+      .eq("organization_id", organizationId)
+      .eq("recipient_user_id", userId)
+      .order("created_at", { ascending: false })
       .limit(20)
   ]);
 
@@ -119,6 +145,14 @@ export async function carregarAvisos(): Promise<Avisos> {
     prazo: string | null;
     criado_em: string;
   }[];
+  const linhasNotificacao = (notificacoesResultado.data ?? []) as {
+    id: string;
+    event_id: string;
+    recipient_persona: PersonaId;
+    escalated: boolean;
+    read_at: string | null;
+    created_at: string;
+  }[];
 
   // Título e trilha do cartão: sem eles o aviso diz "alguém escreveu algo" e
   // obriga a abrir para descobrir onde.
@@ -139,6 +173,27 @@ export async function carregarAvisos(): Promise<Avisos> {
       linha.id,
       linha.full_name?.trim() || linha.email || "Sem nome"
     ])
+  );
+
+  // O embed PostgREST não é usado aqui. Além de tornar o relacionamento
+  // ambíguo quando surgem novas FKs, consultar os fatos em uma segunda etapa
+  // mantém a caixa compatível com ambientes em atualização.
+  const idsEvento = [...new Set(linhasNotificacao.map(item => item.event_id))];
+  const eventosResultado = idsEvento.length
+    ? await supabase
+        .from("operational_events")
+        .select("id,event_code,module_key,title,impact,response_due_at")
+        .in("id", idsEvento)
+    : { data: [] };
+  const eventoPorId = new Map(
+    ((eventosResultado.data ?? []) as {
+      id: string;
+      event_code: string;
+      module_key: string;
+      title: string;
+      impact: string;
+      response_due_at: string;
+    }[]).map(item => [item.id, item])
   );
 
   const mensagens: MensagemAviso[] = linhasNota.map(linha => {
@@ -171,10 +226,35 @@ export async function carregarAvisos(): Promise<Avisos> {
     };
   });
 
+  const operacionais: NotificacaoOperacionalAviso[] = linhasNotificacao.flatMap(linha => {
+    const evento = eventoPorId.get(linha.event_id);
+    if (!evento) return [];
+    const modulo = MODULE_BY_KEY.get(evento.module_key);
+    return [{
+      id: linha.id,
+      eventoId: linha.event_id,
+      titulo: evento.title,
+      corpo: descreverNotificacaoOperacional({
+        title: evento.title,
+        impact: evento.impact,
+        responseDueAt: evento.response_due_at
+      }, linha.recipient_persona),
+      modulo: evento.module_key,
+      moduloNome: modulo?.name ?? evento.module_key,
+      href: modulo?.routePrefix ?? "/app",
+      persona: linha.recipient_persona,
+      prazoResposta: evento.response_due_at,
+      escalada: linha.escalated,
+      nova: linha.read_at === null,
+      criadaEm: linha.created_at
+    }];
+  });
+
   return {
     mensagens,
     atividades,
+    operacionais,
     naoLidas: mensagens.filter(item => item.nova).length,
-    pendentes: atividades.length
+    pendentes: atividades.length + operacionais.filter(item => item.nova).length
   };
 }
