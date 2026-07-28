@@ -1,4 +1,6 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { ACTIVE_ORGANIZATION_COOKIE } from "@/lib/organization-context";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export type OrganizationContext = {
@@ -11,11 +13,7 @@ export type OrganizationContext = {
 export async function requireUser(redirectTo = "/login") {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.getUser();
-
-  if (error || !data.user) {
-    redirect(redirectTo);
-  }
-
+  if (error || !data.user) redirect(redirectTo);
   return { supabase, user: data.user };
 }
 
@@ -23,22 +21,25 @@ export async function requireOrganizationContext(
   allowedRoles?: readonly string[]
 ): Promise<OrganizationContext & { supabase: Awaited<ReturnType<typeof createSupabaseServerClient>> }> {
   const { supabase, user } = await requireUser();
-
-  const { data: membership, error } = await supabase
+  const { data: memberships, error } = await supabase
     .from("organization_memberships")
     .select("organization_id, role")
     .eq("user_id", user.id)
-    .eq("active", true)
-    .limit(1)
-    .maybeSingle();
+    .eq("active", true);
 
-  if (error || !membership) {
+  if (error || !Array.isArray(memberships) || memberships.length === 0) {
     redirect("/login?error=sem-organizacao");
   }
 
-  if (allowedRoles && !allowedRoles.includes(membership.role)) {
-    redirect("/acesso-negado");
-  }
+  const selectedOrganizationId = (await cookies()).get(ACTIVE_ORGANIZATION_COOKIE)?.value ?? null;
+  const membership = selectedOrganizationId
+    ? memberships.find(item => item.organization_id === selectedOrganizationId)
+    : memberships.length === 1
+      ? memberships[0]
+      : null;
+
+  if (!membership) redirect("/selecionar-organizacao");
+  if (allowedRoles && !allowedRoles.includes(membership.role)) redirect("/acesso-negado");
 
   return {
     supabase,
@@ -57,9 +58,6 @@ export async function requireClientContext() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (error || !client) {
-    redirect("/acesso-negado");
-  }
-
+  if (error || !client) redirect("/acesso-negado");
   return { supabase, user, client };
 }

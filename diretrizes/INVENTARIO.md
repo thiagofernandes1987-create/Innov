@@ -2,51 +2,49 @@
 
 **Atualizado em:** 22 de julho de 2026  
 **Base estável:** `main`  
-**Commit estável analisado:** `55f4d56`  
-**Branch de regularização:** `chore/encerramento-etapa-19`  
-**PRs funcionais ativos:** nenhum  
-**Versão:** 0.19.0
-
-Este documento registra o estado necessário para recuperar, validar e continuar o projeto sem depender do contêiner ou do histórico da conversa.
+**Commit estável:** `55f4d56`  
+**Branch funcional ativa:** `feature/etapa-20-prontidao-producao`  
+**PR funcional:** `#23`, empilhado sobre o PR `#22`  
+**Versão:** 0.19.0  
+**Produção:** não liberada
 
 ## 1. Repositório e runtime
 
 - repositório: `thiagofernandes1987-create/Innov`;
-- branch estável: `main`;
-- gerenciador: `pnpm@11.15.0`;
-- Node.js: `>=24`;
-- Python no CI: `3.13`;
+- pnpm `11.15.0`;
+- Node.js `>=24`;
+- Python `3.13` no CI;
 - Next.js 16, React 19 e TypeScript;
 - Supabase Auth, PostgreSQL, RLS e Storage;
-- homologação Supabase: `wyeojufebtwblsubkunr`;
-- CI da `main`: run `29885340336`, conclusão `success`;
-- Vercel: status do commit estável `success`.
+- projeto de homologação: `wyeojufebtwblsubkunr`;
+- CI estável da `main`: run `29885340336`, `success`;
+- CI atual da Etapa 20: run `29913636056`, `success`.
 
 ## 2. Estado dos aplicativos
 
 | Chave | Aplicativo | Estado | Etapa |
 |---|---|---|---|
-| `dashboard` | Início | operacional | 12.1 |
-| `crm` | CRM e Vendas | implementado, homologado e incorporado | 18 |
+| `dashboard` | Início | operacional; fundação visual revisada | 12.1/20 |
+| `crm` | CRM e Vendas | implementado e homologado | 18 |
 | `clientes` | Clientes | Cliente 360 multiobra implementado | 18 |
 | `obras` | Obras | operacional | 12 |
 | `planejamento` | Planejamento | operacional | 12 |
 | `tarefas` | Tarefas | operacional | 12 |
-| `diario` | Diário de Obras | operacional | 12 |
+| `diario` | Diário de Obras | operacional; antimalware pendente | 12/20 |
 | `equipes` | Equipes | operacional | 12 |
 | `orcamentos` | Orçamentos | operacional | 9 |
 | `propostas` | Propostas | operacional | 9 |
 | `contratos` | Contratos | operacional | 9 |
 | `aditivos` | Aditivos | operacional | 9 |
-| `assinaturas` | Assinaturas | operacional em sandbox; provider jurídico pendente | 9/12.2/20 |
-| `documentos` | Documentos | operacional | 12/13 |
-| `qualidade` | Qualidade | operacional | 13 |
-| `compras` | Compras e Suprimentos | operacional | 14 |
-| `estoque` | Estoque, Inventário e Almoxarifado | incorporado e homologado; produção pendente | 17/20 |
-| `financeiro` | Financeiro Operacional | operacional | 15 |
-| `sac` | Pós-venda e SAC | implementado, homologado e E2E aprovado | 18 |
+| `assinaturas` | Assinaturas | sandbox; provider jurídico pendente | 9/12.2/20 |
+| `documentos` | Documentos | operacional; antimalware pendente | 12/13/20 |
+| `qualidade` | Qualidade | operacional; antimalware pendente | 13/20 |
+| `compras` | Compras e Suprimentos | operacional; antimalware pendente | 14/20 |
+| `estoque` | Estoque, Inventário e Almoxarifado | homologado; concorrência real aprovada | 17/20 |
+| `financeiro` | Financeiro Operacional | operacional; antimalware pendente | 15/20 |
+| `sac` | Pós-venda e SAC | homologado; quarentena integrada na branch, homologação pendente | 18/20 |
 | `relatorios` | Relatórios e Indicadores | operacional | 16 |
-| `auditoria` | Auditoria e Observabilidade | implementado, homologado, CI verde e incorporado | 19 |
+| `auditoria` | Auditoria e Observabilidade | homologado e incorporado | 19 |
 | `administracao` | Administração | operacional | 12.1 |
 
 ## 3. Documentação canônica
@@ -77,6 +75,9 @@ docs/ETAPA-18-CRM-CLIENTES-SAC.md
 docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md
 docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md
 docs/ETAPA-20-PRONTIDAO-PRODUCAO.md
+docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md
+docs/ETAPA-20-BACKUP-RESTAURACAO.md
+docs/ETAPA-20-PROTECAO-ANEXOS.md
 docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md
 ```
 
@@ -101,89 +102,79 @@ supabase/tests/stage17_inventory_homologation.sql
 
 - 18 tabelas com RLS;
 - seis views `security_invoker=true`;
-- saldo físico, reservado e disponível derivados;
+- saldos físico, reservado e disponível derivados;
 - movimentos concluídos imutáveis;
 - reversão vinculada;
 - advisory locks por posição;
 - custos protegidos;
 - 14 testes transacionais com `ROLLBACK`;
-- migrations locais alinhadas ao ledger remoto.
+- migrations alinhadas ao ledger.
 
-### Pendências de produção transferidas à Etapa 20
+### Concorrência de produção homologada na Etapa 20
 
-- duas conexões realmente simultâneas disputando a mesma posição;
-- carga e volumetria;
-- backup e restauração testados.
+```text
+workflow: 29889168656
+status: passed
+cleanup: passed
+saldo inicial: 10
+duas saídas concorrentes: 6 + 6
+postagens aprovadas: 1
+postagens rejeitadas: 1
+saldo após disputa: 4
+saldo após cleanup: 0
+```
+
+O advisory lock serializou as transações e o banco rejeitou a segunda saída por estoque disponível insuficiente.
+
+### Pendência restante
+
+- carga e volumetria prolongadas.
 
 ## 5. Etapa 18 — CRM, Clientes e SAC
 
-### Código principal
-
-```text
-lib/relationship/domain.ts
-lib/relationship/server.ts
-app/actions/relationship.ts
-components/relationship/*
-app/app/crm/**
-app/app/clientes/**
-app/app/ocorrencias/**
-app/cliente/ocorrencias/**
-app/api/sac/attachments/[id]/route.ts
-app/relationship.css
-scripts/validate-stage18.mjs
-supabase/tests/stage18_relationship_homologation.sql
-scripts/run-stage18-concurrent-e2e.mjs
-.github/workflows/stage18-concurrent-e2e.yml
-```
-
-### Estado concluído
-
-- 10 tabelas novas com RLS;
-- pipeline comercial exclusivamente interno;
+- 10 tabelas com RLS;
+- pipeline interno;
 - Cliente 360 multiobra;
-- SAC interno e portal do cliente;
-- mensagens, anexos e eventos internos ocultos do cliente;
-- bucket privado `crm-sac-attachments`;
+- SAC interno e portal;
+- bucket `crm-sac-attachments` privado;
 - anexos com SHA-256;
-- estados críticos somente por RPC;
+- estados críticos por RPC;
 - zero RPC operacional para `anon`;
-- E2E concorrente aprovado no run `29883182240`;
-- relatório final `status: passed` e `cleanup: passed`;
-- históricos imutáveis preservados como `immutable_history`;
-- PR `#18` mesclado na `main`.
+- E2E concorrente run `29883182240` aprovado;
+- `cleanup: passed`;
+- PR `#18` mesclado.
+
+### Hardening de anexos na Etapa 20
+
+- migration `20260722104500_stage20_sac_attachment_security.sql` versionada, ainda não aplicada;
+- upload interno e portal passam por `secureUpload` na branch;
+- validação de MIME, tamanho, nome e assinatura dos bytes;
+- quarentena `file-quarantine` privada;
+- ClamAV `INSTREAM` fail-closed;
+- promoção somente após `CLEAN`;
+- RPC exige `scanId`, provider e instante de análise;
+- anexos antigos permanecem `LEGACY` sem evidência artificial;
+- portal recebe somente anexos `CLEAN`;
+- download assinado por 60 segundos e sem cache;
+- E2E local ClamAV run `29913636268` aprovado;
+- artefato `8526935275`;
+- provider real e E2E de homologação pendentes.
 
 ## 6. Etapa 19 — Auditoria e Observabilidade
 
-### Código principal
-
-```text
-lib/observability/domain.ts
-lib/observability/server.ts
-app/actions/observability.ts
-components/observability/observability-navigation.tsx
-app/app/auditoria/**
-app/observability.css
-scripts/validate-stage19.mjs
-supabase/tests/stage19_observability_homologation.sql
-```
-
-### Estado concluído
-
 - seis tabelas com RLS;
 - 13 políticas e seis gatilhos não internos;
-- 16 FKs e zero FK sem índice líder;
+- 16 FKs e zero sem índice líder;
 - fluxo unificado de 12 origens;
-- sanitização recursiva e idempotência;
-- alertas, reconhecimento e resolução;
-- seis health checks;
+- sanitização e idempotência;
+- alertas e seis health checks;
 - diagnósticos globais protegidos;
-- zero função da Etapa 19 executável por `anon`;
-- teste oficial com `ROLLBACK`;
-- advisors revisados;
-- CI final verde;
-- PR `#19` mesclado e conteúdo consolidado na `main` pelo PR `#20`.
+- zero função acessível por `anon`;
+- teste com `ROLLBACK`;
+- CI verde;
+- PRs `#19` e `#20` mesclados.
 
-### Migrations canônicas
+Migrations:
 
 ```text
 20260721100108_stage19_observability_schema.sql
@@ -196,24 +187,94 @@ supabase/tests/stage19_observability_homologation.sql
 
 ## 7. Etapa 20 — Prontidão de Produção
 
-**Estado:** preparação iniciada em branch própria após o fechamento documental da Etapa 19.
+**Estado:** em implementação.
 
-Escopo operacional:
+### Fundação UI/UX e CI concluída
 
-- E2E autenticado completo;
-- concorrência real de estoque;
-- provider jurídico real;
-- revisão jurídica, contábil e LGPD;
-- proteção e antimalware de anexos;
-- pentest;
-- backup e restauração testados;
-- telemetria externa;
-- worker de retenção com dry-run e preservação legal;
-- plano de incidentes;
+```text
+diretrizes/UI-UX-PRO-MAX.md
+docs/ETAPA-20-PRONTIDAO-PRODUCAO.md
+scripts/validate-stage20.mjs
+app/globals.css
+app/stage20.css
+app/app/layout.tsx
+app/app/page.tsx
+.github/workflows/ci.yml
+```
+
+- identidade `Arquitetura em operação`;
+- azul profundo, cobre e materiais naturais;
+- link de salto, foco visível e alvos de 44px;
+- dashboard responsivo sem métricas inventadas;
+- forced colors e redução de movimento;
+- prevenção contra rosa/fúcsia;
+- CI completo run `29913636056` verde.
+
+### Concorrência real concluída
+
+```text
+scripts/run-stage20-inventory-concurrency-e2e.mjs
+.github/workflows/stage20-inventory-concurrency-e2e.yml
+docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md
+```
+
+- duas sessões independentes;
+- uma postagem e uma rejeição;
+- saldo não negativo;
+- cleanup com saldo zero;
+- artefato `8517620520`;
+- `VACINA-013` criada.
+
+### Backup e restauração concluídos no escopo lógico
+
+- run `29911179764` aprovado;
+- artefato `8526039714`;
+- dump custom de `1.812.078` bytes e `2.798` objetos;
+- RTO observado de `201` segundos;
+- snapshots equivalentes e smoke tests aprovados;
+- dump efêmero removido;
+- retenção durável, PITR, buckets e Auth permanecem pendentes.
+
+### Proteção de anexos integrada na branch
+
+```text
+lib/file-security/domain.ts
+lib/file-security/server.ts
+components/file-security/file-security-status.tsx
+scripts/run-stage20-file-security-e2e.mjs
+.github/workflows/stage20-file-security-e2e.yml
+.github/workflows/stage20-file-security-provider-health.yml
+supabase/migrations/20260722104500_stage20_sac_attachment_security.sql
+```
+
+- SAC integrado à quarentena;
+- assinatura dos bytes além do MIME;
+- estados `LEGACY` e `CLEAN` persistidos;
+- UI com estados semânticos e ação `Analisar e enviar`;
+- fixture limpa liberada e EICAR bloqueado;
+- E2E run `29913636268` e artefato `8526935275` aprovados;
+- migration e provider real ainda não ativados em homologação.
+
+### Próxima frente
+
+`attachment_provider_homologation`.
+
+### Escopo pendente
+
+- provider ClamAV real e health check;
+- aplicação coordenada da migration e da aplicação;
+- E2E real do SAC e reanálise de legados;
+- antimalware nos demais módulos;
+- retenção durável, PITR, buckets e Auth;
+- provider jurídico;
+- telemetria e retenção;
+- incidentes;
 - proteção contra senhas comprometidas;
 - MFA adicional;
-- publicação controlada;
-- consolidação do design system UI/UX Pro Max adaptado à Innovar.
+- carga prolongada;
+- pentest;
+- revisão jurídica, contábil e LGPD;
+- publicação controlada.
 
 ## 8. Storage privado
 
@@ -228,13 +289,12 @@ quality-form-attachments
 procurement-attachments
 finance-attachments
 crm-sac-attachments
+file-quarantine
 ```
 
-A Etapa 19 não cria bucket nem armazena payload bruto ou arquivo de log.
+`file-quarantine` deve permanecer privado. Objetos `PENDING`, `SCANNING`, `BLOCKED` ou `ERROR` nunca recebem URL funcional para o usuário.
 
 ## 9. Variáveis conhecidas
-
-Somente nomes são versionados:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
@@ -246,7 +306,18 @@ SIGNATURE_WEBHOOK_SECRET=
 SIGNATURE_EMAIL_WEBHOOK_URL=
 DEMO_ADMIN_PASSWORD=
 DEMO_CLIENT_PASSWORD=
+SUPABASE_DB_URL=
+SUPABASE_RESTORE_DB_URL=
+SUPABASE_RESTORE_CONFIRMATION=
+FILE_SECURITY_PROVIDER=clamav
+FILE_SECURITY_QUARANTINE_BUCKET=file-quarantine
+CLAMAV_HOST=
+CLAMAV_PORT=3310
+CLAMAV_TIMEOUT_MS=15000
+ALLOW_INSECURE_FILE_SCANNER=false
 ```
+
+Somente nomes e finalidades são versionados.
 
 ## 10. CI
 
@@ -257,15 +328,17 @@ pnpm validate:migrations
 pnpm validate:stage17
 pnpm validate:stage18
 pnpm validate:stage19
+pnpm validate:stage20
 pnpm lint
 pnpm typecheck
 pnpm test
 pnpm test:python
 pnpm build
+pnpm test:e2e:stage20:file-security
 ```
 
 ## 11. Recuperação
 
 Procedimento oficial: `diretrizes/RECUPERACAO.md`.
 
-Git recupera código, migrations, testes, arquitetura, vacinas e documentação. Não recupera valores de secrets, usuários reais, conteúdo de buckets, dados operacionais, DNS ou backups físicos.
+O Git não recupera secrets, usuários reais, dados operacionais, buckets, DNS, credenciais de providers ou backups físicos.

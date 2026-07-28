@@ -7,12 +7,12 @@
   "platformVersion": "0.19.0",
   "lastCompletedStage": 19,
   "nextStage": 20,
-  "activeFunctionalBranch": null,
-  "activeFunctionalPullRequest": null,
+  "activeFunctionalBranch": "feature/etapa-20-prontidao-producao",
+  "activeFunctionalPullRequest": 23,
   "mergedPullRequests": [18, 19, 20],
   "ci": {
-    "runId": 29885340336,
-    "runNumber": 1143,
+    "runId": 29913636056,
+    "runNumber": 1308,
     "conclusion": "success"
   },
   "stage18ConcurrentE2E": {
@@ -24,7 +24,96 @@
   },
   "productionReleased": false,
   "productionReadiness": {
-    "status": "not_started",
-    "blockingStage": 20
+    "status": "in_progress",
+    "blockingStage": 20,
+    "foundationCi": {
+      "runId": 29913636056,
+      "runNumber": 1308,
+      "conclusion": "success"
+    },
+    "foundation": {
+      "uiUxProMax": "implemented_ci_green",
+      "stage20Validator": "implemented_ci_green",
+      "shellAndDashboard": "implemented_ci_green",
+      "responsiveHardening": "implemented_ci_green"
+    },
+    "inventoryConcurrency": {
+      "runId": 29889168656,
+      "jobId": 88826051387,
+      "artifactId": 8517620520,
+      "status": "passed",
+      "cleanup": "passed",
+      "initialQuantity": 10,
+      "competingQuantity": 6,
+      "successfulPosts": 1,
+      "rejectedPosts": 1,
+      "stockAfterRace": 4,
+      "finalStock": 0
+    },
+    "backupRestore": {
+      "runId": 29911179764,
+      "jobId": 88894215296,
+      "artifactId": 8526039714,
+      "status": "passed",
+      "sourceAndTargetDistinct": true,
+      "postgresClientVersion": "17.10",
+      "dumpSizeBytes": 1812078,
+      "dumpObjectCount": 2798,
+      "dumpSha256": "c5256ec8018996475dcbb7cf8c52a4eaf9dc5f95c6c0cabc988c2fdc8df2d2b5",
+      "dumpDurationMs": 38400,
+      "restoreDurationMs": 200950,
+      "observedRtoSeconds": 201,
+      "snapshotDifferences": 0,
+      "externalAuthForeignKeysOmitted": 139,
+      "providerManagedDefaultAclsOmitted": 6,
+      "smokeTests": "passed",
+      "dumpRemoved": true,
+      "restoreListRemoved": true,
+      "durableRetention": "pending",
+      "authRecovery": "pending",
+      "bucketRecovery": "pending",
+      "pitrPolicy": "pending"
+    },
+    "attachmentProtection": {
+      "branchIntegration": "implemented_ci_green",
+      "sacUploads": "quarantine_scan_promote_register",
+      "downloadPolicy": "clients_clean_only_internal_legacy_allowed",
+      "legacyPolicy": "explicit_legacy_not_scanned",
+      "migration": "versioned_not_applied",
+      "migrationFile": "20260722104500_stage20_sac_attachment_security.sql",
+      "localClamAvE2E": {
+        "runId": 29913636268,
+        "jobId": 88902223114,
+        "artifactId": 8526935275,
+        "status": "passed",
+        "ping": "passed",
+        "cleanFixture": "clean",
+        "eicarFixture": "blocked"
+      },
+      "providerHealthArchitecture": {
+        "status": "implemented_ci_pending",
+        "transport": "https_application_route",
+        "authentication": "hmac_sha256_timestamped",
+        "maximumClockSkewSeconds": 300,
+        "rawClamdInternetExposureAllowed": false,
+        "route": "/api/internal/file-security/health",
+        "runtimeRequiredVariables": [
+          "CLAMAV_HOST",
+          "CLAMAV_PORT",
+          "CLAMAV_TIMEOUT_MS",
+          "FILE_SECURITY_HEALTH_SECRET"
+        ],
+        "githubEnvironmentRequiredSecrets": [
+          "HOMOLOGATION_APP_URL",
+          "FILE_SECURITY_HEALTH_SECRET"
+        ]
+      },
+      "realProvider": "pending_configuration",
+      "providerHealth": "pending",
+      "homologationSacE2E": "pending",
+      "legacyRescan": "pending",
+      "otherModuleUploads": "pending"
+    },
+    "nextWorkstream": "attachment_provider_homologation"
   }
 }

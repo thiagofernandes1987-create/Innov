@@ -26,11 +26,17 @@
     "validate:stage17": "node scripts/validate-stage17.mjs",
     "validate:stage18": "node scripts/validate-stage18.mjs",
     "validate:stage19": "node scripts/validate-stage19.mjs",
+    "validate:stage20": "node scripts/validate-stage20.mjs",
     "worker:signature-conversion": "node scripts/run-signature-conversion-worker.mjs",
     "worker:signature-delivery": "node scripts/run-signature-delivery-worker.mjs",
     "provision:homologation": "node scripts/provision-homologation-users.mjs",
     "test:e2e:stage11": "node scripts/run-stage11-e2e.mjs",
-    "test:e2e:stage18:concurrent": "node scripts/run-stage18-concurrent-e2e.mjs"
+    "test:e2e:stage18:concurrent": "node scripts/run-stage18-concurrent-e2e.mjs",
+    "test:e2e:stage20:inventory-concurrency": "node scripts/run-stage20-inventory-concurrency-e2e.mjs",
+    "test:drill:stage20:backup-restore": "node scripts/run-stage20-backup-restore-drill.mjs",
+    "test:e2e:stage20:file-security": "node scripts/run-stage20-file-security-e2e.mjs",
+    "test:e2e:stage20:file-security-gateway": "node scripts/run-stage20-file-security-gateway-e2e.mjs",
+    "test:health:stage20:file-security": "node scripts/run-stage20-file-security-provider-health.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

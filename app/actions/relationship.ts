@@ -1,10 +1,16 @@
 "use server";
 
-import{createHash,randomUUID}from"node:crypto";
+import{randomUUID}from"node:crypto";
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireClientContext}from"@/lib/auth";
 import{requireCapability}from"@/lib/authorization";
+import{
+ FILE_SECURITY_SAC_MIME_TYPES,
+ FileSecurityError,
+ sanitizeFileName
+}from"@/lib/file-security/domain";
+import{secureUpload}from"@/lib/file-security/server";
 import{createSupabaseAdminClient}from"@/lib/supabase/admin";
 
 function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
@@ -13,8 +19,15 @@ function numberOrNull(value:unknown){if(value===null||value===undefined||String(
 function boolean(data:FormData,key:string){return data.get(key)!==null;}
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}
 function resultRow<T extends Record<string,unknown>>(value:T|T[]|null){return Array.isArray(value)?value[0]??null:value;}
-function cleanFileName(name:string){return name.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g,"-").replace(/-+/g,"-").slice(0,120)||"arquivo";}
-const ALLOWED_FILES=new Set(["application/pdf","image/jpeg","image/png","image/webp","application/vnd.openxmlformats-officedocument.wordprocessingml.document"]);
+function fileSecurityMessage(error:unknown){
+ if(!(error instanceof FileSecurityError))return"O arquivo não pôde ser analisado com segurança. Tente novamente mais tarde.";
+ if(error.code==="MALWARE_DETECTED")return"O arquivo foi bloqueado pela análise de segurança.";
+ if(error.code==="FILE_TOO_LARGE")return"O arquivo excede 25 MB.";
+ if(error.code==="UNSUPPORTED_MEDIA_TYPE")return"Formato não permitido. Envie PDF, DOCX, JPG, PNG ou WebP.";
+ if(error.code==="FILE_SIGNATURE_MISMATCH")return"O conteúdo do arquivo não corresponde ao formato informado.";
+ if(error.code==="EMPTY_FILE"||error.code==="INVALID_FILENAME")return"Selecione um arquivo válido.";
+ return"O arquivo não pôde ser analisado com segurança. Tente novamente mais tarde.";
+}
 
 export async function createCrmLead(data:FormData){
  const context=await requireCapability("crm","create");const path="/app/crm/leads/novo";
@@ -138,17 +151,27 @@ export async function rateSacTicket(data:FormData){
 async function uploadSacAttachment(data:FormData,portal:boolean){
  const ticketId=text(data,"ticketId");const file=data.get("file");const path=portal?`/cliente/ocorrencias/${ticketId}`:`/app/ocorrencias/${ticketId}`;
  if(!(file instanceof File)||file.size===0)fail(path,"Selecione um arquivo.");
- if(file.size>26214400)fail(path,"O arquivo excede 25 MB.");
- if(!ALLOWED_FILES.has(file.type))fail(path,"Formato não permitido. Envie PDF, DOCX, JPG, PNG ou WebP.");
- let organizationId:string;let supabase;
- if(portal){const context=await requireClientContext();organizationId=context.client.organization_id;supabase=context.supabase;}
- else{const context=await requireCapability("sac","update",optional(data,"projectId"));organizationId=context.organizationId;supabase=context.supabase;}
- const buffer=Buffer.from(await file.arrayBuffer());const sha256=createHash("sha256").update(buffer).digest("hex");
- const storagePath=`${organizationId}/${ticketId}/${randomUUID()}-${cleanFileName(file.name)}`;const admin=createSupabaseAdminClient();
- const{error:uploadError}=await admin.storage.from("crm-sac-attachments").upload(storagePath,buffer,{contentType:file.type,upsert:false});
- if(uploadError)fail(path,uploadError.message);
- const{error}=await supabase.rpc("register_sac_ticket_attachment",{p_ticket_id:ticketId,p_message_id:optional(data,"messageId"),p_storage_path:storagePath,p_file_name:file.name,p_mime_type:file.type,p_size_bytes:file.size,p_sha256:sha256,p_client_visible:portal?true:boolean(data,"clientVisible")});
- if(error){await admin.storage.from("crm-sac-attachments").remove([storagePath]);fail(path,error.message);}
+ if(!FILE_SECURITY_SAC_MIME_TYPES.has(file.type))fail(path,"Formato não permitido. Envie PDF, DOCX, JPG, PNG ou WebP.");
+ let organizationId:string;let actorUserId:string;let supabase;
+ if(portal){const context=await requireClientContext();organizationId=context.client.organization_id;actorUserId=context.user.id;supabase=context.supabase;}
+ else{const context=await requireCapability("sac","update",optional(data,"projectId"));organizationId=context.organizationId;actorUserId=context.userId;supabase=context.supabase;}
+ const buffer=Buffer.from(await file.arrayBuffer());
+ const safeName=sanitizeFileName(file.name);
+ const storagePath=`${organizationId}/${ticketId}/${randomUUID()}-${safeName}`;
+ let secured;
+ try{
+  secured=await secureUpload({
+   targetBucket:"crm-sac-attachments",targetPath:storagePath,body:buffer,filename:safeName,
+   contentType:file.type,organizationId,actorUserId
+  });
+ }catch(error){fail(path,fileSecurityMessage(error));}
+ const{error}=await supabase.rpc("register_sac_ticket_attachment",{
+  p_ticket_id:ticketId,p_message_id:optional(data,"messageId"),p_storage_path:storagePath,
+  p_file_name:safeName,p_mime_type:file.type,p_size_bytes:secured.sizeBytes,p_sha256:secured.sha256,
+  p_client_visible:portal?true:boolean(data,"clientVisible"),p_security_scan_id:secured.scanId,
+  p_security_provider:secured.provider,p_security_scanned_at:secured.scannedAt
+ });
+ if(error){await createSupabaseAdminClient().storage.from("crm-sac-attachments").remove([storagePath]);fail(path,"O arquivo foi analisado, mas não pôde ser vinculado ao chamado.");}
  revalidatePath(path);
 }
 

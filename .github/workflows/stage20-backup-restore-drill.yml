@@ -1,0 +1,107 @@
+name: Stage 20 Backup Restore Drill
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage20-backup-restore-homologation
+  cancel-in-progress: false
+
+jobs:
+  isolated-restore:
+    name: Dump source and restore into disposable Supabase target
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 35
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_RESTORE_DB_URL: ${{ secrets.SUPABASE_RESTORE_DB_URL }}
+      SUPABASE_RESTORE_CONFIRMATION: ${{ secrets.SUPABASE_RESTORE_CONFIRMATION }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Initialize backup restore report
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const payload={
+            status:"prerequisites_pending",
+            workflowRunId:process.env.GITHUB_RUN_ID,
+            event:process.env.GITHUB_EVENT_NAME,
+            startedAt:new Date().toISOString()
+          };
+          fs.writeFileSync("stage20-backup-restore-report.json",JSON.stringify(payload,null,2)+"\n");
+          NODE
+
+      - name: Validate required restore secrets
+        run: |
+          missing=()
+          test -n "$SUPABASE_DB_URL" || missing+=(SUPABASE_DB_URL)
+          test -n "$SUPABASE_RESTORE_DB_URL" || missing+=(SUPABASE_RESTORE_DB_URL)
+          test -n "$SUPABASE_RESTORE_CONFIRMATION" || missing+=(SUPABASE_RESTORE_CONFIRMATION)
+          if [ ${#missing[@]} -gt 0 ]; then
+            MISSING_NAMES="$(printf '%s\n' "${missing[@]}")" node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const missing=(process.env.MISSING_NAMES??"").split("\n").filter(Boolean);
+          const payload={
+            status:"blocked_missing_secrets",
+            workflowRunId:process.env.GITHUB_RUN_ID,
+            missingNames:missing,
+            dumpUploaded:false,
+            finishedAt:new Date().toISOString()
+          };
+          fs.writeFileSync("stage20-backup-restore-report.json",JSON.stringify(payload,null,2)+"\n");
+          NODE
+            printf 'Pré-requisitos ausentes no ambiente homologation: %s\n' "${missing[*]}"
+            exit 1
+          fi
+
+      - name: Validate disposable target confirmation
+        run: |
+          test "$SUPABASE_RESTORE_CONFIRMATION" = "STAGE20_DISPOSABLE_RESTORE"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl ca-certificates
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl --fail --silent --show-error \
+            -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
+            https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          printf '%s\n' \
+            'Types: deb' \
+            'URIs: https://apt.postgresql.org/pub/repos/apt' \
+            "Suites: ${VERSION_CODENAME}-pgdg" \
+            'Components: main' \
+            'Signed-By: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc' \
+            | sudo tee /etc/apt/sources.list.d/pgdg.sources >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+          /usr/lib/postgresql/17/bin/pg_dump --version
+          /usr/lib/postgresql/17/bin/pg_restore --version
+          /usr/lib/postgresql/17/bin/psql --version
+
+      - name: Run backup and isolated restore drill
+        run: node scripts/run-stage20-backup-restore-drill.mjs
+
+      - name: Upload evidence report only
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: stage20-backup-restore-report
+          path: stage20-backup-restore-report.json
+          if-no-files-found: error
+          retention-days: 30

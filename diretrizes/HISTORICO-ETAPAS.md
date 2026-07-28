@@ -31,67 +31,129 @@ Os arquivos em `docs/` preservam decisões, migrations, testes, limitações e p
 - [`docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md`](../docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md) — recuperação, auditoria Supabase, correções e testes transacionais.
 - [`docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md`](../docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md) — evolução futura para WMS avançado.
 
-Estado: incorporada à `main` e homologada tecnicamente; concorrência real, carga, backup e restauração permanecem na Etapa 20.
+Estado: incorporada à `main`, homologada tecnicamente e com concorrência real aprovada na Etapa 20. Permanecem carga prolongada e prontidão produtiva global.
 
 ## Etapa 18 — CRM, Clientes e SAC
 
 - [`docs/ETAPA-18-CRM-CLIENTES-SAC.md`](../docs/ETAPA-18-CRM-CLIENTES-SAC.md) — lead, oportunidade, Cliente 360, múltiplas obras, atendimento e portal.
-- [`docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md`](../docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md) — administrador e cliente autenticados acessando simultaneamente o mesmo chamado no Supabase.
+- [`docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md`](../docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md) — administrador e cliente autenticados acessando simultaneamente o mesmo chamado.
 
 ### Evidências finais
 
 - Etapa 18 incorporada à `main`;
-- 10 tabelas novas com RLS;
-- CRM, Cliente 360 e SAC homologados com transações revertidas;
+- 10 tabelas com RLS;
+- CRM, Cliente 360 e SAC homologados;
 - portal restrito às obras liberadas;
-- workflow de estados protegido;
-- bucket privado e anexos com SHA-256;
-- E2E concorrente executado com duas sessões, `Promise.all`, RLS e cleanup;
-- run `29883182240`: `status: passed` e `cleanup: passed`;
-- históricos append-only preservados como `immutable_history`;
+- workflow protegido;
+- anexos privados com SHA-256;
+- E2E com duas sessões, `Promise.all`, RLS e cleanup;
+- run `29883182240`: `passed`;
+- cleanup: `passed`;
+- históricos preservados como `immutable_history`;
 - PR `#18` mesclado.
 
 ## Etapa 19 — Auditoria e Observabilidade
 
-- [`docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md`](../docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md) — fluxo unificado, correlação, sanitização, alertas, health checks, diagnósticos, retenção, RLS e interface administrativa.
+- [`docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md`](../docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md) — fluxo unificado, correlação, sanitização, alertas, health checks, diagnósticos, retenção, RLS e interface.
 
 ### Linha do tempo consolidada
 
-1. PR `#19` criado como branch empilhada sobre a Etapa 18.
-2. Versão `0.19.0` sincronizada entre `package.json` e SPEC.
-3. Seis migrations aplicadas no Supabase e alinhadas aos timestamps do ledger remoto.
-4. Fluxo unificado de 12 origens homologado sem copiar trilhas de domínio.
-5. Sanitização recursiva confirmou `[REDACTED]` em senha, token, authorization e secret.
-6. Evento idempotente, alerta crítico, reconhecimento, resolução e seis health checks passaram.
-7. Append-only foi bloqueado por privilégio e trigger.
-8. Isolamento multiempresa foi confirmado.
-9. Diagnósticos globais foram protegidos contra cliente e sessão sem membership.
-10. Sete índices complementares eliminaram todas as FKs sem índice do novo domínio.
-11. Advisors foram revisados; dívidas globais antigas foram transferidas à Etapa 20.
-12. Todos os dados artificiais foram revertidos.
-13. CI final ficou verde.
-14. PR `#19` foi mesclado e o PR `#20` consolidou o conteúdo na `main`.
+1. PR `#19` empilhado sobre a Etapa 18.
+2. Versão `0.19.0` sincronizada.
+3. Seis migrations alinhadas ao ledger.
+4. Fluxo unificado de 12 origens homologado.
+5. Sanitização recursiva confirmada.
+6. Evento idempotente, alerta e seis health checks aprovados.
+7. Append-only bloqueado por privilégio e trigger.
+8. Isolamento multiempresa confirmado.
+9. Diagnósticos globais protegidos.
+10. 16 FKs e zero sem índice líder.
+11. Advisors revisados.
+12. Dados artificiais revertidos.
+13. CI verde.
+14. PRs `#19` e `#20` mesclados.
 
-### Estado atual
+## Etapa 20 — Prontidão de Produção
 
-- seis tabelas com RLS;
-- 13 políticas e seis gatilhos não internos;
-- zero função da Etapa 19 acessível por `anon`;
-- 16 FKs, zero sem índice líder;
-- seis migrations alinhadas ao ledger;
-- teste transacional oficial com `ROLLBACK`;
-- documentação e validador atualizados;
-- CI da `main` verde.
+- [`docs/ETAPA-20-PRONTIDAO-PRODUCAO.md`](../docs/ETAPA-20-PRONTIDAO-PRODUCAO.md) — contrato geral de segurança produtiva, recuperação, anexos, provider, telemetria, retenção, incidentes, publicação e UI/UX Pro Max.
+- [`docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md`](../docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md) — prova real de duas sessões disputando a mesma posição de estoque.
+- [`docs/ETAPA-20-BACKUP-RESTAURACAO.md`](../docs/ETAPA-20-BACKUP-RESTAURACAO.md) — dump lógico, restauração isolada, equivalência, RTO e limitações externas.
+- [`docs/ETAPA-20-PROTECAO-ANEXOS.md`](../docs/ETAPA-20-PROTECAO-ANEXOS.md) — quarentena fail-closed, integração do SAC e E2E antimalware.
+
+### Fundação UI/UX e CI
+
+- branch `feature/etapa-20-prontidao-producao`;
+- PR `#23` em rascunho;
+- `UI-UX-PRO-MAX.md` canônica;
+- shell e dashboard redesenhados;
+- acessibilidade e responsividade consolidadas;
+- `validate:stage20` integrado ao CI;
+- CI completo verde.
+
+### Concorrência de estoque
+
+- script `run-stage20-inventory-concurrency-e2e.mjs`;
+- workflow protegido no ambiente `homologation`;
+- saldo inicial `10`;
+- saídas concorrentes `6` e `6`;
+- uma postagem aprovada e uma rejeitada;
+- saldo após disputa `4`;
+- saldo após cleanup `0`;
+- run `29889168656`: `passed`;
+- artefato `8517620520`;
+- execuções duplicadas removidas;
+- `VACINA-013` criada após o guard de custo sensível bloquear corretamente a primeira fixture.
+
+### Backup e restauração
+
+- Session pooler configurado para origem e destino distintos;
+- projetos diferenciados pelo usuário `postgres.<project-ref>`;
+- cliente PostgreSQL `17.10` compatível com servidor `17.6`;
+- dump custom com `1.812.078` bytes e `2.798` objetos;
+- 139 FKs externas para `auth` registradas e omitidas, sem copiar usuários;
+- seis `DEFAULT ACLs` de roles gerenciadas registradas e omitidas;
+- 144 tabelas, 144 tabelas com RLS, 196 funções e 143 migrations equivalentes;
+- RTO observado de `201` segundos;
+- smoke tests de módulos, estoque, auditoria e RLS aprovados;
+- run `29911179764`: `passed`;
+- artefato `8526039714`;
+- dump e lista temporária removidos.
+
+### Proteção de anexos do SAC
+
+- migration `20260722104500_stage20_sac_attachment_security.sql` versionada, ainda não aplicada em homologação;
+- estados persistidos `LEGACY` e `CLEAN` sem atribuir scan retroativo falso;
+- validação de MIME, tamanho, nome e assinatura dos bytes;
+- quarentena privada com manifestos `PENDING`, `SCANNING`, `BLOCKED`, `ERROR` e resultado `CLEAN`;
+- promoção ao bucket final somente após ClamAV `INSTREAM` liberar o arquivo;
+- registro do SAC exige `scanId`, provider e instante de análise;
+- falha na RPC remove o objeto promovido;
+- uploads interno e do portal integrados na branch;
+- portal recebe apenas anexos `CLEAN`; equipe autorizada pode identificar legado;
+- download autenticado com URL assinada por 60 segundos e `no-store`;
+- UI usa estado textual e ação `Analisar e enviar`;
+- E2E com imagem oficial ClamAV, `PING`, fixture limpa e EICAR bloqueado;
+- run `29913636268`: `passed`;
+- artefato `8526935275`;
+- CI completo `29913636056`: `passed`.
+
+### Próxima frente
+
+- provisionar provider ClamAV privado para homologação;
+- executar health check do provider;
+- aplicar migration e aplicação de forma coordenada;
+- executar E2E real do SAC e planejar reanálise dos anexos `LEGACY`;
+- depois provider jurídico, telemetria, retenção, Auth/MFA, pentest, carga e publicação controlada.
 
 ## Vacinas de engenharia
 
-O catálogo está em [`diretrizes/VACINAS.md`](./VACINAS.md), com documentos individuais em `diretrizes/vacinas/`. Toda correção recorrente deve consultar, aplicar ou ampliar esse catálogo. A Etapa 19 adicionou a `VACINA-011`; o fechamento pós-merge adicionou a `VACINA-012`.
+O catálogo está em [`diretrizes/VACINAS.md`](./VACINAS.md). A Etapa 19 adicionou a `VACINA-011`; o fechamento pós-merge adicionou a `VACINA-012`; a concorrência da Etapa 20 adicionou a `VACINA-013`.
 
 ## Planejamento posterior
 
-- Etapa 20 — prontidão de produção, segurança operacional, retenção automatizada, testes ampliados e consolidação UI/UX Pro Max;
+- Etapa 20 — prontidão de produção em execução incremental;
 - Etapa 21 — WMS avançado, RFID, automação logística, fiscal e patrimonial.
 
 ## Regra histórica
 
-Documento histórico não substitui SPEC, inventário, arquitetura, módulos, roadmap, manifesto de estado ou vacinas. Toda nova etapa atualiza documentação canônica e seu próprio relatório no mesmo PR.
+Documento histórico não substitui SPEC, inventário, arquitetura, módulos, roadmap, manifesto ou vacinas. Toda nova etapa atualiza documentação canônica e relatório próprio no mesmo PR.

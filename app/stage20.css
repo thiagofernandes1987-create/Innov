@@ -1,0 +1,38 @@
+/* Hardening transversal da Etapa 20. Regras-base permanecem em globals.css. */
+
+.relationship-row-status {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .topbar { background: #ffffff; }
+}
+
+@media (max-width: 960px) {
+  .brand > span:last-child { display: none; }
+}
+
+@media (max-width: 720px) {
+  .relationship-row-status { justify-content: flex-start; }
+}
+
+@media (forced-colors: active) {
+  .skip-link,
+  button:focus-visible,
+  a:focus-visible,
+  [tabindex]:focus-visible {
+    outline: 3px solid CanvasText;
+    outline-offset: 3px;
+  }
+
+  .organization-chip::before,
+  .eyebrow::before,
+  .stats-grid article::after,
+  .module-card::before {
+    background: CanvasText;
+  }
+}

@@ -1,0 +1,87 @@
+name: Stage 20 File Security Provider Health
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/etapa-20-prontidao-producao
+    paths:
+      - ".github/workflows/stage20-file-security-provider-health.yml"
+      - "scripts/run-stage20-file-security-provider-health.mjs"
+      - "app/api/internal/file-security/health/route.ts"
+      - "lib/file-security/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage20-file-security-provider-homologation
+  cancel-in-progress: false
+
+jobs:
+  provider-health:
+    name: Check homologation scanner through application
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 10
+    env:
+      HOMOLOGATION_APP_URL: ${{ secrets.HOMOLOGATION_APP_URL }}
+      FILE_SECURITY_HEALTH_SECRET: ${{ secrets.FILE_SECURITY_HEALTH_SECRET }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      FILE_SECURITY_HEALTH_TIMEOUT_MS: "30000"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Initialize provider report
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          fs.writeFileSync("stage20-file-security-provider-report.json",JSON.stringify({
+            schemaVersion:1,
+            status:"prerequisites_pending",
+            mode:"provider_health_https",
+            startedAt:new Date().toISOString()
+          },null,2)+"\n");
+          NODE
+
+      - name: Validate provider health secrets
+        run: |
+          missing=()
+          test -n "$HOMOLOGATION_APP_URL" || missing+=(HOMOLOGATION_APP_URL)
+          test -n "$FILE_SECURITY_HEALTH_SECRET" || missing+=(FILE_SECURITY_HEALTH_SECRET)
+          test -n "$VERCEL_AUTOMATION_BYPASS_SECRET" || missing+=(VERCEL_AUTOMATION_BYPASS_SECRET)
+          if [ ${#missing[@]} -gt 0 ]; then
+            MISSING_NAMES="$(printf '%s\n' "${missing[@]}")" node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const missing=(process.env.MISSING_NAMES??"").split("\n").filter(Boolean);
+          fs.writeFileSync("stage20-file-security-provider-report.json",JSON.stringify({
+            schemaVersion:1,
+            status:"blocked_missing_secrets",
+            mode:"provider_health_https",
+            missingNames:missing,
+            finishedAt:new Date().toISOString()
+          },null,2)+"\n");
+          NODE
+            printf 'Pré-requisitos ausentes no ambiente homologation: %s\n' "${missing[*]}"
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Run signed HTTPS provider health check
+        run: node scripts/run-stage20-file-security-provider-health.mjs
+
+      - name: Upload provider health evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: stage20-file-security-provider-report
+          path: stage20-file-security-provider-report.json
+          if-no-files-found: error
+          retention-days: 30
