@@ -970,7 +970,8 @@ comprador, almoxarife, qualidade, contratos, diretoria ou auditoria.
 - [ ] T-30.10 — **Homologar em três cenários por persona** e registrar defeito em Vacinas antes de corrigir
   - [x] T-30.10.1 — Auditoria autenticada de 17 aplicativos do Odoo, inventário de menus e capturas em `artifacts/odoo-audit-2026-07-28/`
   - [x] T-30.10.2 — Corrigir a primeira classe transversal: capacidade existente sem porta de entrada (`VACINA-028`), com menus reais para todos os aplicativos e criação de proposta, contrato, aditivo e documento
-  - [ ] T-30.10.3 — Repetir o QA autenticado da Innovar nos 333 cenários após aplicar a migration e disponibilizar a branch na homologação
+  - [x] T-30.10.3 — Branch publicada e QA autenticado do preview percorreu os 21 aplicativos e os seis fluxos críticos; menu recortado e contraste de aviso viraram `VACINA-030` e `VACINA-031`
+  - [ ] T-30.10.4 — Aplicar a migration no Supabase remoto e repetir as mutações autenticadas de proposta → aceite → contrato → aditivo na homologação
 
 ---
 

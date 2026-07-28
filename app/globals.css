@@ -478,8 +478,8 @@ tbody tr:hover { background: #fafcfd; }
 .financial-row { display: flex; justify-content: space-between; gap: 18px; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,.12); }
 .financial-total { margin: 18px 0; padding: 18px; border: 1px solid rgba(173,107,53,.65); border-radius: 13px; background: rgba(173,107,53,.14); }
 .financial-total strong { display: block; font-size: 30px; color: #efd0b2; }
-.validation { padding: 14px; border: 1px solid #f0d39f; border-radius: 11px; margin-top: 10px; background: var(--warning-soft); color: #714207; }
-.validation.blocking { border-color: #e9c0c5; background: var(--danger-soft); color: #812a34; }
+.validation { padding: 14px; border: 1px solid color-mix(in srgb, var(--warning) 42%, transparent); border-radius: 11px; margin-top: 10px; background: var(--warning-soft); color: var(--warning); }
+.validation.blocking { border-color: color-mix(in srgb, var(--danger) 42%, transparent); background: var(--danger-soft); color: var(--danger); }
 
 .auth-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 80% 10%, rgba(173,107,53,.24), transparent 28rem), linear-gradient(135deg,var(--ink),var(--navy)); }
 .auth-card { width: min(100%, 430px); background: var(--surface); border: 1px solid rgba(255,255,255,.32); border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow); }
@@ -2827,6 +2827,14 @@ tbody tr:hover { background: #fafcfd; }
   border: 1px dashed var(--border-strong);
   border-radius: 8px;
   background: color-mix(in srgb, var(--surface) 72%, transparent);
+}
+
+/* VACINA-030: em notebooks a soma organização + módulo + menus + busca +
+   ações ultrapassa a largura real do cabeçalho. O menu compacto preserva todos
+   os destinos sem deixar rótulos parcialmente visíveis. */
+@media (min-width: 900px) and (max-width: 1699px) {
+  .barra-menus { display: none; }
+  .barra-menu-movel { display: block; }
 }
 
 @media (max-width: 1260px) {

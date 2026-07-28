@@ -93,3 +93,22 @@ trilha contratual da Innovar.
 - migration e validadores do estágio 9 aprovados;
 - PostgreSQL 16 real confirmou proposta com PDF/hash, privilégio mínimo,
   aceite do cliente, contrato derivado e aditivo encadeado.
+
+## Repetição do loop no preview publicado
+
+A branch publicada foi aberta com sessão autenticada e percorreu os 21
+aplicativos operacionais, sem erro de renderização. Em seguida, foram conferidos
+os seis fluxos mais críticos: nova proposta, novo contrato, novo aditivo, envio
+de documento, novo documento para assinatura e planejamento.
+
+O QA visual encontrou dois defeitos adicionais antes do encerramento:
+
+1. o menu de módulo era recortado no viewport de notebook; corrigido pela
+   `VACINA-030`, mantendo todos os destinos no menu compacto;
+2. o aviso de formato da assinatura tinha baixo contraste no tema escuro;
+   corrigido pela `VACINA-031`, com tokens semânticos de estado.
+
+As capturas `17-innov-proposta-nova.png` a `23-innov-launcher.png` registram o
+estado dos fluxos no preview. A transação remota da nova proposta depende da
+aplicação da migration no projeto Supabase; o encadeamento foi comprovado
+localmente em PostgreSQL 16 e permanece pendente de homologação remota.

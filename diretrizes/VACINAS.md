@@ -128,6 +128,8 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-027` | Mock aprovado não chega à implementação por falta de comparação | vigente | fonte visual versionada, captura no mesmo viewport e QA lado a lado |
 | `VACINA-028` | Capacidade existe sem menu, ação primária ou rotina que a exercite | vigente | cobertura módulo–menu–rota–persona e fluxo documental completo |
 | `VACINA-029` | Runner Python usa sintaxe de ambiente específica de POSIX | vigente | wrapper Node define ambiente e interpretador por plataforma |
+| `VACINA-030` | Menu inline é recortado na largura intermediária | vigente | menu compacto em notebooks e teste estrutural de breakpoint |
+| `VACINA-031` | Estado mistura token de fundo com primeiro plano fixo | vigente | cores semânticas em texto, fundo e borda, validadas por teste |
 
 ## 4. Arquivos
 
@@ -161,7 +163,9 @@ diretrizes/vacinas/
 ├── VACINA-026-TESTE-NAO-EXECUTADO-NAO-PASSA.md
 ├── VACINA-027-MOCK-APROVADO-EXIGE-QA-DE-FIDELIDADE.md
 ├── VACINA-028-CAPACIDADE-EXIGE-PORTA-DE-ENTRADA.md
-└── VACINA-029-RUNNER-PYTHON-PORTAVEL.md
+├── VACINA-029-RUNNER-PYTHON-PORTAVEL.md
+├── VACINA-030-MENU-DESKTOP-SEM-CORTE.md
+└── VACINA-031-ESTADO-SEMPRE-USA-TOKENS-DE-TEMA.md
 ```
 
 ## 5. Critérios para nova vacina
