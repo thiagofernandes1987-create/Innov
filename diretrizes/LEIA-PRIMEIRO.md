@@ -25,6 +25,8 @@ Detalhe completo: [`METODO-DE-TRABALHO.md`](./METODO-DE-TRABALHO.md).
 
 Nada é declarado pronto, corrigido ou passando sem a saída do comando que prova. `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:python` e os `pnpm validate:*`. Limitação de ambiente é registrada, não contornada com otimismo.
 
+Quando a avaliação for de pessoa, rotina, tela, controle ou processo, a evidência segue também [`CONTRATO-AUDITAVEL-DE-PERSONAS.md`](./CONTRATO-AUDITAVEL-DE-PERSONAS.md). Os únicos resultados permitidos são `PASS`, `FAIL`, `PARTIAL`, `NOT_ASSESSED`, `BLOCKED_EXTERNAL` e `NOT_APPLICABLE`. Campo ou botão existente não prova processo executado; teste não executado nunca passa.
+
 ### 0.3 Consultar a memória de problemas antes de resolver
 
 Diante de qualquer erro: consultar [`VACINAS.md`](./VACINAS.md) **antes** de propor correção. Se a causa raiz já foi catalogada, aplicar a solução registrada. Se for inédita, resolver e registrar respondendo às cinco perguntas.
@@ -37,6 +39,7 @@ Diante de qualquer erro: consultar [`VACINAS.md`](./VACINAS.md) **antes** de pro
 |---|---|---|
 | **Como se trabalha** | [`METODO-DE-TRABALHO.md`](./METODO-DE-TRABALHO.md) | sempre, antes de propor |
 | **Quem usa e o que sabe** | [`PERSONAS-E-ROTINAS.md`](./PERSONAS-E-ROTINAS.md) | antes de criar tela ou permissão |
+| **Como provar autoridade, controle e evidência** | [`CONTRATO-AUDITAVEL-DE-PERSONAS.md`](./CONTRATO-AUDITAVEL-DE-PERSONAS.md) | antes de auditar pessoa, rotina, tela, processo ou controle |
 | **O que quebra e a quem se pede socorro** | [`FLUXOS-E-RISCOS.md`](./FLUXOS-E-RISCOS.md) | antes de criar qualquer objeto ou fluxo |
 | **Quem fica sabendo, e como** | [`ACOMPANHAMENTO-A-DISTANCIA.md`](./ACOMPANHAMENTO-A-DISTANCIA.md) | ao mexer em notificação, alerta, foto de campo ou portal do cliente |
 | **O que fazer agora** | [`INVENTARIO-DE-EXECUCAO.md`](./INVENTARIO-DE-EXECUCAO.md) | no início de toda sessão e ao terminar cada tarefa |
@@ -155,6 +158,6 @@ Não confie neste parágrafo para saber o que fazer agora — confie no inventá
 7. `diretrizes/OBJECT-RUNTIME.md` quando o assunto for customização;
 8. `diretrizes/VACINAS.md` antes de resolver erro;
 9. `diretrizes/UI-UX-PRO-MAX.md` quando o assunto for interface;
-10. `diretrizes/PERSONAS-E-ROTINAS.md` e `diretrizes/FLUXOS-E-RISCOS.md` antes de criar qualquer coisa nova.
+10. `diretrizes/PERSONAS-E-ROTINAS.md`, `diretrizes/CONTRATO-AUDITAVEL-DE-PERSONAS.md` e `diretrizes/FLUXOS-E-RISCOS.md` antes de criar ou auditar qualquer coisa nova.
 
 Nenhum desses passos depende de memória de conversa, de arquivo temporário de contêiner ou de máquina local. É essa a razão de existir deste diretório.
