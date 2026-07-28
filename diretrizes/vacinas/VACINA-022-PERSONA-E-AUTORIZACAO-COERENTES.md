@@ -36,17 +36,39 @@ também escondia do cliente o fato que ele próprio havia criado.
 - o autor sempre lê o próprio fato, sem ganhar acesso aos fatos internos;
 - a página administrativa e o banco aplicam a mesma regra.
 
+## Ocorrência adicional — aceite de proposta em 28/07/2026
+
+A campanha QA reproduziu a mesma causa raiz fora do domínio de notificações.
+`accept_proposal` validava corretamente `is_client_owner()` e gravava o aceite,
+mas chamava `write_audit`, cujo ator padrão é `INTERNAL`. O livro de auditoria
+recusava a transação inteira com “Organização inválida para auditoria”.
+
+A solução vigente foi reaplicada, sem criar um segundo padrão:
+
+- o aceite permanece exclusivo do proprietário do cliente;
+- `record_audit_event` recebe `actor_type='CLIENT'` e o `client_id` real;
+- o portal não ganha leitura do livro interno;
+- a identidade administrativa confirma o evento com ator, cliente e recurso;
+- o cenário segue até contrato, assinatura, obra e financeiro.
+
 ## Varredura e ocorrências equivalentes
 
 As dezesseis rotinas foram cruzadas com os papéis. P15 é a única cadeira
 externa. A divulgação de notificações continua separada: cliente destinatário
 só recebe recorte com `client_approved = true`.
 
+A ocorrência de aceite também levou à revisão das RPCs externas que escrevem
+auditoria. `rate_sac_ticket` já usa `is_client_owner`; novos fluxos externos não
+podem chamar o atalho interno `write_audit`.
+
 ## Prevenção automática
 
 `pnpm test:db:operations` executa 14 casos, incluindo criação legítima da P15,
 tentativa de representar o SAC, leitura do fato próprio e isolamento dos demais
 fatos. A migration mantém guard no cadastro de responsabilidades.
+
+O E2E comercial passa a exigir que o aceite gere evento com
+`actor_type='CLIENT'`, `actor_user_id` do cliente e `client_id` correspondente.
 
 ## Limitações da prevenção
 
