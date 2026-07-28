@@ -15,6 +15,7 @@
     "validate:docs": "node scripts/validate-documentation.mjs",
     "validate:vaccines": "node scripts/validate-vaccines.mjs",
     "validate:inventory": "node scripts/validate-inventory.mjs",
+    "validate:personas-audit": "node scripts/validate-personas-audit.mjs",
     "validate:object-runtime": "node scripts/validate-object-runtime.mjs",
     "test:db:object-runtime": "node scripts/run-object-runtime-db-tests.mjs",
     "validate:pipeline": "node scripts/validate-pipeline.mjs",
