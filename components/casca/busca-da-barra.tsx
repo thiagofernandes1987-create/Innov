@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { Funnel, MagnifyingGlass } from "@phosphor-icons/react";
+import { usePathname, useRouter } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 // Busca com facetas, no centro da barra superior.
@@ -50,7 +51,10 @@ export function ProvedorDeBusca({ children }: { children: React.ReactNode }) {
   const [caminhoAnterior, setCaminhoAnterior] = useState(caminho);
   if (caminho !== caminhoAnterior) {
     setCaminhoAnterior(caminho);
-    setTermo("");
+    const termoDaUrl = typeof window === "undefined"
+      ? ""
+      : new URL(window.location.href).searchParams.get("q") ?? "";
+    setTermo(termoDaUrl);
   }
 
   // Espelha na URL sem navegar: `replaceState` não dispara re-render de
@@ -92,10 +96,7 @@ export function BuscaDaBarra() {
     <div className="barra-busca">
       <label>
         <span className="sr-only">Buscar nesta tela</span>
-        <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" focusable="false">
-          <circle cx="10.5" cy="10.5" r="6.2" fill="none" stroke="currentColor" strokeWidth="1.7" />
-          <path d="M15.2 15.2 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-        </svg>
+        <MagnifyingGlass size={16} weight="regular" aria-hidden="true" />
 
         {termo ? (
           <span className="barra-busca-faceta">
@@ -125,4 +126,59 @@ export function BuscaDaBarra() {
       </label>
     </div>
   );
+}
+
+/**
+ * Busca global da primeira barra.
+ *
+ * No launcher ela filtra os aplicativos em tempo real. Dentro de um módulo,
+ * Enter leva a pessoa ao launcher já com o termo aplicado. Assim o campo do
+ * mock não é decoração e não disputa estado com a busca/facetas da barra de
+ * trabalho do pipeline.
+ */
+export function BuscaGlobal() {
+  const caminho = usePathname() ?? "";
+  const router = useRouter();
+  const { termo, definir } = useContext(BuscaContexto);
+  const noLauncher = caminho === "/app" || caminho.startsWith("/amostra-launcher");
+  const [rascunho, setRascunho] = useState("");
+  const valor = noLauncher ? termo : rascunho;
+
+  function atualizar(proximo: string) {
+    if (noLauncher) definir(proximo);
+    else setRascunho(proximo);
+  }
+
+  function abrirLauncher() {
+    const busca = valor.trim();
+    if (!busca || noLauncher) return;
+    definir(busca);
+    router.push(`/app?q=${encodeURIComponent(busca)}`);
+  }
+
+  return (
+    <div className="busca-global">
+      <label>
+        <span className="sr-only">Buscar aplicativos, relatórios e documentos</span>
+        <MagnifyingGlass size={18} weight="regular" aria-hidden="true" />
+        <input
+          type="search"
+          value={valor}
+          onChange={evento => atualizar(evento.target.value)}
+          onKeyDown={evento => {
+            if (evento.key === "Enter") {
+              evento.preventDefault();
+              abrirLauncher();
+            }
+          }}
+          placeholder="Buscar aplicativos, relatórios, documentos..."
+        />
+        <kbd>⌘ K</kbd>
+      </label>
+    </div>
+  );
+}
+
+export function IconeFiltroDaBusca() {
+  return <Funnel size={15} weight="fill" aria-hidden="true" />;
 }

@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 // de navegação — porque a navegação é a consulta, não uma lista escrita à mão.
 
 export default async function CentralDeAplicativos() {
-  const { context, applications } = await getEffectiveApplications();
+  const { applications } = await getEffectiveApplications();
 
   const aplicativos: AplicativoAutorizado[] = applications
     .filter(item => item.applicationKey !== "dashboard" && item.accessLevel !== "NONE")
@@ -24,14 +24,8 @@ export default async function CentralDeAplicativos() {
       nivel: item.accessLevel
     }));
 
-  const primeiroNome = context.email?.split("@")[0] ?? "";
-
   return (
     <main className="content pagina-launcher">
-      <section className="launcher-cabecalho">
-        <h1>{primeiroNome ? `Olá, ${primeiroNome}.` : "Aplicativos"}</h1>
-        <p>Estes são os aplicativos liberados para o seu perfil nesta organização.</p>
-      </section>
       <Launcher aplicativos={aplicativos} />
     </main>
   );

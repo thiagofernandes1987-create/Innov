@@ -5,6 +5,10 @@
 
 Motivo de existir: em 26 de julho de 2026 a revisão das telas reais concluiu que os módulos são rascunhos. A conclusão foi verificada, não é impressão. Este documento fixa o alvo para que "pronto" pare de ser opinião.
 
+O alvo visual versionado do launcher está em `diretrizes/ALVO-VISUAL.md`.
+Mock aprovado é contrato de implementação: a aceitação exige comparação
+lado a lado no mesmo viewport e registro em `design-qa.md` (`VACINA-027`).
+
 ---
 
 ## 1. O diagnóstico que originou este documento

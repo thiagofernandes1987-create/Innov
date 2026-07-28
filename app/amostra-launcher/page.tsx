@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { COOKIE_TEMA, temaValido } from "@/lib/tema";
 import { BarraSuperior } from "@/components/casca/barra-superior";
+import { ProvedorDeBusca } from "@/components/casca/busca-da-barra";
 import { Launcher, type AplicativoAutorizado } from "@/components/casca/launcher";
 
 const TODOS: AplicativoAutorizado[] = [
@@ -74,6 +75,7 @@ export default async function Amostra({ searchParams }: { searchParams: Promise<
     : [];
 
   return (
+    <ProvedorDeBusca>
     <div className="casca">
       {/* O estado normal permanece sem contadores inventados. `cenario=problema`
           é uma fixture visual explícita para verificar o estado pessimista. */}
@@ -94,13 +96,10 @@ export default async function Amostra({ searchParams }: { searchParams: Promise<
       />
       <div className="casca-conteudo">
         <main className="content pagina-launcher">
-          <section className="launcher-cabecalho">
-            <h1>Olá, {perfil}.</h1>
-            <p>Estes são os aplicativos liberados para o seu perfil nesta organização.</p>
-          </section>
-          <Launcher aplicativos={aplicativos} />
+          <Launcher aplicativos={aplicativos} demonstracao />
         </main>
       </div>
     </div>
+    </ProvedorDeBusca>
   );
 }

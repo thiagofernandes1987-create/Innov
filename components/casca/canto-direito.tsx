@@ -1,5 +1,6 @@
 "use client";
 
+import { CaretDown, ChatCircleDots, Lightning } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { marcarVisto } from "@/app/actions/avisos";
@@ -89,6 +90,7 @@ export function CantoDireito({
   const pendentesVisiveis = notificacoesVistas
     ? atividades.length
     : pendentes;
+  const usuario = nomeExibicao(email);
 
   function alternar(painel: Painel) {
     // O próximo estado é calculado fora do atualizador de propósito: a função
@@ -118,15 +120,8 @@ export function CantoDireito({
         title="Mensagens"
         onClick={() => alternar("mensagens")}
       >
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-          <path
-            d="M4 5h16a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 20 17H9.5L5 20.5V17H4a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 4 5Z"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <ChatCircleDots size={21} weight="regular" aria-hidden="true" />
+        <span className="canto-botao-rotulo">Mensagens</span>
         {naoLidas > 0 ? <span className="canto-selo" aria-hidden="true">{naoLidas > 9 ? "9+" : naoLidas}</span> : null}
       </button>
 
@@ -139,16 +134,8 @@ export function CantoDireito({
         title="Notificações"
         onClick={() => alternar("notificacoes")}
       >
-        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-          <path
-            d="M12 3.5a5.5 5.5 0 0 0-5.5 5.5c0 4.5-1.7 6-1.7 6h14.4s-1.7-1.5-1.7-6A5.5 5.5 0 0 0 12 3.5Z"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinejoin="round"
-          />
-          <path d="M10.2 18.2a2 2 0 0 0 3.6 0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-        </svg>
+        <Lightning size={21} weight="regular" aria-hidden="true" />
+        <span className="canto-botao-rotulo">Atividades</span>
         {pendentesVisiveis > 0 ? (
           <span className="canto-selo alerta" aria-hidden="true">{pendentesVisiveis > 9 ? "9+" : pendentesVisiveis}</span>
         ) : null}
@@ -158,6 +145,10 @@ export function CantoDireito({
           ocupavam a barra o dia inteiro para uma ação que se faz uma vez por
           dia; as quatro ferramentas do padrão põem tudo isso dentro do avatar,
           junto com tema e dados da conta. */}
+      <div className="canto-tema-topo">
+        <AlternadorTema atual={tema} />
+      </div>
+
       <button
         type="button"
         className="canto-avatar"
@@ -167,7 +158,12 @@ export function CantoDireito({
         title={email ?? "Conta"}
         onClick={() => alternar("configuracao")}
       >
-        <span aria-hidden="true">{iniciais(email)}</span>
+        <span className="canto-avatar-marca" aria-hidden="true">{iniciais(email)}</span>
+        <span className="canto-avatar-texto">
+          <strong>{usuario}</strong>
+          <small>{papel}</small>
+        </span>
+        <CaretDown size={14} weight="bold" aria-hidden="true" />
       </button>
 
       {aberto === "mensagens" ? (
@@ -293,11 +289,6 @@ export function CantoDireito({
             ) : null}
           </ul>
 
-          <div className="canto-tema">
-            <span className="canto-tema-rotulo">Tema</span>
-            <AlternadorTema atual={tema} />
-          </div>
-
           <form action={signOut} className="canto-sair">
             <button type="submit">Sair</button>
           </form>
@@ -314,4 +305,13 @@ function iniciais(email: string | null): string {
   const partes = local.split(/\s+/).filter(Boolean);
   if (partes.length >= 2) return (partes[0][0] + partes[1][0]).toUpperCase();
   return local.slice(0, 2).toUpperCase();
+}
+
+function nomeExibicao(email: string | null): string {
+  const local = (email ?? "Usuário").split("@")[0].replace(/[._-]+/g, " ").trim();
+  if (!local) return "Usuário";
+  return local
+    .split(/\s+/)
+    .map(parte => parte.charAt(0).toUpperCase() + parte.slice(1))
+    .join(" ");
 }

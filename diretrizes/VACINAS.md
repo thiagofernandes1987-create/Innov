@@ -125,6 +125,7 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-024` | Conteúdo interno corta sem causar overflow global | vigente | inspeção do card e empilhamento de título/SLA no breakpoint |
 | `VACINA-025` | Lint retorna sucesso mesmo acumulando avisos | vigente | `--max-warnings=0` e correção da lógica denunciada |
 | `VACINA-026` | Runner retorna sucesso quando o teste de banco não executa | vigente | PostgreSQL Docker portátil, confirmação mínima e falha sem pré-requisito |
+| `VACINA-027` | Mock aprovado não chega à implementação por falta de comparação | vigente | fonte visual versionada, captura no mesmo viewport e QA lado a lado |
 
 ## 4. Arquivos
 
@@ -155,7 +156,8 @@ diretrizes/vacinas/
 ├── VACINA-023-AMOSTRA-SEM-EFEITO-DE-PRODUCAO.md
 ├── VACINA-024-METADADO-RESPONSIVO-SEM-CORTE.md
 ├── VACINA-025-LINT-SEM-AVISO-ACEITO.md
-└── VACINA-026-TESTE-NAO-EXECUTADO-NAO-PASSA.md
+├── VACINA-026-TESTE-NAO-EXECUTADO-NAO-PASSA.md
+└── VACINA-027-MOCK-APROVADO-EXIGE-QA-DE-FIDELIDADE.md
 ```
 
 ## 5. Critérios para nova vacina
