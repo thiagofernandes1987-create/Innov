@@ -84,7 +84,9 @@ for (const term of requiredContractTerms) {
 
 for (const id of operationalPersonas) {
   const auditHeading = new RegExp(`^## ${id}\\s+—`, "m");
-  const personasHeading = new RegExp(`^# ${id}\\s+—`, "m");
+  // P1–P7 são capítulos; P8–P16 ficam dentro do capítulo agrupador e usam ##.
+  // O validador verifica a presença da persona sem reformatar o documento canônico.
+  const personasHeading = new RegExp(`^#{1,2} ${id}\\s+—`, "m");
   const catalogId = new RegExp(`id:\\s*["']${id}["']`);
 
   assert(auditHeading.test(audit), `${id} não possui contrato auditável.`);
