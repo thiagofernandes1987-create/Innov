@@ -145,6 +145,10 @@ jobs:
         run: pnpm validate:menus
       - name: Schedule dependency database tests
         run: pnpm test:db:planejamento
+      - name: Pipeline database tests
+        run: pnpm test:db:pipeline
+      - name: Operational event and notification database tests
+        run: pnpm test:db:operations
       - name: Lint
         run: |
           set -o pipefail

@@ -21,7 +21,8 @@ export function BarraSuperior({
   papel,
   tema,
   avisos,
-  podeAdministrar
+  podeAdministrar,
+  persistirAvisos = true
 }: {
   aplicativos: AplicativoAutorizado[];
   email: string | null;
@@ -29,6 +30,7 @@ export function BarraSuperior({
   tema: Tema;
   avisos: Avisos;
   podeAdministrar: boolean;
+  persistirAvisos?: boolean;
 }) {
   return (
     <header className="barra-superior">
@@ -51,12 +53,14 @@ export function BarraSuperior({
         <CantoDireito
           mensagens={avisos.mensagens}
           atividades={avisos.atividades}
+          operacionais={avisos.operacionais}
           naoLidas={avisos.naoLidas}
           pendentes={avisos.pendentes}
           podeAdministrar={podeAdministrar}
           email={email}
           papel={papel}
           tema={tema}
+          persistirAvisos={persistirAvisos}
         />
       </div>
     </header>

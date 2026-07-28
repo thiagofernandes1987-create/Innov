@@ -176,13 +176,13 @@ Meta mínima: **WCAG 2.2 nível AA**.
 
 ### Desktop
 
-- sidebar persistente;
+- casca superior em duas faixas, sem sidebar no aplicativo interno;
 - conteúdo em grid com densidade controlada;
 - rail lateral somente quando agrega contexto contínuo.
 
 ### Tablet
 
-- sidebar compacta ou controlada;
+- menus do aplicativo em seletor compacto, com os mesmos destinos do desktop;
 - grids de quatro colunas reduzem para duas;
 - ações permanecem visíveis e legíveis.
 

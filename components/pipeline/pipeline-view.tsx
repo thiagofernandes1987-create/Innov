@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Suspense, useMemo, useState, useTransition } from "react";
 import { moverCartao } from "@/app/actions/pipeline";
 import { BuscaDaBarra, useBusca } from "@/components/casca/busca-da-barra";
+import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
 import { SeletorDeFunil, type FunilDisponivel } from "./seletor-de-funil";
 import {
   BotaoNovoCartao,
@@ -147,10 +148,11 @@ export function PipelineView({
     <section className="pipeline" aria-busy={pendente || undefined}>
       {/* Barra de controle no padrão de mercado: criar à esquerda, nome da tela
           ao lado, busca no centro, visualizações em ícone à direita. Uma faixa
-          de 44px no lugar do título de 180px. */}
-      <header className="barra-controle">
-        <div className="barra-controle-esquerda">
-          {podeEditar ? (
+          de 44px no lugar do título de 180px. A busca é trabalho e por isso
+          mora na barra 2; os nomes dos ícones permanecem no aria-label. */}
+      <BarraDeTrabalho
+        title={funilAtual.name}
+        primaryAction={podeEditar ? (
             <button
               type="button"
               className="button button-primary barra-controle-novo"
@@ -160,7 +162,7 @@ export function PipelineView({
               Novo
             </button>
           ) : null}
-          <h1 className="sr-only">{funilAtual.name}</h1>
+        identity={
           <SeletorDeFunil
             trilha={trilha}
             funis={funis}
@@ -169,40 +171,37 @@ export function PipelineView({
             podeConfigurar={podeEditar}
             aoFalhar={setErro}
           />
+        }
+        meta={
           <span className="pipeline-contagem">
             {totalCartoes} {totalCartoes === 1 ? "cartão" : "cartões"}
           </span>
-        </div>
-
-        {/* Busca centralizada, um nível abaixo dos menus superiores. É onde o
-            responsável pediu e onde o Odoo põe: a barra 1 é identidade e
-            navegação, a busca é trabalho, e trabalho mora na barra 2. */}
-        <Suspense fallback={<div className="barra-busca-vazia" aria-hidden="true" />}>
-          <BuscaDaBarra />
-        </Suspense>
-
-        {/* Ícone, não palavra: "Ícones, igual ao Odoo, ocupam menos espaço,
-            poluem menos e facilita a leitura do pipeline". O nome continua no
-            `aria-label` e no `title`, para quem usa leitor de tela e para quem
-            passa o mouse. */}
-        <div className="barra-controle-visoes" role="group" aria-label="Visualização">
-          {VISOES.map(item => (
-            <button
-              key={item.valor}
-              type="button"
-              className={visao === item.valor ? "barra-visao ativa" : "barra-visao"}
-              onClick={() => setVisao(item.valor)}
-              aria-pressed={visao === item.valor}
-              aria-label={item.rotulo}
-              title={item.rotulo}
-            >
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
-                {item.desenho}
-              </svg>
-            </button>
-          ))}
-        </div>
-      </header>
+        }
+        search={
+          <Suspense fallback={<div className="barra-busca-vazia" aria-hidden="true" />}>
+            <BuscaDaBarra />
+          </Suspense>
+        }
+        controls={
+          <div className="barra-controle-visoes" role="group" aria-label="Visualização">
+            {VISOES.map(item => (
+              <button
+                key={item.valor}
+                type="button"
+                className={visao === item.valor ? "barra-visao ativa" : "barra-visao"}
+                onClick={() => setVisao(item.valor)}
+                aria-pressed={visao === item.valor}
+                aria-label={item.rotulo}
+                title={item.rotulo}
+              >
+                <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false">
+                  {item.desenho}
+                </svg>
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       {erro ? (
         <p className="pipeline-erro" role="alert">

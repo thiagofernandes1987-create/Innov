@@ -410,7 +410,6 @@ Isto é contrato, não sugestão. Tela nova não escolhe onde põe o botão.
 | Extrema esquerda | Marca clicável, sozinha, para a tela inicial de aplicativos | Nunca |
 | Esquerda | Ícone e nome do aplicativo, na cor do aplicativo | Só ao trocar de aplicativo |
 | Esquerda, na sequência | Menus **daquele** aplicativo | Só ao trocar de aplicativo |
-| Centro | Busca com facetas de filtro | Nunca sai do lugar |
 | Direita | Mensagens e notificações, com contador quando houver | Nunca |
 | Extrema direita | Avatar do usuário, que abre tema, dados, administração e sair | Nunca |
 
@@ -424,9 +423,12 @@ O nome do usuário por extenso e o botão "Sair" soltos saem da barra: são dois
 |---|---|---|
 | Esquerda | Ações do módulo: `Novo`, `Publicar`, `Importar`, `Aprovar` — o que aquele módulo faz | Sempre |
 | Esquerda, ao lado | Nome da tela ou do registro, em corpo de texto, com engrenagem de configuração quando houver | Sempre |
+| Centro | Busca contextual com facetas, filtros, agrupamento e favoritos | Quando a coleção implementa busca |
 | Direita | Visualizações em ícone: kanban, lista, calendário, tabela dinâmica, gráfico, mapa, atividades | Conforme o módulo suporte |
 
-A barra 2 **não** repete a busca: ela subiu para a barra 1. Não repete o nome do aplicativo: já está acima. Não carrega descrição de página.
+A barra 2 não repete o nome do aplicativo: já está acima. Não carrega descrição
+de página. A busca mora aqui porque filtra a superfície de trabalho e pode
+mudar junto com o arquétipo da coleção.
 
 ### 12.3 Quando cada visualização aparece
 
@@ -445,9 +447,12 @@ A barra 2 **não** repete a busca: ela subiu para a barra 1. Não repete o nome 
 
 ### 12.4 A exceção declarada da busca
 
-O contrato diz que a busca fica sempre no centro da barra 1. Hoje ela só aparece onde a tela sabe consumi-la — no pipeline. Um campo que aceita texto e não filtra nada é pior que campo ausente: quem digita conclui que não há resultado, não que a tela ainda não busca.
+O contrato coloca a busca no centro da barra 2. Hoje ela só aparece onde a tela sabe consumi-la — no pipeline. Um campo que aceita texto e não filtra nada é pior que campo ausente: quem digita conclui que não há resultado, não que a tela ainda não busca.
 
-Enquanto a busca global da `T-24.7` não existir, o campo aparece na tela que implementa e não aparece na que não implementa. **A posição nunca muda; o que varia é existir ou não.** A exceção tem data e dono: some quando a T-24.7 entregar busca por cliente, projeto, chamado e cartão.
+Enquanto a busca global da `T-24.7` não existir, o campo aparece na barra 2 da
+tela que implementa e não aparece na que não implementa. **A posição nunca
+muda; o que varia é existir ou não.** A exceção tem data e dono: some quando a
+T-24.7 entregar busca por cliente, projeto, chamado e cartão.
 
 ### 12.5 Busca com filtros — anatomia a copiar
 

@@ -338,6 +338,37 @@ avisou" não tem resposta.
 
 ---
 
+## §5.1 — Contrato executável já fechado
+
+`lib/operations/notifications.ts` transforma o cenário pessimista das personas
+em um plano de notificação determinístico:
+
+- otimista e normal retornam zero notificações;
+- o código do evento precisa pertencer à persona que o originou;
+- destinatários vêm de `lib/personas/catalog.ts`, não de listas repetidas na
+  tela;
+- cliente só entra com `clientApproved: true`;
+- SLA vencido inclui a Diretoria e não duplica quem já estava na lista;
+- dois fatos do mesmo objeto viram um resumo por destinatário;
+- gerente, financeiro, diretoria, cliente e auditoria recebem corpos diferentes.
+
+Cinco testes negativos e positivos cobrem esses contratos em
+`tests/operational-notifications.test.ts`.
+
+O contrato agora também está persistido no Supabase: o fato é gravado uma vez,
+responsabilidades nominais materializam destinatários por projeto ou
+organização, RLS separa empresas e clientes, e a casca marca a notificação como
+lida. O PostgreSQL real cobre 12 casos, inclusive recorte aprovado do cliente e
+tentativa de alterar colunas protegidas.
+
+**Limite atual:** `quiet_from`, `quiet_until` e `timezone` já fazem parte da
+inscrição, mas ainda não há worker de entrega externa. A caixa interna funciona;
+e-mail/push respeitando janela silenciosa e tentativas de entrega continuam
+pendentes. O app também precisa de uma tela administrativa para atribuir as
+personas sem operação manual no banco.
+
+---
+
 ## §6 — O que este documento obriga
 
 1. **Notificar por exceção.** Normal não avisa. 12 por dia, não 120.

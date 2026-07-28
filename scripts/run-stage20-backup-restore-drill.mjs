@@ -148,6 +148,7 @@ async function secureRemove(file){
 
 const report={runId,status:"running",startedAt:new Date().toISOString(),checks:[]};
 const check=(name,details={})=>report.checks.push({name,ok:true,...details});
+let secrets=[];
 
 try{
  const source=parseDatabaseUrl(sourceUrl,"SUPABASE_DB_URL");
@@ -158,7 +159,7 @@ try{
  assert(sourceIdentity!==targetIdentity,"Origem e destino de restauração não podem ser o mesmo banco.");
  const sourceEnv=databaseEnv(source);
  const targetEnv=databaseEnv(target);
- const secrets=[sourceUrl,targetUrl,source.password,target.password];
+ secrets=[sourceUrl,targetUrl,source.password,target.password];
  report.sourceFingerprint=endpointFingerprint(source);
  report.targetFingerprint=endpointFingerprint(target);
  check("destructive_target_guard",{sourceAndTargetDistinct:true,confirmation:true});
@@ -254,7 +255,7 @@ select json_build_object(
  failure=error instanceof Error?error:new Error(String(error));
  report.status="failed";
  report.finishedAt=new Date().toISOString();
- report.error=sanitize(failure.message,[sourceUrl,targetUrl]);
+ report.error=sanitize(failure.message,secrets);
 }finally{
  await secureRemove(dumpPath);
  await secureRemove(restoreListPath);

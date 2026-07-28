@@ -1,6 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import {
+  dadosSegurosDoErroDeLogin,
+  mensagemPublicaDeErroDeLogin
+} from "@/lib/auth-errors";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function signIn(formData: FormData) {
@@ -11,11 +15,22 @@ export async function signIn(formData: FormData) {
     ? redirectTo
     : "/app/orcamentos";
 
-  const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  let error: unknown = null;
+
+  try {
+    const supabase = await createSupabaseServerClient();
+    const result = await supabase.auth.signInWithPassword({ email, password });
+    error = result.error;
+  } catch (cause) {
+    error = cause;
+  }
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent("Credenciais inválidas ou conta não liberada.")}`);
+    console.error(JSON.stringify({
+      event: "auth.sign_in.failed",
+      ...dadosSegurosDoErroDeLogin(error)
+    }));
+    redirect(`/login?error=${encodeURIComponent(mensagemPublicaDeErroDeLogin(error))}`);
   }
 
   redirect(safeRedirect);

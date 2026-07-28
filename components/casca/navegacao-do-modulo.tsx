@@ -76,18 +76,38 @@ export function NavegacaoDoModulo({ aplicativos }: { aplicativos: AplicativoAuto
       </span>
 
       {menus.length > 0 ? (
-        <nav className="barra-menus" aria-label={`Menu de ${modulo.nome}`}>
-          {menus.map(item => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={item.href === ativo ? "barra-menu ativo" : "barra-menu"}
-              aria-current={item.href === ativo ? "page" : undefined}
-            >
-              {item.rotulo}
-            </Link>
-          ))}
-        </nav>
+        <>
+          <nav className="barra-menus" aria-label={`Menu de ${modulo.nome}`}>
+            {menus.map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={item.href === ativo ? "barra-menu ativo" : "barra-menu"}
+                aria-current={item.href === ativo ? "page" : undefined}
+              >
+                {item.rotulo}
+              </Link>
+            ))}
+          </nav>
+
+          {/* VACINA-019: esconder a navegação desktop exige oferecer o mesmo
+              conjunto de destinos em uma superfície própria para tela estreita. */}
+          <details className="barra-menu-movel">
+            <summary aria-label={`Menu de ${modulo.nome}`}>Menu</summary>
+            <nav aria-label={`Menu móvel de ${modulo.nome}`}>
+              {menus.map(item => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={item.href === ativo ? "ativo" : undefined}
+                  aria-current={item.href === ativo ? "page" : undefined}
+                >
+                  {item.rotulo}
+                </Link>
+              ))}
+            </nav>
+          </details>
+        </>
       ) : null}
     </>
   );

@@ -609,6 +609,61 @@ corte, com histórico. Só isso — medir já muda o comportamento.
 
 ---
 
+# Matriz completa — otimista, normal e pessimista
+
+O fluxo otimista é o limite superior; o normal contém espera, retorno e
+priorização; o pessimista cria o requisito de resiliência. “Notificar o sistema”
+não existe: a última coluna nomeia quem recebe e o que o aplicativo faz.
+
+| Persona | Otimista | Normal | Pessimista | Quem precisa saber | Resposta da plataforma |
+|---|---|---|---|---|---|
+| P1 Vendedor | aprova sem ressalva | cadência, objeção e forecast | proposta parada e desconto fora da alçada | Orçamento P11, Diretoria P13, Contratos P14 | aging, atividade, versão preservada e decisão de margem |
+| P2 Planejador | rede cumpre provável | recalcula com apontamentos | atividade crítica consome pulmão e conflita com recurso/material | Obras P8, Compras P9, Estoque P10, Diretoria P13 | impacto, folga, custo marginal e solicitação nominal |
+| P3 Campo | executa na primeira passagem | aponta, fotografa e encerra pendência | falta material ou medida diverge | Obras P8, Compras P9, Estoque P10, Projeto P7, Planejamento P2 | parada em dois toques, obrigação, evidência e SLA |
+| P4 Financeiro | entradas cobrem saídas | concilia e cobra aprovação | glosa/atraso cria falta de caixa | Obras P8, Compras P9, Diretoria P13, Contratos P14 | déficit por data, bloqueio de alçada e cenários |
+| P5 Assistência | resolve na primeira visita | tria, agenda, informa e confirma | reincidência crítica e peça indisponível | Obras P8, Compras P9, Estoque P10, Qualidade P12, Diretoria P13 | escalonamento, causa de origem e previsão única ao cliente |
+| P6 Administrador | ciclo de acesso sem exceção | revisa e aplica papel | conflito de função ou dependência indisponível | Auditoria P16, Diretoria P13 | recusa, trilha imutável, revogação e incidente técnico |
+| P7 Projetista | libera sem revisão tardia | detalha, compatibiliza e aprova | medida muda ou revisão obsoleta chega ao campo | P2, P3, P8, P12, P14 | bloqueio da revisão e varredura dos itens afetados |
+| P8 Gerente de obras | frentes sincronizadas | consolida restrições e decide | prazo, material e caixa falham juntos | P2, P4, P9, P10, P13 | incidente único, impacto integrado e ações por dono |
+| P9 Comprador | entrega antecipada e conforme | equaliza, compra e acompanha | atraso crítico ou material divergente | P2, P8, P10, P12, P4 | expediting, bloqueio de recebimento e alternativa por TCO |
+| P10 Almoxarife | saldo e endereço conferem | recebe, reserva, separa e conta | saldo virtual ou lote danificado | P3, P8, P9, P4, P12 | bloqueio, recontagem e impacto na tarefa |
+| P11 Orçamentista | escopo e referência completos | quantifica, compõe e versiona | omissão/data-base reduz margem | P1, P4, P8, P13, P14 | congela versão e prioriza itens A para decisão |
+| P12 Qualidade | passa na primeira inspeção | inspeciona, contém e verifica | desvio encoberto ou recorrente | P7, P8, P9, P10, P13, P16 | bloqueia lote/etapa, varre equivalentes e cobra eficácia |
+| P13 Diretoria | só recebe exceção material | revisa tendência e aprova | obras disputam caixa/equipe e cliente crítico | P4, P8, P2, P1 | comparação de cenários e decisão auditável |
+| P14 Contratos | assina e ativa obrigação | controla versão, vigência e mudança | execução sem aditivo/versão vigente | P1, P4, P8, P13, P16 | suspende liberação e conduz aprovação/assinatura |
+| P15 Cliente | decide e paga no prazo | acompanha, aprova e abre chamado | pedido fora do fluxo ou evidência sem contexto | P1, P5, P8, P14 | decisão com impacto e somente evidência aprovada |
+| P16 Auditoria | controle opera como desenhado | testa amostra e monitora ação | trilha incompleta ou conflito de função | P6, P13, P4 e dono do controle | preserva prova, bloqueia conflito e abre achado |
+
+## Regra de conversa entre setores
+
+Todo evento operacional tem seis campos mínimos:
+
+1. `fato` — o que ocorreu, sem interpretação;
+2. `objeto` — cliente, obra, tarefa, pedido, lote, título ou documento;
+3. `impacto` — prazo, custo, qualidade, caixa, cliente ou controle;
+4. `obrigacao` — qual setor deveria prevenir ou responder;
+5. `destinatario` e `prazo` — pessoa nominal e SLA;
+6. `evidencia` — foto, documento, medição, log ou decisão.
+
+O mesmo fato gera recortes, não cópias:
+
+| Público | Recorte |
+|---|---|
+| Executor | próxima ação e prazo |
+| Dono da restrição | solicitação, evidência e SLA |
+| Gerente | impacto integrado e quem está respondendo |
+| Diretoria | exceção material, cenário e decisão pedida |
+| Financeiro | valor, data e efeito no caixa |
+| Cliente | consequência aprovada e previsão, sem nota interna |
+| Auditoria | fato, autor, instante, antes/depois e decisão |
+
+Normal não notifica. Alerta nasce de exceção, agrupa por objeto e escalona
+quando o SLA vence. A implementação executável dos destinatários está em
+`lib/personas/catalog.ts`; a camada de entrega da S-29 deverá consumir esse
+contrato em vez de repetir listas por módulo.
+
+---
+
 # O que este documento obriga
 
 1. **Objeto criado sem dissecação não entra em sprint.** Fluxo otimista, lista

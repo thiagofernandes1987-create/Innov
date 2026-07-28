@@ -12,7 +12,8 @@ if (!fs.existsSync(file)) {
   process.exit(1);
 }
 
-const lines = fs.readFileSync(file, "utf8").split("\n");
+// Normalização de quebra de linha: diretrizes/vacinas/VACINA-017-VALIDADOR-PORTAVEL-CRLF.md.
+const lines = fs.readFileSync(file, "utf8").split(/\r?\n/);
 const sprints = [];
 let current = null;
 

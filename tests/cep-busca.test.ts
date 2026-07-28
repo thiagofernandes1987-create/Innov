@@ -66,11 +66,13 @@ describe("buscarCEP", () => {
   });
 
   it("consulta o serviço apenas com os dígitos e devolve o endereço", async () => {
-    const fetchFalso = vi.fn(async (_url: unknown) => new Response(JSON.stringify(RESPOSTA_OK), { status: 200 }));
+    const fetchFalso = vi.fn(async (url: unknown) => {
+      expect(String(url)).toBe("https://viacep.com.br/ws/12420010/json/");
+      return new Response(JSON.stringify(RESPOSTA_OK), { status: 200 });
+    });
     vi.stubGlobal("fetch", fetchFalso);
     const resultado = await buscarCEP("12420-010");
     expect(fetchFalso).toHaveBeenCalledOnce();
-    expect(String(fetchFalso.mock.calls[0][0])).toBe("https://viacep.com.br/ws/12420010/json/");
     expect(resultado.encontrado).toBe(true);
     expect(resultado.cidade).toBe("Pindamonhangaba");
   });

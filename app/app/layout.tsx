@@ -31,7 +31,7 @@ export default async function AppLayout({ children }: Readonly<{ children: React
   // Avisos não podem derrubar a casca: uma tabela do pipeline ausente em um
   // ambiente atrasado deixaria o usuário sem barra, sem logotipo e sem saída.
   const [avisos, podeAdministrar] = await Promise.all([
-    carregarAvisos().catch(() => ({ mensagens: [], atividades: [], naoLidas: 0, pendentes: 0 })),
+    carregarAvisos().catch(() => ({ mensagens: [], atividades: [], operacionais: [], naoLidas: 0, pendentes: 0 })),
     hasCapability("administracao", "manage", null, context)
   ]);
 

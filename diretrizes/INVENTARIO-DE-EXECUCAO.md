@@ -607,8 +607,8 @@ Do Pipedrive, o consenso de mercado é que o ganho está no **arrastar e soltar 
   - [x] T-23.33.5 — Visualizações em ícone com `aria-label` e `title`: "ícones, igual ao Odoo, ocupam menos espaço, poluem menos e facilita a leitura do pipeline"
   - [x] T-23.33.6 — Cartão deixou de repetir o nome do registro duas vezes na mesma tela; o `h1` passou para dentro do formulário, onde o nome é conteúdo
   - [x] T-23.33.7 — Engrenagem antes do `+` no cabeçalho da coluna, na ordem do padrão
-- [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria
-- [ ] T-23.18 — **Defeito D3 reconfirmado.** Falha de rede aparece como "Credenciais inválidas ou conta não liberada" na tela de login (`app/actions/auth.ts:18`), embora a autenticação direta com as mesmas credenciais devolva 200. Erro de infraestrutura precisa de mensagem própria
+- [x] T-23.18 — **Defeito D3 corrigido.** Login classifica o erro pelo `code`/`status` estável do Supabase Auth; credencial inválida, e-mail não confirmado, limite e indisponibilidade recebem mensagens diferentes. Falha de transporte também é cercada, e o log não recebe e-mail, senha nem mensagem interna (`lib/auth-errors.ts`, 5 testes, `VACINA-018`)
+- [x] T-23.34 — **Acessibilidade e navegação responsiva da casca.** Menus do módulo não desaparecem mais abaixo de 900 px: viram menu móvel com os mesmos destinos e estado ativo. Mensagens, notificações, avatar e controles de toque foram alinhados ao alvo mínimo de 44 × 44 px (`VACINA-019`)
 
 ---
 
@@ -671,18 +671,18 @@ ferramenta do mercado tem. Vai para o fim do inventário conforme R4.
   - [x] T-24.6.4 — Chamado nasce pela RPC `create_sac_ticket`, não por INSERT: é ela que numera e aplica os prazos de primeira resposta e resolução. Inserir direto criaria chamado sem SLA
   - [x] T-24.6.5 — **Defeito encontrado ao verificar**: eu gravava `lifecycle_stage: "LEAD"`, valor que o CHECK não aceita — os válidos são PROSPECT, CUSTOMER, ACTIVE, INACTIVE e FORMER. Corrigido para `PROSPECT`, e a violação de CHECK passou a ter mensagem própria em vez de cair no "não foi possível", que é o defeito D2 por uma porta nova
 - [x] T-24.0 — **Mapa das duas barras escrito antes do código** (`PADRAO-DE-INTERFACE.md` §12), ditado pelo responsável e conferido contra as capturas: o que fica em cada posição, o que nunca pode estar ali, quando cada visualização aparece e a exceção declarada da busca
-  - [x] T-24.0.1 — Barra 1 igual em toda tela: marca sozinha à esquerda, ícone e nome do aplicativo com os menus dele, busca com facetas ao centro, mensagens, notificações e avatar à direita
+  - [x] T-24.0.1 — Barra 1 igual em toda tela: marca sozinha à esquerda, ícone e nome do aplicativo com os menus dele, mensagens, notificações e avatar à direita; busca reconciliada na barra 2 em 28/07
   - [x] T-24.0.2 — E-mail por extenso e botão "Sair" saíram da barra para dentro do avatar, junto com tema, atalhos e "Usuários e permissões" — dois elementos permanentes para uma ação de uma vez por dia
-  - [x] T-24.0.3 — Barra 2 com ações à esquerda e visualizações à direita, sem repetir a busca nem o nome do aplicativo
-  - [x] T-24.0.4 — Grade de três colunas na barra 1: com `margin: auto` a busca centralizava no espaço que sobrava e dançava conforme o tamanho do nome do módulo. Verificado — centro do campo em 720 de 1440
-- [ ] T-24.7 — **Busca global na barra superior**: hoje o campo existe no centro, com faceta e remoção, e filtra a tela do pipeline. Falta procurar em cliente, projeto, chamado e cartão ao mesmo tempo, com resultado agrupado por tipo, e o painel de Filtros, Agrupar por e Favoritos da §12.5
-  - [x] T-24.7.1 — Campo no centro da barra 1, com lupa, faceta removível e Backspace apagando a faceta
+  - [x] T-24.0.3 — Barra 2 com ações à esquerda, busca contextual ao centro e visualizações à direita, sem repetir o nome do aplicativo
+  - [x] T-24.0.4 — `BarraDeTrabalho` extraída como componente transversal e usada no pipeline e na administração de responsabilidades
+- [ ] T-24.7 — **Busca global na barra de trabalho**: hoje o campo existe no centro, com faceta e remoção, e filtra a tela do pipeline. Falta procurar em cliente, projeto, chamado e cartão ao mesmo tempo, com resultado agrupado por tipo, e o painel de Filtros, Agrupar por e Favoritos da §12.5
+  - [x] T-24.7.1 — Campo no centro da barra 2, com lupa, faceta removível e Backspace apagando a faceta
   - [x] T-24.7.2 — Filtro aplicado no navegador, não por navegação. A primeira versão escrevia em `router.replace` a cada tecla; como as telas são `force-dynamic`, cada digitação virava ida ao servidor e a lista chegava quase três segundos atrasada. A URL continua espelhada por `history.replaceState`, sem re-render de servidor
   - [x] T-24.7.3 — Exceção declarada na §12.4: o campo só aparece onde a tela sabe consumi-lo. Campo que aceita texto e não filtra ensina que a busca não funciona
 - [ ] T-24.8 — **Planejamento, visão de lista por cliente** — parcial
   - [x] T-24.8.1 — Coluna de situação do prazo em três estados, com a régua de sete dias: é o intervalo em que ainda dá para remanejar equipe ou antecipar material; menos que isso, o aviso chega junto com o problema
   - [x] T-24.8.2 — O código da obra abre o cronograma, que era o "clicar no nome e abrir o gantt" do print
-  - [ ] T-24.8.3 — Faltam etapa atual, datas da etapa, dias de folga ou atraso, responsável e próxima tarefa programada
+  - [x] T-24.8.3 — Coleção agora mostra etapa atual, datas da etapa, dias de folga ou atraso, responsável e próxima tarefa programada; o código continua abrindo o Gantt
 - [x] T-24.9 — **Gantt com dependências**, no lugar da barra por porcentagem que existia na tela de cronograma
   - [x] T-24.9.1 — Achado que reduziu o trabalho: os quatro tipos **já existiam** como enum desde a etapa 12 — `FS`, `SS`, `FF`, `SF` são exatamente TI, II, TT e IT. `lag_days` e `duration_days` também. Não foi preciso criar modelo de dependência
   - [x] T-24.9.2 — O que faltava era a única coisa que torna cronograma incalculável: **ciclo**. `A→B→C→A` passava por toda restrição existente, porque nenhuma olha além do par imediato. Gatilho com CTE recursiva, cobrindo INSERT e UPDATE
@@ -931,6 +931,43 @@ não existe assinatura ("quem segue o quê") e não existe entrega.
 - [ ] T-29.8 — **As cinco regras que separam acompanhamento de vigilância**, implementadas e não só escritas: o próprio profissional vê o número dele primeiro; o indicador aponta a tarefa e não a pessoa; toda queda tem motivo que entra no número; a janela esquece; e **a resposta da gestão às solicitações do campo é medida e publicada do mesmo jeito que o `TEP`**
   - [ ] T-29.8.1 — Justificativa registrada: na meta-análise clássica de intervenções de feedback, o efeito médio é positivo (**d ≈ 0,41**) mas **mais de um terço das intervenções piorou o desempenho**. A direção confirma a intuição; a variância diz que o **como** decide o sinal. Se o painel cobra o campo em 15 minutos e a gestão responde em três dias, o campo aprende o que o sistema realmente vale
 - [ ] T-29.9 — **Resumo semanal** ao cliente e ao diretor: um e-mail, não trinta
+
+---
+
+## Sprint S-30 — Cobertura profissional integral e cenários intersetoriais
+**Estado:** pendente
+**Marco:** M-5
+
+Nasceu da revisão do responsável em 28 de julho: validar se cada persona é o
+profissional real da cadeira, construir matriz de competências para todas,
+testar rotina otimista, normal e pessimista e definir quem precisa saber quando
+algo quebra. Vai para o fim conforme R4; a S-23 continua sendo a única sprint
+em andamento.
+
+### Diagnóstico
+
+As sete personas existentes aprofundavam Planejamento, Comercial, Campo,
+Financeiro, Assistência, Administração e Projeto, mas deixavam oito famílias de
+aplicativo sem dono profissional específico. “Administrador” não substitui
+comprador, almoxarife, qualidade, contratos, diretoria ou auditoria.
+
+### Tarefas
+
+- [x] T-30.1 — **Dezesseis profissões reais**, com separação de cadeiras que exigem segregação: comprador ≠ almoxarife; orçamentista ≠ financeiro; administrador ≠ auditor; planejador ≠ gerente de obra; projetista ≠ planejador
+- [x] T-30.2 — **Matriz competência → técnica → dado** para todas as personas, documentada em `PERSONAS-E-ROTINAS.md` e codificada em `lib/personas/catalog.ts`
+- [x] T-30.3 — **Cobertura automática dos 22 aplicativos**: o teste reprova módulo sem profissional, persona com menos de quatro competências, técnica sem dado e destinatário inexistente
+- [x] T-30.4 — **Três cenários para cada persona** — otimista, normal e pessimista — com evento, destinatários intersetoriais e resposta esperada, em `FLUXOS-E-RISCOS.md`
+- [x] T-30.5 — **Runner de cenário funcional**: 48 execuções (16 profissões × otimista, normal e pessimista) ligam persona, módulo real, objeto, decisão e destinatários; PostgreSQL executa gravação, permissão e notificação em 14 testes, incluindo P15 sob identidade de cliente
+- [x] T-30.6 — **Evento operacional transversal no domínio**: fato, objeto, impacto, obrigação, destinatário, SLA e evidência; otimista e normal retornam zero notificações (`lib/operations/notifications.ts`, 5 testes)
+- [ ] T-30.7 — **Entrega por recorte**: executor, dono da restrição, gerente, diretoria, financeiro, cliente e auditoria recebem visões diferentes do mesmo fato
+  - [x] T-30.7.1 — Planejamento determinístico dos recortes, bloqueio do cliente sem aprovação, escalonamento sem duplicação e agrupamento por objeto
+  - [ ] T-30.7.2 — Persistência, inscrição por usuário, quiet hours, fila de entrega e leitura
+- [ ] T-30.8 — **Aplicar ao Supabase** com RLS, idempotência, escalonamento e teste negativo multiempresa antes da interface
+  - [x] T-30.8.1 — Migration local com tipos de evento, responsabilidade nominal, fato imutável, destinatário materializado, cliente só com aprovação, RLS forçada, RPC e privilégios mínimos
+  - [x] T-30.8.2 — PostgreSQL 16 real: 14 testes de idempotência, isolamento multiempresa, persona de origem, cliente aprovado, leitura, autoria externa e proibição de escrita direta (`pnpm test:db:operations`, `VACINA-020`, `VACINA-022`)
+  - [x] T-30.8.3 — Aplicada no projeto Supabase `wyeojufebtwblsubkunr`: 16 tipos, 8 políticas, escrita direta e `anon` negados; advisors executados e correção de performance versionada (`VACINA-021`)
+- [ ] T-30.9 — **Aplicar à casca e aos arquétipos de tela**, começando pelo piloto CRM e repetindo coleção, registro, transação, planejamento e campo
+- [ ] T-30.10 — **Homologar em três cenários por persona** e registrar defeito em Vacinas antes de corrigir
 
 ---
 

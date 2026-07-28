@@ -41,6 +41,22 @@ A regra que sai disso e que substitui a regra antiga:
 A regra dos quatro cliques continua valendo, mas agora como consequência —
 mede-se atrito depois de saber qual é a tarefa, nunca antes.
 
+Referências profissionais conferidas na revisão de 28 de julho:
+
+- PMI, *Practice Standard for Scheduling*: modelo de cronograma, CPM, corrente
+  crítica, PERT e manutenção do cronograma;
+- AACE, *Total Cost Management Framework*: estimativa, planejamento,
+  programação, controle de custo e medição de desempenho como sistema único;
+- ISO 21502:2020: práticas de gestão de projetos independentes do ciclo de vida;
+- ISO 9001:2015 e transição 2026: processo, risco, evidência, competência,
+  avaliação de desempenho e melhoria contínua;
+- IIA, *Global Internal Audit Standards* 2024, vigentes desde 2025: competência,
+  independência, planejamento, evidência, comunicação e monitoramento de ações.
+
+O catálogo executável correspondente está em `lib/personas/catalog.ts`. Ele é
+cruzado automaticamente com os 22 aplicativos; um módulo sem profissional,
+competência ou cenário reprova `pnpm test`.
+
 ## Quadro-resumo
 
 | Persona | Competência central | Ferramenta de referência no mercado | Pergunta do dia |
@@ -52,6 +68,15 @@ mede-se atrito depois de saber qual é a tarefa, nunca antes.
 | P5 Assistência | Diagnóstico e tempo de resposta | Service desk, funil | "o que está parado esperando quem?" |
 | P6 Administrador | Modelo de acesso e segregação de função | Console de administração | "quem pode o quê, e por quê?" |
 | P7 Projetista | Detalhamento executivo e compatibilização | Promob, SketchUp, AutoCAD | "esse projeto fabrica sem retrabalho?" |
+| P8 Gerente de obras | Integração de escopo, prazo, custo e restrições | Project/ERP, lookahead, reunião de produção | "qual exceção exige decisão hoje?" |
+| P9 Comprador | Sourcing, equalização e expediting | Portal de compras, mapa comparativo | "o material certo chega antes da necessidade?" |
+| P10 Almoxarife | Saldo, endereço e rastreabilidade | WMS, coletor e inventário cíclico | "o sistema diz que tem; eu encontro onde?" |
+| P11 Orçamentista | Quantificação, composição e risco de custo | Software de orçamento, CAD/BIM, planilha | "esse preço paga o escopo e o risco?" |
+| P12 Qualidade | Prevenção, inspeção e causa raiz | QMS, FVS/FVM, plano de inspeção | "o requisito foi atendido e a causa fechou?" |
+| P13 Diretoria | Portfólio, caixa, margem e governança | BI executivo e controladoria | "onde capital e capacidade geram mais retorno?" |
+| P14 Contratos e documentos | Obrigação, versão, vigência e evidência | GED, CLM e assinatura eletrônica | "qual versão autoriza o quê e até quando?" |
+| P15 Cliente | Decisão, acompanhamento e aceite | Portal do cliente | "o que depende de mim e qual é a previsão confiável?" |
+| P16 Auditoria e compliance | Desenho e eficácia de controles | GRC, trilha e programa de auditoria | "o controle funcionou e a ação resolveu a causa?" |
 
 ---
 
@@ -748,6 +773,209 @@ superado não possa virar ordem de produção.
 
 **Quando quebra:** [`FLUXOS-E-RISCOS.md`](FLUXOS-E-RISCOS.md) §P7 — fabricação
 pela revisão errada, e o plano de corte que desperdiça sem ninguém medir.
+
+---
+
+# P8 a P16 — cobertura profissional dos demais aplicativos
+
+As sete personas originais não cobriam profissionais que, no mundo real,
+respondem por Obras, Compras, Estoque, Orçamentos, Qualidade, Contratos,
+Diretoria e Auditoria. Usar “administrador” ou “financeiro” para representar
+todos eles apagaria competência e segregação de função. A revisão acrescenta
+nove cadeiras reais; nenhuma é um “usuário genérico”.
+
+## P8 — Gerente de obras / gerente de projetos
+
+**Profissional real:** gerente de projetos ou coordenador de obras. Integra
+especialistas; não substitui planejador, comprador, financeiro nem qualidade.
+
+| Competência | Técnicas | Dados que a técnica exige |
+|---|---|---|
+| Integração | plano integrado, governança, controle de mudanças | escopo, baseline, risco, decisão, mudança |
+| Coordenação de frentes | lookahead, restrições, reunião de produção | tarefa liberada, impedimento, equipe, material |
+| Desempenho | EVM, curva S, forecast | PV, EV, AC, previsão de prazo e custo final |
+| Stakeholders | RACI, comunicação por recorte, escalonamento | responsável, informado, SLA, decisão |
+
+**Rotina:** abre portfólio por exceção; trata restrições; decide prioridades;
+aprova mudanças; encerra a semana com previsão única de prazo e custo.
+
+**Quando quebra:** atraso crítico, falta de material e glosa financeira viram
+um incidente integrado; notifica P2, P4, P9, P10 e P13, com uma ação nominal por
+restrição.
+
+## P9 — Comprador
+
+**Profissional real:** comprador de materiais e serviços de construção. Não é o
+almoxarife: o primeiro compromete fornecedor e condição; o segundo recebe,
+guarda e movimenta.
+
+| Competência | Técnicas | Dados que a técnica exige |
+|---|---|---|
+| Sourcing | RFI/RFQ, mapa e homologação | categoria, fornecedor, capacidade, documentos |
+| Equalização | mapa comparativo, TCO, condição equivalente | preço, frete, prazo, tributo, garantia |
+| Negociação | BATNA, alçada, trade-off | meta, limite, alternativa, condição |
+| Expediting | follow-up, OTIF, gestão por exceção | pedido, promessa, confirmação, entrega, desvio |
+
+**Rotina:** recebe solicitação vinculada à necessidade; coteja comparáveis;
+obtém alçada; emite pedido; acompanha marcos; entrega o fato ao estoque e ao
+financeiro.
+
+**Quando quebra:** atraso ou divergência crítica notifica P2, P8, P10, P12 e P4;
+o app compara alternativa pelo custo total da parada, não só pelo preço.
+
+## P10 — Almoxarife / estoquista
+
+**Profissional real:** almoxarife de obra ou estoquista. Responde pela
+materialidade do saldo e pela rastreabilidade física.
+
+| Competência | Técnicas | Dados que a técnica exige |
+|---|---|---|
+| Recebimento | conferência cega, pedido × nota × físico, quarentena | pedido, item, quantidade, lote, condição |
+| Armazenagem | endereçamento, FIFO/FEFO, 5S | depósito, localização, lote, validade |
+| Movimentação | entrada, saída, reserva, rastreabilidade | origem, destino, tarefa, responsável, quantidade |
+| Acuracidade | inventário cíclico, recontagem, causa de divergência | saldo, contagem, diferença, causa |
+
+**Rotina:** recebe; confere; endereça; reserva por tarefa; separa; entrega;
+reconta classes de maior risco.
+
+**Quando quebra:** saldo virtual ou lote danificado bloqueia consumo, abre
+recontagem e informa P3, P8, P9, P4 e P12 com a tarefa afetada.
+
+## P11 — Orçamentista / engenheiro de custos
+
+**Profissional real:** orçamentista, analista de custos ou engenheiro de custos.
+É diferente de P4: P11 estima e forma preço; P4 registra obrigação e caixa.
+
+| Competência | Técnicas | Dados que a técnica exige |
+|---|---|---|
+| Quantificação | takeoff, memória de cálculo, EAP de custo | escopo, unidade, quantidade, fonte |
+| Composição | insumo, produtividade, direto/indireto | coeficiente, preço, perda, encargo |
+| Preço | BDI, markup, margem de contribuição | tributo, despesa, risco, lucro, preço |
+| Risco | três pontos, sensibilidade, Curva ABC | O/M/P, classe ABC, contingência |
+
+**Rotina:** lê escopo; quantifica; compõe; atualiza referência e data-base;
+simula risco; revisa margem; emite versão com premissas e exclusões.
+
+**Quando quebra:** omissão ou preço sem data-base congela a versão, identifica
+os itens A e notifica P1, P4, P8, P13 e P14 antes de prometer margem inexistente.
+
+## P12 — Engenheiro / técnico de qualidade
+
+**Profissional real:** profissional de qualidade de obras, responsável por
+planejar verificação, inspecionar e fechar causa raiz.
+
+| Competência | Técnicas | Dados que a técnica exige |
+|---|---|---|
+| Planejamento | plano de inspeção, FVS/FVM, ponto de espera | requisito, critério, amostra, responsável |
+| Inspeção | checklist, medição, rastreabilidade | resultado, instrumento, evidência, lote, data |
+| Não conformidade | contenção, 8D, 5 porquês | desvio, impacto, causa, ação, prazo |
+| Melhoria | PDCA, auditoria de processo, eficácia | indicador, recorrência, verificação, lição |
+
+**Rotina:** planeja pontos de espera; inspeciona material e serviço; contém
+desvio; aprova liberação; verifica eficácia; varre ocorrências equivalentes.
+
+**Quando quebra:** desvio encoberto ou recorrente bloqueia lote/etapa e notifica
+P7, P8, P9, P10, P13 e P16.
+
+## P13 — Diretoria / controladoria
+
+**Profissional real:** diretor executivo ou controller. Recebe síntese por
+exceção; não é destinatário de cada foto ou atividade.
+
+| Competência | Técnicas | Dados que a técnica exige |
+|---|---|---|
+| Portfólio | priorização, capacidade, cenários | margem, caixa, risco, prazo, capacidade |
+| Controladoria | orçado × realizado, forecast, resultado por obra | receita, custo, comprometido, EAC, variação |
+| Governança | alçada, segregação, apetite a risco | decisão, limite, exceção, autor |
+| Exceção | KPI, threshold, resumo executivo | tendência, desvio, causa, plano, dono |
+
+**Rotina:** revisa tendência e capacidade; decide exceções materiais; confirma
+plano, dono e data de revisão; acompanha resultado agregado.
+
+**Quando quebra:** conflito entre obras vira comparação de cenários e notifica
+P4, P8, P2 e P1; o app registra a decisão e o impacto aceito.
+
+## P14 — Analista de contratos, documentos e assinaturas
+
+**Profissional real:** analista contratual/documental. Não é advogado virtual;
+organiza obrigações e evidência sem interpretar direito fora da alçada.
+
+| Competência | Técnicas | Dados que a técnica exige |
+|---|---|---|
+| Gestão contratual | obrigação, marco, vigência | parte, objeto, valor, prazo, obrigação |
+| Mudança | change log, aditivo, impacto | origem, escopo, prazo, custo, aprovação |
+| Documento | metadado, revisão, retenção | tipo, versão, estado, acesso, validade |
+| Assinatura | ordem, integridade, trilha | signatário, hash, instante, artefato final |
+
+**Rotina:** recebe versão; confere metadados e aprovadores; circula assinatura;
+ativa obrigações; monitora vigência; liga mudança a aditivo.
+
+**Quando quebra:** execução sem aditivo ou versão obsoleta suspende liberação e
+notifica P1, P4, P8, P13 e P16.
+
+## P15 — Cliente contratante
+
+**Profissional real:** contratante da obra ou dos móveis. Usa o portal, não a
+casca interna, e vê apenas evidência aprovada.
+
+| Competência | Técnicas | Dados que a técnica exige |
+|---|---|---|
+| Decisão de escopo | aceite, priorização, trade-off | alternativa, impacto em prazo/custo, prazo da decisão |
+| Acompanhamento | marco, evidência aprovada, previsão | progresso, próximo marco, foto aprovada, desvio explicado |
+| Financeiro contratual | parcela, medição, aditivo | vencimento, evento de cobrança, valor, documento |
+| Ocorrência | chamado, evidência, aceite da solução | assunto, foto, prioridade, previsão, resolução |
+
+**Rotina:** consulta marcos; decide pendências; aprova/assina; acompanha cobrança;
+abre ocorrência; confirma solução.
+
+**Quando quebra:** pedido urgente fora do fluxo ou imagem sem contexto notifica
+P1, P5, P8 e P14; a plataforma transforma pedido em decisão com impacto e
+mantém uma previsão única.
+
+## P16 — Auditor interno / compliance
+
+**Profissional real:** auditor interno ou analista de controles, separado de P6
+para preservar independência entre operar e avaliar o controle.
+
+| Competência | Técnicas | Dados que a técnica exige |
+|---|---|---|
+| Planejamento | avaliação de risco, escopo, programa | universo, risco, controle, amostra |
+| Teste | walkthrough, amostragem, reexecução | critério, evidência, população, exceção |
+| Investigação | trilha, segregação, análise de padrão | autor, instante, antes/depois, correlação |
+| Follow-up | achado, causa, plano, eficácia | impacto, recomendação, dono, prazo, estado |
+
+**Rotina:** seleciona risco; define amostra; testa; discute causa; emite achado;
+acompanha ação até provar eficácia.
+
+**Quando quebra:** trilha incompleta ou conflito de função preserva evidência,
+bloqueia a combinação e notifica P6, P13 e P4.
+
+---
+
+# Cobertura de aplicativos por profissão
+
+| Aplicativo | Persona primária | Personas que precisam ser informadas |
+|---|---|---|
+| Início | P13 para visão executiva; cada profissional para sua fila | conforme exceção |
+| CRM e Clientes | P1 | P11, P14, P8 |
+| Obras | P8 | P2, P3, P4, P13, P15 |
+| Planejamento | P2 | P8, P3, P9, P10, P13 |
+| Tarefas, Diário e Equipes | P3/P8 | P2, P12, P13 |
+| Orçamentos | P11 | P1, P4, P8, P13 |
+| Propostas | P1/P11 | P14, P15 |
+| Contratos, Aditivos, Assinaturas e Documentos | P14 | P1, P4, P7, P8, P15, P16 |
+| Qualidade | P12 | P3, P7, P8, P9, P10, P16 |
+| Compras | P9 | P2, P4, P8, P10, P12 |
+| Estoque | P10 | P3, P4, P8, P9, P12 |
+| Financeiro | P4 | P8, P13, P14 |
+| SAC | P5 | P8, P12, P13, P15 |
+| Relatórios | P13 | donos de cada indicador |
+| Auditoria | P16 | P6, P13 e dono do controle |
+| Administração | P6 | P16 e aprovador de alçada |
+
+O teste `tests/personas-catalog.test.ts` cruza esta responsabilidade com
+`MODULE_REGISTRY`. Cobertura declarada em prosa e ausente no catálogo, ou o
+contrário, é divergência documental e deve ser corrigida na mesma passagem.
 
 ---
 

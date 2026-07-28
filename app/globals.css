@@ -609,6 +609,13 @@ tbody tr:hover { background: #fafcfd; }
   text-overflow: ellipsis;
 }
 .pipeline-contagem { color: var(--muted); font-size: 0.82rem; white-space: nowrap; }
+.workspace-intro {
+  max-width: 76ch;
+  margin: -4px 0 18px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
 
 
 .barra-controle-visoes {
@@ -1246,7 +1253,7 @@ tbody tr:hover { background: #fafcfd; }
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  min-height: 40px;
+  min-height: 44px;
   padding: 3px;
   border-radius: var(--radius-sm);
   color: #fff;
@@ -1313,6 +1320,60 @@ tbody tr:hover { background: #fafcfd; }
 .barra-menu:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 .barra-menu.ativo { background: rgba(255, 255, 255, 0.16); color: #fff; font-weight: 600; }
 .barra-menu:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+.barra-menu-movel {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+}
+@media (min-width: 900px) { .barra-menu-movel { display: none; } }
+.barra-menu-movel summary {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 10px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  color: rgba(255, 255, 255, 0.84);
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+.barra-menu-movel summary::-webkit-details-marker { display: none; }
+.barra-menu-movel summary:hover,
+.barra-menu-movel[open] summary { color: #fff; background: rgba(255, 255, 255, 0.12); }
+.barra-menu-movel summary:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.barra-menu-movel nav {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 70;
+  width: min(280px, calc(100vw - 24px));
+  padding: 6px;
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+.barra-menu-movel nav a {
+  min-height: 44px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.88rem;
+}
+.barra-menu-movel nav a:hover { background: var(--surface-muted); }
+.barra-menu-movel nav a.ativo {
+  color: var(--brand-strong);
+  background: var(--brand-soft);
+  font-weight: 700;
+}
+.barra-menu-movel nav a:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; }
 
 /* Busca centralizada na barra 2, um nível abaixo dos menus superiores —
    decisão do responsável em 27/07 e também onde o Odoo a põe. Vive sobre
@@ -1386,8 +1447,8 @@ tbody tr:hover { background: #fafcfd; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  width: 44px;
+  height: 44px;
   margin-left: 6px;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -1438,8 +1499,8 @@ tbody tr:hover { background: #fafcfd; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
@@ -1508,6 +1569,39 @@ tbody tr:hover { background: #fafcfd; }
 .canto-painel li a:hover { background: var(--surface-muted); }
 .canto-painel li.nova a { border-left-color: var(--brand); }
 .canto-painel li.atrasada a { border-left-color: var(--danger); }
+.canto-painel li.escalada a {
+  border-left-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface));
+}
+
+.responsibility-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: end;
+}
+
+.responsibility-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+}
+
+.responsibility-form .button { min-height: 44px; }
+
+@media (max-width: 860px) {
+  .responsibility-form { grid-template-columns: 1fr; }
+  .canto-painel li.operacional .canto-linha-topo {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .canto-painel li.operacional .canto-linha-topo small {
+    white-space: normal;
+  }
+}
 .canto-linha-topo { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .canto-linha-topo strong { font-size: 0.85rem; font-weight: 600; }
 .canto-linha-topo small { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
@@ -1543,7 +1637,7 @@ tbody tr:hover { background: #fafcfd; }
 .launcher-busca-icone { position: absolute; left: 13px; color: var(--muted); pointer-events: none; }
 .launcher-busca input {
   width: 100%;
-  min-height: 42px;
+  min-height: 44px;
   padding: 0 14px 0 39px;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -1565,7 +1659,7 @@ tbody tr:hover { background: #fafcfd; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  min-height: 34px;
+  min-height: 38px;
   padding: 0 13px;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -1708,8 +1802,8 @@ tbody tr:hover { background: #fafcfd; }
 .alternador-tema-opcao {
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 30px;
+  width: 36px;
+  height: 36px;
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -1735,6 +1829,30 @@ tbody tr:hover { background: #fafcfd; }
 .barra-modulo-icone svg { width: 20px; height: 20px; }
 .launcher-app-icone svg { width: 24px; height: 24px; }
 .launcher-busca-icone { width: 18px; height: 18px; }
+
+@media (max-width: 899px) {
+  .barra-superior { padding-inline: 12px; gap: 10px; }
+  .barra-esquerda { flex: 1 1 auto; overflow: visible; }
+  .barra-modulo { padding-left: 10px; }
+  .barra-modulo strong { max-width: min(24ch, 32vw); }
+}
+
+@media (max-width: 560px) {
+  .barra-modulo-icone { display: none; }
+  .barra-direita { gap: 0; }
+  .canto-avatar { margin-left: 2px; }
+  .launcher-busca { flex-basis: 100%; }
+}
+
+@media (pointer: coarse) {
+  .launcher-filtro,
+  .barra-visao,
+  .funil-engrenagem,
+  .barra-busca-faceta button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
 
 /* Movimento é sinal, não enfeite: quem pediu menos movimento recebe menos. */
 @media (prefers-reduced-motion: reduce) {

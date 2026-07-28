@@ -6,7 +6,7 @@ import { marcarVisto } from "@/app/actions/avisos";
 import { signOut } from "@/app/actions/auth";
 import type { Tema } from "@/lib/tema";
 import { AlternadorTema } from "./alternador-tema";
-import type { AtividadeAviso, MensagemAviso } from "@/lib/casca/avisos";
+import type { AtividadeAviso, MensagemAviso, NotificacaoOperacionalAviso } from "@/lib/casca/avisos";
 import { ROTULO_ATIVIDADE, ROTULO_OBSERVACAO, type TipoAtividade } from "@/lib/pipeline/atividades";
 
 // Canto direito da barra: mensagens, notificações e configuração.
@@ -61,26 +61,34 @@ function formatarPrazo(iso: string | null): string {
 export function CantoDireito({
   mensagens,
   atividades,
+  operacionais,
   naoLidas,
   pendentes,
   podeAdministrar,
   email,
   papel,
-  tema
+  tema,
+  persistirAvisos = true
 }: {
   mensagens: MensagemAviso[];
   atividades: AtividadeAviso[];
+  operacionais: NotificacaoOperacionalAviso[];
   naoLidas: number;
   pendentes: number;
   podeAdministrar: boolean;
   email: string | null;
   papel: string;
   tema: Tema;
+  persistirAvisos?: boolean;
 }) {
   const [aberto, setAberto] = useState<Painel | null>(null);
+  const [notificacoesVistas, setNotificacoesVistas] = useState(false);
   const [, iniciar] = useTransition();
   const prefixo = useId();
   const caixa = useForaEEscape(aberto !== null, () => setAberto(null));
+  const pendentesVisiveis = notificacoesVistas
+    ? atividades.length
+    : pendentes;
 
   function alternar(painel: Painel) {
     // O próximo estado é calculado fora do atualizador de propósito: a função
@@ -90,8 +98,13 @@ export function CantoDireito({
     const proximo = aberto === painel ? null : painel;
     setAberto(proximo);
     // Abrir o painel é o ato de ler: é aí que o marco de "visto" avança.
-    if (proximo === "mensagens" && naoLidas > 0) iniciar(() => marcarVisto("mensagens"));
-    if (proximo === "notificacoes" && pendentes > 0) iniciar(() => marcarVisto("atividades"));
+    if (persistirAvisos && proximo === "mensagens" && naoLidas > 0) {
+      iniciar(() => marcarVisto("mensagens"));
+    }
+    if (proximo === "notificacoes" && pendentes > 0) {
+      setNotificacoesVistas(true);
+      if (persistirAvisos) iniciar(() => marcarVisto("atividades"));
+    }
   }
 
   return (
@@ -120,7 +133,7 @@ export function CantoDireito({
       <button
         type="button"
         className="canto-botao"
-        aria-label={pendentes > 0 ? `Notificações, ${pendentes} atividades em aberto` : "Notificações"}
+        aria-label={pendentesVisiveis > 0 ? `Notificações, ${pendentesVisiveis} itens que pedem atenção` : "Notificações"}
         aria-expanded={aberto === "notificacoes"}
         aria-controls={`${prefixo}-notificacoes`}
         title="Notificações"
@@ -136,8 +149,8 @@ export function CantoDireito({
           />
           <path d="M10.2 18.2a2 2 0 0 0 3.6 0" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
         </svg>
-        {pendentes > 0 ? (
-          <span className="canto-selo alerta" aria-hidden="true">{pendentes > 9 ? "9+" : pendentes}</span>
+        {pendentesVisiveis > 0 ? (
+          <span className="canto-selo alerta" aria-hidden="true">{pendentesVisiveis > 9 ? "9+" : pendentesVisiveis}</span>
         ) : null}
       </button>
 
@@ -190,12 +203,32 @@ export function CantoDireito({
         <div className="canto-painel" id={`${prefixo}-notificacoes`} role="dialog" aria-label="Notificações">
           <header>
             <strong>Notificações</strong>
-            <span>o que está no seu nome, sem data ou já no prazo</span>
+            <span>exceções da operação e atividades no seu nome</span>
           </header>
-          {atividades.length === 0 ? (
+          {operacionais.length === 0 && atividades.length === 0 ? (
             <p className="canto-vazio">Nenhuma atividade em aberto para você.</p>
           ) : (
             <ul>
+              {operacionais.map(item => (
+                <li
+                  key={`operacional-${item.id}`}
+                  className={`operacional ${item.escalada ? "escalada" : item.nova ? "nova" : ""}`.trim()}
+                >
+                  <Link href={item.href} onClick={() => setAberto(null)}>
+                    <span className="canto-linha-topo">
+                      <strong>{item.titulo}</strong>
+                      <small className={item.escalada ? "canto-prazo atrasado" : "canto-prazo"}>
+                        {item.escalada ? "escalada · " : ""}
+                        até {formatarPrazo(item.prazoResposta.slice(0, 10))}
+                      </small>
+                    </span>
+                    <span className="canto-linha-corpo">{item.corpo}</span>
+                    <small className="canto-linha-origem">
+                      Exceção operacional · {item.moduloNome}
+                    </small>
+                  </Link>
+                </li>
+              ))}
               {atividades.map(item => (
                 <li key={item.id} className={item.atrasada ? "atrasada" : undefined}>
                   <Link href={`/app/pipeline/${item.trilha}/${item.cardId}`} onClick={() => setAberto(null)}>
@@ -244,6 +277,11 @@ export function CantoDireito({
                 <li>
                   <Link href="/app/administracao/usuarios" onClick={() => setAberto(null)}>
                     Usuários e permissões
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/app/administracao/responsabilidades" onClick={() => setAberto(null)}>
+                    Responsabilidades operacionais
                   </Link>
                 </li>
                 <li>
