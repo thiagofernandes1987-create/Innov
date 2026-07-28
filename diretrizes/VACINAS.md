@@ -130,6 +130,8 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-029` | Runner Python usa sintaxe de ambiente específica de POSIX | vigente | wrapper Node define ambiente e interpretador por plataforma |
 | `VACINA-030` | Menu inline é recortado na largura intermediária | vigente | menu compacto em notebooks e teste estrutural de breakpoint |
 | `VACINA-031` | Estado mistura token de fundo com primeiro plano fixo | vigente | cores semânticas em texto, fundo e borda, validadas por teste |
+| `VACINA-032` | `SECURITY DEFINER` usa função de extensão sem schema explícito | vigente | `extensions.digest`, varredura das definições finais e portão de CI |
+| `VACINA-033` | Simulador e provedor concluem estados de negócio diferentes | vigente | RPC transacional única chamada por todos os adaptadores |
 
 ## 4. Arquivos
 
@@ -165,7 +167,9 @@ diretrizes/vacinas/
 ├── VACINA-028-CAPACIDADE-EXIGE-PORTA-DE-ENTRADA.md
 ├── VACINA-029-RUNNER-PYTHON-PORTAVEL.md
 ├── VACINA-030-MENU-DESKTOP-SEM-CORTE.md
-└── VACINA-031-ESTADO-SEMPRE-USA-TOKENS-DE-TEMA.md
+├── VACINA-031-ESTADO-SEMPRE-USA-TOKENS-DE-TEMA.md
+├── VACINA-032-FUNCAO-DE-EXTENSAO-QUALIFICADA.md
+└── VACINA-033-SIMULADOR-E-PROVEDOR-CONCLUEM-O-MESMO-DOMINIO.md
 ```
 
 ## 5. Critérios para nova vacina
