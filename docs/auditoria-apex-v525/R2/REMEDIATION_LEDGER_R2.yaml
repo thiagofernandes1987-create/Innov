@@ -1,0 +1,89 @@
+round: R2
+count: 11
+remediations:
+- remediation_id: REM-0001
+  finding_id: FND-0001
+  change_ids:
+  - CHG-0001
+  status: PASS
+  result_basis: 19/19 verificações aprovadas na cópia de trabalho.
+- remediation_id: REM-0002
+  finding_id: FND-0003
+  change_ids:
+  - CHG-0002
+  - CHG-0003
+  status: PASS
+  result_basis: 19/19 verificações aprovadas na cópia de trabalho.
+- remediation_id: REM-0003
+  finding_id: FND-0004
+  change_ids:
+  - CHG-0004
+  status: PASS
+  result_basis: 19/19 verificações aprovadas na cópia de trabalho.
+- remediation_id: REM-0004
+  finding_id: FND-0009
+  change_ids:
+  - CHG-0005
+  status: PASS
+  result_basis: 19/19 verificações aprovadas na cópia de trabalho.
+- remediation_id: null
+  finding_id: FND-0002
+  change_ids: []
+  status: BLOCKED
+  result_basis: Aplicar a CSP exige evidência de runtime em navegador, capacidade
+    indisponível localmente. Mudar para modo bloqueante sem essa evidência poderia
+    quebrar a aplicação.
+- remediation_id: null
+  finding_id: FND-0005
+  change_ids: []
+  status: BLOCKED
+  result_basis: Lacuna declarada fora do escopo da fatia no documento canônico; ampliar
+    o escopo é decisão do responsável, não da remediação automática.
+- remediation_id: null
+  finding_id: FND-0006
+  change_ids: []
+  status: BLOCKED
+  result_basis: Controle de vazão exige decisão de arquitetura e infraestrutura de
+    borda.
+- remediation_id: null
+  finding_id: FND-0007
+  change_ids: []
+  status: BLOCKED
+  result_basis: Exige definição da semântica de reentrega do provedor de assinatura.
+- remediation_id: null
+  finding_id: FND-0008
+  change_ids: []
+  status: BLOCKED
+  result_basis: Incremento atômico exige nova função de banco e migration homologada.
+- remediation_id: null
+  finding_id: FND-0010
+  change_ids: []
+  status: BLOCKED
+  result_basis: Remover a função exige migration e homologação; a função já está revogada
+    para authenticated.
+- remediation_id: null
+  finding_id: FND-0011
+  change_ids: []
+  status: BLOCKED
+  result_basis: Fixar ações por SHA exige política de cadeia de suprimentos e acesso
+    à resolução de commits das ações.
+rolled_back_changes:
+- change_id: CHG-R01
+  remediation_id: REM-0001
+  finding_id: FND-0001
+  paths:
+  - .github/workflows/ci.yml
+  - .github/workflows/stage11-homologation.yml
+  - .github/workflows/stage18-concurrent-e2e.yml
+  - .github/workflows/stage20-inventory-concurrency-e2e.yml
+  intent: Trocar --no-frozen-lockfile por --frozen-lockfile nos quatro workflows.
+  outcome: ROLLED_BACK
+  failure_evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  reason: A validação reprovou em validate:vaccines e validate:stage20. VACINA-008
+    fixa, de forma explícita e verificada por CI, a política transitória --no-frozen-lockfile
+    em todos os workflows até que a Etapa 20 conclua a regeneração e verificação integral
+    do lockfile, e exige que a volta ao modo congelado seja transversal e acompanhada
+    da atualização da própria vacina. A remediação automática não pode alterar essa
+    decisão de governança.
+  corrective_action: Manter apenas a criação do lockfile (CHG-0001) e reclassificar
+    FND-0001 como remediação parcial.

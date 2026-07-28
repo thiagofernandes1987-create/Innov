@@ -1,0 +1,24 @@
+{
+  "files": [
+    {
+      "bytes": 9224,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/CHANGE_TRANSACTION_LEDGER_R2.yaml",
+      "sha256": "147cc4ea82de4dedb64ee09e10876ee9e8b6caaf8b6401dea6fca0ac963146ae"
+    },
+    {
+      "bytes": 3942,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/VALIDATION_LEDGER_R2.yaml",
+      "sha256": "32dee101d72f6e080814dab40dab4b15f3edc92679879b0368c425d57c098aba"
+    },
+    {
+      "bytes": 3204,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/REMEDIATION_LEDGER_R2.yaml",
+      "sha256": "3bb9faee8155ce2aba3b2c704a68fe7bfabf55c0996a15139fe79f040286768f"
+    },
+    {
+      "bytes": 5478532,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/ARTIFACT_INDEX_R2.yaml",
+      "sha256": "728a2dacb63d72838f27e48b69d87112e55e935cbe7da4f42f7b61f2349ee268"
+    }
+  ]
+}

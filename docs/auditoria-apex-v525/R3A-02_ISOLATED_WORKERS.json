@@ -1,0 +1,62 @@
+[
+  {
+    "worker_id": "0",
+    "pid": 13031,
+    "exit_code": 0,
+    "python_isolated_flag": 1,
+    "file_count": 6,
+    "environment_variable_names": [
+      "APEX_R3A_WORKER_ID",
+      "LANG",
+      "LC_ALL",
+      "PATH"
+    ],
+    "pass": true,
+    "status": null
+  },
+  {
+    "worker_id": "1",
+    "pid": 13033,
+    "exit_code": 0,
+    "python_isolated_flag": 1,
+    "file_count": 6,
+    "environment_variable_names": [
+      "APEX_R3A_WORKER_ID",
+      "LANG",
+      "LC_ALL",
+      "PATH"
+    ],
+    "pass": true,
+    "status": null
+  },
+  {
+    "worker_id": "2",
+    "pid": 13035,
+    "exit_code": 0,
+    "python_isolated_flag": 1,
+    "file_count": 6,
+    "environment_variable_names": [
+      "APEX_R3A_WORKER_ID",
+      "LANG",
+      "LC_ALL",
+      "PATH"
+    ],
+    "pass": true,
+    "status": null
+  },
+  {
+    "worker_id": "3",
+    "pid": 13037,
+    "exit_code": 0,
+    "python_isolated_flag": 1,
+    "file_count": 6,
+    "environment_variable_names": [
+      "APEX_R3A_WORKER_ID",
+      "LANG",
+      "LC_ALL",
+      "PATH"
+    ],
+    "pass": true,
+    "status": null
+  }
+]

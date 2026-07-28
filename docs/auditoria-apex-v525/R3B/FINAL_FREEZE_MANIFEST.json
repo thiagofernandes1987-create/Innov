@@ -1,0 +1,29 @@
+{
+  "files": [
+    {
+      "bytes": 5640,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R3B/RECONCILIATION_LEDGER_R3B.yaml",
+      "sha256": "972598d83092883ee8ad450e9e8db17aa3c8e6013aa4c0711c8d218a3df96d8e"
+    },
+    {
+      "bytes": 13531,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R3B/FINAL_FINDING_LEDGER_R3B.yaml",
+      "sha256": "0669f4f1b7963c72378f52789cb68eaee24eba2462f29bced68ae6ff8d835ff1"
+    },
+    {
+      "bytes": 1803,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R3B/FINAL_OUTCOME_LEDGER_R3B.yaml",
+      "sha256": "0f27d6a3d9b020a19652b620becc91fc843efa3f184a50d354ca53730177e773"
+    },
+    {
+      "bytes": 1405,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R3B/FINAL_VALIDATION_LEDGER_R3B.yaml",
+      "sha256": "e387565e073dcd6f8a269115fbabfd240057aab7bf86bef82bf32a6a3a7b5b9c"
+    },
+    {
+      "bytes": 148,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R3B/FINAL_ARTIFACT_INDEX_R3B.yaml",
+      "sha256": "d1d05f068c2b2031fddba5809754b3917910d52c0d8e94b24f9a3144215d3de6"
+    }
+  ]
+}

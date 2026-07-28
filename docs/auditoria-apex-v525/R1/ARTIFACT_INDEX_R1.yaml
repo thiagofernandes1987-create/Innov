@@ -1,0 +1,4422 @@
+round: R1
+commit: 30937ed6aba10d40f24641e9158bb686ab94876d
+artifact_count: 441
+unclassified: []
+by_class:
+  BUILD_CONFIG: 8
+  CANONICAL_DOC: 12
+  CI_PIPELINE: 8
+  CONFIG_TEMPLATE: 1
+  CONTAINER_SPEC: 1
+  CORE_LIBRARY: 37
+  DB_MIGRATION: 106
+  DB_TEST: 3
+  DEPLOY_CONFIG: 3
+  E2E_RUNNER: 5
+  HTTP_ROUTE_HANDLER: 11
+  NEXT_ROUTE_VIEW: 122
+  OPERATIONAL_SCRIPT: 5
+  PYTHON_MODULE: 4
+  REACT_COMPONENT: 25
+  REPO_CONFIG: 1
+  SERVER_ACTION: 17
+  SERVICE_CODE: 2
+  STAGE_DOC: 26
+  STATE_REGISTER: 1
+  STRUCTURAL_VALIDATOR: 15
+  STYLESHEET: 11
+  UNIT_TEST: 4
+  VACCINE_RECORD: 13
+by_surface:
+  APPLICATION_LOGIC: 28
+  CI: 8
+  CONFIG: 9
+  GOVERNANCE: 67
+  OBSERVABILITY: 2
+  OPERATIONS: 9
+  SECURITY_AUTHZ: 41
+  SECURITY_CONFIG: 1
+  SECURITY_DATA_INTEGRITY: 106
+  TEST: 12
+  UI: 158
+artifacts:
+- artifact_id: ART-0001
+  path: .env.example
+  sha256: 51d35210fa023265d4ffa3408ebf51c64a2a8d0411a800668970bf6b6c133787
+  bytes: 1579
+  lines: 51
+  artifact_class: CONFIG_TEMPLATE
+  audit_surface: SECURITY_CONFIG
+  analysis_status: ANALYZED
+- artifact_id: ART-0002
+  path: .github/workflows/ci.yml
+  sha256: 19be7c6b4e7d6dc3e01a13df10a4986acfaedaa377bed77fb085c137b66261c1
+  bytes: 5251
+  lines: 165
+  artifact_class: CI_PIPELINE
+  audit_surface: CI
+  analysis_status: ANALYZED
+- artifact_id: ART-0003
+  path: .github/workflows/stage11-homologation.yml
+  sha256: 7473bb9a21a1440dfb5a0996679289a80f439eafdb6034a3e7fb49caf018adfd
+  bytes: 1864
+  lines: 56
+  artifact_class: CI_PIPELINE
+  audit_surface: CI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura dirigida de instalação de dependências
+    e fixação de ações.
+- artifact_id: ART-0004
+  path: .github/workflows/stage18-concurrent-e2e.yml
+  sha256: 9d1d3f4a95337be2007b277b420c940b35a6c4ef06a3224d44b065054b3b8af1
+  bytes: 4052
+  lines: 114
+  artifact_class: CI_PIPELINE
+  audit_surface: CI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura dirigida de instalação de dependências
+    e fixação de ações.
+- artifact_id: ART-0005
+  path: .github/workflows/stage20-backup-restore-drill.yml
+  sha256: d112450b4136b13dd3b96eb8f2d8b5e31826b1b0751e05d5ead852a184448535
+  bytes: 3989
+  lines: 107
+  artifact_class: CI_PIPELINE
+  audit_surface: CI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura dirigida de instalação de dependências
+    e fixação de ações.
+- artifact_id: ART-0006
+  path: .github/workflows/stage20-file-security-e2e.yml
+  sha256: 2c8dffd95cc5891ab38bd9aa7fba72ded2ecdeba9241bbe7b6a603c1ea05996e
+  bytes: 1371
+  lines: 56
+  artifact_class: CI_PIPELINE
+  audit_surface: CI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura dirigida de instalação de dependências
+    e fixação de ações.
+- artifact_id: ART-0007
+  path: .github/workflows/stage20-file-security-gateway-e2e.yml
+  sha256: 5a87da71adb8ee9a271499c8b7906b35e3bb209be6de1054ed8dc8eac1906ce0
+  bytes: 3352
+  lines: 97
+  artifact_class: CI_PIPELINE
+  audit_surface: CI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura dirigida de instalação de dependências
+    e fixação de ações.
+- artifact_id: ART-0008
+  path: .github/workflows/stage20-file-security-provider-health.yml
+  sha256: f0e58ba2149278084b7f753a37244bcb8e3fb5c3cd6ec46f0103cccfa2876da2
+  bytes: 3080
+  lines: 87
+  artifact_class: CI_PIPELINE
+  audit_surface: CI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura dirigida de instalação de dependências
+    e fixação de ações.
+- artifact_id: ART-0009
+  path: .github/workflows/stage20-inventory-concurrency-e2e.yml
+  sha256: 720d83beaf964d575c24859a0a7dfa5684247737cc71332dbc18d2630b89f3a4
+  bytes: 3781
+  lines: 104
+  artifact_class: CI_PIPELINE
+  audit_surface: CI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura dirigida de instalação de dependências
+    e fixação de ações.
+- artifact_id: ART-0010
+  path: .gitignore
+  sha256: 99baaddd727b3a3a66339056ccd9bdfd56563828bd34d2b486197a8950a131cc
+  bytes: 100
+  lines: 11
+  artifact_class: REPO_CONFIG
+  audit_surface: CONFIG
+  analysis_status: ANALYZED
+- artifact_id: ART-0011
+  path: README.md
+  sha256: 09f044d7150c0b8a7342e9f8cbfa0e1faba500beddeda24aba9d88e713def522
+  bytes: 5771
+  lines: 165
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0012
+  path: app/acesso-negado/page.tsx
+  sha256: ddbc36e59f6fc700b21c2b80c72792c6c9f69e0e82c412389c618bb9b3910bbf
+  bytes: 577
+  lines: 16
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0013
+  path: app/actions/access-control.ts
+  sha256: 1a299153d3334a5b80a150f8bce59940f371381a66e619d097a4fec239f38965
+  bytes: 5460
+  lines: 78
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0014
+  path: app/actions/advanced-signatures.ts
+  sha256: 713a624d5bfd56583388f080877ae8445c53c3bd258c5be247983cb9377564ad
+  bytes: 14530
+  lines: 242
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0015
+  path: app/actions/auth.ts
+  sha256: cccd95a2073c2985f53727a846352ce187ef8346cc1678b17c879b806323bbeb
+  bytes: 935
+  lines: 28
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0016
+  path: app/actions/budgets.ts
+  sha256: 5139669401a56aed42cc6ab6d402fa408efe96a7e2292eb318e3b5529b4c0a9d
+  bytes: 2048
+  lines: 59
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0017
+  path: app/actions/create-budget.ts
+  sha256: b319e3553db4e108388acb0ded7448a307b52e212a3a79dd1294250384753a2b
+  bytes: 1032
+  lines: 31
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0018
+  path: app/actions/inventory-extra.ts
+  sha256: 649086cfa61c99ac9d578b2623e369a2eadc8859136a87aa51f2d028507ee67e
+  bytes: 3130
+  lines: 47
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0019
+  path: app/actions/inventory-stocktake.ts
+  sha256: c8b1db1f4b59bc9409ea56e4028d10349540b3507e63f13307b4effa3e36d75f
+  bytes: 1013
+  lines: 18
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0020
+  path: app/actions/inventory.ts
+  sha256: dd204d500465716b89bd9833830ad8b70195bb356fce66a360737487b1309395
+  bytes: 15050
+  lines: 186
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0021
+  path: app/actions/observability.ts
+  sha256: 0c7bc27301fc7b19d225340e7c7318671a3660d6455ae722b35382d184021fdd
+  bytes: 3133
+  lines: 48
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0022
+  path: app/actions/operational-finance.ts
+  sha256: e4c576a7367d85ea53fa4121ccce864792a7d892f72fed2a0507aebb73d9475d
+  bytes: 13819
+  lines: 95
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0023
+  path: app/actions/organization-context.ts
+  sha256: 477548bd6cacaab1b525533b30324ea37fefb9d7d7337d41097980499c31db62
+  bytes: 1067
+  lines: 32
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0024
+  path: app/actions/procurement.ts
+  sha256: c9c39389829b1c1af8855bee2e863e354ad3e739525dd85530404b98056a8ce9
+  bytes: 15927
+  lines: 150
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0025
+  path: app/actions/projects.ts
+  sha256: 988f23b454850cee92e54fa373a89c62fd40368c1d7da52cde9d0d750569466d
+  bytes: 19091
+  lines: 444
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0026
+  path: app/actions/public-signing.ts
+  sha256: 253d4bedeb219498a5a19bdb5837c62028cc844046494075b5998aa12418f711
+  bytes: 5782
+  lines: 126
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0027
+  path: app/actions/quality.ts
+  sha256: db3b818d501831d27c2b2283658e52b468b30f46903b774ace2ae69fc87844b2
+  bytes: 17006
+  lines: 209
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0028
+  path: app/actions/relationship.ts
+  sha256: 4a9fc1d6e3771fe88943ff0aeeaee2e02c6edfaa5a172b0e6b7cbca34d1c7a64
+  bytes: 15173
+  lines: 179
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0029
+  path: app/actions/reports.ts
+  sha256: 0850b2c2074a6f5568689105091bd802e49a79de6fcbd0a67ec4d3d55d7088b4
+  bytes: 5191
+  lines: 64
+  artifact_class: SERVER_ACTION
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por varredura de guardas de autorização por função
+    exportada e por revisão dirigida dos fluxos não autenticados e de upload.
+- artifact_id: ART-0030
+  path: app/api/compras/cotacoes/[id]/anexo/route.ts
+  sha256: 9c65c0a3640581466661cabdc01378634074f55f924274164f612c5e7ee75f39
+  bytes: 1115
+  lines: 13
+  artifact_class: HTTP_ROUTE_HANDLER
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0031
+  path: app/api/contracts/[versionId]/pdf/route.ts
+  sha256: 7ad8c41f3c9fe60c215af1468af5f8a563b828598fb808bbcad89cfe16d355bf
+  bytes: 4592
+  lines: 123
+  artifact_class: HTTP_ROUTE_HANDLER
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0032
+  path: app/api/documents/signatures/[envelopeId]/route.ts
+  sha256: e9ff0a6d9171e81fd0d571e649e7f5f549044af22639953466fa9067c53d65c4
+  bytes: 2279
+  lines: 45
+  artifact_class: HTTP_ROUTE_HANDLER
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0033
+  path: app/api/financeiro/anexos/[id]/route.ts
+  sha256: 9d68f9e45bd1f3391625ec31ef5f5c716ee4c90472a246f92996e5973ed3b075
+  bytes: 960
+  lines: 12
+  artifact_class: HTTP_ROUTE_HANDLER
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0034
+  path: app/api/internal/file-security/health/route.ts
+  sha256: fc3ecbb8a544f3551bde0f75a7186828a5317a6ca303aa78a262f2d4878e7710
+  bytes: 1413
+  lines: 41
+  artifact_class: HTTP_ROUTE_HANDLER
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0035
+  path: app/api/proposals/[versionId]/pdf/route.ts
+  sha256: ca575af919e9ba14ea4a09b0507dab17d55ae5223f8d57fc0bf1f89d4614a10f
+  bytes: 5353
+  lines: 147
+  artifact_class: HTTP_ROUTE_HANDLER
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0036
+  path: app/api/qualidade/anexos/[id]/route.ts
+  sha256: 7e658f6065cca3f8fdbf892cde5586feb78b9dc78ba57a19530a499b51d8d6f2
+  bytes: 1062
+  lines: 12
+  artifact_class: HTTP_ROUTE_HANDLER
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0037
+  path: app/api/qualidade/documentos/[id]/route.ts
+  sha256: 2c50fa1698d4c5f6c5e0dab58eb40f90e46d00b0a78ea1db0cb364c51250487f
+  bytes: 1072
+  lines: 13
+  artifact_class: HTTP_ROUTE_HANDLER
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0038
+  path: app/api/relatorios/exportar/route.ts
+  sha256: ce644e996a03ecc4566d20957372c2e54b7fdea4d3a3edad337e931fd539cbca
+  bytes: 2258
+  lines: 18
+  artifact_class: HTTP_ROUTE_HANDLER
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0039
+  path: app/api/sac/attachments/[id]/route.ts
+  sha256: f77c0b47c8394bd1f8434e7b2335394f0ea3faaa621cade6c241758124e83d61
+  bytes: 1727
+  lines: 27
+  artifact_class: HTTP_ROUTE_HANDLER
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0040
+  path: app/api/signatures/webhook/route.ts
+  sha256: 35ccb19d0fa9ddd0f5df4b4618d83764b54098781452e2ef2d76a8c218b82a67
+  bytes: 6302
+  lines: 171
+  artifact_class: HTTP_ROUTE_HANDLER
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0041
+  path: app/app/[module]/page.tsx
+  sha256: 6fca65c2953c23b3c2ed08e1662e42f9ba7460963bd79bbc74248d23860a1d96
+  bytes: 1999
+  lines: 45
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0042
+  path: app/app/aditivos/page.tsx
+  sha256: 97229ef47e439e456b3f77ce5b4f63df09f1b8ec61f19e76a08cf471734503ff
+  bytes: 2174
+  lines: 40
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0043
+  path: app/app/administracao/aplicativos/page.tsx
+  sha256: 3dff4acf3032281d988cb2e7fef444b53ff827c05eff09ae62228e45aa9d2df4
+  bytes: 3841
+  lines: 68
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0044
+  path: app/app/administracao/page.tsx
+  sha256: 429e319fb1be38d9ffcac256e2a2139ce31815d1804853ca5e3966d196d03618
+  bytes: 1261
+  lines: 27
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0045
+  path: app/app/administracao/perfis/page.tsx
+  sha256: e3266f1df7bf26ef5bc9ded6382bf613c5d0343a36febfb74377ea59a7e675cb
+  bytes: 4384
+  lines: 56
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0046
+  path: app/app/administracao/usuarios/page.tsx
+  sha256: 3e611a16492a0ffcc9b56e3d1f474270757fa11037c9b0d2046568aee50abaf5
+  bytes: 5738
+  lines: 62
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0047
+  path: app/app/assinaturas/documentos/[id]/page.tsx
+  sha256: 0f94a34e0abe7a1432e0d3956b6ac98a46e8ee12e85d506689225d9a30fe64e5
+  bytes: 15282
+  lines: 88
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0048
+  path: app/app/assinaturas/novo/page.tsx
+  sha256: 12db8993f9ec268a28655a81a31e4542dceb42b3e37de9bde83bf8d0ac57950b
+  bytes: 2913
+  lines: 29
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0049
+  path: app/app/assinaturas/page.tsx
+  sha256: 020d3afc9fe84e8920aedc2780abb4280a07e20b6ea543b16b84e5c8da5fbe2d
+  bytes: 5489
+  lines: 43
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0050
+  path: app/app/auditoria/alertas/page.tsx
+  sha256: 15528016d4f0e14ddf21422c3f0837a6f79d2e8a068937285d6d57d6d42a6efa
+  bytes: 2422
+  lines: 12
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0051
+  path: app/app/auditoria/configuracao/page.tsx
+  sha256: 47f5af9d6d1beb60022ce02e9be49b87f5d126149e4335e26ca49a2171786dc7
+  bytes: 3693
+  lines: 15
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0052
+  path: app/app/auditoria/eventos/[id]/page.tsx
+  sha256: 321b83b4ce158978addb7fb1492cba761f498b611e0086b75eaee43a4068d205
+  bytes: 1911
+  lines: 12
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0053
+  path: app/app/auditoria/eventos/page.tsx
+  sha256: 7b3364ebf6c4e9405b7817333f28f2a59d026c4604de0b41b304bbbe1d7b64a1
+  bytes: 3772
+  lines: 16
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0054
+  path: app/app/auditoria/page.tsx
+  sha256: be5f92426c6d09fe43bfc9b4bef40423900d42e7197fae8fd1d21fd51fd3f6a3
+  bytes: 4235
+  lines: 17
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0055
+  path: app/app/auditoria/saude/page.tsx
+  sha256: 994fc6077d56683c95340d97d6aa31f43682eb58620b4ec4984151867074346b
+  bytes: 2451
+  lines: 13
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0056
+  path: app/app/clientes/[id]/page.tsx
+  sha256: 6b9b554e4fdf0814b87c1cface46d572941b09a14df163a4dd334d8aeb46bcf4
+  bytes: 11269
+  lines: 8
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0057
+  path: app/app/clientes/novo/page.tsx
+  sha256: db1979f9255669169514e1831a482bd6a2aa11fd9f8359362f8352ea00b6311e
+  bytes: 2575
+  lines: 6
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0058
+  path: app/app/clientes/page.tsx
+  sha256: e7b91b0862ead1da99835fdbec3a3a72c82a89ba47c51b264384c41a77ecb182
+  bytes: 2051
+  lines: 7
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0059
+  path: app/app/compras/fornecedores/page.tsx
+  sha256: ab5ad480ad0a6485fa7edf03a17690a64c4ed5ec8ddd803be6fe417cbe2e20c8
+  bytes: 2194
+  lines: 10
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0060
+  path: app/app/compras/page.tsx
+  sha256: e528c61d9613c8d543e5549581242479d6705b256cfa39d181e9051b417c569f
+  bytes: 4232
+  lines: 22
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0061
+  path: app/app/compras/pedidos/[id]/page.tsx
+  sha256: 07a97d8a5676fdf108b3e1f7af50985a2c78a5d98d6e3cb0756ac1fed34395f9
+  bytes: 5860
+  lines: 26
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0062
+  path: app/app/compras/pedidos/page.tsx
+  sha256: 686333fa9ce95469fde78711a29a376f7d6eefc6517e0f44efe3cac8f697b13b
+  bytes: 1921
+  lines: 11
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0063
+  path: app/app/compras/solicitacoes/[id]/page.tsx
+  sha256: aafbd4abeaf4520a650f24db31da43c1a4a25f362e72e3bb43995d07c7306d52
+  bytes: 9113
+  lines: 66
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0064
+  path: app/app/compras/solicitacoes/nova/page.tsx
+  sha256: c93f7a3af99fcac72be93f3ca3fbc948359c57337ec9caa7b322da757cc393d5
+  bytes: 1981
+  lines: 11
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0065
+  path: app/app/compras/solicitacoes/page.tsx
+  sha256: 2d50c80c2c08ec3fec397640e13afe7c8f3936bf594ee5347219641eda2648b3
+  bytes: 1771
+  lines: 10
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0066
+  path: app/app/contratos/page.tsx
+  sha256: 36b1b0d2ba2dd805ab709701b8c7df69b2d2afd58dd8a5460510504bfc817c92
+  bytes: 2302
+  lines: 40
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0067
+  path: app/app/crm/leads/[id]/page.tsx
+  sha256: 16d068c7c9788d68b2d905aa2c38c41dbc61559f0383f9f966c14af8e254a511
+  bytes: 4323
+  lines: 7
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0068
+  path: app/app/crm/leads/novo/page.tsx
+  sha256: 323c856534d36c5b897f766f0f8dd6e213e2da9f5edbdebb72599dd0a558df0c
+  bytes: 2441
+  lines: 6
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0069
+  path: app/app/crm/leads/page.tsx
+  sha256: 105b45af4bf1c56b42ec6d42e5988dd9cf07c438ace67d3e2cdba7b61ecc1b14
+  bytes: 1720
+  lines: 7
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0070
+  path: app/app/crm/oportunidades/[id]/page.tsx
+  sha256: 48010e8f5ac0ae3a516048d9b991387030ddac17acd1ecbce8238a3242d8aa6e
+  bytes: 4600
+  lines: 7
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0071
+  path: app/app/crm/oportunidades/novo/page.tsx
+  sha256: 4d57cd79e9042e35cdca1b103396dec44cbf17bc97f6daa6e1607845a3cfe356
+  bytes: 2364
+  lines: 7
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0072
+  path: app/app/crm/oportunidades/page.tsx
+  sha256: 41931cecb9b1aa76078466200bedfdaf384e31ef06071c60d380e7dac87d3f6b
+  bytes: 1749
+  lines: 7
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0073
+  path: app/app/crm/page.tsx
+  sha256: 16fccde8b1a11398aa3663695600db3085a46be356384c3742a09c658f28c3db
+  bytes: 5538
+  lines: 13
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0074
+  path: app/app/diario/page.tsx
+  sha256: fe266bb25b4b67f369ea6af21460becd2d357f40e4f786a7e319444517e942c3
+  bytes: 2801
+  lines: 28
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0075
+  path: app/app/documentos/page.tsx
+  sha256: 6b7ca2868aeeaf814530634a523be1f883adaee060be67c8461ff013ad1b62bc
+  bytes: 2840
+  lines: 27
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0076
+  path: app/app/equipes/page.tsx
+  sha256: e90da26ac574d4523613d94d37a4517ea3df997c13edcbf4808a61dde67a485a
+  bytes: 2710
+  lines: 39
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0077
+  path: app/app/estoque/ativos/[id]/page.tsx
+  sha256: 8ffb233e01a10f7d65e1fe107beadf8665677d7d5de0e8b2c30add54b4a947ab
+  bytes: 10268
+  lines: 184
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0078
+  path: app/app/estoque/ativos/page.tsx
+  sha256: c33ecca4d09fbbc671433050761a56e1fb791009fc77c683409c39befd05f881
+  bytes: 4441
+  lines: 57
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0079
+  path: app/app/estoque/depositos/[id]/page.tsx
+  sha256: 295e9273e084cd863cd576106d4e402d3c926bdd517a7870f6b8e2ff76219b7a
+  bytes: 6214
+  lines: 49
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0080
+  path: app/app/estoque/depositos/page.tsx
+  sha256: 62210b1ad24f6f1cf07141bd95c74bc8d5fdb4829a27c6c3e4acf27fbb40d869
+  bytes: 3341
+  lines: 10
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0081
+  path: app/app/estoque/inventarios/[id]/page.tsx
+  sha256: f747a1f54c7a3659b4bdc3b2d496c043431ec1a759f4a3e1bbfdbd675f29aa9d
+  bytes: 10938
+  lines: 129
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0082
+  path: app/app/estoque/inventarios/novo/page.tsx
+  sha256: 4ff162dae54519d213d1fba79d5f60a9773ed90b692f4217f4cc62487ed1d6b9
+  bytes: 2209
+  lines: 9
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0083
+  path: app/app/estoque/inventarios/page.tsx
+  sha256: 3c067c468765c79c415623b9d831822445cf287f0a214234f207acbfe38013dd
+  bytes: 2734
+  lines: 9
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0084
+  path: app/app/estoque/itens/[id]/page.tsx
+  sha256: 867c61a66cc54d66e382eb757ceed43993881cf78767ed5eb29fa7701ce87343
+  bytes: 10431
+  lines: 176
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0085
+  path: app/app/estoque/itens/novo/page.tsx
+  sha256: 690fb269a11b4b9f3dbbb3bf25dc6a17f5e2c6feb95d647711df71a08595b0cc
+  bytes: 2970
+  lines: 8
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0086
+  path: app/app/estoque/itens/page.tsx
+  sha256: 63ff2cfe1b635d73b6247a6728fe6b481eaef6769a6abc7306b007f4eaf95767
+  bytes: 1948
+  lines: 8
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0087
+  path: app/app/estoque/movimentos/[id]/page.tsx
+  sha256: 0f8c583b0e8e7a1ef82424545980a1ac35ae208e6b7772735736e388a3fe17c8
+  bytes: 4984
+  lines: 10
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0088
+  path: app/app/estoque/movimentos/novo/page.tsx
+  sha256: 5cb9f1982f866cd23f16f1dfec057334d122326f96b97a88b7e7db92d5d4ed5f
+  bytes: 1819
+  lines: 8
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0089
+  path: app/app/estoque/movimentos/page.tsx
+  sha256: f3b26fc4199041d67114ac39242796d14a6357f3c4f66e70b4c3cdb9bf745157
+  bytes: 7925
+  lines: 112
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0090
+  path: app/app/estoque/page.tsx
+  sha256: 49f246d25f29babe765557c0c890d368ddded6dc6fa11dd3606abe1f7abbdbab
+  bytes: 6102
+  lines: 12
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0091
+  path: app/app/estoque/reservas/[id]/page.tsx
+  sha256: 34d87094249ad94cb9666eee14e51ac131e7566218f9cf6dff83762f71566ca6
+  bytes: 6305
+  lines: 79
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0092
+  path: app/app/estoque/reservas/page.tsx
+  sha256: e03b48daee832d5294e991c2b8d6685777c7fd19f229e33223b5210d39d00cb3
+  bytes: 3949
+  lines: 10
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0093
+  path: app/app/financeiro/configuracoes/page.tsx
+  sha256: 93386888e9b79887b76d8968b57f55e45b188588079d487a82f555120b7d4a01
+  bytes: 4303
+  lines: 16
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0094
+  path: app/app/financeiro/fluxo-de-caixa/page.tsx
+  sha256: b016d1af8de549e91ca85e960903eded2b5343d619b155f65761ad4fc9d2d00c
+  bytes: 4930
+  lines: 19
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0095
+  path: app/app/financeiro/lancamentos/[id]/page.tsx
+  sha256: 15348ae436596483a8f6d17d52b9e7c73b1437b55cd42db28e78cbace1016389
+  bytes: 8143
+  lines: 98
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0096
+  path: app/app/financeiro/lancamentos/novo/page.tsx
+  sha256: 271a6b4810497c2036c2307875b2985563d371fe3f60aa0c73e0fb3b3a496fa5
+  bytes: 5770
+  lines: 19
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0097
+  path: app/app/financeiro/lancamentos/page.tsx
+  sha256: c8cefe0ce2352d9542be89c2851d4067fa56a1cc6934d1e719bb135716019a10
+  bytes: 2786
+  lines: 32
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0098
+  path: app/app/financeiro/medicoes/[id]/page.tsx
+  sha256: fb81be4c554e72b8a8e87f2e09d28a25101e1f836f4b66d3c08aadb9ec6805d7
+  bytes: 4930
+  lines: 17
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0099
+  path: app/app/financeiro/medicoes/nova/page.tsx
+  sha256: 4cf3b2d5de51d9b6809e4633115ec2b35bc73bc7b37d3b440baf27f50624b81b
+  bytes: 2432
+  lines: 14
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0100
+  path: app/app/financeiro/medicoes/page.tsx
+  sha256: fe2ff19173d2dd07f8920631a8b685e305e6623e5cb940934da03d62354e91ac
+  bytes: 2175
+  lines: 11
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0101
+  path: app/app/financeiro/page.tsx
+  sha256: 90433597a4f0b6e699fec1046dd42ca97e747b1613c9535b9fafd01033f9f467
+  bytes: 5460
+  lines: 26
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0102
+  path: app/app/layout.tsx
+  sha256: aaff970cd5179209a0bd11bf92e6e7d64e8da0be03970bb231904078a2cb418a
+  bytes: 2407
+  lines: 64
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0103
+  path: app/app/obras/[id]/cronograma/page.tsx
+  sha256: 596e6a84f68fdbd24dbf4590ee5d4bf24c7bc9dfd09edec6db5f282d19375d4c
+  bytes: 9664
+  lines: 131
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0104
+  path: app/app/obras/[id]/diario/[logId]/page.tsx
+  sha256: 4755d09df5b2c134836ce62161e06da9e41b482009b9575211b2fa8ac86a4158
+  bytes: 10185
+  lines: 129
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0105
+  path: app/app/obras/[id]/diario/page.tsx
+  sha256: 5770a5c8b48592b0c80d39f2e42d4b8ae61f2de45eb066053388cf090dbda386
+  bytes: 4735
+  lines: 84
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0106
+  path: app/app/obras/[id]/documentos/page.tsx
+  sha256: 39fdfff0f2a82e8caf3c7b4af4d62156071a00c42d3364f41f6ff7f0b800ebe3
+  bytes: 6763
+  lines: 98
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0107
+  path: app/app/obras/[id]/eap/page.tsx
+  sha256: d2efc3ef3c69010556dba99971b8ff86b73f3c9ee63cf638b347c7dec944cc51
+  bytes: 5616
+  lines: 108
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0108
+  path: app/app/obras/[id]/equipes/page.tsx
+  sha256: 77feca43693001fa1a45ad5b8e7f2114c6eccc78f1ad78c1f1152374559bec41
+  bytes: 6721
+  lines: 96
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0109
+  path: app/app/obras/[id]/page.tsx
+  sha256: 58606820e44fcc93a76cefc627133794970910f3a0a8c83fdcb9efaa31c5b47b
+  bytes: 8312
+  lines: 138
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0110
+  path: app/app/obras/[id]/tarefas/page.tsx
+  sha256: fef153fdf647ab99c98b1ae1edbc448b1244d2fe3794913968011ff91ef46a2b
+  bytes: 7540
+  lines: 114
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0111
+  path: app/app/obras/novo/page.tsx
+  sha256: 41962b56debefc350b662d1fbedc40620f1ba5e5cdf0577b6edc41f38f4551cc
+  bytes: 3174
+  lines: 66
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0112
+  path: app/app/obras/page.tsx
+  sha256: 22e1225277f53ee9214d3fff1841d993530139612620b6e0f84bfbfd6b6fba1a
+  bytes: 4168
+  lines: 79
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0113
+  path: app/app/ocorrencias/[id]/page.tsx
+  sha256: d660fdf9b95052e93a8cee5209106e1c6918005ecca62f374d353069f78d0ae2
+  bytes: 6748
+  lines: 9
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0114
+  path: app/app/ocorrencias/novo/page.tsx
+  sha256: ea21937f065471fb0dd8e2158744f6d3d0d6f64cca305e440e6e00fedbb22f14
+  bytes: 2515
+  lines: 7
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0115
+  path: app/app/ocorrencias/page.tsx
+  sha256: e8169ddfa7ba77daddafce24485744379d29dda9dce871a1a345a625a1dafba6
+  bytes: 3058
+  lines: 10
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0116
+  path: app/app/orcamentos/[id]/page.tsx
+  sha256: 8dcad2d28fa423f63cc72fc646716423791f5bd19079822557f5c89dc680b40c
+  bytes: 9796
+  lines: 155
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0117
+  path: app/app/orcamentos/novo/page.tsx
+  sha256: 6975fd403856b33e40ec4181195dfe0db372b2af611bd626127a082676d54218
+  bytes: 2521
+  lines: 55
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0118
+  path: app/app/orcamentos/page.tsx
+  sha256: 2ad4bd1f254b0b0318cfb28df237399848bd1b471d49d8bf48bfe3700b248e46
+  bytes: 5069
+  lines: 108
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0119
+  path: app/app/page.tsx
+  sha256: 1d6bda150f747ffbc8e9f8d46f7142ed86971ccfc23ffbe7b86524ac62f846f4
+  bytes: 4507
+  lines: 112
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0120
+  path: app/app/planejamento/page.tsx
+  sha256: b9d28f99ed5c32a3af71cf68f68e3a5fcd823ef24bf0c75d0c720ac7d92c1cc8
+  bytes: 3709
+  lines: 44
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0121
+  path: app/app/propostas/page.tsx
+  sha256: d2da06b98e232e399fd3ffc58dfd260729e0fb7807dda094281c759d54d6b0e6
+  bytes: 2385
+  lines: 44
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0122
+  path: app/app/qualidade/documentos/page.tsx
+  sha256: 2e2b78ab05c3b0f49d743822afb8f03692b70d361381f8b26e4530ddf352ec36
+  bytes: 4008
+  lines: 17
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0123
+  path: app/app/qualidade/formularios/[id]/page.tsx
+  sha256: 762b927631f428f7d0644c99d73a76456410159ebdb9116c06f297f0a13e7500
+  bytes: 6692
+  lines: 27
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0124
+  path: app/app/qualidade/formularios/novo/page.tsx
+  sha256: 85218219ad6b9c04f5a4f8acf359af9bc700233bf62739af7db833e45e59e860
+  bytes: 1129
+  lines: 10
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0125
+  path: app/app/qualidade/formularios/page.tsx
+  sha256: 1a3a04d447941d9fbad0703f52abb7239e9fca04123826bb29af568e59efff88
+  bytes: 2330
+  lines: 11
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0126
+  path: app/app/qualidade/page.tsx
+  sha256: f6ff575332cfaf34f7fe4d9486a649a60e1257d7ba623e70e9ddc21de4861dac
+  bytes: 4052
+  lines: 20
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0127
+  path: app/app/qualidade/preenchimentos/[id]/page.tsx
+  sha256: 6b23b7f786a3a3e597ad5471e685635793a8a1e4689deed44a18b09c010c22ee
+  bytes: 4364
+  lines: 22
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0128
+  path: app/app/qualidade/preenchimentos/page.tsx
+  sha256: ac5ca946d919069f90cc15886ffbadbe4999d1a3c380d193c9bc3939c38ca762
+  bytes: 2001
+  lines: 10
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0129
+  path: app/app/qualidade/respostas/[id]/page.tsx
+  sha256: d59fd17a427e42154a3672a975109822a5362993e1c42874f014500b1522480f
+  bytes: 3548
+  lines: 21
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0130
+  path: app/app/relatorios/compras/page.tsx
+  sha256: 92163635d977ebf432e88ea8ad74480cc0f384e2956fd1f69097c0b3f8c1534e
+  bytes: 2793
+  lines: 11
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0131
+  path: app/app/relatorios/financeiro/page.tsx
+  sha256: b9d9d9702d6f3c54209ea0087e15a5b51fee6cbcec5936858139b09c5bd20c5a
+  bytes: 3557
+  lines: 13
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0132
+  path: app/app/relatorios/metas/page.tsx
+  sha256: 943435f2659d8e9fb1fc9f914b13ca73064518a6facac34ef16733d972a21280
+  bytes: 3856
+  lines: 19
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0133
+  path: app/app/relatorios/obras/[id]/page.tsx
+  sha256: 07f9ba571a90eaec5be02460abc1bad959796643d4a36dd608efe0a1d086fb95
+  bytes: 5476
+  lines: 16
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0134
+  path: app/app/relatorios/obras/page.tsx
+  sha256: a9ff2ac4acf0dbcbd2039c347613934b9f073b43efc4b406c5235101dbbf05e1
+  bytes: 2823
+  lines: 12
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0135
+  path: app/app/relatorios/page.tsx
+  sha256: 8bfab06ee57d26deade02f7986a69415d899125b5204be75b93ab35ef541c481
+  bytes: 8605
+  lines: 27
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0136
+  path: app/app/relatorios/qualidade/page.tsx
+  sha256: 74b64c24da5456975d4ab4c1f93179da3481c318979bd1e91df460c8656ad72a
+  bytes: 3231
+  lines: 11
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0137
+  path: app/app/relatorios/salvos/page.tsx
+  sha256: 8461036af913cd51b84fb2f9c7de032ba499af598b00fe0e5a73419c7657dbaa
+  bytes: 4064
+  lines: 15
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0138
+  path: app/app/relatorios/snapshots/page.tsx
+  sha256: 5e9effc677c8059b7119dda25ac8a950363a620081128aa6272fae7d8d1d055b
+  bytes: 4709
+  lines: 19
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0139
+  path: app/app/tarefas/page.tsx
+  sha256: 4ef3b5056187e4ac896b8e81d4867e8729d2396f1da4405d0e667e4a63138daa
+  bytes: 3210
+  lines: 28
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0140
+  path: app/assinar/[token]/page.tsx
+  sha256: 0b798375a3884e39000c55aec684b5402a21d721eec83475ba9a194eb42ca0fd
+  bytes: 5706
+  lines: 60
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0141
+  path: app/cliente/[module]/page.tsx
+  sha256: 1ccab9643b959a5d1d21cda0696e760d3a4f6e03d829121ea56b517a18dadeba
+  bytes: 1619
+  lines: 39
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0142
+  path: app/cliente/aditivos/page.tsx
+  sha256: 562f31bbbdeec6c522e6b819fd8658fd2aa026241d00986350f8662d1090fabf
+  bytes: 3174
+  lines: 62
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0143
+  path: app/cliente/assinaturas/page.tsx
+  sha256: eee6c6ba6398bf465406b32160f546d4b042ded515df7a9e970f48b48bdb3f7b
+  bytes: 4029
+  lines: 40
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0144
+  path: app/cliente/contratos/page.tsx
+  sha256: bd406be171630cca7016bd8d4f77fcb514865215dc06e08ee46d92b952500d0c
+  bytes: 2679
+  lines: 62
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0145
+  path: app/cliente/cronograma/page.tsx
+  sha256: 4a0d3c102f6daa2a41bc6afe02350ee2a7cb73732876cba0d19311b1a105b241
+  bytes: 3349
+  lines: 32
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0146
+  path: app/cliente/documentos/page.tsx
+  sha256: 1cbc8cdd2d2f3995ee52ad9a7d7a65a69ebbb558003188c573a2243828285121
+  bytes: 2820
+  lines: 35
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0147
+  path: app/cliente/formularios/[id]/page.tsx
+  sha256: 777cf79a14ca585cc01323f09a46b4ad248aa888f9db38eaf6d1a3c185d32f65
+  bytes: 2132
+  lines: 18
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0148
+  path: app/cliente/formularios/page.tsx
+  sha256: 3d7569a1a403f5bc76b8c82252022fbf3a2ed0f5dd259372fd2e636099260647
+  bytes: 2530
+  lines: 15
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0149
+  path: app/cliente/layout.tsx
+  sha256: 1c9fa343c0b64eb0dd8d583146543a136b9a353359dfce3febc3c3418f4d9e42
+  bytes: 1616
+  lines: 25
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0150
+  path: app/cliente/midia/page.tsx
+  sha256: d58634571340df0a56f150c02a9a84f208aadc7f3ed327b17f4e58da113fe369
+  bytes: 2457
+  lines: 35
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0151
+  path: app/cliente/obras/[id]/page.tsx
+  sha256: b406cfe941338131042d5e6018ea8d841985b34b86a100647d1e29f12a7830be
+  bytes: 7000
+  lines: 56
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0152
+  path: app/cliente/obras/page.tsx
+  sha256: 53f99ee412e28ffb2f7252d11ff9cfabfc19bd12145b537dc32257bd0c81e7db
+  bytes: 2310
+  lines: 41
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0153
+  path: app/cliente/ocorrencias/[id]/page.tsx
+  sha256: da86ba840fe28b657c7f49747e7dc1b5ad8ea0ca5381927c8b0840337915f61c
+  bytes: 4718
+  lines: 7
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0154
+  path: app/cliente/ocorrencias/novo/page.tsx
+  sha256: 6761662c8ac2b1a82d9c0b747c6033ca88b9b6d8e5845e59abf478462b40938f
+  bytes: 1897
+  lines: 7
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0155
+  path: app/cliente/ocorrencias/page.tsx
+  sha256: a39fd1f442904b5503ab795e9499876e2633140745516105543f8d17db1bda94
+  bytes: 1590
+  lines: 7
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0156
+  path: app/cliente/orcamentos/page.tsx
+  sha256: 514dfd95c6a4893d2a9eed865e07c5f3e0c3e34034fb2a52b7699ba1be57168e
+  bytes: 3878
+  lines: 87
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0157
+  path: app/cliente/page.tsx
+  sha256: f509e178fdf9c656b070e6dba48958c88bd4d8f355fb5d71dad509c1bebcff8f
+  bytes: 3918
+  lines: 28
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0158
+  path: app/finance-operational.css
+  sha256: 595516d4d197c890867fc1c70d1d38eb49f04bd816a7161ba0c5574d4e930d8a
+  bytes: 3946
+  lines: 1
+  artifact_class: STYLESHEET
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Sem superfície de segurança ou lógica; coberta por build e
+    lint.
+- artifact_id: ART-0159
+  path: app/formularios/[token]/page.tsx
+  sha256: 0a4e1b6887f5df63af8e21647a28b82f2e95bc2b5ea04a6382fd2c48d715fe6e
+  bytes: 2469
+  lines: 19
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0160
+  path: app/fornecedores/cotacoes/[token]/page.tsx
+  sha256: b40b00d5f794af7fd21542f4b53d0aba0ba493e6d0c9e49e818684c292d1a4fc
+  bytes: 2958
+  lines: 22
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0161
+  path: app/globals.css
+  sha256: f53da34b9668850e87edf9a4da5f271ce582a52673b4cbeb4949280f73ed0955
+  bytes: 18164
+  lines: 417
+  artifact_class: STYLESHEET
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Sem superfície de segurança ou lógica; coberta por build e
+    lint.
+- artifact_id: ART-0162
+  path: app/inventory.css
+  sha256: cfc215abbda13923de627e205e1dcd18cd4b991a40ca83c73ff27b980239417e
+  bytes: 5614
+  lines: 1
+  artifact_class: STYLESHEET
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Sem superfície de segurança ou lógica; coberta por build e
+    lint.
+- artifact_id: ART-0163
+  path: app/layout.tsx
+  sha256: 78b82ec8cfb992252d67ae3c12313ef5aedd7945ddb47fa9df8ffe267eb2151f
+  bytes: 717
+  lines: 24
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0164
+  path: app/login/page.tsx
+  sha256: a6e8beb630e791cb38c7b481a13ca7222c3ca658609eca17e72c6949f2a1e95a
+  bytes: 1789
+  lines: 46
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0165
+  path: app/observability.css
+  sha256: 37da9f8a2875df6ace88590ee14493ecec0212589bcca85f140b3c7d8dd64315
+  bytes: 3705
+  lines: 1
+  artifact_class: STYLESHEET
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Sem superfície de segurança ou lógica; coberta por build e
+    lint.
+- artifact_id: ART-0166
+  path: app/page.tsx
+  sha256: 376750f0611f3ea7c037544d23feec5e79fdbd11fb8e8caf8751e39113bab39b
+  bytes: 993
+  lines: 27
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0167
+  path: app/procurement.css
+  sha256: 8bd8d50d87ecddbe4c6a9e0b8f306aacd3344cfca03c1fc927f357941415b5b4
+  bytes: 4525
+  lines: 1
+  artifact_class: STYLESHEET
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Sem superfície de segurança ou lógica; coberta por build e
+    lint.
+- artifact_id: ART-0168
+  path: app/quality.css
+  sha256: 7fcaf9b18fdfde3bbddb1f628f4a97ad73054fe4aff6df3eba1e3249ad409ef0
+  bytes: 9561
+  lines: 3
+  artifact_class: STYLESHEET
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Sem superfície de segurança ou lógica; coberta por build e
+    lint.
+- artifact_id: ART-0169
+  path: app/relationship.css
+  sha256: 2de0b70ee2dcc6cca38cc50557f19ecca2acf567d44c4dfc73c73bbb2bc258ab
+  bytes: 6297
+  lines: 1
+  artifact_class: STYLESHEET
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Sem superfície de segurança ou lógica; coberta por build e
+    lint.
+- artifact_id: ART-0170
+  path: app/reports.css
+  sha256: e1935b3b356219856cd48b37f351f4ea0c9d4bd06afe86c7648769edcd92963b
+  bytes: 4825
+  lines: 1
+  artifact_class: STYLESHEET
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Sem superfície de segurança ou lógica; coberta por build e
+    lint.
+- artifact_id: ART-0171
+  path: app/selecionar-organizacao/page.tsx
+  sha256: 0ec0465c88d964acea82f913c8bdbd570f9058db44af83a74ce8e3f99f078569
+  bytes: 1727
+  lines: 45
+  artifact_class: NEXT_ROUTE_VIEW
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0172
+  path: app/signatures.css
+  sha256: 740f5dd27aa87bc4fb20d4b4edce2029eded4f0485b8f3ebec802f1fb6fdeb84
+  bytes: 4141
+  lines: 10
+  artifact_class: STYLESHEET
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Sem superfície de segurança ou lógica; coberta por build e
+    lint.
+- artifact_id: ART-0173
+  path: app/stage12.css
+  sha256: 9ab58f462f5074715ac296bcb046360e3527e37ca2f7bc00021b558451380b45
+  bytes: 4740
+  lines: 79
+  artifact_class: STYLESHEET
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Sem superfície de segurança ou lógica; coberta por build e
+    lint.
+- artifact_id: ART-0174
+  path: app/stage20.css
+  sha256: c97f1db160e3444dd4849375771f8fb8844d0e1fbec60ac2ccfdd730026ce613
+  bytes: 785
+  lines: 38
+  artifact_class: STYLESHEET
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Sem superfície de segurança ou lógica; coberta por build e
+    lint.
+- artifact_id: ART-0175
+  path: components/file-security/file-security-status.tsx
+  sha256: 3118d6177641ff5e7c6078f7539b02c97a65fcb56bcc2fa26aa27d98dc7eaf19
+  bytes: 584
+  lines: 21
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0176
+  path: components/finance/installments-builder.tsx
+  sha256: 559bf32f9da2ff7993c55b34abac71deab52b66db8af0ab3cf0518986e676bf6
+  bytes: 2391
+  lines: 15
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0177
+  path: components/finance/measurement-items-builder.tsx
+  sha256: 02e86eab9a72379d945a79aca769b8ad3478dd57ec7562127e94a05ab96e9ad2
+  bytes: 2810
+  lines: 14
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0178
+  path: components/finance/settlement-form.tsx
+  sha256: 9b512db2c592808aa826d0331c087c2d66f7a0cb511f2c75448dabafa60212da
+  bytes: 1878
+  lines: 6
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0179
+  path: components/inventory/inventory-metric-card.tsx
+  sha256: cdab9b73398082d0c12b419d43f7644a23a05c30f2f685569dda20dbae3860a7
+  bytes: 312
+  lines: 1
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0180
+  path: components/inventory/inventory-movement-form.tsx
+  sha256: f7b98cec676e869d83634c8e189a01548db98842be4aeff3b536274dcb661545
+  bytes: 5689
+  lines: 24
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0181
+  path: components/inventory/inventory-navigation.tsx
+  sha256: 3cb011446f6672fd7eccb35b94a361f6bc661655787893ef0a5998d5821bebff
+  bytes: 509
+  lines: 9
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0182
+  path: components/inventory/inventory-receipt-import-form.tsx
+  sha256: c4012642436dfedacdd066c2fdef7e270d2c1ac7f5040459775dc4045fa51088
+  bytes: 2191
+  lines: 13
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0183
+  path: components/inventory/inventory-reservation-consume-form.tsx
+  sha256: 9655efd25faa0e0e68ceb1ae60380431772bdd59e9d4b4b9f9be2cb97b6847a9
+  bytes: 1693
+  lines: 12
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0184
+  path: components/inventory/inventory-reservation-form.tsx
+  sha256: c4925acaeaee5351e69666879bee150b023c79ca7691f1cf6614e1a992bb192f
+  bytes: 4124
+  lines: 18
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0185
+  path: components/inventory/inventory-stocktake-count-form.tsx
+  sha256: bcfeffca95940e15b0edf03f75accf7899586ca52e4df0594699b811dd7ad032
+  bytes: 2607
+  lines: 13
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0186
+  path: components/observability/observability-navigation.tsx
+  sha256: 05ac06fc6eb6e60af3fe3e02544af64cd0ac686d83a7f3891a6e28d456ffb106
+  bytes: 725
+  lines: 11
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0187
+  path: components/procurement/receipt-form.tsx
+  sha256: 9a494cb3d525d586fd284f8da3f2616bb84cf48912e8a0560b2cd3485a063b5d
+  bytes: 2853
+  lines: 20
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0188
+  path: components/procurement/request-items-builder.tsx
+  sha256: 59f3339cd5cf5d85fcebefec9cd3b7bdd14599e82e16f399854e9900ce29aed4
+  bytes: 2695
+  lines: 25
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0189
+  path: components/procurement/supplier-quote-form.tsx
+  sha256: 101c811c498d46d081dd5b64de110f38823192baf725694c730b1920d43c4a18
+  bytes: 3532
+  lines: 21
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0190
+  path: components/project-nav.tsx
+  sha256: 01ee6c54995de38b1e3503af590b6a19d84044cbe7bd8de81c76ba0e6703157a
+  bytes: 595
+  lines: 23
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0191
+  path: components/quality/quality-form-builder.tsx
+  sha256: 422050470775d1c7a9c2c7e3aeff41cd75fb87644f0e7ada6b939f1ad26924f1
+  bytes: 6403
+  lines: 37
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0192
+  path: components/quality/quality-form-renderer.tsx
+  sha256: aa0c4c216c9d567fec72ea10fef1c2769373623319db954810f72bf7024bb574
+  bytes: 4357
+  lines: 33
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0193
+  path: components/relationship/relationship-metric.tsx
+  sha256: cccda4f860ff5bacc9deac0f75f698a25623793899a52347b2b0d8f9057408a7
+  bytes: 334
+  lines: 1
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0194
+  path: components/relationship/relationship-navigation.tsx
+  sha256: b3d8d43811177c73e20eab02180020893dc692048559a4b681f1293195c139db
+  bytes: 685
+  lines: 11
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0195
+  path: components/reports/metric-card.tsx
+  sha256: df09356206e109bfaef5639574e25e282752b4df22d1a80ad95e262d35e71268
+  bytes: 356
+  lines: 5
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0196
+  path: components/reports/report-navigation.tsx
+  sha256: d879f2382da8847bc9c5d70d6ab666cab6e3b94b3a57c0ed19a8e0d2aa2c22ad
+  bytes: 551
+  lines: 9
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0197
+  path: components/signatures/signature-pad.tsx
+  sha256: f597073785a3a5c2c89d3df9056b725e474621004b13793f1ab20329ed671398
+  bytes: 2605
+  lines: 50
+  artifact_class: REACT_COMPONENT
+  audit_surface: UI
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por lint, typecheck e varreduras dirigidas (XSS, uso
+    de cliente administrativo, process.env); sem leitura integral.
+- artifact_id: ART-0198
+  path: deploy/file-security-free/Caddyfile
+  sha256: 49eda95cfdc1eb16b238f7bc830920276b2ae28bc3dc7294f047e04b46b0558a
+  bytes: 265
+  lines: 13
+  artifact_class: DEPLOY_CONFIG
+  audit_surface: OPERATIONS
+  analysis_status: ANALYZED
+- artifact_id: ART-0199
+  path: deploy/file-security-free/docker-compose.yml
+  sha256: 443e7a4721e93d66881cfe4bcffb21cbe4ebddbaf8b439470d2b43e077961687
+  bytes: 1272
+  lines: 60
+  artifact_class: DEPLOY_CONFIG
+  audit_surface: OPERATIONS
+  analysis_status: ANALYZED
+- artifact_id: ART-0200
+  path: deploy/file-security-free/env.example
+  sha256: 514c85ac35b4a122344e10e5f422198a05bd5049446e4bd3daa79003e0b3e461
+  bytes: 176
+  lines: 5
+  artifact_class: DEPLOY_CONFIG
+  audit_surface: OPERATIONS
+  analysis_status: ANALYZED
+- artifact_id: ART-0201
+  path: diretrizes/ARQUITETURA.md
+  sha256: dc121a87019083f125a8956947bf8f3a4de05907c1b398943e420ff84d38adba
+  bytes: 9287
+  lines: 333
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0202
+  path: diretrizes/ESTADO-ATUAL.json
+  sha256: d809ee248956748ca3f0c9dd0f81ae643c354454b999c5265ac0e43be4c686f2
+  bytes: 3806
+  lines: 119
+  artifact_class: STATE_REGISTER
+  audit_surface: GOVERNANCE
+  analysis_status: ANALYZED
+- artifact_id: ART-0203
+  path: diretrizes/HISTORICO-ETAPAS.md
+  sha256: 539c1dc790f6fe6f1af35f46323c64cc51189438f4092a626c4f6a1ab282d9c5
+  bytes: 8606
+  lines: 159
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0204
+  path: diretrizes/INVENTARIO.md
+  sha256: 14aa1b39d3cbfb54594db96b96e3cb45a0041f810bf6da1ae6e0880bce7c0996
+  bytes: 9950
+  lines: 344
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0205
+  path: diretrizes/MODULOS.md
+  sha256: 7088ddce4d4a3fd5bda678267da07149af36e02a9812b66aff499c0d58a00306
+  bytes: 9747
+  lines: 328
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0206
+  path: diretrizes/PADRAO-DOCUMENTACAO.md
+  sha256: edd202db312753c0e1bfb9ff6ea4eaf3b7baedf1b50036e8ec2248d984a8e3ab
+  bytes: 5653
+  lines: 224
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0207
+  path: diretrizes/README.md
+  sha256: b311a328014e5095b16ecaa621f5b049c6361ec3eb9a587a0f12ea2d015663b6
+  bytes: 4021
+  lines: 80
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0208
+  path: diretrizes/RECUPERACAO.md
+  sha256: 5fc7a68e592ce21098768d0d061f8167c1d252f7097d8b2e2d0b739a0fcc8cce
+  bytes: 8609
+  lines: 310
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0209
+  path: diretrizes/ROADMAP.md
+  sha256: ee9d636c948f9fd5d2480d3819b4bed4fd0ff73884ebf15f435d9ea462d00b33
+  bytes: 9169
+  lines: 298
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0210
+  path: diretrizes/SPEC.md
+  sha256: 60ae39370058ce6bc1a31b3ba43a805ad9403a8661fd5d5b58d562accecf46d3
+  bytes: 6053
+  lines: 148
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0211
+  path: diretrizes/UI-UX-PRO-MAX.md
+  sha256: 345f53ba57ae7a1c0194526688f06b7c0b99fb23cd0001254448e736ab1cc3da
+  bytes: 10507
+  lines: 288
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0212
+  path: diretrizes/VACINAS.md
+  sha256: 338e99f4f557f7d39e5f84cfedb37b8b2cecfd080bb7c86924afba74419546e8
+  bytes: 4757
+  lines: 95
+  artifact_class: CANONICAL_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0213
+  path: diretrizes/vacinas/VACINA-001-RELACOES-SUPABASE.md
+  sha256: 97cc1bb83bc97cb09770594cbf05b5c7e4c39e7bbdd522ea009616a2f331c738
+  bytes: 2049
+  lines: 71
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0214
+  path: diretrizes/vacinas/VACINA-002-VALIDADORES-SEMANTICOS.md
+  sha256: 24374a3c8d7416681772ec1fa41f90015e8711fab20363a6a51172b4a3942f73
+  bytes: 1702
+  lines: 44
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0215
+  path: diretrizes/vacinas/VACINA-003-LEDGER-MIGRATIONS-SUPABASE.md
+  sha256: 5a178d9ad59e996ca84cd77f9114bbbc14510fd794331867595fb5d8e603c18f
+  bytes: 1447
+  lines: 36
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0216
+  path: diretrizes/vacinas/VACINA-004-PRIVILEGIOS-RPCS.md
+  sha256: f29afe3c6a0ca14d7cbb0ecb4a3d1168fdd21696584ef6fa76de5669e38bdc40
+  bytes: 1463
+  lines: 44
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0217
+  path: diretrizes/vacinas/VACINA-005-WORKFLOW-PROTEGIDO.md
+  sha256: fb2a0873dcc68d2a53b5cf5fd6d90677b521abb60f57b602622f273b52a6c5dc
+  bytes: 1822
+  lines: 49
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0218
+  path: diretrizes/vacinas/VACINA-006-RUNTIME-GITHUB-ACTIONS.md
+  sha256: 661775ad9c42f297497ee376648fb1c4262d5c29b08888cc4d7698d8fc8425f1
+  bytes: 2057
+  lines: 66
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0219
+  path: diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md
+  sha256: a796c4a31dffb09d1604b97575391bc2a6c3fff572935a479057205890770bd2
+  bytes: 1890
+  lines: 68
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0220
+  path: diretrizes/vacinas/VACINA-008-INSTALACAO-HOMOLOGACAO.md
+  sha256: af331e823d588b0335aa02a422469f2a2260ea5030619f7c46051f0420a61559
+  bytes: 1918
+  lines: 52
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0221
+  path: diretrizes/vacinas/VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md
+  sha256: 8a664ab27df6793c5e2de36004a89ddf1bf7f08fa5b9eef0f4c11c907e01bc9d
+  bytes: 2448
+  lines: 77
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0222
+  path: diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md
+  sha256: 846f19b7e096512a2806429d5532be30a041fedca2040aeaa597a919f7213e6b
+  bytes: 1497
+  lines: 51
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0223
+  path: diretrizes/vacinas/VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md
+  sha256: 87d364da5ec4b5ec9e78d7725a59014b7ddb852a9a1a8fa848de653d7f5c3574
+  bytes: 1692
+  lines: 49
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0224
+  path: diretrizes/vacinas/VACINA-012-ESTADO-POS-MERGE.md
+  sha256: e4924c005a1c479f39df5a0962d1e03e70cc50d0235fadbfb4952d5175173dd8
+  bytes: 3112
+  lines: 76
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0225
+  path: diretrizes/vacinas/VACINA-013-FIXTURES-RESPEITAM-FRONTEIRAS-SENSIVEIS.md
+  sha256: 73c6f77f11c6f46f6db731b72fbf6f9707cee06c0c5ed23c67ff6b172b236fe2
+  bytes: 3280
+  lines: 80
+  artifact_class: VACCINE_RECORD
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador de vacinas executado no baseline.
+- artifact_id: ART-0226
+  path: docs/ADENDO-ESCOPO-MULTIOBRA-ASSINATURAS-PERMISSOES.md
+  sha256: be5644f8c2015a62ca47b30b8da0410ed3753e966425ef0cdfba9b31a15be231
+  bytes: 8740
+  lines: 289
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0227
+  path: docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md
+  sha256: ac1608bc09acae8ba0a3ea33f80cbe8a738e8d411d890faba74f1367cc909157
+  bytes: 8872
+  lines: 364
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0228
+  path: docs/ETAPA-09-FINANCEIRO-CONTRATOS.md
+  sha256: dfd77e439151b45ad6712e39ec582a013bea05a6ea0842beff6171dd07c65774
+  bytes: 6309
+  lines: 303
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0229
+  path: docs/ETAPA-09-TEST-PLAN.md
+  sha256: 650975e077d12cb9d8e010337073d11f295fba61d68f7776e4bd27ff052e5a44
+  bytes: 2652
+  lines: 111
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0230
+  path: docs/ETAPA-10-HOMOLOGACAO-SUPABASE.md
+  sha256: 716b24ddfb9caad1e64c02ded0c691c56dda804f8a9116aa81e1e3830d657d60
+  bytes: 5152
+  lines: 140
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0231
+  path: docs/ETAPA-11-HOMOLOGACAO-AUTENTICADA.md
+  sha256: df34ef4a6ea1f1547e65126dafff4e90877c6a6fd668d779cdf3d895bc59daff
+  bytes: 3427
+  lines: 119
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0232
+  path: docs/ETAPA-12-1-NUCLEO-MODULAR-E-ACESSOS.md
+  sha256: a08e04337924b64b92a4cb536923259117b07d6a0ff22e2c7c7b216f9a3741ce
+  bytes: 5179
+  lines: 146
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0233
+  path: docs/ETAPA-12-2-ASSINATURA-AVANCADA.md
+  sha256: 0098b4b53cb1f2ca07fff8f4ab21b4fe1b81e0b711f590016124f0f6f8883768
+  bytes: 5729
+  lines: 215
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0234
+  path: docs/ETAPA-12-GESTAO-DE-OBRAS.md
+  sha256: 506e6383412449c7d5d72c0361a55bff0c8f0f9916db309505e70301cacd9187
+  bytes: 1517
+  lines: 50
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0235
+  path: docs/ETAPA-13-QUALIDADE-FORMULARIOS.md
+  sha256: 66b6a8cdabd2bf7f663dfa8ac439785516b437d60d320013d2de0e85e0d52ed7
+  bytes: 4676
+  lines: 209
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0236
+  path: docs/ETAPA-14-COMPRAS-SUPRIMENTOS.md
+  sha256: cac8c956e253bb6151a8be0c0a49f6b60d75b15e43f14785b74b9d4a20d5c0fe
+  bytes: 4463
+  lines: 155
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0237
+  path: docs/ETAPA-15-FINANCEIRO-OPERACIONAL.md
+  sha256: 16a7f20b827515e5bd51d36ac4e1043cbeb24c63321d2be7f30ec63ba4afa2be
+  bytes: 4985
+  lines: 198
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0238
+  path: docs/ETAPA-16-RELATORIOS-INDICADORES-EXECUTIVOS.md
+  sha256: 71b87d6b41a1e8a452a7e6769789b08376b9dc7f0cc46b70b9986c14dcdaaf6c
+  bytes: 2257
+  lines: 76
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0239
+  path: docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md
+  sha256: 174f8c0c0ccdeb36bb7ba8c537248831418662470f607cd28e6ec9be4ad18a11
+  bytes: 15203
+  lines: 526
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0240
+  path: docs/ETAPA-17-HOMOLOGACAO-POS-MERGE.md
+  sha256: c8dde2b085cdf1a18eedaecf025d00e1590677c3113672437d843efe1444c1e7
+  bytes: 6187
+  lines: 169
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0241
+  path: docs/ETAPA-18-CRM-CLIENTES-SAC.md
+  sha256: 7973f9d20fff898d3337e9e83a7268cbdb8d8336ea39f043d49184b22bac63ab
+  bytes: 3929
+  lines: 120
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0242
+  path: docs/ETAPA-18-E2E-CONCORRENTE-SUPABASE.md
+  sha256: 084799371ae3ae71e407c56290a96e98faa8491288a828873a0a6d27ac391706
+  bytes: 4450
+  lines: 121
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0243
+  path: docs/ETAPA-19-AUDITORIA-OBSERVABILIDADE.md
+  sha256: c0b3ac04dc6029f8cf5593b6fdd027460a1f5e09940a8b9d26ac35e3bac4ee4b
+  bytes: 7299
+  lines: 240
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0244
+  path: docs/ETAPA-20-BACKUP-RESTAURACAO.md
+  sha256: 0355947fabe0b2a033cc918841e889695cb622f5c44b045827d22304faaf2c06
+  bytes: 5775
+  lines: 188
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0245
+  path: docs/ETAPA-20-CLAMAV-GRATUITO.md
+  sha256: 9b9e33b18c556a2a1225d9bbde96c0a13840548f1e46f058126cbdfc7dd4c4b6
+  bytes: 6305
+  lines: 251
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0246
+  path: docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md
+  sha256: 8855254ec34500e89dd507f2532200a928fc21c8a0d541cf9fca33380cb4c2a3
+  bytes: 5170
+  lines: 169
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0247
+  path: docs/ETAPA-20-PRONTIDAO-PRODUCAO.md
+  sha256: 8cb3dd74e1036eaae360806cea9487184f9ea2661de614384e833cd772b8a700
+  bytes: 7835
+  lines: 273
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: ANALYZED
+- artifact_id: ART-0248
+  path: docs/ETAPA-20-PROTECAO-ANEXOS.md
+  sha256: 365cdad2f5c50cd2b41c3f18da6bfb45017a3a2ee1550d043b2f55eb998088e7
+  bytes: 9402
+  lines: 265
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: ANALYZED
+- artifact_id: ART-0249
+  path: docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md
+  sha256: 2ff13a94ce65c7c7580615b01ba2d7a8b80c7b3ea6d63ac8f031fcaa79291934
+  bytes: 3857
+  lines: 116
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0250
+  path: docs/RELATORIO-HOMOLOGACAO-ETAPA-12.md
+  sha256: 1d35bddd10cdd78efdfd8cd36f32d145042579b3c38eca652bf019251f39cbf1
+  bytes: 3321
+  lines: 99
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0251
+  path: docs/RELATORIO-HOMOLOGACAO-ETAPA-17.md
+  sha256: 75b06dd99805315a8b9ba4e9245332b1e2b88a85226f18d5724b3a8f70ea82ef
+  bytes: 8715
+  lines: 255
+  artifact_class: STAGE_DOC
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pelo validador estrutural de documentação executado
+    no baseline.
+- artifact_id: ART-0252
+  path: eslint.config.mjs
+  sha256: c113257c3c7e6ceab8521cef9dc2c68a49c521eae8642315d87ab852dc0b1233
+  bytes: 317
+  lines: 9
+  artifact_class: BUILD_CONFIG
+  audit_surface: CONFIG
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, lint e build declarados no CI.
+- artifact_id: ART-0253
+  path: lib/auth.ts
+  sha256: 791fc951cce993b6925360c03cf00e3f15936ae47b134a2b7a829892cde265d9
+  bytes: 2126
+  lines: 63
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: ANALYZED
+- artifact_id: ART-0254
+  path: lib/authorization.ts
+  sha256: 19b5ca7581e81ac45185b6dc512013b3dccdd8650c1daea9472bc5f383f97d18
+  bytes: 4652
+  lines: 96
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: ANALYZED
+- artifact_id: ART-0255
+  path: lib/domain.ts
+  sha256: fedbb525fba2ccfe4423fcdbb6717502ca2e02ed000906b593f5519f465b8e99
+  bytes: 1832
+  lines: 80
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0256
+  path: lib/file-security/domain.ts
+  sha256: bdd0464e883ecc1864f0010a3b37f60d74c2619eec94a40be3c2c71a18ae14ea
+  bytes: 4537
+  lines: 114
+  artifact_class: CORE_LIBRARY
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0257
+  path: lib/file-security/gateway-auth.ts
+  sha256: 5c27811ca180c18033575c52f9c664e8fb182bc3b9da20d0e424613d9a58c90c
+  bytes: 1498
+  lines: 25
+  artifact_class: CORE_LIBRARY
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0258
+  path: lib/file-security/health-auth.ts
+  sha256: 3650c134ba79601032eea15a897d64febab3b488d34de9d52a568be3be616df1
+  bytes: 1460
+  lines: 33
+  artifact_class: CORE_LIBRARY
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0259
+  path: lib/file-security/server.ts
+  sha256: 2237739c4e6363b21a3ffa939772a34d11090bf564b937b3ff83904edee13489
+  bytes: 12274
+  lines: 280
+  artifact_class: CORE_LIBRARY
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0260
+  path: lib/finance.test.ts
+  sha256: 8785306a8eb5dcc4e86816e960e7a87b13e24af300079374d96f34014af3b0c5
+  bytes: 1938
+  lines: 63
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0261
+  path: lib/finance.ts
+  sha256: b68f99c3a7018317f53fd608b101391866e6089a5d7fc4eff9eb58bb2d4de3e9
+  bytes: 7613
+  lines: 230
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0262
+  path: lib/financial/cash-flow.test.ts
+  sha256: 9fea2380783b171079d6f5992a1cf978b60e13c96721d4b1c1fb361e907bd259
+  bytes: 1090
+  lines: 23
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0263
+  path: lib/financial/cash-flow.ts
+  sha256: 2b411d044eea88c64a1ec2d5bf256bc9fbf436404e6ba27f18e05b07a3eef0f9
+  bytes: 1785
+  lines: 25
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0264
+  path: lib/inventory/domain.ts
+  sha256: bf6bd1955151c793871b61708492f04880d28dbb107aa8718b88eb214d11447d
+  bytes: 7323
+  lines: 91
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0265
+  path: lib/inventory/server.ts
+  sha256: d68d1f4c4b44eefdd82849553a3830f14096170e24d99f0199bdb16a6a8eea7d
+  bytes: 695
+  lines: 13
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0266
+  path: lib/modules/registry.test.ts
+  sha256: b6dde6070dd1dc862420e020bb2ef55c9299c105e46bf6f5b6dc9eebe437bf4f
+  bytes: 992
+  lines: 23
+  artifact_class: CORE_LIBRARY
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0267
+  path: lib/modules/registry.ts
+  sha256: 8c6dfae3bba1afee5588fbe4ac7166a6d61451f8d274d2091ad6abfe91971ac1
+  bytes: 6326
+  lines: 73
+  artifact_class: CORE_LIBRARY
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0268
+  path: lib/observability/domain.ts
+  sha256: c0996a431cb07b01d580d6480d4c2732aa217bd9706cb6dd3af216a64b1010b6
+  bytes: 3286
+  lines: 39
+  artifact_class: CORE_LIBRARY
+  audit_surface: OBSERVABILITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0269
+  path: lib/observability/server.ts
+  sha256: 24f965f16c09847f0b4f2711540c995d5f329c872df44c5e5bd8a48171e00007
+  bytes: 4030
+  lines: 53
+  artifact_class: CORE_LIBRARY
+  audit_surface: OBSERVABILITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0270
+  path: lib/organization-context.ts
+  sha256: 0bae8ffef8ad289df32fd7662708c5dd1b1985b17da03777be5d9fd1ee65dc4b
+  bytes: 1002
+  lines: 34
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: ANALYZED
+- artifact_id: ART-0271
+  path: lib/pdf.ts
+  sha256: 3feddb14526d1c0a4de1649518a5a6262875cd595fa2f1679370c735aef56eba
+  bytes: 6036
+  lines: 169
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0272
+  path: lib/procurement/comparison.test.ts
+  sha256: 12dd02ac4883b89597225b7a24feb6adbbac314bb8d68059751bf8918172a574
+  bytes: 1392
+  lines: 33
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0273
+  path: lib/procurement/comparison.ts
+  sha256: df795a802d8f57b43f2b223e56a834ae86ff564690cfff9591b8ef15d5f3887b
+  bytes: 1926
+  lines: 41
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0274
+  path: lib/public-errors.ts
+  sha256: 63b18ac32fe3a1d43954cc86ba9fbbcdac7de1334d4e1b1ab656970364a29f44
+  bytes: 701
+  lines: 29
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: ANALYZED
+- artifact_id: ART-0275
+  path: lib/quality/database.ts
+  sha256: 5306c5aa1f60fcf849e94a95a23782db3d95bd5833ea4b0c463b528172ac5fb4
+  bytes: 785
+  lines: 16
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0276
+  path: lib/quality/forms.test.ts
+  sha256: 1bda1c17d0895aaba2878c0cac1684802e28ad0455466fdf156cd01ea5119805
+  bytes: 1480
+  lines: 29
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0277
+  path: lib/quality/forms.ts
+  sha256: 348f07585ae3327a9b7bf7e4d34838f5289a6520f6103c1c0d835007434ec5d8
+  bytes: 5282
+  lines: 109
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0278
+  path: lib/relationship/domain.ts
+  sha256: 54143841c947d46c433a3c3dc37f51ad296575b367282b54b13de303aeee3c29
+  bytes: 4668
+  lines: 66
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0279
+  path: lib/relationship/server.ts
+  sha256: 82a3c92897da18054d1db3feb2b7419ede45dcfc45212207017e4f14cda8b496
+  bytes: 7534
+  lines: 94
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0280
+  path: lib/reports/metrics.test.ts
+  sha256: 77f75f612eb3ff280cf62a93d66854d18d313a5bde630e78f8e7f3ddca1008d1
+  bytes: 2089
+  lines: 58
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0281
+  path: lib/reports/metrics.ts
+  sha256: aebaf97624395cfd77ea9244f414c1d20c5bd6d8e06f51ed08779aca3e84b81c
+  bytes: 8421
+  lines: 18
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0282
+  path: lib/reports/server.ts
+  sha256: 3879b1f06a9adb436b92faeb62eb0c72051d455cc49cb9b4e68c252f7b82bde9
+  bytes: 968
+  lines: 13
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0283
+  path: lib/signatures/crypto.ts
+  sha256: abf4a2b6bc2fba73346a949c9369dac47c0f11e03bd3befeca98d4a0ab3e16ea
+  bytes: 1230
+  lines: 30
+  artifact_class: CORE_LIBRARY
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0284
+  path: lib/signatures/index.ts
+  sha256: f4cb5d53eff34fa22a7fc8de5bc68d096b572ee28b561386719c503c94b5029d
+  bytes: 2576
+  lines: 88
+  artifact_class: CORE_LIBRARY
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0285
+  path: lib/stage12.test.ts
+  sha256: 6ad8cbcc87081f4706343f67fac5daa44a09d2b0cae6ccdba8a78dbb9a992a58
+  bytes: 558
+  lines: 17
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0286
+  path: lib/stage12.ts
+  sha256: 6292c8d69acbc0ceb98d5c2edecc37ebe83489fdc9d58249ef1ed35a48d27dd3
+  bytes: 1532
+  lines: 42
+  artifact_class: CORE_LIBRARY
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, testes e varreduras dirigidas; sem leitura
+    integral.
+- artifact_id: ART-0287
+  path: lib/supabase/admin.ts
+  sha256: 08818194b100a8a06392d0d8314d9e668ac78a705d25d7f8a1ddaef9229ebe87
+  bytes: 513
+  lines: 19
+  artifact_class: CORE_LIBRARY
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0288
+  path: lib/supabase/relations.ts
+  sha256: 88240c9e8ea4d8fe5725cb7cd8ad93d1d1887f399e360550bf71f60c11a6bf32
+  bytes: 1128
+  lines: 35
+  artifact_class: CORE_LIBRARY
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0289
+  path: lib/supabase/server.ts
+  sha256: 32af6638b09dcbfe4407447ede1c96c447be042b2ff7b66ed14e4cb894ed52ef
+  bytes: 846
+  lines: 29
+  artifact_class: CORE_LIBRARY
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0290
+  path: next-env.d.ts
+  sha256: 89be6d6426b0065c500bef67188206acc7d7b506127f185a77ac4d98eb2f57bc
+  bytes: 126
+  lines: 4
+  artifact_class: BUILD_CONFIG
+  audit_surface: CONFIG
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, lint e build declarados no CI.
+- artifact_id: ART-0291
+  path: next.config.ts
+  sha256: b97415fc22cd2154f3e2a501c20d80fa5090fced78d241e569a28db5c5ecf267
+  bytes: 1314
+  lines: 44
+  artifact_class: BUILD_CONFIG
+  audit_surface: CONFIG
+  analysis_status: ANALYZED
+- artifact_id: ART-0292
+  path: package.json
+  sha256: bb997f76afda07f0eb4896a922914c7c65034e6574f9844e667b9c967db05db5
+  bytes: 2760
+  lines: 63
+  artifact_class: BUILD_CONFIG
+  audit_surface: CONFIG
+  analysis_status: ANALYZED
+- artifact_id: ART-0293
+  path: pnpm-workspace.yaml
+  sha256: a2e0602ef69b476ef4c00c234f046dd91201fd429b133ee5a473a1fd178072b9
+  bytes: 66
+  lines: 6
+  artifact_class: BUILD_CONFIG
+  audit_surface: CONFIG
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, lint e build declarados no CI.
+- artifact_id: ART-0294
+  path: proxy.ts
+  sha256: 2b85f86b17046e6abc3804d5dcb50cac85908e1bf96aaf3f73677c6bb8681748
+  bytes: 4036
+  lines: 107
+  artifact_class: BUILD_CONFIG
+  audit_surface: CONFIG
+  analysis_status: ANALYZED
+- artifact_id: ART-0295
+  path: python/quality_forms/__init__.py
+  sha256: b394c76bc3cba4210f4f19712ef669721364b20403f35586e657ddcad7147f00
+  bytes: 470
+  lines: 25
+  artifact_class: PYTHON_MODULE
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pela execução dos testes unitários de python/tests.
+- artifact_id: ART-0296
+  path: python/quality_forms/cli.py
+  sha256: becda651743f2c2f4131ec6a373521f4bcd4713f779d91896281fcee45eb252c
+  bytes: 1595
+  lines: 37
+  artifact_class: PYTHON_MODULE
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pela execução dos testes unitários de python/tests.
+- artifact_id: ART-0297
+  path: python/quality_forms/models.py
+  sha256: fdd5f6e31ff34f5af0b9a0ea22c459e6d5a5549a50564e27d3e34a278026d235
+  bytes: 10217
+  lines: 273
+  artifact_class: PYTHON_MODULE
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pela execução dos testes unitários de python/tests.
+- artifact_id: ART-0298
+  path: python/quality_forms/render.py
+  sha256: 00058333e1d54198da527bd069c46ae5f0bd01db788117ed82bb01c8bc7f8f38
+  bytes: 4117
+  lines: 97
+  artifact_class: PYTHON_MODULE
+  audit_surface: APPLICATION_LOGIC
+  analysis_status: LIMITED
+  analysis_limitation: Coberta pela execução dos testes unitários de python/tests.
+- artifact_id: ART-0299
+  path: python/tests/test_quality_forms.py
+  sha256: 0943366bf1e3f4752dff6b7629fceba414cb9dc60a171074fb1f7be5e1c08af5
+  bytes: 3418
+  lines: 89
+  artifact_class: UNIT_TEST
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Executada via vitest/unittest no baseline.
+- artifact_id: ART-0300
+  path: scripts/provision-homologation-users.mjs
+  sha256: 34c2f0ecf11abe3c31f90575f3ce9464b0990e0cca80589b9dc6025ad1cb5d66
+  bytes: 4377
+  lines: 136
+  artifact_class: OPERATIONAL_SCRIPT
+  audit_surface: OPERATIONS
+  analysis_status: LIMITED
+  analysis_limitation: Requer credenciais operacionais indisponíveis localmente; não
+    executada.
+- artifact_id: ART-0301
+  path: scripts/run-signature-conversion-worker.mjs
+  sha256: d9d3a3d9b8ce32b52f19242060b1cd7d50a5d5e5b5a1d1e74b12780b3e05ce74
+  bytes: 3576
+  lines: 60
+  artifact_class: OPERATIONAL_SCRIPT
+  audit_surface: OPERATIONS
+  analysis_status: LIMITED
+  analysis_limitation: Requer credenciais operacionais indisponíveis localmente; não
+    executada.
+- artifact_id: ART-0302
+  path: scripts/run-signature-delivery-worker.mjs
+  sha256: 439aa453a75176c51f115bac85a69fd51e468581ca9eddc73d00f6721a986186
+  bytes: 3325
+  lines: 65
+  artifact_class: OPERATIONAL_SCRIPT
+  audit_surface: OPERATIONS
+  analysis_status: LIMITED
+  analysis_limitation: Requer credenciais operacionais indisponíveis localmente; não
+    executada.
+- artifact_id: ART-0303
+  path: scripts/run-stage11-e2e.mjs
+  sha256: d700b9d2b422f35964f89f6be718d59a2349b7e81a46cfd6dd9cd500bba5b488
+  bytes: 21910
+  lines: 719
+  artifact_class: E2E_RUNNER
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Requer ambiente Supabase de homologação indisponível localmente;
+    não executada nesta auditoria.
+- artifact_id: ART-0304
+  path: scripts/run-stage18-concurrent-e2e.mjs
+  sha256: 55b837267a8292228d36f594a440342cc3c23a9a109a1504e56bb86acd71df6e
+  bytes: 10259
+  lines: 153
+  artifact_class: E2E_RUNNER
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Requer ambiente Supabase de homologação indisponível localmente;
+    não executada nesta auditoria.
+- artifact_id: ART-0305
+  path: scripts/run-stage20-backup-restore-drill.mjs
+  sha256: 0538e70b50e321bd72555f6975510c970255d387ce415313ea5dbaf070e2c008
+  bytes: 12203
+  lines: 267
+  artifact_class: OPERATIONAL_SCRIPT
+  audit_surface: OPERATIONS
+  analysis_status: LIMITED
+  analysis_limitation: Requer credenciais operacionais indisponíveis localmente; não
+    executada.
+- artifact_id: ART-0306
+  path: scripts/run-stage20-file-security-e2e.mjs
+  sha256: 41ec288780b7cd108017c28a6c56ca6a107446e288e3eb737dada29c20c3c36c
+  bytes: 4420
+  lines: 122
+  artifact_class: E2E_RUNNER
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Requer ambiente Supabase de homologação indisponível localmente;
+    não executada nesta auditoria.
+- artifact_id: ART-0307
+  path: scripts/run-stage20-file-security-gateway-e2e.mjs
+  sha256: c4234ce3f1be7c489bd53d9e34ae5a6aaa4c9ca6e7ee7656c1c7589ccde29405
+  bytes: 2584
+  lines: 57
+  artifact_class: E2E_RUNNER
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Requer ambiente Supabase de homologação indisponível localmente;
+    não executada nesta auditoria.
+- artifact_id: ART-0308
+  path: scripts/run-stage20-file-security-provider-health.mjs
+  sha256: d22b0f579153ad81de3ff456421e588acd4f0ec2d1658e1bd1a1d68baa74819e
+  bytes: 3165
+  lines: 71
+  artifact_class: OPERATIONAL_SCRIPT
+  audit_surface: OPERATIONS
+  analysis_status: LIMITED
+  analysis_limitation: Requer credenciais operacionais indisponíveis localmente; não
+    executada.
+- artifact_id: ART-0309
+  path: scripts/run-stage20-inventory-concurrency-e2e.mjs
+  sha256: da46f4a56f106b69ba87c01f1ab5b7f1d72f32454a952988fcdb0888b9488b23
+  bytes: 13230
+  lines: 280
+  artifact_class: E2E_RUNNER
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Requer ambiente Supabase de homologação indisponível localmente;
+    não executada nesta auditoria.
+- artifact_id: ART-0310
+  path: scripts/validate-documentation.mjs
+  sha256: 7aa7c96bebe999d54684cea32a8c308a5c120e35942010414d8dfa7e6d156d17
+  bytes: 12058
+  lines: 164
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0311
+  path: scripts/validate-stage12-1.mjs
+  sha256: bd93f99dc3813fb712b5e66bbf1b548c5e92dcb61bd2823eeba88ee5873fc8be
+  bytes: 3832
+  lines: 39
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0312
+  path: scripts/validate-stage12-2.mjs
+  sha256: 2f1c368f12fc8836fe0b8145b060835bc953900bba1264fdd17fdcd7ed7b7f59
+  bytes: 4679
+  lines: 53
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0313
+  path: scripts/validate-stage12.mjs
+  sha256: ca8620d88fe9b30a1a7071652fec70e78608f6f7ca68d70fcacc284e04d2ac1e
+  bytes: 3375
+  lines: 52
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0314
+  path: scripts/validate-stage13.mjs
+  sha256: b8061e78850bb8bb309bffe9cdaaa0efaf48c0de40c65133d653046508aaadbf
+  bytes: 4148
+  lines: 44
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0315
+  path: scripts/validate-stage14.mjs
+  sha256: a5b682174cac00f1b62f68122606855d4c837afa46aebd69a13a4e89150e63e1
+  bytes: 4992
+  lines: 51
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0316
+  path: scripts/validate-stage15.mjs
+  sha256: 1202067ed9b6b05018981d731092a09b245f3a85fbef9f2e0dead3f74986823f
+  bytes: 4863
+  lines: 49
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0317
+  path: scripts/validate-stage16.mjs
+  sha256: 0b2bbb801cb5c7adf7d8e31c0498543b5060b073b868fae597a3deb23d1c1597
+  bytes: 6015
+  lines: 56
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0318
+  path: scripts/validate-stage17.mjs
+  sha256: 2c6d2dbcf7957c22f4ad97ea935dcc175a87b7dc2339519b787b1fd3de9b52ef
+  bytes: 11058
+  lines: 125
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0319
+  path: scripts/validate-stage18.mjs
+  sha256: 9c19b490f80748f8676d11191609829beb254a58a644bdc6efac88bb661d9761
+  bytes: 7652
+  lines: 78
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0320
+  path: scripts/validate-stage19.mjs
+  sha256: 17f32224b2d2ab1a0d9aaaa3754830e1e656664a2453bf728a444548b47a3faf
+  bytes: 6499
+  lines: 61
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0321
+  path: scripts/validate-stage20.mjs
+  sha256: 7fcd25b17112556554ca6c030051b8070de00d66fb3f3c687065792e959bc9df
+  bytes: 14102
+  lines: 199
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0322
+  path: scripts/validate-stage9.mjs
+  sha256: 0e506ffd294b87e2b57ec2732a9f5252a283e87c2f8dfc1a330384be0ed2eb13
+  bytes: 7450
+  lines: 194
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0323
+  path: scripts/validate-supabase-migrations.mjs
+  sha256: add7ab1e801918f4d08d28eb04b1701460d4d1a923b2a3703ff66b92ada4488d
+  bytes: 2127
+  lines: 46
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0324
+  path: scripts/validate-vaccines.mjs
+  sha256: b04e5dbae42e27eadb00c9944ffd7e42eb8a39d1d513c0cbe7aea97b1e97e3f8
+  bytes: 14177
+  lines: 217
+  artifact_class: STRUCTURAL_VALIDATOR
+  audit_surface: GOVERNANCE
+  analysis_status: LIMITED
+  analysis_limitation: Executada no baseline (19/19 verificações) em vez de lida integralmente.
+- artifact_id: ART-0325
+  path: services/file-security-gateway/Dockerfile
+  sha256: 153d333cf9ff2530abf709fa4092d5e3eb9e8998ac8c1acdadf60584ba811f44
+  bytes: 171
+  lines: 12
+  artifact_class: CONTAINER_SPEC
+  audit_surface: OPERATIONS
+  analysis_status: ANALYZED
+- artifact_id: ART-0326
+  path: services/file-security-gateway/package.json
+  sha256: 943dadf64f2b3e99d7fa2aed5fafb676b16c60d101a5568a043119ebd0050665
+  bytes: 199
+  lines: 12
+  artifact_class: SERVICE_CODE
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: LIMITED
+  analysis_limitation: Lida integralmente.
+- artifact_id: ART-0327
+  path: services/file-security-gateway/server.mjs
+  sha256: fcda02a9600ae7bcc4712fb919f3a66ebc2cd240e156a2349919487ec983b7a5
+  bytes: 7070
+  lines: 163
+  artifact_class: SERVICE_CODE
+  audit_surface: SECURITY_AUTHZ
+  analysis_status: ANALYZED
+- artifact_id: ART-0328
+  path: supabase/migrations/20260719214500_stage10_homologation_hardening.sql
+  sha256: 13929b1392851f8c4d6afcab2346f7da331131050a9198b8edd446395b83afe0
+  bytes: 5944
+  lines: 79
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0329
+  path: supabase/migrations/20260719215500_stage11_signature_signer_idempotency.sql
+  sha256: 92dcdb1342c527484bc48c8ce015d3cff094f1510e6f8afb2b99ef7deb5dd42b
+  bytes: 169
+  lines: 6
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0330
+  path: supabase/migrations/20260719223000_stage12_planning_schema.sql
+  sha256: 55f052e3dca6c2b8447d67e4a236bd02e5cad9a0ca45c6e51b798a1536ced7aa
+  bytes: 18352
+  lines: 381
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0331
+  path: supabase/migrations/20260719223100_stage12_planning_functions.sql
+  sha256: 3515b9e291cb03e7ccc0d8e616e1bcf840e91014d9340b57a16e79275f749b1e
+  bytes: 15119
+  lines: 539
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0332
+  path: supabase/migrations/20260719223200_stage12_rls_core.sql
+  sha256: b78c0acf1dfe8c7cffcb84c1c76ad8757dba1d6c496ed4a70ed5522614574152
+  bytes: 2258
+  lines: 55
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0333
+  path: supabase/migrations/20260719223250_stage12_rls_resources.sql
+  sha256: 26dd103b57f680188a0ffe8f750c47632eedc878cd59fb41c2599c022a44766b
+  bytes: 1028
+  lines: 28
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0334
+  path: supabase/migrations/20260719223260_stage12_rls_baselines.sql
+  sha256: d5b11a9015ff5ab2b4f898adeca28e9bc7355b98de74eba8718c2450eb7b94f6
+  bytes: 744
+  lines: 30
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0335
+  path: supabase/migrations/20260719223275_stage12_rls_field_documents.sql
+  sha256: a7e003c95e92c0ea09453582bd2a30a1311c482a7be6b8234855c59846c43a72
+  bytes: 3709
+  lines: 74
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0336
+  path: supabase/migrations/20260719223300_stage12_planning_storage.sql
+  sha256: 0d5d2b90db13cfe99c25dd6e8768968b3702d9093df560f27da00e0d63fc0763
+  bytes: 3604
+  lines: 131
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0337
+  path: supabase/migrations/20260719223400_stage12_permissions_helpers.sql
+  sha256: 08373d3bb28e359fc65186b896bf0d8131286f7cf10074dbab72119a69a4932a
+  bytes: 1034
+  lines: 17
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0338
+  path: supabase/migrations/20260719223450_stage12_permissions_planning.sql
+  sha256: 800d8c53484c866dc2e454bc39bf1d8516f19209ede241ad34e031b5c3846df1
+  bytes: 870
+  lines: 13
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0339
+  path: supabase/migrations/20260719223475_stage12_permissions_field.sql
+  sha256: f9eed935fdd8a78e8436902168b97c7296d3a53eaf5fe31f2b89ac03337e941b
+  bytes: 566
+  lines: 11
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0340
+  path: supabase/migrations/20260719223500_stage12_performance_indexes.sql
+  sha256: baec7ecaf491c9a27d33519e68b06f6ab1f8ea50262252f9fe1b5f0c28dfe425
+  bytes: 3676
+  lines: 86
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0341
+  path: supabase/migrations/20260719230000_stage9_financial_contracts.sql
+  sha256: 9d5336e07c93aab9c940650c66cb8a29e0d4f27fc023555db7e299d11e0fa3a4
+  bytes: 49703
+  lines: 1090
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0342
+  path: supabase/migrations/20260719231500_stage9_workflows.sql
+  sha256: bfe9d585844ed92de70ce75a506ef4cb3cf31b6b9ce9c96f98a06c76e0c0846e
+  bytes: 11304
+  lines: 234
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0343
+  path: supabase/migrations/20260719232500_stage9_client_signature_policies.sql
+  sha256: 26ff085195572fa41863a5842c2701a4cc541a7a3d9773c4344cbc06618f0e7c
+  bytes: 2701
+  lines: 83
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0344
+  path: supabase/migrations/20260719233500_stage9_frozen_version_rules.sql
+  sha256: 32212bbc72209669fa8082fdd4803b8574d0961969445d7f27a6a61721fd635c
+  bytes: 2508
+  lines: 57
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0345
+  path: supabase/migrations/20260719234000_stage9_apply_amendment.sql
+  sha256: f2cd3bcb1337d0ee3aed22b7baa76a197bece10fe3af9941a361be4f27a98351
+  bytes: 1941
+  lines: 69
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: ANALYZED
+- artifact_id: ART-0346
+  path: supabase/migrations/20260719234500_stage9_security_hardening.sql
+  sha256: 5c39b9d9284f92b86c900409b7430e7d0384e8c81515505b5a6ac4a1b99b0ec9
+  bytes: 9363
+  lines: 231
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: ANALYZED
+- artifact_id: ART-0347
+  path: supabase/migrations/20260720043000_stage12_1_module_catalog_multi_profiles.sql
+  sha256: e860d2336b5bee618c5c6d5ee87cab69842b68bd7eedde74aa88757ca31760db
+  bytes: 6405
+  lines: 88
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0348
+  path: supabase/migrations/20260720043100_stage12_1_permission_resolution.sql
+  sha256: 610b014b09cc1eabd0d8c1c04427c5b216d86c89e935fb82d9dca29d7df80237
+  bytes: 22842
+  lines: 720
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0349
+  path: supabase/migrations/20260720043200_stage12_1_module_security.sql
+  sha256: bbed4a5eb49abfec78e0383610008ea99ebde8e076493b6ebfc23bf9735ffe6f
+  bytes: 2110
+  lines: 41
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0350
+  path: supabase/migrations/20260720043300_stage12_1_project_capability_override.sql
+  sha256: 3943b625e79d1504fdb82fa2a69a77d0c3d811ee8272d1b7270d4fceab92e54e
+  bytes: 2968
+  lines: 97
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0351
+  path: supabase/migrations/20260720054000_stage12_2_advanced_signature_schema.sql
+  sha256: a7e4259a80f9b53755116146b006ac75dc6032853d364bbab4d723838bcf70ba
+  bytes: 12187
+  lines: 250
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0352
+  path: supabase/migrations/20260720054100_stage12_2_tokens_and_conversion_jobs.sql
+  sha256: efadfe98cfff4cc8b600a77adafb729d40e4c04979468dbe8df521f5db3f47fa
+  bytes: 4882
+  lines: 135
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0353
+  path: supabase/migrations/20260720054200_stage12_2_document_layout_workflow.sql
+  sha256: 2b40a36f52fd524f85ee61f23aa086b13877b4685fc36e995730ee0a3a8569e4
+  bytes: 12499
+  lines: 346
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0354
+  path: supabase/migrations/20260720054210_stage12_2_external_signing.sql
+  sha256: 727e66e5aa4cb42cb39fa387d2b56e648615b24837fb3e7048650abba176a910
+  bytes: 9133
+  lines: 299
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0355
+  path: supabase/migrations/20260720054220_stage12_2_finalization_delivery.sql
+  sha256: 5ea717f7a0d42b19222e8e019f480458b1188f36d879a1b1e445f99dea2bb4c6
+  bytes: 8528
+  lines: 254
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0356
+  path: supabase/migrations/20260720054300_stage12_2_signature_rls.sql
+  sha256: fa23d73d7d5339d38f61fd3662d423022675d4271f9e9561a35f146631f2e47b
+  bytes: 7034
+  lines: 185
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0357
+  path: supabase/migrations/20260720054310_stage12_2_signature_storage.sql
+  sha256: 8fe0fe19271de978caa4bd784d9a095546b91d9057175aa8f702b8fc9fdae53c
+  bytes: 1627
+  lines: 53
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0358
+  path: supabase/migrations/20260720054320_stage12_2_signature_privileges.sql
+  sha256: 2a1f14ebb165837d45a2e152c218d5effa59eb09ad02bce899074b801e0388d6
+  bytes: 3634
+  lines: 79
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0359
+  path: supabase/migrations/20260720054330_stage12_2_client_signature_visibility.sql
+  sha256: 514fc3a2479b992feac8a8608348ace2d8f4fa602a7893572cab345a4146129c
+  bytes: 2404
+  lines: 65
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0360
+  path: supabase/migrations/20260720054340_stage12_2_delivery_processing_status.sql
+  sha256: 345e6dc9f1397102b162afcd0c417ca1c0d7f5dcaa94aff00c60b6afb159b82f
+  bytes: 98
+  lines: 2
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0361
+  path: supabase/migrations/20260720054341_stage12_2_delivery_worker_lock.sql
+  sha256: 52042f2a83163ca9846ee5857bb2555662d935e5ed542f7bafcd654db132a899
+  bytes: 2394
+  lines: 86
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0362
+  path: supabase/migrations/20260720054350_stage12_2_signature_indexes.sql
+  sha256: 181ccaf94a6d2801cee4e0ac0eb362081a5c66f75b73414a97b386b11151c2c9
+  bytes: 1875
+  lines: 37
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0363
+  path: supabase/migrations/20260720080000_stage13_quality_forms_schema.sql
+  sha256: 19e229d71ef41db9064f5155f5f3761a81ba0bc3565605b630c1c10baa842894
+  bytes: 9474
+  lines: 195
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0364
+  path: supabase/migrations/20260720080100_stage13_quality_forms_security.sql
+  sha256: d5c6a06817b063842a32cb4997b052d43fa0caaad3a4961a14fab90388ce4392
+  bytes: 12586
+  lines: 168
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0365
+  path: supabase/migrations/20260720080150_stage13_quality_forms_hardening.sql
+  sha256: 9ddb8a38373064b42a0ec9ab53c4a205d65ec8001978564d6faa6ddc71dce9c7
+  bytes: 2785
+  lines: 48
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0366
+  path: supabase/migrations/20260720080200_stage13_quality_forms_seed.sql
+  sha256: 4eeaae1eee66e15f84116da630dd71a8158f2e4075d7b512c6c477a826799dd6
+  bytes: 10056
+  lines: 106
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0367
+  path: supabase/migrations/20260720080210_stage13_quality_default_template_installer.sql
+  sha256: cb823cb48e822f44c3ba5218369fa640569771eefeb3756effe47ec9d60b3eac
+  bytes: 6655
+  lines: 86
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0368
+  path: supabase/migrations/20260720080220_stage13_quality_performance_security.sql
+  sha256: 50cf69460e36b013905609ba341e39a6dca4c779df990f813bc8a3c5d10bc74e
+  bytes: 1946
+  lines: 48
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0369
+  path: supabase/migrations/20260720103000_stage14_procurement_schema.sql
+  sha256: 867a29ef25aedbce05d85bcf039ab7dcb3e2136d3268e59287ad1a6c7fcc0026
+  bytes: 14249
+  lines: 162
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0370
+  path: supabase/migrations/20260720103100_stage14_procurement_security.sql
+  sha256: 47d1ff959bd9b9cb1b0197c98fdc3b88a55bf93d6449e1b262b25541b35f66d4
+  bytes: 14764
+  lines: 166
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0371
+  path: supabase/migrations/20260720103200_stage14_procurement_module.sql
+  sha256: 40e793293db68c34308289ae47edc99f662a6f2e73c47cdcb648a3f3593bc3d4
+  bytes: 2923
+  lines: 44
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0372
+  path: supabase/migrations/20260720103300_stage14_procurement_hardening.sql
+  sha256: ea8ae76127c97d1bc8992f93088ae96e7e258085b8de103c9b3c8dc161a2992f
+  bytes: 7175
+  lines: 127
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0373
+  path: supabase/migrations/20260720103400_stage14_procurement_performance.sql
+  sha256: 76e76f57b323632876ee52ecdfe07fec1b6c70daaa5d65c9d4190dea61f2afa9
+  bytes: 2464
+  lines: 22
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0374
+  path: supabase/migrations/20260720123000_stage15_finance_schema.sql
+  sha256: 5753e6ed8ce0ad7759ee3dca40f0e944cfe5ff3d5c62b80a8710406566d00f47
+  bytes: 15317
+  lines: 191
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0375
+  path: supabase/migrations/20260720123100_stage15_finance_security.sql
+  sha256: ac965acd1c14f19071d6b8c20bf83c2ac02f35121b5992c274f00d99b2bf019c
+  bytes: 20576
+  lines: 229
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0376
+  path: supabase/migrations/20260720123200_stage15_finance_module.sql
+  sha256: a94fc2a1e298bc112b8c93c89e248088c15eb8b360cfd050513fff5d64f41246
+  bytes: 4916
+  lines: 86
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0377
+  path: supabase/migrations/20260720123300_stage15_finance_hardening.sql
+  sha256: 8a621fec492826f3cf3fb30b5b0c2c2a1d616a8446dea56977fa674d6bf07b1f
+  bytes: 13484
+  lines: 215
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0378
+  path: supabase/migrations/20260720123400_stage15_finance_performance.sql
+  sha256: 23fd22d5282488a9465479948e68b0553f4ce7e0a4c241b96986adfd4fdf10cf
+  bytes: 1730
+  lines: 16
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0379
+  path: supabase/migrations/20260720123500_stage15_finance_atomic_attachments.sql
+  sha256: 70d731855b09fee0f61ae7c8fcaf5f17902048dea6bc4fd2892d30268f8d59a7
+  bytes: 2334
+  lines: 51
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0380
+  path: supabase/migrations/20260720143000_stage16_reports_schema.sql
+  sha256: 1f285112ea07dbce5eb71053e98d963e078c4fd55d550246e95cb353aa6e7a3d
+  bytes: 17078
+  lines: 302
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0381
+  path: supabase/migrations/20260720143100_stage16_reports_security.sql
+  sha256: 06b7c8231ba11d84d9adb91dea3927033f16d69f5fd5d68310bac9109f8d4369
+  bytes: 16070
+  lines: 273
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0382
+  path: supabase/migrations/20260720143150_stage16_permission_boolean_guard.sql
+  sha256: 95e02cc9e5f39c4295eabd78c48ffcce4136fcdaa173e4122ca50b5eea7ce6db
+  bytes: 989
+  lines: 20
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0383
+  path: supabase/migrations/20260720143200_stage16_reports_module.sql
+  sha256: 79500121616f9239b2b21d91297a3eb5ebdc24a443f828c6fb69a58b2a9127cb
+  bytes: 10734
+  lines: 144
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0384
+  path: supabase/migrations/20260720143300_stage16_reports_hardening.sql
+  sha256: 5637d70c2719ebd4ac203eb51eb81cb3382f9a485fa65d09aab1bf9585299eb2
+  bytes: 10729
+  lines: 153
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0385
+  path: supabase/migrations/20260720143400_stage16_reports_integrity.sql
+  sha256: cb1fad019e53ba057f6a8934002f9a46baac85f2cac5bb10a4534916d476ca74
+  bytes: 5108
+  lines: 79
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0386
+  path: supabase/migrations/20260720143500_stage16_reports_installer_fix.sql
+  sha256: 317ed8839538a47266d0d8c99665ee702b2ca39716636345d0846d0a2b42d447
+  bytes: 7416
+  lines: 78
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0387
+  path: supabase/migrations/20260720143700_stage16_report_link_guard_fix.sql
+  sha256: 9f8437df0f321f6d68c6be9318f04de8a55d61b9ffb4745885a40f41db5c21f3
+  bytes: 1939
+  lines: 45
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0388
+  path: supabase/migrations/20260720143800_stage16_progress_scale_fix.sql
+  sha256: e4ff23c8358a3641fa4c36319d37ffea162c81b537708f94c81e81fe0f4f4b16
+  bytes: 3669
+  lines: 63
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0389
+  path: supabase/migrations/20260720143900_stage16_module_bootstrap_security.sql
+  sha256: 8d320a32d7f8624ccd24fbd503dfb26c4ea281a9e6180792ad50e4055f6f9790
+  bytes: 555
+  lines: 9
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0390
+  path: supabase/migrations/20260720160000_stage17_inventory_schema.sql
+  sha256: 1df2c572fa349f48dfe9b4fbc697fc64b21cab768e6a9ee0ec00decab45156cb
+  bytes: 23161
+  lines: 469
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0391
+  path: supabase/migrations/20260720160100_stage17_inventory_balances.sql
+  sha256: 1548046faec0adb63697b903e5f836cc0dfa34c7bfd585a9f4e388b23180c27b
+  bytes: 5859
+  lines: 138
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0392
+  path: supabase/migrations/20260720160200_stage17_inventory_movement_functions.sql
+  sha256: 26667ce7c2ca60322f90d33a77b1846981f79c4a25c56ab30b3aacb21398525c
+  bytes: 23657
+  lines: 443
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0393
+  path: supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql
+  sha256: b8e855ee430336a027021c75a9b9aae87a2532bb07c74415dee6e0216d411ab5
+  bytes: 18412
+  lines: 349
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0394
+  path: supabase/migrations/20260720160400_stage17_inventory_assets_stocktakes_01.sql
+  sha256: 45701b6dcb03abe2d2922870a60b9c346a5728ccc121baf829a17b4e3f5ebad8
+  bytes: 7615
+  lines: 142
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0395
+  path: supabase/migrations/20260720160410_stage17_inventory_assets_stocktakes_02.sql
+  sha256: bb816a64eb0c68458905e519234fd1667c9eb9f2f194e0c269a54d72bf05ae08
+  bytes: 6180
+  lines: 113
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0396
+  path: supabase/migrations/20260720160420_stage17_inventory_assets_stocktakes_03.sql
+  sha256: 89cad5552af27c1a57d2a812aac68c3c1722455b096f969ae39d341d2631fa04
+  bytes: 8041
+  lines: 132
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0397
+  path: supabase/migrations/20260720160430_stage17_inventory_assets_stocktakes_04.sql
+  sha256: 7dda834e6e5afd8284a9eaddbffada9a4681f830778d9441e2d063b98c60f0fc
+  bytes: 1734
+  lines: 34
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0398
+  path: supabase/migrations/20260720160500_stage17_inventory_security.sql
+  sha256: dd4483ec0abf6f5be9022daa30020deb22e974a7d839652b3a6057cd9a133818
+  bytes: 12282
+  lines: 186
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0399
+  path: supabase/migrations/20260720160510_stage17_inventory_dashboard.sql
+  sha256: 6fb977d72dbb01e91c3e3bb343677f288712815aada5b2eeefc6b97cf2b899a7
+  bytes: 11298
+  lines: 218
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0400
+  path: supabase/migrations/20260720160520_stage17_inventory_movement_detail.sql
+  sha256: cba492f26b828b46048c5bb70fc2ebcb71a10e0abe82b2b015ffa24e7fcdf589
+  bytes: 3031
+  lines: 51
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0401
+  path: supabase/migrations/20260720160525_stage17_inventory_item_asset_detail.sql
+  sha256: 691624baa78e484a20f929d0a7de477f096f20cb71d96d669143902c4264478f
+  bytes: 7030
+  lines: 133
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0402
+  path: supabase/migrations/20260720160530_stage17_inventory_stocktake_found_items.sql
+  sha256: f126523cfa4a4e95a974865096740ea6d6da992fb7ccab82cfe1e229e363d087
+  bytes: 3176
+  lines: 56
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0403
+  path: supabase/migrations/20260720160600_stage17_inventory_module.sql
+  sha256: 5c2737e12509a964a291b576e74d82b678fc018cee081ac1aeda25c81412e8a8
+  bytes: 7126
+  lines: 135
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0404
+  path: supabase/migrations/20260720160650_stage17_inventory_creation_rpcs.sql
+  sha256: 0b449604a2047b9daafb17957c593d552a49e45cfd3513a62f83ebc260876072
+  bytes: 12793
+  lines: 240
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0405
+  path: supabase/migrations/20260720160700_stage17_inventory_hardening.sql
+  sha256: acb68bf50a2532409b84bce757510b3572ec7757a63431282961c793c26e016d
+  bytes: 15752
+  lines: 171
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0406
+  path: supabase/migrations/20260720160720_stage17_inventory_sensitive_columns.sql
+  sha256: 76851a13e2bc044405ee369e5f1f73dfa437ac51f04180294da3629b797851b6
+  bytes: 1777
+  lines: 31
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0407
+  path: supabase/migrations/20260720160730_stage17_inventory_sensitive_write_guard.sql
+  sha256: 8aa00695cc7d9a350851fe61a9e266e0602616c04601c6f34f63c53f53fdff17
+  bytes: 2611
+  lines: 47
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0408
+  path: supabase/migrations/20260720160740_stage17_inventory_state_guards.sql
+  sha256: a04c8fe0545c7c3b9b1783f169beb68755150f3e2575d4d1d0ac9b94363e1666
+  bytes: 2447
+  lines: 50
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0409
+  path: supabase/migrations/20260720233052_stage17_inventory_concurrency_locks.sql
+  sha256: 6acfacad856c7e7f5ad18740cc7f878f482c71d1dc55216476b48ecc91dbf0c2
+  bytes: 8343
+  lines: 167
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: ANALYZED
+- artifact_id: ART-0410
+  path: supabase/migrations/20260720233657_stage17_homologation_balance_project_scope.sql
+  sha256: 2e0a3f9e1af80220404d8f898cdbe6673e47545f9871c2aef88f2fea1e5d47a3
+  bytes: 3608
+  lines: 87
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0411
+  path: supabase/migrations/20260720234333_stage17_inventory_performance_indexes.sql
+  sha256: dba3eeb6f29c049516ec57c6aaf71e53147accc3fd68bfa8f3ab4023010e6624
+  bytes: 1193
+  lines: 28
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0412
+  path: supabase/migrations/20260720234549_stage17_inventory_rpc_privileges.sql
+  sha256: f65634e4acae32ab113ee635ed76277c9da09c61bbf74a97ce40b291ac2a42b4
+  bytes: 1124
+  lines: 22
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0413
+  path: supabase/migrations/20260721012434_stage18_relationship_schema.sql
+  sha256: 4a49dc370e637037146aeeb3340d59a14196aec080420bd5f8466fd80f42ff5c
+  bytes: 13994
+  lines: 246
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0414
+  path: supabase/migrations/20260721012505_stage18_relationship_idempotency.sql
+  sha256: 3724c5ef8a2eaae74cff7426e3e9929e25c240de72ef61634f1464692c19f238
+  bytes: 809
+  lines: 17
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0415
+  path: supabase/migrations/20260721012701_stage18_relationship_security.sql
+  sha256: e6fd71c28785489236b4fb0bc2ebc53cf92c9b13d50ef5d09452a38ad34b4aa9
+  bytes: 10953
+  lines: 208
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0416
+  path: supabase/migrations/20260721013434_stage18_relationship_invariants.sql
+  sha256: 40391bcb006c6898781156003b4fa319063e13ae3695ff2e07a3a199c0e52745
+  bytes: 9469
+  lines: 234
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0417
+  path: supabase/migrations/20260721013534_stage18_crm_functions.sql
+  sha256: e5b781ff4fdee7383e260a22f4e448801ecbb7f58d8d4ad1f04fe0e10fd693bf
+  bytes: 14429
+  lines: 415
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0418
+  path: supabase/migrations/20260721013547_stage18_sac_client_actors.sql
+  sha256: f7b87c2c9037b5812c9c5f42b5d2d3a00d8968acd66dfcb299a7024f514ba759
+  bytes: 1156
+  lines: 23
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0419
+  path: supabase/migrations/20260721013654_stage18_sac_functions.sql
+  sha256: cb1340e3f8b39ec25cee050f532f9a12ebe47cc4ae6b4506d68cc680440358a9
+  bytes: 15589
+  lines: 463
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0420
+  path: supabase/migrations/20260721013941_stage18_relationship_queries.sql
+  sha256: 2c9ab1fc225d4d7e306c7e9f58111201df27cb72b8ddbf6ca8f0525452bbf9b4
+  bytes: 13043
+  lines: 307
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0421
+  path: supabase/migrations/20260721014030_stage18_relationship_module.sql
+  sha256: 25bd1253f01ef9170abad91cd7b7543d0993568431853c412ae9645c45c0cb9d
+  bytes: 7344
+  lines: 158
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0422
+  path: supabase/migrations/20260721014621_stage18_relationship_performance.sql
+  sha256: d2df8a52f847179c156631781ed6c9cdec613c7d0d04f51f21e5e742e1fdedc5
+  bytes: 3087
+  lines: 53
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0423
+  path: supabase/migrations/20260721015350_stage18_sac_portal_release_guard.sql
+  sha256: 78987feffcef771d9485df865a4bf856dc151a70c232c59f1767bc3a20da8df6
+  bytes: 4266
+  lines: 120
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0424
+  path: supabase/migrations/20260721020003_stage18_workflow_privilege_hardening.sql
+  sha256: f282dbc685e2d15798afc616637ea9fd0b0036efa2f388ad6de265af541aee08
+  bytes: 5425
+  lines: 135
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0425
+  path: supabase/migrations/20260721100108_stage19_observability_schema.sql
+  sha256: b22d88d5a9228a672de601fd5910883594d7e91aac174dfa0de8433caa435933
+  bytes: 6653
+  lines: 120
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0426
+  path: supabase/migrations/20260721100159_stage19_observability_security.sql
+  sha256: c62d200a72bb2c2a70c8ac19e974887671964a0c011c21bbd6aa6a96c029fe40
+  bytes: 5091
+  lines: 73
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0427
+  path: supabase/migrations/20260721122302_stage19_observability_functions.sql
+  sha256: 242aa20f4adfde2c2f55c045462393f9684765bd89d8d896e3320b94192e0087
+  bytes: 19005
+  lines: 277
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0428
+  path: supabase/migrations/20260721122355_stage19_observability_unified_stream.sql
+  sha256: 142fa83ad29acfb53c86adeb093d0fb6cda9056cfe9e2dc880de57c3ea30c5a6
+  bytes: 12429
+  lines: 159
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0429
+  path: supabase/migrations/20260721122436_stage19_observability_module_performance.sql
+  sha256: 45620ed55b77197a1574a671f9af8c1fc6b093a15c80572bd0fff1a3aa2b8287
+  bytes: 8196
+  lines: 113
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0430
+  path: supabase/migrations/20260721123305_stage19_observability_hardening.sql
+  sha256: d39e0362843052afb6ac185a77a6b8c27217d4f132382c2d2ea3514b5ac37930
+  bytes: 2205
+  lines: 59
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0431
+  path: supabase/migrations/20260722104500_stage20_sac_attachment_security.sql
+  sha256: 84372d5203033de84b97a0e3fc1f8b6b1c9d7bf78c3a6f5749af6ce652ab8614
+  bytes: 8955
+  lines: 221
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por análise estática dirigida (RLS, policies, security
+    definer, search_path, grants, locks) sobre as 106 migrations; leitura integral
+    apenas das migrations de segurança e concorrência.
+- artifact_id: ART-0432
+  path: supabase/migrations/20260723062000_r2_stage14_procurement_parent_chain.sql
+  sha256: 374b059c075e02f7b6d3120fbb85facb8261aaa2188ae85687c764e7f5408155
+  bytes: 3983
+  lines: 55
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: ANALYZED
+- artifact_id: ART-0433
+  path: supabase/migrations/20260723104500_r3b_observability_security_hardening.sql
+  sha256: aa5703e067605a1945539d7b6bc4b88b271da4a4437d7556329a4c6024d24701
+  bytes: 8532
+  lines: 116
+  artifact_class: DB_MIGRATION
+  audit_surface: SECURITY_DATA_INTEGRITY
+  analysis_status: ANALYZED
+- artifact_id: ART-0434
+  path: supabase/tests/stage17_inventory_homologation.sql
+  sha256: 42068331b2f8de99f3fe7e52c1e1f4bfde9113adc78adf5df34b646aefe5b1e2
+  bytes: 10874
+  lines: 323
+  artifact_class: DB_TEST
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Requer instância Postgres/Supabase indisponível localmente.
+- artifact_id: ART-0435
+  path: supabase/tests/stage18_relationship_homologation.sql
+  sha256: 9b08e0e663c299ba199c1752d28283fa3dbcf02362a943d64447569f23d9be18
+  bytes: 12049
+  lines: 306
+  artifact_class: DB_TEST
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Requer instância Postgres/Supabase indisponível localmente.
+- artifact_id: ART-0436
+  path: supabase/tests/stage19_observability_homologation.sql
+  sha256: 165e0465d418041e80b8c3a87983c8bd6f613c1988060cbffa2f965518e4a51e
+  bytes: 6168
+  lines: 71
+  artifact_class: DB_TEST
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Requer instância Postgres/Supabase indisponível localmente.
+- artifact_id: ART-0437
+  path: tests/file-security-gateway-auth.test.ts
+  sha256: 8dadd642d75c15f2cd51659a0c27760a1e60e3e2b51301354aaad3f4d0606219
+  bytes: 1206
+  lines: 28
+  artifact_class: UNIT_TEST
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Executada via vitest/unittest no baseline.
+- artifact_id: ART-0438
+  path: tests/file-security-health-auth.test.ts
+  sha256: 03f939d5d032c9eb54e54a278afe8af3ff1198c52755e0b6b407fcf7c109e640
+  bytes: 1584
+  lines: 38
+  artifact_class: UNIT_TEST
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Executada via vitest/unittest no baseline.
+- artifact_id: ART-0439
+  path: tests/file-security.test.ts
+  sha256: 30138fbdf36ca8e2f68dcaf6f6065e09b68a9756c936067d3e037f376e326493
+  bytes: 2145
+  lines: 51
+  artifact_class: UNIT_TEST
+  audit_surface: TEST
+  analysis_status: LIMITED
+  analysis_limitation: Executada via vitest/unittest no baseline.
+- artifact_id: ART-0440
+  path: tsconfig.json
+  sha256: 104fbd18432406714408395ec11b2fbb3c716da1fce21e5abd7d74e80720838f
+  bytes: 563
+  lines: 21
+  artifact_class: BUILD_CONFIG
+  audit_surface: CONFIG
+  analysis_status: LIMITED
+  analysis_limitation: Coberta por typecheck, lint e build declarados no CI.
+- artifact_id: ART-0441
+  path: vitest.config.ts
+  sha256: 0143aa8a428081ddd6a33bf9ddf425a83ee2dd79319bc5a55bb18d5603433f24
+  bytes: 214
+  lines: 11
+  artifact_class: BUILD_CONFIG
+  audit_surface: CONFIG
+  analysis_status: ANALYZED
+analysis_summary:
+  ANALYZED: 45
+  LIMITED: 396

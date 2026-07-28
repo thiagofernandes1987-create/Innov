@@ -4,6 +4,8 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
+import { fileSecurityMessage } from "@/lib/file-security/domain";
+import { secureUpload } from "@/lib/file-security/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { safeFileName, sha256 } from "@/lib/signatures/crypto";
 
@@ -59,8 +61,16 @@ export async function registerFinanceSettlement(data: FormData) {
     fileSize = file.size;
     fileHash = sha256(fileBytes);
     uploadedPath = `${context.organizationId}/settlements/${randomUUID()}-${safeFileName(file.name)}`;
-    const { error: uploadError } = await admin.storage.from("finance-attachments").upload(uploadedPath, fileBytes, { contentType: file.type, upsert: false });
-    if (uploadError) fail(`/app/financeiro/lancamentos/${entryId}`, uploadError.message);
+    try {
+      await secureUpload({
+        targetBucket: "finance-attachments", targetPath: uploadedPath, body: fileBytes,
+        filename: file.name, contentType: file.type,
+        organizationId: context.organizationId, actorUserId: context.userId,
+        policy: { allowedMimeTypes: MIMES, maxBytes: MAX_FILE }
+      });
+    } catch (error) {
+      fail(`/app/financeiro/lancamentos/${entryId}`, fileSecurityMessage(error, { allowedLabel: "PDF, XLSX, JPG, PNG ou WebP" }));
+    }
   }
 
   const { error } = await context.supabase.rpc("register_finance_settlement_with_attachment", {

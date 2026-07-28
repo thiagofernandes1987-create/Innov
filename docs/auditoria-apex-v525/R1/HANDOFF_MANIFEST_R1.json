@@ -1,0 +1,54 @@
+{
+  "round": "R1",
+  "commit": "30937ed6aba10d40f24641e9158bb686ab94876d",
+  "produced": [
+    "ARTIFACT_INDEX_R1.yaml",
+    "EVIDENCE_LEDGER_R1.yaml",
+    "FINDING_LEDGER_R1.yaml",
+    "DIMENSION_LEDGER_R1.yaml",
+    "R1_FREEZE_MANIFEST.json",
+    "R1_FREEZE_MANIFEST.sha256"
+  ],
+  "artifact_count": 441,
+  "evidence_count": 27,
+  "finding_count": 11,
+  "gates": {
+    "ARTIFACT_INDEX_COMPLETE_OR_LIMITED": true,
+    "IDS_FROZEN_AND_LEDGERS_SCHEMA_VALID": true,
+    "R1_FREEZE_VALID": true,
+    "ALL_ANALYZABLE_ITEMS_REVIEWED": "COGNITIVE_ATTESTATION_PASS_WITH_LIMITATIONS"
+  },
+  "open_findings": [
+    "FND-0001",
+    "FND-0002",
+    "FND-0003",
+    "FND-0004",
+    "FND-0005",
+    "FND-0006",
+    "FND-0007",
+    "FND-0008",
+    "FND-0009",
+    "FND-0010",
+    "FND-0011"
+  ],
+  "limitations": [
+    {
+      "dimension_id": "DIM-14",
+      "name": "Acessibilidade da interface",
+      "status": "NOT_ASSESSED",
+      "justification": "Exige execução de navegador e leitor de tela; capacidade indisponível localmente (LIMITATION)."
+    },
+    {
+      "dimension_id": "DIM-15",
+      "name": "Comportamento em produção (RUNTIME)",
+      "status": "BLOCKED_EXTERNAL",
+      "justification": "Sem ambiente Supabase/produção acessível; nenhuma afirmação de runtime é feita."
+    },
+    {
+      "dimension_id": "DIM-16",
+      "name": "Desempenho sob carga",
+      "status": "NOT_ASSESSED",
+      "justification": "Fora do alcance local; exige ambiente de carga dedicado (LIMITATION)."
+    }
+  ]
+}

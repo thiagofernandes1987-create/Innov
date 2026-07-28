@@ -1,0 +1,39 @@
+{
+  "action": "DISCOVER_CAPABILITIES",
+  "status": "PASS",
+  "executed": true,
+  "binding": "adapters.runtime.discover_capabilities",
+  "authority_context_used": false,
+  "result": {
+    "collected_at_epoch": 1784933546.7586699,
+    "hostname": "vm",
+    "platform": "Linux-6.18.5-x86_64-with-glibc2.39",
+    "python_version": "3.11.15",
+    "cpu_visible": 4,
+    "cpu_max_raw": null,
+    "cpu_quota_effective": null,
+    "memory_limit_bytes": null,
+    "memory_current_bytes": null,
+    "memory_headroom_bytes": null,
+    "fd_soft_limit": 4096,
+    "fd_hard_limit": 4096,
+    "disk_total_bytes": 270553174016,
+    "disk_free_bytes": 32112918528,
+    "cgroup": "7:pids:/\n6:blkio:/\n5:freezer:/\n4:devices:/\n3:memory:/process_api/019f9648-ccda-74f6-ad3b-a0c8f961efec\n2:cpuacct:/\n1:cpu:/\n0::/",
+    "pid_namespace": "pid:[4026531836]",
+    "mount_namespace": "mnt:[4026531832]",
+    "capabilities": {
+      "PYTHON_LOCAL": true,
+      "FILESYSTEM_READ": true,
+      "FILESYSTEM_WRITE": true,
+      "SUBPROCESS_LOCAL": true,
+      "REMOTE_SANDBOX": false,
+      "FRESH_MODEL_CONTEXT": false
+    },
+    "notes": [
+      "cgroup limits are preferred over host-visible totals when available.",
+      "local subprocess is not a security sandbox.",
+      "REMOTE_SANDBOX and FRESH_MODEL_CONTEXT are false because this project forbids external orchestrators."
+    ]
+  }
+}

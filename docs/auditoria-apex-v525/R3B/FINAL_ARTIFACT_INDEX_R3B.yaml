@@ -1,0 +1,9 @@
+round: R3B
+packages:
+- package: R1
+  status: VERIFIED
+- package: R2
+  status: VERIFIED
+- package: R3A
+  status: VERIFIED
+package_verification: true

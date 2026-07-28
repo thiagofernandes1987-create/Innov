@@ -1,0 +1,90 @@
+name: Stage 20 Security Headers
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "URL HTTPS a sondar. Vazio usa HOMOLOGATION_APP_URL."
+        required: false
+        type: string
+  push:
+    branches:
+      - feature/etapa-20-prontidao-producao
+    paths:
+      - ".github/workflows/stage20-security-headers.yml"
+      - "scripts/run-stage20-security-headers.mjs"
+      - "next.config.ts"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: stage20-security-headers
+  cancel-in-progress: false
+
+jobs:
+  security-headers:
+    name: Check delivered security headers
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 10
+    env:
+      HOMOLOGATION_APP_URL: ${{ secrets.HOMOLOGATION_APP_URL }}
+      SECURITY_HEADERS_URL: ${{ inputs.target_url }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      SECURITY_HEADERS_TIMEOUT_MS: "30000"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Initialize security headers report
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          fs.writeFileSync("stage20-security-headers-report.json",JSON.stringify({
+            schemaVersion:1,
+            status:"prerequisites_pending",
+            mode:"security_headers_https",
+            startedAt:new Date().toISOString()
+          },null,2)+"\n");
+          NODE
+
+      - name: Validate required secrets
+        run: |
+          missing=()
+          test -n "$SECURITY_HEADERS_URL" || test -n "$HOMOLOGATION_APP_URL" || missing+=(HOMOLOGATION_APP_URL)
+          test -n "$VERCEL_AUTOMATION_BYPASS_SECRET" || missing+=(VERCEL_AUTOMATION_BYPASS_SECRET)
+          if [ ${#missing[@]} -gt 0 ]; then
+            MISSING_NAMES="$(printf '%s\n' "${missing[@]}")" node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const missing=(process.env.MISSING_NAMES??"").split("\n").filter(Boolean);
+          fs.writeFileSync("stage20-security-headers-report.json",JSON.stringify({
+            schemaVersion:1,
+            status:"blocked_missing_secrets",
+            mode:"security_headers_https",
+            missingNames:missing,
+            finishedAt:new Date().toISOString()
+          },null,2)+"\n");
+          NODE
+            printf 'Pré-requisitos ausentes no ambiente homologation: %s\n' "${missing[*]}"
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Check delivered security headers
+        run: node scripts/run-stage20-security-headers.mjs
+
+      - name: Upload security headers evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: stage20-security-headers-report
+          path: stage20-security-headers-report.json
+          if-no-files-found: error
+          retention-days: 30

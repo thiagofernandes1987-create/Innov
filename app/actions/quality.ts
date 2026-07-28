@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
 import { requireClientContext, requireUser } from "@/lib/auth";
+import { fileSecurityMessage } from "@/lib/file-security/domain";
+import { secureUpload } from "@/lib/file-security/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { evaluateQualityResponse, parseQualityFormSchema, type QualityAnswerMap, type QualityFormSchema } from "@/lib/quality/forms";
 import { safeFileName, sha256 } from "@/lib/signatures/crypto";
@@ -37,8 +39,14 @@ export async function uploadQualityDocument(formData:FormData){
   const{data:last}=await admin.from("quality_documents").select("version_number").eq("logical_id",logicalId).order("version_number",{ascending:false}).limit(1).maybeSingle();
   const version=Number(last?.version_number??0)+1;
   const path=`${context.organizationId}/library/${logicalId}/v${version}/${randomUUID()}-${safeFileName(file.name)}`;
-  const{error:uploadError}=await context.supabase.storage.from("quality-documents").upload(path,bytes,{contentType:file.type,upsert:false});
-  if(uploadError)fail("/app/qualidade/documentos",uploadError.message);
+  try{
+    await secureUpload({
+      targetBucket:"quality-documents",targetPath:path,body:bytes,
+      filename:file.name,contentType:file.type,
+      organizationId:context.organizationId,actorUserId:context.userId,
+      policy:{allowedMimeTypes:DOCUMENT_MIMES,maxBytes:MAX_DOCUMENT_SIZE}
+    });
+  }catch(error){fail("/app/qualidade/documentos",fileSecurityMessage(error,{maxBytesLabel:"50 MB",allowedLabel:"PDF, DOCX, XLSX, JPG, PNG ou WebP"}));}
   if(version>1)await admin.from("quality_documents").update({is_current:false}).eq("logical_id",logicalId);
   const{error}=await context.supabase.from("quality_documents").insert({
     organization_id:context.organizationId,project_id:projectId,client_id:optional(formData,"clientId"),logical_id:logicalId,
@@ -159,8 +167,18 @@ async function persistQualityResponse(input:{assignmentId:string;respondentUserI
     for(const field of schema.fields){
       const file=files.get(field.key);let fileData:Record<string,unknown>={};
       if(file){const bytes=new Uint8Array(await file.arrayBuffer());const path=`${assignment.organization_id}/responses/${responseId}/${field.key}/${randomUUID()}-${safeFileName(file.name)}`;
-        const{error:uploadError}=await admin.storage.from("quality-form-attachments").upload(path,bytes,{contentType:file.type,upsert:false});
-        if(uploadError)throw new Error(uploadError.message);uploaded.push(path);fileData={file_name:file.name,file_mime_type:file.type,file_size_bytes:file.size,file_storage_path:path,file_sha256:sha256(bytes)};}
+        try{
+          await secureUpload({
+            targetBucket:"quality-form-attachments",targetPath:path,body:bytes,
+            filename:file.name,contentType:file.type,
+            organizationId:assignment.organization_id,actorUserId:input.respondentUserId??responseId,
+            correlationId:responseId,
+            // HEIC é aceito pelo formulário e não possui assinatura de conteúdo
+            // conhecida; segue para a análise antimalware sem essa verificação.
+            policy:{allowedMimeTypes:ATTACHMENT_MIMES,maxBytes:MAX_ATTACHMENT_SIZE,requireContentSignature:false}
+          });
+        }catch(error){throw new Error(fileSecurityMessage(error,{maxBytesLabel:"20 MB",allowedLabel:"PDF, DOCX, JPG, PNG, WebP ou HEIC"}));}
+        uploaded.push(path);fileData={file_name:file.name,file_mime_type:file.type,file_size_bytes:file.size,file_storage_path:path,file_sha256:sha256(bytes)};}
       rows.push({organization_id:assignment.organization_id,response_id:responseId,field_key:field.key,value_json:files.has(field.key)?null:answers[field.key],...fileData});
     }
     const{error:answersError}=await admin.from("quality_form_answers").insert(rows);if(answersError)throw new Error(answersError.message);
@@ -177,7 +195,7 @@ export async function submitPublicQualityForm(formData:FormData){
   if(error||!link||link.revoked_at||(link.expires_at&&new Date(link.expires_at).getTime()<Date.now()))fail(path,"Link expirado ou revogado.");
   try{await persistQualityResponse({assignmentId:link.assignment_id,respondentName:text(formData,"respondentName")||null,respondentEmail:text(formData,"respondentEmail")||null,formData});}
   catch(error){fail(path,error instanceof Error?error.message:"Não foi possível enviar a resposta.");}
-  await admin.from("quality_public_links").update({last_access_at:new Date().toISOString(),access_count:Number(link.access_count??0)+1}).eq("id",link.id);
+  await admin.rpc("register_quality_public_link_access",{p_token_sha256:tokenHash});
   redirect(`${path}?submitted=1`);
 }
 
