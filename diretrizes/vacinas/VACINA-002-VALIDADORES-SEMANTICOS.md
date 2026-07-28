@@ -28,6 +28,7 @@ Aplicada em:
 
 - `validate-stage17.mjs`;
 - `validate-stage18.mjs`;
+- `validate-stage20.mjs`, reconciliado com a casca e o Launcher atuais;
 - validação da navegação do portal;
 - validação das migrations fracionadas de ativos/inventário.
 
