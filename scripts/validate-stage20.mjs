@@ -104,10 +104,10 @@ if(errors.length===0){
  for(const token of['className="barra-superior"','aria-label="Ir para a tela inicial de aplicativos"','<CantoDireito'])
   if(!topBar.includes(token))errors.push(`Barra superior sem contrato de navegação: ${token}`);
 
- for(const token of['className="content pagina-launcher"','className="launcher-cabecalho"','<Launcher aplicativos={aplicativos}'])
+ for(const token of['className="content pagina-launcher"','<Launcher aplicativos={aplicativos}'])
   if(!dashboard.includes(token))errors.push(`Launcher sem composição canônica: ${token}`);
  for(const token of[
-  'className="launcher-busca"','aria-label="Filtrar por categoria"','className="launcher-grade"',
+  'className="launcher-faixa"','id="launcher-titulo"','aria-label="Filtrar por categoria"','className="launcher-grade"',
   'className="launcher-app"','className="launcher-vazio"','role="status"'
  ])if(!launcher.includes(token))errors.push(`Componente Launcher sem contrato funcional: ${token}`);
 

@@ -38,6 +38,7 @@ Aplicada em:
 
 - o validador da Etapa 18 não procura a forma rígida `href:"/cliente/ocorrencias"`;
 - a navegação exige semanticamente o rótulo e a rota;
+- a Etapa 20 exige a faixa, o título, os filtros e a grade atuais do Launcher, sem reintroduzir as classes removidas `launcher-cabecalho` e `launcher-busca`;
 - a Etapa 17 referencia os quatro arquivos `_01` a `_04` e não o arquivo monolítico removido.
 
 ## Critério de encerramento
