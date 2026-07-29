@@ -45,7 +45,7 @@ export async function createFlexibleProject(formData: FormData) {
   const entryMode = text(formData, "entryMode") || "INDEPENDENT";
   const progressPercent = decimal(formData, "progressPercent", 0);
 
-  const { data, error } = await context.supabase.rpc("create_independent_project", {
+  const { data, error } = await context.supabase.rpc("create_independent_project_v2", {
     p_organization_id: context.organizationId,
     p_client_id: optional(formData, "clientId"),
     p_entry_mode: entryMode,
@@ -60,6 +60,7 @@ export async function createFlexibleProject(formData: FormData) {
     p_data_cutoff: optional(formData, "dataCutoff"),
     p_historical_cost: decimal(formData, "historicalCost", 0),
     p_address_line: optional(formData, "addressLine"),
+    p_district: optional(formData, "district"),
     p_city: optional(formData, "city"),
     p_state: optional(formData, "state"),
     p_postal_code: optional(formData, "postalCode"),
