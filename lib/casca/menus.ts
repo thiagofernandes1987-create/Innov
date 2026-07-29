@@ -16,13 +16,6 @@
 export type ItemDeMenu = { rotulo: string; href: string };
 
 export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
-  // Pipeline não é aplicativo: é a visão de funil **de cada** aplicativo.
-  //
-  // A primeira versão criou um módulo "Pipeline" com as três trilhas dentro, e
-  // o responsável riscou isso na captura: CRM é venda, o funil de projeto
-  // pertence a Projetos e o de assistência pertence a Chamados. Um aplicativo
-  // "Pipeline" obrigaria o vendedor a atravessar o funil de obra para chegar no
-  // dele, e é o oposto do que o padrão de mercado faz.
   crm: [
     { rotulo: "Pipeline", href: "/app/pipeline/cliente" },
     { rotulo: "Leads", href: "/app/crm/leads" },
@@ -34,12 +27,14 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
   ],
   obras: [
     { rotulo: "Projetos", href: "/app/obras" },
+    { rotulo: "Nova obra", href: "/app/obras/novo" },
     { rotulo: "Pipeline", href: "/app/pipeline/projeto" },
     { rotulo: "Planejamento", href: "/app/planejamento" },
     { rotulo: "Relatórios", href: "/app/relatorios/obras" }
   ],
   planejamento: [
     { rotulo: "Portfólio", href: "/app/planejamento" },
+    { rotulo: "Novo projeto", href: "/app/obras/novo" },
     { rotulo: "Tarefas", href: "/app/tarefas" },
     { rotulo: "Equipes", href: "/app/equipes" },
     { rotulo: "Diário", href: "/app/diario" },
@@ -88,9 +83,6 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
   ],
   qualidade: [
     { rotulo: "Formulários", href: "/app/qualidade/formularios" },
-    // `respostas` e `assinaturas/documentos` só existem por id: são telas de
-    // detalhe sem índice. Menu para elas abriria 404 — o validador recusou os
-    // dois destinos na primeira execução, que é o motivo de ele existir.
     { rotulo: "Preenchimentos", href: "/app/qualidade/preenchimentos" },
     { rotulo: "Documentos", href: "/app/qualidade/documentos" }
   ],
@@ -118,9 +110,11 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
     { rotulo: "Aplicativos", href: "/app/administracao/aplicativos" }
   ],
   orcamentos: [
-    { rotulo: "Orçamentos", href: "/app/orcamentos" },
+    { rotulo: "Carteira", href: "/app/orcamentos" },
+    { rotulo: "Novo orçamento", href: "/app/orcamentos/novo" },
     { rotulo: "SINAPI", href: "/app/orcamentos/sinapi" },
-    { rotulo: "Novo orçamento", href: "/app/orcamentos/novo" }
+    { rotulo: "Propostas", href: "/app/propostas" },
+    { rotulo: "Relatórios", href: "/app/relatorios" }
   ],
   propostas: [
     { rotulo: "Propostas", href: "/app/propostas" },
@@ -161,11 +155,6 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
   ]
 };
 
-/**
- * Módulo sem menu declarado não ganha menu falso. O teste de cobertura exige
- * que todo aplicativo instalável tenha ao menos uma rota real e impede que uma
- * capacidade volte a existir apenas por URL conhecida.
- */
 export function menusDe(moduloChave: string): ItemDeMenu[] {
   return MENUS_DO_MODULO[moduloChave] ?? [];
 }
