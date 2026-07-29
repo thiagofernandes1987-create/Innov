@@ -1,23 +1,25 @@
 import Link from "next/link";
 import { SmartSearchBar } from "@/components/busca/smart-search-bar";
 import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
+import { PlanningPortfolioView } from "@/components/planejamento/portfolio-view";
+import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatDate, formatPercent } from "@/lib/stage12";
 import { singleRelation } from "@/lib/supabase/relations";
 
-function prazoDaObra(plannedEnd: string | null, overdue: number) {
-  if (overdue > 0) return <span className="badge badge-danger">Atrasada</span>;
-  if (!plannedEnd) return <span className="muted">Sem prazo</span>;
-  const dias = Math.round((new Date(`${plannedEnd}T12:00:00`).getTime() - Date.now()) / 86400000);
-  if (dias < 0) return <span className="badge badge-danger">Vencida há {Math.abs(dias)} d</span>;
-  if (dias <= 7) return <span className="badge badge-warning">Vence em {dias} d</span>;
-  return <span className="badge badge-success">No prazo</span>;
+function prazoDoProjeto(plannedEnd: string | null, overdue: number) {
+  if (overdue > 0) return { className: "badge badge-danger", label: "Atrasado" };
+  if (!plannedEnd) return { className: "badge", label: "Sem prazo" };
+  const days = Math.round((new Date(`${plannedEnd}T12:00:00`).getTime() - Date.now()) / 86400000);
+  if (days < 0) return { className: "badge badge-danger", label: `Vencido há ${Math.abs(days)} d` };
+  if (days <= 7) return { className: "badge badge-warning", label: `Vence em ${days} d` };
+  return { className: "badge badge-success", label: "No prazo" };
 }
 
-function diferencaDias(inicio: string | null, fim: string | null): number | null {
-  if (!inicio || !fim) return null;
+function differenceInDays(start: string | null, end: string | null): number | null {
+  if (!start || !end) return null;
   return Math.round(
-    (new Date(`${fim}T12:00:00`).getTime() - new Date(`${inicio}T12:00:00`).getTime()) / 86_400_000
+    (new Date(`${end}T12:00:00`).getTime() - new Date(`${start}T12:00:00`).getTime()) / 86_400_000
   );
 }
 
@@ -28,7 +30,7 @@ export default async function PlanningPage({
 }) {
   const query = await searchParams;
   const { supabase, organizationId } = await requireOrganizationContext();
-  const [{ data: projects, error }, { data: milestones }] = await Promise.all([
+  const [projectsResult, milestonesResult] = await Promise.all([
     supabase
       .from("projects")
       .select("id,code,name,status,entry_mode,city,district,progress,planned_start,planned_end,clients(legal_name,trade_name,email,phone),project_tasks(id,title,status,planned_start,planned_end,responsible_id)")
@@ -41,43 +43,49 @@ export default async function PlanningPage({
       .eq("organization_id", organizationId)
       .gte("planned_date", new Date().toISOString().slice(0, 10))
       .order("planned_date")
-      .limit(12)
+      .limit(50)
   ]);
 
-  const rowsBase = (projects ?? []).map((project) => {
+  reportDataAccessError("planning.projects", projectsResult.error);
+  reportDataAccessError("planning.milestones", milestonesResult.error);
+
+  const rowsBase = (projectsResult.data ?? []).map((project) => {
     const tasks = [...(project.project_tasks ?? [])].sort((a, b) =>
       String(a.planned_start ?? "9999-12-31").localeCompare(String(b.planned_start ?? "9999-12-31"))
     );
     const overdue = tasks.filter((task) => task.planned_end && new Date(`${task.planned_end}T23:59:59`) < new Date() && task.status !== "COMPLETED").length;
     const blocked = tasks.filter((task) => task.status === "BLOCKED").length;
-    const abertas = tasks.filter(task => !["COMPLETED", "CANCELED"].includes(task.status));
-    const atual = abertas.find(task => ["IN_PROGRESS", "BLOCKED"].includes(task.status)) ?? abertas[0] ?? null;
-    const indiceAtual = atual ? abertas.findIndex(task => task.id === atual.id) : -1;
-    const proxima = indiceAtual >= 0 ? (abertas[indiceAtual + 1] ?? null) : null;
-    const terminoMaisTarde = tasks.map(task => task.planned_end).filter((date): date is string => Boolean(date)).sort().at(-1) ?? null;
+    const openTasks = tasks.filter((task) => !["COMPLETED", "CANCELED"].includes(task.status));
+    const current = openTasks.find((task) => ["IN_PROGRESS", "BLOCKED"].includes(task.status)) ?? openTasks[0] ?? null;
+    const currentIndex = current ? openTasks.findIndex((task) => task.id === current.id) : -1;
+    const next = currentIndex >= 0 ? (openTasks[currentIndex + 1] ?? null) : null;
+    const latestTaskEnd = tasks.map((task) => task.planned_end).filter((date): date is string => Boolean(date)).sort().at(-1) ?? null;
     return {
       ...project,
       client: singleRelation(project.clients),
       overdue,
       blocked,
-      atual,
-      proxima,
-      folga: diferencaDias(terminoMaisTarde, project.planned_end)
+      current,
+      next,
+      slack: differenceInDays(latestTaskEnd, project.planned_end)
     };
   });
-  const responsibleIds = [...new Set(rowsBase.map(row => row.atual?.responsible_id).filter((id): id is string => Boolean(id)))];
+
+  const responsibleIds = [...new Set(rowsBase.map((row) => row.current?.responsible_id).filter((id): id is string => Boolean(id)))];
   const profilesResult = responsibleIds.length
     ? await supabase.from("profiles").select("id,full_name,email").in("id", responsibleIds)
     : { data: [], error: null };
-  const profileById = new Map((profilesResult.data ?? []).map(profile => [
+  reportDataAccessError("planning.responsibles", profilesResult.error);
+
+  const profileById = new Map((profilesResult.data ?? []).map((profile) => [
     profile.id,
     profile.full_name || profile.email || profile.id.slice(0, 8)
   ]));
 
   const normalizedQuery = String(query.q ?? "").trim().toLocaleLowerCase("pt-BR");
-  const rows = rowsBase.map(row => ({
+  const filteredRows = rowsBase.map((row) => ({
     ...row,
-    responsavel: row.atual?.responsible_id ? (profileById.get(row.atual.responsible_id) ?? "Não identificado") : "Não atribuído"
+    responsible: row.current?.responsible_id ? (profileById.get(row.current.responsible_id) ?? "Não identificado") : "Não atribuído"
   })).filter((row) => {
     const searchable = [
       row.code,
@@ -88,8 +96,8 @@ export default async function PlanningPage({
       row.client?.legal_name,
       row.client?.email,
       row.client?.phone,
-      row.atual?.title,
-      row.responsavel
+      row.current?.title,
+      row.responsible
     ].filter(Boolean).join(" ").toLocaleLowerCase("pt-BR");
     if (normalizedQuery && !searchable.includes(normalizedQuery)) return false;
     if (query.status && row.status !== query.status) return false;
@@ -99,17 +107,57 @@ export default async function PlanningPage({
     return true;
   });
 
+  const portfolioRows = filteredRows.map((row) => {
+    const deadline = prazoDoProjeto(row.planned_end, row.overdue);
+    return {
+      id: row.id,
+      code: row.code,
+      name: row.name,
+      entryMode: row.entry_mode,
+      location: [row.district, row.city].filter(Boolean).join(" · ") || "—",
+      clientName: row.client?.trade_name || row.client?.legal_name || "Sem cliente",
+      currentTitle: row.current?.title ?? "Sem tarefa aberta",
+      currentStatus: row.current?.status ?? row.status,
+      currentPeriod: row.current ? `${formatDate(row.current.planned_start)} → ${formatDate(row.current.planned_end)}` : "—",
+      responsible: row.responsible,
+      progress: Number(row.progress),
+      progressLabel: formatPercent(row.progress),
+      slackDays: row.slack,
+      deadlineClass: deadline.className,
+      deadlineLabel: deadline.label,
+      blockedCount: row.blocked,
+      nextTitle: row.next?.title ?? "—",
+      plannedEnd: row.planned_end
+    };
+  });
+
+  const milestones = (milestonesResult.data ?? []).map((milestone) => {
+    const project = singleRelation(milestone.projects);
+    return {
+      id: milestone.id,
+      projectId: milestone.project_id,
+      projectCode: project?.code || "—",
+      projectName: project?.name || "Projeto",
+      title: milestone.title,
+      plannedDate: milestone.planned_date,
+      plannedDateLabel: formatDate(milestone.planned_date),
+      completed: milestone.completed
+    };
+  });
+
+  const loadFailed = Boolean(projectsResult.error || milestonesResult.error || profilesResult.error);
+
   return (
     <main className="content">
       <BarraDeTrabalho
         title="Planejamento"
-        primaryAction={<Link className="button button-primary barra-controle-novo" href="/app/obras/novo">Novo projeto/obra</Link>}
-        meta={<span className="pipeline-contagem">{rows.length} obra(s)</span>}
+        primaryAction={<Link className="button button-primary barra-controle-novo" href="/app/obras/novo">Novo projeto</Link>}
+        meta={<span className="pipeline-contagem">{portfolioRows.length} projeto(s)</span>}
       />
       <SmartSearchBar
         initialQuery={query.q}
         initialFilters={query}
-        placeholder="Buscar projeto, obra, cliente, tarefa, responsável, contato, cidade ou bairro..."
+        placeholder="Buscar projeto, cliente, tarefa, responsável, contato, cidade ou bairro..."
         filters={[
           {
             name: "status",
@@ -117,10 +165,10 @@ export default async function PlanningPage({
             type: "select",
             options: [
               { value: "PLANNING", label: "Planejamento" },
-              { value: "ACTIVE", label: "Ativa" },
+              { value: "ACTIVE", label: "Ativo" },
               { value: "IN_PROGRESS", label: "Em andamento" },
-              { value: "ON_HOLD", label: "Pausada" },
-              { value: "COMPLETED", label: "Concluída" }
+              { value: "ON_HOLD", label: "Pausado" },
+              { value: "COMPLETED", label: "Concluído" }
             ]
           },
           {
@@ -130,7 +178,7 @@ export default async function PlanningPage({
             options: [
               { value: "CONTRACT", label: "Contrato" },
               { value: "INDEPENDENT", label: "Projeto independente" },
-              { value: "IN_PROGRESS", label: "Obra anterior em andamento" },
+              { value: "IN_PROGRESS", label: "Projeto anterior em andamento" },
               { value: "HISTORICAL", label: "Histórico" },
               { value: "IMPORTED", label: "Importado" }
             ]
@@ -139,15 +187,9 @@ export default async function PlanningPage({
           { name: "district", label: "Bairro", placeholder: "Capivari" }
         ]}
       />
-      <p className="workspace-intro">Prazo, etapa, responsabilidade, recursos e próxima ação por obra, inclusive projetos sem proposta ou orçamento.</p>
-      {error ? <div className="validation blocking">{error.message}</div> : null}
-      <section className="card table-wrap" style={{ marginTop: 18 }}>
-        <table><thead><tr><th>Obra</th><th>Origem/local</th><th>Cliente</th><th>Etapa atual</th><th>Datas da etapa</th><th>Responsável</th><th>Progresso</th><th>Folga</th><th>Situação</th><th>Próxima tarefa</th></tr></thead><tbody>
-          {rows.map((project) => <tr key={project.id}><td><Link href={`/app/obras/${project.id}/cronograma`}><strong>{project.code}</strong><br /><span className="muted">{project.name}</span></Link></td><td><span className="badge">{project.entry_mode}</span><br /><small className="muted">{[project.district, project.city].filter(Boolean).join(" · ") || "—"}</small></td><td>{project.client?.trade_name || project.client?.legal_name || "Sem cliente"}</td><td><strong>{project.atual?.title ?? "Sem tarefa aberta"}</strong><small>{project.atual?.status ?? project.status}</small></td><td>{project.atual ? `${formatDate(project.atual.planned_start)} → ${formatDate(project.atual.planned_end)}` : "—"}</td><td>{project.responsavel}</td><td style={{ minWidth: 150 }}><div className="progress-row"><div><span>{formatPercent(project.progress)}</span></div><div className="progress-track"><div className="progress-fill" style={{ width: formatPercent(project.progress) }} /></div></div></td><td>{project.folga === null ? "—" : project.folga >= 0 ? `${project.folga} d` : <span className="badge badge-danger">{project.folga} d</span>}</td><td>{prazoDaObra(project.planned_end, project.overdue)}{project.blocked ? <small>{project.blocked} bloqueada(s)</small> : null}</td><td>{project.proxima?.title ?? "—"}</td></tr>)}
-          {!rows.length ? <tr><td colSpan={10}>Nenhuma obra encontrada com os filtros informados.</td></tr> : null}
-        </tbody></table>
-      </section>
-      <section className="card card-pad" style={{ marginTop: 22 }}><h2>Próximos marcos</h2><div className="timeline" style={{ marginTop: 14 }}>{(milestones ?? []).map((milestone) => { const project = singleRelation(milestone.projects); return <div key={milestone.id} style={{ display: "flex", justifyContent: "space-between", gap: 16, padding: "11px 0", borderBottom: "1px solid var(--border)" }}><span><strong>{project?.code || "—"}</strong> · {milestone.title}</span><span className={milestone.completed ? "badge badge-success" : "badge"}>{formatDate(milestone.planned_date)}</span></div>; })}{!milestones?.length ? <p className="muted">Nenhum marco futuro cadastrado.</p> : null}</div></section>
+      <p className="workspace-intro">Prazo, etapa, responsabilidade, recursos e próxima ação por projeto, inclusive sem proposta ou orçamento.</p>
+      {loadFailed ? <div className="validation blocking" role="alert">{DATA_LOAD_ERROR_MESSAGE}</div> : null}
+      <PlanningPortfolioView rows={portfolioRows} milestones={milestones} />
     </main>
   );
 }

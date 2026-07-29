@@ -54,6 +54,9 @@ insert into public.budgets(
   '12000000-0000-0000-0000-000000000001'
 );
 
+-- A fixture nasce editável. Seções e itens são montados primeiro; somente depois
+-- a versão é congelada. Preparar conteúdo após `frozen_at` enfraqueceria o teste,
+-- porque o trigger de imutabilidade deve bloquear exatamente essa mutação.
 insert into public.budget_versions(
   id, organization_id, budget_id, version_number, base_date, status,
   markup_model_id, invested_capital, direct_cost, sale_price,
@@ -65,7 +68,7 @@ insert into public.budget_versions(
   1, current_date, 'APPROVAL_PENDING',
   '43000000-0000-0000-0000-000000000002',
   1000, 1000, 1428.57,
-  now(),
+  null,
   '12000000-0000-0000-0000-000000000001'
 );
 
@@ -95,12 +98,19 @@ insert into public.budget_items(
   '12000000-0000-0000-0000-000000000001'
 );
 
+update public.budget_versions
+set frozen_at = now()
+where id = '42000000-0000-0000-0000-000000000003';
+
+-- Não usa `\gset`: variáveis psql não são interpoladas dentro de um bloco DO.
+-- A tabela temporária vive só nesta transação e torna a evidência acessível ao
+-- PL/pgSQL sem acoplamento ao cliente que executa o arquivo.
+create temporary table next_budget_version_result on commit drop as
 select id as next_version_id
 from public.create_next_budget_version(
   '41000000-0000-0000-0000-000000000003',
   'Revisão após congelamento'
-)
-\gset
+);
 
 do $$
 declare
@@ -116,7 +126,7 @@ begin
 
   select * into v_next
   from public.budget_versions
-  where id = :'next_version_id';
+  where id = (select next_version_id from next_budget_version_result);
 
   select current_version_id into v_current
   from public.budgets
