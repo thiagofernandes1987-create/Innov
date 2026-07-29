@@ -1,6 +1,7 @@
 -- Bootstrap mínimo para replay das migrations do repositório em PostgreSQL limpo.
 -- Reproduz o que o Supabase provê antes da primeira migration do projeto:
--- papéis, esquemas `auth`, `storage` e `extensions`, e as funções de identidade.
+-- papéis, esquemas `auth`, `storage` e `extensions`, funções de identidade e
+-- privilégios padrão dos papéis da API sobre objetos que ainda serão criados.
 --
 -- Não reimplementa regra de negócio. Serve para responder uma pergunta só:
 -- o repositório, sozinho, constrói o esquema da plataforma?
@@ -72,3 +73,19 @@ create or replace function storage.filename(name text) returns text
 language sql immutable as $$ select (string_to_array(name, '/'))[array_length(string_to_array(name, '/'), 1)]; $$;
 
 grant usage on schema public, auth, storage, extensions to anon, authenticated, service_role;
+
+-- A instância gerenciada concede privilégios de objeto aos papéis da API e usa
+-- RLS/revogações específicas para reduzir cada domínio. Sem os DEFAULT
+-- PRIVILEGES, o replay limpo testa um PostgreSQL mais restritivo que o ambiente
+-- real e reprova antes de alcançar as políticas. As migrations continuam livres
+-- para revogar escrita direta em livros imutáveis e RPCs protegidas.
+grant all on all tables in schema public to anon, authenticated, service_role;
+grant all on all sequences in schema public to anon, authenticated, service_role;
+grant execute on all functions in schema public to anon, authenticated, service_role;
+
+alter default privileges in schema public
+  grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant all on sequences to anon, authenticated, service_role;
+alter default privileges in schema public
+  grant execute on functions to anon, authenticated, service_role;
