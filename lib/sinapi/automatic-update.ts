@@ -51,6 +51,15 @@ export type SinapiOfficialPackageInspection = {
 
 type CaixaCategory = { ID?: number; Id?: number; Title?: string };
 type ODataResults<T> = { d?: { results?: T[] } };
+type PreviousBatch = {
+  id: string;
+  base_date: string;
+  source_sha256: string;
+  status: string;
+  imported_inputs: number | string;
+  imported_compositions: number | string;
+  rejected_records: number | string;
+};
 
 type LoadedPackage = {
   source: SinapiOfficialSource;
@@ -125,7 +134,6 @@ async function fetchOfficial(
   timeoutMs = REQUEST_TIMEOUT_MS
 ): Promise<Response> {
   let current = officialUrl(input);
-  // O portal oficial exige este cookie antes de servir páginas, API e arquivos.
   const cookies = new Map<string, string>([["security", "true"]]);
 
   for (let redirects = 0; redirects <= 7; redirects += 1) {
@@ -379,6 +387,34 @@ async function importCompositions(
   return imported;
 }
 
+function previousBatchResult(
+  previous: PreviousBatch,
+  status: "already_current" | "newer_local_base",
+  context: {
+    finalUrl: string;
+    sourceSha256: string;
+    region: string;
+    taxRelief: boolean;
+    xlsxFiles: number;
+    worksheets: number;
+  }
+): SinapiAutomaticUpdateResult {
+  return {
+    status,
+    batchId: previous.id,
+    sourceUrl: context.finalUrl,
+    sourceSha256: context.sourceSha256,
+    baseDate: previous.base_date,
+    region: context.region,
+    taxRelief: context.taxRelief,
+    inputs: Number(previous.imported_inputs),
+    compositions: Number(previous.imported_compositions),
+    rejected: Number(previous.rejected_records),
+    xlsxFiles: context.xlsxFiles,
+    worksheets: context.worksheets
+  };
+}
+
 export async function runSinapiAutomaticUpdate(input: {
   organizationId: string;
   region: string;
@@ -402,24 +438,19 @@ export async function runSinapiAutomaticUpdate(input: {
     .maybeSingle();
   if (latestError) throw new Error(`Falha ao consultar o estado atual do SINAPI: ${latestError.message}`);
 
-  const priorResult = (status: "already_current" | "newer_local_base"): SinapiAutomaticUpdateResult => ({
-    status,
-    batchId: latest.id,
-    sourceUrl: finalUrl,
+  const context = {
+    finalUrl,
     sourceSha256,
-    baseDate: latest.base_date,
     region,
     taxRelief: input.taxRelief,
-    inputs: Number(latest.imported_inputs),
-    compositions: Number(latest.imported_compositions),
-    rejected: Number(latest.rejected_records),
     xlsxFiles: parsed.xlsxFiles.length,
     worksheets: parsed.worksheets
-  });
-
-  if (latest && latest.base_date > parsed.baseDate) return priorResult("newer_local_base");
+  };
+  if (latest && latest.base_date > parsed.baseDate) {
+    return previousBatchResult(latest as PreviousBatch, "newer_local_base", context);
+  }
   if (latest && latest.base_date === parsed.baseDate && latest.source_sha256 === sourceSha256) {
-    return priorResult("already_current");
+    return previousBatchResult(latest as PreviousBatch, "already_current", context);
   }
 
   let batchId: string | null = null;
