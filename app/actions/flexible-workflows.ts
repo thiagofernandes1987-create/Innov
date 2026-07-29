@@ -22,6 +22,15 @@ const MANAGEMENT_ROLES = [
   "ENGENHEIRO"
 ] as const;
 
+export type ProposalCreationState = {
+  status: "idle" | "error";
+  message?: string;
+};
+
+export type ProposalUploadPreparation =
+  | { ok: true; path: string; token: string }
+  | { ok: false; message: string };
+
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
@@ -44,6 +53,57 @@ function decimal(formData: FormData, key: string, fallback = 0) {
 
 function fail(path: string, message: string): never {
   redirect(`${path}${path.includes("?") ? "&" : "?"}error=${encodeURIComponent(message)}`);
+}
+
+function proposalError(message: string): ProposalCreationState {
+  return { status: "error", message };
+}
+
+function validProposalPath(path: string, organizationId: string) {
+  return path.startsWith(`${organizationId}/proposals/`) && !path.includes("..") && !path.includes("\\");
+}
+
+async function removeProposalUpload(
+  supabase: Awaited<ReturnType<typeof requireCapability>>["supabase"],
+  storagePath: string | null
+) {
+  if (!storagePath) return;
+  const removal = await supabase.storage.from("commercial-documents").remove([storagePath]);
+  reportDataAccessError("proposal-upload.cleanup", removal.error);
+}
+
+export async function prepareProposalUpload(input: {
+  name: string;
+  type: string;
+  size: number;
+}): Promise<ProposalUploadPreparation> {
+  const context = await requireCapability("propostas", "create");
+  const name = String(input.name ?? "").trim();
+  const type = String(input.type ?? "").trim().toLowerCase();
+  const size = Number(input.size ?? 0);
+
+  if (!name || (!name.toLowerCase().endsWith(".pdf") && type !== PDF_MIME)) {
+    return { ok: false, message: "Selecione um arquivo PDF válido." };
+  }
+  if (!Number.isFinite(size) || size <= 0) {
+    return { ok: false, message: "O PDF selecionado está vazio ou não pôde ser lido." };
+  }
+  if (size > MAX_COMMERCIAL_PDF_SIZE) {
+    return { ok: false, message: "O PDF excede o limite de 20 MB." };
+  }
+
+  const safeName = name.replace(/[^a-zA-Z0-9._-]/g, "-");
+  const storagePath = `${context.organizationId}/proposals/${randomUUID()}-${safeName}`;
+  const signed = await context.supabase.storage
+    .from("commercial-documents")
+    .createSignedUploadUrl(storagePath);
+
+  if (signed.error || !signed.data?.token) {
+    reportDataAccessError("proposal-upload.prepare", signed.error);
+    return { ok: false, message: "Não foi possível preparar o envio do PDF. Tente novamente." };
+  }
+
+  return { ok: true, path: storagePath, token: signed.data.token };
 }
 
 export async function createFlexibleProject(
@@ -91,40 +151,76 @@ export async function createFlexibleProject(
   redirect(`/app/obras/${data}`);
 }
 
-export async function createFlexibleProposal(formData: FormData) {
+export async function createFlexibleProposal(
+  _previousState: ProposalCreationState,
+  formData: FormData
+): Promise<ProposalCreationState> {
   const context = await requireCapability("propostas", "create");
-  const file = formData.get("file");
-  let storagePath: string | null = null;
-  let sha256: string | null = null;
+  const pricingMode = text(formData, "pricingMode") || "FIXED";
+  const budgetVersionId = optional(formData, "budgetVersionId");
+  const fixedValue = decimal(formData, "fixedValue", 0);
+  const discountPercent = decimal(formData, "discountPercent", 0);
+  const discountReason = optional(formData, "discountReason");
+  const releaseClient = formData.get("releaseClient") !== null;
+  const storagePath = optional(formData, "uploadedPath");
 
-  if (file instanceof File && file.size > 0) {
-    if (file.type !== PDF_MIME) {
-      fail("/app/propostas/nova", "A proposta comercial precisa ser enviada em PDF.");
-    }
-    if (file.size > MAX_COMMERCIAL_PDF_SIZE) {
-      fail("/app/propostas/nova", "O PDF excede o limite de 20 MB.");
-    }
-
-    const bytes = Buffer.from(await file.arrayBuffer());
-    sha256 = createHash("sha256").update(bytes).digest("hex");
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-    storagePath = `${context.organizationId}/proposals/${randomUUID()}-${safeName}`;
-    const upload = await context.supabase.storage
-      .from("commercial-documents")
-      .upload(storagePath, bytes, { contentType: PDF_MIME, upsert: false });
-
-    if (upload.error) fail("/app/propostas/nova", upload.error.message);
+  if (pricingMode !== "BUDGET" && pricingMode !== "FIXED") {
+    return proposalError("Escolha como o valor da proposta será formado.");
+  }
+  if (pricingMode === "BUDGET" && !budgetVersionId) {
+    return proposalError("Selecione um orçamento calculado para continuar.");
+  }
+  if (pricingMode === "FIXED" && fixedValue <= 0) {
+    return proposalError("Informe um valor fixo maior que zero.");
+  }
+  if (!text(formData, "code") || !text(formData, "title")) {
+    return proposalError("Preencha o código e o título da proposta.");
+  }
+  if (!text(formData, "objectText") || !text(formData, "scopeText")) {
+    return proposalError("Preencha o objeto e o escopo da proposta.");
+  }
+  if (discountPercent < 0 || discountPercent >= 100) {
+    return proposalError("O desconto precisa estar entre 0% e 99,99%.");
+  }
+  if (discountPercent > 7 && !discountReason) {
+    return proposalError("Justifique o desconto acima de 7% para solicitar aprovação da diretoria.");
+  }
+  if (releaseClient && !storagePath) {
+    return proposalError("Anexe o PDF final antes de liberar a proposta ao portal do cliente.");
+  }
+  if (storagePath && !validProposalPath(storagePath, context.organizationId)) {
+    reportDataAccessError("proposal-upload.invalid-path", { code: "INVALID_PATH" });
+    return proposalError("O PDF anexado não pertence a esta organização. Selecione o arquivo novamente.");
   }
 
-  const pricingMode = text(formData, "pricingMode") || "FIXED";
-  const discountPercent = decimal(formData, "discountPercent", 0);
+  let sha256: string | null = null;
+  if (storagePath) {
+    const downloaded = await context.supabase.storage.from("commercial-documents").download(storagePath);
+    if (downloaded.error || !downloaded.data) {
+      reportDataAccessError("proposal-upload.download", downloaded.error);
+      return proposalError("O PDF não pôde ser confirmado no armazenamento. Selecione o arquivo novamente.");
+    }
+
+    if (downloaded.data.size <= 0 || downloaded.data.size > MAX_COMMERCIAL_PDF_SIZE) {
+      await removeProposalUpload(context.supabase, storagePath);
+      return proposalError("O PDF está vazio ou excede o limite de 20 MB.");
+    }
+
+    const bytes = Buffer.from(await downloaded.data.arrayBuffer());
+    if (bytes.subarray(0, 5).toString("ascii") !== "%PDF-") {
+      await removeProposalUpload(context.supabase, storagePath);
+      return proposalError("O arquivo enviado não possui uma assinatura PDF válida.");
+    }
+    sha256 = createHash("sha256").update(bytes).digest("hex");
+  }
+
   const { data, error } = await context.supabase.rpc("create_commercial_proposal", {
     p_client_id: optional(formData, "clientId"),
-    p_budget_version_id: optional(formData, "budgetVersionId"),
+    p_budget_version_id: budgetVersionId,
     p_pricing_mode: pricingMode,
-    p_fixed_value: decimal(formData, "fixedValue", 0),
+    p_fixed_value: fixedValue,
     p_discount_rate: discountPercent / 100,
-    p_discount_reason: optional(formData, "discountReason"),
+    p_discount_reason: discountReason,
     p_code: text(formData, "code"),
     p_title: text(formData, "title"),
     p_object_text: text(formData, "objectText"),
@@ -140,14 +236,13 @@ export async function createFlexibleProposal(formData: FormData) {
     p_valid_until: optional(formData, "validUntil"),
     p_document_path: storagePath,
     p_document_sha256: sha256,
-    p_release_client: formData.get("releaseClient") !== null
+    p_release_client: releaseClient
   });
 
   if (error || !data) {
-    if (storagePath) {
-      await context.supabase.storage.from("commercial-documents").remove([storagePath]);
-    }
-    fail("/app/propostas/nova", error?.message ?? "Não foi possível criar a proposta.");
+    reportDataAccessError("create-flexible-proposal.rpc", error);
+    await removeProposalUpload(context.supabase, storagePath);
+    return proposalError("Não foi possível criar a proposta. Revise os dados e tente novamente.");
   }
 
   revalidatePath("/app/propostas");
@@ -164,6 +259,9 @@ export async function decideFlexibleProposalDiscount(formData: FormData) {
     p_comment: text(formData, "comment")
   });
 
-  if (error) fail("/app/propostas", error.message);
+  if (error) {
+    reportDataAccessError("proposal-discount.decision", error);
+    fail("/app/propostas", "Não foi possível registrar a decisão de desconto.");
+  }
   revalidatePath("/app/propostas");
 }
