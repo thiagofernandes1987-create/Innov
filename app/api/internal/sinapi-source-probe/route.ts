@@ -8,7 +8,9 @@ export const dynamic = "force-dynamic";
 const PROBE_TOKEN = "sinapi-source-probe-20260729-7f4a9";
 
 export async function GET(request: Request) {
-  if (request.headers.get("x-sinapi-probe-token") !== PROBE_TOKEN) {
+  const url = new URL(request.url);
+  const token = request.headers.get("x-sinapi-probe-token") ?? url.searchParams.get("token");
+  if (token !== PROBE_TOKEN) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
