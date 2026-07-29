@@ -7,6 +7,10 @@ const migrations = fs.readdirSync("supabase/migrations")
   .sort()
   .map(file => `supabase/migrations/${file}`);
 
+// Cada cenário possui uma evidência nominal. O contador não aceita qualquer
+// NOTICE genérico e continua exigindo as seis confirmações do domínio.
+const budgetApprovalPattern = /NOTICE:.*(Orçamento vazio bloqueado|Material, mão de obra, custo fixo, impostos e margem aprovados|Autoaprovação de orçamento bloqueada|Aprovação independente registrada|Nova versão editável preserva|Importação, busca, composição, orçamento e guardas SINAPI aprovados)/i;
+
 runPostgresFiles({
   containerPrefix: "innov-budget-readiness",
   database: "budget_readiness_test",
@@ -17,6 +21,7 @@ runPostgresFiles({
     "supabase/tests/budgets/next-version.test.sql",
     "supabase/tests/budgets/sinapi.test.sql"
   ],
+  approvalPattern: budgetApprovalPattern,
   expectedApprovals: 6,
   successMessage: "Testes de composição, fontes, margem, aprovação, versões e SINAPI aprovados."
 });
