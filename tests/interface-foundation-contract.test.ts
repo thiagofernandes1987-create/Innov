@@ -35,7 +35,7 @@ describe("S-23 — fundação de interface", () => {
 
     expect(schedule).toContain('import { Gantt }');
     expect(schedule).toContain("dependencias=");
-    expect(gantt).toContain("calcularCronograma");
+    expect(gantt).toMatch(/\bcalcular\(tarefas, dependencias, calendario\)/);
   });
 
   it("mantém o orçamento operável com inclusão, remoção e recálculo", () => {
