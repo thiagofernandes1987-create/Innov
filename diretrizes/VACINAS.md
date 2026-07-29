@@ -138,6 +138,8 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-037` | Orçamento existe sem composição, procedência ou formação de preço utilizável | vigente | bloqueios de prontidão, classificação de itens, UI completa e `test:db:budgets` |
 | `VACINA-038` | Fonte externa é tratada como dado confiável sem origem, data-base e coerência | vigente | domínio oficial, hashes, validações fail-closed e teste do parser |
 | `VACINA-039` | Atualização mensal de referência pode alterar orçamento histórico | vigente | snapshot por UF/data/regime/hash, catálogo oficial imutável e custo copiado |
+| `VACINA-040` | Fluxo comercial obrigatório exclui projeto ou proposta sem documento predecessor | vigente | modo explícito, FK opcional, data de corte e validação estrutural |
+| `VACINA-041` | Alçada comercial existe apenas como campo de interface | vigente | regra no banco, decisão independente, trilha e teste negativo |
 
 ## 4. Arquivos
 
@@ -181,7 +183,9 @@ diretrizes/vacinas/
 ├── VACINA-036-CONSULTA-SEGUE-CONTRATO-REAL-DA-TABELA.md
 ├── VACINA-037-ORCAMENTO-EXIGE-COMPOSICAO-E-FORMACAO-DE-PRECO.md
 ├── VACINA-038-FONTE-EXTERNA-NAO-PUBLICA-SEM-EVIDENCIA.md
-└── VACINA-039-FONTE-MENSAL-NAO-ALTERA-ORCAMENTO-HISTORICO.md
+├── VACINA-039-FONTE-MENSAL-NAO-ALTERA-ORCAMENTO-HISTORICO.md
+├── VACINA-040-FLUXO-NAO-OBRIGA-DOCUMENTO-ANTERIOR.md
+└── VACINA-041-ALCADA-NAO-E-SOMENTE-CAMPO.md
 ```
 
 ## 5. Critérios para nova vacina
