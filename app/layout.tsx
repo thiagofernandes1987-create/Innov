@@ -12,6 +12,7 @@ import "./inventory.css";
 import "./relationship.css";
 import "./observability.css";
 import "./stage20.css";
+import "./modern-workflows.css";
 
 export const metadata: Metadata = {
   title: {
