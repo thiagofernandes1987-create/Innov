@@ -195,8 +195,7 @@ async function fetchOfficialJson<T>(url: string) {
 }
 
 function categoryApiUrl() {
-  const query = "$select=ID,Title&$top=5000&$filter=Ativo%20eq%201%20and%20ArtefatosId%20eq%2039&$orderby=Title";
-  return `${CAIXA_BASE_URL}/_api/web/lists/getbytitle('LT_T077_Downloads_Categorias')/Items?${query}`;
+  return `${CAIXA_BASE_URL}/_api/web/lists/getbytitle('LT_T077_Downloads_Categorias')/Items?$select=ID,Title&$top=5000&$orderby=Title`;
 }
 
 function filesApiUrl(categoryId: number) {
