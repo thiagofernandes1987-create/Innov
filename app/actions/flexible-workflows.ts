@@ -5,6 +5,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
 import { requireOrganizationContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
+import type { ProjectCreationState } from "@/lib/forms/project-creation-state";
+import {
+  classifyProjectCreationProviderError,
+  validateFlexibleProject
+} from "@/lib/projects/project-creation";
 
 const PDF_MIME = "application/pdf";
 const MAX_COMMERCIAL_PDF_SIZE = 20 * 1024 * 1024;
@@ -40,36 +46,44 @@ function fail(path: string, message: string): never {
   redirect(`${path}${path.includes("?") ? "&" : "?"}error=${encodeURIComponent(message)}`);
 }
 
-export async function createFlexibleProject(formData: FormData) {
+export async function createFlexibleProject(
+  _previousState: ProjectCreationState,
+  formData: FormData
+): Promise<ProjectCreationState> {
   const context = await requireOrganizationContext(MANAGEMENT_ROLES);
-  const entryMode = text(formData, "entryMode") || "INDEPENDENT";
-  const progressPercent = decimal(formData, "progressPercent", 0);
+  const validation = validateFlexibleProject(formData, context.organizationId);
+  if (!validation.ok) return validation.state;
 
-  const { data, error } = await context.supabase.rpc("create_independent_project_v2", {
-    p_organization_id: context.organizationId,
-    p_client_id: optional(formData, "clientId"),
-    p_entry_mode: entryMode,
-    p_code: text(formData, "code"),
-    p_name: text(formData, "name"),
-    p_status: text(formData, "status") || (entryMode === "IN_PROGRESS" ? "IN_PROGRESS" : "PLANNING"),
-    p_description: optional(formData, "description"),
-    p_planned_start: optional(formData, "plannedStart"),
-    p_planned_end: optional(formData, "plannedEnd"),
-    p_actual_start: optional(formData, "actualStart"),
-    p_progress: progressPercent / 100,
-    p_data_cutoff: optional(formData, "dataCutoff"),
-    p_historical_cost: decimal(formData, "historicalCost", 0),
-    p_address_line: optional(formData, "addressLine"),
-    p_district: optional(formData, "district"),
-    p_city: optional(formData, "city"),
-    p_state: optional(formData, "state"),
-    p_postal_code: optional(formData, "postalCode"),
-    p_manager_id: optional(formData, "managerId"),
-    p_imported_from: optional(formData, "importedFrom")
+  const input = validation.value;
+  const { data, error } = await context.supabase.rpc("create_independent_project_v3", {
+    p_organization_id: input.organizationId,
+    p_client_id: input.clientId,
+    p_entry_mode: input.entryMode,
+    p_code: input.code,
+    p_name: input.name,
+    p_status: input.status,
+    p_description: input.description,
+    p_planned_start: input.plannedStart,
+    p_planned_end: input.plannedEnd,
+    p_actual_start: input.actualStart,
+    p_progress: input.progress,
+    p_data_cutoff: input.dataCutoff,
+    p_historical_cost: input.historicalCost,
+    p_address_line: input.addressLine,
+    p_district: input.district,
+    p_city: input.city,
+    p_state: input.state,
+    p_postal_code: input.postalCode,
+    p_manager_id: input.managerId,
+    p_imported_from: input.importedFrom
   });
 
   if (error || !data) {
-    fail("/app/obras/novo", error?.message ?? "Não foi possível criar a obra ou projeto.");
+    reportDataAccessError("create-flexible-project.rpc", error);
+    return classifyProjectCreationProviderError(
+      error,
+      "Não foi possível criar a obra ou projeto. Os dados preenchidos foram preservados para uma nova tentativa."
+    );
   }
 
   revalidatePath("/app/obras");
