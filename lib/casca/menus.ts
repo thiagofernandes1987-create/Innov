@@ -119,6 +119,7 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
   ],
   orcamentos: [
     { rotulo: "Orçamentos", href: "/app/orcamentos" },
+    { rotulo: "SINAPI", href: "/app/orcamentos/sinapi" },
     { rotulo: "Novo orçamento", href: "/app/orcamentos/novo" }
   ],
   propostas: [
