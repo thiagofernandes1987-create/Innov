@@ -3,7 +3,7 @@ import { runPostgresFiles } from "./lib/postgres-test-container.mjs";
 
 // VACINA-014: descobre migrations do domínio e da Rodada 02 sem lista fixa.
 const migrations = fs.readdirSync("supabase/migrations")
-  .filter(file => /_(stage9_|budget_readiness_and_cost_sources|seed_sinduscon_sp_cub|budget_item_categories|budget_next_version|sinapi_official_catalog|sinapi_authenticated_rpcs_invoker|sinapi_import_fk_indexes).*\.sql$/.test(file))
+  .filter(file => /_(stage9_|budget_readiness_and_cost_sources|seed_sinduscon_sp_cub|budget_item_categories|budget_next_version|sinapi_official_catalog|sinapi_authenticated_rpcs_invoker|sinapi_import_fk_indexes|sinapi_automatic_update_guard).*\.sql$/.test(file))
   .sort()
   .map(file => `supabase/migrations/${file}`);
 
