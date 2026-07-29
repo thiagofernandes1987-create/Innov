@@ -1,5 +1,13 @@
 import { notFound } from "next/navigation";
-import { calculateBudgetVersion, decideBudgetApproval, freezeBudgetVersion } from "@/app/actions/budgets";
+import {
+  addCubReferenceItem,
+  addManualBudgetItem,
+  calculateBudgetVersion,
+  decideBudgetApproval,
+  freezeBudgetVersion,
+  removeBudgetItem,
+  updateBudgetPricing
+} from "@/app/actions/budgets";
 import { requireOrganizationContext } from "@/lib/auth";
 import { budgetStatusLabels, formatCurrency, formatPercent, type BudgetStatus } from "@/lib/domain";
 
@@ -7,6 +15,49 @@ type BudgetDetailProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ error?: string }>;
 };
+
+type CostReferenceSnapshot = {
+  id: string;
+  source_name: string;
+  region: string;
+  reference_code: string;
+  base_date: string;
+  publication_date: string | null;
+  tax_relief: boolean;
+  unit: string;
+  total_cost: number | string;
+  materials_cost: number | string | null;
+  labor_cost: number | string | null;
+  administrative_cost: number | string | null;
+  source_url: string;
+};
+
+const categoryLabels: Record<string, string> = {
+  MATERIAL: "Material",
+  LABOR: "Mão de obra",
+  EQUIPMENT: "Equipamento",
+  SERVICE: "Serviço",
+  SUBCONTRACT: "Subempreita",
+  FIXED_COST: "Custo fixo",
+  REFERENCE: "Referência global",
+  OTHER: "Outro"
+};
+
+const costTypeLabels: Record<string, string> = {
+  DIRECT: "Direto",
+  INDIRECT: "Indireto",
+  FIXED: "Fixo",
+  ADMINISTRATIVE: "Administrativo"
+};
+
+function formatDate(value: string | null | undefined) {
+  if (!value) return "—";
+  return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(`${value}T12:00:00Z`));
+}
+
+function asPercent(value: unknown) {
+  return Number(value ?? 0) * 100;
+}
 
 export default async function BudgetDetailPage({ params, searchParams }: BudgetDetailProps) {
   const { id } = await params;
@@ -22,17 +73,54 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
 
   if (!budget || !budget.current_version_id) notFound();
 
-  const [{ data: version }, { data: items }, { data: validations }, { data: approvals }] = await Promise.all([
-    supabase.from("budget_versions").select("*").eq("id", budget.current_version_id).single(),
-    supabase.from("budget_items").select("id, code, description, unit, quantity, unit_cost, loss_rate, freight_rate, cost_type").eq("budget_version_id", budget.current_version_id).order("sequence"),
-    supabase.from("budget_validation_results").select("id, code, severity, message, field_name, resolved_at").eq("budget_version_id", budget.current_version_id).order("created_at"),
-    supabase.from("budget_approvals").select("id, approval_type, status, requested_by, approver_id, requires_aal2, reason, created_at").eq("budget_version_id", budget.current_version_id).order("created_at")
-  ]);
+  const { data: version } = await supabase
+    .from("budget_versions")
+    .select("*")
+    .eq("id", budget.current_version_id)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
 
   if (!version) notFound();
 
+  const [
+    { data: items },
+    { data: validations },
+    { data: approvals },
+    { data: referenceSnapshots },
+    { data: markupModel }
+  ] = await Promise.all([
+    supabase
+      .from("budget_items")
+      .select("id, code, description, unit, quantity, unit_cost, loss_rate, freight_rate, cost_type, item_category, source, region, base_date")
+      .eq("budget_version_id", version.id)
+      .order("sequence"),
+    supabase
+      .from("budget_validation_results")
+      .select("id, code, severity, message, field_name, resolved_at")
+      .eq("budget_version_id", version.id)
+      .order("created_at"),
+    supabase
+      .from("budget_approvals")
+      .select("id, approval_type, status, requested_by, approver_id, requires_aal2, reason, created_at")
+      .eq("budget_version_id", version.id)
+      .order("created_at"),
+    supabase
+      .from("cost_reference_snapshots")
+      .select("id, source_name, region, reference_code, base_date, publication_date, tax_relief, unit, total_cost, materials_cost, labor_cost, administrative_cost, source_url")
+      .eq("source_key", "SINDUSCON_SP_CUB")
+      .order("base_date", { ascending: false })
+      .order("tax_relief", { ascending: true }),
+    supabase
+      .from("markup_models")
+      .select("id, method, tax_rate, commission_rate, variable_expense_rate, desired_margin_rate")
+      .eq("id", version.markup_model_id ?? "00000000-0000-0000-0000-000000000000")
+      .maybeSingle()
+  ]);
+
   const baseCost = Number(version.direct_cost) + Number(version.indirect_cost) + Number(version.fixed_cost) + Number(version.administrative_fee);
   const client = budget.clients as { legal_name?: string } | null;
+  const frozen = Boolean(version.frozen_at);
+  const snapshots = (referenceSnapshots ?? []) as CostReferenceSnapshot[];
 
   return (
     <main className="content">
@@ -40,49 +128,203 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
         <div>
           <span className="badge">{budget.code} · V{version.version_number}</span>
           <h1>{budget.title}</h1>
-          <p className="muted">{client?.legal_name ?? "Cliente não identificado"} · {budgetStatusLabels[budget.status as BudgetStatus] ?? budget.status}</p>
+          <p className="muted">
+            {client?.legal_name ?? "Cliente não identificado"} · {budgetStatusLabels[budget.status as BudgetStatus] ?? budget.status}
+          </p>
         </div>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <form action={calculateBudgetVersion}>
             <input type="hidden" name="budgetId" value={budget.id} />
             <input type="hidden" name="versionId" value={version.id} />
-            <button className="button button-secondary" type="submit" disabled={Boolean(version.frozen_at)}>Recalcular</button>
+            <button className="button button-secondary" type="submit" disabled={frozen}>Recalcular</button>
           </form>
           <form action={freezeBudgetVersion}>
             <input type="hidden" name="budgetId" value={budget.id} />
             <input type="hidden" name="versionId" value={version.id} />
-            <button className="button button-primary" type="submit" disabled={Boolean(version.frozen_at)}>Congelar e solicitar aprovação</button>
+            <button className="button button-primary" type="submit" disabled={frozen}>Congelar e solicitar aprovação</button>
           </form>
         </div>
       </div>
 
       {query.error ? <div className="validation blocking" role="alert">{query.error}</div> : null}
+      {frozen ? (
+        <div className="validation" role="status">
+          Esta versão está congelada desde {new Date(version.frozen_at).toLocaleString("pt-BR")}. Crie uma nova versão para alterar custos ou margem.
+        </div>
+      ) : null}
 
       <div className="financial-grid">
         <div className="grid">
+          <section className="card card-pad">
+            <h2>Adicionar custos ao orçamento</h2>
+            <p className="muted">
+              Escolha uma referência global por metragem ou cadastre material, mão de obra, equipamento, serviço e custos fixos individualmente.
+            </p>
+
+            <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", alignItems: "start" }}>
+              <article className="card card-pad">
+                <span className="badge">REFERÊNCIA OFICIAL</span>
+                <h3>CUB SindusCon-SP por m²</h3>
+                <p className="muted">Use como referência global de coerência. Para orçamento executivo, complemente com composições e cotações.</p>
+                <form action={addCubReferenceItem} className="grid">
+                  <input type="hidden" name="budgetId" value={budget.id} />
+                  <input type="hidden" name="versionId" value={version.id} />
+                  <label>
+                    Referência e data-base
+                    <select name="snapshotId" required defaultValue="" disabled={frozen}>
+                      <option value="" disabled>Selecione o CUB</option>
+                      {snapshots.map((snapshot) => (
+                        <option key={snapshot.id} value={snapshot.id}>
+                          {snapshot.reference_code} · {snapshot.tax_relief ? "com" : "sem"} desoneração · {formatDate(snapshot.base_date)} · {formatCurrency(Number(snapshot.total_cost))}/{snapshot.unit}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Metragem da obra
+                    <input name="area" type="number" min="0.01" step="0.01" placeholder="100,00" required disabled={frozen} />
+                  </label>
+                  <button className="button button-primary" type="submit" disabled={frozen || snapshots.length === 0}>
+                    Aplicar CUB à metragem
+                  </button>
+                </form>
+                {snapshots[0] ? (
+                  <p className="muted" style={{ marginTop: 12 }}>
+                    Última publicação carregada: {formatDate(snapshots[0].publication_date)}. Fonte: {snapshots[0].source_name}.
+                  </p>
+                ) : (
+                  <div className="validation blocking">Nenhuma referência oficial carregada.</div>
+                )}
+              </article>
+
+              <article className="card card-pad">
+                <span className="badge">COMPOSIÇÃO MANUAL</span>
+                <h3>Material, mão de obra ou serviço</h3>
+                <form action={addManualBudgetItem} className="grid">
+                  <input type="hidden" name="budgetId" value={budget.id} />
+                  <input type="hidden" name="versionId" value={version.id} />
+                  <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))" }}>
+                    <label>
+                      Natureza
+                      <select name="itemCategory" defaultValue="MATERIAL" disabled={frozen}>
+                        <option value="MATERIAL">Material</option>
+                        <option value="LABOR">Mão de obra</option>
+                        <option value="EQUIPMENT">Equipamento</option>
+                        <option value="SERVICE">Serviço</option>
+                        <option value="SUBCONTRACT">Subempreita</option>
+                        <option value="FIXED_COST">Custo fixo</option>
+                        <option value="OTHER">Outro</option>
+                      </select>
+                    </label>
+                    <label>
+                      Classificação contábil
+                      <select name="costType" defaultValue="DIRECT" disabled={frozen}>
+                        <option value="DIRECT">Custo direto</option>
+                        <option value="INDIRECT">Custo indireto</option>
+                        <option value="FIXED">Custo fixo</option>
+                        <option value="ADMINISTRATIVE">Administrativo</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div className="grid" style={{ gridTemplateColumns: "160px minmax(0,1fr)" }}>
+                    <label>Código<input name="code" placeholder="MAT-001" disabled={frozen} /></label>
+                    <label>Descrição<input name="description" placeholder="Cimento CP II 50 kg" required disabled={frozen} /></label>
+                  </div>
+                  <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))" }}>
+                    <label>Unidade<input name="unit" placeholder="m², h, un, mês" required disabled={frozen} /></label>
+                    <label>Quantidade/metragem<input name="quantity" type="number" min="0.000001" step="0.000001" required disabled={frozen} /></label>
+                    <label>Custo unitário<input name="unitCost" type="number" min="0.0001" step="0.0001" required disabled={frozen} /></label>
+                  </div>
+                  <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))" }}>
+                    <label>Perda (%)<input name="lossRate" type="number" min="0" max="100" step="0.01" defaultValue="0" disabled={frozen} /></label>
+                    <label>Frete (%)<input name="freightRate" type="number" min="0" max="100" step="0.01" defaultValue="0" disabled={frozen} /></label>
+                    <label>Região<input name="region" defaultValue="SP" required disabled={frozen} /></label>
+                    <label>Data-base<input name="baseDate" type="date" defaultValue={version.base_date} required disabled={frozen} /></label>
+                  </div>
+                  <label>
+                    Fonte do custo
+                    <input name="source" placeholder="Cotação fornecedor, SINAPI, TCPO, contrato ou pesquisa" required disabled={frozen} />
+                  </label>
+                  <button className="button button-primary" type="submit" disabled={frozen}>Adicionar item e recalcular</button>
+                </form>
+              </article>
+            </div>
+          </section>
+
+          <section className="card card-pad">
+            <h2>Impostos, despesas e margem</h2>
+            <p className="muted">
+              Formação de preço pelo divisor: preço = custo-base ÷ (1 − impostos − comissão − despesas variáveis − margem desejada).
+            </p>
+            <form action={updateBudgetPricing} className="grid">
+              <input type="hidden" name="budgetId" value={budget.id} />
+              <input type="hidden" name="versionId" value={version.id} />
+              <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))" }}>
+                <label>
+                  Impostos (%)
+                  <input name="taxRate" type="number" min="0" max="99.99" step="0.01" defaultValue={asPercent(markupModel?.tax_rate)} disabled={frozen} />
+                </label>
+                <label>
+                  Comissão (%)
+                  <input name="commissionRate" type="number" min="0" max="99.99" step="0.01" defaultValue={asPercent(markupModel?.commission_rate)} disabled={frozen} />
+                </label>
+                <label>
+                  Despesas variáveis (%)
+                  <input name="variableExpenseRate" type="number" min="0" max="99.99" step="0.01" defaultValue={asPercent(markupModel?.variable_expense_rate)} disabled={frozen} />
+                </label>
+                <label>
+                  Margem desejada (%)
+                  <input name="desiredMarginRate" type="number" min="0" max="99.99" step="0.01" defaultValue={asPercent(markupModel?.desired_margin_rate)} disabled={frozen} />
+                </label>
+                <label>
+                  Capital investido
+                  <input name="investedCapital" type="number" min="0" step="0.01" defaultValue={Number(version.invested_capital ?? 0)} disabled={frozen} />
+                </label>
+              </div>
+              <div className="validation">
+                Para reduzir a margem, informe um percentual menor e salve. A soma dos quatro percentuais precisa permanecer abaixo de 100%.
+              </div>
+              <button className="button button-primary" type="submit" disabled={frozen}>Salvar formação de preço e recalcular</button>
+            </form>
+          </section>
+
           <section className="card">
             <div className="card-pad">
               <h2>Estrutura de custos</h2>
-              <p className="muted">Itens que formam a versão atual. Versões congeladas são imutáveis.</p>
+              <p className="muted">Itens que formam a versão atual. Custo fixo pode ser cadastrado por mês, verba, unidade ou período.</p>
             </div>
             <div className="table-wrap">
               <table>
-                <thead><tr><th>Item</th><th>Tipo</th><th>Un.</th><th>Qtd.</th><th>Custo unit.</th><th>Subtotal</th></tr></thead>
+                <thead>
+                  <tr>
+                    <th>Item</th><th>Natureza</th><th>Tipo</th><th>Un.</th><th>Qtd.</th><th>Custo unit.</th><th>Subtotal</th><th>Fonte</th><th>Ação</th>
+                  </tr>
+                </thead>
                 <tbody>
                   {(items ?? []).map((item) => {
                     const subtotal = Number(item.quantity) * Number(item.unit_cost) * (1 + Number(item.loss_rate) + Number(item.freight_rate));
                     return (
                       <tr key={item.id}>
                         <td><strong>{item.code ?? "—"}</strong><br /><span className="muted">{item.description}</span></td>
-                        <td><span className="badge">{item.cost_type}</span></td>
+                        <td>{categoryLabels[item.item_category] ?? item.item_category}</td>
+                        <td><span className="badge">{costTypeLabels[item.cost_type] ?? item.cost_type}</span></td>
                         <td>{item.unit}</td>
                         <td className="mono">{Number(item.quantity).toLocaleString("pt-BR")}</td>
                         <td className="mono">{formatCurrency(Number(item.unit_cost))}</td>
                         <td className="mono">{formatCurrency(subtotal)}</td>
+                        <td><span>{item.source ?? "—"}</span><br /><small className="muted">{item.region ?? "—"} · {formatDate(item.base_date)}</small></td>
+                        <td>
+                          <form action={removeBudgetItem}>
+                            <input type="hidden" name="budgetId" value={budget.id} />
+                            <input type="hidden" name="versionId" value={version.id} />
+                            <input type="hidden" name="itemId" value={item.id} />
+                            <button className="button button-secondary" type="submit" disabled={frozen}>Remover</button>
+                          </form>
+                        </td>
                       </tr>
                     );
                   })}
-                  {!items?.length ? <tr><td colSpan={6}>Nenhum item cadastrado nesta versão.</td></tr> : null}
+                  {!items?.length ? <tr><td colSpan={9}>Nenhum item cadastrado. Use CUB por metragem ou a composição manual acima.</td></tr> : null}
                 </tbody>
               </table>
             </div>
@@ -90,7 +332,7 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
 
           <section className="card card-pad">
             <h2>Validações</h2>
-            <p className="muted">Bloqueios impedem aprovação até correção ou justificativa por alçada.</p>
+            <p className="muted">Orçamento vazio, sem fonte, sem data-base, desatualizado ou sem recálculo não pode seguir para aprovação.</p>
             {(validations ?? []).map((validation) => (
               <div key={validation.id} className={`validation ${validation.severity === "BLOCKING" ? "blocking" : ""}`}>
                 <strong>{validation.code}</strong> · {validation.message}
@@ -102,7 +344,7 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
 
           <section className="card card-pad">
             <h2>Aprovações e alçadas</h2>
-            <p className="muted">Exceções críticas exigem MFA AAL2 e separação entre solicitante e aprovador.</p>
+            <p className="muted">O solicitante não pode decidir a própria aprovação. Justificativa é obrigatória.</p>
             <div className="grid">
               {(approvals ?? []).map((approval) => (
                 <article key={approval.id} className="card card-pad">
@@ -138,16 +380,16 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
           <div className="financial-row"><span>Custos fixos</span><strong className="mono">{formatCurrency(Number(version.fixed_cost))}</strong></div>
           <div className="financial-row"><span>Taxa administrativa</span><strong className="mono">{formatCurrency(Number(version.administrative_fee))}</strong></div>
           <div className="financial-row"><span>Custo-base</span><strong className="mono">{formatCurrency(baseCost)}</strong></div>
+          <div className="financial-row"><span>Impostos</span><strong className="mono">{formatPercent(Number(markupModel?.tax_rate ?? 0))}</strong></div>
+          <div className="financial-row"><span>Margem desejada</span><strong className="mono">{formatPercent(Number(markupModel?.desired_margin_rate ?? 0))}</strong></div>
           <div className="financial-row"><span>BDI</span><strong className="mono">{formatPercent(Number(version.bdi_rate))}</strong></div>
           <div className="financial-row"><span>Markup</span><strong className="mono">{Number(version.markup_factor).toFixed(4)}</strong></div>
           <div className="financial-total"><small>PREÇO DE VENDA</small><strong>{formatCurrency(Number(version.sale_price))}</strong></div>
-          <div className="financial-row"><span>Margem</span><strong className="mono">{formatPercent(Number(version.gross_margin_rate))}</strong></div>
+          <div className="financial-row"><span>Margem realizada</span><strong className="mono">{formatPercent(Number(version.gross_margin_rate))}</strong></div>
           <div className="financial-row"><span>Lucro estimado</span><strong className="mono">{formatCurrency(Number(version.estimated_profit))}</strong></div>
           <div className="financial-row"><span>ROI</span><strong className="mono">{version.estimated_roi_rate == null ? "—" : formatPercent(Number(version.estimated_roi_rate))}</strong></div>
           <div className="financial-row"><span>Payback</span><strong className="mono">{version.payback_month ? `Mês ${version.payback_month}` : "—"}</strong></div>
-          <p style={{ color: "rgba(255,255,255,.58)", fontSize: 12 }}>
-            Estes dados nunca são enviados ao portal do cliente.
-          </p>
+          <p style={{ color: "rgba(255,255,255,.58)", fontSize: 12 }}>Estes dados nunca são enviados ao portal do cliente.</p>
         </aside>
       </div>
     </main>
