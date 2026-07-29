@@ -137,6 +137,7 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-036` | Consulta presume coluna convencional ausente no schema real | vigente | ordem derivada da linha da solicitação e fluxo até saldo físico |
 | `VACINA-037` | Orçamento existe sem composição, procedência ou formação de preço utilizável | vigente | bloqueios de prontidão, classificação de itens, UI completa e `test:db:budgets` |
 | `VACINA-038` | Fonte externa é tratada como dado confiável sem origem, data-base e coerência | vigente | domínio oficial, hashes, validações fail-closed e teste do parser |
+| `VACINA-039` | Atualização mensal de referência pode alterar orçamento histórico | vigente | snapshot por UF/data/regime/hash, catálogo oficial imutável e custo copiado |
 
 ## 4. Arquivos
 
@@ -179,7 +180,8 @@ diretrizes/vacinas/
 ├── VACINA-035-TRANSICAO-ENUM-TIPADA.md
 ├── VACINA-036-CONSULTA-SEGUE-CONTRATO-REAL-DA-TABELA.md
 ├── VACINA-037-ORCAMENTO-EXIGE-COMPOSICAO-E-FORMACAO-DE-PRECO.md
-└── VACINA-038-FONTE-EXTERNA-NAO-PUBLICA-SEM-EVIDENCIA.md
+├── VACINA-038-FONTE-EXTERNA-NAO-PUBLICA-SEM-EVIDENCIA.md
+└── VACINA-039-FONTE-MENSAL-NAO-ALTERA-ORCAMENTO-HISTORICO.md
 ```
 
 ## 5. Critérios para nova vacina
