@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { CalendarBlank, ListBullets, SquaresFour } from "@phosphor-icons/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 export type PlanningPortfolioRow = {
   id: string;
@@ -38,11 +38,40 @@ export type PlanningMilestone = {
 
 type View = "list" | "cards" | "calendar";
 
+const STORAGE_KEY = "planning-portfolio-view";
+const STORAGE_CHANGE_EVENT = "planning-portfolio-view-change";
+
 const views = [
   { id: "list" as const, label: "Lista", Icon: ListBullets },
   { id: "cards" as const, label: "Cartões", Icon: SquaresFour },
   { id: "calendar" as const, label: "Calendário", Icon: CalendarBlank }
 ];
+
+function isView(value: string | null): value is View {
+  return value === "list" || value === "cards" || value === "calendar";
+}
+
+function getViewSnapshot(): View {
+  const saved = window.localStorage.getItem(STORAGE_KEY);
+  return isView(saved) ? saved : "list";
+}
+
+function getServerViewSnapshot(): View {
+  return "list";
+}
+
+function subscribeToView(onStoreChange: () => void) {
+  function handleStorage(event: StorageEvent) {
+    if (event.key === STORAGE_KEY) onStoreChange();
+  }
+
+  window.addEventListener("storage", handleStorage);
+  window.addEventListener(STORAGE_CHANGE_EVENT, onStoreChange);
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+    window.removeEventListener(STORAGE_CHANGE_EVENT, onStoreChange);
+  };
+}
 
 export function PlanningPortfolioView({
   rows,
@@ -51,16 +80,11 @@ export function PlanningPortfolioView({
   rows: PlanningPortfolioRow[];
   milestones: PlanningMilestone[];
 }) {
-  const [view, setView] = useState<View>("list");
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem("planning-portfolio-view");
-    if (saved === "list" || saved === "cards" || saved === "calendar") setView(saved);
-  }, []);
+  const view = useSyncExternalStore(subscribeToView, getViewSnapshot, getServerViewSnapshot);
 
   function selectView(next: View) {
-    setView(next);
-    window.localStorage.setItem("planning-portfolio-view", next);
+    window.localStorage.setItem(STORAGE_KEY, next);
+    window.dispatchEvent(new Event(STORAGE_CHANGE_EVENT));
   }
 
   const calendarItems = useMemo(() => {
