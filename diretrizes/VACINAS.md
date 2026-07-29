@@ -136,6 +136,7 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-035` | `CASE` textual alimenta coluna enum sem tipo explícito | vigente | casts enum por ramo e execução real das transições |
 | `VACINA-036` | Consulta presume coluna convencional ausente no schema real | vigente | ordem derivada da linha da solicitação e fluxo até saldo físico |
 | `VACINA-037` | Orçamento existe sem composição, procedência ou formação de preço utilizável | vigente | bloqueios de prontidão, classificação de itens, UI completa e `test:db:budgets` |
+| `VACINA-038` | Fonte externa é tratada como dado confiável sem origem, data-base e coerência | vigente | domínio oficial, hashes, validações fail-closed e teste do parser |
 
 ## 4. Arquivos
 
@@ -177,7 +178,8 @@ diretrizes/vacinas/
 ├── VACINA-034-APROVACAO-EXIGE-ATOR-INDEPENDENTE.md
 ├── VACINA-035-TRANSICAO-ENUM-TIPADA.md
 ├── VACINA-036-CONSULTA-SEGUE-CONTRATO-REAL-DA-TABELA.md
-└── VACINA-037-ORCAMENTO-EXIGE-COMPOSICAO-E-FORMACAO-DE-PRECO.md
+├── VACINA-037-ORCAMENTO-EXIGE-COMPOSICAO-E-FORMACAO-DE-PRECO.md
+└── VACINA-038-FONTE-EXTERNA-NAO-PUBLICA-SEM-EVIDENCIA.md
 ```
 
 ## 5. Critérios para nova vacina
