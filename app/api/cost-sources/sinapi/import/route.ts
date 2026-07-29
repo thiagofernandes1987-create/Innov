@@ -6,6 +6,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+const normalizedRow = z.record(z.string(), z.unknown());
+
 const startSchema = z.object({
   action: z.literal("start"),
   organizationId: z.string().uuid(),
@@ -20,10 +22,16 @@ const startSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional()
 });
 
-const chunkSchema = z.object({
-  action: z.enum(["inputs", "compositions"]),
+const inputsSchema = z.object({
+  action: z.literal("inputs"),
   batchId: z.string().uuid(),
-  rows: z.array(z.record(z.string(), z.unknown())).max(1000)
+  rows: z.array(normalizedRow).max(1000)
+});
+
+const compositionsSchema = z.object({
+  action: z.literal("compositions"),
+  batchId: z.string().uuid(),
+  rows: z.array(normalizedRow).max(250)
 });
 
 const finishSchema = z.object({
@@ -32,7 +40,12 @@ const finishSchema = z.object({
   errorMessage: z.string().max(1000).nullable().optional()
 });
 
-const requestSchema = z.discriminatedUnion("action", [startSchema, chunkSchema, finishSchema]);
+const requestSchema = z.discriminatedUnion("action", [
+  startSchema,
+  inputsSchema,
+  compositionsSchema,
+  finishSchema
+]);
 
 function requiredEnv(name: string) {
   const value = process.env[name]?.trim();
@@ -90,19 +103,21 @@ export async function POST(request: Request) {
     return response(201, { status: "running", batchId: data });
   }
 
-  if (payload.action === "inputs" || payload.action === "compositions") {
-    const rpc = payload.action === "inputs"
-      ? "import_sinapi_inputs_chunk"
-      : "import_sinapi_compositions_chunk";
-    const limit = payload.action === "inputs" ? 1000 : 250;
-    if (payload.rows.length > limit) {
-      return response(400, { status: "invalid_payload", message: `Chunk limitado a ${limit} registros.` });
-    }
-    const { data, error } = await supabase.rpc(rpc, {
+  if (payload.action === "inputs") {
+    const { data, error } = await supabase.rpc("import_sinapi_inputs_chunk", {
       p_batch_id: payload.batchId,
       p_rows: payload.rows
     });
-    if (error) return response(422, { status: "failed", code: rpc.toUpperCase(), message: error.message });
+    if (error) return response(422, { status: "failed", code: "IMPORT_SINAPI_INPUTS", message: error.message });
+    return response(200, { status: "imported", kind: payload.action, records: data });
+  }
+
+  if (payload.action === "compositions") {
+    const { data, error } = await supabase.rpc("import_sinapi_compositions_chunk", {
+      p_batch_id: payload.batchId,
+      p_rows: payload.rows
+    });
+    if (error) return response(422, { status: "failed", code: "IMPORT_SINAPI_COMPOSITIONS", message: error.message });
     return response(200, { status: "imported", kind: payload.action, records: data });
   }
 
