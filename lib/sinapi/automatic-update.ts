@@ -2,17 +2,25 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
-import { parseSinapiZipPackage, type SinapiCompositionImportRow, type SinapiInputImportRow } from "./xlsx-parser";
+import {
+  selectLatestSinapiXlsxFile,
+  parseSinapiBaseDate,
+  type CaixaSinapiFile,
+  type SinapiOfficialSource
+} from "./source-catalog";
+import {
+  parseSinapiZipPackage,
+  type ParsedSinapiPackage,
+  type SinapiCompositionImportRow,
+  type SinapiInputImportRow
+} from "./xlsx-parser";
 
-const OFFICIAL_DOWNLOAD_FOLDER = "https://www.caixa.gov.br/Downloads/sinapi-relatorios-mensais-a-partir-2025/";
-const DISCOVERY_PAGES = [
-  "https://www.caixa.gov.br/site/Paginas/downloads.aspx#categoria_888",
-  OFFICIAL_DOWNLOAD_FOLDER,
-  "https://www.caixa.gov.br/poder-publico/modernizacao-gestao/sinapi/Paginas/default.aspx"
-] as const;
+const CAIXA_BASE_URL = "https://www.caixa.gov.br";
+const DOWNLOADS_PAGE = `${CAIXA_BASE_URL}/site/Paginas/downloads.aspx`;
+const CATEGORY_TITLE = "SINAPI - Relatórios mensais - a partir de 2025";
 const MAX_DOWNLOAD_BYTES = 180 * 1024 * 1024;
 const REQUEST_TIMEOUT_MS = 45_000;
-const DOWNLOAD_TIMEOUT_MS = 150_000;
+const DOWNLOAD_TIMEOUT_MS = 180_000;
 
 export type SinapiAutomaticUpdateResult = {
   status: "updated" | "already_current" | "newer_local_base";
@@ -29,6 +37,29 @@ export type SinapiAutomaticUpdateResult = {
   worksheets: number;
 };
 
+export type SinapiOfficialPackageInspection = {
+  source: SinapiOfficialSource;
+  finalUrl: string;
+  sourceSha256: string;
+  downloadedBytes: number;
+  baseDate: string;
+  inputs: number;
+  compositions: number;
+  xlsxFiles: string[];
+  worksheets: number;
+};
+
+type CaixaCategory = { ID?: number; Id?: number; Title?: string };
+type ODataResults<T> = { d?: { results?: T[] } };
+
+type LoadedPackage = {
+  source: SinapiOfficialSource;
+  finalUrl: string;
+  buffer: Buffer;
+  sourceSha256: string;
+  parsed: ParsedSinapiPackage;
+};
+
 function requiredEnv(name: string) {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`Configuração obrigatória ausente: ${name}.`);
@@ -43,6 +74,15 @@ function serviceClient() {
   );
 }
 
+function normalize(value: unknown) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
 function officialUrl(value: string) {
   let parsed: URL;
   try {
@@ -51,9 +91,10 @@ function officialUrl(value: string) {
     throw new Error("A URL encontrada para o SINAPI é inválida.");
   }
   const hostname = parsed.hostname.toLowerCase();
-  if (parsed.protocol !== "https:" || (hostname !== "caixa.gov.br" && !hostname.endsWith(".caixa.gov.br"))) {
-    throw new Error("A atualização SINAPI aceita somente HTTPS no domínio oficial da CAIXA.");
+  if (hostname !== "caixa.gov.br" && !hostname.endsWith(".caixa.gov.br")) {
+    throw new Error("A atualização SINAPI aceita somente o domínio oficial da CAIXA.");
   }
+  parsed.protocol = "https:";
   parsed.hash = "";
   return parsed;
 }
@@ -84,21 +125,25 @@ async function fetchOfficial(
   timeoutMs = REQUEST_TIMEOUT_MS
 ): Promise<Response> {
   let current = officialUrl(input);
-  const cookies = new Map<string, string>();
+  // O portal oficial exige este cookie antes de servir páginas, API e arquivos.
+  const cookies = new Map<string, string>([["security", "true"]]);
 
   for (let redirects = 0; redirects <= 7; redirects += 1) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     const headers = new Headers(init.headers);
     if (!headers.has("User-Agent")) {
-      headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/138 Safari/537.36 Innovar-SINAPI-Updater/1.0");
+      headers.set(
+        "User-Agent",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/138 Safari/537.36 Innovar-SINAPI-Updater/1.0"
+      );
     }
     if (!headers.has("Accept")) {
-      headers.set("Accept", "text/html,application/xhtml+xml,application/zip,application/octet-stream;q=0.9,*/*;q=0.5");
+      headers.set("Accept", "text/html,application/json,application/zip,application/octet-stream;q=0.9,*/*;q=0.5");
     }
     if (!headers.has("Accept-Language")) headers.set("Accept-Language", "pt-BR,pt;q=0.9,en;q=0.6");
-    if (!headers.has("Referer")) headers.set("Referer", "https://www.caixa.gov.br/");
-    if (cookies.size) headers.set("Cookie", [...cookies].map(([name, value]) => `${name}=${value}`).join("; "));
+    if (!headers.has("Referer")) headers.set("Referer", DOWNLOADS_PAGE);
+    headers.set("Cookie", [...cookies].map(([name, value]) => `${name}=${value}`).join("; "));
 
     let response: Response;
     try {
@@ -126,125 +171,90 @@ async function fetchOfficial(
   throw new Error("A CAIXA excedeu o limite de redirecionamentos permitido.");
 }
 
-function htmlDecode(value: string) {
-  return value
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, "\"")
-    .replace(/&#39;|&apos;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
+async function fetchOfficialJson<T>(url: string) {
+  const response = await fetchOfficial(url, {
+    method: "GET",
+    headers: { Accept: "application/json;odata=verbose" }
+  });
+  if (!response.ok) throw new Error(`A API de downloads da CAIXA respondeu HTTP ${response.status}.`);
+  const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
+  if (!contentType.includes("json")) throw new Error("A API de downloads da CAIXA não retornou JSON.");
+  try {
+    return await response.json() as T;
+  } catch {
+    throw new Error("A API de downloads da CAIXA retornou JSON inválido.");
+  }
 }
 
-function xlsxMarker(value: string) {
-  return value.includes("xlsx") || value.includes("formato xlsx");
+function categoryApiUrl() {
+  const query = "$select=ID,Title&$top=5000&$filter=Ativo%20eq%201%20and%20ArtefatosId%20eq%2039&$orderby=Title";
+  return `${CAIXA_BASE_URL}/_api/web/lists/getbytitle('LT_T077_Downloads_Categorias')/Items?${query}`;
 }
 
-function isSinapiXlsxCandidate(url: URL, label = "") {
-  const combined = `${decodeURIComponent(url.pathname)} ${label}`.toLowerCase();
-  return combined.includes("sinapi")
-    && xlsxMarker(combined)
-    && (combined.includes("relatorios-mensais") || combined.includes("formatoxlsx") || combined.includes("formato-xlsx"))
-    && (url.pathname.toLowerCase().endsWith(".zip") || combined.includes("formatoxlsx") || combined.includes("formato-xlsx"));
+function filesApiUrl(categoryId: number) {
+  const select = "Title,Modified,File_x0020_Type,FileLeafRef,EncodedAbsUrl,Descricao,FileSizeDisplay,Categoria/ID";
+  const filter = `Categoria/ID%20eq%20${categoryId}%20and%20FSObjType%20eq%200%20and%20OData__ModerationStatus%20eq%200`;
+  return `${CAIXA_BASE_URL}/_api/web/lists/getbytitle('Downloads')/Items?$select=${select}&$expand=Categoria&$filter=${filter}&$top=5000&$orderby=Modified%20desc`;
 }
 
-function extractCandidates(html: string, baseUrl: string) {
-  const candidates = new Set<string>();
-  for (const match of html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/gi)) {
-    const href = match[1].match(/\bhref\s*=\s*(?:"([^"]+)"|'([^']+)')/i)?.slice(1).find(Boolean);
-    if (!href) continue;
-    const label = htmlDecode(match[2].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
-    try {
-      const url = officialUrl(new URL(htmlDecode(href), baseUrl).toString());
-      if (isSinapiXlsxCandidate(url, label)) candidates.add(url.toString());
-    } catch {
-      // Links externos e inválidos são deliberadamente ignorados.
-    }
+async function discoverSourceFromCaixaApi() {
+  const categoriesPayload = await fetchOfficialJson<ODataResults<CaixaCategory>>(categoryApiUrl());
+  const categories = categoriesPayload.d?.results ?? [];
+  const category = categories.find(item => normalize(item.Title) === normalize(CATEGORY_TITLE));
+  const categoryId = Number(category?.ID ?? category?.Id);
+  if (!Number.isInteger(categoryId) || categoryId < 1) {
+    throw new Error(`A categoria oficial “${CATEGORY_TITLE}” não foi encontrada na CAIXA.`);
   }
 
-  for (const match of html.matchAll(/(?:https:\/\/[^"'\s<>]+|\/Downloads\/[^"'\s<>]+)/gi)) {
-    try {
-      const url = officialUrl(new URL(htmlDecode(match[0]), baseUrl).toString());
-      if (isSinapiXlsxCandidate(url)) candidates.add(url.toString());
-    } catch {
-      // Mantém descoberta fail-closed no domínio CAIXA.
-    }
-  }
-  return [...candidates];
-}
-
-function candidateBaseDate(value: string) {
-  const decoded = (() => {
-    try { return decodeURIComponent(value); } catch { return value; }
-  })();
-  const match = decoded.match(/SINAPI[^0-9]{0,20}(20\d{2})[-_ ]?(0[1-9]|1[0-2])/i)
-    ?? decoded.match(/(20\d{2})[-_ ]?(0[1-9]|1[0-2])/);
-  return match ? `${match[1]}-${match[2]}-01` : "0000-00-01";
-}
-
-function generatedMonthlyCandidates() {
-  const candidates: string[] = [];
-  const cursor = new Date();
-  cursor.setUTCDate(1);
-  for (let offset = 0; offset < 20; offset += 1) {
-    const year = cursor.getUTCFullYear();
-    const month = String(cursor.getUTCMonth() + 1).padStart(2, "0");
-    const officialStem = `SINAPI${year}${month}formatoxlsx`;
-    const legacyStem = `SINAPI-${year}-${month}-formato-xlsx`;
-    candidates.push(new URL(`${officialStem}.zip`, OFFICIAL_DOWNLOAD_FOLDER).toString());
-    candidates.push(new URL(`${legacyStem}.zip`, OFFICIAL_DOWNLOAD_FOLDER).toString());
-    cursor.setUTCMonth(cursor.getUTCMonth() - 1);
-  }
-  return candidates;
+  const filesPayload = await fetchOfficialJson<ODataResults<CaixaSinapiFile>>(filesApiUrl(categoryId));
+  const files = filesPayload.d?.results ?? [];
+  const source = selectLatestSinapiXlsxFile(files);
+  if (!source) throw new Error("A categoria oficial da CAIXA não contém um ZIP XLSX SINAPI válido.");
+  return source;
 }
 
 async function probeZip(url: string) {
-  try {
-    const response = await fetchOfficial(url, {
-      method: "GET",
-      headers: { Range: "bytes=0-7" }
-    }, 20_000);
-    if (!response.ok && response.status !== 206) return false;
-    const reader = response.body?.getReader();
-    if (!reader) return false;
-    const { value } = await reader.read();
-    await reader.cancel().catch(() => undefined);
-    return Boolean(value && value.length >= 4 && value[0] === 0x50 && value[1] === 0x4b && value[2] === 0x03 && value[3] === 0x04);
-  } catch {
-    return false;
+  const response = await fetchOfficial(url, {
+    method: "GET",
+    headers: { Range: "bytes=0-7" }
+  }, 30_000);
+  if (!response.ok && response.status !== 206) return false;
+  const reader = response.body?.getReader();
+  if (!reader) return false;
+  const { value } = await reader.read();
+  await reader.cancel().catch(() => undefined);
+  return Boolean(value && value.length >= 4 && value[0] === 0x50 && value[1] === 0x4b && value[2] === 0x03 && value[3] === 0x04);
+}
+
+function configuredSource(value: string): SinapiOfficialSource {
+  const url = officialUrl(value);
+  const baseDate = parseSinapiBaseDate(url.pathname);
+  if (!baseDate || !/sinapi/i.test(url.pathname) || !/xlsx/i.test(url.pathname) || !/\.zip$/i.test(url.pathname)) {
+    throw new Error("SINAPI_XLSX_URL não identifica um pacote ZIP/XLSX mensal do SINAPI.");
   }
+  return {
+    url: url.toString(),
+    baseDate,
+    modifiedAt: "1970-01-01T00:00:00.000Z",
+    fileName: url.pathname.split("/").pop() ?? "SINAPI-formato-xlsx.zip",
+    title: "SINAPI XLSX configurado",
+    description: "Fonte definida por SINAPI_XLSX_URL",
+    declaredSize: 0,
+    isRectification: /retifica/i.test(url.pathname)
+  };
+}
+
+export async function discoverLatestSinapiXlsxSource() {
+  const configured = process.env.SINAPI_XLSX_URL?.trim();
+  const source = configured ? configuredSource(configured) : await discoverSourceFromCaixaApi();
+  if (!await probeZip(source.url)) {
+    throw new Error(`A publicação ${source.fileName} não respondeu com um ZIP válido.`);
+  }
+  return source;
 }
 
 export async function discoverLatestSinapiXlsxUrl() {
-  const configured = process.env.SINAPI_XLSX_URL?.trim();
-  if (configured) {
-    const url = officialUrl(configured);
-    if (!isSinapiXlsxCandidate(url)) throw new Error("SINAPI_XLSX_URL não identifica um pacote ZIP/XLSX do SINAPI.");
-    if (!await probeZip(url.toString())) throw new Error("SINAPI_XLSX_URL não respondeu com um ZIP válido.");
-    return url.toString();
-  }
-
-  const discovered = new Set<string>();
-  for (const pageUrl of DISCOVERY_PAGES) {
-    try {
-      const response = await fetchOfficial(pageUrl);
-      if (!response.ok) continue;
-      const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
-      if (!contentType.includes("html") && !contentType.includes("text")) continue;
-      const html = await response.text();
-      for (const candidate of extractCandidates(html, response.url || pageUrl)) discovered.add(candidate);
-    } catch {
-      // A próxima fonte oficial ou os candidatos mensais serão tentados.
-    }
-  }
-
-  const candidates = [...discovered, ...generatedMonthlyCandidates()]
-    .filter((value, index, list) => list.indexOf(value) === index)
-    .sort((left, right) => candidateBaseDate(right).localeCompare(candidateBaseDate(left)));
-
-  for (const candidate of candidates) {
-    if (await probeZip(candidate)) return candidate;
-  }
-  throw new Error("Nenhum pacote ZIP/XLSX mensal acessível foi encontrado nas fontes oficiais da CAIXA.");
+  return (await discoverLatestSinapiXlsxSource()).url;
 }
 
 async function readLimitedBody(response: Response, limit: number) {
@@ -269,34 +279,70 @@ async function readLimitedBody(response: Response, limit: number) {
   return Buffer.concat(chunks.map(chunk => Buffer.from(chunk)), size);
 }
 
-async function downloadOfficialPackage(url: string) {
-  const response = await fetchOfficial(url, { method: "GET" }, DOWNLOAD_TIMEOUT_MS);
+async function downloadOfficialPackage(source: SinapiOfficialSource) {
+  if (source.declaredSize > MAX_DOWNLOAD_BYTES) {
+    throw new Error("O tamanho publicado pela CAIXA excede o limite permitido.");
+  }
+  const response = await fetchOfficial(source.url, { method: "GET" }, DOWNLOAD_TIMEOUT_MS);
   if (!response.ok) throw new Error(`Falha ao baixar o SINAPI na CAIXA: HTTP ${response.status}.`);
-  const finalUrl = officialUrl(response.url || url).toString();
+  const finalUrl = officialUrl(response.url || source.url).toString();
   const buffer = await readLimitedBody(response, MAX_DOWNLOAD_BYTES);
   if (buffer.length < 4 || buffer.readUInt32LE(0) !== 0x04034b50) {
     throw new Error("O conteúdo baixado da CAIXA não possui assinatura ZIP.");
   }
+  if (source.declaredSize > 0 && buffer.length !== source.declaredSize) {
+    throw new Error(`O tamanho baixado (${buffer.length}) diverge do catálogo oficial (${source.declaredSize}).`);
+  }
   return { buffer, finalUrl };
+}
+
+function validateBaseDate(baseDate: string, sourceBaseDate: string) {
+  if (!/^20\d{2}-(0[1-9]|1[0-2])-01$/.test(baseDate)) {
+    throw new Error("Data-base identificada no pacote SINAPI é inválida.");
+  }
+  if (baseDate !== sourceBaseDate) {
+    throw new Error(`A data-base interna ${baseDate} diverge da publicação ${sourceBaseDate}.`);
+  }
+  const current = new Date();
+  const currentMonth = `${current.getUTCFullYear()}-${String(current.getUTCMonth() + 1).padStart(2, "0")}-01`;
+  if (baseDate > currentMonth) throw new Error("O pacote SINAPI informa uma data-base futura.");
+  const minimum = new Date();
+  minimum.setUTCDate(1);
+  minimum.setUTCMonth(minimum.getUTCMonth() - 24);
+  const minimumMonth = `${minimum.getUTCFullYear()}-${String(minimum.getUTCMonth() + 1).padStart(2, "0")}-01`;
+  if (baseDate < minimumMonth) throw new Error("O pacote SINAPI encontrado é antigo demais para atualização automática.");
+}
+
+async function loadOfficialPackage(region: string, taxRelief: boolean): Promise<LoadedPackage> {
+  const source = await discoverLatestSinapiXlsxSource();
+  const { buffer, finalUrl } = await downloadOfficialPackage(source);
+  const sourceSha256 = createHash("sha256").update(buffer).digest("hex");
+  const parsed = parseSinapiZipPackage(buffer, { sourceUrl: finalUrl, region, taxRelief });
+  validateBaseDate(parsed.baseDate, source.baseDate);
+  return { source, finalUrl, buffer, sourceSha256, parsed };
+}
+
+export async function inspectLatestSinapiOfficialPackage(input: { region: string; taxRelief: boolean }) {
+  const region = input.region.trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(region)) throw new Error("UF inválida para inspeção SINAPI.");
+  const loaded = await loadOfficialPackage(region, input.taxRelief);
+  return {
+    source: loaded.source,
+    finalUrl: loaded.finalUrl,
+    sourceSha256: loaded.sourceSha256,
+    downloadedBytes: loaded.buffer.length,
+    baseDate: loaded.parsed.baseDate,
+    inputs: loaded.parsed.inputs.length,
+    compositions: loaded.parsed.compositions.length,
+    xlsxFiles: loaded.parsed.xlsxFiles,
+    worksheets: loaded.parsed.worksheets
+  } satisfies SinapiOfficialPackageInspection;
 }
 
 function chunksOf<T>(rows: T[], size: number) {
   const chunks: T[][] = [];
   for (let index = 0; index < rows.length; index += size) chunks.push(rows.slice(index, index + size));
   return chunks;
-}
-
-function monthStart(value = new Date()) {
-  return `${value.getUTCFullYear()}-${String(value.getUTCMonth() + 1).padStart(2, "0")}-01`;
-}
-
-function validateBaseDate(baseDate: string) {
-  if (!/^20\d{2}-(0[1-9]|1[0-2])-01$/.test(baseDate)) throw new Error("Data-base identificada no pacote SINAPI é inválida.");
-  if (baseDate > monthStart()) throw new Error("O pacote SINAPI informa uma data-base futura.");
-  const minimum = new Date();
-  minimum.setUTCDate(1);
-  minimum.setUTCMonth(minimum.getUTCMonth() - 24);
-  if (baseDate < monthStart(minimum)) throw new Error("O pacote SINAPI encontrado é antigo demais para atualização automática.");
 }
 
 async function importInputs(
@@ -341,12 +387,8 @@ export async function runSinapiAutomaticUpdate(input: {
   const region = input.region.trim().toUpperCase();
   if (!/^[A-Z]{2}$/.test(region)) throw new Error("UF inválida para atualização SINAPI.");
 
-  const sourceCandidate = await discoverLatestSinapiXlsxUrl();
-  const { buffer, finalUrl } = await downloadOfficialPackage(sourceCandidate);
-  const sourceSha256 = createHash("sha256").update(buffer).digest("hex");
-  const parsed = parseSinapiZipPackage(buffer, { sourceUrl: finalUrl, region, taxRelief: input.taxRelief });
-  validateBaseDate(parsed.baseDate);
-
+  const loaded = await loadOfficialPackage(region, input.taxRelief);
+  const { source, finalUrl, buffer, sourceSha256, parsed } = loaded;
   const supabase = serviceClient();
   const { data: latest, error: latestError } = await supabase
     .from("sinapi_import_batches")
@@ -360,38 +402,24 @@ export async function runSinapiAutomaticUpdate(input: {
     .maybeSingle();
   if (latestError) throw new Error(`Falha ao consultar o estado atual do SINAPI: ${latestError.message}`);
 
-  if (latest && latest.base_date > parsed.baseDate) {
-    return {
-      status: "newer_local_base",
-      batchId: latest.id,
-      sourceUrl: finalUrl,
-      sourceSha256,
-      baseDate: latest.base_date,
-      region,
-      taxRelief: input.taxRelief,
-      inputs: Number(latest.imported_inputs),
-      compositions: Number(latest.imported_compositions),
-      rejected: Number(latest.rejected_records),
-      xlsxFiles: parsed.xlsxFiles.length,
-      worksheets: parsed.worksheets
-    };
-  }
+  const priorResult = (status: "already_current" | "newer_local_base"): SinapiAutomaticUpdateResult => ({
+    status,
+    batchId: latest.id,
+    sourceUrl: finalUrl,
+    sourceSha256,
+    baseDate: latest.base_date,
+    region,
+    taxRelief: input.taxRelief,
+    inputs: Number(latest.imported_inputs),
+    compositions: Number(latest.imported_compositions),
+    rejected: Number(latest.rejected_records),
+    xlsxFiles: parsed.xlsxFiles.length,
+    worksheets: parsed.worksheets
+  });
 
+  if (latest && latest.base_date > parsed.baseDate) return priorResult("newer_local_base");
   if (latest && latest.base_date === parsed.baseDate && latest.source_sha256 === sourceSha256) {
-    return {
-      status: "already_current",
-      batchId: latest.id,
-      sourceUrl: finalUrl,
-      sourceSha256,
-      baseDate: latest.base_date,
-      region,
-      taxRelief: input.taxRelief,
-      inputs: Number(latest.imported_inputs),
-      compositions: Number(latest.imported_compositions),
-      rejected: Number(latest.rejected_records),
-      xlsxFiles: parsed.xlsxFiles.length,
-      worksheets: parsed.worksheets
-    };
+    return priorResult("already_current");
   }
 
   let batchId: string | null = null;
@@ -405,7 +433,12 @@ export async function runSinapiAutomaticUpdate(input: {
       p_source_sha256: sourceSha256,
       p_metadata: {
         automatic: true,
-        parserVersion: "4",
+        parserVersion: "5",
+        sourceFileName: source.fileName,
+        sourceModifiedAt: source.modifiedAt,
+        sourceDescription: source.description,
+        sourceDeclaredBytes: source.declaredSize,
+        sourceRectification: source.isRectification,
         downloadedBytes: buffer.length,
         xlsxFiles: parsed.xlsxFiles,
         worksheets: parsed.worksheets
