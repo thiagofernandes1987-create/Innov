@@ -16,23 +16,36 @@ function decodeHtml(value: string) {
     .replace(/&gt;/g, ">");
 }
 
-function relevantLinks(html: string) {
-  const links = new Set<string>();
-  const expression = /(?:href|src|data-url|data-href)\s*=\s*(?:"([^"]+)"|'([^']+)')/gi;
+function attributeUrls(html: string, attribute: string) {
+  const urls = new Set<string>();
+  const expression = new RegExp(`${attribute}\\s*=\\s*(?:\"([^\"]+)\"|'([^']+)')`, "gi");
   for (const match of html.matchAll(expression)) {
     const raw = decodeHtml(match[1] ?? match[2] ?? "");
-    if (!raw) continue;
-    try {
-      const url = new URL(raw, pageUrl);
-      const combined = `${decodeURIComponent(url.pathname)} ${url.search} ${raw}`.toLowerCase();
-      if (combined.includes("sinapi") || combined.includes("xlsx") || combined.includes("categoria_888") || combined.includes("downloadid")) {
-        links.add(url.toString());
-      }
-    } catch {
-      // Diagnóstico ignora URL inválida.
+    if (!raw || raw.startsWith("javascript:") || raw.startsWith("#")) continue;
+    try { urls.add(new URL(raw, pageUrl).toString()); } catch { /* URL inválida */ }
+  }
+  return [...urls];
+}
+
+function endpointCandidates(html: string) {
+  const candidates = new Set<string>();
+  const decoded = decodeHtml(html.replace(/\\\//g, "/"));
+  const expressions = [
+    /(?:https?:)?\/\/[^"'\s<>]+/gi,
+    /(?:\/|\.\.\/)[A-Za-z0-9_./?=&%#-]+(?:\.asmx|\.svc|\.ashx|\.json|\.js|\.aspx|\/_api\/[^"'\s<>]*)/gi,
+    /["']([^"']*(?:download|categoria|arquivo|consulta|servico|service|api)[^"']*)["']/gi
+  ];
+  for (const expression of expressions) {
+    for (const match of decoded.matchAll(expression)) {
+      const raw = (match[1] ?? match[0] ?? "").trim();
+      if (!raw || raw.length > 1_500) continue;
+      const lower = raw.toLowerCase();
+      if (!/(download|categoria|arquivo|consulta|servico|service|api)/.test(lower)) continue;
+      try { candidates.add(new URL(raw, pageUrl).toString()); }
+      catch { candidates.add(raw); }
     }
   }
-  return [...links].slice(0, 300);
+  return [...candidates].slice(0, 500);
 }
 
 function snippets(html: string, term: string) {
@@ -40,10 +53,10 @@ function snippets(html: string, term: string) {
   const lower = normalized.toLowerCase();
   const result: string[] = [];
   let cursor = 0;
-  while (result.length < 20) {
+  while (result.length < 30) {
     const index = lower.indexOf(term.toLowerCase(), cursor);
     if (index < 0) break;
-    result.push(normalized.slice(Math.max(0, index - 500), Math.min(normalized.length, index + term.length + 1200)));
+    result.push(normalized.slice(Math.max(0, index - 700), Math.min(normalized.length, index + term.length + 1_500)));
     cursor = index + term.length;
   }
   return result;
@@ -70,10 +83,11 @@ export async function GET(request: Request) {
     ok: response.ok,
     status: response.status,
     length: html.length,
-    links: relevantLinks(html),
-    sinapi: snippets(html, "SINAPI"),
-    category888: snippets(html, "categoria_888"),
-    reports2025: snippets(html, "Relatórios mensais - a partir de 2025"),
-    formatXlsx: snippets(html, "formato XLSX")
+    scripts: attributeUrls(html, "src").filter(url => /\.js(?:\?|$)/i.test(url)),
+    styles: attributeUrls(html, "href").filter(url => /\.css(?:\?|$)/i.test(url)),
+    endpoints: endpointCandidates(html),
+    downloadSnippets: snippets(html, "download"),
+    apiSnippets: snippets(html, "_api"),
+    ajaxSnippets: snippets(html, "ajax")
   });
 }
