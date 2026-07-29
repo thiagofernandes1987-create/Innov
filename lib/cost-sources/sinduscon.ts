@@ -97,8 +97,8 @@ function extractPublicationDate(html: string, text: string) {
 function extractBaseDate(text: string) {
   const patterns = [
     /por metro quadrado em\s+([a-zç]+)\s+de\s+(20\d{2})/i,
-    /em\s+([a-zç]+)\s+de\s+(20\d{2})[^.]{0,120}CUB/i,
-    /CUB[^.]{0,160}\b([a-zç]+)\s+de\s+(20\d{2})/i
+    /em\s+([a-zç]+)\s+de\s+(20\d{2})[\s\S]{0,160}?CUB/i,
+    /CUB[\s\S]{0,220}?\b([a-zç]+)\s+de\s+(20\d{2})/i
   ];
   for (const pattern of patterns) {
     const match = text.match(pattern);
@@ -155,13 +155,13 @@ export function parseSindusconCubPublication(
   const baseDate = extractBaseDate(text);
 
   const normalCost = extractMoney(text, [
-    /CUB representativo[^.]{0,260}?R\$\s*([\d.]+,\d{2})\s+por metro quadrado/i,
-    /Sem desoneração\s*\.?\s*R8-N\s*R\$?\s*([\d.]+,\d{2})/i
+    /CUB representativo[\s\S]{0,420}?R\$\s*([\d.]+,\d{2})\s+por metro quadrado/i,
+    /Sem desoneração\s*\.?\s*R8-N[\s\S]{0,80}?R\$?\s*([\d.]+,\d{2})/i
   ], "CUB sem desoneração");
 
   const relievedCost = extractMoney(text, [
-    /com desoneração[^.]{0,420}?(?:atingiu|subiu para|ficou em)\s*R\$\s*([\d.]+,\d{2})/i,
-    /Com desoneração\s*\.?\s*R8-N\s*R\$?\s*([\d.]+,\d{2})/i
+    /com desoneração[\s\S]{0,1200}?(?:atingiu|subiu para|ficou em)\s*R\$\s*([\d.]+,\d{2})/i,
+    /Com desoneração\s*\.?\s*R8-N[\s\S]{0,80}?R\$?\s*([\d.]+,\d{2})/i
   ], "CUB com desoneração");
 
   const laborCost = optionalMoney(text, [
@@ -174,8 +174,12 @@ export function parseSindusconCubPublication(
     /R\$\s*([\d.]+,\d{2})\s+às\s+despesas administrativas/i
   ]);
 
-  const normalRates = text.match(/variação positiva de\s*([\d.,]+)%[^.]{0,120}acumulou elevação de\s*([\d.,]+)%\s+no ano\s+e de\s*([\d.,]+)%\s+nos últimos 12 meses/i);
-  const relievedRates = text.match(/com desoneração[^.]{0,220}?variação positiva de\s*([\d.,]+)%[^.]{0,180}?ano[^\d]*([\d.,]+)%[^.]{0,120}?12 meses[^\d]*([\d.,]+)%/i);
+  const normalRates = text.match(
+    /variação positiva de\s*([\d.,]+)%[\s\S]{0,320}?acumulou elevação de\s*([\d.,]+)%\s+no ano\s+e de\s*([\d.,]+)%\s+nos últimos 12 meses/i
+  );
+  const relievedRates = text.match(
+    /com desoneração[\s\S]{0,700}?variação positiva de\s*([\d.,]+)%[\s\S]{0,360}?ano[^\d]*([\d.,]+)%[\s\S]{0,220}?12 meses[^\d]*([\d.,]+)%/i
+  );
 
   const common = {
     sourceKey: SINDUSCON_CUB_SOURCE_KEY,
