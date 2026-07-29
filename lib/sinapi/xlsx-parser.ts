@@ -375,23 +375,31 @@ function headerContains(header: string, words: string[]) {
 }
 
 function pickHeaderIndex(headers: string[], groups: string[][], excluded = new Set<number>()) {
-  let best: { index: number; score: number } | null = null;
-  headers.forEach((header, index) => {
-    if (!header || excluded.has(index)) return;
-    groups.forEach((group, groupIndex) => {
-      if (!headerContains(header, group)) return;
+  let bestIndex = -1;
+  let bestScore = Number.NEGATIVE_INFINITY;
+  for (let index = 0; index < headers.length; index += 1) {
+    const header = headers[index];
+    if (!header || excluded.has(index)) continue;
+    for (let groupIndex = 0; groupIndex < groups.length; groupIndex += 1) {
+      const group = groups[groupIndex];
+      if (!headerContains(header, group)) continue;
       const score = 100 - groupIndex * 5 - Math.max(0, header.split(" ").length - group.length);
-      if (!best || score > best.score) best = { index, score };
-    });
-  });
-  return best?.index ?? -1;
+      if (score > bestScore) {
+        bestIndex = index;
+        bestScore = score;
+      }
+    }
+  }
+  return bestIndex;
 }
 
 function pickCostIndex(headers: string[], taxRelief: boolean, excluded: Set<number>) {
-  let best: { index: number; score: number } | null = null;
-  headers.forEach((header, index) => {
-    if (!header || excluded.has(index) || !/(PRECO|CUSTO|VALOR)/.test(header)) return;
-    if (/(COEFICIENTE|PERCENTUAL|MAO DE OBRA|ENCARGO)/.test(header) && !header.includes("TOTAL")) return;
+  let bestIndex = -1;
+  let bestScore = Number.NEGATIVE_INFINITY;
+  for (let index = 0; index < headers.length; index += 1) {
+    const header = headers[index];
+    if (!header || excluded.has(index) || !/(PRECO|CUSTO|VALOR)/.test(header)) continue;
+    if (/(COEFICIENTE|PERCENTUAL|MAO DE OBRA|ENCARGO)/.test(header) && !header.includes("TOTAL")) continue;
 
     let score = 10;
     if (header.includes("TOTAL")) score += 8;
@@ -400,9 +408,12 @@ function pickCostIndex(headers: string[], taxRelief: boolean, excluded: Set<numb
     const headerRegime = inferRegime(header);
     if (headerRegime === taxRelief) score += 20;
     else if (headerRegime !== null) score -= 30;
-    if (!best || score > best.score) best = { index, score };
-  });
-  return best?.index ?? -1;
+    if (score > bestScore) {
+      bestIndex = index;
+      bestScore = score;
+    }
+  }
+  return bestIndex;
 }
 
 function detectHeaders(rows: string[][], kind: "INPUT" | "COMPOSITION", taxRelief: boolean) {
@@ -651,7 +662,7 @@ export function parseSinapiZipPackage(
   const inputRows = [...inputs.values()];
   const compositionRows = [...compositions.values()];
   if (inputRows.length < 500) fail(`somente ${inputRows.length} insumos válidos foram encontrados; mínimo esperado: 500.`);
-  if (compositionRows.length < 500) fail(`somente ${compositionRows.length} composições válidas foram encontradas; mínimo esperado: 500.`);
+  if (compositionRows.length < 500) fail(`somente ${compositionRows.length} composições válidas foram encontrados; mínimo esperado: 500.`);
   if (inputRows.length > 100_000 || compositionRows.length > 100_000) fail("volume de registros excede o limite técnico.");
 
   const baseDate = extractBaseDate([options.sourceUrl, ...xlsxEntries.map(entry => entry.name)]);
