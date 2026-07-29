@@ -1,0 +1,25 @@
+.field-error {
+  display: block;
+  margin-top: 5px;
+  color: var(--danger, #dc2626);
+  font-size: .76rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: var(--danger, #dc2626);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger, #dc2626) 18%, transparent);
+}
+
+.project-entry-form button:disabled,
+.project-entry-layout button:disabled {
+  cursor: progress;
+  opacity: .68;
+}
+
+.project-entry-layout .validation[role="alert"] {
+  scroll-margin-top: 96px;
+}
