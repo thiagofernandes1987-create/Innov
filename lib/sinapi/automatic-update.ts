@@ -58,15 +58,48 @@ function officialUrl(value: string) {
   return parsed;
 }
 
+function absorbResponseCookies(headers: Headers, jar: Map<string, string>) {
+  const getSetCookie = (headers as Headers & { getSetCookie?: () => string[] }).getSetCookie;
+  const setCookies = typeof getSetCookie === "function"
+    ? getSetCookie.call(headers)
+    : headers.get("set-cookie")
+      ? [headers.get("set-cookie") as string]
+      : [];
+
+  for (const setCookie of setCookies) {
+    const pair = setCookie.split(";", 1)[0]?.trim();
+    const separator = pair?.indexOf("=") ?? -1;
+    if (!pair || separator <= 0) continue;
+    const name = pair.slice(0, separator).trim();
+    const value = pair.slice(separator + 1).trim();
+    if (!name) continue;
+    if (!value) jar.delete(name);
+    else jar.set(name, value);
+  }
+}
+
 async function fetchOfficial(
   input: string,
   init: RequestInit = {},
   timeoutMs = REQUEST_TIMEOUT_MS
 ): Promise<Response> {
   let current = officialUrl(input);
-  for (let redirects = 0; redirects <= 4; redirects += 1) {
+  const cookies = new Map<string, string>();
+
+  for (let redirects = 0; redirects <= 7; redirects += 1) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const headers = new Headers(init.headers);
+    if (!headers.has("User-Agent")) {
+      headers.set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/138 Safari/537.36 Innovar-SINAPI-Updater/1.0");
+    }
+    if (!headers.has("Accept")) {
+      headers.set("Accept", "text/html,application/xhtml+xml,application/zip,application/octet-stream;q=0.9,*/*;q=0.5");
+    }
+    if (!headers.has("Accept-Language")) headers.set("Accept-Language", "pt-BR,pt;q=0.9,en;q=0.6");
+    if (!headers.has("Referer")) headers.set("Referer", "https://www.caixa.gov.br/");
+    if (cookies.size) headers.set("Cookie", [...cookies].map(([name, value]) => `${name}=${value}`).join("; "));
+
     let response: Response;
     try {
       response = await fetch(current, {
@@ -74,19 +107,17 @@ async function fetchOfficial(
         redirect: "manual",
         cache: "no-store",
         signal: controller.signal,
-        headers: {
-          "User-Agent": "Innovar-SINAPI-Updater/1.0 (+https://github.com/thiagofernandes1987-create/Innov)",
-          Accept: "text/html,application/zip,application/octet-stream;q=0.9,*/*;q=0.5",
-          ...(init.headers ?? {})
-        }
+        headers
       });
     } finally {
       clearTimeout(timer);
     }
 
+    absorbResponseCookies(response.headers, cookies);
     if ([301, 302, 303, 307, 308].includes(response.status)) {
       const location = response.headers.get("location");
       if (!location) throw new Error("A CAIXA respondeu com redirecionamento sem destino.");
+      await response.body?.cancel().catch(() => undefined);
       current = officialUrl(new URL(location, current).toString());
       continue;
     }
@@ -104,16 +135,16 @@ function htmlDecode(value: string) {
     .replace(/&gt;/g, ">");
 }
 
+function xlsxMarker(value: string) {
+  return value.includes("xlsx") || value.includes("formato xlsx");
+}
+
 function isSinapiXlsxCandidate(url: URL, label = "") {
   const combined = `${decodeURIComponent(url.pathname)} ${label}`.toLowerCase();
   return combined.includes("sinapi")
     && xlsxMarker(combined)
     && (combined.includes("relatorios-mensais") || combined.includes("formatoxlsx") || combined.includes("formato-xlsx"))
     && (url.pathname.toLowerCase().endsWith(".zip") || combined.includes("formatoxlsx") || combined.includes("formato-xlsx"));
-}
-
-function xlsxMarker(value: string) {
-  return value.includes("xlsx") || value.includes("formato xlsx");
 }
 
 function extractCandidates(html: string, baseUrl: string) {
@@ -374,7 +405,7 @@ export async function runSinapiAutomaticUpdate(input: {
       p_source_sha256: sourceSha256,
       p_metadata: {
         automatic: true,
-        parserVersion: "3",
+        parserVersion: "4",
         downloadedBytes: buffer.length,
         xlsxFiles: parsed.xlsxFiles,
         worksheets: parsed.worksheets
