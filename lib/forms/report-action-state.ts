@@ -7,6 +7,7 @@ export type ReportActionField =
   | "periodEnd"
   | "visibleMetrics"
   | "description"
+  | "shared"
   | "metricKey"
   | "comparison"
   | "warningValue"
