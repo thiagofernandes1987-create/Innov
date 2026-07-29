@@ -416,6 +416,39 @@ function pickCostIndex(headers: string[], taxRelief: boolean, excluded: Set<numb
   return bestIndex;
 }
 
+function projectWideRegionSheet(rows: string[][], region: string) {
+  const maximum = Math.min(rows.length, 45);
+  for (let rowIndex = 0; rowIndex < maximum; rowIndex += 1) {
+    const headers = rows[rowIndex].map(normalizeText);
+    const regionColumn = headers.findIndex(header => header === region || header === `UF ${region}`);
+    if (regionColumn < 0) continue;
+
+    const used = new Set<number>([regionColumn]);
+    const code = pickHeaderIndex(headers, [["CODIGO", "INSUMO"], ["CODIGO", "COMPOSICAO"], ["COD"], ["CODIGO"]], used);
+    if (code >= 0) used.add(code);
+    const description = pickHeaderIndex(headers, [["DESCRICAO", "INSUMO"], ["DESCRICAO", "COMPOSICAO"], ["DESCRICAO"]], used);
+    if (description >= 0) used.add(description);
+    const unit = pickHeaderIndex(headers, [["UNIDADE"], ["UNID"], ["UN"]], used);
+    if ([code, description, unit].some(index => index < 0)) continue;
+    const itemType = pickHeaderIndex(headers, [["TIPO", "INSUMO"], ["TIPO"], ["ORIGEM", "PRECO"], ["CATEGORIA"]], used);
+
+    const projected: string[][] = [["CODIGO", "DESCRICAO", "UNIDADE", "CUSTO", "UF", "TIPO"]];
+    for (let index = rowIndex + 1; index < rows.length; index += 1) {
+      const row = rows[index];
+      projected.push([
+        row[code] ?? "",
+        row[description] ?? "",
+        row[unit] ?? "",
+        row[regionColumn] ?? "",
+        region,
+        itemType >= 0 ? row[itemType] ?? "" : ""
+      ]);
+    }
+    return projected;
+  }
+  return rows;
+}
+
 function detectHeaders(rows: string[][], kind: "INPUT" | "COMPOSITION", taxRelief: boolean) {
   let best: HeaderMap | null = null;
   const maximum = Math.min(rows.length, 45);
@@ -584,7 +617,7 @@ function extractBaseDate(values: string[]) {
     const decoded = (() => {
       try { return decodeURIComponent(value); } catch { return value; }
     })();
-    for (const match of decoded.matchAll(/(?:SINAPI[^0-9]{0,20})?(20\d{2})[-_ ](0[1-9]|1[0-2])/gi)) {
+    for (const match of decoded.matchAll(/(?:SINAPI[^0-9]{0,20})?(20\d{2})[-_ ]?(0[1-9]|1[0-2])/gi)) {
       candidates.push(`${match[1]}-${match[2]}-01`);
     }
   }
@@ -636,23 +669,25 @@ export function parseSinapiZipPackage(
       const hintedKind = contextKind(context);
       const sheetRegion = inferRegion(sheet.name) ?? contextRegion;
       const sheetRegime = inferRegime(sheet.name) ?? contextRegime;
+      const projectedRows = projectWideRegionSheet(sheet.rows, region);
+      const projectedRegion = projectedRows === sheet.rows ? sheetRegion : region;
 
       if (hintedKind !== "COMPOSITION") {
-        const inputHeader = detectHeaders(sheet.rows, "INPUT", options.taxRelief);
+        const inputHeader = detectHeaders(projectedRows, "INPUT", options.taxRelief);
         if (inputHeader && (hintedKind === "INPUT" || inputHeader.score >= 30)) {
           for (const row of mapInputRows(
-            sheet.rows, inputHeader, xlsxEntry.name, sheet.name,
-            region, options.taxRelief, sheetRegion, sheetRegime
+            projectedRows, inputHeader, xlsxEntry.name, sheet.name,
+            region, options.taxRelief, projectedRegion, sheetRegime
           )) inputs.set(row.code, row);
         }
       }
 
       if (hintedKind !== "INPUT") {
-        const compositionHeader = detectHeaders(sheet.rows, "COMPOSITION", options.taxRelief);
+        const compositionHeader = detectHeaders(projectedRows, "COMPOSITION", options.taxRelief);
         if (compositionHeader && (hintedKind === "COMPOSITION" || compositionHeader.score >= 30)) {
           for (const row of mapCompositionRows(
-            sheet.rows, compositionHeader, xlsxEntry.name, sheet.name,
-            region, options.taxRelief, sheetRegion, sheetRegime
+            projectedRows, compositionHeader, xlsxEntry.name, sheet.name,
+            region, options.taxRelief, projectedRegion, sheetRegime
           )) compositions.set(row.code, row);
         }
       }
