@@ -34,13 +34,18 @@ reproduzir bloqueio
 → corrigir estados encontrados no reteste
 → adicionar validador e CI
 → conferir build Vercel
+→ conferir runtime e índices novos
 ```
 
 ## 3. Migrations
 
 - `20260729163500_flexible_projects_proposals_discounts.sql`;
 - `20260729170500_project_district_and_flexible_rpc_v2.sql`;
-- `20260729171500_discount_decision_preserves_proposal_readiness.sql`.
+- `20260729171500_discount_decision_preserves_proposal_readiness.sql`;
+- `20260729173500_discount_decision_fk_indexes.sql`.
+
+A última migration reaplicou a VACINA-021 e adicionou índices de cobertura para
+`proposal_id`, `requested_by` e `decided_by` na trilha de alçada comercial.
 
 ## 4. Cenários executados no Supabase
 
@@ -146,15 +151,33 @@ Novo portão:
 pnpm validate:flexible-workflows
 ```
 
-O validador confere banco, ações, formulários, filtros, menus, contraste e
-responsividade do resumo. Está no preflight e na etapa de qualidade do CI.
+O validador confere banco, ações, formulários, filtros, menus, contraste,
+responsividade do resumo e índices das decisões de desconto. Está no preflight
+e na etapa de qualidade do CI.
 
 Vacinas registradas:
 
 - VACINA-040 — fluxo não obriga documento anterior;
 - VACINA-041 — alçada não é somente campo.
 
-## 7. Segurança e limitações
+Vacina reaplicada:
+
+- VACINA-021 — FKs operacionais precisam de índice de cobertura.
+
+## 7. Verificação pós-deploy
+
+- deployment consolidado da `main`: `READY` no Vercel;
+- erros de runtime no recorte posterior à publicação: zero;
+- migrations aplicadas no Supabase;
+- FKs novas da alçada revisadas e indexadas;
+- nenhum dado dos cenários QA permaneceu no banco.
+
+A tentativa de executar o validador em um checkout local desta sessão foi
+bloqueada por falha de resolução DNS do ambiente. Isso não foi contado como
+aprovação. A evidência executada desta rodada é o build do Vercel e os cenários
+PostgreSQL no Supabase.
+
+## 8. Segurança e limitações
 
 As novas RPCs aparecem no advisor como `SECURITY DEFINER` executáveis por
 `authenticated`. Isso é intencional nesta rodada porque elas atravessam tabelas
