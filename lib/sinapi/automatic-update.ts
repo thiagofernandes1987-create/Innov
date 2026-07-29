@@ -107,9 +107,13 @@ function htmlDecode(value: string) {
 function isSinapiXlsxCandidate(url: URL, label = "") {
   const combined = `${decodeURIComponent(url.pathname)} ${label}`.toLowerCase();
   return combined.includes("sinapi")
-    && combined.includes("xlsx")
-    && (combined.includes("relatorios-mensais") || combined.includes("formato-xlsx"))
-    && (url.pathname.toLowerCase().endsWith(".zip") || combined.includes("formato-xlsx"));
+    && xlsxMarker(combined)
+    && (combined.includes("relatorios-mensais") || combined.includes("formatoxlsx") || combined.includes("formato-xlsx"))
+    && (url.pathname.toLowerCase().endsWith(".zip") || combined.includes("formatoxlsx") || combined.includes("formato-xlsx"));
+}
+
+function xlsxMarker(value: string) {
+  return value.includes("xlsx") || value.includes("formato xlsx");
 }
 
 function extractCandidates(html: string, baseUrl: string) {
@@ -141,8 +145,8 @@ function candidateBaseDate(value: string) {
   const decoded = (() => {
     try { return decodeURIComponent(value); } catch { return value; }
   })();
-  const match = decoded.match(/SINAPI[^0-9]{0,20}(20\d{2})[-_ ](0[1-9]|1[0-2])/i)
-    ?? decoded.match(/(20\d{2})[-_ ](0[1-9]|1[0-2])/);
+  const match = decoded.match(/SINAPI[^0-9]{0,20}(20\d{2})[-_ ]?(0[1-9]|1[0-2])/i)
+    ?? decoded.match(/(20\d{2})[-_ ]?(0[1-9]|1[0-2])/);
   return match ? `${match[1]}-${match[2]}-01` : "0000-00-01";
 }
 
@@ -153,8 +157,10 @@ function generatedMonthlyCandidates() {
   for (let offset = 0; offset < 20; offset += 1) {
     const year = cursor.getUTCFullYear();
     const month = String(cursor.getUTCMonth() + 1).padStart(2, "0");
-    const stem = `SINAPI-${year}-${month}-formato-xlsx`;
-    candidates.push(new URL(`${stem}.zip`, OFFICIAL_DOWNLOAD_FOLDER).toString());
+    const officialStem = `SINAPI${year}${month}formatoxlsx`;
+    const legacyStem = `SINAPI-${year}-${month}-formato-xlsx`;
+    candidates.push(new URL(`${officialStem}.zip`, OFFICIAL_DOWNLOAD_FOLDER).toString());
+    candidates.push(new URL(`${legacyStem}.zip`, OFFICIAL_DOWNLOAD_FOLDER).toString());
     cursor.setUTCMonth(cursor.getUTCMonth() - 1);
   }
   return candidates;
@@ -368,7 +374,7 @@ export async function runSinapiAutomaticUpdate(input: {
       p_source_sha256: sourceSha256,
       p_metadata: {
         automatic: true,
-        parserVersion: "2",
+        parserVersion: "3",
         downloadedBytes: buffer.length,
         xlsxFiles: parsed.xlsxFiles,
         worksheets: parsed.worksheets
