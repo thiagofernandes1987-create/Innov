@@ -47,7 +47,10 @@ describe("S-23 — fundação de interface", () => {
       "app/app/obras/page.tsx",
       "app/app/obras/[id]/tarefas/page.tsx",
       "app/app/obras/[id]/cronograma/page.tsx",
-      "app/app/obras/[id]/equipes/page.tsx"
+      "app/app/obras/[id]/equipes/page.tsx",
+      "app/app/obras/[id]/diario/page.tsx",
+      "app/app/obras/[id]/eap/page.tsx",
+      "app/app/obras/[id]/documentos/page.tsx"
     ];
 
     for (const relativePath of collectionPages) {
@@ -71,6 +74,37 @@ describe("S-23 — fundação de interface", () => {
     expect(read(collectionPages[2])).toContain("!scheduleLoadFailed");
     expect(read(collectionPages[3])).toContain("!teamsLoadFailed");
     expect(read(collectionPages[3])).toContain("!resourcesLoadFailed");
+    expect(read(collectionPages[4])).toContain("!logsLoadFailed");
+    expect(read(collectionPages[5])).toContain("!itemsLoadFailed");
+  });
+
+  it("separa coleção, versões e URLs assinadas nos documentos da obra", () => {
+    const page = read("app/app/obras/[id]/documentos/page.tsx");
+
+    expect(page).toContain('.from("project_documents")');
+    expect(page).toContain('.from("project_document_versions")');
+    expect(page).not.toMatch(/project_documents[\s\S]{0,250}project_document_versions\(/);
+    expect(page).toContain("documentsLoadFailed");
+    expect(page).toContain("signedUrlsLoadFailed");
+    expect(page).toContain("link indisponível");
+    expect(page).not.toContain('href={signedByPath.get(version.storage_path) ?? "#"}');
+  });
+
+  it("mantém cadastro independente quando apenas a coleção do diário falha", () => {
+    const page = read("app/app/obras/[id]/diario/page.tsx");
+
+    expect(page).toContain("!logsLoadFailed");
+    expect(page).toContain("<form action={createDailyLog}");
+    expect(page.indexOf("<form action={createDailyLog}"))
+      .toBeGreaterThan(page.indexOf("!logsLoadFailed"));
+  });
+
+  it("bloqueia peso e hierarquia da EAP quando os itens não são confirmados", () => {
+    const page = read("app/app/obras/[id]/eap/page.tsx");
+
+    expect(page).toContain("!itemsLoadFailed");
+    expect(page).toContain("Peso raiz");
+    expect(page).toContain("O cadastro está bloqueado porque a hierarquia atual não pôde ser carregada");
   });
 
   it("mantém o cronograma Gantt calculado com dependências", () => {
