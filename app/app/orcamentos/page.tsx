@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { createNextBudgetVersion } from "@/app/actions/budget-versions";
 import { requireOrganizationContext } from "@/lib/auth";
 import { budgetStatusLabels, formatCurrency, formatPercent, type BudgetStatus } from "@/lib/domain";
 import { singleRelation, type SupabaseRelation } from "@/lib/supabase/relations";
@@ -56,7 +57,7 @@ export default async function BudgetsPage() {
         <div>
           <span className="badge">ETAPA 9</span>
           <h1>Orçamentos</h1>
-          <p className="muted">Versões, cenários, alçadas, propostas e conversão em contrato.</p>
+          <p className="muted">Versões, composições, impostos, margens, alçadas e propostas.</p>
         </div>
         <Link className="button button-primary" href="/app/orcamentos/novo">Novo orçamento</Link>
       </div>
@@ -73,14 +74,14 @@ export default async function BudgetsPage() {
       <section className="card" style={{ marginTop: 22 }}>
         <div className="card-pad">
           <h2>Carteira de orçamentos</h2>
-          <p className="muted">Os dados internos só são exibidos a perfis autorizados.</p>
+          <p className="muted">Versões congeladas permanecem imutáveis; use “Criar nova versão” para continuar a composição.</p>
         </div>
         <div className="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>Código</th><th>Cliente</th><th>Status</th><th>Versão</th>
-                <th>Preço</th><th>Margem</th><th>ROI</th><th>Validade</th>
+                <th>Preço</th><th>Margem</th><th>ROI</th><th>Validade</th><th>Ação</th>
               </tr>
             </thead>
             <tbody>
@@ -94,10 +95,21 @@ export default async function BudgetsPage() {
                   <td className="mono">{formatPercent(Number(budget.currentVersion?.gross_margin_rate ?? 0))}</td>
                   <td className="mono">{budget.currentVersion?.estimated_roi_rate == null ? "—" : formatPercent(Number(budget.currentVersion.estimated_roi_rate))}</td>
                   <td>{budget.valid_until ? new Intl.DateTimeFormat("pt-BR").format(new Date(`${budget.valid_until}T12:00:00`)) : "—"}</td>
+                  <td>
+                    {budget.currentVersion?.frozen_at ? (
+                      <form action={createNextBudgetVersion} style={{ display: "grid", gap: 8, minWidth: 190 }}>
+                        <input type="hidden" name="budgetId" value={budget.id} />
+                        <input type="hidden" name="changeSummary" value="Continuidade da composição em nova versão" />
+                        <button className="button button-primary" type="submit">Criar nova versão</button>
+                      </form>
+                    ) : (
+                      <Link className="button button-secondary" href={`/app/orcamentos/${budget.id}`}>Compor custos</Link>
+                    )}
+                  </td>
                 </tr>
               ))}
               {!budgets.length ? (
-                <tr><td colSpan={8}><div className="card-pad"><strong>Nenhum orçamento cadastrado.</strong><p className="muted">Aplique a migration e crie o primeiro orçamento para iniciar a carteira.</p></div></td></tr>
+                <tr><td colSpan={9}><div className="card-pad"><strong>Nenhum orçamento cadastrado.</strong><p className="muted">Crie o primeiro orçamento para iniciar a carteira.</p></div></td></tr>
               ) : null}
             </tbody>
           </table>
