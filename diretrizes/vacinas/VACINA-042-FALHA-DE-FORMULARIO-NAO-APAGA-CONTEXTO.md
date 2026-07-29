@@ -33,6 +33,10 @@ da RPC mostrou que `GESTOR_OBRAS` e `ENGENHEIRO` podiam criar projetos sem
 receber `project_membership`; na conversão de contrato, um engenheiro era
 gravado artificialmente como `GESTOR_OBRAS`.
 
+O teste negativo posterior encontrou uma segunda causa: `REVOKE` aplicado apenas
+a `authenticated` não removia o `EXECUTE` herdado de `PUBLIC`, portanto as RPCs
+antigas continuavam chamáveis apesar da migration aparentar bloqueá-las.
+
 ## Qual foi a solução
 
 - formulários passaram a usar `useActionState` e estado estruturado;
@@ -44,7 +48,7 @@ gravado artificialmente como `GESTOR_OBRAS`.
 - a RPC cria membership para autor e responsável;
 - o papel real do ator é preservado, sem elevação implícita;
 - regras temporais e de origem também foram protegidas por constraints/RPC;
-- portas antigas perderam `EXECUTE` quando permitiam contornar as invariantes.
+- portas antigas perderam `EXECUTE` de `PUBLIC`, `anon` e `authenticated`.
 
 ## Varredura e ocorrências equivalentes
 
@@ -57,15 +61,17 @@ da S-23; não foram declaradas resolvidas neste PR.
 
 - `tests/project-creation-contract.test.ts` valida entradas normais e negativas;
 - `validate:flexible-workflows` exige estado preservado, RPC endurecida,
-  membership e separação de dependências;
+  membership, separação de dependências e revogação completa das portas antigas;
 - replay completo garante que as migrations antigas e novas coexistem;
+- teste vivo com associação temporária confirmou `ENGENHEIRO` preservado nas
+  duas portas, vínculo do contrato e `can_manage_project`, sempre com `ROLLBACK`;
 - lint, typecheck, testes e build são portões obrigatórios do PR.
 
 ## Limitações da prevenção
 
-O teste estrutural comprova os contratos de interface e banco, mas não substitui
-um navegador autenticado para conferir foco, autofill e comportamento dos
-controles nativos. O ensaio vivo de papel `ENGENHEIRO` não foi executado nesta
-sessão porque a ferramenta bloqueou a alteração temporária de papel antes de o
-SQL chegar ao banco; essa evidência ficou coberta por replay/CI e deve ser
-repetida em homologação dedicada.
+O teste estrutural e os cenários PostgreSQL comprovam contratos de interface,
+autorização e banco, mas não substituem um navegador autenticado para conferir
+foco, autofill, contraste final e comportamento dos controles nativos. A
+validação visual continua dependente de preview navegável; nesta rodada a
+Vercel bloqueou novos builds por limite de taxa, e isso deve ser tratado como
+bloqueio externo, não como aprovação visual.
