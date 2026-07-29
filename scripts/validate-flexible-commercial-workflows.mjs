@@ -21,9 +21,13 @@ const migration = read("supabase/migrations/20260729163500_flexible_projects_pro
 const districtMigration = read("supabase/migrations/20260729170500_project_district_and_flexible_rpc_v2.sql");
 const readinessMigration = read("supabase/migrations/20260729171500_discount_decision_preserves_proposal_readiness.sql");
 const indexMigration = read("supabase/migrations/20260729173500_discount_decision_fk_indexes.sql");
+const safeProjectMigration = read("supabase/migrations/20260729211500_safe_project_creation_workflows.sql");
 const actions = read("app/actions/flexible-workflows.ts");
+const contractAction = read("app/actions/project-creation.ts");
 const proposalForm = read("components/propostas/proposal-form.tsx");
 const projectForm = read("components/obras/project-entry-form.tsx");
+const contractForm = read("components/obras/contract-project-form.tsx");
+const newProjectPage = read("app/app/obras/novo/page.tsx");
 const proposalsPage = read("app/app/propostas/page.tsx");
 const newProposalPage = read("app/app/propostas/nova/page.tsx");
 const planningPage = read("app/app/planejamento/page.tsx");
@@ -47,8 +51,6 @@ requirePattern(migration, /create_independent_project/i,
   "Entrada de projeto independente ausente.");
 requirePattern(districtMigration, /add column if not exists district text/i,
   "Bairro não foi persistido em projects.");
-requirePattern(districtMigration, /p_district text/i,
-  "RPC v2 não recebe bairro.");
 requirePattern(readinessMigration, /document_sha256 is null or v_version\.frozen_at is null/i,
   "Aprovação de desconto pode aprovar proposta sem documento final.");
 for (const column of ["proposal_id", "requested_by", "decided_by"]) {
@@ -56,8 +58,29 @@ for (const column of ["proposal_id", "requested_by", "decided_by"]) {
     `VACINA-021: FK ${column} das decisões de desconto não possui índice versionado.`);
 }
 
-requirePattern(actions, /create_independent_project_v2/i,
-  "Ação de projeto não usa a RPC que persiste bairro.");
+requirePattern(safeProjectMigration, /create_independent_project_v3/i,
+  "Criação livre não possui RPC endurecida v3.");
+requirePattern(safeProjectMigration, /create_project_from_contract_v2/i,
+  "Conversão de contrato não possui RPC endurecida v2.");
+requirePattern(safeProjectMigration, /revoke execute on function public\.create_independent_project_v2/i,
+  "RPC independente antiga ainda pode contornar as invariantes novas.");
+requirePattern(safeProjectMigration, /insert into public\.project_memberships/i,
+  "Autor da obra pode continuar sem membership após a criação.");
+requirePattern(safeProjectMigration, /v_creator_role/i,
+  "Criação por contrato continua elevando o autor para papel fixo.");
+requirePattern(safeProjectMigration, /data de corte não pode estar no futuro/i,
+  "Data de corte futura não está bloqueada no banco.");
+
+requirePattern(actions, /create_independent_project_v3/i,
+  "Ação de projeto não usa a RPC endurecida v3.");
+requirePattern(actions, /ProjectCreationState/i,
+  "Ação de projeto não devolve estado estruturado ao formulário.");
+requirePattern(actions, /reportDataAccessError\("create-flexible-project\.rpc"/i,
+  "Falha de criação independente não possui log técnico seguro.");
+requirePattern(contractAction, /create_project_from_contract_v2/i,
+  "Conversão de contrato não usa a RPC endurecida.");
+requirePattern(contractAction, /ProjectCreationState/i,
+  "Conversão de contrato não preserva estado do formulário.");
 requirePattern(actions, /create_commercial_proposal/i,
   "Ação flexível de proposta não usa a RPC de domínio.");
 requirePattern(actions, /MAX_COMMERCIAL_PDF_SIZE = 20 \* 1024 \* 1024/i,
@@ -80,8 +103,21 @@ for (const mode of ["INDEPENDENT", "IN_PROGRESS", "HISTORICAL", "IMPORTED"]) {
   requirePattern(projectForm, new RegExp(`["']${mode}["']`),
     `Formulário de projeto não oferece ${mode}.`);
 }
+requirePattern(projectForm, /useActionState/i,
+  "Formulário de projeto perde dados ao validar no servidor.");
+requirePattern(contractForm, /useActionState/i,
+  "Conversão de contrato perde dados ao validar no servidor.");
 requirePattern(projectForm, /name=["']district["']/i,
   "Formulário de projeto não permite bairro.");
+requirePattern(newProjectPage, /contractsAvailable/i,
+  "Tela de nova obra não separa falha de contratos de lista vazia.");
+requirePattern(newProjectPage, /clientsAvailable/i,
+  "Tela de nova obra não preserva entrada livre quando clientes falham.");
+requirePattern(newProjectPage, /managersAvailable/i,
+  "Tela de nova obra não preserva entrada livre quando responsáveis falham.");
+requirePattern(newProjectPage, /\.in\("role", \[\.\.\.MANAGEMENT_ROLES\]\)/i,
+  "Responsável da obra ainda pode ser escolhido fora da equipe de gestão.");
+if (/error\.message/.test(newProjectPage)) failures.push("Tela de nova obra ainda expõe erro técnico cru.");
 requirePattern(planningPage, /name: ["']district["']/i,
   "Planejamento não filtra por bairro.");
 requirePattern(planningPage, /entry_mode/i,
@@ -132,6 +168,9 @@ console.log(JSON.stringify({
   checks: {
     independentProjects: true,
     existingProjectsWithCutoff: true,
+    safeProjectCreationState: true,
+    projectMembershipAfterCreation: true,
+    contractRolePreserved: true,
     fixedAndBudgetProposals: true,
     discountAuthority: true,
     discountDecisionIndexes: true,
