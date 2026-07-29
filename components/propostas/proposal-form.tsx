@@ -1,7 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { createFlexibleProposal } from "@/app/actions/flexible-workflows";
+import { useActionState, useMemo, useState } from "react";
+import {
+  createFlexibleProposal,
+  prepareProposalUpload,
+  type ProposalCreationState
+} from "@/app/actions/flexible-workflows";
+import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export type ProposalBudgetOption = {
   id: string;
@@ -16,6 +21,14 @@ export type ProposalClientOption = {
   label: string;
   city?: string | null;
 };
+
+type UploadState =
+  | { status: "idle"; message: string }
+  | { status: "uploading"; message: string }
+  | { status: "ready"; message: string }
+  | { status: "error"; message: string };
+
+const INITIAL_PROPOSAL_STATE: ProposalCreationState = { status: "idle" };
 
 function currency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
@@ -35,6 +48,15 @@ export function ProposalForm({
   const [budgetVersionId, setBudgetVersionId] = useState("");
   const [fixedValue, setFixedValue] = useState(0);
   const [discountPercent, setDiscountPercent] = useState(0);
+  const [uploadedPath, setUploadedPath] = useState("");
+  const [uploadState, setUploadState] = useState<UploadState>({
+    status: "idle",
+    message: "Opcional para rascunho. Obrigatório para liberar ao cliente. Somente PDF, até 20 MB."
+  });
+  const [creationState, formAction, pending] = useActionState(
+    createFlexibleProposal,
+    INITIAL_PROPOSAL_STATE
+  );
 
   const selectedBudget = budgets.find((budget) => budget.id === budgetVersionId);
   const basePrice = pricingMode === "BUDGET" ? Number(selectedBudget?.price ?? 0) : fixedValue;
@@ -44,14 +66,69 @@ export function ProposalForm({
   );
   const finalPrice = Math.max(0, basePrice - discountAmount);
   const needsApproval = discountPercent > 7;
+  const uploadInProgress = uploadState.status === "uploading";
+  const pdfReady = uploadState.status === "ready" && Boolean(uploadedPath);
+
+  async function uploadPdf(file: File | undefined) {
+    setUploadedPath("");
+    if (!file) {
+      setUploadState({
+        status: "idle",
+        message: "Opcional para rascunho. Obrigatório para liberar ao cliente. Somente PDF, até 20 MB."
+      });
+      return;
+    }
+
+    setUploadState({ status: "uploading", message: "Enviando PDF diretamente ao armazenamento seguro…" });
+    try {
+      const prepared = await prepareProposalUpload({
+        name: file.name,
+        type: file.type,
+        size: file.size
+      });
+      if (!prepared.ok) {
+        setUploadState({ status: "error", message: prepared.message });
+        return;
+      }
+
+      const supabase = createSupabaseBrowserClient();
+      const uploaded = await supabase.storage
+        .from("commercial-documents")
+        .uploadToSignedUrl(prepared.path, prepared.token, file, {
+          contentType: "application/pdf",
+          upsert: false
+        });
+
+      if (uploaded.error) {
+        setUploadState({
+          status: "error",
+          message: "Não foi possível enviar o PDF. Verifique a conexão e selecione o arquivo novamente."
+        });
+        return;
+      }
+
+      setUploadedPath(prepared.path);
+      setUploadState({ status: "ready", message: `${file.name} enviado e pronto para vincular à proposta.` });
+    } catch {
+      setUploadState({
+        status: "error",
+        message: "Não foi possível preparar o upload do PDF. Tente novamente."
+      });
+    }
+  }
 
   return (
     <form
       id="proposal-form"
-      action={createFlexibleProposal}
-      encType="multipart/form-data"
+      action={formAction}
       className="card card-pad field-form proposal-form"
     >
+      {creationState.status === "error" ? (
+        <div className="validation blocking span-2" role="alert">
+          {creationState.message}
+        </div>
+      ) : null}
+
       <fieldset className="workflow-choice span-2">
         <legend>Como o valor da proposta será formado?</legend>
         <label className={pricingMode === "BUDGET" ? "workflow-choice-active" : ""}>
@@ -93,8 +170,11 @@ export function ProposalForm({
               ))}
             </select>
             <small className="field-help">
-              Versões em aprovação podem gerar rascunho. Somente versões aprovadas podem ser enviadas ao cliente.
+              Versões em revisão podem gerar rascunho. Somente versões aprovadas podem ser liberadas ao cliente.
             </small>
+            {!budgets.length ? (
+              <small className="validation blocking">Nenhum orçamento calculado foi encontrado. Use valor fixo ou conclua o cálculo de um orçamento.</small>
+            ) : null}
           </label>
         ) : (
           <>
@@ -110,12 +190,13 @@ export function ProposalForm({
               <input
                 name="fixedValue"
                 type="number"
+                inputMode="decimal"
                 min="0.01"
                 step="0.01"
                 required
                 value={fixedValue || ""}
                 onChange={(event) => setFixedValue(Number(event.target.value))}
-                placeholder="150000,00"
+                placeholder="150.000,00"
               />
             </label>
           </>
@@ -144,6 +225,7 @@ export function ProposalForm({
             <input
               name="discountPercent"
               type="number"
+              inputMode="decimal"
               min="0"
               max="99.99"
               step="0.01"
@@ -172,19 +254,37 @@ export function ProposalForm({
         )}
 
         <label className="span-2 signature-dropzone">PDF final da proposta
-          <input name="file" type="file" accept="application/pdf" />
-          <small>Opcional para rascunho. Obrigatório para liberar ao cliente. Somente PDF, até 20 MB.</small>
+          <input
+            type="file"
+            accept="application/pdf,.pdf"
+            disabled={uploadInProgress || pending}
+            onChange={(event) => void uploadPdf(event.target.files?.[0])}
+          />
+          <input type="hidden" name="uploadedPath" value={uploadedPath} />
+          <small
+            className={uploadState.status === "error" ? "field-error" : uploadState.status === "ready" ? "upload-success" : "field-help"}
+            role={uploadState.status === "error" ? "alert" : "status"}
+            aria-live="polite"
+          >
+            {uploadState.message}
+          </small>
         </label>
       </div>
 
       <label className="checkline">
-        <input name="releaseClient" type="checkbox" disabled={needsApproval || (pricingMode === "BUDGET" && !selectedBudget?.approved)} />
+        <input
+          name="releaseClient"
+          type="checkbox"
+          disabled={needsApproval || !pdfReady || (pricingMode === "BUDGET" && !selectedBudget?.approved)}
+        />
         Liberar esta versão ao portal do cliente assim que for criada
       </label>
 
       <div className="proposal-form-footer">
         <span className="muted">Até 7%: alçada automática. Acima de 7%: diretoria.</span>
-        <button className="button button-primary" type="submit">Criar proposta</button>
+        <button className="button button-primary" type="submit" disabled={pending || uploadInProgress}>
+          {pending ? "Criando proposta…" : uploadInProgress ? "Aguardando PDF…" : "Criar proposta"}
+        </button>
       </div>
     </form>
   );
