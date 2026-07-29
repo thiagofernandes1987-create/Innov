@@ -22,6 +22,7 @@ const districtMigration = read("supabase/migrations/20260729170500_project_distr
 const readinessMigration = read("supabase/migrations/20260729171500_discount_decision_preserves_proposal_readiness.sql");
 const indexMigration = read("supabase/migrations/20260729173500_discount_decision_fk_indexes.sql");
 const safeProjectMigration = read("supabase/migrations/20260729211500_safe_project_creation_workflows.sql");
+const legacyProjectRevokeMigration = read("supabase/migrations/20260729214500_revoke_legacy_project_creation_rpcs.sql");
 const actions = read("app/actions/flexible-workflows.ts");
 const contractAction = read("app/actions/project-creation.ts");
 const proposalForm = read("components/propostas/proposal-form.tsx");
@@ -62,8 +63,12 @@ requirePattern(safeProjectMigration, /create_independent_project_v3/i,
   "Criação livre não possui RPC endurecida v3.");
 requirePattern(safeProjectMigration, /create_project_from_contract_v2/i,
   "Conversão de contrato não possui RPC endurecida v2.");
-requirePattern(safeProjectMigration, /revoke execute on function public\.create_independent_project_v2/i,
-  "RPC independente antiga ainda pode contornar as invariantes novas.");
+requirePattern(legacyProjectRevokeMigration,
+  /revoke all on function public\.create_independent_project_v2[\s\S]*from public, anon, authenticated/i,
+  "RPC independente v2 ainda herda EXECUTE de PUBLIC.");
+requirePattern(legacyProjectRevokeMigration,
+  /revoke all on function public\.create_independent_project\([\s\S]*from public, anon, authenticated/i,
+  "RPC independente v1 ainda herda EXECUTE de PUBLIC.");
 requirePattern(safeProjectMigration, /insert into public\.project_memberships/i,
   "Autor da obra pode continuar sem membership após a criação.");
 requirePattern(safeProjectMigration, /v_creator_role/i,
@@ -159,7 +164,11 @@ for (const href of [
 }
 
 if (failures.length) {
-  console.error(JSON.stringify({ status: "failed", vaccine: ["VACINA-021", "VACINA-028", "VACINA-040", "VACINA-041"], failures }, null, 2));
+  console.error(JSON.stringify({
+    status: "failed",
+    vaccine: ["VACINA-021", "VACINA-028", "VACINA-040", "VACINA-041", "VACINA-042"],
+    failures
+  }, null, 2));
   process.exit(1);
 }
 
@@ -171,6 +180,7 @@ console.log(JSON.stringify({
     safeProjectCreationState: true,
     projectMembershipAfterCreation: true,
     contractRolePreserved: true,
+    legacyProjectPortsRevoked: true,
     fixedAndBudgetProposals: true,
     discountAuthority: true,
     discountDecisionIndexes: true,
