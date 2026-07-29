@@ -20,6 +20,7 @@ function requirePattern(content, pattern, message) {
 const migration = read("supabase/migrations/20260729163500_flexible_projects_proposals_discounts.sql");
 const districtMigration = read("supabase/migrations/20260729170500_project_district_and_flexible_rpc_v2.sql");
 const readinessMigration = read("supabase/migrations/20260729171500_discount_decision_preserves_proposal_readiness.sql");
+const indexMigration = read("supabase/migrations/20260729173500_discount_decision_fk_indexes.sql");
 const actions = read("app/actions/flexible-workflows.ts");
 const proposalForm = read("components/propostas/proposal-form.tsx");
 const projectForm = read("components/obras/project-entry-form.tsx");
@@ -50,6 +51,10 @@ requirePattern(districtMigration, /p_district text/i,
   "RPC v2 não recebe bairro.");
 requirePattern(readinessMigration, /document_sha256 is null or v_version\.frozen_at is null/i,
   "Aprovação de desconto pode aprovar proposta sem documento final.");
+for (const column of ["proposal_id", "requested_by", "decided_by"]) {
+  requirePattern(indexMigration, new RegExp(`proposal_discount_decisions\\(${column}\\)`, "i"),
+    `VACINA-021: FK ${column} das decisões de desconto não possui índice versionado.`);
+}
 
 requirePattern(actions, /create_independent_project_v2/i,
   "Ação de projeto não usa a RPC que persiste bairro.");
@@ -118,7 +123,7 @@ for (const href of [
 }
 
 if (failures.length) {
-  console.error(JSON.stringify({ status: "failed", vaccine: ["VACINA-028", "VACINA-040", "VACINA-041"], failures }, null, 2));
+  console.error(JSON.stringify({ status: "failed", vaccine: ["VACINA-021", "VACINA-028", "VACINA-040", "VACINA-041"], failures }, null, 2));
   process.exit(1);
 }
 
@@ -129,6 +134,7 @@ console.log(JSON.stringify({
     existingProjectsWithCutoff: true,
     fixedAndBudgetProposals: true,
     discountAuthority: true,
+    discountDecisionIndexes: true,
     districtSearch: true,
     embeddedFilters: true,
     fieldContrast: true,
