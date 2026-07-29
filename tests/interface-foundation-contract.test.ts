@@ -42,6 +42,37 @@ describe("S-23 — fundação de interface", () => {
     expect(portfolio).toContain("Abrir cronograma");
   });
 
+  it("não expõe erro técnico nem converte indisponibilidade em vazio ou 404", () => {
+    const collectionPages = [
+      "app/app/obras/page.tsx",
+      "app/app/obras/[id]/tarefas/page.tsx",
+      "app/app/obras/[id]/cronograma/page.tsx",
+      "app/app/obras/[id]/equipes/page.tsx"
+    ];
+
+    for (const relativePath of collectionPages) {
+      const page = read(relativePath);
+      expect(page, relativePath).not.toContain("error.message");
+      expect(page, relativePath).toContain("DATA_LOAD_ERROR_MESSAGE");
+      expect(page, relativePath).toContain("reportDataAccessError");
+    }
+
+    const projects = read(collectionPages[0]);
+    expect(projects).toContain("!projects.length && !loadFailed");
+
+    for (const relativePath of collectionPages.slice(1)) {
+      const page = read(relativePath);
+      expect(page.indexOf("if (projectResult.error)"), relativePath).toBeGreaterThan(-1);
+      expect(page.indexOf("if (!project) notFound()"), relativePath)
+        .toBeGreaterThan(page.indexOf("if (projectResult.error)"));
+    }
+
+    expect(read(collectionPages[1])).toContain("!tasksLoadFailed");
+    expect(read(collectionPages[2])).toContain("!scheduleLoadFailed");
+    expect(read(collectionPages[3])).toContain("!teamsLoadFailed");
+    expect(read(collectionPages[3])).toContain("!resourcesLoadFailed");
+  });
+
   it("mantém o cronograma Gantt calculado com dependências", () => {
     const schedule = read("app/app/obras/[id]/cronograma/page.tsx");
     const gantt = read("components/planejamento/gantt.tsx");
