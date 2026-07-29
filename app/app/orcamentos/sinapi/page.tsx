@@ -1,8 +1,10 @@
-import { addSinapiBudgetItem } from "@/app/actions/sinapi";
+import { addSinapiBudgetItem, updateSinapiAutomatically } from "@/app/actions/sinapi";
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
 
-type SinapiPageProps = {
+export const maxDuration = 300;
+
+ type SinapiPageProps = {
   searchParams: Promise<{
     q?: string;
     kind?: string;
@@ -10,6 +12,7 @@ type SinapiPageProps = {
     relief?: string;
     baseDate?: string;
     error?: string;
+    success?: string;
   }>;
 };
 
@@ -27,19 +30,51 @@ type SinapiReference = {
   component_count: number | string;
 };
 
+type SinapiBatch = {
+  id: string;
+  region: string;
+  base_date: string;
+  tax_relief: boolean;
+  status: "RUNNING" | "COMPLETED" | "FAILED" | "SUPERSEDED";
+  imported_inputs: number | string;
+  imported_compositions: number | string;
+  rejected_records: number | string;
+  source_url: string;
+  error_message: string | null;
+  started_at: string;
+  finished_at: string | null;
+};
+
 const ufs = [
   "AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT",
   "PA", "PB", "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO"
 ];
+const automaticUpdateRoles = new Set(["SUPER_ADMIN", "DIRECAO", "ADMINISTRADOR", "ORCAMENTISTA"]);
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC", month: "2-digit", year: "numeric" })
     .format(new Date(`${value}T12:00:00Z`));
 }
 
+function formatDateTime(value: string | null) {
+  if (!value) return "—";
+  return new Intl.DateTimeFormat("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "America/Sao_Paulo"
+  }).format(new Date(value));
+}
+
+function batchStatus(status: SinapiBatch["status"]) {
+  if (status === "COMPLETED") return "Concluído";
+  if (status === "RUNNING") return "Em processamento";
+  if (status === "FAILED") return "Falhou";
+  return "Substituído";
+}
+
 export default async function SinapiCatalogPage({ searchParams }: SinapiPageProps) {
   const query = await searchParams;
-  const { supabase, organizationId } = await requireOrganizationContext([
+  const { supabase, organizationId, role } = await requireOrganizationContext([
     "SUPER_ADMIN", "DIRECAO", "ADMINISTRADOR", "ORCAMENTISTA", "FINANCEIRO"
   ]);
 
@@ -52,7 +87,7 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
     : "ALL";
   const search = String(query.q ?? "").trim();
 
-  const [{ data: budgets }, { data: batches }] = await Promise.all([
+  const [{ data: budgets }, { data: batchRows }] = await Promise.all([
     supabase
       .from("budgets")
       .select("id, code, title, current_version_id")
@@ -60,12 +95,13 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
       .order("updated_at", { ascending: false }),
     supabase
       .from("sinapi_import_batches")
-      .select("id, region, base_date, tax_relief, status, imported_inputs, imported_compositions, source_url, finished_at")
+      .select("id, region, base_date, tax_relief, status, imported_inputs, imported_compositions, rejected_records, source_url, error_message, started_at, finished_at")
       .eq("organization_id", organizationId)
-      .eq("status", "COMPLETED")
-      .order("base_date", { ascending: false })
+      .order("started_at", { ascending: false })
   ]);
 
+  const batches = (batchRows ?? []) as SinapiBatch[];
+  const completedBatches = batches.filter(batch => batch.status === "COMPLETED");
   const currentVersionIds = (budgets ?? [])
     .map(budget => budget.current_version_id)
     .filter((value): value is string => Boolean(value));
@@ -86,7 +122,7 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
       };
     });
 
-  const availableBatches = (batches ?? []).filter(
+  const availableBatches = completedBatches.filter(
     batch => batch.region === region && Boolean(batch.tax_relief) === taxRelief
   );
   const selectedBaseDate = query.baseDate && /^\d{4}-\d{2}-01$/.test(query.baseDate)
@@ -107,6 +143,8 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
 
   const rows = (references ?? []) as SinapiReference[];
   const currentBatch = availableBatches.find(batch => batch.base_date === selectedBaseDate);
+  const latestAttempt = batches.find(batch => batch.region === region && Boolean(batch.tax_relief) === taxRelief);
+  const canUpdate = automaticUpdateRoles.has(role);
 
   return (
     <main className="content">
@@ -116,8 +154,18 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
           <h1>Catálogo SINAPI</h1>
           <p className="muted">Insumos e composições mensais com UF, data-base e regime de desoneração preservados.</p>
         </div>
+        {canUpdate ? (
+          <form action={updateSinapiAutomatically}>
+            <input type="hidden" name="region" value={region} />
+            <input type="hidden" name="taxRelief" value={String(taxRelief)} />
+            <button className="button button-primary" type="submit">
+              Atualizar SINAPI automaticamente
+            </button>
+          </form>
+        ) : null}
       </div>
 
+      {query.success ? <div className="validation success" role="status">{query.success}</div> : null}
       {query.error ? <div className="validation blocking" role="alert">{query.error}</div> : null}
       {searchError ? <div className="validation blocking" role="alert">{searchError.message}</div> : null}
 
@@ -162,6 +210,26 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
           <button className="button button-primary" type="submit">Consultar SINAPI</button>
         </form>
       </section>
+
+      {latestAttempt ? (
+        <section className="card card-pad" style={{ marginTop: 18 }} aria-label="Última atualização SINAPI">
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
+            <div>
+              <span className="badge">{batchStatus(latestAttempt.status)}</span>
+              <h2 style={{ marginBottom: 4 }}>Última atualização de {region}</h2>
+              <p className="muted" style={{ margin: 0 }}>
+                {formatDate(latestAttempt.base_date)} · {taxRelief ? "com" : "sem"} desoneração · iniciada em {formatDateTime(latestAttempt.started_at)}
+              </p>
+            </div>
+            <div className="mono">
+              {Number(latestAttempt.imported_inputs).toLocaleString("pt-BR")} insumos · {Number(latestAttempt.imported_compositions).toLocaleString("pt-BR")} composições
+            </div>
+          </div>
+          {latestAttempt.error_message ? (
+            <div className="validation blocking" style={{ marginTop: 14 }}>{latestAttempt.error_message}</div>
+          ) : null}
+        </section>
+      ) : null}
 
       {currentBatch ? (
         <section className="grid grid-kpi" aria-label="Estado da base SINAPI" style={{ marginTop: 18 }}>
