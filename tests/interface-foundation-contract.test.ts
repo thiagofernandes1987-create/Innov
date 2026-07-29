@@ -107,6 +107,40 @@ describe("S-23 — fundação de interface", () => {
     expect(page).toContain("O cadastro está bloqueado porque a hierarquia atual não pôde ser carregada");
   });
 
+  it("protege tarefas, diário, equipes e relatórios globais contra zeros e vazios falsos", () => {
+    const tasks = read("app/app/tarefas/page.tsx");
+    const dailyLogs = read("app/app/diario/page.tsx");
+    const teams = read("app/app/equipes/page.tsx");
+    const reports = read("app/app/relatorios/page.tsx");
+
+    for (const [relativePath, page] of [
+      ["tarefas", tasks],
+      ["diario", dailyLogs],
+      ["equipes", teams],
+      ["relatorios", reports]
+    ] as const) {
+      expect(page, relativePath).not.toContain("error.message");
+      expect(page, relativePath).toContain("DATA_LOAD_ERROR_MESSAGE");
+      expect(page, relativePath).toContain("reportDataAccessError");
+    }
+
+    expect(tasks).toContain("!loadFailed ?");
+    expect(tasks.indexOf("!tasks.length")).toBeGreaterThan(tasks.indexOf("!loadFailed ?"));
+    expect(dailyLogs).toContain("!loadFailed ?");
+    expect(dailyLogs.indexOf("!logs.length")).toBeGreaterThan(dailyLogs.indexOf("!loadFailed ?"));
+
+    expect(teams).toContain("teamsLoadFailed");
+    expect(teams).toContain("resourcesLoadFailed");
+    expect(teams).toContain('reportDataAccessError("all-teams.resources"');
+    expect(teams).toContain("Indicadores de recursos indisponíveis");
+
+    expect(reports).not.toContain("throw new Error");
+    expect(reports).toContain('reportDataAccessError("reports.dashboard.all"');
+    expect(reports).toContain('reportDataAccessError("reports.dashboard.project"');
+    expect(reports).toContain("selectedProjectLoadFailed");
+    expect(reports).toContain("Nenhum indicador, total ou estado vazio foi calculado");
+  });
+
   it("mantém o cronograma Gantt calculado com dependências", () => {
     const schedule = read("app/app/obras/[id]/cronograma/page.tsx");
     const gantt = read("components/planejamento/gantt.tsx");
