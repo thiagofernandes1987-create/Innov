@@ -81,36 +81,38 @@ create index if not exists sinapi_import_batches_latest_idx
 create or replace function public.guard_official_cost_reference()
 returns trigger
 language plpgsql
-security definer
 set search_path to 'public', 'auth', 'pg_temp'
 as $function$
 declare
   v_source_key text;
+  v_parent_id uuid;
 begin
   if current_user in ('postgres', 'service_role') then
-    return coalesce(new, old);
+    if tg_op = 'DELETE' then return old; else return new; end if;
   end if;
 
   if tg_table_name = 'cost_catalog_items' then
-    v_source_key := coalesce(new.source_key, old.source_key);
+    v_source_key := case when tg_op = 'DELETE' then old.source_key else new.source_key end;
   elsif tg_table_name = 'cost_compositions' then
-    v_source_key := coalesce(new.source_key, old.source_key);
+    v_source_key := case when tg_op = 'DELETE' then old.source_key else new.source_key end;
   elsif tg_table_name = 'cost_composition_versions' then
+    v_parent_id := case when tg_op = 'DELETE' then old.composition_id else new.composition_id end;
     select source_key into v_source_key
     from public.cost_compositions
-    where id = coalesce(new.composition_id, old.composition_id);
+    where id = v_parent_id;
   elsif tg_table_name = 'cost_composition_items' then
+    v_parent_id := case when tg_op = 'DELETE' then old.composition_version_id else new.composition_version_id end;
     select composition.source_key into v_source_key
     from public.cost_composition_versions version
     join public.cost_compositions composition on composition.id = version.composition_id
-    where version.id = coalesce(new.composition_version_id, old.composition_version_id);
+    where version.id = v_parent_id;
   end if;
 
   if v_source_key = 'SINAPI_CAIXA' then
     raise exception 'Referência oficial SINAPI é imutável fora do importador autorizado.';
   end if;
 
-  return coalesce(new, old);
+  if tg_op = 'DELETE' then return old; else return new; end if;
 end;
 $function$;
 
@@ -156,7 +158,7 @@ declare
   v_id uuid;
   v_region text := upper(trim(p_region));
 begin
-  if current_user not in ('postgres', 'service_role') then
+  if coalesce(auth.role(), current_user) not in ('postgres', 'service_role') then
     raise exception 'Importação SINAPI exige service_role.';
   end if;
   if v_region !~ '^[A-Z]{2}$' then raise exception 'UF SINAPI inválida.'; end if;
@@ -213,7 +215,7 @@ declare
   v_cost numeric;
   v_count integer := 0;
 begin
-  if current_user not in ('postgres', 'service_role') then
+  if coalesce(auth.role(), current_user) not in ('postgres', 'service_role') then
     raise exception 'Importação SINAPI exige service_role.';
   end if;
   if jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows) > 1000 then
@@ -316,7 +318,7 @@ declare
   v_version_number integer;
   v_count integer := 0;
 begin
-  if current_user not in ('postgres', 'service_role') then
+  if coalesce(auth.role(), current_user) not in ('postgres', 'service_role') then
     raise exception 'Importação SINAPI exige service_role.';
   end if;
   if jsonb_typeof(p_rows) <> 'array' or jsonb_array_length(p_rows) > 250 then
@@ -475,7 +477,7 @@ as $function$
 declare
   v_batch public.sinapi_import_batches;
 begin
-  if current_user not in ('postgres', 'service_role') then
+  if coalesce(auth.role(), current_user) not in ('postgres', 'service_role') then
     raise exception 'Importação SINAPI exige service_role.';
   end if;
 
@@ -716,13 +718,17 @@ begin
     ) returning * into v_budget_item;
 
   elsif v_kind = 'COMPOSITION' then
-    select version.*, composition.*
-    into v_composition_version, v_composition
-    from public.cost_composition_versions version
-    join public.cost_compositions composition on composition.id = version.composition_id
-    where version.id = p_reference_id
-      and version.organization_id = v_version.organization_id
-      and composition.source_key = 'SINAPI_CAIXA';
+    select * into v_composition_version
+    from public.cost_composition_versions
+    where id = p_reference_id
+      and organization_id = v_version.organization_id;
+    if not found then raise exception 'Versão de composição SINAPI não encontrada.'; end if;
+
+    select * into v_composition
+    from public.cost_compositions
+    where id = v_composition_version.composition_id
+      and organization_id = v_version.organization_id
+      and source_key = 'SINAPI_CAIXA';
     if not found then raise exception 'Composição SINAPI não encontrada.'; end if;
 
     insert into public.budget_items(
