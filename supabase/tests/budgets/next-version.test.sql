@@ -54,6 +54,9 @@ insert into public.budgets(
   '12000000-0000-0000-0000-000000000001'
 );
 
+-- A fixture nasce editável. Seções e itens são montados primeiro; somente depois
+-- a versão é congelada. Preparar conteúdo após `frozen_at` enfraqueceria o teste,
+-- porque o trigger de imutabilidade deve bloquear exatamente essa mutação.
 insert into public.budget_versions(
   id, organization_id, budget_id, version_number, base_date, status,
   markup_model_id, invested_capital, direct_cost, sale_price,
@@ -65,7 +68,7 @@ insert into public.budget_versions(
   1, current_date, 'APPROVAL_PENDING',
   '43000000-0000-0000-0000-000000000002',
   1000, 1000, 1428.57,
-  now(),
+  null,
   '12000000-0000-0000-0000-000000000001'
 );
 
@@ -94,6 +97,10 @@ insert into public.budget_items(
   10, 100, 'Custo interno', 'SP', current_date, 1,
   '12000000-0000-0000-0000-000000000001'
 );
+
+update public.budget_versions
+set frozen_at = now()
+where id = '42000000-0000-0000-0000-000000000003';
 
 select id as next_version_id
 from public.create_next_budget_version(
