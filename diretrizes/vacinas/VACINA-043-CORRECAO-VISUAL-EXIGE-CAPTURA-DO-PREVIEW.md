@@ -40,8 +40,8 @@ O gate é transversal e se aplica à casca global, CRM, propostas, orçamentos, 
 
 ## Prevenção automática
 
-`docs/QA-VISUAL-POR-CAPTURAS.md` define o protocolo e a matriz obrigatória. `scripts/validate-vaccines.mjs` exige que o protocolo continue versionado e contenha os gates essenciais. Testes estruturais continuam protegendo contratos conhecidos, mas não substituem a captura do preview.
+`docs/QA-VISUAL-POR-CAPTURAS.md` define o protocolo e a matriz obrigatória. `tests/visual-qa-capture-protocol.test.ts` exige que o protocolo continue versionado e contenha os gates essenciais. O catálogo canônico e `validate:vaccines` confirmam que a vacina permanece registrada. Testes estruturais continuam protegendo contratos conhecidos, mas não substituem a captura do preview.
 
 ## Limitações da prevenção
 
-O validador confirma a existência e a estrutura do protocolo; não consegue declarar sozinho que uma captura foi realmente analisada. A evidência visual precisa ser produzida no preview publicado e anexada ao PR ou à issue de QA. Uma captura também não substitui a execução interativa de teclado, foco, upload, submissão e permissões por persona.
+O teste confirma a existência e a estrutura do protocolo; não consegue declarar sozinho que uma captura foi realmente analisada. A evidência visual precisa ser produzida no preview publicado e anexada ao PR ou à issue de QA. Uma captura também não substitui a execução interativa de teclado, foco, upload, submissão e permissões por persona.
