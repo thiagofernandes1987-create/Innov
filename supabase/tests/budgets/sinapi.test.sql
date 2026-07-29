@@ -53,6 +53,13 @@ update public.budgets
 set current_version_id='42000000-0000-0000-0000-000000000001'
 where id='41000000-0000-0000-0000-000000000001';
 
+-- A ingestão oficial é uma rotina administrativa de backend. O teste assume a
+-- mesma identidade JWT usada pelo cliente service-role real; depois troca para
+-- authenticated para comprovar que o usuário comum continua bloqueado.
+select set_config('request.jwt.claim.role','service_role',true);
+select set_config('request.jwt.claims','{"role":"service_role"}',true);
+set local role service_role;
+
 do $$
 declare
   v_batch uuid;
