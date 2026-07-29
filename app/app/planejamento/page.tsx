@@ -24,14 +24,14 @@ function diferencaDias(inicio: string | null, fim: string | null): number | null
 export default async function PlanningPage({
   searchParams
 }: {
-  searchParams: Promise<{ q?: string; status?: string; city?: string; entryMode?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; city?: string; district?: string; entryMode?: string }>;
 }) {
   const query = await searchParams;
   const { supabase, organizationId } = await requireOrganizationContext();
   const [{ data: projects, error }, { data: milestones }] = await Promise.all([
     supabase
       .from("projects")
-      .select("id,code,name,status,entry_mode,city,progress,planned_start,planned_end,clients(legal_name,trade_name,email,phone),project_tasks(id,title,status,planned_start,planned_end,responsible_id)")
+      .select("id,code,name,status,entry_mode,city,district,progress,planned_start,planned_end,clients(legal_name,trade_name,email,phone),project_tasks(id,title,status,planned_start,planned_end,responsible_id)")
       .eq("organization_id", organizationId)
       .is("archived_at", null)
       .order("planned_start"),
@@ -83,6 +83,7 @@ export default async function PlanningPage({
       row.code,
       row.name,
       row.city,
+      row.district,
       row.client?.trade_name,
       row.client?.legal_name,
       row.client?.email,
@@ -94,6 +95,7 @@ export default async function PlanningPage({
     if (query.status && row.status !== query.status) return false;
     if (query.entryMode && row.entry_mode !== query.entryMode) return false;
     if (query.city && !String(row.city ?? "").toLocaleLowerCase("pt-BR").includes(query.city.toLocaleLowerCase("pt-BR"))) return false;
+    if (query.district && !String(row.district ?? "").toLocaleLowerCase("pt-BR").includes(query.district.toLocaleLowerCase("pt-BR"))) return false;
     return true;
   });
 
@@ -107,7 +109,7 @@ export default async function PlanningPage({
       <SmartSearchBar
         initialQuery={query.q}
         initialFilters={query}
-        placeholder="Buscar projeto, obra, cliente, tarefa, responsável, contato ou cidade..."
+        placeholder="Buscar projeto, obra, cliente, tarefa, responsável, contato, cidade ou bairro..."
         filters={[
           {
             name: "status",
@@ -133,14 +135,15 @@ export default async function PlanningPage({
               { value: "IMPORTED", label: "Importado" }
             ]
           },
-          { name: "city", label: "Cidade", placeholder: "Campos do Jordão" }
+          { name: "city", label: "Cidade", placeholder: "Campos do Jordão" },
+          { name: "district", label: "Bairro", placeholder: "Capivari" }
         ]}
       />
       <p className="workspace-intro">Prazo, etapa, responsabilidade, recursos e próxima ação por obra, inclusive projetos sem proposta ou orçamento.</p>
       {error ? <div className="validation blocking">{error.message}</div> : null}
       <section className="card table-wrap" style={{ marginTop: 18 }}>
-        <table><thead><tr><th>Obra</th><th>Origem</th><th>Cliente</th><th>Etapa atual</th><th>Datas da etapa</th><th>Responsável</th><th>Progresso</th><th>Folga</th><th>Situação</th><th>Próxima tarefa</th></tr></thead><tbody>
-          {rows.map((project) => <tr key={project.id}><td><Link href={`/app/obras/${project.id}/cronograma`}><strong>{project.code}</strong><br /><span className="muted">{project.name}</span></Link></td><td><span className="badge">{project.entry_mode}</span><br /><small className="muted">{project.city || "—"}</small></td><td>{project.client?.trade_name || project.client?.legal_name || "Sem cliente"}</td><td><strong>{project.atual?.title ?? "Sem tarefa aberta"}</strong><small>{project.atual?.status ?? project.status}</small></td><td>{project.atual ? `${formatDate(project.atual.planned_start)} → ${formatDate(project.atual.planned_end)}` : "—"}</td><td>{project.responsavel}</td><td style={{ minWidth: 150 }}><div className="progress-row"><div><span>{formatPercent(project.progress)}</span></div><div className="progress-track"><div className="progress-fill" style={{ width: formatPercent(project.progress) }} /></div></div></td><td>{project.folga === null ? "—" : project.folga >= 0 ? `${project.folga} d` : <span className="badge badge-danger">{project.folga} d</span>}</td><td>{prazoDaObra(project.planned_end, project.overdue)}{project.blocked ? <small>{project.blocked} bloqueada(s)</small> : null}</td><td>{project.proxima?.title ?? "—"}</td></tr>)}
+        <table><thead><tr><th>Obra</th><th>Origem/local</th><th>Cliente</th><th>Etapa atual</th><th>Datas da etapa</th><th>Responsável</th><th>Progresso</th><th>Folga</th><th>Situação</th><th>Próxima tarefa</th></tr></thead><tbody>
+          {rows.map((project) => <tr key={project.id}><td><Link href={`/app/obras/${project.id}/cronograma`}><strong>{project.code}</strong><br /><span className="muted">{project.name}</span></Link></td><td><span className="badge">{project.entry_mode}</span><br /><small className="muted">{[project.district, project.city].filter(Boolean).join(" · ") || "—"}</small></td><td>{project.client?.trade_name || project.client?.legal_name || "Sem cliente"}</td><td><strong>{project.atual?.title ?? "Sem tarefa aberta"}</strong><small>{project.atual?.status ?? project.status}</small></td><td>{project.atual ? `${formatDate(project.atual.planned_start)} → ${formatDate(project.atual.planned_end)}` : "—"}</td><td>{project.responsavel}</td><td style={{ minWidth: 150 }}><div className="progress-row"><div><span>{formatPercent(project.progress)}</span></div><div className="progress-track"><div className="progress-fill" style={{ width: formatPercent(project.progress) }} /></div></div></td><td>{project.folga === null ? "—" : project.folga >= 0 ? `${project.folga} d` : <span className="badge badge-danger">{project.folga} d</span>}</td><td>{prazoDaObra(project.planned_end, project.overdue)}{project.blocked ? <small>{project.blocked} bloqueada(s)</small> : null}</td><td>{project.proxima?.title ?? "—"}</td></tr>)}
           {!rows.length ? <tr><td colSpan={10}>Nenhuma obra encontrada com os filtros informados.</td></tr> : null}
         </tbody></table>
       </section>
