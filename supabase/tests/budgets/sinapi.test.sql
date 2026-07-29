@@ -65,6 +65,20 @@ declare
   v_manual_edit_blocked boolean:=false;
   v_frozen_blocked boolean:=false;
 begin
+  if exists(
+    select 1
+    from pg_proc procedure
+    join pg_namespace namespace on namespace.oid=procedure.pronamespace
+    where namespace.nspname='public'
+      and procedure.proname in(
+        'search_sinapi_references',
+        'add_sinapi_reference_to_budget'
+      )
+      and procedure.prosecdef
+  ) then
+    raise exception 'RPC autenticada SINAPI voltou a executar como SECURITY DEFINER';
+  end if;
+
   begin
     perform public.start_sinapi_import(
       '21000000-0000-0000-0000-000000000001',
