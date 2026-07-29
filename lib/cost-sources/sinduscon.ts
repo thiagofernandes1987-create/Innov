@@ -77,7 +77,11 @@ function parseBrazilianNumber(value: string) {
 
 function parsePercent(value: string | undefined) {
   if (!value) return null;
-  return parseBrazilianNumber(value) / 100;
+  const percent = parseBrazilianNumber(value);
+  // O valor oficial vem em percentual e o domínio armazena taxa decimal.
+  // A normalização textual evita resíduos de divisão binária como
+  // 2,24 / 100 = 0,022400000000000003, que alterariam JSON, hash e igualdade.
+  return Number((percent / 100).toFixed(8));
 }
 
 function isoDate(year: number, month: number, day = 1) {
