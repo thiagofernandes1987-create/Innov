@@ -3,7 +3,7 @@ import { runPostgresFiles } from "./lib/postgres-test-container.mjs";
 
 // VACINA-014: descobre migrations do domínio e da Rodada 02 sem lista fixa.
 const migrations = fs.readdirSync("supabase/migrations")
-  .filter(file => /_(stage9_|budget_readiness_and_cost_sources|seed_sinduscon_sp_cub|budget_item_categories).*\.sql$/.test(file))
+  .filter(file => /_(stage9_|budget_readiness_and_cost_sources|seed_sinduscon_sp_cub|budget_item_categories|budget_next_version).*\.sql$/.test(file))
   .sort()
   .map(file => `supabase/migrations/${file}`);
 
@@ -13,8 +13,9 @@ runPostgresFiles({
   files: [
     "supabase/tests/replay/bootstrap.sql",
     ...migrations,
-    "supabase/tests/budgets/readiness.test.sql"
+    "supabase/tests/budgets/readiness.test.sql",
+    "supabase/tests/budgets/next-version.test.sql"
   ],
-  expectedApprovals: 4,
-  successMessage: "Testes de composição, fontes, margem e aprovação de orçamento aprovados."
+  expectedApprovals: 5,
+  successMessage: "Testes de composição, fontes, margem, aprovação e versões de orçamento aprovados."
 });
