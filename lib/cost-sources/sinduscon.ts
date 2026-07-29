@@ -183,15 +183,15 @@ export function parseSindusconCubPublication(
 
   const common = {
     sourceKey: SINDUSCON_CUB_SOURCE_KEY,
-    sourceName: "SindusCon-SP" as const,
-    region: "SP" as const,
-    referenceCode: "R8-N" as const,
+    sourceName: "SindusCon-SP",
+    region: "SP",
+    referenceCode: "R8-N",
     baseDate,
     publicationDate,
-    unit: "m²" as const,
+    unit: "m²",
     equipmentCost: null,
     sourceUrl
-  };
+  } as const;
 
   const normalPayload = {
     ...common,
@@ -203,7 +203,7 @@ export function parseSindusconCubPublication(
     monthlyChangeRate: parsePercent(normalRates?.[1]),
     yearChangeRate: parsePercent(normalRates?.[2]),
     twelveMonthChangeRate: parsePercent(normalRates?.[3])
-  };
+  } as const;
   const relievedPayload = {
     ...common,
     taxRelief: true,
@@ -214,7 +214,7 @@ export function parseSindusconCubPublication(
     monthlyChangeRate: parsePercent(relievedRates?.[1]),
     yearChangeRate: parsePercent(relievedRates?.[2]),
     twelveMonthChangeRate: parsePercent(relievedRates?.[3])
-  };
+  } as const;
 
   const normal: SindusconCubRecord = {
     ...normalPayload,
