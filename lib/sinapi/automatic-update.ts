@@ -424,10 +424,14 @@ export async function runSinapiAutomaticUpdate(input: {
     };
   } catch (error) {
     if (batchId) {
-      await supabase.rpc("finish_sinapi_import", {
-        p_batch_id: batchId,
-        p_error_message: error instanceof Error ? error.message : "Falha desconhecida na atualização automática."
-      }).catch(() => undefined);
+      try {
+        await supabase.rpc("finish_sinapi_import", {
+          p_batch_id: batchId,
+          p_error_message: error instanceof Error ? error.message : "Falha desconhecida na atualização automática."
+        });
+      } catch {
+        // O erro original permanece a evidência principal da execução.
+      }
     }
     throw error;
   }
