@@ -104,13 +104,15 @@ describe("criação segura de projetos", () => {
 
   it("protege acesso e coerência também no banco", () => {
     const migration = read("supabase/migrations/20260729211500_safe_project_creation_workflows.sql");
+    const legacyRevoke = read("supabase/migrations/20260729214500_revoke_legacy_project_creation_rpcs.sql");
 
     expect(migration).toContain("create_independent_project_v3");
     expect(migration).toContain("create_project_from_contract_v2");
-    expect(migration).toMatch(/revoke execute on function public\.create_independent_project_v2/i);
     expect(migration).toContain("project_memberships");
     expect(migration).toContain("v_creator_role");
     expect(migration).toContain("Contrato já possui obra vinculada");
     expect(migration).toContain("Data de corte não pode estar no futuro");
+    expect(legacyRevoke).toMatch(/revoke all on function public\.create_independent_project_v2[\s\S]*from public, anon, authenticated/i);
+    expect(legacyRevoke).toMatch(/revoke all on function public\.create_independent_project\([\s\S]*from public, anon, authenticated/i);
   });
 });
