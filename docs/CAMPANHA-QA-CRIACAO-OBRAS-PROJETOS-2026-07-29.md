@@ -3,6 +3,7 @@
 **Data:** 29/07/2026  
 **Sprint:** S-23 — Fundação de interface  
 **PR:** #30 — `fix: protege criação de obras e projetos`  
+**Merge:** `438607170c0e988ea051c40f2a3c59db601f2cf7`  
 **Escopo:** `/app/obras/novo`, ações de criação, RPCs, autorização e continuidade operacional
 
 ## 1. Estado do recorte
@@ -16,8 +17,10 @@
 | Membership do autor e responsável | PASS | cenário PostgreSQL com `ROLLBACK` |
 | Papel `ENGENHEIRO` preservado | PASS | associação temporária, duas portas e `ROLLBACK` |
 | Revogação das RPCs antigas | PASS após correção | privilégios de `PUBLIC`, `anon` e `authenticated` verificados como `false` |
-| CI completo do primeiro passe | PASS | replay, banco, lint, tipos, testes Python/TypeScript e build |
-| Preview/navegação visual final | BLOCKED_EXTERNAL | Vercel `build-rate-limit` |
+| CI final do PR | PASS | replay, banco, lint, tipos, testes Python/TypeScript e build |
+| Deployment da `main` | PASS | Vercel production `dpl_GmhbL52Wm2asBvG9ZVJ2NQ6zNWzx` em `READY` |
+| Erros de runtime no novo deployment | PASS | nenhum log `error` ou `fatal` no período pós-publicação |
+| Revisão visual autenticada | NOT_ASSESSED | não houve sessão de navegador autenticado nesta rodada |
 | Dados fictícios persistidos | NÃO | todos os ensaios operacionais usaram `ROLLBACK` |
 
 ## 2. Problemas reproduzidos
@@ -32,7 +35,7 @@
 8. datas, avanço histórico e origem importada não estavam protegidos em todas as camadas;
 9. o primeiro `REVOKE` das RPCs antigas retirava acesso de `authenticated`, mas o papel continuava herdando `EXECUTE` de `PUBLIC`.
 
-## 3. Correções implantadas no branch
+## 3. Correções implantadas
 
 ### 3.1 Interface e actions
 
@@ -157,13 +160,34 @@ As duas RPCs atuais continuam aparecendo no advisor como funções `SECURITY DEF
 
 O advisor global ainda contém avisos históricos de outros módulos e não foi declarado limpo.
 
-## 7. Limitações honestas
+## 7. Pós-merge e produção
 
-- a Vercel bloqueou os novos builds por limite de taxa;
-- portanto, o comportamento visual final em navegador autenticado não foi aprovado nesta rodada;
-- foco, autofill, contraste nativo, responsividade e restauração visual dos controles continuam dependentes de preview navegável;
-- outras server actions que ainda redirecionam mensagens cruas permanecem fora deste recorte e devem ser tratadas nos próximos microblocos.
+O PR #30 foi mesclado por squash no commit:
 
-## 8. Critério de fechamento
+```text
+438607170c0e988ea051c40f2a3c59db601f2cf7
+```
 
-Este recorte pode ser mesclado quando o passe final do CI, incluindo este relatório e a migration complementar, permanecer verde. A publicação em produção continua separada e só pode ser classificada como concluída após a Vercel aceitar um deployment da `main`.
+A Vercel publicou esse mesmo commit como `production`:
+
+```text
+Deployment: dpl_GmhbL52Wm2asBvG9ZVJ2NQ6zNWzx
+Estado: READY
+Aliases:
+- innov-one.vercel.app
+- innov-apex-method.vercel.app
+- innov-git-main-apex-method.vercel.app
+```
+
+A consulta pós-deploy não encontrou logs de nível `error` ou `fatal` no novo deployment.
+
+## 8. Limitações honestas
+
+- deployment e runtime foram confirmados, mas não houve navegação autenticada pela tela;
+- foco, autofill, contraste nativo, responsividade e restauração visual dos controles permanecem `NOT_ASSESSED` em navegador real;
+- outras server actions que ainda redirecionam mensagens cruas permanecem fora deste recorte e devem ser tratadas nos próximos microblocos;
+- os avisos históricos dos advisors continuam abertos.
+
+## 9. Critério de fechamento
+
+O recorte de criação de obras e projetos está fechado para código, domínio, CI, migrations e deployment. A revisão visual autenticada permanece uma evidência separada e não foi transformada em aprovação implícita.
