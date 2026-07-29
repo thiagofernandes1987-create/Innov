@@ -29,6 +29,19 @@ describe("S-23 — fundação de interface", () => {
     expect(pipeline).toContain("BarraDeTrabalho");
   });
 
+  it("oferece lista, cartões e calendário funcionais no mesmo portfólio", () => {
+    const planningPage = read("app/app/planejamento/page.tsx");
+    const portfolio = read("components/planejamento/portfolio-view.tsx");
+
+    expect(planningPage).toContain("PlanningPortfolioView");
+    expect(planningPage).not.toMatch(/\{\s*error\.message\s*\}/);
+    for (const view of ["list", "cards", "calendar"]) {
+      expect(portfolio).toContain(`id: "${view}"`);
+    }
+    expect(portfolio).toContain("planning-portfolio-view");
+    expect(portfolio).toContain("Abrir cronograma");
+  });
+
   it("mantém o cronograma Gantt calculado com dependências", () => {
     const schedule = read("app/app/obras/[id]/cronograma/page.tsx");
     const gantt = read("components/planejamento/gantt.tsx");
