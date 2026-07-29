@@ -1,12 +1,54 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { runSinapiAutomaticUpdate } from "@/lib/sinapi/automatic-update";
 
 const allowedRoles = ["SUPER_ADMIN", "DIRECAO", "ADMINISTRADOR", "ORCAMENTISTA", "FINANCEIRO"] as const;
+const updateRoles = ["SUPER_ADMIN", "DIRECAO", "ADMINISTRADOR", "ORCAMENTISTA"] as const;
 
 function catalogError(message: string): never {
   redirect(`/app/orcamentos/sinapi?error=${encodeURIComponent(message)}`);
+}
+
+function automaticRedirect(region: string, taxRelief: boolean, key: "error" | "success", message: string): never {
+  const params = new URLSearchParams({
+    region,
+    relief: String(taxRelief),
+    [key]: message
+  });
+  redirect(`/app/orcamentos/sinapi?${params.toString()}`);
+}
+
+export async function updateSinapiAutomatically(formData: FormData) {
+  const region = String(formData.get("region") ?? "").trim().toUpperCase();
+  const taxRelief = String(formData.get("taxRelief") ?? "false") === "true";
+  if (!/^[A-Z]{2}$/.test(region)) automaticRedirect("SP", taxRelief, "error", "UF inválida para atualização SINAPI.");
+
+  const { organizationId } = await requireOrganizationContext(updateRoles);
+  let result;
+  try {
+    result = await runSinapiAutomaticUpdate({ organizationId, region, taxRelief });
+  } catch (error) {
+    automaticRedirect(
+      region,
+      taxRelief,
+      "error",
+      error instanceof Error ? error.message : "Falha desconhecida na atualização automática do SINAPI."
+    );
+  }
+
+  revalidatePath("/app/orcamentos/sinapi");
+  const regime = taxRelief ? "com desoneração" : "sem desoneração";
+  const month = new Intl.DateTimeFormat("pt-BR", { month: "2-digit", year: "numeric", timeZone: "UTC" })
+    .format(new Date(`${result.baseDate}T12:00:00Z`));
+  const message = result.status === "updated"
+    ? `SINAPI ${region} ${regime} atualizado para ${month}: ${result.inputs.toLocaleString("pt-BR")} insumos e ${result.compositions.toLocaleString("pt-BR")} composições.`
+    : result.status === "already_current"
+      ? `A base SINAPI ${region} ${regime} de ${month} já estava atualizada.`
+      : `A base local SINAPI ${region} ${regime} (${month}) é mais nova que o pacote encontrado na CAIXA; nenhum dado foi substituído.`;
+  automaticRedirect(region, taxRelief, "success", message);
 }
 
 export async function addSinapiBudgetItem(formData: FormData) {
