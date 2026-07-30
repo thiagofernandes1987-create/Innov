@@ -1,6 +1,6 @@
 .planner {
   --left-pane: 660px;
-  --row-height: 42px;
+  --row-height: 44px;
   --header-height: 62px;
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -734,4 +734,111 @@
   .formGrid,
   .formGrid.three,
   .relationColumns { grid-template-columns: 1fr; }
+}
+
+
+/* QA_PLANNING_ITER2_RESPONSIVE */
+/* O editor mantém dimensões operacionais; no tablet/mobile as colunas auxiliares
+   ficam disponíveis no modal e o Gantt preserva uma faixa útil com rolagem interna. */
+.toolButton,
+.zoomButton,
+.primaryButton,
+.iconButton,
+.tab,
+.secondaryButton,
+.dangerButton {
+  min-height: 44px;
+}
+
+.iconButton,
+.zoomButton {
+  width: 44px;
+  min-width: 44px;
+}
+
+.collapseButton {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+}
+
+.field input,
+.field select,
+.field textarea,
+.fullField input,
+.fullField select,
+.fullField textarea {
+  min-height: 44px;
+}
+
+.relationRow {
+  min-height: 44px;
+}
+
+.viewport {
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.legend {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 860px) {
+  .planner {
+    --left-pane: clamp(220px, 44vw, 340px);
+  }
+
+  .viewport {
+    grid-template-columns: var(--left-pane) minmax(520px, 1fr);
+  }
+
+  .leftHeader,
+  .leftRow {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .leftHeader > :nth-child(n + 3),
+  .leftRow > :nth-child(n + 3) {
+    display: none;
+  }
+
+  .toolbar {
+    flex-wrap: wrap;
+  }
+
+  .toolbarGroup,
+  .toolbarActions {
+    width: 100%;
+  }
+
+  .toolbarActions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .planner {
+    --left-pane: 220px;
+  }
+
+  .toolbarGroup,
+  .toolbarActions {
+    gap: 6px;
+  }
+
+  .toolbarTitle {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .toolButton,
+  .primaryButton {
+    padding-inline: 10px;
+  }
+
+  .legend {
+    gap: 8px 12px;
+    font-size: 0.68rem;
+  }
 }

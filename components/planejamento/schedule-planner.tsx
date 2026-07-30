@@ -38,7 +38,7 @@ import { feriadosNaFaixa, regimePorChave } from "@/lib/planejamento/calendario";
 import styles from "./schedule-planner.module.css";
 
 const DAY = 86_400_000;
-const ROW_HEIGHT = 42;
+const ROW_HEIGHT = 44;
 
 export type PlannerWbs = {
   id: string;
