@@ -36,11 +36,11 @@ describe("upload de PDF da proposta", () => {
     expect(actionSource).not.toContain('fail("/app/propostas/nova", error?.message');
   });
 
-  it("oferece versões calculadas em revisão além das aprovadas", () => {
-    expect(pageSource).toContain('"TECHNICAL_REVIEW"');
-    expect(pageSource).toContain('"FINANCIAL_REVIEW"');
+  it("oferece somente versões aptas à preparação comercial", () => {
     expect(pageSource).toContain('"APPROVAL_PENDING"');
     expect(pageSource).toContain('"APPROVED"');
+    expect(pageSource).not.toContain('"TECHNICAL_REVIEW"');
+    expect(pageSource).not.toContain('"FINANCIAL_REVIEW"');
     expect(pageSource).not.toContain('.not("frozen_at", "is", null)');
   });
 });
