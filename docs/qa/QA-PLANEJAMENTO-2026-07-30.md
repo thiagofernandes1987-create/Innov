@@ -9,10 +9,11 @@
 
 | Superfície | Estado | Motivo |
 |---|---|---|
-| Integridade das actions | `PASS` | CI completo verde, validação negativa e mensagens seguras |
-| Fixture visual do editor | `PARTIAL` | rodada imutável validou a responsividade; correção final dos dois botões de remoção aguarda nova captura do head |
-| Persona gestor de obras | `NOT_ASSESSED` | fluxo autenticado ainda não foi executado com credencial real |
-| Integração Obras ↔ Planejamento ↔ Tarefas ↔ Diário | `PARTIAL` | contratos e testes de banco passaram; falhas de comunicação e jornada autenticada ainda pendentes |
+| Integridade das actions | `PASS` | CI completo verde, validações negativas e mensagens públicas seguras |
+| Fixture visual — iteração 2 | `PASS` | seis cenários, modal Geral e dependências, zero alvo abaixo de 44px, console e servidor limpos |
+| Fixture visual — iteração 3 | `PARTIAL` | contraste escuro e alinhamento dos nomes corrigidos; nova captura do deployment ainda pendente |
+| Persona gestor de obras | `BLOCKED_EXTERNAL` | credencial específica ausente em `QA_PERSONAS_JSON` |
+| Integração Obras ↔ Planejamento ↔ Tarefas ↔ Diário | `PARTIAL` | contratos e testes de banco passaram; jornadas de falha e leitura intermodular ainda pendentes |
 | Concorrência da rede lógica | `PARTIAL` | proteção na aplicação existe; RPC transacional no PostgreSQL ainda pendente |
 
 O módulo permanece **não aprovado** e o PR continua em rascunho.
@@ -26,7 +27,7 @@ O módulo permanece **não aprovado** e o PR continua em rascunho.
 | mensagem técnica do banco podia chegar à URL e à interface | `app/actions/schedule.ts` | crítica | o usuário recebe SQL, constraint ou detalhe sem ação operacional clara |
 | dependência confirmava apenas que predecessora e sucessora eram diferentes | criação de relação | crítica | ciclo indireto ou relação cruzada podia corromper a rede lógica |
 | atividade superior não era validada contra descendentes | edição da atividade | crítica | a árvore podia se tornar circular |
-| duração e defasagem aceitavam meio dia, mas o motor arredondava | formulários e calendário | alta | a data exibida não correspondia ao valor que o usuário acreditava ter informado |
+| duração e defasagem aceitavam meio dia, mas o motor arredondava | formulários e calendário | alta | a data exibida não correspondia ao valor informado |
 | alteração e exclusão não confirmavam linha afetada | actions | alta | operação podia parecer concluída sobre registro inexistente ou fora do escopo |
 | teste de contrato ainda exigia o componente antigo `Gantt` | CI | alta | evolução real do editor era reprovada por contrato obsoleto |
 
@@ -58,7 +59,7 @@ Run `30554458398`:
 
 ### Primeira captura válida
 
-A primeira matriz autenticada pelo link compartilhável do deployment confirmou que a aplicação, o Gantt e as duas abas do modal eram renderizados, mas encontrou:
+A primeira matriz do editor confirmou a renderização da EAP, Gantt e das duas abas do modal, mas encontrou:
 
 - controles principais com 34px;
 - botões de expandir/recolher com 22–32px;
@@ -78,13 +79,14 @@ A primeira matriz autenticada pelo link compartilhável do deployment confirmou 
 - botões de remoção receberam largura mínima de 44px;
 - “Cadeia crítica” foi renomeada para “Cadeia determinante”.
 
-### Rodada em deployment imutável
+### Matriz final da iteração 2
 
-Deployment: `innov-8xrktbeum-apex-method.vercel.app`  
-Workflow: `QA Fixture do Planejamento`, run `30554159477`  
-Artefato: `8764138717`
+Deployment: `innov-g79hg3qg6-apex-method.vercel.app`  
+Workflow: `QA Fixture do Planejamento`, run `30555440684`  
+Artefato: `8764606299`  
+Conclusão: `success`
 
-Resultados comuns aos seis cenários:
+Resultados nos seis cenários, 375px, 768px e 1280px, claro e escuro:
 
 - 375px: 89px úteis de Gantt;
 - 768px: 344px úteis de Gantt;
@@ -93,23 +95,51 @@ Resultados comuns aos seis cenários:
 - sem console error/warning;
 - sem page error;
 - sem resposta 5xx;
+- zero alvo abaixo de 44px na área principal;
+- zero alvo abaixo de 44px no modal Geral;
+- zero alvo abaixo de 44px no modal de dependências;
 - modal Geral abriu;
-- aba Predecessoras e sucessoras abriu;
-- área principal e aba Geral sem alvo inferior a 44px.
+- aba Predecessoras e sucessoras abriu.
 
-O único achado dessa rodada foram os dois botões `×` com 34px de largura na aba de dependências. A correção está no head atual, mas ainda precisa de nova captura em deployment imutável.
+## Iteração 3 — autocrítica manual
+
+O sucesso automático não encerrou a análise. A inspeção das imagens encontrou:
+
+| Problema | Localização | Severidade | Impacto na persona |
+|---|---|---:|---|
+| cabeçalho da página no tema escuro sobre gradiente claro | superfície externa do editor | alta | título e descrição perdem contraste e parecem desabilitados |
+| nomes centralizados e cortados em telas estreitas | coluna Etapa / atividade | média | o gestor perde o início do nome, geralmente a parte mais útil para identificar a tarefa |
+
+### Correções
+
+- o fundo global deixou de usar cores claras fixas e passou a derivar de tokens de tema;
+- nomes das atividades passaram a alinhar à esquerda;
+- `title` exibe código e nome completos;
+- `aria-label` descreve a ação e a atividade sem depender do texto cortado.
+
+A nova captura de preview dessa iteração ainda é obrigatória.
+
+## Persona real
+
+Workflow: `QA Planejamento por Persona`, run `30555693107`  
+Artefato: `8764708777`  
+Resultado: `BLOCKED_EXTERNAL`
+
+O runner carregou o contrato P8 — gerente de obras/projetos — e recusou substituir a persona por administrador. O relatório registrou:
+
+> Credencial específica da persona `gestor_de_obras` não está disponível em `QA_PERSONAS_JSON`.
+
+Nenhuma captura autenticada foi produzida e nenhuma aprovação foi inferida.
 
 ## Autocrítica
 
-A matriz automática não substitui a avaliação da persona. Ela confirma geometria, erros técnicos e fluxos básicos, mas não prova:
+A fixture confirma geometria, temas, erros técnicos e abertura dos fluxos básicos, mas não prova:
 
 - que um gestor de obras entende como criar a primeira EAP;
 - que datas derivadas e persistidas são interpretadas corretamente entre módulos;
-- que a navegação horizontal é suficientemente evidente no celular;
 - que alteração de dependência produz o resultado esperado no banco real;
-- que Obras, Tarefas e Diário recebem a mesma versão do fato.
-
-Por isso a fixture permanece `PARTIAL`, mesmo com CI verde.
+- que Obras, Tarefas e Diário recebem a mesma versão do fato;
+- que duas gravações concorrentes não fecham ciclo.
 
 ## Vacinas
 
@@ -121,16 +151,15 @@ Aplicadas nesta rodada:
 - `VACINA-025` — warning de lint não foi aceito;
 - `VACINA-027` — captura comparada à referência visual;
 - `VACINA-031` — temas e primeiro plano mantidos por tokens;
-- `VACINA-043` — reservada no PR #34; a campanha segue o gate de captura do preview;
+- `VACINA-043` — captura do preview como gate obrigatório;
 - `VACINA-044` — nova, estado `parcial`, para integridade da rede lógica.
 
 ## Próximos portões
 
-1. obter deployment imutável do head final;
-2. repetir os seis cenários e confirmar zero alvo abaixo de 44px;
-3. revisar manualmente as novas imagens;
-4. revisar runtime logs do deployment;
-5. executar o fluxo autenticado como gestor de obras;
-6. testar dois cenários pessimistas de falha entre Planejamento e módulos adjacentes;
-7. projetar RPC transacional para a rede lógica, sem promover a vacina antes do teste concorrente;
-8. somente depois avaliar aprovação e merge.
+1. publicar a iteração 3 em deployment imutável;
+2. repetir os seis cenários e revisar manualmente as imagens;
+3. revisar runtime logs do deployment;
+4. executar o fluxo autenticado quando a credencial específica da persona existir;
+5. testar dois cenários pessimistas de falha entre Planejamento e módulos adjacentes;
+6. projetar RPC transacional para a rede lógica e teste concorrente;
+7. somente depois avaliar aprovação e merge.
