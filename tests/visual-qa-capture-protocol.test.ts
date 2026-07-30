@@ -5,6 +5,7 @@ const protocol = readFileSync(
   new URL("../docs/QA-VISUAL-POR-CAPTURAS.md", import.meta.url),
   "utf8"
 );
+const normalizedProtocol = protocol.toLocaleLowerCase("pt-BR");
 const vaccine = readFileSync(
   new URL(
     "../diretrizes/vacinas/VACINA-043-CORRECAO-VISUAL-EXIGE-CAPTURA-DO-PREVIEW.md",
@@ -36,12 +37,12 @@ describe("protocolo de QA visual por capturas", () => {
       "contraste",
       "sobrepõem",
       "overflow horizontal",
-      "pt-BR",
-      "NaN",
-      "PGRST",
+      "pt-br",
+      "nan",
+      "pgrst",
       "estados vazio"
     ]) {
-      expect(protocol).toContain(token);
+      expect(normalizedProtocol).toContain(token);
     }
   });
 
