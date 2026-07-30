@@ -537,7 +537,13 @@ export function SchedulePlanner({
                   <div className={styles.cell}>
                     <span className={styles.treeIndent} style={{ "--depth": row.depth } as CSSProperties} />
                     <span className={styles.taskDot} />
-                    <button className={styles.nameButton} type="button" onClick={() => openTaskEditor(row.task.id)} title="Abrir informações da atividade">
+                    <button
+                      className={styles.nameButton}
+                      type="button"
+                      onClick={() => openTaskEditor(row.task.id)}
+                      title={`${row.task.code} · ${row.task.title}`}
+                      aria-label={`Abrir atividade ${row.task.code} · ${row.task.title}`}
+                    >
                       {row.task.title}
                     </button>
                   </div>

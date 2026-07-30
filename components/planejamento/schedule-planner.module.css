@@ -916,3 +916,10 @@
   justify-content: center;
   z-index: 2;
 }
+
+
+/* QA_PLANNING_ITER3_TEXT_ALIGNMENT */
+.nameButton {
+  justify-content: flex-start;
+  text-align: left;
+}
