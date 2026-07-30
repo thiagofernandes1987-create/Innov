@@ -277,10 +277,6 @@ export function SchedulePlanner({
   const selectedTask = editorTaskId ? taskById.get(editorTaskId) ?? null : null;
 
   useEffect(() => {
-    setEditorTab("general");
-  }, [editorTaskId]);
-
-  useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setCreationModal(null);
@@ -413,6 +409,11 @@ export function SchedulePlanner({
     });
   }
 
+  function openTaskEditor(taskId: string): void {
+    setEditorTab("general");
+    setEditorTaskId(taskId);
+  }
+
   function predecessorLabel(taskId: string): string {
     return (incomingByTask.get(taskId) ?? [])
       .map(dependency => {
@@ -452,9 +453,9 @@ export function SchedulePlanner({
             type="button"
             onClick={() => setCriticalVisible(value => !value)}
             aria-pressed={criticalVisible}
-            title="Destacar a cadeia que determina a entrega"
+            title="Destacar a cadeia determinante da entrega"
           >
-            <LinkSimple size={16} /> Cadeia crítica
+            <LinkSimple size={16} /> Cadeia determinante
           </button>
           <button className={styles.toolButton} type="button" onClick={scrollToToday}>
             <Crosshair size={16} /> Hoje
@@ -536,7 +537,7 @@ export function SchedulePlanner({
                   <div className={styles.cell}>
                     <span className={styles.treeIndent} style={{ "--depth": row.depth } as CSSProperties} />
                     <span className={styles.taskDot} />
-                    <button className={styles.nameButton} type="button" onClick={() => setEditorTaskId(row.task.id)} title="Abrir informações da atividade">
+                    <button className={styles.nameButton} type="button" onClick={() => openTaskEditor(row.task.id)} title="Abrir informações da atividade">
                       {row.task.title}
                     </button>
                   </div>
@@ -624,7 +625,7 @@ export function SchedulePlanner({
                           ].filter(Boolean).join(" ")}
                           type="button"
                           style={{ left: (start - range.start) * dayWidth, width: (end - start + 1) * dayWidth }}
-                          onClick={() => setEditorTaskId(row.task.id)}
+                          onClick={() => openTaskEditor(row.task.id)}
                           title={`${row.task.code} · ${row.task.title}: ${formatShortDate(bar.inicio)} a ${formatShortDate(bar.termino)}`}
                         >
                           <span className={styles.progressFill} style={{ width: `${Math.round(row.task.progress * 100)}%` }} />
@@ -708,7 +709,7 @@ export function SchedulePlanner({
               <label className={styles.field}>Etapa da EAP<select name="wbsId" defaultValue=""><option value="">Sem etapa</option>{wbsItems.map(item => <option key={item.id} value={item.id}>{item.code} · {item.title}</option>)}</select></label>
               <label className={styles.fullField}>Nome da atividade<input name="title" required /></label>
               <label className={styles.fullField}>Descrição<textarea name="description" /></label>
-              <label className={styles.field}>Duração (dias úteis)<input type="number" min="0" step="0.5" name="durationDays" defaultValue="1" required /></label>
+              <label className={styles.field}>Duração (dias úteis)<input type="number" min="1" step="1" name="durationDays" defaultValue="1" required /></label>
               <label className={styles.field}>Atividade superior<select name="parentTaskId" defaultValue=""><option value="">Nenhuma</option>{tasks.map(task => <option key={task.id} value={task.id}>{task.code} · {task.title}</option>)}</select></label>
               <label className={styles.field}>Início planejado<input type="date" name="plannedStart" defaultValue={projectStart ?? today} /></label>
               <label className={styles.field}>Término planejado<input type="date" name="plannedEnd" /></label>
@@ -743,7 +744,7 @@ export function SchedulePlanner({
                 <label className={styles.field}>Ordem<input type="number" name="sequence" defaultValue={selectedTask.sequence} /></label>
                 <label className={styles.fullField}>Nome da atividade<input name="title" defaultValue={selectedTask.title} required /></label>
                 <label className={styles.fullField}>Descrição<textarea name="description" defaultValue={selectedTask.description ?? ""} /></label>
-                <label className={styles.field}>Duração (dias úteis)<input type="number" min="0" step="0.5" name="durationDays" defaultValue={selectedTask.durationDays} required /></label>
+                <label className={styles.field}>Duração (dias úteis)<input type="number" min="1" step="1" name="durationDays" defaultValue={selectedTask.durationDays} required /></label>
                 <label className={styles.field}>Início planejado<input type="date" name="plannedStart" defaultValue={selectedTask.plannedStart ?? ""} /></label>
                 <label className={styles.field}>Término planejado<input type="date" name="plannedEnd" defaultValue={selectedTask.plannedEnd ?? ""} /></label>
                 <label className={styles.field}>Avanço (%)<input type="number" min="0" max="100" step="1" name="progressPercent" defaultValue={Math.round(selectedTask.progress * 100)} /></label>
@@ -809,7 +810,7 @@ export function SchedulePlanner({
                   <div className={`${styles.formGrid} ${styles.three}`}>
                     <label className={styles.field}>Adicionar predecessora<select name="predecessorTaskId" defaultValue="" required><option value="">Selecione</option>{tasks.filter(task => task.id !== selectedTask.id).map(task => <option key={task.id} value={task.id}>{task.code} · {task.title}</option>)}</select></label>
                     <label className={styles.field}>Relação<select name="dependencyType" defaultValue="FS"><option value="FS">Término → Início</option><option value="SS">Início → Início</option><option value="FF">Término → Término</option><option value="SF">Início → Término</option></select></label>
-                    <label className={styles.field}>Defasagem (dias)<input type="number" step="0.5" name="lagDays" defaultValue="0" /></label>
+                    <label className={styles.field}>Defasagem (dias)<input type="number" step="1" name="lagDays" defaultValue="0" /></label>
                   </div>
                   <div className={styles.modalFooter}><button className={styles.primaryButton} type="submit">Vincular predecessora</button></div>
                 </form>
@@ -822,7 +823,7 @@ export function SchedulePlanner({
                   <div className={`${styles.formGrid} ${styles.three}`}>
                     <label className={styles.field}>Adicionar sucessora<select name="successorTaskId" defaultValue="" required><option value="">Selecione</option>{tasks.filter(task => task.id !== selectedTask.id).map(task => <option key={task.id} value={task.id}>{task.code} · {task.title}</option>)}</select></label>
                     <label className={styles.field}>Relação<select name="dependencyType" defaultValue="FS"><option value="FS">Término → Início</option><option value="SS">Início → Início</option><option value="FF">Término → Término</option><option value="SF">Início → Término</option></select></label>
-                    <label className={styles.field}>Defasagem (dias)<input type="number" step="0.5" name="lagDays" defaultValue="0" /></label>
+                    <label className={styles.field}>Defasagem (dias)<input type="number" step="1" name="lagDays" defaultValue="0" /></label>
                   </div>
                   <div className={styles.modalFooter}><button className={styles.primaryButton} type="submit">Vincular sucessora</button></div>
                 </form>
