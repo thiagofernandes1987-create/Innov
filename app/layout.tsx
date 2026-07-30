@@ -15,6 +15,7 @@ import "./stage20.css";
 import "./modern-workflows.css";
 import "./project-creation.css";
 import "./module-validation.css";
+import "./module-validation-a11y.css";
 
 export const metadata: Metadata = {
   title: {
