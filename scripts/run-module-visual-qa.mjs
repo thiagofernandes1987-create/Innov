@@ -13,7 +13,17 @@ const moduleRoute = process.env.MODULE_ROUTE.startsWith("/")
   ? process.env.MODULE_ROUTE
   : `/${process.env.MODULE_ROUTE}`;
 const persona = process.env.QA_PERSONA;
+const expectedHeading = process.env.QA_EXPECTED_HEADING
+  ? new RegExp(process.env.QA_EXPECTED_HEADING, "i")
+  : null;
 const outputRoot = process.env.QA_OUTPUT_DIR ?? path.join("artifacts", "module-visual-qa", moduleKey);
+const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET ?? "";
+const extraHTTPHeaders = bypassSecret
+  ? {
+      "x-vercel-protection-bypass": bypassSecret,
+      "x-vercel-set-bypass-cookie": "samesitenone"
+    }
+  : {};
 
 function credentialsForPersona() {
   if (process.env.QA_PERSONAS_JSON) {
@@ -44,9 +54,9 @@ function credentialsForPersona() {
 
 const credentials = credentialsForPersona();
 const viewports = [
-  { name: "1920x1080", width: 1920, height: 1080 },
-  { name: "1366x768", width: 1366, height: 768 },
-  { name: "390x844", width: 390, height: 844 }
+  { name: "375px", width: 375, height: 812 },
+  { name: "768px", width: 768, height: 1024 },
+  { name: "1280px", width: 1280, height: 800 }
 ];
 const themes = ["claro", "escuro"];
 const technicalPatterns = [
@@ -85,6 +95,46 @@ async function login(page) {
       ]);
     }
   }
+
+  if (page.url().includes("/login")) {
+    throw new Error(`Login não concluiu para a persona ${persona}.`);
+  }
+}
+
+async function inspectTouchTargets(page) {
+  return page.evaluate(() => {
+    const selector = [
+      "button",
+      "[role='button']",
+      "a.button",
+      ".barra-superior a",
+      ".barra-superior button",
+      ".launcher-faixa a",
+      ".launcher-faixa button",
+      ".barra-de-trabalho a",
+      ".barra-de-trabalho button"
+    ].join(",");
+
+    return [...document.querySelectorAll(selector)]
+      .filter((element) => {
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+      })
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          label:
+            element.getAttribute("aria-label") ||
+            element.getAttribute("title") ||
+            element.textContent?.trim().replace(/\s+/g, " ").slice(0, 80) ||
+            "sem rótulo",
+          width: Math.round(rect.width),
+          height: Math.round(rect.height)
+        };
+      })
+      .filter((item) => item.width < 44 || item.height < 44);
+  });
 }
 
 await fs.mkdir(outputRoot, { recursive: true });
@@ -93,6 +143,7 @@ const report = {
   module: moduleKey,
   route: moduleRoute,
   persona,
+  authenticatedAs: credentials.email,
   previewUrl,
   generatedAt: new Date().toISOString(),
   scenarios: []
@@ -103,13 +154,15 @@ try {
     for (const theme of themes) {
       const findings = [];
       const consoleErrors = [];
+      const consoleWarnings = [];
       const pageErrors = [];
       const failedResponses = [];
       const context = await browser.newContext({
         viewport: { width: viewport.width, height: viewport.height },
         colorScheme: theme === "escuro" ? "dark" : "light",
         locale: "pt-BR",
-        timezoneId: "America/Sao_Paulo"
+        timezoneId: "America/Sao_Paulo",
+        extraHTTPHeaders
       });
 
       await context.addCookies([
@@ -123,6 +176,7 @@ try {
       const page = await context.newPage();
       page.on("console", (message) => {
         if (message.type() === "error") consoleErrors.push(message.text());
+        if (message.type() === "warning") consoleWarnings.push(message.text());
       });
       page.on("pageerror", (error) => pageErrors.push(error.message));
       page.on("response", (response) => {
@@ -138,7 +192,14 @@ try {
         const bodyText = await page.locator("body").innerText().catch(() => "");
         for (const pattern of technicalPatterns) {
           const match = bodyText.match(pattern);
-          if (match) findings.push(`[Mensagem técnica visível] ${match[0]} — severidade: bloqueante`);
+          if (match) findings.push(`[Mensagem técnica visível] | ${moduleRoute} | bloqueante | A persona recebe detalhe interno: ${match[0]}`);
+        }
+
+        if (expectedHeading) {
+          const headings = await page.getByRole("heading").allTextContents();
+          if (!headings.some((heading) => expectedHeading.test(heading))) {
+            findings.push(`[Título esperado ausente] | ${moduleRoute} | alta | A persona não confirma em qual módulo está`);
+          }
         }
 
         const geometry = await page.evaluate(() => {
@@ -156,11 +217,18 @@ try {
         });
 
         if (geometry.documentWidth > geometry.viewportWidth + 2) {
-          findings.push(`[Overflow horizontal global] ${geometry.documentWidth}px > ${geometry.viewportWidth}px — severidade: alta`);
+          findings.push(`[Overflow horizontal global] | ${moduleRoute} | alta | A persona precisa rolar lateralmente: ${geometry.documentWidth}px > ${geometry.viewportWidth}px`);
         }
-        if (consoleErrors.length) findings.push(`[Console] ${consoleErrors.length} erro(s) — severidade: alta`);
-        if (pageErrors.length) findings.push(`[Page error] ${pageErrors.length} erro(s) — severidade: bloqueante`);
-        if (failedResponses.length) findings.push(`[Servidor] ${failedResponses.length} resposta(s) 5xx — severidade: bloqueante`);
+
+        const undersizedTargets = await inspectTouchTargets(page);
+        for (const target of undersizedTargets) {
+          findings.push(`[Alvo abaixo de 44px] | ${target.label} | alta | Toque impreciso para a persona: ${target.width}x${target.height}px`);
+        }
+
+        if (consoleErrors.length) findings.push(`[Console] | ${moduleRoute} | alta | ${consoleErrors.length} erro(s) durante o fluxo`);
+        if (consoleWarnings.length) findings.push(`[Warning] | ${moduleRoute} | alta | ${consoleWarnings.length} warning(s) inesperado(s)`);
+        if (pageErrors.length) findings.push(`[Page error] | ${moduleRoute} | bloqueante | ${pageErrors.length} erro(s) de página`);
+        if (failedResponses.length) findings.push(`[Servidor] | ${moduleRoute} | bloqueante | ${failedResponses.length} resposta(s) 5xx`);
 
         const screenshotName = `${moduleKey}-${viewport.name}-${theme}.png`;
         const screenshotPath = path.join(outputRoot, screenshotName);
@@ -172,7 +240,9 @@ try {
           finalUrl: page.url(),
           screenshot: screenshotPath,
           geometry,
+          undersizedTargets,
           consoleErrors,
+          consoleWarnings,
           pageErrors,
           failedResponses,
           findings,
@@ -181,13 +251,14 @@ try {
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        findings.push(`[Falha de execução] ${message} — severidade: bloqueante`);
+        findings.push(`[Falha de execução] | ${page.url()} | bloqueante | ${message}`);
         report.scenarios.push({
           viewport: viewport.name,
           theme,
           finalUrl: page.url(),
           screenshot: null,
           consoleErrors,
+          consoleWarnings,
           pageErrors,
           failedResponses,
           findings,
