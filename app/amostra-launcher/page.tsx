@@ -3,6 +3,7 @@ import { COOKIE_TEMA, temaValido } from "@/lib/tema";
 import { BarraSuperior } from "@/components/casca/barra-superior";
 import { ProvedorDeBusca } from "@/components/casca/busca-da-barra";
 import { Launcher, type AplicativoAutorizado } from "@/components/casca/launcher";
+import type { LauncherSummaryMap } from "@/lib/casca/launcher-domain";
 
 const TODOS: AplicativoAutorizado[] = [
   { chave: "crm", nome: "CRM e Vendas", descricao: "Leads, oportunidades e pipeline.", categoria: "Comercial", href: "#", nivel: "READ_WRITE" },
@@ -33,6 +34,10 @@ const PERFIS: Record<string, string[]> = {
   financeiro: ["financeiro", "orcamentos", "clientes", "tarefas", "contratos", "compras", "relatorios"],
   admin: TODOS.map(a => a.chave)
 };
+
+// A amostra existe para validar composição e responsividade. Sem dados
+// confirmados, o Launcher apresenta o estado indisponível do contrato.
+const RESUMOS: LauncherSummaryMap = {};
 
 export default async function Amostra({ searchParams }: { searchParams: Promise<{ perfil?: string; cenario?: string }> }) {
   const { perfil = "admin", cenario = "normal" } = await searchParams;
@@ -76,30 +81,30 @@ export default async function Amostra({ searchParams }: { searchParams: Promise<
 
   return (
     <ProvedorDeBusca>
-    <div className="casca">
-      {/* O estado normal permanece sem contadores inventados. `cenario=problema`
-          é uma fixture visual explícita para verificar o estado pessimista. */}
-      <BarraSuperior
-        aplicativos={[]}
-        email={email}
-        papel={papel}
-        tema={tema}
-        avisos={{
-          mensagens: [],
-          atividades: [],
-          operacionais,
-          naoLidas: 0,
-          pendentes: operacionais.length
-        }}
-        podeAdministrar={perfil === "admin"}
-        persistirAvisos={false}
-      />
-      <div className="casca-conteudo">
-        <main className="content pagina-launcher">
-          <Launcher aplicativos={aplicativos} demonstracao />
-        </main>
+      <div className="casca">
+        {/* O estado normal permanece sem contadores inventados. `cenario=problema`
+            é uma fixture visual explícita para verificar o estado pessimista. */}
+        <BarraSuperior
+          aplicativos={[]}
+          email={email}
+          papel={papel}
+          tema={tema}
+          avisos={{
+            mensagens: [],
+            atividades: [],
+            operacionais,
+            naoLidas: 0,
+            pendentes: operacionais.length
+          }}
+          podeAdministrar={perfil === "admin"}
+          persistirAvisos={false}
+        />
+        <div className="casca-conteudo">
+          <main className="content pagina-launcher">
+            <Launcher aplicativos={aplicativos} resumos={RESUMOS} />
+          </main>
+        </div>
       </div>
-    </div>
     </ProvedorDeBusca>
   );
 }
