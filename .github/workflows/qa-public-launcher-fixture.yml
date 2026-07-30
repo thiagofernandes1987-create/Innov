@@ -20,7 +20,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.55.0-noble
     env:
-      PREVIEW_URL: https://innov-git-fix-module-validation-loop-20260730-apex-method.vercel.app/amostra-launcher?_vercel_share=yTE1P8scAVaWnvBnYZOffBrFCIyka7j6
+      PREVIEW_URL: https://innov-olkol5nx4-apex-method.vercel.app/amostra-launcher?_vercel_share=zyGwqEnlcBDIH9q1DI84Yzh8FJLlNyW9
       QA_OUTPUT_DIR: artifacts/public-launcher-fixture
     steps:
       - name: Checkout
