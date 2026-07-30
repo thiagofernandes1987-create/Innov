@@ -1,0 +1,35 @@
+name: Aplicar integração Planejamento Tarefas iter4
+
+on:
+  push:
+    branches:
+      - qa/planejamento-iter1
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: qa/planejamento-iter1
+          fetch-depth: 0
+
+      - name: Apply exact patch
+        run: node scripts/patch-planning-task-integration-iter4.mjs
+
+      - name: Commit integration correction
+        run: |
+          if git diff --quiet -- app/app/obras/[id]/tarefas/page.tsx app/actions/projects.ts lib/planejamento/cronograma.ts; then
+            echo "Nenhuma alteração pendente."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/app/obras/[id]/tarefas/page.tsx app/actions/projects.ts lib/planejamento/cronograma.ts
+          git commit -m "fix(schedule): converge datas e validações com Tarefas"
+          git push origin HEAD:qa/planejamento-iter1
