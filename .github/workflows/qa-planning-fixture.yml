@@ -20,7 +20,7 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.55.0-noble
     env:
-      PREVIEW_URL: https://innov-8xrktbeum-apex-method.vercel.app/amostra-planejamento?_vercel_share=azf4LkR509pSNii5nElxQGWmgJJo0yMX
+      PREVIEW_URL: https://innov-g79hg3qg6-apex-method.vercel.app/amostra-planejamento?_vercel_share=QFl6Z8HvmCQ31L91p6VyroAJlmxGW2oS
       QA_OUTPUT_DIR: artifacts/planning-fixture
     steps:
       - name: Checkout
