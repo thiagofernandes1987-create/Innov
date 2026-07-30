@@ -18,43 +18,74 @@ on:
       persona:
         description: Persona configurada em QA_PERSONAS_JSON
         required: true
-        default: super_admin
+        default: administrador
         type: string
       ref:
         description: Branch, tag ou commit correspondente ao preview
         required: true
         default: fix/module-validation-loop-20260730
         type: string
+  pull_request:
+    paths:
+      - "diretrizes/qa/ALVO-CAPTURA-ATUAL.json"
+      - "scripts/run-module-visual-qa.mjs"
+      - ".github/workflows/module-visual-qa.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: module-visual-qa-${{ inputs.module_key }}-${{ inputs.ref }}
-  cancel-in-progress: false
+  group: module-visual-qa-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     container:
       image: mcr.microsoft.com/playwright:v1.55.0-noble
     env:
-      PREVIEW_URL: ${{ inputs.preview_url }}
-      MODULE_KEY: ${{ inputs.module_key }}
-      MODULE_ROUTE: ${{ inputs.module_route }}
-      QA_PERSONA: ${{ inputs.persona }}
       QA_PERSONAS_JSON: ${{ secrets.QA_PERSONAS_JSON }}
       DEMO_ADMIN_EMAIL: ${{ secrets.DEMO_ADMIN_EMAIL }}
       DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
       DEMO_CLIENT_EMAIL: ${{ secrets.DEMO_CLIENT_EMAIL }}
       DEMO_CLIENT_PASSWORD: ${{ secrets.DEMO_CLIENT_PASSWORD }}
-      QA_OUTPUT_DIR: artifacts/module-visual-qa/${{ inputs.module_key }}
+      INPUT_PREVIEW_URL: ${{ inputs.preview_url }}
+      INPUT_MODULE_KEY: ${{ inputs.module_key }}
+      INPUT_MODULE_ROUTE: ${{ inputs.module_route }}
+      INPUT_PERSONA: ${{ inputs.persona }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.ref }}
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || github.head_ref }}
+
+      - name: Resolve capture target
+        run: |
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const dispatch = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch';
+          const target = dispatch
+            ? {
+                enabled: true,
+                previewUrl: process.env.INPUT_PREVIEW_URL,
+                moduleKey: process.env.INPUT_MODULE_KEY,
+                moduleRoute: process.env.INPUT_MODULE_ROUTE,
+                persona: process.env.INPUT_PERSONA
+              }
+            : JSON.parse(fs.readFileSync('diretrizes/qa/ALVO-CAPTURA-ATUAL.json', 'utf8'));
+          if (!target.enabled) throw new Error('Alvo de captura está desabilitado.');
+          for (const key of ['previewUrl', 'moduleKey', 'moduleRoute', 'persona']) {
+            if (!target[key]) throw new Error(`Alvo de captura sem ${key}.`);
+          }
+          const output = process.env.GITHUB_ENV;
+          fs.appendFileSync(output, `PREVIEW_URL=${target.previewUrl}\n`);
+          fs.appendFileSync(output, `MODULE_KEY=${target.moduleKey}\n`);
+          fs.appendFileSync(output, `MODULE_ROUTE=${target.moduleRoute}\n`);
+          fs.appendFileSync(output, `QA_PERSONA=${target.persona}\n`);
+          fs.appendFileSync(output, `QA_OUTPUT_DIR=artifacts/module-visual-qa/${target.moduleKey}\n`);
+          console.log(JSON.stringify(target, null, 2));
+          NODE
 
       - name: Validate requested module
         run: |
@@ -80,7 +111,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: module-visual-qa-${{ inputs.module_key }}-${{ github.run_id }}
-          path: artifacts/module-visual-qa/${{ inputs.module_key }}/
+          name: module-visual-qa-${{ env.MODULE_KEY }}-${{ github.run_id }}
+          path: artifacts/module-visual-qa/${{ env.MODULE_KEY }}/
           if-no-files-found: warn
           retention-days: 30
