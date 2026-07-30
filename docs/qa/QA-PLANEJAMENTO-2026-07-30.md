@@ -11,9 +11,9 @@
 |---|---|---|
 | Integridade das actions | `PASS` | validações negativas, escopo e mensagens públicas seguras |
 | Fixture visual — iteração 2 | `PASS` | seis cenários, modal Geral e dependências, zero alvo abaixo de 44px, console e servidor limpos |
-| Fixture visual — iteração 3 | `BLOCKED_EXTERNAL` | correções prontas; Vercel recusou o novo build por `build-rate-limit` |
+| Fixture visual — iteração 3 | `PASS` | deployment imutável, matriz automática e revisão manual confirmaram contraste e leitura |
 | Persona gestor de obras | `BLOCKED_EXTERNAL` | credencial específica ausente em `QA_PERSONAS_JSON` |
-| Planejamento ↔ Tarefas | `PASS_CODE` | mesmo motor de datas, duração inteira e portas equivalentes protegidas; CI final em validação |
+| Planejamento ↔ Tarefas | `PASS_CODE` | mesmo motor de datas, duração inteira e portas equivalentes protegidas; CI consolidado verde |
 | Obras ↔ Planejamento ↔ Diário | `PARTIAL` | revalidações e contratos existem; jornada autenticada e falhas de comunicação ainda pendentes |
 | Concorrência da rede lógica | `PARTIAL` | proteção na aplicação existe; RPC transacional no PostgreSQL ainda pendente |
 
@@ -43,18 +43,6 @@ O módulo permanece **não aprovado** e o PR continua em rascunho.
 - atualização e exclusão confirmam o registro afetado;
 - testes negativos em `tests/schedule-validation.test.ts`;
 - contrato de interface atualizado para `SchedulePlanner`.
-
-### Evidência de CI da fundação
-
-Run `30554458398`:
-
-- preflight: `success`;
-- validações de banco: `success`;
-- lint: `success`;
-- typecheck: `success`;
-- testes TypeScript: `success`;
-- testes Python: `success`;
-- build: `success`.
 
 ## Iteração 2 — responsividade e áreas de interação
 
@@ -102,9 +90,9 @@ Resultados nos seis cenários, 375px, 768px e 1280px, claro e escuro:
 - modal Geral abriu;
 - aba Predecessoras e sucessoras abriu.
 
-## Iteração 3 — autocrítica manual
+## Iteração 3 — autocrítica manual e nova captura
 
-O sucesso automático não encerrou a análise. A inspeção das imagens encontrou:
+O sucesso automático da iteração 2 não encerrou a análise. A inspeção das imagens encontrou:
 
 | Problema | Localização | Severidade | Impacto na persona |
 |---|---|---:|---|
@@ -118,9 +106,29 @@ O sucesso automático não encerrou a análise. A inspeção das imagens encontr
 - `title` exibe código e nome completos;
 - `aria-label` descreve a ação e a atividade sem depender do texto cortado.
 
-### Bloqueio de publicação
+### Evidência final
 
-A Vercel recusou os commits posteriores com status `failure` apontando para `upgradeToPro=build-rate-limit`. Logo, a iteração 3 não possui deployment imutável nem captura válida e permanece `BLOCKED_EXTERNAL`.
+Deployment imutável: `innov-pk16rmqx8-apex-method.vercel.app`  
+Workflow: `QA Planejamento iter3 imutável`, run `30558579631`  
+Artefato: `8765881259`  
+Conclusão: `success`
+
+A matriz repetiu 375px, 768px e 1280px nos temas claro e escuro e confirmou:
+
+- as mesmas faixas úteis de Gantt: 89px, 344px e 519px;
+- zero alvo abaixo de 44px;
+- ausência de overflow global, console error/warning, page error e 5xx;
+- abertura do modal Geral e da aba de dependências.
+
+A revisão manual confirmou:
+
+- contraste consistente no tema escuro;
+- início dos nomes preservado em telas estreitas;
+- texto completo disponível em `title` e `aria-label`;
+- modal rolável no mobile;
+- relações, remoção e formulários continuam legíveis.
+
+Textos longos continuam truncados intencionalmente na coluna estreita, sem ocultar o início e sem remover a alternativa acessível.
 
 ## Iteração 4 — convergência com Tarefas
 
@@ -141,7 +149,7 @@ O Kanban de Tarefas usava apenas `planned_start` e `planned_end` persistidos, en
 
 ## Iteração 5 — portas equivalentes e cenários pessimistas
 
-### Cenário A — ação antiga contorna a proteção nova
+### Cenário A — action antiga contorna a proteção nova
 
 A action histórica `createDependency` ainda gravava diretamente em `task_dependencies`. Ela passou a delegar para `createScheduleDependency`, preservando validação de escopo, duplicidade e ciclo.
 
@@ -167,6 +175,19 @@ Sem correspondência, a operação termina com `A tarefa não pertence a esta ob
 
 Os workflows visuais e de persona deixaram de disparar em todo commit. Agora são manuais e exigem uma URL imutável compartilhável. Alias de branch é rejeitado para impedir capturas stale e consumo inútil de builds.
 
+## CI consolidado
+
+Run `30558166350`:
+
+- preflight: `success`;
+- documentação, personas e vacinas: `success`;
+- testes de banco do cronograma e demais domínios: `success`;
+- lint: `success`;
+- typecheck: `success`;
+- testes TypeScript: `success`;
+- testes Python: `success`;
+- build: `success`.
+
 ## Persona real
 
 Workflow: `QA Planejamento por Persona`, run `30555693107`  
@@ -181,7 +202,7 @@ Nenhuma captura autenticada foi produzida e nenhuma aprovação foi inferida.
 
 ## Logs
 
-No deployment imutável validado, as requisições de `/amostra-planejamento` retornaram `200`; a consulta de runtime não encontrou erro ou resposta 5xx. Isso cobre a fixture da iteração 2, não os commits bloqueados pelo limite de builds.
+Nos deployments imutáveis validados, as requisições de `/amostra-planejamento` retornaram `200`; as matrizes não registraram console error/warning, page error ou resposta 5xx.
 
 ## Autocrítica
 
@@ -190,8 +211,7 @@ A fixture confirma geometria, temas, erros técnicos e abertura dos fluxos bási
 - que um gestor de obras entende como criar a primeira EAP;
 - que uma alteração real de dependência persiste e recalcula corretamente no banco;
 - que Obras e Diário exibem todas as consequências operacionais do mesmo fato;
-- que duas gravações concorrentes não fecham ciclo;
-- que a correção visual da iteração 3 está correta no preview publicado.
+- que duas gravações concorrentes não fecham ciclo.
 
 ## Vacinas
 
@@ -208,11 +228,8 @@ Aplicadas nesta rodada:
 
 ## Próximos portões
 
-1. CI completo do head final;
-2. liberação do limite de build da Vercel;
-3. deployment imutável da iteração 3 e integrações;
-4. repetição manual dos seis cenários e revisão das imagens;
-5. execução autenticada quando a credencial específica da persona existir;
-6. teste real de persistência e falhas de comunicação entre Planejamento, Tarefas, Obras e Diário;
-7. RPC transacional e teste concorrente da rede lógica;
-8. somente depois avaliar aprovação e merge.
+1. executar o fluxo autenticado quando a credencial específica da persona existir;
+2. testar persistência real de EAP, atividade e dependência na obra de QA;
+3. validar as consequências em Obras e Diário com a mesma persona;
+4. implementar RPC transacional e teste concorrente da rede lógica;
+5. somente depois avaliar aprovação e merge.
