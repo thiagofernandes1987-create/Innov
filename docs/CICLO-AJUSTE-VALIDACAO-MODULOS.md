@@ -1,7 +1,7 @@
 # Ciclo de ajuste e validação de módulos
 
 **Documento operacional:** obrigatório  
-**Branch da campanha:** `fix/qa-personas-visual-runtime-loop`  
+**Branch da campanha:** `fix/module-validation-loop-20260730`  
 **Rastreamento:** issue #32
 
 ## Objetivo
@@ -29,25 +29,29 @@ Repita até o status do módulo ser `aprovado`:
 2. **TESTAR LOCALMENTE** — executar testes unitários, contratos, validações, lint, typecheck, build e o fluxo funcional mínimo.
 3. **PUBLICAR PREVIEW** — obter URL imutável do deployment e aguardar `READY`.
 4. **SIMULAR PERSONA REAL** — autenticar com o papel definido, navegar pelo caminho real e executar a tarefa, não apenas abrir a rota.
-5. **CAPTURAR** — registrar a tela completa e estados intermediários necessários nos viewports e temas definidos.
+5. **CAPTURAR** — registrar a página completa e os estados intermediários necessários em 375px, 768px e 1280px de largura, nos temas definidos.
 6. **ANALISAR COMO USUÁRIO** — comparar com a referência e registrar cada achado no formato:
 
 ```text
-[Problema] — [Localização] — [Severidade: baixa | média | alta | bloqueante]
+[Problema] | [Localização] | [Severidade: baixa | média | alta | bloqueante] | [Impacto na persona]
 ```
 
-7. **DECIDIR** — sem problemas abertos e com todos os critérios verdadeiros, avançar; caso contrário, priorizar bloqueantes/altos e voltar ao passo 1.
-8. **REVISAR LOGS** — verificar console do navegador, rede, funções da Vercel, logs do servidor e erros do provedor. Erro inesperado reabre o ciclo.
-9. **REGISTRAR VACINA** — documentar causa, solução, prevenção, teste negativo, módulos equivalentes e limitações.
-10. **ATUALIZAR INVENTÁRIO** — atualizar `diretrizes/qa/VALIDACAO-MODULOS.json` com iterações, problemas, capturas, logs, vacina e decisão.
+7. **AUTOCRÍTICA** — remover preferências estéticas sem impacto, procurar estados vazios, erro, carregamento, transições e possíveis falsos negativos.
+8. **DECIDIR** — sem problemas abertos e com todos os critérios verdadeiros, avançar; caso contrário, priorizar bloqueantes/altos e voltar ao passo 1.
+9. **REVISAR LOGS** — verificar console do navegador, rede, funções da Vercel, logs do servidor e erros do provedor. Erro inesperado reabre o ciclo.
+10. **REGISTRAR VACINA** — documentar causa, solução, prevenção, teste negativo, módulos equivalentes e limitações.
+11. **TESTAR INTEGRAÇÃO PESSIMISTA** — executar dois cenários de falha de comunicação com módulos adjacentes e verificar consistência visual e terminológica.
+12. **ATUALIZAR INVENTÁRIO** — atualizar `diretrizes/qa/VALIDACAO-MODULOS.json` com iterações, problemas, capturas, logs, vacina, riscos de integração e decisão.
 
 ## Matriz visual mínima
 
-| Viewport | Tema claro | Tema escuro |
+As capturas são **full-page**; portanto, a dimensão obrigatória é a largura. A altura é apenas a janela inicial do navegador e não limita a fotografia final.
+
+| Largura | Tema claro | Tema escuro |
 |---|---:|---:|
-| 1920×1080 | obrigatório | obrigatório |
-| 1366×768 | obrigatório | obrigatório |
-| 390×844 | obrigatório | obrigatório |
+| 375px | obrigatório | obrigatório |
+| 768px | obrigatório | obrigatório |
+| 1280px | obrigatório | obrigatório |
 
 Kanban, Gantt, tabelas, painéis laterais, formulários extensos e documentos podem exigir capturas adicionais.
 
@@ -55,18 +59,19 @@ Kanban, Gantt, tabelas, painéis laterais, formulários extensos e documentos po
 
 - layout coerente com as referências aprovadas;
 - contraste legível para texto, placeholder, ícone, borda e estado;
-- controles clicáveis/tocáveis com feedback de foco, hover, seleção e carregamento;
+- controles clicáveis/tocáveis com feedback de foco, hover, seleção e carregamento e área de toque mínima de 44px;
 - menu, busca, header, modal, drawer e conteúdo sem sobreposição;
 - textos, cards, campos e tabelas sem corte ou transbordamento;
 - ausência de overflow horizontal acidental na página;
 - valores, moeda, percentuais, datas e horas formatados e plausíveis;
 - nenhum `NaN`, `Infinity`, UUID bruto, SQL, PGRST, constraint ou stack trace na interface;
 - estados vazio, erro, carregando, sucesso, bloqueado e somente leitura distinguíveis;
-- zero erro inesperado no console durante o fluxo principal;
+- zero erro ou warning inesperado no console durante o fluxo principal;
 - zero erro inesperado nos logs do servidor para as rotas exercitadas;
 - dados efetivamente salvos, enviados, alterados ou consultados conforme a tarefa;
 - persona conclui o fluxo sem depender de documento predecessor artificial;
-- permissões negativas também testadas.
+- permissões negativas também testadas;
+- dois cenários pessimistas de integração exercitados após a aprovação funcional do módulo.
 
 ## Saída obrigatória
 
@@ -77,18 +82,19 @@ Cada módulo mantém um registro equivalente a:
   "modulo": "crm",
   "status": "aprovado",
   "iteracoes": 3,
-  "problemas_resolvidos": [
+  "problemasResolvidos": [
     {
-      "descricao": "Menu sobrepunha a busca em notebook",
+      "problema": "Menu sobrepunha a busca em notebook",
       "localizacao": "header do CRM",
       "severidade": "alta",
+      "impactoPersona": "o vendedor não conseguia localizar a busca sem fechar o menu",
       "solucao": "separação de faixas e menu controlado por clique",
-      "vacina_registrada": "VACINA-043"
+      "vacina": "VACINA-043"
     }
   ],
-  "capturas_aprovadas": [
+  "capturasAprovadas": [
     {
-      "viewport": "1366x768",
+      "viewport": "768px",
       "tema": "escuro",
       "url": "https://..."
     }
@@ -106,12 +112,14 @@ Cada módulo mantém um registro equivalente a:
 Um módulo não pode ser marcado como `aprovado` quando qualquer condição abaixo ocorrer:
 
 - `iteracoes` menor que 1;
-- captura ausente em um viewport ou tema obrigatório;
+- captura ausente em uma largura ou tema obrigatório;
 - problema aberto;
 - critério de aceitação falso;
 - logs não revisados ou diferentes de `limpo`;
 - persona ou fluxo principal não registrados;
+- autenticação executada com papel diferente da persona sem justificativa e teste negativo equivalente;
 - vacina ausente para causa recorrente;
+- cenários pessimistas de integração ausentes;
 - preview sem URL e commit imutáveis.
 
 ## Economia de retrabalho
