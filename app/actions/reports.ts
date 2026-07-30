@@ -46,9 +46,10 @@ function classifyReportProviderError(error: { code?: string | null }, fallback: 
 }
 
 export async function saveReportView(
-  _previous: ReportActionState = INITIAL_REPORT_ACTION_STATE,
+  previous: ReportActionState = INITIAL_REPORT_ACTION_STATE,
   data: FormData
 ): Promise<ReportActionState> {
+  void previous;
   const submitted = values(data);
   const projectId = optional(data, "projectId");
   const context = await requireCapability("relatorios", "create", projectId);
@@ -113,9 +114,10 @@ export async function archiveReportView(data: FormData) {
 }
 
 export async function saveReportTarget(
-  _previous: ReportActionState = INITIAL_REPORT_ACTION_STATE,
+  previous: ReportActionState = INITIAL_REPORT_ACTION_STATE,
   data: FormData
 ): Promise<ReportActionState> {
+  void previous;
   const submitted = values(data);
   const projectId = optional(data, "projectId");
   const context = await requireCapability("relatorios", "manage", projectId);
@@ -172,9 +174,10 @@ export async function saveReportTarget(
 }
 
 export async function generateReportSnapshot(
-  _previous: ReportActionState = INITIAL_REPORT_ACTION_STATE,
+  previous: ReportActionState = INITIAL_REPORT_ACTION_STATE,
   data: FormData
 ): Promise<ReportActionState> {
+  void previous;
   const submitted = values(data);
   const projectId = optional(data, "projectId");
   const context = await requireCapability("relatorios", "update", projectId);
