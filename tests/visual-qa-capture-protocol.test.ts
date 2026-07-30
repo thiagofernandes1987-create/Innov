@@ -25,8 +25,8 @@ describe("protocolo de QA visual por capturas", () => {
     }
   });
 
-  it("mantém a matriz mínima de viewports e temas", () => {
-    for (const token of ["1920x1080", "1366x768", "390x844", "Tema claro", "Tema escuro"]) {
+  it("mantém a matriz mínima de larguras e temas", () => {
+    for (const token of ["375px", "768px", "1280px", "Tema claro", "Tema escuro"]) {
       expect(protocol).toContain(token);
     }
   });
@@ -39,7 +39,8 @@ describe("protocolo de QA visual por capturas", () => {
       "pt-BR",
       "NaN",
       "PGRST",
-      "estados vazio"
+      "estados vazio",
+      "44px"
     ]) {
       expect(protocol).toContain(token);
     }
