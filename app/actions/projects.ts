@@ -4,6 +4,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { publicScheduleDatabaseMessage } from "@/lib/planejamento/schedule-validation";
 
 const managementRoles = [
   "SUPER_ADMIN",
@@ -109,31 +110,81 @@ export async function createWbsItem(formData: FormData) {
 
 export async function createTask(formData: FormData) {
   const projectId = text(formData, "projectId");
-  const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
+  const path = `/app/obras/${projectId}/tarefas`;
+  const code = text(formData, "code").toUpperCase();
+  const title = text(formData, "title");
   const plannedStart = optionalText(formData, "plannedStart");
   const plannedEnd = optionalText(formData, "plannedEnd");
+  const durationDays = optionalNumber(formData, "durationDays") ?? 1;
+  const sequence = optionalNumber(formData, "sequence") ?? 0;
+  const weightPercent = optionalNumber(formData, "weightPercent") ?? 0;
+  const status = text(formData, "status") || "BACKLOG";
+  const priority = text(formData, "priority") || "NORMAL";
+  const wbsId = optionalText(formData, "wbsId");
+  const responsibleId = optionalText(formData, "responsibleId");
+
+  if (!projectId || !code || !title) fail(path, "Informe código e título da atividade.");
+  if (plannedStart && plannedEnd && plannedEnd < plannedStart) fail(path, "A data de término não pode ser anterior à data de início.");
+  if (!Number.isInteger(durationDays) || durationDays < 1) fail(path, "A duração deve ser informada em dias úteis inteiros, a partir de 1.");
+  if (!Number.isInteger(sequence) || sequence < 0) fail(path, "A sequência deve ser um número inteiro não negativo.");
+  if (weightPercent < 0 || weightPercent > 100) fail(path, "O peso deve ficar entre 0% e 100%.");
+  if (!["BACKLOG", "READY", "IN_PROGRESS", "BLOCKED", "REVIEW", "COMPLETED", "CANCELED"].includes(status)) fail(path, "O status selecionado é inválido.");
+  if (!["LOW", "NORMAL", "HIGH", "CRITICAL"].includes(priority)) fail(path, "A prioridade selecionada é inválida.");
+
+  const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
+  if (wbsId) {
+    const { data: wbs, error: wbsError } = await supabase
+      .from("work_breakdown_items")
+      .select("id")
+      .eq("id", wbsId)
+      .eq("project_id", projectId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (wbsError) {
+      console.error("[projects.create-task.wbs]", wbsError);
+      fail(path, publicScheduleDatabaseMessage(wbsError, "Não foi possível validar a etapa da EAP."));
+    }
+    if (!wbs) fail(path, "A etapa da EAP selecionada não pertence a esta obra.");
+  }
+  if (responsibleId) {
+    const { data: membership, error: membershipError } = await supabase
+      .from("project_memberships")
+      .select("user_id")
+      .eq("project_id", projectId)
+      .eq("user_id", responsibleId)
+      .eq("active", true)
+      .maybeSingle();
+    if (membershipError) {
+      console.error("[projects.create-task.responsible]", membershipError);
+      fail(path, publicScheduleDatabaseMessage(membershipError, "Não foi possível validar o responsável."));
+    }
+    if (!membership) fail(path, "O responsável selecionado não participa desta obra.");
+  }
 
   const { error } = await supabase.from("project_tasks").insert({
     organization_id: organizationId,
     project_id: projectId,
-    wbs_id: optionalText(formData, "wbsId"),
-    parent_task_id: optionalText(formData, "parentTaskId"),
-    code: text(formData, "code").toUpperCase(),
-    title: text(formData, "title"),
+    wbs_id: wbsId,
+    parent_task_id: null,
+    code,
+    title,
     description: optionalText(formData, "description"),
-    status: text(formData, "status") || "BACKLOG",
-    priority: text(formData, "priority") || "NORMAL",
-    sequence: optionalNumber(formData, "sequence") ?? 0,
+    status,
+    priority,
+    sequence,
     planned_start: plannedStart,
     planned_end: plannedEnd,
-    duration_days: optionalNumber(formData, "durationDays") ?? 1,
-    weight: (optionalNumber(formData, "weightPercent") ?? 0) / 100,
-    responsible_id: optionalText(formData, "responsibleId"),
+    duration_days: durationDays,
+    weight: weightPercent / 100,
+    responsible_id: responsibleId,
     client_visible: bool(formData, "clientVisible"),
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/tarefas`, error.message);
-  revalidatePath(`/app/obras/${projectId}/tarefas`);
+  if (error) {
+    console.error("[projects.create-task]", error);
+    fail(path, publicScheduleDatabaseMessage(error, "Não foi possível adicionar a atividade."));
+  }
+  revalidatePath(path);
   revalidatePath(`/app/obras/${projectId}/cronograma`);
 }
 
