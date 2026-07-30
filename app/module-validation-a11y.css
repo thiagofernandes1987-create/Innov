@@ -1,0 +1,21 @@
+/* Regras transversais confirmadas no ciclo QA de launcher e Projetos. */
+.launcher-filtro,
+.launcher-personalizar,
+.barra-menu,
+.barra-menu-movel-gatilho,
+.barra-menu-movel > nav a {
+  min-height: 44px;
+}
+
+.launcher-personalizar-painel {
+  width: min(230px, calc(100vw - 24px));
+}
+
+@media (max-width: 600px) {
+  .canto-botao,
+  .canto-avatar {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+  }
+}
