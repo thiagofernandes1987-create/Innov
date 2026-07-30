@@ -18,6 +18,12 @@ describe("ações seguras de relatórios", () => {
     expect(actions).not.toMatch(/redirect\([^\n]*error\.message/);
   });
 
+  it("mantém a assinatura exigida por useActionState sem warning de parâmetro ocioso", () => {
+    const actions = read("app/actions/reports.ts");
+    expect(actions.match(/void previous;/g)).toHaveLength(3);
+    expect(actions).not.toContain("_previous:");
+  });
+
   it("trata falhas parciais e evita estados vazios enganosos", () => {
     const saved = read("app/app/relatorios/salvos/page.tsx");
     const targets = read("app/app/relatorios/metas/page.tsx");
