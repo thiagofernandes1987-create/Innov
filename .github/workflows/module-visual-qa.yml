@@ -1,0 +1,86 @@
+name: Module Visual QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: URL imutável do preview Vercel
+        required: true
+        type: string
+      module_key:
+        description: Chave do módulo em lib/modules/registry.ts
+        required: true
+        type: string
+      module_route:
+        description: Rota autenticada a capturar
+        required: true
+        type: string
+      persona:
+        description: Persona configurada em QA_PERSONAS_JSON
+        required: true
+        default: super_admin
+        type: string
+      ref:
+        description: Branch, tag ou commit correspondente ao preview
+        required: true
+        default: fix/qa-personas-visual-runtime-loop
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: module-visual-qa-${{ inputs.module_key }}-${{ inputs.ref }}
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
+    env:
+      PREVIEW_URL: ${{ inputs.preview_url }}
+      MODULE_KEY: ${{ inputs.module_key }}
+      MODULE_ROUTE: ${{ inputs.module_route }}
+      QA_PERSONA: ${{ inputs.persona }}
+      QA_PERSONAS_JSON: ${{ secrets.QA_PERSONAS_JSON }}
+      DEMO_ADMIN_EMAIL: ${{ secrets.DEMO_ADMIN_EMAIL }}
+      DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
+      DEMO_CLIENT_EMAIL: ${{ secrets.DEMO_CLIENT_EMAIL }}
+      DEMO_CLIENT_PASSWORD: ${{ secrets.DEMO_CLIENT_PASSWORD }}
+      QA_OUTPUT_DIR: artifacts/module-visual-qa/${{ inputs.module_key }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.ref }}
+
+      - name: Validate requested module
+        run: |
+          node scripts/validate-module-qa.mjs
+          node - <<'NODE'
+          const fs = require('node:fs');
+          const inventory = JSON.parse(fs.readFileSync('diretrizes/qa/VALIDACAO-MODULOS.json', 'utf8'));
+          const moduleKey = process.env.MODULE_KEY;
+          const route = process.env.MODULE_ROUTE;
+          const module = inventory.modules.find(item => item.modulo === moduleKey);
+          if (!module) throw new Error(`Módulo ausente do inventário: ${moduleKey}`);
+          if (!route.startsWith('/app') && !route.startsWith('/cliente')) throw new Error(`Rota QA inválida: ${route}`);
+          console.log(JSON.stringify({ module: moduleKey, route, persona: process.env.QA_PERSONA }, null, 2));
+          NODE
+
+      - name: Install Playwright runtime
+        run: npm install --no-save --no-package-lock playwright@1.55.0
+
+      - name: Capture preview matrix
+        run: node scripts/run-module-visual-qa.mjs
+
+      - name: Upload screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: module-visual-qa-${{ inputs.module_key }}-${{ github.run_id }}
+          path: artifacts/module-visual-qa/${{ inputs.module_key }}/
+          if-no-files-found: warn
+          retention-days: 30
