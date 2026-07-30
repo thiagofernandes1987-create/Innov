@@ -1,0 +1,41 @@
+name: QA Planejamento iter3 imutável
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-planning-iter3-immutable
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
+    env:
+      PREVIEW_URL: https://innov-pk16rmqx8-apex-method.vercel.app/amostra-planejamento?_vercel_share=xiczvrAJpv1LWGl2IpxIDo7wg9uTgFjE
+      QA_OUTPUT_DIR: artifacts/planning-iter3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Playwright runtime
+        run: npm install --no-save --no-package-lock playwright@1.55.0
+
+      - name: Capture immutable planning matrix
+        run: node scripts/run-planning-fixture-qa.mjs
+
+      - name: Upload screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: planning-iter3-${{ github.run_id }}
+          path: artifacts/planning-iter3/
+          if-no-files-found: warn
+          retention-days: 30
