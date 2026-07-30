@@ -38,54 +38,54 @@ if (document) {
 
   const registryKeys = [...registry.matchAll(/\{\s*key:\s*"([^"]+)"/g)].map(match => match[1]);
   for (const key of registryKeys) {
-    if (!modules.some(module => module?.key === key)) errors.push(`Módulo do registry sem inventário QA: ${key}`);
+    if (!modules.some(moduleEntry => moduleEntry?.key === key)) errors.push(`Módulo do registry sem inventário QA: ${key}`);
   }
 
-  for (const module of modules) {
-    if (!module || typeof module !== "object") {
+  for (const moduleEntry of modules) {
+    if (!moduleEntry || typeof moduleEntry !== "object") {
       errors.push("Entrada de módulo inválida.");
       continue;
     }
 
-    if (!module.key || typeof module.key !== "string") errors.push("Módulo sem key.");
-    else if (keys.has(module.key)) errors.push(`Módulo duplicado: ${module.key}`);
-    else keys.add(module.key);
+    if (!moduleEntry.key || typeof moduleEntry.key !== "string") errors.push("Módulo sem key.");
+    else if (keys.has(moduleEntry.key)) errors.push(`Módulo duplicado: ${moduleEntry.key}`);
+    else keys.add(moduleEntry.key);
 
-    if (!module.name || typeof module.name !== "string") errors.push(`${module.key ?? "?"}: name ausente.`);
-    if (!module.route || typeof module.route !== "string" || !module.route.startsWith("/")) errors.push(`${module.key ?? "?"}: route inválida.`);
-    if (!module.persona || typeof module.persona !== "string") errors.push(`${module.key ?? "?"}: persona ausente.`);
-    if (!allowedStatuses.has(module.status)) errors.push(`${module.key ?? "?"}: status não permitido: ${module.status}`);
-    if (!Number.isInteger(module.iterations) || module.iterations < 0) errors.push(`${module.key ?? "?"}: iterations inválido.`);
-    if (!Array.isArray(module.acceptance) || module.acceptance.length === 0) errors.push(`${module.key ?? "?"}: critérios de aceitação ausentes.`);
-    if (!Array.isArray(module.resolvedProblems)) errors.push(`${module.key ?? "?"}: resolvedProblems precisa ser array.`);
-    if (!Array.isArray(module.approvedCaptures)) errors.push(`${module.key ?? "?"}: approvedCaptures precisa ser array.`);
-    if (!Array.isArray(module.vaccines) || !module.vaccines.includes("VACINA-043")) errors.push(`${module.key ?? "?"}: VACINA-043 ausente.`);
+    if (!moduleEntry.name || typeof moduleEntry.name !== "string") errors.push(`${moduleEntry.key ?? "?"}: name ausente.`);
+    if (!moduleEntry.route || typeof moduleEntry.route !== "string" || !moduleEntry.route.startsWith("/")) errors.push(`${moduleEntry.key ?? "?"}: route inválida.`);
+    if (!moduleEntry.persona || typeof moduleEntry.persona !== "string") errors.push(`${moduleEntry.key ?? "?"}: persona ausente.`);
+    if (!allowedStatuses.has(moduleEntry.status)) errors.push(`${moduleEntry.key ?? "?"}: status não permitido: ${moduleEntry.status}`);
+    if (!Number.isInteger(moduleEntry.iterations) || moduleEntry.iterations < 0) errors.push(`${moduleEntry.key ?? "?"}: iterations inválido.`);
+    if (!Array.isArray(moduleEntry.acceptance) || moduleEntry.acceptance.length === 0) errors.push(`${moduleEntry.key ?? "?"}: critérios de aceitação ausentes.`);
+    if (!Array.isArray(moduleEntry.resolvedProblems)) errors.push(`${moduleEntry.key ?? "?"}: resolvedProblems precisa ser array.`);
+    if (!Array.isArray(moduleEntry.approvedCaptures)) errors.push(`${moduleEntry.key ?? "?"}: approvedCaptures precisa ser array.`);
+    if (!Array.isArray(moduleEntry.vaccines) || !moduleEntry.vaccines.includes("VACINA-043")) errors.push(`${moduleEntry.key ?? "?"}: VACINA-043 ausente.`);
 
-    if (module.status === "aprovado") {
-      if (module.iterations < 1) errors.push(`${module.key}: aprovado sem iteração executada.`);
-      if (module.approvedCaptures.length < 6) errors.push(`${module.key}: aprovado sem as seis capturas mínimas.`);
-      if (module.runtimeLogsReviewed !== true) errors.push(`${module.key}: aprovado sem revisão dos logs do servidor.`);
-      if (module.browserConsoleReviewed !== true) errors.push(`${module.key}: aprovado sem revisão do console do navegador.`);
+    if (moduleEntry.status === "aprovado") {
+      if (moduleEntry.iterations < 1) errors.push(`${moduleEntry.key}: aprovado sem iteração executada.`);
+      if (moduleEntry.approvedCaptures.length < 6) errors.push(`${moduleEntry.key}: aprovado sem as seis capturas mínimas.`);
+      if (moduleEntry.runtimeLogsReviewed !== true) errors.push(`${moduleEntry.key}: aprovado sem revisão dos logs do servidor.`);
+      if (moduleEntry.browserConsoleReviewed !== true) errors.push(`${moduleEntry.key}: aprovado sem revisão do console do navegador.`);
 
-      for (const capture of module.approvedCaptures) {
+      for (const capture of moduleEntry.approvedCaptures) {
         if (!capture || typeof capture !== "object") {
-          errors.push(`${module.key}: captura aprovada sem metadados.`);
+          errors.push(`${moduleEntry.key}: captura aprovada sem metadados.`);
           continue;
         }
         for (const field of ["url", "viewport", "theme", "persona", "previewCommit", "decision"]) {
-          if (!capture[field]) errors.push(`${module.key}: captura sem ${field}.`);
+          if (!capture[field]) errors.push(`${moduleEntry.key}: captura sem ${field}.`);
         }
-        if (!requiredViewports.has(capture.viewport)) errors.push(`${module.key}: viewport não homologado: ${capture.viewport}`);
-        if (!requiredThemes.has(capture.theme)) errors.push(`${module.key}: tema não homologado: ${capture.theme}`);
-        if (capture.decision !== "aprovado") errors.push(`${module.key}: captura final sem decisão aprovada.`);
-        if (Array.isArray(capture.findings) && capture.findings.length > 0) errors.push(`${module.key}: captura aprovada ainda possui achados.`);
+        if (!requiredViewports.has(capture.viewport)) errors.push(`${moduleEntry.key}: viewport não homologado: ${capture.viewport}`);
+        if (!requiredThemes.has(capture.theme)) errors.push(`${moduleEntry.key}: tema não homologado: ${capture.theme}`);
+        if (capture.decision !== "aprovado") errors.push(`${moduleEntry.key}: captura final sem decisão aprovada.`);
+        if (Array.isArray(capture.findings) && capture.findings.length > 0) errors.push(`${moduleEntry.key}: captura aprovada ainda possui achados.`);
       }
     }
   }
 
   const requireAll = process.argv.includes("--require-all-approved");
   if (requireAll) {
-    const pending = modules.filter(module => module.status !== "aprovado").map(module => module.key);
+    const pending = modules.filter(moduleEntry => moduleEntry.status !== "aprovado").map(moduleEntry => moduleEntry.key);
     if (pending.length) errors.push(`Campanha ainda não concluída: ${pending.join(", ")}`);
   }
 }
@@ -96,5 +96,5 @@ if (errors.length) {
   process.exit(1);
 }
 
-const approved = document.modules.filter(module => module.status === "aprovado").length;
+const approved = document.modules.filter(moduleEntry => moduleEntry.status === "aprovado").length;
 console.log(`Inventário QA válido: ${document.modules.length} módulos, ${approved} aprovado(s).`);
