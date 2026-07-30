@@ -47,6 +47,20 @@ describe("Planejamento ↔ Tarefas", () => {
     expect(actions).not.toContain('fail(`/app/obras/${projectId}/cronograma`, error.message)');
   });
 
+  it("confirma tarefa, obra e organização antes de movimentar o registro", () => {
+    const actions = read("app/actions/projects.ts");
+    const validationStart = actions.indexOf('const { data: scopedTask');
+    const rpcStart = actions.indexOf('supabase.rpc("move_project_task"');
+
+    expect(validationStart).toBeGreaterThan(-1);
+    expect(rpcStart).toBeGreaterThan(validationStart);
+    expect(actions.slice(validationStart, rpcStart)).toContain('.from("project_tasks")');
+    expect(actions.slice(validationStart, rpcStart)).toContain('.eq("id", taskId)');
+    expect(actions.slice(validationStart, rpcStart)).toContain('.eq("project_id", projectId)');
+    expect(actions.slice(validationStart, rpcStart)).toContain('.eq("organization_id", organizationId)');
+    expect(actions).toContain("A tarefa não pertence a esta obra.");
+  });
+
   it("produz a mesma data efetiva para uma sucessora sem início fixado", () => {
     const result = calcular(
       [
