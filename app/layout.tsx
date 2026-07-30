@@ -14,6 +14,7 @@ import "./observability.css";
 import "./stage20.css";
 import "./modern-workflows.css";
 import "./project-creation.css";
+import "./module-validation.css";
 
 export const metadata: Metadata = {
   title: {
@@ -24,9 +25,6 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  // O tema vem do cookie e já vai no HTML servido. É o que evita a página
-  // nascer clara e escurecer depois — o piscar branco de quem resolve isso
-  // só no cliente.
   const tema = temaValido((await cookies()).get(COOKIE_TEMA)?.value);
 
   return (
