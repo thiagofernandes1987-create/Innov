@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "repository": "thiagofernandes1987-create/Innov",
-  "branch": "fix/qa-personas-visual-runtime-loop",
+  "branch": "qa/launcher-projetos-iter1",
   "issue": 32,
-  "updatedAt": "2026-07-30T08:14:53Z",
+  "updatedAt": "2026-07-30T10:55:00Z",
   "allowedStatuses": [
     "pendente",
     "em_correcao",
@@ -12,12 +12,13 @@
     "reprovado",
     "aprovado"
   ],
-  "requiredViewports": ["1920x1080", "1366x768", "390x844"],
+  "requiredViewports": ["375px", "768px", "1280px"],
   "requiredThemes": ["claro", "escuro"],
   "requiredAcceptanceCriteria": [
     "layout_referencia",
     "contraste",
     "interacoes",
+    "alvos_44px",
     "sem_sobreposicao",
     "sem_cortes",
     "sem_overflow_acidental",
@@ -28,7 +29,8 @@
     "servidor_limpo",
     "fluxo_funcional",
     "persona_conclui",
-    "permissoes_negativas"
+    "permissoes_negativas",
+    "integracao_pessimista"
   ],
   "modules": [
     {
@@ -37,14 +39,22 @@
       "rotaPrincipal": "/app",
       "personaPrincipal": "administrador",
       "fluxoPrincipal": "abrir launcher, filtrar aplicativos, consultar gadgets e entrar em um módulo autorizado",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
+      "status": "em_correcao",
+      "iteracoes": 1,
+      "problemasAbertos": [
+        "capturas autenticadas bloqueadas porque DEMO_ADMIN_PASSWORD não está configurada no GitHub Actions",
+        "preview protegido ainda não possui VERCEL_AUTOMATION_BYPASS_SECRET no GitHub Actions",
+        "comparação visual full-page em 375px, 768px e 1280px ainda não foi produzida"
+      ],
+      "problemasResolvidos": [
+        "alvos da casca e filtros elevados para 44px",
+        "painel de personalização limitado à largura da viewport",
+        "amostra visual atualizada para o contrato de resumos sem inventar indicadores"
+      ],
+      "criteriosAtendidos": ["alvos_44px"],
       "capturasAprovadas": [],
       "logs": null,
-      "vacinas": []
+      "vacinas": ["VACINA-019", "VACINA-027", "VACINA-031"]
     },
     {
       "modulo": "crm",
@@ -81,18 +91,24 @@
     },
     {
       "modulo": "obras",
-      "nome": "Obras",
+      "nome": "Obras e Projetos",
       "rotaPrincipal": "/app/obras",
       "personaPrincipal": "gestor_de_obras",
-      "fluxoPrincipal": "criar obra independente ou em andamento, abrir visão geral e navegar nos módulos contextuais",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
+      "fluxoPrincipal": "abrir a carteira, alternar lista e Kanban, filtrar projetos e navegar para o planejamento contextual",
+      "status": "em_correcao",
+      "iteracoes": 1,
+      "problemasAbertos": [
+        "simulação com gestor de obras ou planejador real está bloqueada por ausência de credencial de QA",
+        "controles Lista e Kanban precisam de captura e verificação por nome acessível",
+        "consistência com a referência visual de Projetos ainda precisa de revisão full-page"
+      ],
+      "problemasResolvidos": [
+        "casca responsiva passou a preservar alvos mínimos de 44px"
+      ],
+      "criteriosAtendidos": ["alvos_44px"],
       "capturasAprovadas": [],
       "logs": null,
-      "vacinas": ["VACINA-040", "VACINA-043"]
+      "vacinas": ["VACINA-019", "VACINA-027", "VACINA-040", "VACINA-043"]
     },
     {
       "modulo": "planejamento",
