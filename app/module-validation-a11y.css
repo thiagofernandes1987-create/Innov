@@ -33,8 +33,19 @@
 .launcher-destaque > p,
 .launcher-app > p,
 .launcher-categoria,
-.launcher-recentes small {
+.launcher-recentes small,
+.launcher-filtro,
+.launcher-personalizar {
   color: var(--muted);
+}
+
+.launcher-filtro.ativo {
+  color: #fff;
+}
+
+.launcher-personalizar:hover {
+  color: var(--text);
+  background: var(--surface-muted);
 }
 
 .launcher-recentes b,
@@ -71,6 +82,15 @@
 
   .launcher-paineis.com-destaque > .launcher-destaque {
     grid-column: span 2;
+  }
+
+  .launcher-titulo-grupo {
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  .launcher-titulo-grupo > span {
+    margin-left: 0;
   }
 }
 
