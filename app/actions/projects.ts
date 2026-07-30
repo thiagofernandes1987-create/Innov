@@ -241,7 +241,17 @@ export async function moveTask(formData: FormData) {
   if (!["BACKLOG", "READY", "IN_PROGRESS", "BLOCKED", "REVIEW", "COMPLETED", "CANCELED"].includes(status)) fail(path, "O status selecionado é inválido.");
   if (progressPercent !== null && (progressPercent < 0 || progressPercent > 100)) fail(path, "O progresso deve ficar entre 0% e 100%.");
 
-  const { supabase } = await requireOrganizationContext(managementRoles);
+  const { supabase, organizationId } = await requireOrganizationContext(managementRoles);
+  const { data: scopedTask, error: taskError } = await supabase
+    .from("project_tasks")
+    .select("id")
+    .eq("id", taskId)
+    .eq("project_id", projectId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (taskError) failProjectDatabase(path, "move-task.validate-scope", taskError, "Não foi possível validar a tarefa.");
+  if (!scopedTask) fail(path, "A tarefa não pertence a esta obra.");
+
   const { error } = await supabase.rpc("move_project_task", {
     p_task_id: taskId,
     p_status: status,
