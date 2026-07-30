@@ -115,9 +115,9 @@ for (const token of [
   "ANALISAR COMO USUÁRIO",
   "REVISAR LOGS",
   "REGISTRAR VACINA",
-  "1920×1080",
-  "1366×768",
-  "390×844"
+  "375px",
+  "768px",
+  "1280px"
 ]) {
   if (!protocol.includes(token)) errors.push(`Protocolo de módulos sem token obrigatório: ${token}`);
 }
