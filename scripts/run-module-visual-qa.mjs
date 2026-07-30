@@ -7,11 +7,11 @@ for (const name of required) {
   if (!process.env[name]) throw new Error(`Variável obrigatória ausente: ${name}`);
 }
 
-const previewUrl = process.env.PREVIEW_URL.replace(/\/$/, "");
+const previewInput = new URL(process.env.PREVIEW_URL);
+const previewUrl = previewInput.origin;
+const vercelShareToken = previewInput.searchParams.get("_vercel_share") ?? process.env.VERCEL_SHARE_TOKEN ?? null;
 const moduleKey = process.env.MODULE_KEY;
-const moduleRoute = process.env.MODULE_ROUTE.startsWith("/")
-  ? process.env.MODULE_ROUTE
-  : `/${process.env.MODULE_ROUTE}`;
+const moduleRoute = process.env.MODULE_ROUTE.startsWith("/") ? process.env.MODULE_ROUTE : `/${process.env.MODULE_ROUTE}`;
 const persona = process.env.QA_PERSONA.trim().toLowerCase();
 const outputRoot = process.env.QA_OUTPUT_DIR ?? path.join("artifacts", "module-visual-qa", moduleKey);
 
@@ -63,10 +63,16 @@ const technicalPatterns = [
   /ReferenceError:/i
 ];
 
+async function unlockPreview(page) {
+  if (!vercelShareToken) return;
+  await page.goto(`${previewUrl}/?_vercel_share=${encodeURIComponent(vercelShareToken)}`, {
+    waitUntil: "domcontentloaded"
+  });
+}
+
 async function login(page) {
   const redirect = encodeURIComponent(moduleRoute);
   await page.goto(`${previewUrl}/login?redirect=${redirect}`, { waitUntil: "domcontentloaded" });
-
   if (!page.url().includes("/login")) return;
 
   await page.locator('input[name="email"]').fill(credentials.email);
@@ -94,6 +100,7 @@ const report = {
   route: moduleRoute,
   persona,
   previewUrl,
+  previewProtected: Boolean(vercelShareToken),
   generatedAt: new Date().toISOString(),
   scenarios: []
 };
@@ -113,18 +120,17 @@ try {
       });
 
       await context.addCookies([{ name: "innovar-tema", value: theme, url: previewUrl }]);
-
       const page = await context.newPage();
-      page.on("console", (message) => {
+      page.on("console", message => {
         if (message.type() === "error") consoleErrors.push(message.text());
       });
-      page.on("pageerror", (error) => pageErrors.push(error.message));
-      page.on("response", (response) => {
-        const status = response.status();
-        if (status >= 500) failedResponses.push(`${status} ${response.url()}`);
+      page.on("pageerror", error => pageErrors.push(error.message));
+      page.on("response", response => {
+        if (response.status() >= 500) failedResponses.push(`${response.status()} ${response.url()}`);
       });
 
       try {
+        await unlockPreview(page);
         await login(page);
         await page.goto(`${previewUrl}${moduleRoute}`, { waitUntil: "networkidle" });
         await page.waitForTimeout(800);
@@ -133,7 +139,8 @@ try {
         if (finalPath.startsWith("/login") || finalPath.startsWith("/selecionar-organizacao") || finalPath.startsWith("/acesso-negado")) {
           findings.push(`[Rota incorreta] captura terminou em ${finalPath} — severidade: bloqueante`);
         }
-        if (!finalPath.startsWith(moduleRoute)) {
+        const routeMatches = moduleRoute === "/app" ? finalPath === "/app" : finalPath.startsWith(moduleRoute);
+        if (!routeMatches) {
           findings.push(`[Desvio de navegação] esperado ${moduleRoute}, recebido ${finalPath} — severidade: alta`);
         }
 
@@ -207,14 +214,6 @@ try {
 
 const reportPath = path.join(outputRoot, "report.json");
 await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
-
-const failed = report.scenarios.some((scenario) => scenario.technicalStatus === "reprovado");
-console.log(JSON.stringify({
-  ok: !failed,
-  moduleKey,
-  scenarios: report.scenarios.length,
-  outputRoot,
-  reportPath
-}, null, 2));
-
+const failed = report.scenarios.some(scenario => scenario.technicalStatus === "reprovado");
+console.log(JSON.stringify({ ok: !failed, moduleKey, scenarios: report.scenarios.length, outputRoot, reportPath }, null, 2));
 if (failed) process.exit(1);
