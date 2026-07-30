@@ -614,6 +614,10 @@ export function SchedulePlanner({
                     const start = toDay(bar.inicio);
                     const end = toDay(bar.termino);
                     const delayed = end < toDay(today) && row.task.progress < 1;
+                    const visualWidth = (end - start + 1) * dayWidth;
+                    const hitWidth = Math.max(44, visualWidth);
+                    const hitOffset = (hitWidth - visualWidth) / 2;
+                    const progressWidth = Math.round(visualWidth * row.task.progress);
                     return (
                       <div className={styles.timelineRow} key={`timeline-${row.key}`}>
                         <button
@@ -624,11 +628,16 @@ export function SchedulePlanner({
                             bar.derivada ? styles.derived : ""
                           ].filter(Boolean).join(" ")}
                           type="button"
-                          style={{ left: (start - range.start) * dayWidth, width: (end - start + 1) * dayWidth }}
+                          style={{
+                            left: (start - range.start) * dayWidth - hitOffset,
+                            width: hitWidth,
+                            "--bar-offset": `${hitOffset}px`,
+                            "--bar-visual-width": `${visualWidth}px`
+                          } as CSSProperties}
                           onClick={() => openTaskEditor(row.task.id)}
                           title={`${row.task.code} · ${row.task.title}: ${formatShortDate(bar.inicio)} a ${formatShortDate(bar.termino)}`}
                         >
-                          <span className={styles.progressFill} style={{ width: `${Math.round(row.task.progress * 100)}%` }} />
+                          <span className={styles.progressFill} style={{ width: progressWidth }} />
                           <span className={styles.barLabel}>{Math.round(row.task.progress * 100)}%</span>
                         </button>
                       </div>
