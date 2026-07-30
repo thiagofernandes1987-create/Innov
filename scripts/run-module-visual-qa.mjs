@@ -12,7 +12,7 @@ const moduleKey = process.env.MODULE_KEY;
 const moduleRoute = process.env.MODULE_ROUTE.startsWith("/")
   ? process.env.MODULE_ROUTE
   : `/${process.env.MODULE_ROUTE}`;
-const persona = process.env.QA_PERSONA;
+const persona = process.env.QA_PERSONA.trim().toLowerCase();
 const outputRoot = process.env.QA_OUTPUT_DIR ?? path.join("artifacts", "module-visual-qa", moduleKey);
 
 function credentialsForPersona() {
@@ -23,7 +23,7 @@ function credentialsForPersona() {
     } catch {
       throw new Error("QA_PERSONAS_JSON não é JSON válido.");
     }
-    const item = parsed?.[persona];
+    const item = parsed?.[persona] ?? parsed?.[persona.toUpperCase()] ?? parsed?.[process.env.QA_PERSONA];
     if (item?.email && item?.password) return item;
   }
 
@@ -90,7 +90,7 @@ async function login(page) {
 await fs.mkdir(outputRoot, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 const report = {
-  module: moduleKey,
+  moduleKey,
   route: moduleRoute,
   persona,
   previewUrl,
@@ -112,13 +112,7 @@ try {
         timezoneId: "America/Sao_Paulo"
       });
 
-      await context.addCookies([
-        {
-          name: "innovar-tema",
-          value: theme,
-          url: previewUrl
-        }
-      ]);
+      await context.addCookies([{ name: "innovar-tema", value: theme, url: previewUrl }]);
 
       const page = await context.newPage();
       page.on("console", (message) => {
@@ -134,6 +128,14 @@ try {
         await login(page);
         await page.goto(`${previewUrl}${moduleRoute}`, { waitUntil: "networkidle" });
         await page.waitForTimeout(800);
+
+        const finalPath = new URL(page.url()).pathname;
+        if (finalPath.startsWith("/login") || finalPath.startsWith("/selecionar-organizacao") || finalPath.startsWith("/acesso-negado")) {
+          findings.push(`[Rota incorreta] captura terminou em ${finalPath} — severidade: bloqueante`);
+        }
+        if (!finalPath.startsWith(moduleRoute)) {
+          findings.push(`[Desvio de navegação] esperado ${moduleRoute}, recebido ${finalPath} — severidade: alta`);
+        }
 
         const bodyText = await page.locator("body").innerText().catch(() => "");
         for (const pattern of technicalPatterns) {
@@ -209,7 +211,7 @@ await fs.writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 const failed = report.scenarios.some((scenario) => scenario.technicalStatus === "reprovado");
 console.log(JSON.stringify({
   ok: !failed,
-  module: moduleKey,
+  moduleKey,
   scenarios: report.scenarios.length,
   outputRoot,
   reportPath
