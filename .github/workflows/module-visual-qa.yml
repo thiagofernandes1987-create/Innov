@@ -23,7 +23,7 @@ on:
       ref:
         description: Branch, tag ou commit correspondente ao preview
         required: true
-        default: fix/qa-personas-visual-runtime-loop
+        default: fix/module-validation-loop-20260730
         type: string
 
 permissions:
@@ -64,10 +64,10 @@ jobs:
           const inventory = JSON.parse(fs.readFileSync('diretrizes/qa/VALIDACAO-MODULOS.json', 'utf8'));
           const moduleKey = process.env.MODULE_KEY;
           const route = process.env.MODULE_ROUTE;
-          const module = inventory.modules.find(item => item.modulo === moduleKey);
-          if (!module) throw new Error(`Módulo ausente do inventário: ${moduleKey}`);
+          const moduleEntry = inventory.modules.find(item => item.modulo === moduleKey);
+          if (!moduleEntry) throw new Error(`Módulo ausente do inventário: ${moduleKey}`);
           if (!route.startsWith('/app') && !route.startsWith('/cliente')) throw new Error(`Rota QA inválida: ${route}`);
-          console.log(JSON.stringify({ module: moduleKey, route, persona: process.env.QA_PERSONA }, null, 2));
+          console.log(JSON.stringify({ moduleKey, route, persona: process.env.QA_PERSONA }, null, 2));
           NODE
 
       - name: Install Playwright runtime
