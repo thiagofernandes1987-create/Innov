@@ -36,6 +36,17 @@ describe("Planejamento ↔ Tarefas", () => {
     expect(actions).not.toContain('fail(path, error.message)');
   });
 
+  it("faz as actions antigas do Planejamento convergirem para regras seguras", () => {
+    const actions = read("app/actions/projects.ts");
+
+    expect(actions).toContain("return createScheduleDependency(formData)");
+    expect(actions).toContain('failProjectDatabase(path, "move-task"');
+    expect(actions).toContain('failProjectDatabase(path, "create-milestone"');
+    expect(actions).toContain('failProjectDatabase(path, "create-baseline"');
+    expect(actions).toContain('failProjectDatabase(path, "create-wbs"');
+    expect(actions).not.toContain('fail(`/app/obras/${projectId}/cronograma`, error.message)');
+  });
+
   it("produz a mesma data efetiva para uma sucessora sem início fixado", () => {
     const result = calcular(
       [
