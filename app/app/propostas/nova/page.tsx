@@ -5,16 +5,7 @@ import { formatCurrency } from "@/lib/domain";
 import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
 import { singleRelation } from "@/lib/supabase/relations";
 
-const proposalBudgetStatuses = [
-  "TECHNICAL_REVIEW",
-  "FINANCIAL_REVIEW",
-  "APPROVAL_PENDING",
-  "APPROVED"
-] as const;
-
 const proposalBudgetStatusLabels: Record<string, string> = {
-  TECHNICAL_REVIEW: "Revisão técnica",
-  FINANCIAL_REVIEW: "Revisão financeira",
   APPROVAL_PENDING: "Em aprovação",
   APPROVED: "Aprovado"
 };
@@ -27,7 +18,7 @@ export default async function NewProposalPage() {
       .from("budget_versions")
       .select("id,version_number,sale_price,status,frozen_at,budgets!inner(code,title,status,clients(legal_name,trade_name))")
       .eq("organization_id", context.organizationId)
-      .in("status", [...proposalBudgetStatuses])
+      .in("status", ["APPROVAL_PENDING", "APPROVED"])
       .gt("sale_price", 0)
       .order("created_at", { ascending: false }),
     context.supabase
@@ -65,7 +56,7 @@ export default async function NewProposalPage() {
     <main className="content">
       <BarraDeTrabalho title="Nova proposta" />
       <p className="workspace-intro">
-        Crie uma proposta a partir de orçamento calculado ou defina um valor fixo. Descontos acima de 7% entram automaticamente na alçada da diretoria.
+        Crie uma proposta a partir de orçamento calculado em aprovação/aprovado ou defina um valor fixo. Descontos acima de 7% entram automaticamente na alçada da diretoria.
       </p>
       {versionsResult.error || clientsResult.error ? (
         <div className="validation blocking" role="alert">{DATA_LOAD_ERROR_MESSAGE}</div>
