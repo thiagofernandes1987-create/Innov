@@ -50,6 +50,7 @@ jobs:
       DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
       DEMO_CLIENT_EMAIL: ${{ secrets.DEMO_CLIENT_EMAIL }}
       DEMO_CLIENT_PASSWORD: ${{ secrets.DEMO_CLIENT_PASSWORD }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
       INPUT_PREVIEW_URL: ${{ inputs.preview_url }}
       INPUT_MODULE_KEY: ${{ inputs.module_key }}
       INPUT_MODULE_ROUTE: ${{ inputs.module_route }}
@@ -104,7 +105,7 @@ jobs:
       - name: Install Playwright runtime
         run: npm install --no-save --no-package-lock playwright@1.55.0
 
-      - name: Capture preview matrix
+      - name: Capture preview matrix 375 768 1280
         run: node scripts/run-module-visual-qa.mjs
 
       - name: Upload screenshots and report
