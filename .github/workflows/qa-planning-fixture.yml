@@ -1,0 +1,42 @@
+name: QA Fixture do Planejamento
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-planning-fixture-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
+    env:
+      PREVIEW_URL: https://innov-54o75tn0v-apex-method.vercel.app/amostra-planejamento?_vercel_share=7dbIKpUw06eodYmnM4cVvhVP7za7INkb
+      QA_OUTPUT_DIR: artifacts/planning-fixture
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Playwright runtime
+        run: npm install --no-save --no-package-lock playwright@1.55.0
+
+      - name: Capture planning matrix
+        run: node scripts/run-planning-fixture-qa.mjs
+
+      - name: Upload screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: planning-fixture-${{ github.run_id }}
+          path: artifacts/planning-fixture/
+          if-no-files-found: warn
+          retention-days: 30
