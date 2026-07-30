@@ -42,8 +42,8 @@ if (inventory) {
   if (!Array.isArray(inventory.requiredThemes) || !inventory.requiredThemes.includes("claro") || !inventory.requiredThemes.includes("escuro")) errors.push("Inventário precisa exigir temas claro e escuro.");
   if (!Array.isArray(inventory.requiredAcceptanceCriteria) || inventory.requiredAcceptanceCriteria.length < 10) errors.push("Inventário sem critérios de aceitação suficientes.");
 
-  const modules = Array.isArray(inventory.modules) ? inventory.modules : [];
-  const moduleKeys = modules.map((module) => module?.modulo);
+  const moduleRecords = Array.isArray(inventory.modules) ? inventory.modules : [];
+  const moduleKeys = moduleRecords.map((moduleRecord) => moduleRecord?.modulo);
   const duplicates = moduleKeys.filter((key, index) => moduleKeys.indexOf(key) !== index);
   if (duplicates.length) errors.push(`Módulos duplicados no inventário: ${[...new Set(duplicates)].join(", ")}`);
 
@@ -64,41 +64,41 @@ if (inventory) {
     ? inventory.requiredThemes
     : [];
 
-  for (const module of modules) {
-    const label = module?.modulo ?? "<sem-modulo>";
-    if (typeof module?.nome !== "string" || !module.nome.trim()) errors.push(`${label}: nome ausente.`);
-    if (typeof module?.rotaPrincipal !== "string" || !module.rotaPrincipal.startsWith("/app")) errors.push(`${label}: rotaPrincipal inválida.`);
-    if (typeof module?.personaPrincipal !== "string" || !module.personaPrincipal.trim()) errors.push(`${label}: personaPrincipal ausente.`);
-    if (typeof module?.fluxoPrincipal !== "string" || module.fluxoPrincipal.trim().length < 20) errors.push(`${label}: fluxoPrincipal insuficiente.`);
-    if (!allowedStatuses.has(module?.status)) errors.push(`${label}: status inválido (${module?.status}).`);
-    if (!Number.isInteger(module?.iteracoes) || module.iteracoes < 0) errors.push(`${label}: iteracoes deve ser inteiro >= 0.`);
+  for (const moduleRecord of moduleRecords) {
+    const label = moduleRecord?.modulo ?? "<sem-modulo>";
+    if (typeof moduleRecord?.nome !== "string" || !moduleRecord.nome.trim()) errors.push(`${label}: nome ausente.`);
+    if (typeof moduleRecord?.rotaPrincipal !== "string" || !moduleRecord.rotaPrincipal.startsWith("/app")) errors.push(`${label}: rotaPrincipal inválida.`);
+    if (typeof moduleRecord?.personaPrincipal !== "string" || !moduleRecord.personaPrincipal.trim()) errors.push(`${label}: personaPrincipal ausente.`);
+    if (typeof moduleRecord?.fluxoPrincipal !== "string" || moduleRecord.fluxoPrincipal.trim().length < 20) errors.push(`${label}: fluxoPrincipal insuficiente.`);
+    if (!allowedStatuses.has(moduleRecord?.status)) errors.push(`${label}: status inválido (${moduleRecord?.status}).`);
+    if (!Number.isInteger(moduleRecord?.iteracoes) || moduleRecord.iteracoes < 0) errors.push(`${label}: iteracoes deve ser inteiro >= 0.`);
 
     for (const field of ["problemasAbertos", "problemasResolvidos", "criteriosAtendidos", "capturasAprovadas", "vacinas"]) {
-      if (!Array.isArray(module?.[field])) errors.push(`${label}: ${field} deve ser array.`);
+      if (!Array.isArray(moduleRecord?.[field])) errors.push(`${label}: ${field} deve ser array.`);
     }
 
-    if (module?.status === "em_correcao" && module.iteracoes < 1) {
+    if (moduleRecord?.status === "em_correcao" && moduleRecord.iteracoes < 1) {
       errors.push(`${label}: módulo em correção precisa registrar ao menos uma iteração.`);
     }
 
-    if (module?.status === "aprovado") {
-      if (module.iteracoes < 1) errors.push(`${label}: aprovado sem iteração.`);
-      if (module.problemasAbertos.length) errors.push(`${label}: aprovado com problemas abertos.`);
+    if (moduleRecord?.status === "aprovado") {
+      if (moduleRecord.iteracoes < 1) errors.push(`${label}: aprovado sem iteração.`);
+      if (moduleRecord.problemasAbertos.length) errors.push(`${label}: aprovado com problemas abertos.`);
 
-      const missingCriteria = requiredCriteria.filter((criterion) => !module.criteriosAtendidos.includes(criterion));
+      const missingCriteria = requiredCriteria.filter((criterion) => !moduleRecord.criteriosAtendidos.includes(criterion));
       if (missingCriteria.length) errors.push(`${label}: aprovado sem critérios ${missingCriteria.join(", ")}.`);
 
       for (const viewport of requiredViewports) {
         for (const theme of requiredThemes) {
-          const capture = module.capturasAprovadas.find((item) => item?.viewport === viewport && item?.tema === theme && typeof item?.url === "string" && item.url.startsWith("http"));
+          const capture = moduleRecord.capturasAprovadas.find((item) => item?.viewport === viewport && item?.tema === theme && typeof item?.url === "string" && item.url.startsWith("http"));
           if (!capture) errors.push(`${label}: aprovado sem captura ${viewport}/${theme}.`);
         }
       }
 
-      if (!module.logs || module.logs.console_navegador !== "limpo" || module.logs.servidor !== "limpo") {
+      if (!moduleRecord.logs || moduleRecord.logs.console_navegador !== "limpo" || moduleRecord.logs.servidor !== "limpo") {
         errors.push(`${label}: aprovado sem logs de navegador e servidor limpos.`);
       }
-      if (!module.logs?.consultado_em || Number.isNaN(Date.parse(module.logs.consultado_em))) {
+      if (!moduleRecord.logs?.consultado_em || Number.isNaN(Date.parse(moduleRecord.logs.consultado_em))) {
         errors.push(`${label}: aprovado sem data válida de revisão de logs.`);
       }
     }
@@ -128,9 +128,9 @@ if (errors.length) {
   process.exit(1);
 }
 
-const counts = inventory.modules.reduce((acc, module) => {
-  acc[module.status] = (acc[module.status] ?? 0) + 1;
-  return acc;
+const counts = inventory.modules.reduce((accumulator, moduleRecord) => {
+  accumulator[moduleRecord.status] = (accumulator[moduleRecord.status] ?? 0) + 1;
+  return accumulator;
 }, {});
 console.log(JSON.stringify({
   ok: true,
