@@ -1,0 +1,35 @@
+name: Aplicar actions equivalentes do Planejamento iter5
+
+on:
+  push:
+    branches:
+      - qa/planejamento-iter1
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v6
+        with:
+          ref: qa/planejamento-iter1
+          fetch-depth: 0
+
+      - name: Apply exact patch
+        run: node scripts/patch-planning-equivalent-actions-iter5.mjs
+
+      - name: Commit equivalent action protection
+        run: |
+          if git diff --quiet -- app/actions/projects.ts; then
+            echo "Nenhuma alteração pendente."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/actions/projects.ts
+          git commit -m "fix(schedule): protege actions equivalentes do Planejamento"
+          git push origin HEAD:qa/planejamento-iter1
