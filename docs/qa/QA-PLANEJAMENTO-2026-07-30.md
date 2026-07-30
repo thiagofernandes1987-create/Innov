@@ -9,11 +9,12 @@
 
 | Superfície | Estado | Motivo |
 |---|---|---|
-| Integridade das actions | `PASS` | CI completo verde, validações negativas e mensagens públicas seguras |
+| Integridade das actions | `PASS` | validações negativas, escopo e mensagens públicas seguras |
 | Fixture visual — iteração 2 | `PASS` | seis cenários, modal Geral e dependências, zero alvo abaixo de 44px, console e servidor limpos |
-| Fixture visual — iteração 3 | `PARTIAL` | contraste escuro e alinhamento dos nomes corrigidos; nova captura do deployment ainda pendente |
+| Fixture visual — iteração 3 | `BLOCKED_EXTERNAL` | correções prontas; Vercel recusou o novo build por `build-rate-limit` |
 | Persona gestor de obras | `BLOCKED_EXTERNAL` | credencial específica ausente em `QA_PERSONAS_JSON` |
-| Integração Obras ↔ Planejamento ↔ Tarefas ↔ Diário | `PARTIAL` | contratos e testes de banco passaram; jornadas de falha e leitura intermodular ainda pendentes |
+| Planejamento ↔ Tarefas | `PASS_CODE` | mesmo motor de datas, duração inteira e portas equivalentes protegidas; CI final em validação |
+| Obras ↔ Planejamento ↔ Diário | `PARTIAL` | revalidações e contratos existem; jornada autenticada e falhas de comunicação ainda pendentes |
 | Concorrência da rede lógica | `PARTIAL` | proteção na aplicação existe; RPC transacional no PostgreSQL ainda pendente |
 
 O módulo permanece **não aprovado** e o PR continua em rascunho.
@@ -43,7 +44,7 @@ O módulo permanece **não aprovado** e o PR continua em rascunho.
 - testes negativos em `tests/schedule-validation.test.ts`;
 - contrato de interface atualizado para `SchedulePlanner`.
 
-### Evidência de CI
+### Evidência de CI da fundação
 
 Run `30554458398`:
 
@@ -117,7 +118,54 @@ O sucesso automático não encerrou a análise. A inspeção das imagens encontr
 - `title` exibe código e nome completos;
 - `aria-label` descreve a ação e a atividade sem depender do texto cortado.
 
-A nova captura de preview dessa iteração ainda é obrigatória.
+### Bloqueio de publicação
+
+A Vercel recusou os commits posteriores com status `failure` apontando para `upgradeToPro=build-rate-limit`. Logo, a iteração 3 não possui deployment imutável nem captura válida e permanece `BLOCKED_EXTERNAL`.
+
+## Iteração 4 — convergência com Tarefas
+
+### Problema reproduzido
+
+O Kanban de Tarefas usava apenas `planned_start` e `planned_end` persistidos, enquanto o Gantt calculava datas efetivas a partir da rede de dependências. A mesma atividade poderia aparecer com datas diferentes. A tela Tarefas também aceitava duração de `0,5` dia, embora o motor trabalhasse com dias úteis inteiros.
+
+### Correções
+
+- Tarefas passou a consultar as dependências da obra;
+- usa a mesma função `calcular(...)` do Gantt;
+- exibe início e término efetivos;
+- identifica datas derivadas com o selo `Calculada`;
+- duração passou a `min="1"` e `step="1"`;
+- criação de tarefa valida datas, duração inteira, sequência, peso, status, prioridade, EAP e responsável;
+- falhas de banco usam mensagens públicas seguras;
+- `tests/planning-task-integration.test.ts` protege a convergência e a data efetiva de uma sucessora TI.
+
+## Iteração 5 — portas equivalentes e cenários pessimistas
+
+### Cenário A — ação antiga contorna a proteção nova
+
+A action histórica `createDependency` ainda gravava diretamente em `task_dependencies`. Ela passou a delegar para `createScheduleDependency`, preservando validação de escopo, duplicidade e ciclo.
+
+A mesma varredura protegeu:
+
+- criação de EAP e etapa superior;
+- movimentação de tarefa;
+- criação de marco;
+- congelamento de baseline;
+- mensagens públicas seguras em todos esses fluxos.
+
+### Cenário B — formulário mistura obra e tarefa
+
+Um formulário poderia enviar `projectId` de uma obra e `taskId` de outra. Antes de chamar `move_project_task`, a action agora confirma o registro por:
+
+- `id = taskId`;
+- `project_id = projectId`;
+- `organization_id = organizationId`.
+
+Sem correspondência, a operação termina com `A tarefa não pertence a esta obra.` O teste estrutural exige que essa validação apareça antes da RPC.
+
+### Laboratório de QA
+
+Os workflows visuais e de persona deixaram de disparar em todo commit. Agora são manuais e exigem uma URL imutável compartilhável. Alias de branch é rejeitado para impedir capturas stale e consumo inútil de builds.
 
 ## Persona real
 
@@ -131,15 +179,19 @@ O runner carregou o contrato P8 — gerente de obras/projetos — e recusou subs
 
 Nenhuma captura autenticada foi produzida e nenhuma aprovação foi inferida.
 
+## Logs
+
+No deployment imutável validado, as requisições de `/amostra-planejamento` retornaram `200`; a consulta de runtime não encontrou erro ou resposta 5xx. Isso cobre a fixture da iteração 2, não os commits bloqueados pelo limite de builds.
+
 ## Autocrítica
 
 A fixture confirma geometria, temas, erros técnicos e abertura dos fluxos básicos, mas não prova:
 
 - que um gestor de obras entende como criar a primeira EAP;
-- que datas derivadas e persistidas são interpretadas corretamente entre módulos;
-- que alteração de dependência produz o resultado esperado no banco real;
-- que Obras, Tarefas e Diário recebem a mesma versão do fato;
-- que duas gravações concorrentes não fecham ciclo.
+- que uma alteração real de dependência persiste e recalcula corretamente no banco;
+- que Obras e Diário exibem todas as consequências operacionais do mesmo fato;
+- que duas gravações concorrentes não fecham ciclo;
+- que a correção visual da iteração 3 está correta no preview publicado.
 
 ## Vacinas
 
@@ -156,10 +208,11 @@ Aplicadas nesta rodada:
 
 ## Próximos portões
 
-1. publicar a iteração 3 em deployment imutável;
-2. repetir os seis cenários e revisar manualmente as imagens;
-3. revisar runtime logs do deployment;
-4. executar o fluxo autenticado quando a credencial específica da persona existir;
-5. testar dois cenários pessimistas de falha entre Planejamento e módulos adjacentes;
-6. projetar RPC transacional para a rede lógica e teste concorrente;
-7. somente depois avaliar aprovação e merge.
+1. CI completo do head final;
+2. liberação do limite de build da Vercel;
+3. deployment imutável da iteração 3 e integrações;
+4. repetição manual dos seis cenários e revisão das imagens;
+5. execução autenticada quando a credencial específica da persona existir;
+6. teste real de persistência e falhas de comunicação entre Planejamento, Tarefas, Obras e Diário;
+7. RPC transacional e teste concorrente da rede lógica;
+8. somente depois avaliar aprovação e merge.
