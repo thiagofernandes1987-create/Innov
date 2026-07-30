@@ -1,16 +1,18 @@
 name: QA Planejamento por Persona
 
 on:
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      preview_url:
+        description: URL imutável e compartilhável do deployment
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: qa-planning-persona-${{ github.head_ref || github.ref_name }}
+  group: qa-planning-persona-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
@@ -20,12 +22,20 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.55.0-noble
     env:
-      PREVIEW_URL: https://innov-g79hg3qg6-apex-method.vercel.app?_vercel_share=QFl6Z8HvmCQ31L91p6VyroAJlmxGW2oS
+      PREVIEW_URL: ${{ inputs.preview_url }}
       QA_PERSONAS_JSON: ${{ secrets.QA_PERSONAS_JSON }}
       QA_OUTPUT_DIR: artifacts/planning-persona
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Validate immutable preview URL
+        run: |
+          case "$PREVIEW_URL" in
+            https://innov-git-*) echo "Use a URL imutável do deployment, não o alias do branch." >&2; exit 1 ;;
+            https://*.vercel.app*) ;;
+            *) echo "URL de preview inválida para o Planejamento." >&2; exit 1 ;;
+          esac
 
       - name: Install Playwright runtime
         run: npm install --no-save --no-package-lock playwright@1.55.0
