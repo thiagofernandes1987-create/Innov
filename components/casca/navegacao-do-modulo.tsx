@@ -16,22 +16,19 @@ const MODULO_DA_ROTA: { prefixo: string; chave: string }[] = [
 
 export function NavegacaoDoModulo({ aplicativos }: { aplicativos: AplicativoAutorizado[] }) {
   const caminho = usePathname() ?? "";
-  const [menuAberto, setMenuAberto] = useState(false);
+  const [caminhoDoMenuAberto, setCaminhoDoMenuAberto] = useState<string | null>(null);
+  const menuAberto = caminhoDoMenuAberto === caminho;
   const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMenuAberto(false);
-  }, [caminho]);
 
   useEffect(() => {
     if (!menuAberto) return;
 
     function fecharAoClicarFora(evento: MouseEvent | TouchEvent) {
-      if (!menuRef.current?.contains(evento.target as Node)) setMenuAberto(false);
+      if (!menuRef.current?.contains(evento.target as Node)) setCaminhoDoMenuAberto(null);
     }
 
     function fecharComEscape(evento: KeyboardEvent) {
-      if (evento.key === "Escape") setMenuAberto(false);
+      if (evento.key === "Escape") setCaminhoDoMenuAberto(null);
     }
 
     document.addEventListener("mousedown", fecharAoClicarFora);
@@ -97,7 +94,7 @@ export function NavegacaoDoModulo({ aplicativos }: { aplicativos: AplicativoAuto
               aria-label={`Menu de ${modulo.nome}`}
               aria-expanded={menuAberto}
               aria-controls="barra-menu-movel-conteudo"
-              onClick={() => setMenuAberto(aberto => !aberto)}
+              onClick={() => setCaminhoDoMenuAberto(menuAberto ? null : caminho)}
             >
               Menu
             </button>
@@ -109,7 +106,7 @@ export function NavegacaoDoModulo({ aplicativos }: { aplicativos: AplicativoAuto
                     href={item.href}
                     className={item.href === ativo ? "ativo" : undefined}
                     aria-current={item.href === ativo ? "page" : undefined}
-                    onClick={() => setMenuAberto(false)}
+                    onClick={() => setCaminhoDoMenuAberto(null)}
                   >
                     {item.rotulo}
                   </Link>
