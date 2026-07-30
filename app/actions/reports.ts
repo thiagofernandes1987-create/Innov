@@ -8,7 +8,7 @@ import {
   reportActionError,
   type ReportActionState
 } from "@/lib/forms/report-action-state";
-import { reportDataAccessError } from "@/lib/observability/data-access";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { defaultReportPeriod } from "@/lib/reports/server";
 
 function text(data: FormData, key: string) {
