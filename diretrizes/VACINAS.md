@@ -141,9 +141,8 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-040` | Fluxo comercial obrigatório exclui projeto ou proposta sem documento predecessor | vigente | modo explícito, FK opcional, data de corte e validação estrutural |
 | `VACINA-041` | Alçada comercial existe apenas como campo de interface | vigente | regra no banco, decisão independente, trilha e teste negativo |
 | `VACINA-042` | Falha de formulário apaga preenchimento, mistura dependências e pode deixar o autor sem acesso | vigente | `useActionState`, erros por campo, dependências separadas, membership e papel preservado |
+| `VACINA-043` | Correção visual é encerrada sem captura do preview no mesmo contexto | vigente | captura publicada, comparação por viewport/tema/persona e gate no CI |
 | `VACINA-044` | Rede lógica aceita relação cruzada, duplicada ou cíclica antes da persistência | parcial | escopo por obra/organização, validação de grafo e testes negativos; RPC transacional ainda pendente |
-
-> O identificador `VACINA-043` está reservado no PR #34 para o gate de captura visual do preview.
 
 ## 4. Arquivos
 
@@ -191,6 +190,7 @@ diretrizes/vacinas/
 ├── VACINA-040-FLUXO-NAO-OBRIGA-DOCUMENTO-ANTERIOR.md
 ├── VACINA-041-ALCADA-NAO-E-SOMENTE-CAMPO.md
 ├── VACINA-042-FALHA-DE-FORMULARIO-NAO-APAGA-CONTEXTO.md
+├── VACINA-043-CORRECAO-VISUAL-EXIGE-CAPTURA-DO-PREVIEW.md
 └── VACINA-044-REDE-LOGICA-VALIDADA-ANTES-DA-GRAVACAO.md
 ```
 
