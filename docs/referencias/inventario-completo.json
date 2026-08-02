@@ -1,0 +1,1546 @@
+[
+ {
+  "sha256": "a4480055f8c51c36",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-477-studio-2026-07-26-08_28_07.png",
+  "legenda": null,
+  "modulo": "administracao",
+  "bytes": 111784
+ },
+ {
+  "sha256": "2eeca461cfeb3d09",
+  "origem": "comentada",
+  "arquivo": "009.png",
+  "legenda": "Mensagens, Notificações, studio e usuário, campo de escolha de tema deveria ficar aqui",
+  "modulo": "administracao",
+  "bytes": 3560
+ },
+ {
+  "sha256": "62db82ed4829317e",
+  "origem": "auditoria-repo",
+  "arquivo": "08-sign.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 59867
+ },
+ {
+  "sha256": "009a4113234fd601",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-2026-07-26-08_26_28.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 68647
+ },
+ {
+  "sha256": "5a540ed17cfa0fb9",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-action-sign-Template-1-action-sign-SignableDocument-2026-07-26-08_21_11.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 5249467
+ },
+ {
+  "sha256": "2d0f1047bd23405d",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-action-sign-Template-2026-07-26-08_20_12.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 4487626
+ },
+ {
+  "sha256": "cd13e9e350664e8b",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-action-sign-Template-2026-07-26-08_20_39.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 3930844
+ },
+ {
+  "sha256": "7640429ab6c3b7c9",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-all-documents-2026-07-26-08_25_26.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 94980
+ },
+ {
+  "sha256": "7e4562a48bf7df42",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-all-documents-2026-07-26-08_25_35.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 78065
+ },
+ {
+  "sha256": "e5d43727aefd0e80",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-all-documents-2026-07-26-08_25_39.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 62204
+ },
+ {
+  "sha256": "d5733c9e0e86e7fd",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-all-documents-2026-07-26-08_25_44.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 67313
+ },
+ {
+  "sha256": "5a8018352f15fc11",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-all-documents-2026-07-26-08_25_53.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 66869
+ },
+ {
+  "sha256": "fc4c4b85cf3dd3bd",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-all-documents-2026-07-26-08_25_59.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 75468
+ },
+ {
+  "sha256": "b3e49baa0aa56a15",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-all-documents-2026-07-26-08_26_12.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 116024
+ },
+ {
+  "sha256": "02ad00981b18a955",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2-sign-2-sign-template-2-2026-07-26-08_24_42.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 97914
+ },
+ {
+  "sha256": "bcf46292dc402727",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2-sign-2-sign-template-2-2026-07-26-08_24_47.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 101099
+ },
+ {
+  "sha256": "bbf6c78152e9d439",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2-sign-2-sign-template-2-2026-07-26-08_24_52.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 116197
+ },
+ {
+  "sha256": "8467ae05f781392f",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2-sign-2-sign-template-2-2026-07-26-08_25_05.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 119358
+ },
+ {
+  "sha256": "1d075f28aab34d0d",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2-sign-2026-07-26-08_24_29.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 76852
+ },
+ {
+  "sha256": "12e9dfb9c9a379e7",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2-sign-2026-07-26-08_24_34.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 79682
+ },
+ {
+  "sha256": "9117aa8750ed8f43",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2026-07-26-02_34_59.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 149903
+ },
+ {
+  "sha256": "ced1fc367290aa80",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2026-07-26-08_23_18.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 75543
+ },
+ {
+  "sha256": "b0b205acd8dc69fa",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2026-07-26-08_23_26.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 78401
+ },
+ {
+  "sha256": "2142605b5ed1a95f",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2026-07-26-08_23_32.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 88634
+ },
+ {
+  "sha256": "6e04725e315c3809",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2026-07-26-08_23_56.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 92880
+ },
+ {
+  "sha256": "2680d4db150f456d",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-2026-07-26-08_24_20.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 104358
+ },
+ {
+  "sha256": "99f2577fb6c2e618",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_16_32.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 263685
+ },
+ {
+  "sha256": "10edbaccd5dc4c9f",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_17_03.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 277950
+ },
+ {
+  "sha256": "3f820c3520ae4d9d",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_17_13.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 263045
+ },
+ {
+  "sha256": "244195ac2f2f0aa2",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_17_20.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 264831
+ },
+ {
+  "sha256": "facd246c67a25bd6",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_17_32.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 264387
+ },
+ {
+  "sha256": "290f3f39341e0040",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_17_40.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 264824
+ },
+ {
+  "sha256": "651d40cf2bf837a4",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_17_52.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 264754
+ },
+ {
+  "sha256": "e5d564663fa783c9",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_18_07.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 262061
+ },
+ {
+  "sha256": "831c3580aeb43fa9",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_18_11.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 263336
+ },
+ {
+  "sha256": "e0b999102d5ce8e2",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_18_17.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 262159
+ },
+ {
+  "sha256": "c8d849f48ef46c43",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_18_35.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 288926
+ },
+ {
+  "sha256": "7d2f66475c69b451",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_18_40.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 283850
+ },
+ {
+  "sha256": "a148e290b7e0b110",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_18_50.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 285742
+ },
+ {
+  "sha256": "38220bff40e98658",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_19_01.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 288500
+ },
+ {
+  "sha256": "55cfd9c37bdfdd74",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-sign-documents-action-sign-Template-2026-07-26-08_19_10.png",
+  "legenda": null,
+  "modulo": "assinaturas",
+  "bytes": 226804
+ },
+ {
+  "sha256": "6ebce983796392a3",
+  "origem": "comentada",
+  "arquivo": "023.png",
+  "legenda": "tela login usuário",
+  "modulo": "autenticacao",
+  "bytes": 622659
+ },
+ {
+  "sha256": "569e2ec9a419af81",
+  "origem": "comentada",
+  "arquivo": "024.png",
+  "legenda": "tela login",
+  "modulo": "autenticacao",
+  "bytes": 832771
+ },
+ {
+  "sha256": "1ffc3437847ef771",
+  "origem": "comentada",
+  "arquivo": "004.png",
+  "legenda": "card cliente",
+  "modulo": "clientes",
+  "bytes": 261289
+ },
+ {
+  "sha256": "6d6e8659dfb5646e",
+  "origem": "comentada",
+  "arquivo": "013.png",
+  "legenda": "nosso pipe line cliente",
+  "modulo": "clientes",
+  "bytes": 322428
+ },
+ {
+  "sha256": "8ef2dbbd21e2d6ed",
+  "origem": "auditoria-repo",
+  "arquivo": "09-purchase.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 73787
+ },
+ {
+  "sha256": "64f8c19675b0ab54",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-2026-07-26-09_25_45.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 173458
+ },
+ {
+  "sha256": "862cbfdcffa905eb",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-new-2026-07-26-09_25_49.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 112583
+ },
+ {
+  "sha256": "3b610bbd006ee7e4",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-new-2026-07-26-09_25_54.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 121166
+ },
+ {
+  "sha256": "64672076f7423530",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-new-2026-07-26-09_26_02.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 115763
+ },
+ {
+  "sha256": "06db8fdbbf6796de",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-new-2026-07-26-09_26_06.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 116867
+ },
+ {
+  "sha256": "3143efbfa6d14259",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-new-2026-07-26-09_26_10.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 121136
+ },
+ {
+  "sha256": "77a4dfb5996419fa",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-2026-07-26-09_28_28.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 85738
+ },
+ {
+  "sha256": "f8d4d2e87a9118f7",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-2026-07-26-09_28_56.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 96909
+ },
+ {
+  "sha256": "354de3bce985eadf",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-2026-07-26-09_29_02.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 59166
+ },
+ {
+  "sha256": "08d4c04acd317f48",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-2026-07-26-09_30_46.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 92834
+ },
+ {
+  "sha256": "84a84117ebecbe70",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-9-2026-07-26-09_28_33.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 116340
+ },
+ {
+  "sha256": "7e0c439602fa59c7",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-9-2026-07-26-09_28_38.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 94747
+ },
+ {
+  "sha256": "cd41bdc67e0a2e36",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-9-2026-07-26-09_28_43.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 105918
+ },
+ {
+  "sha256": "ab1d628240792890",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-9-2026-07-26-09_28_46.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 106990
+ },
+ {
+  "sha256": "3ee12c73be73f32f",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-9-2026-07-26-09_28_49.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 92963
+ },
+ {
+  "sha256": "d44bb656fc07eaee",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-new-2026-07-26-09_29_11.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 119649
+ },
+ {
+  "sha256": "50ad7475dd264eec",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-new-2026-07-26-09_29_16.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 98007
+ },
+ {
+  "sha256": "290fff0dd9cdf33f",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-new-2026-07-26-09_29_21.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 104521
+ },
+ {
+  "sha256": "df03a1ffe5e031ef",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-purchase-products-new-2026-07-26-09_30_02.png",
+  "legenda": null,
+  "modulo": "compras",
+  "bytes": 109980
+ },
+ {
+  "sha256": "81e5e7cb96b9c97e",
+  "origem": "auditoria-repo",
+  "arquivo": "01-crm.png",
+  "legenda": null,
+  "modulo": "crm",
+  "bytes": 43602
+ },
+ {
+  "sha256": "bb906269d08d857f",
+  "origem": "comentada",
+  "arquivo": "000.png",
+  "legenda": "adicionar etapas ao pipeline",
+  "modulo": "crm",
+  "bytes": 70370
+ },
+ {
+  "sha256": "e2649b3a3f15a652",
+  "origem": "comentada",
+  "arquivo": "002.png",
+  "legenda": "busca com filtro crm",
+  "modulo": "crm",
+  "bytes": 4626
+ },
+ {
+  "sha256": "e9fe0fa145c2f918",
+  "origem": "comentada",
+  "arquivo": "005.png",
+  "legenda": "cards crm",
+  "modulo": "crm",
+  "bytes": 194998
+ },
+ {
+  "sha256": "0f6952e44460f0be",
+  "origem": "comentada",
+  "arquivo": "006.png",
+  "legenda": "Criar e editar etapas pipeline, depois voce movimenta segurando e arrastando o mouse",
+  "modulo": "crm",
+  "bytes": 68810
+ },
+ {
+  "sha256": "567a0c108d4aa15a",
+  "origem": "comentada",
+  "arquivo": "007.png",
+  "legenda": "crm tela inicial",
+  "modulo": "crm",
+  "bytes": 154141
+ },
+ {
+  "sha256": "594b16b2a150706a",
+  "origem": "comentada",
+  "arquivo": "010.png",
+  "legenda": "menu crm",
+  "modulo": "crm",
+  "bytes": 30568
+ },
+ {
+  "sha256": "f7eccd1d6f2dd49b",
+  "origem": "comentada",
+  "arquivo": "017.png",
+  "legenda": "pop pup filtro crm",
+  "modulo": "crm",
+  "bytes": 35927
+ },
+ {
+  "sha256": "0531d479f915ced4",
+  "origem": "comentada",
+  "arquivo": "018.png",
+  "legenda": "repare como tudo é padronizado, todos as vizualizações tipo kanban, listas, onde tem pipeline segue o mesmo padrão, o que você faz para um se aplica a quase todos",
+  "modulo": "crm",
+  "bytes": 64764
+ },
+ {
+  "sha256": "74db556465898684",
+  "origem": "comentada",
+  "arquivo": "020.png",
+  "legenda": "repare que sempre tem os mesmos conteúdos padrão, menus, notificação, icones de tipo de visualização, onde acrescenta arquivos, adicionar mais etapas ao pipeline, tipos de cards, todos seguem um padrão de layout em todos os módulos",
+  "modulo": "crm",
+  "bytes": 59610
+ },
+ {
+  "sha256": "35f77afc4caf5823",
+  "origem": "auditoria-repo",
+  "arquivo": "00-odoo-home-apps.png",
+  "legenda": null,
+  "modulo": "dashboard",
+  "bytes": 84648
+ },
+ {
+  "sha256": "97d210af9db17639",
+  "origem": "auditoria-repo",
+  "arquivo": "16-approvals.png",
+  "legenda": null,
+  "modulo": "dashboard",
+  "bytes": 72987
+ },
+ {
+  "sha256": "b1618cd236985563",
+  "origem": "comentada",
+  "arquivo": "012.png",
+  "legenda": "nossa tela app",
+  "modulo": "dashboard",
+  "bytes": 318787
+ },
+ {
+  "sha256": "86196eea702b60d8",
+  "origem": "comentada",
+  "arquivo": "016.png",
+  "legenda": "Padrão em todos cards, mensagens, atividades, notas, whathapp e ação",
+  "modulo": "dashboard",
+  "bytes": 49463
+ },
+ {
+  "sha256": "07601875113ce20f",
+  "origem": "auditoria-repo",
+  "arquivo": "02-contacts.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 55045
+ },
+ {
+  "sha256": "09c6fa53413353ba",
+  "origem": "auditoria-repo",
+  "arquivo": "03-sales.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 44794
+ },
+ {
+  "sha256": "70d7e3eafa032d08",
+  "origem": "auditoria-repo",
+  "arquivo": "05-planning.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 61724
+ },
+ {
+  "sha256": "eb821ae6b17fe03e",
+  "origem": "auditoria-repo",
+  "arquivo": "06-timesheets.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 62200
+ },
+ {
+  "sha256": "10dee797251375e1",
+  "origem": "auditoria-repo",
+  "arquivo": "07-documents.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 46263
+ },
+ {
+  "sha256": "a4b0712ae808dbcd",
+  "origem": "auditoria-repo",
+  "arquivo": "10-inventory.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 49625
+ },
+ {
+  "sha256": "454b62d50e27f08b",
+  "origem": "auditoria-repo",
+  "arquivo": "11-quality.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 29922
+ },
+ {
+  "sha256": "d638d16dc6647847",
+  "origem": "auditoria-repo",
+  "arquivo": "12-accounting.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 62644
+ },
+ {
+  "sha256": "99c662e466bca3f7",
+  "origem": "auditoria-repo",
+  "arquivo": "14-dashboards.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 84030
+ },
+ {
+  "sha256": "8f3b81833ec4f725",
+  "origem": "auditoria-repo",
+  "arquivo": "15-settings.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 73023
+ },
+ {
+  "sha256": "dc4bac324fdbc717",
+  "origem": "auditoria-repo",
+  "arquivo": "17-innov-proposta-nova.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 115752
+ },
+ {
+  "sha256": "6af0bf73937bd90c",
+  "origem": "auditoria-repo",
+  "arquivo": "18-innov-contrato-novo.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 62999
+ },
+ {
+  "sha256": "20ab9ddfc922421c",
+  "origem": "auditoria-repo",
+  "arquivo": "19-innov-aditivo-novo.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 67925
+ },
+ {
+  "sha256": "55f415abb893c574",
+  "origem": "auditoria-repo",
+  "arquivo": "20-innov-documento-novo.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 70755
+ },
+ {
+  "sha256": "e151fc648871b72f",
+  "origem": "auditoria-repo",
+  "arquivo": "21-innov-assinatura-nova.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 76154
+ },
+ {
+  "sha256": "94a77b6d51d833d5",
+  "origem": "auditoria-repo",
+  "arquivo": "23-innov-launcher.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 218678
+ },
+ {
+  "sha256": "883d53804518eb29",
+  "origem": "auditoria-repo",
+  "arquivo": "odoo-audit-01.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 132016
+ },
+ {
+  "sha256": "58855da1fa858335",
+  "origem": "auditoria-repo",
+  "arquivo": "odoo-audit-02.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 120286
+ },
+ {
+  "sha256": "a1c804013954fa6b",
+  "origem": "auditoria-repo",
+  "arquivo": "odoo-audit-03.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 123044
+ },
+ {
+  "sha256": "3b10526d31ca24c4",
+  "origem": "auditoria-repo",
+  "arquivo": "odoo-audit-04.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 154800
+ },
+ {
+  "sha256": "7211204e60d0cbd6",
+  "origem": "auditoria-repo",
+  "arquivo": "odoo-audit-05.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 64307
+ },
+ {
+  "sha256": "5e9e5e2762c24662",
+  "origem": "avulsa",
+  "arquivo": "173dc4c6-1000461111.webp",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 119730
+ },
+ {
+  "sha256": "a93fc510b2a1f688",
+  "origem": "avulsa",
+  "arquivo": "1c5e4d83-1000461089.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 107745
+ },
+ {
+  "sha256": "3777b20aee65ec72",
+  "origem": "avulsa",
+  "arquivo": "1db4a274-1000461854.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 310036
+ },
+ {
+  "sha256": "3b169c6badf5ef4e",
+  "origem": "avulsa",
+  "arquivo": "2cb34b9f-call_o1M3JWobaIjtFxZH4VHcqQbf.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 1345686
+ },
+ {
+  "sha256": "e7131728f608add6",
+  "origem": "avulsa",
+  "arquivo": "54e2c20a-1000461110.webp",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 130266
+ },
+ {
+  "sha256": "9eb9dddef54f29e9",
+  "origem": "avulsa",
+  "arquivo": "69e8cfe6-1000461098.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 373118
+ },
+ {
+  "sha256": "6386124c16f9cbb9",
+  "origem": "avulsa",
+  "arquivo": "70e3a62b-1000461859.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 115812
+ },
+ {
+  "sha256": "641315d14cc7274c",
+  "origem": "avulsa",
+  "arquivo": "8867f693-1000461096.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 668546
+ },
+ {
+  "sha256": "3f21df797d725758",
+  "origem": "avulsa",
+  "arquivo": "c365fce6-1000461100.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 390985
+ },
+ {
+  "sha256": "260e09ea4e3056ca",
+  "origem": "avulsa",
+  "arquivo": "d1a8de9d-1000462124.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 433731
+ },
+ {
+  "sha256": "b9bba0b71c7627f4",
+  "origem": "avulsa",
+  "arquivo": "dfe7d799-1000461095.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 339761
+ },
+ {
+  "sha256": "6f64cc1c56cae868",
+  "origem": "avulsa",
+  "arquivo": "ecc434e9-1000462120.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 254853
+ },
+ {
+  "sha256": "bbe297ca0016acf4",
+  "origem": "avulsa",
+  "arquivo": "efd082d5-1000461091.jpg",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 348929
+ },
+ {
+  "sha256": "49058efa1841eae1",
+  "origem": "captura-odoo",
+  "arquivo": "Captura de tela 2026-07-26 082150.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 207062
+ },
+ {
+  "sha256": "465e97a3826c1de8",
+  "origem": "captura-odoo",
+  "arquivo": "Captura de tela 2026-07-26 082233.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 69225
+ },
+ {
+  "sha256": "0178c0722f3f3832",
+  "origem": "captura-odoo",
+  "arquivo": "Captura de tela 2026-07-26 092753.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 79082
+ },
+ {
+  "sha256": "9ae4a079d7483a36",
+  "origem": "captura-odoo",
+  "arquivo": "Captura de tela 2026-07-26 092941.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 93938
+ },
+ {
+  "sha256": "851b8b15681812e7",
+  "origem": "captura-odoo",
+  "arquivo": "Captura de tela 2026-07-26 093020.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 98565
+ },
+ {
+  "sha256": "e75a98c01637fefb",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-188-2026-07-26-09_26_16.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 74847
+ },
+ {
+  "sha256": "1592c81aa5dbbbb2",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-188-new-2026-07-26-09_26_32.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 90194
+ },
+ {
+  "sha256": "c9fb364e5f5fd369",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-188-new-2026-07-26-09_27_09.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 92388
+ },
+ {
+  "sha256": "a122bb054a4062c5",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-475-2026-07-26-08_27_33.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 79577
+ },
+ {
+  "sha256": "22c88e6488a5eb56",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-475-new-2026-07-26-08_27_42.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 72505
+ },
+ {
+  "sha256": "732a40325032e9b8",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-477-2026-07-26-08_27_49.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 57387
+ },
+ {
+  "sha256": "2b7d8d98d4594cb7",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-479-2026-07-26-08_26_36.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 128295
+ },
+ {
+  "sha256": "9fd095d5750bb32c",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-479-2026-07-26-08_26_46.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 236598
+ },
+ {
+  "sha256": "4e49decbc05ed091",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-479-2026-07-26-08_26_51.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 236554
+ },
+ {
+  "sha256": "4c94b7ae936ca421",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-479-2026-07-26-08_26_57.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 236581
+ },
+ {
+  "sha256": "69b63673c728da76",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-479-2026-07-26-08_27_04.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 236584
+ },
+ {
+  "sha256": "8b55646f577b5903",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-action-479-2026-07-26-08_27_26.png",
+  "legenda": null,
+  "modulo": "nao-classificado",
+  "bytes": 134715
+ },
+ {
+  "sha256": "438753a55495a8aa",
+  "origem": "comentada",
+  "arquivo": "021.png",
+  "legenda": "tela inial dos aplicativos, olha como é colorida e moderna",
+  "modulo": "nao-classificado",
+  "bytes": 182136
+ },
+ {
+  "sha256": "7b4c19465a00288d",
+  "origem": "auditoria-repo",
+  "arquivo": "04-project.png",
+  "legenda": null,
+  "modulo": "obras",
+  "bytes": 31358
+ },
+ {
+  "sha256": "7891775ae611a1a9",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-project-activity-plans-new-2026-07-26-02_33_52.png",
+  "legenda": null,
+  "modulo": "obras",
+  "bytes": 70967
+ },
+ {
+  "sha256": "2030f4dbccf6946d",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-project-activity-plans-new-2026-07-26-02_33_56.png",
+  "legenda": null,
+  "modulo": "obras",
+  "bytes": 94055
+ },
+ {
+  "sha256": "dcec99531e436c10",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-project-activity-plans-new-2026-07-26-02_34_07.png",
+  "legenda": null,
+  "modulo": "obras",
+  "bytes": 73108
+ },
+ {
+  "sha256": "c57cb264eb067322",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-project-activity-plans-new-2026-07-26-02_34_22.png",
+  "legenda": null,
+  "modulo": "obras",
+  "bytes": 81289
+ },
+ {
+  "sha256": "27bbab12381bba21",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-project-activity-plans-new-2026-07-26-02_34_28.png",
+  "legenda": null,
+  "modulo": "obras",
+  "bytes": 81212
+ },
+ {
+  "sha256": "29a249dd176dacd6",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-project-activity-plans-new-2026-07-26-02_34_33.png",
+  "legenda": null,
+  "modulo": "obras",
+  "bytes": 81182
+ },
+ {
+  "sha256": "49cdff566cc73947",
+  "origem": "auditoria-repo",
+  "arquivo": "22-innov-planejamento.png",
+  "legenda": null,
+  "modulo": "planejamento",
+  "bytes": 50580
+ },
+ {
+  "sha256": "89b58219f055e1be",
+  "origem": "comentada",
+  "arquivo": "014.png",
+  "legenda": "nosso planejamentp",
+  "modulo": "planejamento",
+  "bytes": 380819
+ },
+ {
+  "sha256": "3201c8dcda1e1b83",
+  "origem": "comentada",
+  "arquivo": "025.png",
+  "legenda": "tela planejamento odoo",
+  "modulo": "planejamento",
+  "bytes": 98863
+ },
+ {
+  "sha256": "404508b4b55cf45a",
+  "origem": "auditoria-repo",
+  "arquivo": "13-helpdesk.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 54377
+ },
+ {
+  "sha256": "b0d2eddf36a46f6b",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-1-2026-07-26-08_38_30.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 145046
+ },
+ {
+  "sha256": "156bc9d14230f263",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-1-2026-07-26-08_38_37.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 142532
+ },
+ {
+  "sha256": "cfa07a51b782abf7",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-1-2026-07-26-08_38_42.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 145610
+ },
+ {
+  "sha256": "7a47857be9cae377",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-1-2026-07-26-08_38_48.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 142046
+ },
+ {
+  "sha256": "eb09f16a1ad96591",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-1-2026-07-26-08_38_52.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 144976
+ },
+ {
+  "sha256": "cf31b643b04cd865",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-1-2026-07-26-08_38_58.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 145405
+ },
+ {
+  "sha256": "fff576f85b5f9d04",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-1-2026-07-26-08_39_10.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 124818
+ },
+ {
+  "sha256": "60335ff8c7991119",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-1-2026-07-26-08_39_17.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 139875
+ },
+ {
+  "sha256": "ccf5f8bc9bcb06b3",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-1-2026-07-26-08_39_25.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 138905
+ },
+ {
+  "sha256": "8b6e40685ef950f5",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-1-2026-07-26-08_39_45.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 127571
+ },
+ {
+  "sha256": "fcff3ddec83f0f96",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-2-2026-07-26-08_29_43.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 121096
+ },
+ {
+  "sha256": "970675a45cf9397d",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-2-2026-07-26-08_29_57.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 125761
+ },
+ {
+  "sha256": "4fb11415e9276c4e",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-2026-07-26-08_28_50.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 134567
+ },
+ {
+  "sha256": "20684e5b821d8d40",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-2026-07-26-08_28_53.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 72639
+ },
+ {
+  "sha256": "05e69b8a19a8050f",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-2026-07-26-08_29_02.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 77007
+ },
+ {
+  "sha256": "1cf3de6ce2b9dce8",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-2026-07-26-08_29_21.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 95495
+ },
+ {
+  "sha256": "542782fab7c0eb3c",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-2026-07-26-08_40_02.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 89816
+ },
+ {
+  "sha256": "0de4db38fccf692f",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-2026-07-26-08_40_07.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 61451
+ },
+ {
+  "sha256": "02dcfae367582507",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-2026-07-26-08_40_11.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 65260
+ },
+ {
+  "sha256": "523a4fab1bf58875",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-2026-07-26-08_40_14.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 69452
+ },
+ {
+  "sha256": "1c4b53d7f63e6c85",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_40_35.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 82661
+ },
+ {
+  "sha256": "71186f712821e235",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_40_41.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 177847
+ },
+ {
+  "sha256": "16e430627ff5f73b",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_40_49.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 66229
+ },
+ {
+  "sha256": "1c4d1de9e54cb696",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_40_53.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 102627
+ },
+ {
+  "sha256": "550a2d52a32347d3",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_40_59.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 72435
+ },
+ {
+  "sha256": "a6ff1c44d41ed314",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_41_02.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 103515
+ },
+ {
+  "sha256": "09c5af81e32d47ca",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_41_07.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 127599
+ },
+ {
+  "sha256": "ced1f188d396b821",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_41_26.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 137461
+ },
+ {
+  "sha256": "a88f9a4ed799d0cc",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_41_38.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 103525
+ },
+ {
+  "sha256": "0fdcf4b59a265644",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_41_58.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 76399
+ },
+ {
+  "sha256": "5d17f6652bb8b56c",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_42_02.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 94588
+ },
+ {
+  "sha256": "216083f13caa4a84",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_42_11.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 77425
+ },
+ {
+  "sha256": "cc02d2f3f2f90a84",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_42_15.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 71134
+ },
+ {
+  "sha256": "df1f9c236be9f8b1",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_42_20.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 152454
+ },
+ {
+  "sha256": "d62232590715f6cf",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_42_27.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 133311
+ },
+ {
+  "sha256": "d1b1e973ab376d80",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_42_34.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 120727
+ },
+ {
+  "sha256": "c3adf90b8f622ba8",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_42_39.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 86677
+ },
+ {
+  "sha256": "72c3e9959ccdf265",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_42_45.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 82521
+ },
+ {
+  "sha256": "3b771e694783035a",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_42_57.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 69167
+ },
+ {
+  "sha256": "114dc546c4a94edb",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-1-tickets-studio-2026-07-26-08_43_03.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 528699
+ },
+ {
+  "sha256": "5f788dc8b27758de",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-2026-07-26-08_28_31.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 92250
+ },
+ {
+  "sha256": "0c84db1a6047bbcd",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-2026-07-26-08_28_40.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 106614
+ },
+ {
+  "sha256": "63310fb9a8d7ce75",
+  "origem": "captura-odoo",
+  "arquivo": "screencapture-innovar1-odoo-odoo-helpdesk-2026-07-26-08_38_16.png",
+  "legenda": null,
+  "modulo": "sac",
+  "bytes": 83181
+ },
+ {
+  "sha256": "44893f483da79f2f",
+  "origem": "comentada",
+  "arquivo": "008.png",
+  "legenda": "kambam, lista, calendário, tabela dinâmica, gráfico, localização, tarefas",
+  "modulo": "tarefas",
+  "bytes": 2255
+ },
+ {
+  "sha256": "0a6fd52f650d42c5",
+  "origem": "auditoria-repo",
+  "arquivo": "24-innov-menu-compacto-aberto.png",
+  "legenda": null,
+  "modulo": "transversal",
+  "bytes": 62828
+ },
+ {
+  "sha256": "b8c8648fecc0c211",
+  "origem": "comentada",
+  "arquivo": "001.png",
+  "legenda": "adicionar novos cards as etapas e configuração aparece ao passar o mouse por cima",
+  "modulo": "transversal",
+  "bytes": 70457
+ },
+ {
+  "sha256": "5fa93d48d324754d",
+  "origem": "comentada",
+  "arquivo": "003.png",
+  "legenda": "busca com filtro",
+  "modulo": "transversal",
+  "bytes": 5533
+ },
+ {
+  "sha256": "2e5e8ae16ac73d1a",
+  "origem": "comentada",
+  "arquivo": "011.png",
+  "legenda": "menu padrão",
+  "modulo": "transversal",
+  "bytes": 3656
+ },
+ {
+  "sha256": "9d01add919d066d3",
+  "origem": "comentada",
+  "arquivo": "015.png",
+  "legenda": "Padrão de criação de novos inputs, publicar, etc",
+  "modulo": "transversal",
+  "bytes": 5581
+ },
+ {
+  "sha256": "8c88a3feba4417d9",
+  "origem": "comentada",
+  "arquivo": "019.png",
+  "legenda": "repare os padrões do card, como eles reaproveiram quase tudo do layout e acrescentam alguns objetos, porem tudo é parecido e semelhante, só mudam algumas coisas conforme a tarefa da pessoa que realiza a atividade e precisa de campos específicos",
+  "modulo": "transversal",
+  "bytes": 95713
+ },
+ {
+  "sha256": "fd238204353e6db3",
+  "origem": "comentada",
+  "arquivo": "022.png",
+  "legenda": "tela inicial projeto, um card por projeto, o restante segue o mesmo padrão",
+  "modulo": "transversal",
+  "bytes": 60077
+ }
+]
