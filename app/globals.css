@@ -3315,11 +3315,13 @@ main.content {
    para 3,89:1, abaixo do mínimo. Um azul um passo mais escuro devolve a
    legibilidade sem mudar a identidade. Só `.button-primary` existe no
    repositório — verificado no navegador antes de escrever a regra. */
-:root[data-tema="escuro"] .button-primary {
+:root[data-tema="escuro"] .button-primary,
+:root[data-tema="escuro"] .smart-search-submit {
   background: #2c5fae;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-tema="claro"]) .button-primary {
+  :root:not([data-tema="claro"]) .button-primary,
+  :root:not([data-tema="claro"]) .smart-search-submit {
     background: #2c5fae;
   }
 }
@@ -3370,4 +3372,49 @@ main.content {
   .barra-superior {
     grid-template-columns: minmax(320px, auto) minmax(280px, 520px) minmax(340px, auto);
   }
+}
+
+/* Situação da etapa, na tabela do portfólio. `<small>` é inline e ficava colado
+   no título: a célula lia "Sem tarefa abertaACTIVE". Linha própria e cor de
+   apoio separam as duas informações. */
+.data-table td > strong + small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+/* ── Tema escuro em componentes transversais ────────────────────────────────
+   Mesma causa raiz da VACINA-043, agora fora do launcher: cor fixa que só vale
+   num tema, usada em componente que aparece em toda tela.
+
+   Medido em /app/planejamento no escuro:
+     tbody tr:hover  → fundo #fafcfd (quase branco) com texto claro por cima,
+                       1,05:1. Passar o mouse numa linha APAGAVA a linha, em
+                       toda tabela do sistema;
+     .badge-success  → texto #245540 sobre --success-soft #14291f, 1,79:1;
+                       verde escuro sobre verde escuro.
+
+   O fundo do hover passa a ser token, e o texto dos selos passa a ser o token
+   de cor forte, que existe nos dois temas. */
+tbody tr:hover { background: var(--surface-muted); }
+
+:root[data-tema="escuro"] .badge-warning,
+:root[data-tema="escuro"] .badge-success,
+:root[data-tema="escuro"] .badge-danger {
+  border-color: transparent;
+}
+:root[data-tema="escuro"] .badge-warning { color: #f0c07a; }
+:root[data-tema="escuro"] .badge-success { color: #7fd0a8; }
+:root[data-tema="escuro"] .badge-danger { color: #f0a0a8; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .badge-warning,
+  :root:not([data-tema="claro"]) .badge-success,
+  :root:not([data-tema="claro"]) .badge-danger {
+    border-color: transparent;
+  }
+  :root:not([data-tema="claro"]) .badge-warning { color: #f0c07a; }
+  :root:not([data-tema="claro"]) .badge-success { color: #7fd0a8; }
+  :root:not([data-tema="claro"]) .badge-danger { color: #f0a0a8; }
 }
