@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { proximoCodigo } from "@/lib/planejamento/eap";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
 
@@ -48,6 +49,55 @@ function revalidateSchedule(projectId: string): void {
   revalidatePath(`/app/obras/${projectId}/tarefas`);
 }
 
+
+/**
+ * Código da EAP calculado, não digitado.
+ *
+ * "se já temos na tabela salvo o sequenciamento dos itens por que toda vez
+ * fazer o usuário digitar?" — a pergunta é justa. O sistema conhece os irmãos,
+ * então conhece o próximo número. O campo continua aceitando valor manual para
+ * quem precisa espelhar uma EAP contratual que já existe em papel; o que muda é
+ * que **vazio não é mais erro**.
+ */
+async function codigoDaEtapa(
+  supabase: Awaited<ReturnType<typeof requireOrganizationContext>>["supabase"],
+  projectId: string,
+  parentId: string | null,
+  informado: string
+): Promise<string> {
+  if (informado) return informado;
+  const { data } = await supabase
+    .from("work_breakdown_items")
+    .select("id,code")
+    .eq("project_id", projectId);
+  const codigos = (data ?? []).map(linha => String(linha.code ?? ""));
+  let paiCodigo: string | null = null;
+  if (parentId) {
+    const pai = (data ?? []).find(linha => linha.id === parentId);
+    paiCodigo = pai ? String(pai.code ?? "") : null;
+  }
+  return proximoCodigo(codigos, paiCodigo);
+}
+
+/** Mesma regra para atividade: numera dentro da etapa da EAP quando há uma. */
+async function codigoDaAtividade(
+  supabase: Awaited<ReturnType<typeof requireOrganizationContext>>["supabase"],
+  projectId: string,
+  wbsId: string | null,
+  informado: string
+): Promise<string> {
+  if (informado) return informado;
+  const [tarefas, etapas] = await Promise.all([
+    supabase.from("project_tasks").select("code").eq("project_id", projectId),
+    wbsId
+      ? supabase.from("work_breakdown_items").select("code").eq("id", wbsId).maybeSingle()
+      : Promise.resolve({ data: null })
+  ]);
+  const codigos = (tarefas.data ?? []).map(linha => String(linha.code ?? ""));
+  const paiCodigo = etapas.data ? String((etapas.data as { code?: string }).code ?? "") : null;
+  return proximoCodigo(codigos, paiCodigo || null);
+}
+
 export async function createScheduleWbs(formData: FormData) {
   const projectId = text(formData, "projectId");
   const code = text(formData, "code").toUpperCase();
@@ -55,15 +105,16 @@ export async function createScheduleWbs(formData: FormData) {
   const plannedStart = optionalText(formData, "plannedStart");
   const plannedEnd = optionalText(formData, "plannedEnd");
 
-  if (!projectId || !code || !title) fail(projectId, "Informe o código e o nome da etapa da EAP.");
+  if (!projectId || !title) fail(projectId, "Informe o nome da etapa da EAP.");
   validatePeriod(projectId, plannedStart, plannedEnd);
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(scheduleRoles);
+  const parentId = optionalText(formData, "parentId");
   const { error } = await supabase.from("work_breakdown_items").insert({
     organization_id: organizationId,
     project_id: projectId,
-    parent_id: optionalText(formData, "parentId"),
-    code,
+    parent_id: parentId,
+    code: await codigoDaEtapa(supabase, projectId, parentId, code),
     title,
     description: optionalText(formData, "description"),
     sequence: optionalNumber(formData, "sequence") ?? 0,
@@ -85,17 +136,18 @@ export async function createScheduleTask(formData: FormData) {
   const plannedEnd = optionalText(formData, "plannedEnd");
   const durationDays = optionalNumber(formData, "durationDays") ?? 1;
 
-  if (!projectId || !code || !title) fail(projectId, "Informe o código e o nome da atividade.");
+  if (!projectId || !title) fail(projectId, "Informe o nome da atividade.");
   if (durationDays < 0) fail(projectId, "A duração não pode ser negativa.");
   validatePeriod(projectId, plannedStart, plannedEnd);
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(scheduleRoles);
+  const wbsId = optionalText(formData, "wbsId");
   const { error } = await supabase.from("project_tasks").insert({
     organization_id: organizationId,
     project_id: projectId,
-    wbs_id: optionalText(formData, "wbsId"),
+    wbs_id: wbsId,
     parent_task_id: optionalText(formData, "parentTaskId"),
-    code,
+    code: await codigoDaAtividade(supabase, projectId, wbsId, code),
     title,
     description: optionalText(formData, "description"),
     status: "BACKLOG",

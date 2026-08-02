@@ -1,6 +1,7 @@
 "use server";
 
 import{randomUUID}from"node:crypto";
+import { lerMoeda } from "@/lib/validacao/moeda";
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireClientContext}from"@/lib/auth";
@@ -16,7 +17,10 @@ import{checarCamposBR}from"@/lib/validacao/formulario";
 
 function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
-function numberOrNull(value:unknown){if(value===null||value===undefined||String(value).trim()==="")return null;const parsed=Number(value);return Number.isFinite(parsed)?parsed:null;}
+// Lê valor monetário tolerando o que gente digita e o que planilha cola:
+// "1.500,25", "1500.25" e "R$ 1.500,00" chegam ao mesmo número. `Number()` cru
+// lia "1.500" como 1,5 — erro de três ordens de grandeza num campo de dinheiro.
+function numberOrNull(value:unknown){return lerMoeda(value as string|number|null|undefined);}
 function boolean(data:FormData,key:string){return data.get(key)!==null;}
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}
 function resultRow<T extends Record<string,unknown>>(value:T|T[]|null){return Array.isArray(value)?value[0]??null:value;}

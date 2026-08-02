@@ -1,3 +1,4 @@
+import { CampoMoeda } from "@/components/campos/campos-br";
 import { notFound } from "next/navigation";
 import { createProjectResource, createTeam } from "@/app/actions/projects";
 import { ProjectNav } from "@/components/project-nav";
@@ -117,7 +118,7 @@ export default async function TeamsPage({
             <label>Tipo<select name="resourceType" required><option value="LABOR">Mão de obra</option><option value="EQUIPMENT">Equipamento</option><option value="MATERIAL">Material</option><option value="SUBCONTRACTOR">Subcontratado</option></select></label>
             <div className="field-grid"><label>Código<input name="code" /></label><label>Unidade<input name="unit" defaultValue="un" required /></label></div>
             <label>Nome<input name="name" required /></label>
-            <div className="field-grid"><label>Custo/hora<input type="number" step="0.01" name="hourlyCost" /></label><label>Custo/dia<input type="number" step="0.01" name="dailyCost" /></label></div>
+            <div className="field-grid"><CampoMoeda name="hourlyCost" label="Custo/hora" /><CampoMoeda name="dailyCost" label="Custo/dia" /></div>
             <button className="button button-primary" type="submit">Adicionar recurso</button>
           </form>
         </article>

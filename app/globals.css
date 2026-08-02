@@ -3418,3 +3418,30 @@ tbody tr:hover { background: var(--surface-muted); }
   :root:not([data-tema="claro"]) .badge-success { color: #7fd0a8; }
   :root:not([data-tema="claro"]) .badge-danger { color: #f0a0a8; }
 }
+
+/* Campo de moeda: símbolo fixo à esquerda, número alinhado à direita como em
+   extrato. Substitui `type="number"`, onde "1.500" virava 1,5. */
+.campo-moeda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--paper);
+}
+.campo-moeda:focus-within { border-color: var(--brand); box-shadow: 0 0 0 3px var(--ring); }
+.campo-moeda-simbolo { color: var(--muted); font-size: 0.82rem; font-weight: 700; }
+.campo-moeda input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.campo-moeda input:focus { outline: none; }

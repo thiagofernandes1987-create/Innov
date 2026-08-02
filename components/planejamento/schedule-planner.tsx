@@ -691,7 +691,7 @@ export function SchedulePlanner({
           <form action={createScheduleWbs} className={styles.modalBody}>
             <input type="hidden" name="projectId" value={projectId} />
             <div className={styles.formGrid}>
-              <label className={styles.field}>Código EAP<input name="code" placeholder="1.2" required /></label>
+              <label className={styles.field}>Código EAP<input name="code" placeholder="automático" /><small className={styles.dica}>Deixe em branco para numerar sozinho: 1, 1.1, 1.2…</small></label>
               <label className={styles.field}>Etapa superior<select name="parentId" defaultValue=""><option value="">Etapa principal</option>{wbsItems.map(item => <option key={item.id} value={item.id}>{item.code} · {item.title}</option>)}</select></label>
               <label className={styles.fullField}>Nome da etapa<input name="title" required /></label>
               <label className={styles.fullField}>Descrição<textarea name="description" /></label>
@@ -712,7 +712,7 @@ export function SchedulePlanner({
           <form action={createScheduleTask} className={styles.modalBody}>
             <input type="hidden" name="projectId" value={projectId} />
             <div className={styles.formGrid}>
-              <label className={styles.field}>Código<input name="code" placeholder="1.2.10" required /></label>
+              <label className={styles.field}>Código<input name="code" placeholder="automático" /><small className={styles.dica}>Em branco, segue a numeração da etapa escolhida.</small></label>
               <label className={styles.field}>Etapa da EAP<select name="wbsId" defaultValue=""><option value="">Sem etapa</option>{wbsItems.map(item => <option key={item.id} value={item.id}>{item.code} · {item.title}</option>)}</select></label>
               <label className={styles.fullField}>Nome da atividade<input name="title" required /></label>
               <label className={styles.fullField}>Descrição<textarea name="description" /></label>

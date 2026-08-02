@@ -735,3 +735,12 @@
   .formGrid.three,
   .relationColumns { grid-template-columns: 1fr; }
 }
+
+/* Dica sob o campo de código: explica que vazio numera sozinho. O campo
+   continua aceitando valor manual para quem espelha uma EAP contratual. */
+.dica {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
