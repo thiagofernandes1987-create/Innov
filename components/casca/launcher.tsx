@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useBusca } from "./busca-da-barra";
 import { corDoModulo, IconeDoModulo } from "./icones";
+import type { Indicador } from "@/lib/casca/indicadores";
 
 export type AplicativoAutorizado = {
   chave: string;
@@ -15,39 +16,9 @@ export type AplicativoAutorizado = {
   nivel: string;
 };
 
-type Indicador = {
-  rotulo: string;
-  valor: string;
-  apoio?: string;
-  progresso?: number;
-};
 
-const ROTULO_NIVEL: Record<string, string> = {
-  READ: "Leitura",
-  READ_WRITE: "Leitura e edição",
-  FULL: "Acesso completo"
-};
 
-const INDICADORES_DEMONSTRACAO: Record<string, Indicador> = {
-  clientes: { rotulo: "Clientes ativos", valor: "1.243", apoio: "+12%", progresso: 76 },
-  obras: { rotulo: "Em andamento", valor: "18", apoio: "12 em execução", progresso: 64 },
-  planejamento: { rotulo: "Cronogramas ativos", valor: "27", apoio: "4 exigem decisão", progresso: 58 },
-  tarefas: { rotulo: "Em aberto", valor: "142", apoio: "18 atrasadas", progresso: 72 },
-  diario: { rotulo: "Último registro", valor: "28/07/2026", apoio: "Obra Residencial Vereda", progresso: 82 },
-  equipes: { rotulo: "Pessoas alocadas", valor: "236", apoio: "12 equipes", progresso: 69 },
-  orcamentos: { rotulo: "Em análise", valor: "14", apoio: "R$ 3,8 mi", progresso: 61 },
-  propostas: { rotulo: "Enviadas", valor: "23", apoio: "7 aguardando retorno", progresso: 54 },
-  contratos: { rotulo: "Vigentes", valor: "31", apoio: "3 renovações próximas", progresso: 73 },
-  documentos: { rotulo: "Arquivos", valor: "8.742", apoio: "64% de 15 GB", progresso: 64 },
-  qualidade: { rotulo: "Não conformidades", valor: "9", apoio: "2 críticas", progresso: 32 },
-  financeiro: { rotulo: "Conciliação", valor: "94%", apoio: "7 pendências", progresso: 94 },
-  compras: { rotulo: "Pedidos abertos", valor: "38", apoio: "6 críticos", progresso: 66 },
-  estoque: { rotulo: "Itens monitorados", valor: "2.418", apoio: "11 abaixo do mínimo", progresso: 78 },
-  sac: { rotulo: "Chamados abertos", valor: "17", apoio: "3 vencendo hoje", progresso: 48 },
-  relatorios: { rotulo: "Painéis salvos", valor: "12", apoio: "Atualizados hoje", progresso: 85 },
-  auditoria: { rotulo: "Eventos hoje", valor: "286", apoio: "Sem bloqueios", progresso: 91 },
-  administracao: { rotulo: "Usuários ativos", valor: "84", apoio: "16 perfis", progresso: 80 }
-};
+
 
 const TODAS = "__todas__";
 
@@ -60,10 +31,11 @@ function normalizar(texto: string): string {
 
 export function Launcher({
   aplicativos,
-  demonstracao = false
+  indicadores = {}
 }: {
   aplicativos: AplicativoAutorizado[];
-  demonstracao?: boolean;
+  /** Contagem real por módulo. Ausente = card sem indicador, nunca número inventado. */
+  indicadores?: Record<string, Indicador>;
 }) {
   const busca = useBusca();
   const [categoria, setCategoria] = useState(TODAS);
@@ -165,7 +137,7 @@ export function Launcher({
               <li key={app.chave}>
                 <AplicativoCard
                   aplicativo={app}
-                  indicador={demonstracao ? INDICADORES_DEMONSTRACAO[app.chave] : undefined}
+                  indicador={indicadores[app.chave]}
                   mostrarIndicadores={mostrarIndicadores}
                 />
               </li>
@@ -240,16 +212,115 @@ function AplicativoCard({
       <strong>{aplicativo.nome}</strong>
       <p>{aplicativo.descricao}</p>
 
-      {mostrarIndicadores ? (
+      {mostrarIndicadores && indicador ? (
         <span className="launcher-indicador">
-          <small>{indicador?.rotulo ?? "Permissão no módulo"}</small>
-          <b>{indicador?.valor ?? ROTULO_NIVEL[aplicativo.nivel] ?? aplicativo.nivel}</b>
-          {indicador?.apoio ? <em>{indicador.apoio}</em> : null}
-          {indicador?.progresso !== undefined ? (
-            <progress max={100} value={indicador.progresso} aria-label={`${indicador.rotulo}: ${indicador.valor}`} />
-          ) : null}
+          <small>{indicador.rotulo}</small>
+          <b>{indicador.valor}</b>
+          {indicador.apoio ? <em>{indicador.apoio}</em> : null}
+          <FormaDoIndicador indicador={indicador} />
         </span>
       ) : null}
     </Link>
   );
+}
+
+// ── Formas do micro-indicador ───────────────────────────────────────────────
+//
+// Alvo visual de 2 de agosto: a forma acompanha a natureza do dado, não o gosto
+// de quem desenha. Série para o que varia no tempo, etapas para o que percorre
+// um fluxo, faixas para o que se reparte entre estados, uso para o que enche,
+// barras para distribuição, pessoas para quem é gente.
+//
+// Tudo em SVG inline e CSS: nenhuma biblioteca de gráfico entra na tela inicial,
+// que é a primeira coisa que todo usuário carrega.
+
+function FormaDoIndicador({ indicador }: { indicador: Indicador }) {
+  const forma = indicador.forma;
+  if (!forma) return null;
+
+  if (forma.tipo === "serie") {
+    const pontos = forma.pontos;
+    if (pontos.length < 2) return null;
+    const max = Math.max(...pontos);
+    const min = Math.min(...pontos);
+    const faixa = max - min || 1;
+    const d = pontos
+      .map((v, i) => `${(i / (pontos.length - 1)) * 100},${28 - ((v - min) / faixa) * 24}`)
+      .join(" L ");
+    return (
+      <svg className="ind-serie" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+        <path d={`M ${d}`} fill="none" stroke="var(--cor-app, currentColor)" strokeWidth="1.6" vectorEffect="non-scaling-stroke" />
+      </svg>
+    );
+  }
+
+  if (forma.tipo === "etapas") {
+    return (
+      <span className="ind-etapas" aria-hidden="true">
+        {forma.etapas.map(etapa => (
+          <span key={etapa.rotulo} className={etapa.ativo ? "ind-etapa ativa" : "ind-etapa"}>
+            <i />
+            <small>{etapa.rotulo}</small>
+          </span>
+        ))}
+      </span>
+    );
+  }
+
+  if (forma.tipo === "faixas") {
+    const total = forma.faixas.reduce((soma, f) => soma + f.valor, 0) || 1;
+    return (
+      <span className="ind-faixas">
+        <span className="ind-faixas-barra" aria-hidden="true">
+          {forma.faixas.map(f => (
+            <i key={f.rotulo} data-tom={f.tom} style={{ width: `${(f.valor / total) * 100}%` }} />
+          ))}
+        </span>
+        <span className="ind-faixas-legenda">
+          {forma.faixas.map(f => (
+            <span key={f.rotulo}>
+              <i data-tom={f.tom} aria-hidden="true" />
+              {f.rotulo}
+              <b>{f.valor}</b>
+            </span>
+          ))}
+        </span>
+      </span>
+    );
+  }
+
+  if (forma.tipo === "uso") {
+    return (
+      <span className="ind-uso">
+        <progress max={100} value={forma.percentual} aria-label={`${indicador.rotulo}: ${forma.apoio}`} />
+        <small>{forma.apoio}</small>
+      </span>
+    );
+  }
+
+  if (forma.tipo === "barras") {
+    const max = Math.max(...forma.valores, 1);
+    return (
+      <span className="ind-barras" aria-hidden="true">
+        {forma.valores.map((v, i) => (
+          <i key={i} style={{ height: `${Math.max(8, (v / max) * 100)}%` }} />
+        ))}
+      </span>
+    );
+  }
+
+  if (forma.tipo === "pessoas") {
+    const bolhas = Math.min(5, forma.total);
+    const resto = forma.total - bolhas;
+    return (
+      <span className="ind-pessoas" aria-hidden="true">
+        {Array.from({ length: bolhas }, (_, i) => (
+          <i key={i} />
+        ))}
+        {resto > 0 ? <b>+{resto}</b> : null}
+      </span>
+    );
+  }
+
+  return null;
 }

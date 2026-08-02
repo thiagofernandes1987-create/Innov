@@ -150,8 +150,14 @@ p { margin-top: 0; }
   transform: translateY(-180%);
   padding: 10px 14px;
   border-radius: var(--radius-sm);
-  color: white;
-  background: var(--brand-strong);
+  /* `--brand-strong` INVERTE entre os temas — #0f3767 no claro, #72a8f3 no
+     escuro — então nem branco nem tinta servem para os dois. Justo o atalho de
+     acessibilidade era o elemento menos acessível da tela: branco sobre o azul
+     claro dava 2,44:1. `--ink` é escuro nos dois temas, e branco sobre ele
+     passa nos dois. Par estável vence par bonito. */
+  color: #fff;
+  background: var(--ink);
+  outline: 2px solid var(--brand-strong);
   box-shadow: var(--shadow-sm);
   font-weight: 800;
   transition: transform var(--transition-fast);
@@ -2793,7 +2799,10 @@ tbody tr:hover { background: #fafcfd; }
 }
 
 .launcher-indicador b {
-  color: #fff;
+  /* Era `#fff`: o valor do indicador — o único número do card — ficava branco
+     sobre card claro, 1,08:1, invisível nos 20 cards. Mesma causa da
+     VACINA-043, e escapou porque a varredura tratou `#fff` como seguro. */
+  color: var(--text);
   font-size: 1.2rem;
   line-height: 1.1;
   font-weight: 560;
@@ -3116,4 +3125,115 @@ tbody tr:hover { background: #fafcfd; }
   .pipeline-grafico-linha span {
     text-align: left;
   }
+}
+
+/* ── Formas do micro-indicador do card ──────────────────────────────────────
+   Alvo visual de 2 de agosto. A forma acompanha a natureza do dado: série para
+   o que varia no tempo, etapas para o que percorre um fluxo, faixas para o que
+   se reparte entre estados, uso para o que enche, barras para distribuição,
+   pessoas para quem é gente. Tudo em SVG inline e CSS — nenhuma biblioteca de
+   gráfico na primeira tela que todo usuário carrega. */
+
+.launcher-indicador .ind-serie {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 34px;
+  margin-top: 10px;
+  color: var(--brand);
+  opacity: 0.95;
+}
+
+.launcher-indicador .ind-etapas {
+  grid-column: 1 / -1;
+  margin-top: 14px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: start;
+  position: relative;
+}
+.launcher-indicador .ind-etapas::before {
+  content: "";
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 5px;
+  height: 2px;
+  background: var(--border);
+}
+.launcher-indicador .ind-etapa { display: grid; justify-items: center; gap: 6px; position: relative; }
+.launcher-indicador .ind-etapa i {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid var(--border-strong);
+  background: var(--surface);
+}
+.launcher-indicador .ind-etapa.ativa i {
+  border-color: var(--cor-app, var(--brand));
+  background: var(--cor-app, var(--brand));
+}
+.launcher-indicador .ind-etapa small { color: var(--muted); font-size: 0.62rem; text-align: center; }
+
+.launcher-indicador .ind-faixas { grid-column: 1 / -1; margin-top: 12px; display: grid; gap: 8px; }
+.launcher-indicador .ind-faixas-barra {
+  display: flex;
+  height: 7px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-muted);
+}
+.launcher-indicador .ind-faixas-barra i { display: block; height: 100%; }
+.launcher-indicador .ind-faixas-legenda { display: grid; gap: 3px; }
+.launcher-indicador .ind-faixas-legenda span {
+  display: grid;
+  grid-template-columns: 9px 1fr auto;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+.launcher-indicador .ind-faixas-legenda i { width: 8px; height: 8px; border-radius: 2px; }
+.launcher-indicador .ind-faixas-legenda b { color: var(--text); font-size: 0.7rem; font-weight: 600; }
+.launcher-indicador [data-tom="atraso"] { background: #d1584f; }
+.launcher-indicador [data-tom="hoje"] { background: #d99a3f; }
+.launcher-indicador [data-tom="prazo"] { background: #3f9d7c; }
+
+.launcher-indicador .ind-uso { grid-column: 1 / -1; margin-top: 12px; display: grid; gap: 6px; }
+.launcher-indicador .ind-uso small { color: var(--muted); font-size: 0.66rem; }
+
+.launcher-indicador .ind-barras {
+  grid-column: 1 / -1;
+  margin-top: 12px;
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 34px;
+}
+.launcher-indicador .ind-barras i {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  background: var(--cor-app, var(--brand));
+  opacity: 0.85;
+}
+
+.launcher-indicador .ind-pessoas {
+  grid-column: 1 / -1;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+}
+.launcher-indicador .ind-pessoas i {
+  width: 26px;
+  height: 26px;
+  margin-right: -7px;
+  border-radius: 999px;
+  border: 2px solid var(--surface);
+  background: linear-gradient(140deg, var(--cor-app, var(--brand)), color-mix(in srgb, var(--cor-app, var(--brand)) 45%, #8fb6ea));
+}
+.launcher-indicador .ind-pessoas b {
+  margin-left: 14px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 600;
 }
