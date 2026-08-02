@@ -3323,3 +3323,51 @@ main.content {
     background: #2c5fae;
   }
 }
+
+/* ── Área de toque mínima ───────────────────────────────────────────────────
+   Critério de aceitação do QA: alvo interativo com pelo menos 44px nos dois
+   eixos. Medido em /app/crm, os botões de ícone já tinham 44px de ALTURA e
+   falhavam só na largura — 28px na engrenagem da etapa e no `+`, 32px nos sete
+   ícones de visualização, 36px no alternador de tema. Ícone quadrado precisa
+   ser quadrado nos dois lados; o desenho não muda, o alvo cresce. */
+.barra-visao,
+.coluna-acao,
+.funil-engrenagem,
+.alternador-tema-opcao {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Os menus do módulo tinham 33px de altura na barra superior, que tem 76px —
+   cabem 44 sem mexer na altura da barra. */
+.barra-menu {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* O campo de busca tinha 40px. */
+.busca-global input,
+.barra-busca input {
+  min-height: 44px;
+}
+
+/* No cartão do kanban só o título era clicável, com 220x19. O alvo efetivo
+   passa a ser o cartão inteiro: o título ocupa a área, em vez de o usuário ter
+   de acertar uma linha de texto de 19px. */
+.pipeline-cartao { position: relative; }
+.pipeline-cartao-titulo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+/* O alvo mínimo de 44px alargou o alternador de tema em 24px, e a barra
+   superior passou a estourar 8px em 1366. A busca é quem cede: ela tem faixa
+   elástica e continua confortável com 280px de mínimo, enquanto as ações da
+   direita são todas alvos de toque e não podem encolher. */
+@media (min-width: 1261px) and (max-width: 1699px) {
+  .barra-superior {
+    grid-template-columns: minmax(320px, auto) minmax(280px, 520px) minmax(340px, auto);
+  }
+}
