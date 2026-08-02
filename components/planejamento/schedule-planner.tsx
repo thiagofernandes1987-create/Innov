@@ -276,9 +276,17 @@ export function SchedulePlanner({
   const taskById = useMemo(() => new Map(tasks.map(task => [task.id, task])), [tasks]);
   const selectedTask = editorTaskId ? taskById.get(editorTaskId) ?? null : null;
 
-  useEffect(() => {
+  // Volta para a aba "geral" quando o editor troca de tarefa.
+  //
+  // Ajuste **durante a renderização**, não em `useEffect`: o efeito rodava
+  // depois da pintura, então a aba antiga aparecia por um quadro na tarefa
+  // nova, e o lint reprova por renderização em cascata. O padrão do React para
+  // estado derivado de prop é comparar com o valor anterior guardado em estado.
+  const [tarefaDoEditor, setTarefaDoEditor] = useState<string | null>(editorTaskId);
+  if (tarefaDoEditor !== editorTaskId) {
+    setTarefaDoEditor(editorTaskId);
     setEditorTab("general");
-  }, [editorTaskId]);
+  }
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {

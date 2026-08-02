@@ -2235,6 +2235,12 @@ tbody tr:hover { background: #fafcfd; }
 .gantt-escala { position: sticky; top: 0; z-index: 3; }
 .gantt-cabecalho-vazio { position: sticky; top: 0; z-index: 3; }
 
+/* QA visual — tema claro do launcher.
+   As cores acima eram hex fixos amostrados da referência ESCURA (Imagem 3) e
+   ficavam quase invisíveis no tema claro: medido, 78 reprovações WCAG AA na
+   tela inicial, com `#a9b6c5` sobre `#f8f6f1` dando 1,91:1 contra o mínimo de
+   4,5:1. Trocados pelos tokens, que existem nos dois temas. */
+
 /* ── Redesign visual 2026-07-28 ─────────────────────────────────────────────
    A Imagem 3 gerada é o alvo da casca e do launcher. O bloco fica ao fim para
    tornar a reconciliação explícita enquanto os estilos históricos continuam
@@ -2542,7 +2548,7 @@ tbody tr:hover { background: #fafcfd; }
   border: 1px solid var(--border);
   border-radius: 7px;
   background: transparent;
-  color: #bac5d2;
+  color: var(--muted);
   font-size: 0.75rem;
   font-weight: 520;
 }
@@ -2561,7 +2567,7 @@ tbody tr:hover { background: #fafcfd; }
 .launcher-personalizar {
   min-height: 38px;
   padding: 0 10px;
-  color: #d8e0e9;
+  color: var(--text);
   border: 0;
   background: transparent;
   font-size: 0.78rem;
@@ -2655,7 +2661,7 @@ tbody tr:hover { background: #fafcfd; }
   padding: 4px 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
-  color: #afbdcb;
+  color: var(--muted);
   font-size: 0.64rem;
   line-height: 1.25;
 }
@@ -2670,7 +2676,7 @@ tbody tr:hover { background: #fafcfd; }
 .launcher-destaque > p,
 .launcher-app > p {
   margin: 0;
-  color: #a9b6c5;
+  color: var(--muted);
   font-size: 0.8rem;
   line-height: 1.5;
 }
@@ -2718,15 +2724,15 @@ tbody tr:hover { background: #fafcfd; }
 }
 
 .launcher-recentes a > span:last-child { text-align: right; }
-.launcher-recentes b { color: #e9eef5; font-size: 0.73rem; font-weight: 560; }
-.launcher-recentes small { color: #8598ac; font-size: 0.64rem; }
+.launcher-recentes b { color: var(--text); font-size: 0.73rem; font-weight: 560; }
+.launcher-recentes small { color: var(--muted); font-size: 0.64rem; }
 
 .launcher-ver-todas {
   margin-top: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #e6edf5;
+  color: var(--text);
   font-size: 0.73rem;
 }
 
@@ -2782,7 +2788,7 @@ tbody tr:hover { background: #fafcfd; }
 
 .launcher-indicador small {
   grid-column: 1 / -1;
-  color: #9cabbc;
+  color: var(--muted);
   font-size: 0.69rem;
 }
 
