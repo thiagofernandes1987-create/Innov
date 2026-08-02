@@ -1045,6 +1045,58 @@ não pede trabalho novo — ela **precifica** o que já estava na fila e mostra 
 
 ---
 
+## Sprint S-32 — Reúso de informação: sugestão, documento por modelo e campo próprio
+**Estado:** pendente
+**Marco:** M-5
+
+Ditada pelo responsável em 2 de agosto. Desenho e dissecação em
+[`REUSO-DE-INFORMACAO.md`](REUSO-DE-INFORMACAO.md). Vai para o fim conforme R4.
+
+### O levantamento que mudou o escopo
+
+Metade do pedido **já estava no banco**, e conferir antes de desenhar evitou
+reconstruir o que funciona:
+
+| Pedido | Situação |
+|---|---|
+| Vários seguidores por cartão | **Pronto**: `pipeline_card_followers` com RLS, ações e interface. Verificado no cartão — *"SEGUIDORES 1 · Deixar de seguir"* |
+| Modelo com variáveis | **Metade**: `contract_templates.body_template` e `variables_schema` existem desde a etapa 9; falta o motor e falta sair de contrato |
+| Campos próprios | **Desenhado e nunca construído**: `OBJECT-RUNTIME.md` é canônico e não tem uma migration sequer |
+| Auto-sugestão | Não existe |
+
+### Tarefas
+
+- [ ] T-32.0 — **Catálogo de valores usados** por `(organização, escopo, valor)`, com contagem e último uso. Uma tabela e um componente de campo servem a EAP, funil, marcador, disciplina, unidade, motivo de perda e motivo de parada
+  - [ ] T-32.0.1 — Ordenar por frequência recente e cortar em 8; digitar filtra. Sugestão com 300 valores é ruído
+  - [ ] T-32.0.2 — Valor usado uma vez só há mais de 6 meses sai da lista: erro de digitação antigo não vira sugestão para sempre
+  - [ ] T-32.0.3 — **Sugestão nunca é lista fechada.** É campo de texto com apoio, e valor novo sempre passa
+  - [ ] T-32.0.4 — Limpar o catálogo é ação de administrador, porque o catálogo é da organização
+- [ ] T-32.1 — **Modelo de EAP**: sugerir o conjunto, não só a palavra. Quem cria "Fundação" pela terceira vez com as mesmas cinco atividades embaixo deveria poder trazer as cinco. É o "modelo de projeto" que o atlas mostra em 3 das 46 telas do capítulo Projetos
+- [ ] T-32.2 — **Motor de documento por modelo**, um só para proposta, orçamento, contrato, laudo e ordem de serviço
+  - [ ] T-32.2.1 — Corpo em **Markdown**, não editor proprietário: versiona em diff legível, converte para PDF e DOCX e sobrevive à plataforma. O editor é visual, o que grava é Markdown
+  - [ ] T-32.2.2 — **Variável escolhida, não decorada**: painel com as disponíveis para o escopo, nome legível e valor de exemplo do registro atual; clicar insere. Decorar nome de variável é a razão de esse recurso morrer sem uso
+  - [ ] T-32.2.3 — Vocabulário `{{escopo.campo}}` — `{{cliente.nome_completo}}`, `{{obra.codigo}}`, `{{orcamento.valor_total}}`, `{{hoje}}`. O editor aceita também a forma com sublinhado na colagem e normaliza
+  - [ ] T-32.2.4 — **Substituição, nunca execução**: sem expressão, sem laço, sem chamada, com HTML escapado. Modelo é dado, e dado que executa é o caminho mais curto para extrair o que não se pode ver
+  - [ ] T-32.2.5 — **O dicionário respeita a RLS** de quem gera. Modelo não é caminho para contornar permissão
+  - [ ] T-32.2.6 — **Variável não resolvida aparece**, com contagem de lacunas no envio e bloqueio antes da assinatura. Documento assinado com buraco em branco é pior que documento que não gerou
+  - [ ] T-32.2.7 — **Documento emitido guarda o texto resolvido**, nunca a referência ao molde: contrato não pode mudar porque alguém editou o modelo depois
+  - [ ] T-32.2.8 — Validação do modelo lista variáveis inexistentes **antes** de publicar
+- [ ] T-32.3 — **Campos próprios por objeto**, primeiro corte do Object Runtime, que é canônico desde antes desta sprint e nunca virou migration
+  - [ ] T-32.3.1 — A tela pergunta **o que a informação faz** — "é uma data?", "é uma pessoa da equipe?", "é dinheiro?" — e o tipo sai daí. O usuário não responde "qual tipo?" na forma técnica
+  - [ ] T-32.3.2 — **Nasce filtrável**: campo que não entra na busca vira campo que ninguém lê
+  - [ ] T-32.3.3 — Campo do tipo pessoa **inscreve como seguidor** quando preenchido — é o que faz "arquiteto do projeto" valer mais que texto
+  - [ ] T-32.3.4 — Sugestão de campo existente por nome parecido **antes** de criar, para não nascerem "Arquiteto" e "arquiteto"
+  - [ ] T-32.3.5 — Arquivar em vez de excluir, preservando o preenchido; obrigatoriedade vale para frente e não invalida registro antigo
+
+### Ordem, e por que ela inverte a intuição
+
+Sugestão primeiro, documento depois, campo próprio por último — apesar de campo
+próprio ser o mais estruturante. Sugestão e documento **entregam sozinhos**;
+campo próprio entrega melhor depois que os dois existem, porque um campo
+"Arquiteto" criado hoje já quer aparecer no contrato amanhã.
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.
