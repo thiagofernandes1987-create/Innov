@@ -3,94 +3,98 @@
 Localizado em 2 de agosto de 2026, a pedido do responsável: *"você consegue
 localizar os 261 screenshots? eles são as referências das telas dos apps"*.
 
-## O que foi encontrado — e o que não foi
+## As 261 estão no atlas, não soltas
 
-**193 imagens únicas**, contadas por hash SHA-256 depois de remover duplicatas.
-Não são 261. O que existe está listado abaixo; **cerca de 68 referências não
-estão neste ambiente** e não foram localizadas em lugar nenhum a que esta sessão
-tenha acesso.
+Primeira resposta desta sessão foi **errada por busca incompleta**: eu contei
+193 imagens únicas espalhadas em anexos e disse que ~68 não existiam. O
+responsável corrigiu — *"está nos zips"* — e estavam: as 261 são os objetos de
+imagem embutidos em **`Odoo19_Atlas_Visual_Comentado.pdf`**, dentro de
+`Ebook_Odoo_2.zip`.
 
-| Origem | Únicas | Onde estava |
+O próprio atlas se descreve: *"Menus, funcionalidades e 261 telas reais
+explicadas uma por uma"*, *"12 módulos organizados por capítulo"*, *"telas
+fornecidas pelo usuário + documentação oficial Odoo 19"*.
+
+**Lição de método:** contar o que está solto e concluir que o resto não existe é
+concluir a partir da própria varredura, não a partir do material. Arquivo
+composto — PDF, zip aninhado — precisa ser aberto antes de qualquer contagem.
+
+## O que foi versionado
+
+| Conjunto | Telas | Onde |
 |---|---:|---|
-| Capturas do Odoo | 124 | `Fotos_1.zip`, anexo do chat |
-| **Comentadas pelo responsável** | **26** | `comentarios_nos_nomes_das_fotos.zip`, anexo do chat |
-| Auditoria já versionada | 30 | `artifacts/odoo-audit-2026-07-28/` |
-| Avulsas | 13 | anexos soltos do chat |
-| **Total** | **193** | 38,8 MB |
+| **Atlas comentado, completo** | **261** | [`atlas-odoo/`](atlas-odoo/) + [`catalogo.json`](atlas-odoo/catalogo.json) |
+| Comentadas no nome do arquivo | 26 | [`odoo-comentadas/`](odoo-comentadas/) |
+| Auditoria anterior | 30 | `artifacts/odoo-audit-2026-07-28/` |
 
-### Por que a diferença até 261 importa
+O atlas tem 13,3 MB e substitui a contagem anterior como fonte canônica. As 26
+comentadas continuam porque trazem instrução escrita pelo responsável que o
+atlas não tem.
 
-Anexo de chat vive fora do repositório e **o contêiner é reciclado**. As 163 que
-vieram por anexo existiam apenas no diretório de uploads desta sessão; as ~68
-que faltam provavelmente vieram em sessões anteriores, cujos anexos já não
-existem. Referência que só existe em anexo é referência que a plataforma perde.
+## Cada tela vem com o que observar
 
-**É por isso que as 26 comentadas foram versionadas agora**, em
-`docs/referencias/odoo-comentadas/`: são as de maior valor por byte, porque
-carregam a instrução escrita pelo próprio responsável no nome do arquivo.
+O atlas não é álbum: cada captura tem módulo, caminho de menu, quando usar, o
+que observar e a ação típica. **As 261 têm os quatro campos preenchidos.**
+Exemplo, de `catalogo.json`:
 
-As outras 167 continuam disponíveis nesta sessão e podem ser versionadas a
-pedido — são mais 35 MB, e essa é uma decisão do responsável, não minha.
+```json
+{
+  "arquivo": "crm-001.jpg",
+  "modulo_innovar": "crm",
+  "onde_fica": "CRM > Vendas > Meu funil",
+  "o_que_observar": "Kanban, busca, filtros e indicadores ajudam a organizar o funil."
+}
+```
 
-## Distribuição por módulo
+Isso muda o loop de QA: cada módulo passa a ter alvo visual **com critério
+escrito**, em vez de "parecer com a captura".
 
-| Módulo | Referências |
+## Distribuição por módulo da Innovar
+
+| Módulo | Telas |
 |---|---:|
-| Não classificado | 52 |
-| SAC / Helpdesk | 44 |
-| Assinaturas | 39 |
-| Compras | 20 |
-| CRM | 10 |
-| Obras / Projetos | 7 |
-| Transversal (padrão de layout) | 7 |
-| Início / Aplicativos | 4 |
-| Planejamento | 3 |
-| Administração | 2 |
-| Autenticação | 2 |
-| Clientes | 2 |
-| Tarefas | 1 |
+| Assinaturas | 52 |
+| Obras / Projetos | 46 |
+| Administração (Studio e Configurações) | 39 |
+| Clientes / Contatos | 29 |
+| CRM | 27 |
+| Compras | 25 |
+| SAC / Central de Ajuda | 24 |
+| Tarefas / Compromissos | 14 |
+| Transversal (Discuss, Calendário) | 4 |
+| Início / Aplicativos | 1 |
 
-O desequilíbrio é informação: **helpdesk e assinaturas concentram 83 das 193**,
-porque foram os fluxos percorridos com mais profundidade no Odoo. Módulos com
-uma ou duas referências não têm alvo visual suficiente, e para eles a régua é o
-padrão transversal, não uma tela específica.
+O desequilíbrio é informação. **Assinaturas, Obras e Administração concentram
+137 das 261** — são os fluxos percorridos com mais profundidade. Módulos sem
+tela própria — Financeiro, Estoque, Orçamentos, Propostas, Qualidade, Diário,
+Relatórios, Auditoria, Equipes — **não têm alvo visual**, e para eles a régua é
+o padrão transversal, nunca uma tela inventada.
 
-## As 26 comentadas — a instrução está no nome do arquivo
+## A regra que as referências repetem
 
-Versionadas em [`odoo-comentadas/`](odoo-comentadas/), com
-[`indice.json`](odoo-comentadas/indice.json). O responsável escreveu o que
-observar no próprio nome; os comentários que mais governam desenho:
+Três capturas comentadas dizem a mesma coisa por ângulos diferentes:
 
 - *"repare que sempre tem os mesmos conteúdos padrão, menus, notificação, ícones
   de tipo de visualização, onde acrescenta arquivos, adicionar mais etapas ao
   pipeline, tipos de cards, todos seguem um padrão de layout em todos os
   módulos"*
-- *"repare como tudo é padronizado, todas as visualizações tipo kanban, listas,
-  onde tem pipeline segue o mesmo padrão, o que você faz para um se aplica a
-  quase todos"*
-- *"repare os padrões do card, como eles reaproveitam quase tudo do layout e
-  acrescentam alguns objetos, porém tudo é parecido e semelhante, só mudam
-  algumas coisas conforme a tarefa da pessoa que realiza a atividade e precisa
-  de campos específicos"*
-- *"Mensagens, Notificações, studio e usuário, campo de escolha de tema deveria
-  ficar aqui"*
-- *"Padrão em todos cards, mensagens, atividades, notas, whatsapp e ação"*
-- *"kanban, lista, calendário, tabela dinâmica, gráfico, localização, tarefas"*
-- *"tela inicial dos aplicativos, olha como é colorida e moderna"*
-- *"tela inicial projeto, um card por projeto, o restante segue o mesmo padrão"*
-- *"adicionar novos cards às etapas e configuração aparece ao passar o mouse por
-  cima"*
-- *"Criar e editar etapas pipeline, depois você movimenta segurando e arrastando
-  o mouse"*
-- *"Padrão de criação de novos inputs, publicar, etc"*
+- *"repare como tudo é padronizado (…) o que você faz para um se aplica a quase
+  todos"*
+- *"reaproveitam quase tudo do layout e acrescentam alguns objetos (…) só mudam
+  algumas coisas conforme a tarefa da pessoa que realiza a atividade"*
 
-Os três primeiros dizem a mesma coisa por ângulos diferentes, e é a regra que
-governa o resto: **o layout é um só, e o módulo só acrescenta o que a tarefa
-daquela pessoa exige.** Desenhar cada módulo por conta própria contraria a
-referência antes de contrariar qualquer preferência estética.
+**O layout é um só; o módulo acrescenta apenas o que a tarefa daquela pessoa
+exige.** Desenhar cada módulo por conta própria contraria a referência antes de
+contrariar qualquer preferência estética.
+
+Outras que fixam decisão: *"Mensagens, Notificações, studio e usuário, campo de
+escolha de tema deveria ficar aqui"*; *"kanban, lista, calendário, tabela
+dinâmica, gráfico, localização, tarefas"*; *"Padrão em todos cards: mensagens,
+atividades, notas, whatsapp e ação"*.
 
 ## Fontes que não são usadas
 
 `Odoo1.zip` contém `_OceanofPDF.com_Odoo_19_Development_Cookbook...pdf` — cópia
-pirata de livro comercial. **Não é usada como fonte** e não é versionada. A
-documentação oficial do Odoo é pública e serve ao mesmo propósito.
+pirata de livro comercial. **Não é usada como fonte e não é versionada.** A
+documentação oficial do Odoo é pública e serve ao mesmo propósito. O atlas é
+outra coisa: foi montado sobre as telas do próprio responsável.
