@@ -975,6 +975,76 @@ comprador, almoxarife, qualidade, contratos, diretoria ou auditoria.
 
 ---
 
+## Sprint S-31 — Qualidade: Ishikawa sobre dado, Pareto sobre custo, e a cobrança do gestor
+**Estado:** pendente
+**Marco:** M-5
+
+Ditada pelo responsável em 27 de julho:
+
+> "daí Pareto e Ishikawa entram na qualidade, entendeu como tudo se conecta? daí
+> você começa mapear e identificar os erros (…) daí você começa a pegar custos
+> invisíveis, identificar pontos de falha, consegue identificar qual área precisa
+> de maior atenção, começa a criar treinamentos para começar a capacitar e
+> corrigir as equipes, consegue cobrar as pessoas que estão em nível gerencial"
+
+Desenho, aritmética e dissecação em
+[`QUALIDADE-CAUSA-RAIZ.md`](QUALIDADE-CAUSA-RAIZ.md). Dono da rotina é a persona
+**P12**, cuja matriz já declara 8D, 5 porquês, PDCA e verificação de eficácia —
+esta sprint dá a **aritmética** que faltava a essas técnicas. Vai para o fim
+conforme R4.
+
+### O achado que ordena a sprint
+
+Pareto sobre 1.584 dias-montagem/ano, com custo por ocorrência = horas paradas ×
+R$ 104,00 + retrabalho:
+
+| Causa | Ocor./ano | R$/ano | Acum. | Espinha 6M |
+|---|---:|---:|---:|---|
+| Medida diferente do projeto | 190 | **387.003** | 48,1% | Medição |
+| Peça faltando ou trocada | 158 | **158.552** | 67,8% | Método |
+| Chuva ou condição | 63 | **52.716** | 74,3% | Meio ambiente |
+| Acesso bloqueado | 95 | 49.421 | 80,5% | Meio ambiente |
+| Cliente muda no local | 79 | 44.986 | 86,1% | Método |
+| Ferragem errada | 111 | 43.021 | 91,4% | Material |
+| Sem energia / andaime | 127 | 39.537 | 96,3% | Meio ambiente |
+| Outra equipe no ambiente | 143 | 29.652 | 100,0% | Método |
+| **Total** | | **804.887** | | |
+
+**3 causas de 8 concentram 80% da perda.** E o achado que justifica a sprint
+inteira: somando por espinha do Ishikawa, **mão de obra responde por 0,0%**.
+Nenhuma das oito causas é do montador — mas sem dado a classificação default é
+"falta de atenção", o treinamento vai para quem não causou o problema, e a
+reunião seguinte conclui que "o pessoal não aprende".
+
+Custo invisível anual: **R$ 986.715**, sendo R$ 804.887 o Pareto acima
+decomposto e **R$ 181.827** de hora de gestão apagando incêndio, retorno de
+assistência evitável e escopo executado e não cobrado. Nenhum tem linha própria
+no DRE — aparecem diluídos em folha, frete e "margem menor que a esperada".
+
+Retorno de atacar a causa 1 (a T-28.2, já registrada): reduzir 30% economiza
+**R$ 116.101/ano**, e uma ação de R$ 25.000 paga em **2,6 meses**. Esta sprint
+não pede trabalho novo — ela **precifica** o que já estava na fila e mostra que
+é o mais rentável de todos.
+
+### Tarefas
+
+- [ ] T-31.0 — **Sintoma e causa como campos separados**, com Pareto rodando sobre **causa**. "Porta desalinhada" 40 vezes vira projeto de melhoria de porta quando a causa era assentamento de piso — sintoma agrupa chamado, causa decide investimento
+- [ ] T-31.1 — **Classificação nos 6M no momento do fato**, por quem estava lá, com exemplos por espinha
+  - [ ] T-31.1.1 — Painel de distribuição por espinha, com alerta de concentração: 100% numa espinha só é classificação preguiçosa, não operação com causa única
+  - [ ] T-31.1.2 — Auditoria por amostragem cruzando causa declarada com evidência anexada; e comparação entre equipes, porque distribuição muito diferente na mesma praça é classificação diferente, não operação diferente
+- [ ] T-31.2 — **Pareto ordenado por custo**, com frequência como segunda leitura. Calculado, a causa mais frequente da lista responde por 3,7% da perda — priorizar por frequência é trabalhar muito para economizar pouco
+- [ ] T-31.3 — **Custo invisível publicado em reais**, por obra e por carteira. Enquanto for adjetivo, não entra em decisão
+- [ ] T-31.4 — **Reincidência 6+6 como prova da ação**, na mesma janela da `KPIS.md`
+  - [ ] T-31.4.1 — **Cobertura de apontamento no mesmo gráfico** (T-28.10): queda de ocorrência com queda de cobertura não é melhoria, é o sistema perdendo visão — e precisa aparecer como alerta, não como conquista
+- [ ] T-31.5 — **Plano de ação amarrado à causa**, com dono nominal, prazo, e eficácia verificada pela reincidência e não pela conclusão da tarefa. Causa de classe A sem ação é decisão de não agir, e fica registrada como tal
+- [ ] T-31.6 — **Cinco porquês apoiados em registro**: cada nível referencia parada, foto, medição ou documento. Nível sem evidência fica marcado como hipótese, e hipótese não vira plano de ação de classe A
+- [ ] T-31.7 — **Da causa ao treinamento**: cada causa aponta competência nomeada da matriz de `PERSONAS-E-ROTINAS.md` e o nível alvo. Transforma "precisamos treinar a equipe" em "três projetistas precisam subir de 3 para 4 em metrologia, e isso vale R$ 193.501/ano". Subida de nível se afirma por reincidência, não por certificado de presença
+- [ ] T-31.8 — **Painel do gestor**, com o que é dele e não do campo: tempo de resposta à solicitação, cobertura de apontamento da equipe, reincidência sob sua alçada, causas classe A com ação aberta, evolução da matriz da equipe e custo invisível da carteira
+  - [ ] T-31.8.1 — Regra registrada: gestor com equipe de `TEP` ruim **e** resposta em três dias tem problema de gestão; com resposta em 40 minutos tem problema de competência ou de recurso. Sem separar os dois, toda reunião de resultado termina cobrando quem estava na obra
+- [ ] T-31.9 — **Registrar problema nunca pode piorar o indicador de quem registrou**: parada com obrigação de terceiro não entra na produtividade de quem a abriu, e taxa de registro é indicador **positivo** do gestor. É a falha que inutiliza o programa inteiro — se registrar dói, ninguém registra, e a operação fica cega com o painel verde
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.

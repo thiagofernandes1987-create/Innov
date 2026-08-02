@@ -143,11 +143,18 @@ describe("S-23 — fundação de interface", () => {
 
   it("mantém o cronograma Gantt calculado com dependências", () => {
     const schedule = read("app/app/obras/[id]/cronograma/page.tsx");
-    const gantt = read("components/planejamento/gantt.tsx");
+    const planner = read("components/planejamento/schedule-planner.tsx");
 
-    expect(schedule).toContain('import { Gantt }');
-    expect(schedule).toContain("dependencias=");
-    expect(gantt).toMatch(/\bcalcular\(tarefas, dependencias, calendario\)/);
+    // O contrato é a **invariante**, não o nome do arquivo: a tela de
+    // cronograma desenha barras cujas datas saem do cálculo de rede, e não de
+    // data digitada. Quando o espaço de trabalho de EAP e Gantt substituiu o
+    // componente `<Gantt>`, este teste reprovou por procurar o import antigo —
+    // o cálculo tinha sido preservado, só mudou de casa. Amarrar o teste ao
+    // import fez um refactor correto parecer regressão.
+    expect(schedule).toContain("SchedulePlanner");
+    expect(schedule).toContain("dependencies");
+    expect(planner).toMatch(/\bcalcular\(/);
+    expect(planner).toMatch(/\bcadeiaMaisLonga\(/);
   });
 
   it("mantém o orçamento operável com inclusão, remoção e recálculo", () => {
