@@ -183,20 +183,44 @@ primeira.
 
 ---
 
-## §4 — Ordem, e por que esta
+## §4 — Ordem, e por que ela mudou
 
-1. **Auto-sugestão** — a mais barata e a que aparece em todos os módulos no
-   mesmo dia. Uma tabela, um componente de campo.
-2. **Documentos por modelo** — a de maior valor percebido, e já tem metade do
-   caminho em `contract_templates`. Generalizar é menos trabalho que criar.
-3. **Campos próprios** — a maior, e a que depende do Object Runtime começar.
-   Também é a que mais se beneficia das duas anteriores: campo próprio novo já
-   nasce com sugestão e já vira variável de documento.
+A proposta original era sugestão primeiro. **O responsável inverteu em 2 de
+agosto**, e a justificativa decide:
 
-A ordem inverte a intuição de fazer primeiro o mais estruturante. O motivo é que
-sugestão e documento entregam sozinhos, e campo próprio entrega melhor **depois**
-que os dois existem — um campo "Arquiteto" criado hoje já quer aparecer no
-contrato amanhã.
+> "o editor tem que ser uma prioridade para continuar a desenvolver os outros
+> módulos que utilizam documentações, como propostas, layouts de mensagens
+> padrão, orçamentos, FVS, FVM, um monte de apps dependem desse módulo"
+
+O motor de documento **não é funcionalidade do módulo de propostas** — é
+infraestrutura de sete módulos:
+
+| Módulo | O que precisa do motor |
+|---|---|
+| Propostas | Corpo da proposta com dados do cliente e do orçamento |
+| Orçamentos | Layout padrão de envio |
+| Contratos | Já tem `contract_templates`, sem motor |
+| Aditivos | Mesmo corpo, com o que mudou |
+| Qualidade | **FVS e FVM** — verificação de serviço e de material |
+| Relacionamento | Mensagem padrão, e-mail e WhatsApp |
+| SAC | Resposta padrão e laudo |
+
+Construir esses módulos antes do motor é construir **sete editores para desfazer
+depois**. Ordem vigente:
+
+1. **Motor de documento por modelo** — destrava sete módulos.
+2. **Auto-sugestão** — barata, entrega sozinha, mas não destrava ninguém.
+3. **Campos próprios** — a maior, e a que mais se beneficia das outras duas:
+   campo novo já nasce com sugestão e já vira variável de documento.
+
+### O que ainda é decisão do responsável
+
+O formato de saída ficou explicitamente em aberto: *"depois decidimos sobre o
+formato dos arquivos para contrato, propostas, e-mails, etc"*. O que este
+documento fixa é o **corpo** — Markdown — e a substituição de variáveis. A saída
+— PDF, DOCX, HTML de e-mail — é conversão a partir dele, e pode ser decidida sem
+refazer o motor. É justamente por isso que o corpo é Markdown e não um formato
+de saída: escolher a saída depois continua barato.
 
 ## §5 — O que este documento obriga
 

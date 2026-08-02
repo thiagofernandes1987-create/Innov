@@ -1088,12 +1088,35 @@ reconstruir o que funciona:
   - [ ] T-32.3.4 — Sugestão de campo existente por nome parecido **antes** de criar, para não nascerem "Arquiteto" e "arquiteto"
   - [ ] T-32.3.5 — Arquivar em vez de excluir, preservando o preenchido; obrigatoriedade vale para frente e não invalida registro antigo
 
-### Ordem, e por que ela inverte a intuição
+### Ordem, e por que ela mudou
 
-Sugestão primeiro, documento depois, campo próprio por último — apesar de campo
-próprio ser o mais estruturante. Sugestão e documento **entregam sozinhos**;
-campo próprio entrega melhor depois que os dois existem, porque um campo
-"Arquiteto" criado hoje já quer aparecer no contrato amanhã.
+O desenho original era sugestão → documento → campo próprio. **O responsável
+inverteu os dois primeiros em 2 de agosto**, com a justificativa que decide:
+
+> "o editor tem que ser uma prioridade para continuar a desenvolver os outros
+> módulos que utilizam documentações, como propostas, layouts de mensagens
+> padrão, orçamentos, FVS, FVM, um monte de apps dependem desse módulo"
+
+É pré-requisito descoberto, o caso previsto na R5. O motor de documento não é
+uma funcionalidade do módulo de propostas: é **infraestrutura de sete módulos**,
+e construir cada um sem ele significa construir sete editores que depois
+precisam ser desfeitos.
+
+Quem depende, nominalmente:
+
+| Módulo | O que precisa do motor |
+|---|---|
+| Propostas | Corpo da proposta com dados do cliente e do orçamento |
+| Orçamentos | Layout padrão de envio |
+| Contratos | Já tem `contract_templates`, sem motor |
+| Aditivos | Mesmo corpo do contrato, com o que mudou |
+| Qualidade | **FVS e FVM** — ficha de verificação de serviço e de material |
+| Relacionamento | Layouts de mensagem padrão, e-mail e WhatsApp |
+| SAC | Resposta padrão e laudo de atendimento |
+
+Ordem vigente: **motor de documento → sugestão → campo próprio.** Sugestão
+continua barata e entrega sozinha, mas não destrava ninguém; o motor destrava
+sete.
 
 ---
 
@@ -1103,6 +1126,7 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
+| 2026-08-02 | Dentro da S-32, o motor de documento passa à frente da auto-sugestão | **Pré-requisito descoberto**, caso previsto na R5. O responsável nomeou os dependentes: propostas, orçamentos, contratos, aditivos, FVS e FVM da qualidade, layouts de mensagem padrão e resposta do SAC. Construir esses módulos antes do motor significa construir sete editores para desfazer depois. A auto-sugestão continua barata e entrega sozinha, mas não destrava nenhum módulo. |
 | 2026-07-26 | S-23 passa à frente da S-22 e da S-20 | Caso de **base reaproveitável** previsto na R5. Os componentes de campo da S-23 servem aos 20 módulos e resolvem o defeito mais grave já verificado — dado inválido gravado em produção. A S-22 trata de reconstrução do banco e não bloqueia interface; a S-20 troca vocabulário nas mesmas telas que a S-23 vai refazer, então entra junto, tela por tela, para não refazer duas vezes. |
 | 2026-07-25 | Virada S-21 → S-22, sem reordenação | A S-22 nasceu do resultado da própria S-21 e é pré-requisito de tudo: enquanto o repositório não reconstrói o banco, nenhuma sprint que crie migration tem base verificável. A S-06 e a S-20 seguem atrás dela. |
 | 2026-07-25 | S-21 passa à frente da S-06 | Pré-requisito descoberto, caso previsto na R5. A S-06 cria a camada compartilhada sobre o esquema da homologação; enquanto o repositório não reproduz esse esquema, qualquer migration nova é aplicada sobre chão que ninguém consegue recriar. Reconciliar o ledger primeiro é o que torna a S-06 verificável. |

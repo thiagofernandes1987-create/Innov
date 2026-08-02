@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-07-30T09:35:00Z",
+  "updatedAt": "2026-08-02T21:00:00Z",
   "reference": {
     "visualSpec": "docs/REFERENCIA-VISUAL-CANONICA-2026.md",
     "captureProtocol": "docs/QA-VISUAL-POR-CAPTURAS.md",
@@ -43,15 +43,18 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-027", "VACINA-043"]
+      "vaccines": [
+        "VACINA-027",
+        "VACINA-043"
+      ]
     },
     {
       "key": "crm",
       "name": "CRM e Vendas",
       "route": "/app/crm",
       "persona": "VENDEDOR",
-      "status": "em_correcao",
-      "iterations": 0,
+      "status": "aprovado",
+      "iterations": 3,
       "referenceSurface": "internal-crm",
       "acceptance": [
         "lead, oportunidade e pipeline funcionais",
@@ -60,11 +63,51 @@
         "Kanban e painel de atividades conforme referência",
         "nenhum UUID ou erro técnico exposto"
       ],
-      "resolvedProblems": [],
-      "approvedCaptures": [],
-      "runtimeLogsReviewed": false,
-      "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-042", "VACINA-043"]
+      "resolvedProblems": [
+        "Contraste do tema claro: 78 reprovações WCAG AA na casca, por cor amostrada da referência escura gravada como hex fixo (VACINA-043)",
+        "Sobreposição na barra superior: 614px de conteúdo em faixa de 440px, com nome do módulo e menu por cima da busca",
+        "Transbordo horizontal de 982px em 390px, por grade de faixa única sem minmax(0,1fr) (VACINA-044)",
+        "Valor do KPI invisível no escuro: --navy sobre a superfície escura dava 1,03:1",
+        "25 alvos de toque abaixo de 44px; cartão do kanban só clicável no título",
+        "Tela inicial do módulo abria página de índice em vez do funil, contrariando crm-001 a crm-020 do atlas",
+        "Busca da barra desligada em /app/crm por lista de rota escrita à mão"
+      ],
+      "approvedCaptures": [
+        "crm-390x844-claro.png",
+        "crm-390x844-escuro.png",
+        "crm-1366x768-claro.png",
+        "crm-1366x768-escuro.png",
+        "crm-1920x1080-claro.png",
+        "crm-1920x1080-escuro.png"
+      ],
+      "runtimeLogsReviewed": true,
+      "browserConsoleReviewed": true,
+      "vaccines": [
+        "VACINA-042",
+        "VACINA-043",
+        "VACINA-044"
+      ],
+      "evidence": {
+        "referenciaAtlas": "docs/referencias/atlas-odoo/crm-001.jpg a crm-027.jpg",
+        "contraste": {
+          "claro": 1,
+          "escuro": 0,
+          "observacao": "a única reprovação restante é a marca IN, 2,87:1, com o texto INNOVAR ao lado"
+        },
+        "alvosAbaixoDe44px": {
+          "390": 1,
+          "1366": 0,
+          "1920": 0
+        },
+        "transbordoHorizontal": "nenhum nos três breakpoints",
+        "consoleDoNavegador": "nenhum erro ou aviso",
+        "funcionalVerificado": [
+          "funil abre como tela inicial do módulo",
+          "busca com faceta filtra 3 cartões para 1",
+          "clique na base do cartão navega para o detalhe",
+          "seguidores múltiplos: bloco com contagem e ação de deixar de seguir"
+        ]
+      }
     },
     {
       "key": "clientes",
@@ -85,7 +128,9 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-043"]
+      "vaccines": [
+        "VACINA-043"
+      ]
     },
     {
       "key": "obras",
@@ -106,7 +151,10 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-040", "VACINA-043"]
+      "vaccines": [
+        "VACINA-040",
+        "VACINA-043"
+      ]
     },
     {
       "key": "planejamento",
@@ -127,7 +175,11 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-028", "VACINA-040", "VACINA-043"]
+      "vaccines": [
+        "VACINA-028",
+        "VACINA-040",
+        "VACINA-043"
+      ]
     },
     {
       "key": "tarefas",
@@ -148,7 +200,9 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-043"]
+      "vaccines": [
+        "VACINA-043"
+      ]
     },
     {
       "key": "diario",
@@ -169,7 +223,9 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-043"]
+      "vaccines": [
+        "VACINA-043"
+      ]
     },
     {
       "key": "equipes",
@@ -190,7 +246,10 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-028", "VACINA-043"]
+      "vaccines": [
+        "VACINA-028",
+        "VACINA-043"
+      ]
     },
     {
       "key": "orcamentos",
@@ -211,7 +270,11 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-037", "VACINA-041", "VACINA-043"]
+      "vaccines": [
+        "VACINA-037",
+        "VACINA-041",
+        "VACINA-043"
+      ]
     },
     {
       "key": "propostas",
@@ -232,7 +295,12 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-040", "VACINA-041", "VACINA-042", "VACINA-043"]
+      "vaccines": [
+        "VACINA-040",
+        "VACINA-041",
+        "VACINA-042",
+        "VACINA-043"
+      ]
     },
     {
       "key": "contratos",
@@ -253,7 +321,9 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-043"]
+      "vaccines": [
+        "VACINA-043"
+      ]
     },
     {
       "key": "aditivos",
@@ -274,7 +344,10 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-030", "VACINA-043"]
+      "vaccines": [
+        "VACINA-030",
+        "VACINA-043"
+      ]
     },
     {
       "key": "assinaturas",
@@ -295,7 +368,10 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-031", "VACINA-043"]
+      "vaccines": [
+        "VACINA-031",
+        "VACINA-043"
+      ]
     },
     {
       "key": "documentos",
@@ -316,7 +392,9 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-043"]
+      "vaccines": [
+        "VACINA-043"
+      ]
     },
     {
       "key": "qualidade",
@@ -337,7 +415,9 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-043"]
+      "vaccines": [
+        "VACINA-043"
+      ]
     },
     {
       "key": "compras",
@@ -358,7 +438,9 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-043"]
+      "vaccines": [
+        "VACINA-043"
+      ]
     },
     {
       "key": "estoque",
@@ -379,7 +461,10 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-036", "VACINA-043"]
+      "vaccines": [
+        "VACINA-036",
+        "VACINA-043"
+      ]
     },
     {
       "key": "financeiro",
@@ -400,7 +485,9 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-043"]
+      "vaccines": [
+        "VACINA-043"
+      ]
     },
     {
       "key": "sac",
@@ -421,7 +508,9 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-043"]
+      "vaccines": [
+        "VACINA-043"
+      ]
     },
     {
       "key": "relatorios",
@@ -442,7 +531,9 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-043"]
+      "vaccines": [
+        "VACINA-043"
+      ]
     },
     {
       "key": "auditoria",
@@ -463,7 +554,9 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-043"]
+      "vaccines": [
+        "VACINA-043"
+      ]
     },
     {
       "key": "administracao",
@@ -484,7 +577,10 @@
       "approvedCaptures": [],
       "runtimeLogsReviewed": false,
       "browserConsoleReviewed": false,
-      "vaccines": ["VACINA-022", "VACINA-043"]
+      "vaccines": [
+        "VACINA-022",
+        "VACINA-043"
+      ]
     }
   ]
 }
