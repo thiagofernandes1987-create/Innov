@@ -402,7 +402,11 @@ h3 { margin: 0; font-size: 19px; line-height: 1.25; }
 .grid-kpi { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .kpi { padding: 20px; }
 .kpi small, .stats-grid article small { color: var(--muted); font-weight: 820; letter-spacing: .06em; font-size: 11px; }
-.kpi strong, .stats-grid article strong { display: block; margin-top: 7px; font: 830 28px/1.1 Manrope, sans-serif; color: var(--navy); }
+/* Era `var(--navy)`, que é #0a2037 nos DOIS temas: no escuro isso dá 1,03:1
+   contra a superfície #102238 — o número do KPI ficava com a cor do cartão.
+   Medido em /app/crm: "R$ 79.500,00" e "R$ 0,00" invisíveis. `--text` é o
+   token que acompanha o tema, e é o papel certo para o número principal. */
+.kpi strong, .stats-grid article strong { display: block; margin-top: 7px; font: 830 28px/1.1 Manrope, sans-serif; color: var(--text); }
 
 .dashboard-page { position: relative; }
 .dashboard-page::before {
@@ -2312,7 +2316,39 @@ tbody tr:hover { background: #fafcfd; }
 
 .barra-esquerda {
   gap: 16px;
-  overflow: visible;
+  /* Era `overflow: visible`, e isso reabriu o defeito que a VACINA-030 tratou
+     por outro lado. Medido em /app/crm a 1366px: 614px de conteúdo numa faixa
+     de 440px, com o nome do módulo e o botão de menu **por cima do campo de
+     busca**, que começa em 493. A vacina reduziu o conteúdo (menu compacto
+     entre 900 e 1699px) mas não o suficiente; sem o corte, o excedente invade
+     a coluna vizinha em vez de ser truncado. O corte volta, e a truncagem
+     abaixo escolhe QUEM encolhe. */
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* Quem cede espaço é o nome da organização, não o do módulo: o usuário troca
+   de organização raramente e sabe em qual está; o módulo é onde ele está
+   agora. Nome de módulo longo — "Estoque, Inventário e Almoxarifado" — trunca
+   com reticências em vez de empurrar o vizinho. */
+.barra-organizacao { min-width: 0; flex: 0 1 auto; }
+.barra-organizacao > * { min-width: 0; }
+.barra-organizacao span,
+.barra-organizacao strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* `flex: 0 0 auto` na camada histórica impedia o encolhimento, e por isso a
+   truncagem não tinha efeito: "Estoque, Inventário e Almoxarifado" continuava
+   empurrando 537px numa faixa de 440. Com `0 1 auto` o nome trunca em vez de
+   empurrar o vizinho. */
+.barra-modulo { min-width: 0; flex: 0 1 auto; }
+.barra-modulo strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .barra-modulo-inicio {
@@ -2850,6 +2886,13 @@ tbody tr:hover { background: #fafcfd; }
 @media (min-width: 900px) and (max-width: 1699px) {
   .barra-menus { display: none; }
   .barra-menu-movel { display: block; }
+  /* Mesma causa da vacina, medida agora: com o menu compacto, /app/crm ainda
+     somava 614px de conteúdo numa faixa de 440px, e /app/estoque 745px. Não
+     cabem organização E módulo. Cede a organização, que é onde o usuário
+     raramente troca e já sabe onde está — o módulo é onde ele está agora, e a
+     referência do Odoo também põe a empresa do lado direito, não à esquerda.
+     Acima de 1700px as duas voltam. */
+  .barra-organizacao { display: none; }
 }
 
 @media (max-width: 1260px) {
@@ -3236,4 +3279,47 @@ tbody tr:hover { background: #fafcfd; }
   color: var(--muted);
   font-size: 0.68rem;
   font-weight: 600;
+}
+
+/* ── Transbordo horizontal em tela estreita ─────────────────────────────────
+   Medido em /app/crm a 390px: a página tinha 982px de rolagem horizontal.
+   Causa: `.relationship-app` é grade de faixa única sem `minmax(0, …)`, então
+   a faixa cresce até o `min-content` do filho mais largo — a tabela de seis
+   colunas de "Oportunidades recentes", com 968px. Todas as seções da página
+   herdavam essa largura, inclusive as que caberiam.
+
+   Grade sem `minmax(0, 1fr)` não encolhe: é a causa mais comum de rolagem
+   horizontal em telas de dado, e vale para toda página de aplicativo, não só
+   esta. A tabela ganha rolagem própria, que é o comportamento certo — tabela
+   larga rola dentro do cartão, não empurra a página. */
+.relationship-app,
+.content > .stack,
+main.content {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.card:has(> table),
+.card-pad:has(> table),
+.card:has(> .tabela),
+.table-scroll {
+  overflow-x: auto;
+}
+
+.card > table,
+.card-pad > table {
+  min-width: 100%;
+}
+
+
+/* Botão primário no tema escuro: `--brand` clareia para #4d80d8 e o branco cai
+   para 3,89:1, abaixo do mínimo. Um azul um passo mais escuro devolve a
+   legibilidade sem mudar a identidade. Só `.button-primary` existe no
+   repositório — verificado no navegador antes de escrever a regra. */
+:root[data-tema="escuro"] .button-primary {
+  background: #2c5fae;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .button-primary {
+    background: #2c5fae;
+  }
 }

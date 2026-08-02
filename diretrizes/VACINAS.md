@@ -142,6 +142,7 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-041` | Alçada comercial existe apenas como campo de interface | vigente | regra no banco, decisão independente, trilha e teste negativo |
 | `VACINA-042` | Falha de formulário apaga preenchimento, mistura dependências e pode deixar o autor sem acesso | vigente | `useActionState`, erros por campo, dependências separadas, membership e papel preservado |
 | `VACINA-043` | Cor amostrada da referência escura vira texto invisível no tema claro | aplicada | token no lugar do hex em superfície que muda, e auditoria de contraste medida nos dois temas |
+| `VACINA-044` | Grade de faixa única sem `minmax(0, …)` não encolhe e a página rola de lado | aplicada | faixa declarada como `minmax(0, 1fr)`, tabela com rolagem própria e verificação de transbordo nos três breakpoints |
 
 ## 4. Arquivos
 
@@ -189,7 +190,8 @@ diretrizes/vacinas/
 ├── VACINA-040-FLUXO-NAO-OBRIGA-DOCUMENTO-ANTERIOR.md
 ├── VACINA-041-ALCADA-NAO-E-SOMENTE-CAMPO.md
 ├── VACINA-042-FALHA-DE-FORMULARIO-NAO-APAGA-CONTEXTO.md
-└── VACINA-043-COR-AMOSTRADA-DA-REFERENCIA-ESCURA.md
+├── VACINA-043-COR-AMOSTRADA-DA-REFERENCIA-ESCURA.md
+└── VACINA-044-GRADE-DE-FAIXA-UNICA-NAO-ENCOLHE.md
 ```
 
 ## 5. Critérios para nova vacina
