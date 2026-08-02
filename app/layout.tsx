@@ -29,8 +29,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   // só no cliente.
   const tema = temaValido((await cookies()).get(COOKIE_TEMA)?.value);
 
+  // `data-scroll-behavior` declara que o `scroll-behavior: smooth` do CSS é
+  // intencional. Sem ele o Next avisa no console de TODA página, e aviso
+  // recorrente que ninguém vai tratar ensina a ignorar o console — que é
+  // justamente onde o defeito seguinte vai aparecer.
   return (
-    <html lang="pt-BR" data-tema={tema}>
+    <html lang="pt-BR" data-tema={tema} data-scroll-behavior="smooth">
       <body>{children}</body>
     </html>
   );

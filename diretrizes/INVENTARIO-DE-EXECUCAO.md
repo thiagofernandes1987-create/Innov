@@ -1072,15 +1072,16 @@ reconstruir o que funciona:
   - [ ] T-32.0.3 — **Sugestão nunca é lista fechada.** É campo de texto com apoio, e valor novo sempre passa
   - [ ] T-32.0.4 — Limpar o catálogo é ação de administrador, porque o catálogo é da organização
 - [ ] T-32.1 — **Modelo de EAP**: sugerir o conjunto, não só a palavra. Quem cria "Fundação" pela terceira vez com as mesmas cinco atividades embaixo deveria poder trazer as cinco. É o "modelo de projeto" que o atlas mostra em 3 das 46 telas do capítulo Projetos
-- [ ] T-32.2 — **Motor de documento por modelo**, um só para proposta, orçamento, contrato, laudo e ordem de serviço
-  - [ ] T-32.2.1 — Corpo em **Markdown**, não editor proprietário: versiona em diff legível, converte para PDF e DOCX e sobrevive à plataforma. O editor é visual, o que grava é Markdown
-  - [ ] T-32.2.2 — **Variável escolhida, não decorada**: painel com as disponíveis para o escopo, nome legível e valor de exemplo do registro atual; clicar insere. Decorar nome de variável é a razão de esse recurso morrer sem uso
-  - [ ] T-32.2.3 — Vocabulário `{{escopo.campo}}` — `{{cliente.nome_completo}}`, `{{obra.codigo}}`, `{{orcamento.valor_total}}`, `{{hoje}}`. O editor aceita também a forma com sublinhado na colagem e normaliza
-  - [ ] T-32.2.4 — **Substituição, nunca execução**: sem expressão, sem laço, sem chamada, com HTML escapado. Modelo é dado, e dado que executa é o caminho mais curto para extrair o que não se pode ver
+- [~] T-32.2 — **Motor de documento por modelo**, um só para proposta, orçamento, contrato, laudo e ordem de serviço — **corpo, variáveis e pré-visualização entregues em 2 de agosto**; falta gravar e publicar pela tela
+  - [x] T-32.2.1 — Corpo em **Markdown**, não editor proprietário: versiona em diff legível, converte para PDF e DOCX e sobrevive à plataforma. O editor é visual, o que grava é Markdown
+  - [x] T-32.2.2 — **Variável escolhida, não decorada**: painel com as disponíveis para o escopo, nome legível e valor de exemplo do registro atual; clicar insere. Decorar nome de variável é a razão de esse recurso morrer sem uso
+  - [x] T-32.2.3 — Vocabulário `{{escopo.campo}}` — `{{cliente.nome_completo}}`, `{{obra.codigo}}`, `{{orcamento.valor_total}}`, `{{hoje}}`. O editor aceita também a forma com sublinhado na colagem e normaliza
+  - [x] T-32.2.4 — **Substituição, nunca execução**: sem expressão, sem laço, sem chamada, com HTML escapado. Modelo é dado, e dado que executa é o caminho mais curto para extrair o que não se pode ver
+  - [x] T-32.2.9 — **Tabela `document_templates`** com `module_key` e `purpose`, RLS pela permissão do módulo, aplicada e conferida no banco: RLS ligada, forçada e quatro políticas
   - [ ] T-32.2.5 — **O dicionário respeita a RLS** de quem gera. Modelo não é caminho para contornar permissão
-  - [ ] T-32.2.6 — **Variável não resolvida aparece**, com contagem de lacunas no envio e bloqueio antes da assinatura. Documento assinado com buraco em branco é pior que documento que não gerou
+  - [x] T-32.2.6 — **Variável não resolvida aparece**, com contagem de lacunas no envio e bloqueio antes da assinatura. Documento assinado com buraco em branco é pior que documento que não gerou
   - [ ] T-32.2.7 — **Documento emitido guarda o texto resolvido**, nunca a referência ao molde: contrato não pode mudar porque alguém editou o modelo depois
-  - [ ] T-32.2.8 — Validação do modelo lista variáveis inexistentes **antes** de publicar
+  - [x] T-32.2.8 — Validação do modelo lista variáveis inexistentes **antes** de publicar
 - [ ] T-32.3 — **Campos próprios por objeto**, primeiro corte do Object Runtime, que é canônico desde antes desta sprint e nunca virou migration
   - [ ] T-32.3.1 — A tela pergunta **o que a informação faz** — "é uma data?", "é uma pessoa da equipe?", "é dinheiro?" — e o tipo sai daí. O usuário não responde "qual tipo?" na forma técnica
   - [ ] T-32.3.2 — **Nasce filtrável**: campo que não entra na busca vira campo que ninguém lê
