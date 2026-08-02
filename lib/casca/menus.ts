@@ -17,9 +17,12 @@ export type ItemDeMenu = { rotulo: string; href: string };
 
 export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
   crm: [
-    { rotulo: "Pipeline", href: "/app/pipeline/cliente" },
+    // O funil é a primeira entrada porque é a tela inicial do módulo — o mesmo
+    // endereço do aplicativo. A referência abre o CRM no kanban do funil.
+    { rotulo: "Funil", href: "/app/crm" },
     { rotulo: "Leads", href: "/app/crm/leads" },
-    { rotulo: "Oportunidades", href: "/app/crm/oportunidades" }
+    { rotulo: "Oportunidades", href: "/app/crm/oportunidades" },
+    { rotulo: "Visão geral", href: "/app/crm/visao-geral" }
   ],
   clientes: [
     { rotulo: "Clientes", href: "/app/clientes" },
