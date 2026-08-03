@@ -1,16 +1,17 @@
 # Contratos dos módulos — Innovar Platform
 
-**Atualizado em:** 21 de julho de 2026  
+**Atualizado em:** 3 de agosto de 2026  
 **Versão:** 0.19.0  
 **Registro técnico:** `lib/modules/registry.ts`
 
-Cada módulo possui chave estável, rota, estado por organização, dependências, capacidades e escopos. Desabilitar um módulo preserva dados e bloqueia o uso funcional. Perfis personalizados não são sobrescritos por instaladores.
+Cada módulo possui chave estável, rota, estado por organização, dependências, capacidades e escopos. Desabilitar um módulo preserva dados e bloqueia o uso funcional. Perfis personalizados não são sobrescritos por instaladores. Nenhum módulo em implementação deve ser descrito como homologado antes dos testes reais de banco, segurança e integração externa.
 
 ## `dashboard` — Início
 
 - rota `/app`;
-- operacional;
-- mostra apenas aplicativos habilitados e autorizados.
+- módulo de sistema;
+- mostra apenas aplicativos habilitados e autorizados;
+- não expõe métricas inventadas quando uma fonte falha.
 
 ## `crm` — CRM e Vendas
 
@@ -33,7 +34,7 @@ Escopo:
 Segurança:
 
 - acesso exclusivamente interno;
-- pipeline não é exposto ao cliente;
+- pipeline não exposto ao cliente;
 - criação e estados críticos somente por RPC;
 - zero RPC operacional para `anon`;
 - RLS por organização.
@@ -59,7 +60,6 @@ Escopo:
 ## `obras` — Obras
 
 - rota `/app/obras`;
-- operacional;
 - depende de `clientes`;
 - carteira multiobra, datas, progresso, gerente, contrato e portal;
 - somente obra liberada aparece ao cliente.
@@ -67,62 +67,64 @@ Escopo:
 ## `planejamento` — Planejamento
 
 - rota `/app/planejamento`;
-- operacional;
+- depende de `obras`;
 - EAP, cronograma, dependências, marcos e baselines;
 - baseline concluída é imutável.
 
 ## `tarefas` — Tarefas
 
 - rota `/app/tarefas`;
-- operacional;
+- depende de `obras`;
 - responsáveis, prioridade, datas, progresso e bloqueios;
 - reservas de estoque podem apontar para tarefa.
 
 ## `diario` — Diário de Obras
 
 - rota `/app/diario`;
-- operacional;
+- depende de `obras`;
 - atividades, mão de obra, segurança, ocorrências e mídias;
-- bucket privado `daily-log-media`.
+- bucket privado `daily-log-media`;
+- antimalware ainda pendente fora do SAC.
 
 ## `equipes` — Equipes
 
 - rota `/app/equipes`;
-- operacional;
+- depende de `obras`;
 - equipes, integrantes, recursos e atribuições;
 - integração com custódia de ativos.
 
 ## `orcamentos` — Orçamentos
 
 - rota `/app/orcamentos`;
-- operacional;
+- depende de `clientes`;
 - custos, taxa administrativa, BDI, markup, margem, ROI e cenários;
 - versão congelada é imutável.
 
 ## `propostas` — Propostas
 
 - rota `/app/propostas`;
-- operacional;
+- depende de `orcamentos`;
 - versões, PDF, validade, liberação e aceite;
 - cliente vê somente versão liberada.
 
 ## `contratos` — Contratos
 
 - rota `/app/contratos`;
-- operacional;
+- depende de `propostas`;
 - templates, versões, partes, vigência e valores;
 - versão enviada ou assinada é imutável.
 
 ## `aditivos` — Aditivos
 
 - rota `/app/aditivos`;
-- operacional;
+- depende de `contratos`;
 - alterações de escopo, valor e prazo;
 - aplicação ao contrato é idempotente.
 
 ## `assinaturas` — Assinaturas
 
 - rota `/app/assinaturas`;
+- depende de `documentos`;
 - operacional em sandbox;
 - PDF/DOCX, conversão, layout e campos;
 - assinatura, rubrica, data, nome completo, foto e anexos;
@@ -133,22 +135,21 @@ Escopo:
 ## `documentos` — Documentos
 
 - rota `/app/documentos`;
-- operacional;
 - arquivos privados, disciplinas, versões, hashes e liberação;
-- versão liberada é imutável.
+- versão liberada é imutável;
+- integra documentos de obras, propostas, contratos e assinaturas.
 
 ## `qualidade` — Qualidade
 
 - rota `/app/qualidade`;
-- operacional;
+- depende de `obras`;
 - biblioteca, FVS, FVM, formulários internos, formulários para clientes e pesquisas;
-- anexos online;
 - schema publicado é imutável.
 
 ## `compras` — Compras e Suprimentos
 
 - rota `/app/compras`;
-- operacional;
+- depende de `obras` e `qualidade`;
 - solicitações, fornecedores, cotações, comparação, aprovação, pedidos e recebimentos;
 - somente quantidade aceita alimenta estoque;
 - recebimento é idempotente.
@@ -182,7 +183,7 @@ saldo disponível = físico - reservado
 Segurança e concorrência:
 
 - saldo não editável diretamente;
-- movimento concluído imutável;
+- movimentos concluídos imutáveis;
 - correção por reversão;
 - advisory lock por posição;
 - custos protegidos;
@@ -203,7 +204,7 @@ Definition of Done adicional:
 ## `financeiro` — Financeiro Operacional
 
 - rota `/app/financeiro`;
-- operacional;
+- depende de `obras`, `contratos` e `compras`;
 - contas a pagar/receber, parcelas, aprovações, baixas, comprovantes, medições e caixa;
 - custos de estoque são informativos e não criam lançamento automaticamente.
 
@@ -221,7 +222,6 @@ Escopo:
 - categorias e SLAs;
 - abertura interna, telefone, e-mail, WhatsApp ou portal;
 - vínculo a cliente, obra e contrato;
-- obra/contrato externo somente quando liberado ao cliente;
 - prioridades, estados e responsáveis;
 - mensagens internas ou públicas;
 - fotos, PDF e DOCX até 25 MB;
@@ -235,14 +235,85 @@ Segurança:
 - cliente vê somente os próprios chamados;
 - mensagem interna, anexo interno e evento não aparecem no portal;
 - mudanças de estado somente por RPC;
-- upload do cliente autorizado pela sessão e realizado server-side;
 - download autenticado por URL assinada curta;
+- anexos novos devem passar pela quarentena da Etapa 20;
 - zero RPC operacional para `anon`.
+
+## `whatsapp` — WhatsApp e Atendimento
+
+- rota `/app/whatsapp`;
+- versão inicial `1.0.0`;
+- sensível;
+- branch funcional `feature/etapa-22-whatsapp-omnichannel`;
+- PR de rascunho `#39`;
+- implementação em andamento e **não homologada**;
+- provider produtivo inicial: Meta WhatsApp Business Platform — Cloud API;
+- dependências: `clientes`, `crm`, `sac` e `documentos`.
+
+Escopo inicial:
+
+- caixa de entrada compartilhada;
+- contas, contatos, conversas e mensagens;
+- vínculo com Cliente 360, obra, contrato, oportunidade e chamado SAC;
+- texto, template aprovado e documento privado;
+- recebimento de texto e metadados de mídia;
+- estados enviado, entregue, lido e falho;
+- janela móvel de atendimento de 24 horas;
+- webhooks assinados e idempotentes;
+- registro de proveniência da mensagem.
+
+Fontes canônicas das mensagens padrão:
+
+- `contract_templates`;
+- `proposal_versions`;
+- `contract_versions`;
+- `amendment_versions`;
+- `project_document_versions`.
+
+O módulo não mantém uma cópia editável das mensagens padrão. Cada binding referencia a fonte e o envio registra tipo, ID, campo, versão, nome, SHA-256 e instante de resolução. Mensagens livres permanecem possíveis somente dentro das regras do provider e das permissões do usuário.
+
+Segurança:
+
+- HMAC SHA-256 em `x-hub-signature-256`;
+- RLS em todas as tabelas;
+- `service_role` exclusivamente server-side;
+- nenhuma credencial versionada;
+- URLs de documentos privadas e temporárias;
+- idempotência de envio e webhook;
+- histórico sem exclusão direta;
+- estados de entrega monotônicos no domínio e no PostgreSQL;
+- nenhuma dependência de Puppeteer, Baileys, `whatsapp-web.js` ou sessão por QR Code em produção;
+- WhatsControl e Evolution API não foram incorporados ao código;
+- padrões do wacrm podem ser adaptados sob MIT com atribuição quando houver cópia substancial.
+
+Pendências antes da homologação:
+
+- aplicar migrations em ambiente controlado;
+- verificar e registrar o número na Meta;
+- assinar a WABA ao aplicativo;
+- configurar secrets em homologação;
+- sincronizar ciclo de vida dos templates;
+- tornar mídia recebida compatível com quarentena/antimalware;
+- E2E de texto, template, documento, inbound e status;
+- filas, atribuição, notas internas e handoff;
+- revisão de RLS, índices, advisors, LGPD e retenção;
+- lint, typecheck, testes e build verdes.
+
+Definition of Done:
+
+- documentação atualizada no mesmo PR;
+- migrations aplicadas e homologadas;
+- isolamento multiempresa e multiobra comprovado;
+- nenhum texto padrão duplicado fora da fonte canônica;
+- webhook e status idempotentes;
+- nenhum provider não oficial no runtime produtivo;
+- CI verde;
+- PR revisado sem merge automático.
 
 ## `relatorios` — Relatórios e Indicadores
 
 - rota `/app/relatorios`;
-- operacional;
+- depende de `obras`;
 - dashboards, metas, alertas, relatórios salvos, snapshots e CSV;
 - valores sensíveis mascarados;
 - snapshots concluídos imutáveis.
@@ -256,29 +327,13 @@ Segurança:
 - acesso padrão: `SUPER_ADMIN`, `DIRECAO` e `ADMINISTRADOR`;
 - cliente não possui acesso.
 
-Rotas:
-
-```text
-/app/auditoria
-/app/auditoria/eventos
-/app/auditoria/eventos/[id]
-/app/auditoria/alertas
-/app/auditoria/saude
-/app/auditoria/configuracao
-```
-
 Escopo:
 
 - fluxo unificado de eventos sem duplicar trilhas de domínio;
-- fontes: auditoria, permissões, assinaturas, documentos, qualidade, compras, financeiro, relatórios, estoque, SAC e CRM;
 - pesquisa por módulo, severidade, texto, período e `correlation_id`;
-- correlação por organização, obra, cliente, ator, recurso e request;
 - sanitização recursiva de payloads;
 - idempotência por `deduplication_key`;
-- alertas por severidade, padrão, limite, janela e cooldown;
-- reconhecimento e resolução com motivo obrigatório;
-- health checks de banco, workers, relatórios e SLA;
-- diagnósticos de FKs, RLS, políticas, privilégios e ledger;
+- alertas, health checks e diagnósticos;
 - retenção entre 30 e 3650 dias.
 
 Segurança:
@@ -286,29 +341,14 @@ Segurança:
 - leitura exige `auditoria:read`;
 - configuração e transições exigem capacidade `administer`;
 - eventos e health checks são append-only;
-- escrita direta em eventos, alertas técnicos, health checks e diagnósticos é bloqueada;
-- RPCs não são executáveis por `anon`;
-- IP e user-agent somente como SHA-256;
-- senhas, tokens, authorization, secrets, cookies e chaves privadas recebem `[REDACTED]`;
-- payload bruto do provider de assinatura não é exposto.
-
-Definition of Done da Etapa 19:
-
-- schema, RLS e privilégios mínimos;
-- fluxo unificado e sanitização;
-- alertas, health checks e diagnósticos;
-- interface administrativa;
-- teste transacional com `ROLLBACK`;
-- documentação atualizada no mesmo PR;
-- migrations aplicadas e homologadas;
-- advisors revisados;
-- lint, typecheck, testes e build;
-- CI verde.
+- escrita direta bloqueada;
+- RPCs não executáveis por `anon`;
+- segredos e credenciais recebem `[REDACTED]`.
 
 ## `administracao` — Administração
 
 - rota `/app/administracao`;
-- operacional;
+- módulo de sistema;
 - catálogo de módulos, perfis, usuários, escopos, overrides e permissões;
 - níveis: nenhuma, leitura, edição e exclusão;
 - capacidades adicionais: aprovar, liberar, assinar, exportar, administrar e visualizar sensíveis.
