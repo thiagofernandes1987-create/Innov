@@ -111,25 +111,102 @@ export async function createScheduleWbs(formData: FormData) {
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(scheduleRoles);
   const parentId = optionalText(formData, "parentId");
-  const { error } = await supabase.from("work_breakdown_items").insert({
-    organization_id: organizationId,
-    project_id: projectId,
-    parent_id: parentId,
-    code: await codigoDaEtapa(supabase, projectId, parentId, code),
-    title,
-    description: optionalText(formData, "description"),
-    sequence: optionalNumber(formData, "sequence") ?? 0,
-    planned_start: plannedStart,
-    planned_end: plannedEnd,
-    client_visible: true,
-    created_by: userId
-  });
+  const { data: criada, error } = await supabase
+    .from("work_breakdown_items")
+    .insert({
+      organization_id: organizationId,
+      project_id: projectId,
+      parent_id: parentId,
+      code: await codigoDaEtapa(supabase, projectId, parentId, code),
+      title,
+      description: optionalText(formData, "description"),
+      sequence: optionalNumber(formData, "sequence") ?? 0,
+      planned_start: plannedStart,
+      planned_end: plannedEnd,
+      client_visible: true,
+      created_by: userId
+    })
+    .select("id")
+    .maybeSingle();
 
   if (error) fail(projectId, error.message);
   // Depois de gravar, e só depois: valor que o usuário digitou e abandonou não
   // é vocabulário da empresa, e entraria na lista de todo mundo.
   await registrarValorUsado(supabase, organizationId, ESCOPOS.etapaDaEap, title);
+  await criarAtividadesDoModelo(supabase, formData, {
+    projectId,
+    organizationId,
+    userId,
+    wbsId: criada?.id ? String(criada.id) : null
+  });
   revalidateSchedule(projectId);
+}
+
+/**
+ * As atividades que vieram do modelo de EAP, criadas junto com a etapa.
+ *
+ * **Nada acontece sem marcação explícita.** O formulário manda uma linha por
+ * atividade escolhida; sem escolha, a etapa nasce vazia como sempre nasceu.
+ * Trazer por padrão transformaria sugestão em imposição, e a EAP de quem não
+ * quis o modelo nasceria com cinco linhas para apagar.
+ *
+ * Falha de uma atividade não derruba a etapa: a etapa já está gravada, e
+ * desfazer o que deu certo por causa do que não deu deixaria a pessoa sem
+ * nenhum dos dois.
+ */
+async function criarAtividadesDoModelo(
+  supabase: Awaited<ReturnType<typeof requireOrganizationContext>>["supabase"],
+  formData: FormData,
+  contexto: { projectId: string; organizationId: string; userId: string; wbsId: string | null }
+): Promise<void> {
+  const escolhidas = formData
+    .getAll("atividadeDoModelo")
+    .map(valor => String(valor).trim())
+    .filter(Boolean);
+  if (escolhidas.length === 0) return;
+
+  const codigosExistentes = await supabase
+    .from("project_tasks")
+    .select("code")
+    .eq("project_id", contexto.projectId);
+  const codigos = (codigosExistentes.data ?? []).map(linha => String(linha.code ?? ""));
+
+  const { data: etapa } = contexto.wbsId
+    ? await supabase.from("work_breakdown_items").select("code").eq("id", contexto.wbsId).maybeSingle()
+    : { data: null };
+  const paiCodigo = etapa ? String((etapa as { code?: string }).code ?? "") : null;
+
+  // Numera em sequência, acumulando: `proximoCodigo` olha para a lista de
+  // códigos existentes, e sem devolver a ela o código recém-atribuído as cinco
+  // atividades receberiam o mesmo número.
+  const atribuidos = [...codigos];
+  const linhas = escolhidas.map((title, indice) => {
+    const code = proximoCodigo(atribuidos, paiCodigo || null);
+    atribuidos.push(code);
+    return {
+      organization_id: contexto.organizationId,
+      project_id: contexto.projectId,
+      wbs_id: contexto.wbsId,
+      code,
+      title,
+      status: "BACKLOG",
+      priority: "NORMAL",
+      sequence: indice,
+      duration_days: 1,
+      progress: 0,
+      client_visible: true,
+      created_by: contexto.userId
+    };
+  });
+
+  const { error } = await supabase.from("project_tasks").insert(linhas);
+  if (error) {
+    console.error("[eap:modelo]", error.message);
+    return;
+  }
+  for (const title of escolhidas) {
+    await registrarValorUsado(supabase, contexto.organizationId, ESCOPOS.atividadeDaEap, title);
+  }
 }
 
 export async function createScheduleTask(formData: FormData) {

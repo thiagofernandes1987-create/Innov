@@ -31,13 +31,13 @@ a ignorar.
 | Aplicativos no registro | 23 |
 | Rotas | 153 (137 páginas, 16 de API) |
 | Server actions | 178 em 30 arquivos |
-| Módulos de `lib/` | 80 |
+| Módulos de `lib/` | 82 |
 | Funções do banco declaradas | 222 |
 | Funções do banco chamadas do código | 113 |
-| Suítes de teste | 39, com 417 casos |
+| Suítes de teste | 40, com 437 casos |
 | Migrations | 152 |
 | Validadores de CI | 27 |
-| Módulos de `lib/` citados por algum teste | 38 de 80 |
+| Módulos de `lib/` citados por algum teste | 39 de 82 |
 
 ## 1. Aplicativos
 
@@ -614,6 +614,8 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/planejamento/cronograma` | sim | `ROTULO_DEPENDENCIA`, `SIGLA_PT`, `TIPOS_DEPENDENCIA`, `cadeiaMaisLonga`, `calcular`, `ordenar` |
 | `@/lib/planejamento/curvas` | não | `curvaDeAvanco`, `desvioDeHoje` |
 | `@/lib/planejamento/eap` | sim | `compararCodigos`, `diferencas`, `partes`, `proximoCodigo`, `renumerar` |
+| `@/lib/planejamento/modelos-de-eap` | sim | `MINIMO_DE_OCORRENCIAS`, `modeloPara`, `modelosDeEtapa` |
+| `@/lib/planejamento/modelos-servidor` | não | `modelosDeEap` |
 | `@/lib/planejamento/server` | não | `carregarCronograma`, `listaDoPlanejamento` |
 | `@/lib/procurement/comparison` | não | `compareProcurementQuotes`, `formatCurrency` |
 | `@/lib/projects/project-creation` | sim | `PROJECT_ENTRY_MODES`, `PROJECT_STATUSES_BY_MODE`, `classifyProjectCreationProviderError`, `validateContractProject`, `validateFlexibleProject` |
@@ -895,6 +897,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/interface-foundation-contract.test.ts` | 11 | S-23 — fundação de interface |
 | `tests/inventory-validator.test.ts` | 1 | validador do inventário de execução |
 | `tests/listas.test.ts` | 6 | motivo escolhido pertence à lista |
+| `tests/modelos-de-eap.test.ts` | 20 | o caso que a tarefa descreve; o que entra no modelo; grafia; achar o modelo do que está sendo digitado |
 | `tests/module-navigation.test.tsx` | 2 | NavegacaoDoModulo |
 | `tests/moeda.test.ts` | 15 | leitura de valor digitado; máscara de digitação, no padrão de caixa; exibição |
 | `tests/object-runtime-spec.test.ts` | 24 | canonicalSpecJson; specFingerprint; slotFamilyFor; allocateSlots |
@@ -958,7 +961,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 1 |
 | Server action nunca referenciada | 7 |
-| Módulo de `lib/` sem teste que o cite | 42 de 80 |
+| Módulo de `lib/` sem teste que o cite | 43 de 82 |
 
 ### Módulos sem teste que os cite
 
@@ -986,6 +989,7 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/pipeline/atividades`
 - `@/lib/pipeline/server`
 - `@/lib/planejamento/curvas`
+- `@/lib/planejamento/modelos-servidor`
 - `@/lib/planejamento/server`
 - `@/lib/procurement/comparison`
 - `@/lib/public-errors`

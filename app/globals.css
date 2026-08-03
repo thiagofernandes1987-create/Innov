@@ -3763,3 +3763,49 @@ tbody tr:hover { background: var(--surface-muted); }
 .linha-de-renomear input { flex: 1 1 200px; min-width: 180px; }
 .linha-de-ordem { display: flex; gap: 6px; }
 .linha-de-ordem button { min-width: 44px; padding-inline: 10px; }
+
+/* ── Modelo de EAP no formulário de nova etapa ─────────────────────────────
+   Aparece só quando o nome digitado já foi montado antes, com as atividades
+   que se repetiram. Todas vêm marcadas: quem digitou "Fundação" pela terceira
+   vez quer as cinco, e obrigá-lo a marcar cinco caixas devolveria o trabalho
+   que o recurso existe para tirar. */
+.modelo-de-etapa {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-muted);
+}
+.modelo-de-etapa-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.modelo-de-etapa-cabecalho strong { font-size: 13px; line-height: 1.35; }
+.modelo-de-etapa-alternar {
+  min-height: 44px;
+  padding-inline: 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--brand);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.modelo-de-etapa-lista { display: grid; gap: 2px; margin: 8px 0 0; padding: 0; list-style: none; }
+.modelo-de-etapa-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding-inline: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.modelo-de-etapa-item:hover { background: var(--surface); }
+.modelo-de-etapa-item input { width: 18px; height: 18px; margin: 0; flex: none; }
+.modelo-de-etapa-item span { flex: 1; font-size: 14px; }
+.modelo-de-etapa-item small { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.modelo-de-etapa-nota { margin: 8px 0 0; color: var(--muted); font-size: 12px; }
