@@ -10,6 +10,8 @@
 // roda antes de publicar. Um catálogo só, para que "a variável existe" e "a
 // variável aparece na lista" nunca possam divergir.
 
+import { tipo } from "./tipos";
+
 export type EscopoVariavel = "cliente" | "obra" | "orcamento" | "proposta" | "empresa" | "sistema";
 
 export type DefinicaoVariavel = {
@@ -63,33 +65,23 @@ export const ROTULO_ESCOPO: Record<EscopoVariavel, string> = {
 };
 
 /**
- * Escopos que cada função de documento oferece.
+ * As variáveis oferecidas para um tipo de documento, na ordem do catálogo.
  *
- * Uma FVS não tem orçamento, e uma mensagem padrão de cobrança não tem obra.
- * Mostrar variável que nunca vai resolver naquele documento é convidar a
- * lacuna — o usuário insere, publica, e a lacuna aparece na frente do cliente.
+ * Os escopos vêm de `tipos.ts`, que é o catálogo único: uma FVS não tem
+ * orçamento, e uma mensagem de boas-vindas não tem obra. Mostrar variável que
+ * nunca vai resolver naquele documento é convidar a lacuna — o usuário insere,
+ * publica, e a lacuna aparece na frente de quem recebe.
+ *
+ * Tipo desconhecido cai num conjunto seguro em vez de oferecer tudo.
  */
-export const ESCOPOS_POR_FUNCAO: Record<string, EscopoVariavel[]> = {
-  PROPOSTA: ["cliente", "obra", "orcamento", "proposta", "empresa", "sistema"],
-  ORCAMENTO_ENVIO: ["cliente", "obra", "orcamento", "empresa", "sistema"],
-  CONTRATO: ["cliente", "obra", "orcamento", "proposta", "empresa", "sistema"],
-  ADITIVO: ["cliente", "obra", "empresa", "sistema"],
-  FVS: ["obra", "empresa", "sistema"],
-  FVM: ["obra", "empresa", "sistema"],
-  MENSAGEM: ["cliente", "obra", "empresa", "sistema"],
-  EMAIL: ["cliente", "obra", "orcamento", "proposta", "empresa", "sistema"],
-  LAUDO: ["cliente", "obra", "empresa", "sistema"]
-};
-
-/** As variáveis oferecidas para uma função, na ordem do painel. */
-export function variaveisDaFuncao(funcao: string): DefinicaoVariavel[] {
-  const escopos = ESCOPOS_POR_FUNCAO[funcao] ?? ["cliente", "empresa", "sistema"];
-  return VARIAVEIS.filter(v => escopos.includes(v.escopo));
+export function variaveisDoTipo(tipoDoDocumento: string): DefinicaoVariavel[] {
+  const escopos = tipo(tipoDoDocumento)?.escopos ?? (["cliente", "empresa", "sistema"] as const);
+  return VARIAVEIS.filter(v => (escopos as readonly string[]).includes(v.escopo));
 }
 
 /** Dicionário de exemplo, para a pré-visualização antes de haver registro real. */
-export function dicionarioDeExemplo(funcao: string): Record<string, string> {
+export function dicionarioDeExemplo(tipoDoDocumento: string): Record<string, string> {
   const saida: Record<string, string> = {};
-  for (const v of variaveisDaFuncao(funcao)) saida[v.nome] = v.exemplo;
+  for (const v of variaveisDoTipo(tipoDoDocumento)) saida[v.nome] = v.exemplo;
   return saida;
 }

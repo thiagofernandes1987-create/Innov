@@ -13,18 +13,19 @@
 // em andamento. Publicar é da organização: o modelo passa a gerar documento que
 // vai para fora, e aí a régua é a mais dura que existir.
 
-import { variaveisDaFuncao } from "./dicionario";
-import { moduloDaFuncao, rotuloDaFuncao } from "./funcoes";
+import { variaveisDoTipo } from "./dicionario";
 import { variaveisInexistentes } from "./modelo";
+import { rotuloDoTipo, tipo } from "./tipos";
 
 export const LIMITE_DO_NOME = 120;
 
-export type ErroDeCampo = { campo: "nome" | "corpo" | "funcao"; mensagem: string };
+export type ErroDeCampo = { campo: "nome" | "corpo" | "tipo"; mensagem: string };
 
 export type EntradaDeModelo = {
   nome: string;
   corpo: string;
-  funcao: string;
+  /** Chave do catálogo `tipos.ts` — é como o módulo organiza a biblioteca. */
+  tipo: string;
   publicar: boolean;
 };
 
@@ -46,8 +47,8 @@ export function validarModelo(entrada: EntradaDeModelo): { erros: ErroDeCampo[] 
     erros.push({ campo: "nome", mensagem: `O nome do modelo cabe em ${LIMITE_DO_NOME} caracteres.` });
   }
 
-  if (!moduloDaFuncao(entrada.funcao)) {
-    erros.push({ campo: "funcao", mensagem: "Este tipo de documento não pertence a nenhum aplicativo." });
+  if (!tipo(entrada.tipo)) {
+    erros.push({ campo: "tipo", mensagem: "Escolha um tipo de documento do catálogo." });
   }
 
   if (entrada.publicar) {
@@ -57,13 +58,13 @@ export function validarModelo(entrada: EntradaDeModelo): { erros: ErroDeCampo[] 
     // Publicar com variável que não resolve é o defeito que só aparece na
     // frente de quem recebe o documento. A conferência do editor é conforto; a
     // que vale é esta, no servidor, porque validação de cliente não é validação.
-    const conhecidas = variaveisDaFuncao(entrada.funcao).map(v => v.nome);
+    const conhecidas = variaveisDoTipo(entrada.tipo).map(v => v.nome);
     const faltantes = variaveisInexistentes(corpo, conhecidas);
     if (faltantes.length > 0) {
       erros.push({
         campo: "corpo",
         mensagem:
-          `Estas variáveis não existem em ${rotuloDaFuncao(entrada.funcao)}: ${faltantes.join(", ")}. ` +
+          `Estas variáveis não existem em ${rotuloDoTipo(entrada.tipo)}: ${faltantes.join(", ")}. ` +
           "Corrija ou remova antes de publicar."
       });
     }
@@ -85,30 +86,30 @@ export function traduzirFalhaDoBanco(erro: { code?: string; message?: string } |
 
   if (code === "23505") return "Já existe um modelo com o mesmo nome neste tipo de documento. Escolha outro nome.";
   if (code === "42501" || /row-level security/i.test(message)) {
-    return "Você não tem permissão para gravar modelos deste aplicativo. Fale com quem administra os acessos.";
+    return "Você não tem permissão para gravar na biblioteca de modelos. Fale com quem administra os acessos.";
   }
   if (code === "23514") {
     if (/publicado_tem_corpo/.test(message)) return "Modelo publicado precisa ter corpo.";
     return "O modelo não atende a uma regra do aplicativo. Revise nome, tipo e corpo.";
   }
-  if (code === "23503") return "O aplicativo dono deste modelo não existe mais nesta organização.";
+  if (code === "23503") return "Este tipo de documento não existe mais no catálogo.";
   return "Não foi possível gravar o modelo agora. O que você escreveu continua aqui — tente de novo.";
 }
 
 /** Nome sugerido ao salvar pela primeira vez: o título que o autor já escreveu. */
-export function nomeSugerido(corpo: string, funcao: string): string {
+export function nomeSugerido(corpo: string, tipoDoDocumento: string): string {
   const titulo = String(corpo ?? "")
     .split("\n")
     .map(l => l.trim())
     .find(l => /^#{1,3}\s+\S/.test(l));
-  if (!titulo) return rotuloDaFuncao(funcao);
+  if (!titulo) return rotuloDoTipo(tipoDoDocumento);
   const limpo = titulo
     .replace(/^#{1,3}\s+/, "")
     .replace(/\{\{[^}]*\}\}/g, "")
     .replace(/[*_`]/g, "")
     .replace(/\s+/g, " ")
     .trim();
-  return limpo ? limpo.slice(0, LIMITE_DO_NOME) : rotuloDaFuncao(funcao);
+  return limpo ? limpo.slice(0, LIMITE_DO_NOME) : rotuloDoTipo(tipoDoDocumento);
 }
 
 export type EstadoDoModelo = {
@@ -120,6 +121,8 @@ export type EstadoDoModelo = {
   versao: number;
   status: "DRAFT" | "PUBLISHED" | "ARCHIVED" | null;
   salvoEm: string | null;
+  /** Origem do modelo: da plataforma (não editável) ou da empresa. */
+  escopo: "PLATAFORMA" | "ORGANIZACAO" | null;
   /**
    * O corpo que o servidor confirmou ter gravado.
    *
@@ -140,5 +143,6 @@ export const ESTADO_INICIAL: EstadoDoModelo = {
   versao: 0,
   status: null,
   salvoEm: null,
+  escopo: null,
   corpoSalvo: null
 };

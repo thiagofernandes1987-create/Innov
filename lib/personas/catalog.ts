@@ -38,7 +38,7 @@ export const PERSONAS_OPERACIONAIS = [
     role: "Vendedor / SDR",
     profession: "Executivo comercial de obras e móveis planejados",
     mission: "Qualificar demanda, manter próximo passo e transformar oportunidade em contrato defendível.",
-    modules: ["dashboard", "crm", "clientes", "propostas", "tarefas", "documentos", "relatorios"],
+    modules: ["dashboard", "crm", "clientes", "propostas", "tarefas", "documentos", "modelos", "relatorios"],
     competencies: [
       { name: "Qualificação", techniques: ["BANT", "SPIN", "critérios de aderência"], requiredData: ["origem", "necessidade", "orçamento", "autoridade", "prazo"] },
       { name: "Gestão de funil", techniques: ["probabilidade por etapa", "aging", "forecast"], requiredData: ["etapa", "valor", "probabilidade", "dias na etapa", "previsão de fechamento"] },
@@ -154,7 +154,7 @@ export const PERSONAS_OPERACIONAIS = [
     role: "Administrador",
     profession: "Administrador de sistemas e identidades",
     mission: "Manter acesso mínimo, segregação de função e continuidade operacional sem virar superusuário invisível.",
-    modules: ["dashboard", "administracao", "auditoria", "relatorios"],
+    modules: ["dashboard", "administracao", "auditoria", "modelos", "relatorios"],
     competencies: [
       { name: "Identidade e acesso", techniques: ["RBAC", "menor privilégio", "ciclo de vida"], requiredData: ["usuário", "papel", "organização", "vigência"] },
       { name: "Segregação de função", techniques: ["SoD", "matriz de conflito", "dupla aprovação"], requiredData: ["capacidade", "conflito", "alçada", "aprovador"] },
@@ -177,7 +177,7 @@ export const PERSONAS_OPERACIONAIS = [
     role: "Projetista",
     profession: "Projetista de móveis e detalhamento executivo",
     mission: "Entregar documentação fabricável, montável e compatibilizada com a condição real do local.",
-    modules: ["dashboard", "documentos", "obras", "tarefas", "qualidade", "relatorios"],
+    modules: ["dashboard", "documentos", "modelos", "obras", "tarefas", "qualidade", "relatorios"],
     competencies: [
       { name: "Modelagem e detalhamento", techniques: ["CAD/CAM", "cotas funcionais", "lista de peças"], requiredData: ["geometria", "material", "ferragem", "tolerância"] },
       { name: "Compatibilização", techniques: ["clash check", "interface disciplina", "DSM"], requiredData: ["arquitetura", "elétrica", "hidráulica", "dependências"] },
@@ -292,7 +292,7 @@ export const PERSONAS_OPERACIONAIS = [
     role: "Qualidade",
     profession: "Engenheiro ou técnico de qualidade de obras",
     mission: "Prevenir não conformidade, verificar requisitos e fechar causa raiz com eficácia comprovada.",
-    modules: ["dashboard", "qualidade", "diario", "documentos", "obras", "compras", "estoque", "tarefas", "relatorios"],
+    modules: ["dashboard", "qualidade", "diario", "documentos", "modelos", "obras", "compras", "estoque", "tarefas", "relatorios"],
     competencies: [
       { name: "Planejamento da qualidade", techniques: ["plano de inspeção", "FVS/FVM", "ponto de espera"], requiredData: ["requisito", "critério", "amostra", "responsável"] },
       { name: "Inspeção", techniques: ["checklist", "medição", "rastreabilidade"], requiredData: ["resultado", "instrumento", "evidência", "lote", "data"] },
@@ -338,7 +338,7 @@ export const PERSONAS_OPERACIONAIS = [
     role: "Contratos e documentos",
     profession: "Analista de contratos, documentos e assinaturas",
     mission: "Manter obrigação, versão, vigência, aprovação e evidência documental ligadas ao fato que autorizam.",
-    modules: ["dashboard", "propostas", "contratos", "aditivos", "assinaturas", "documentos", "clientes", "obras", "relatorios"],
+    modules: ["dashboard", "propostas", "contratos", "aditivos", "assinaturas", "documentos", "modelos", "clientes", "obras", "relatorios"],
     competencies: [
       { name: "Gestão contratual", techniques: ["obrigações", "marcos", "vigência"], requiredData: ["parte", "objeto", "valor", "prazo", "obrigação"] },
       { name: "Controle de mudanças", techniques: ["change log", "aditivo", "impacto"], requiredData: ["origem", "escopo", "prazo", "custo", "aprovação"] },

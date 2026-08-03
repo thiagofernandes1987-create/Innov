@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { excluirModelo, salvarModelo } from "@/app/actions/documentos";
+import { duplicarModelo, excluirModelo, salvarModelo } from "@/app/actions/documentos";
 import {
   ROTULO_ESCOPO,
   dicionarioDeExemplo,
-  variaveisDaFuncao,
+  variaveisDoTipo,
   type DefinicaoVariavel
 } from "@/lib/documentos/dicionario";
 import {
@@ -25,6 +25,7 @@ import { markdownParaHTML } from "@/lib/documentos/markdown";
 import { renderizar, variaveisInexistentes } from "@/lib/documentos/modelo";
 import { importarParaMarkdown } from "@/lib/documentos/importar";
 import { ESTADO_INICIAL, nomeSugerido } from "@/lib/documentos/modelos";
+import { ROTULO_CATEGORIA, TIPOS, categorias } from "@/lib/documentos/tipos";
 import { BarraDeMenu, type Menu } from "./menu-do-editor";
 
 // Editor de documento — layout desenhado pelo responsável em 3 de agosto.
@@ -53,31 +54,46 @@ type Aba = "markdown" | "wysiwyg";
 const FONTES = ["Roboto", "Inter", "Manrope", "IBM Plex Mono", "Georgia", "Times New Roman"];
 const TAMANHOS = [10, 11, 12, 14, 16, 18, 20, 24, 28, 32];
 
+export type ItemDaBiblioteca = {
+  id: string;
+  nome: string;
+  status: string;
+  escopo: "PLATAFORMA" | "ORGANIZACAO";
+  clienteVe: boolean;
+  aberto: boolean;
+};
+
 export type PastaDeModelos = {
   pasta: string;
-  funcao: string;
-  itens: { id: string; nome: string; status: string; aberto: boolean }[];
+  chave: string;
+  grupos: { tipo: string; rotulo: string; itens: ItemDaBiblioteca[] }[];
 };
 
 export function EditorDeModelo({
-  funcao,
+  tipo: tipoInicial,
   corpoInicial = "",
   modeloId = null,
   nomeInicial = "",
   versaoInicial = 0,
   statusInicial = null,
+  clienteVeInicial = false,
+  escopoInicial = "ORGANIZACAO",
   pastas = []
 }: {
-  funcao: string;
+  tipo: string;
   corpoInicial?: string;
   modeloId?: string | null;
   nomeInicial?: string;
   versaoInicial?: number;
   statusInicial?: "DRAFT" | "PUBLISHED" | null;
+  clienteVeInicial?: boolean;
+  escopoInicial?: "PLATAFORMA" | "ORGANIZACAO";
   pastas?: PastaDeModelos[];
 }) {
   const [corpo, setCorpo] = useState(corpoInicial);
   const [nome, setNome] = useState(nomeInicial);
+  const [tipo, setTipo] = useState(tipoInicial);
+  const [clienteVe, setClienteVe] = useState(clienteVeInicial);
   const [selecao, setSelecao] = useState<Selecao>({ inicio: 0, fim: 0 });
   const [aba, setAba] = useState<Aba>("markdown");
   const [mostrarExplorador, setMostrarExplorador] = useState(pastas.length > 0);
@@ -110,6 +126,7 @@ export function EditorDeModelo({
     status: statusInicial
   });
   const [remocao, remover, removendo] = useActionState(excluirModelo, ESTADO_INICIAL);
+  const [copia, copiar, duplicando] = useActionState(duplicarModelo, ESTADO_INICIAL);
 
   if (modeloId !== identidade && modeloId !== estado.modeloId) {
     setIdentidade(modeloId);
@@ -120,9 +137,13 @@ export function EditorDeModelo({
 
   // O que vale é sempre a última resposta do servidor: depois de gravar, o id e
   // a versão mudam, e regravar com a versão antiga seria recusado como conflito.
-  const idAtual = estado.modeloId ?? modeloId;
+  const idAtual = estado.modeloId ?? (copia.ok ? copia.modeloId : null) ?? modeloId;
   const versaoAtual = estado.versao || versaoInicial;
   const statusAtual = estado.status ?? statusInicial;
+  // Depois de duplicar, o que está na tela é a cópia da empresa — o selo de
+  // "padrão da plataforma" some junto, senão o editor continuaria dizendo que
+  // não pode gravar o que acabou de virar dele.
+  const daPlataforma = escopoInicial === "PLATAFORMA" && !copia.ok;
 
   // "Salvo" é derivado da resposta do servidor, não de um instantâneo tirado
   // aqui: a marca é o corpo que o banco confirmou ter gravado. Dizer salvo
@@ -153,14 +174,27 @@ export function EditorDeModelo({
     window.history.replaceState(
       null,
       "",
-      `/app/documentos/modelos?funcao=${encodeURIComponent(funcao)}&modelo=${encodeURIComponent(estado.modeloId)}`
+      `/app/modelos?tipo=${encodeURIComponent(tipo)}&modelo=${encodeURIComponent(estado.modeloId)}`
     );
-  }, [estado.ok, estado.modeloId, funcao, modeloId]);
+  }, [estado.ok, estado.modeloId, tipo, modeloId]);
+
+  const duplicar = useCallback(() => {
+    const dados = new FormData();
+    dados.set("modeloId", modeloId ?? "");
+    startTransition(() => copiar(dados));
+  }, [copiar, modeloId]);
+
+  // A cópia recém-criada passa a ser o documento aberto, com o endereço junto:
+  // recarregar depois de duplicar tem de trazer a cópia, não o padrão.
+  useEffect(() => {
+    if (!copia.ok || !copia.modeloId) return;
+    window.history.replaceState(null, "", `/app/modelos?tipo=${encodeURIComponent(tipo)}&modelo=${encodeURIComponent(copia.modeloId)}`);
+  }, [copia.ok, copia.modeloId, tipo]);
 
   const abrir = useCallback((id: string) => {
     if (alterado && !window.confirm("Há alterações não salvas neste modelo. Abrir outro descarta o que você escreveu.")) return;
-    router.push(`/app/documentos/modelos?funcao=${encodeURIComponent(funcao)}&modelo=${encodeURIComponent(id)}`);
-  }, [alterado, funcao, router]);
+    router.push(`/app/modelos?tipo=${encodeURIComponent(tipo)}&modelo=${encodeURIComponent(id)}`);
+  }, [alterado, tipo, router]);
 
   // A lista fecha no Escape e no clique fora, como todo menu suspenso.
   useEffect(() => {
@@ -180,8 +214,8 @@ export function EditorDeModelo({
       document.removeEventListener("keydown", fechar);
     };
   }, [listaAberta]);
-  const disponiveis = useMemo(() => variaveisDaFuncao(funcao), [funcao]);
-  const exemplo = useMemo(() => dicionarioDeExemplo(funcao), [funcao]);
+  const disponiveis = useMemo(() => variaveisDoTipo(tipo), [tipo]);
+  const exemplo = useMemo(() => dicionarioDeExemplo(tipo), [tipo]);
 
   // Em tempo real a prévia acompanha o que se digita; desligado, ela mostra o
   // último congelamento. Quem escreve documento longo em máquina modesta
@@ -226,8 +260,8 @@ export function EditorDeModelo({
 
   const emBreve = (o_que: string) => `${o_que} entra na próxima tarefa do motor de documento.`;
 
-  const totalDeModelos = pastas.reduce((soma, p) => soma + p.itens.length, 0);
-  const arquivo = (nome || nomeSugerido(corpo, funcao))
+  const totalDeModelos = pastas.reduce((soma, p) => soma + p.grupos.reduce((n, g) => n + g.itens.length, 0), 0);
+  const arquivo = (nome || nomeSugerido(corpo, tipo))
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^A-Za-z0-9]+/g, "-")
@@ -236,14 +270,14 @@ export function EditorDeModelo({
 
   const novo = useCallback(() => {
     if (alterado && !window.confirm("Há alterações não salvas. Começar um modelo novo descarta o que você escreveu.")) return;
-    router.push(`/app/documentos/modelos?funcao=${encodeURIComponent(funcao)}`);
-  }, [alterado, funcao, router]);
+    router.push(`/app/modelos?tipo=${encodeURIComponent(tipo)}`);
+  }, [alterado, tipo, router]);
 
   // "Salvar como" é uma gravação nova: some o id, e o servidor insere. Sem
   // limpar o id, salvar como sobrescreveria o modelo aberto — que é
   // exatamente o oposto do que o nome do comando promete.
   const salvarComo = useCallback(() => {
-    const sugerido = window.prompt("Salvar como:", nome ? `${nome} (cópia)` : nomeSugerido(corpo, funcao));
+    const sugerido = window.prompt("Salvar como:", nome ? `${nome} (cópia)` : nomeSugerido(corpo, tipo));
     if (sugerido === null) return;
     const limpo = sugerido.trim();
     if (!limpo) return;
@@ -253,7 +287,7 @@ export function EditorDeModelo({
     const campoId = form.elements.namedItem("modeloId");
     if (campoId instanceof HTMLInputElement) campoId.value = "";
     requestAnimationFrame(() => enviar(false));
-  }, [corpo, enviar, funcao, nome]);
+  }, [corpo, enviar, tipo, nome]);
 
   const entrada = useRef<HTMLInputElement>(null);
   const [importando, setImportando] = useState(false);
@@ -274,12 +308,12 @@ export function EditorDeModelo({
     if (corpo.trim() && !window.confirm("Importar substitui todo o corpo do editor. Continuar?")) return;
     setCorpo(r.markdown);
     setCongelado(r.markdown);
-    if (!nome) setNome(nomeSugerido(r.markdown, funcao) || arquivo.name.replace(/\.[^.]+$/, ""));
+    if (!nome) setNome(nomeSugerido(r.markdown, tipo) || arquivo.name.replace(/\.[^.]+$/, ""));
     setAvisoDaImportacao({
       ok: true,
       texto: `${arquivo.name} convertido: ${r.markdown.split("\n").length} linhas.` + (r.aviso ? ` ${r.aviso}` : "")
     });
-  }, [corpo, funcao, nome]);
+  }, [corpo, tipo, nome]);
 
   const excluir = useCallback(() => {
     const publicado = statusAtual === "PUBLISHED";
@@ -289,13 +323,12 @@ export function EditorDeModelo({
     if (!window.confirm(pergunta)) return;
     const dados = new FormData();
     dados.set("modeloId", idAtual ?? "");
-    dados.set("funcao", funcao);
     // Ação de `useActionState` chamada fora de transição não atualiza o estado
     // de "em andamento" — e o React avisa no console. Salvar passa pelo
     // `action` do formulário; excluir não tem formulário, então declara a
     // transição na mão.
     startTransition(() => remover(dados));
-  }, [funcao, idAtual, remover, statusAtual]);
+  }, [idAtual, remover, statusAtual]);
 
   const menus: Menu[] = [
     {
@@ -308,7 +341,7 @@ export function EditorDeModelo({
           atalho: "Ctrl+O",
           aoEscolher: () => setMostrarExplorador(true),
           desabilitado: totalDeModelos === 0,
-          dica: totalDeModelos === 0 ? "Ainda não há modelo salvo neste aplicativo." : "Escolha no explorador, à esquerda."
+          dica: totalDeModelos === 0 ? "A biblioteca ainda está vazia." : "Escolha no explorador, à esquerda."
         },
         { tipo: "separador" },
         {
@@ -405,17 +438,23 @@ export function EditorDeModelo({
 
   const erroDoNome = estado.erros.find(e => e.campo === "nome");
   const errosDoCorpo = estado.erros.filter(e => e.campo !== "nome");
-  const aviso = avisoDaImportacao?.texto || remocao.mensagem || estado.mensagem;
-  const avisoOk = avisoDaImportacao ? avisoDaImportacao.ok : remocao.mensagem ? remocao.ok : estado.ok;
+  const aviso = avisoDaImportacao?.texto || copia.mensagem || remocao.mensagem || estado.mensagem;
+  const avisoOk = avisoDaImportacao
+    ? avisoDaImportacao.ok
+    : copia.mensagem
+      ? copia.ok
+      : remocao.mensagem
+        ? remocao.ok
+        : estado.ok;
 
   return (
     <form className="editor-doc" ref={formulario} action={gravar}>
       {/* O que vai para a action. O corpo é campo do formulário e não estado
           perdido: se a gravação falhar, ele continua no DOM — VACINA-042. */}
-      <input type="hidden" name="funcao" value={funcao} />
       <input type="hidden" name="modeloId" defaultValue={idAtual ?? ""} key={idAtual ?? "novo"} />
       <input type="hidden" name="versao" value={versaoAtual} />
       <input type="hidden" name="publicar" value="" disabled />
+      {clienteVe ? <input type="hidden" name="clienteVe" value="1" /> : null}
       <textarea name="corpo" value={corpo} readOnly hidden />
       <input
         ref={entrada}
@@ -439,26 +478,51 @@ export function EditorDeModelo({
             name="nome"
             value={nome}
             onChange={e => setNome(e.target.value)}
-            placeholder={nomeSugerido(corpo, funcao)}
+            placeholder={nomeSugerido(corpo, tipo)}
             aria-label="Nome do modelo"
             aria-invalid={Boolean(erroDoNome)}
             maxLength={120}
           />
+          <select
+            className="editor-doc-tipo"
+            name="tipo"
+            value={tipo}
+            onChange={e => setTipo(e.target.value)}
+            aria-label="Tipo de documento"
+            disabled={daPlataforma}
+          >
+            {categorias().map(categoria => (
+              <optgroup key={categoria} label={ROTULO_CATEGORIA[categoria]}>
+                {TIPOS.filter(t => t.categoria === categoria).map(t => (
+                  <option key={t.chave} value={t.chave}>{t.rotulo}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
           <span className={salvo ? "editor-doc-estado salvo" : "editor-doc-estado"}>
             {importando ? "Convertendo…" : gravando ? "Salvando…" : salvo ? `Salvo · v${versaoAtual}` : "Não salvo"}
           </span>
           {statusAtual === "PUBLISHED" ? <span className="editor-selo ok">Publicado</span> : null}
+          {daPlataforma ? <span className="editor-selo aviso">Padrão da plataforma</span> : null}
         </span>
         <span className="editor-doc-acoes">
           <button type="button" className="button button-secondary" onClick={() => setMostrarPrevia(v => !v)}>
             {mostrarPrevia ? "Ocultar prévia" : "Visualizar"}
           </button>
-          <button type="button" className="button button-secondary" onClick={() => enviar(true)} disabled={gravando || statusAtual === "PUBLISHED"}>
-            Publicar
-          </button>
-          <button type="button" className="button button-primary" onClick={() => enviar(false)} disabled={gravando}>
-            {gravando ? "Salvando…" : "Salvar"}
-          </button>
+          {daPlataforma ? (
+            <button type="button" className="button button-primary" onClick={duplicar} disabled={duplicando}>
+              {duplicando ? "Duplicando…" : "Duplicar para a minha empresa"}
+            </button>
+          ) : (
+            <>
+              <button type="button" className="button button-secondary" onClick={() => enviar(true)} disabled={gravando || statusAtual === "PUBLISHED"}>
+                Publicar
+              </button>
+              <button type="button" className="button button-primary" onClick={() => enviar(false)} disabled={gravando}>
+                {gravando ? "Salvando…" : "Salvar"}
+              </button>
+            </>
+          )}
         </span>
       </header>
 
@@ -571,25 +635,30 @@ export function EditorDeModelo({
               <button type="button" onClick={() => setMostrarExplorador(false)} aria-label="Fechar explorador">×</button>
             </header>
             {pastas.map(pasta => (
-              <div className="editor-pasta" key={pasta.funcao}>
+              <div className="editor-pasta" key={pasta.chave}>
                 <h3>{pasta.pasta}</h3>
-                {pasta.itens.length === 0 ? (
-                  <p className="editor-pasta-vazia">Nenhum modelo ainda.</p>
-                ) : (
-                  pasta.itens.map(item => (
-                    <button
-                      type="button"
-                      className={item.aberto ? "editor-arquivo aberto" : "editor-arquivo"}
-                      key={item.id}
-                      onClick={() => abrir(item.id)}
-                      title={item.status === "PUBLISHED" ? "Publicado" : "Rascunho"}
-                    >
-                      <span aria-hidden="true">M↓</span>
-                      {item.nome}
-                      {item.status === "PUBLISHED" ? <em aria-label="publicado">•</em> : null}
-                    </button>
-                  ))
-                )}
+                {pasta.grupos.map(grupo => (
+                  <div className="editor-grupo-de-tipo" key={grupo.tipo}>
+                    <h4>{grupo.rotulo}</h4>
+                    {grupo.itens.map(item => (
+                      <button
+                        type="button"
+                        className={item.aberto ? "editor-arquivo aberto" : "editor-arquivo"}
+                        key={item.id}
+                        onClick={() => abrir(item.id)}
+                        title={
+                          (item.escopo === "PLATAFORMA" ? "Padrão da plataforma" : "Da sua empresa") +
+                          (item.status === "PUBLISHED" ? " · publicado" : " · rascunho") +
+                          (item.clienteVe ? " · vai para o cliente" : "")
+                        }
+                      >
+                        <span aria-hidden="true">{item.escopo === "PLATAFORMA" ? "◆" : "M↓"}</span>
+                        {item.nome}
+                        {item.status === "PUBLISHED" ? <em aria-label="publicado">•</em> : null}
+                      </button>
+                    ))}
+                  </div>
+                ))}
               </div>
             ))}
           </aside>
@@ -700,6 +769,15 @@ export function EditorDeModelo({
         <span>Lin {posicao.linha}, Col {posicao.coluna}</span>
         <span>{palavras} palavras</span>
         <span>Markdown</span>
+        <label className="editor-status-cliente">
+          <input
+            type="checkbox"
+            checked={clienteVe}
+            onChange={() => setClienteVe(v => !v)}
+            disabled={daPlataforma}
+          />
+          Pode ser enviado ao cliente
+        </label>
         <span className="editor-status-direita">UTF-8</span>
         <span>LF</span>
       </footer>

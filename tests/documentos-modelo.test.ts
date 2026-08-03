@@ -147,26 +147,26 @@ describe("markdown para HTML", () => {
 });
 
 describe("dicionário de variáveis", () => {
-  it("cada função oferece só os escopos que resolvem nela", async () => {
-    const { variaveisDaFuncao } = await import("../lib/documentos/dicionario");
+  it("cada tipo oferece só os escopos que resolvem nele", async () => {
+    const { variaveisDoTipo } = await import("../lib/documentos/dicionario");
     // FVS é ficha de verificação de serviço: não tem orçamento nem proposta.
     // Oferecer variável que nunca resolve é convidar a lacuna a aparecer na
     // frente do cliente.
-    const fvs = variaveisDaFuncao("FVS").map(v => v.escopo);
+    const fvs = variaveisDoTipo("FVS").map(v => v.escopo);
     expect(fvs).not.toContain("orcamento");
     expect(fvs).not.toContain("proposta");
-    expect(variaveisDaFuncao("PROPOSTA").map(v => v.escopo)).toContain("orcamento");
+    expect(variaveisDoTipo("PROPOSTA").map(v => v.escopo)).toContain("orcamento");
   });
 
   it("função desconhecida cai num conjunto seguro em vez de oferecer tudo", async () => {
-    const { variaveisDaFuncao } = await import("../lib/documentos/dicionario");
-    const escopos = new Set(variaveisDaFuncao("INEXISTENTE").map(v => v.escopo));
+    const { variaveisDoTipo } = await import("../lib/documentos/dicionario");
+    const escopos = new Set(variaveisDoTipo("INEXISTENTE").map(v => v.escopo));
     expect([...escopos].sort()).toEqual(["cliente", "empresa", "sistema"]);
   });
 
   it("o catálogo e a validação enxergam a mesma lista", async () => {
-    const { variaveisDaFuncao, dicionarioDeExemplo } = await import("../lib/documentos/dicionario");
-    const nomes = variaveisDaFuncao("PROPOSTA").map(v => v.nome);
+    const { variaveisDoTipo, dicionarioDeExemplo } = await import("../lib/documentos/dicionario");
+    const nomes = variaveisDoTipo("PROPOSTA").map(v => v.nome);
     const corpo = nomes.map(n => `{{${n}}}`).join(" ");
     expect(variaveisInexistentes(corpo, nomes)).toEqual([]);
     // E a pré-visualização resolve todas, sem lacuna.

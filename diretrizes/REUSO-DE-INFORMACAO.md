@@ -154,12 +154,34 @@ pode ver.
 **O dicionário respeita a RLS.** A variável só resolve o que o usuário que
 gerou o documento pode ler. Modelo não é caminho para contornar permissão.
 
-**O modelo mora no módulo que emite o documento.** Proposta em `propostas`,
-contrato em `contratos`, FVS e FVM em `qualidade`. Não é organização de pastas:
-`module_key` na linha é a **chave de permissão**, e a RLS reaproveita
-`has_module_permission`, que já é o mecanismo de toda a plataforma. Um depósito
-comum de modelos obrigaria uma segunda régua de acesso — duas réguas que
-divergem no primeiro ajuste.
+**Um acervo só, num aplicativo próprio, lido por todos.** Modelos e
+Documentações (`/app/modelos`), uma tabela, 35 tipos em 7 categorias.
+
+A primeira versão prendia cada modelo ao módulo emissor e usava isso como chave
+de permissão. **O responsável recusou em 3 de agosto**, com o caso que derruba o
+desenho: *"enviar uma proposta para o cliente na etapa de projeto ou o contrato
+assinado, não teria como se cada documento ficasse preso a um único módulo"*.
+Documento circula entre módulos por natureza, e amarrar ao emissor transforma
+todo uso legítimo numa exceção. Registrado em `VACINA-050`.
+
+Três perguntas, três lugares:
+
+| Pergunta | Onde mora |
+|---|---|
+| quem pode ver | permissão do aplicativo `modelos`, pela RLS de sempre |
+| o que a peça é | `document_type`, do catálogo |
+| onde aparece | `document_module_types`, marcado pela Administração de cada empresa |
+
+**A marcação por aplicativo é disponibilização, não segurança.** Ela decide o
+que aparece na lista de dentro de cada aplicativo — para quem emite ordem de
+serviço em Obras não escolher entre trinta e cinco tipos. Desmarcar não esconde
+nada de quem for à biblioteca, e a tela diz isso: filtro apresentado como
+permissão é a forma mais comum de acreditar em segurança que não existe.
+
+**Duas origens.** `PLATAFORMA` (`organization_id is null`) é o padrão que vale
+para todas as empresas e muda por migration; `ORGANIZACAO` é da empresa. Quem
+quer sua versão do padrão **duplica**, e `derived_from` guarda de onde a cópia
+veio — editar por cima do padrão comum mudaria o de todas as outras.
 
 **Salvar é do autor; publicar é da organização.** Rascunho aceita corpo
 incompleto e variável ainda errada, porque é trabalho em andamento. Publicado

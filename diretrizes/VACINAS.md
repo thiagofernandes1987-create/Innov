@@ -148,6 +148,7 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-047` | Constante exportada de módulo `"use server"` chega ao cliente como `undefined` | aplicada | tipo e valor inicial moram no módulo puro, e a action importa de lá |
 | `VACINA-048` | `textarea` enviado por formulário chega com CRLF e nunca bate com o que está na tela | aplicada | normalização para `\n` na entrada da action, antes de gravar, comparar ou versionar |
 | `VACINA-049` | Salvar rebaixava modelo publicado a rascunho em silêncio | aplicada | estado seguinte decidido a partir do atual, e mudança de publicação exigida também na política do banco |
+| `VACINA-050` | Acervo compartilhado amarrado ao módulo que o emite transforma toda circulação legítima em exceção | aplicada | aplicativo próprio para o acervo, tipo classifica, disponibilização por aplicativo separada da permissão, e teste que exige o mesmo documento em mais de um módulo |
 
 ## 4. Arquivos
 
@@ -201,7 +202,8 @@ diretrizes/vacinas/
 ├── VACINA-046-ALVO-DE-TOQUE-E-O-ROTULO-NAO-A-CAIXA.md
 ├── VACINA-047-USE-SERVER-SO-EXPORTA-FUNCAO.md
 ├── VACINA-048-TEXTAREA-ENVIA-CRLF.md
-└── VACINA-049-SALVAR-NAO-MUDA-ESTADO-DE-PUBLICACAO.md
+├── VACINA-049-SALVAR-NAO-MUDA-ESTADO-DE-PUBLICACAO.md
+└── VACINA-050-ACERVO-COMPARTILHADO-NAO-SE-PRENDE-AO-EMISSOR.md
 ```
 
 ## 5. Critérios para nova vacina

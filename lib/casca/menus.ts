@@ -147,6 +147,10 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
     { rotulo: "Qualidade", href: "/app/qualidade/documentos" },
     { rotulo: "Relatórios", href: "/app/relatorios" }
   ],
+  modelos: [
+    { rotulo: "Biblioteca", href: "/app/modelos" },
+    { rotulo: "Disponibilização", href: "/app/administracao/modelos" }
+  ],
   ocorrencias: [
     { rotulo: "Ocorrências", href: "/app/ocorrencias" },
     { rotulo: "Nova ocorrência", href: "/app/ocorrencias/novo" }

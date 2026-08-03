@@ -1,10 +1,9 @@
 "use server";
 
-// Um módulo "use server" só exporta função assíncrona: tipo e constante ficam
-// em `lib/documentos/modelos`, senão chegam ao cliente como `undefined`.
+// Um módulo "use server" só exporta função assíncrona (VACINA-047): tipo e
+// constante ficam em `lib/documentos/modelos`.
 import { revalidatePath } from "next/cache";
 import { hasCapability, requireCapability } from "@/lib/authorization";
-import { moduloDaFuncao } from "@/lib/documentos/funcoes";
 import { extrairVariaveis } from "@/lib/documentos/modelo";
 import {
   ESTADO_INICIAL,
@@ -13,18 +12,23 @@ import {
   type ErroDeCampo,
   type EstadoDoModelo
 } from "@/lib/documentos/modelos";
+import { tipo as tipoDoCatalogo } from "@/lib/documentos/tipos";
 
-// Gravação de modelo de documento.
+// Gravação na biblioteca de Modelos e Documentações.
+//
+// **Uma biblioteca só, lida por todos os aplicativos.** A permissão é sempre a
+// do aplicativo `modelos`; o `document_type` diz o que a peça é, e a
+// Administração decide, por empresa, quais tipos cada aplicativo oferece. Foi a
+// correção pedida em 3 de agosto: preso ao módulo emissor, não haveria como
+// mandar a proposta de dentro de Projetos nem anexar o contrato assinado num
+// atendimento.
 //
 // Nenhuma destas ações redireciona em erro. Elas devolvem estado, porque o
 // formulário é um editor: perder duas páginas de contrato porque o nome repetiu
-// é o defeito de VACINA-042 na sua forma mais cara.
-//
-// A concorrência é tratada de frente, não ignorada: `version_number` viaja no
-// formulário e a gravação só acontece se a versão no banco ainda for aquela.
-// Sem isso, dois responsáveis editando o mesmo modelo — que é o caso normal de
-// um modelo de proposta da empresa — fazem o último apagar o trabalho do
-// primeiro **sem nenhum dos dois ficar sabendo**.
+// é o defeito de VACINA-042 na forma mais cara.
+
+const MODULO = "modelos";
+const ROTA = "/app/modelos";
 
 function texto(formData: FormData, chave: string) {
   return String(formData.get(chave) ?? "").trim();
@@ -39,84 +43,96 @@ function falha(base: EstadoDoModelo, mensagem: string, erros: ErroDeCampo[] = []
  *
  * Insere quando não há `modeloId`, atualiza quando há. Publicar é a mesma
  * gravação com a régua dura: corpo obrigatório e nenhuma variável que não
- * resolva na função.
+ * resolva no tipo.
  */
 export async function salvarModelo(
   anterior: EstadoDoModelo,
   formData: FormData
 ): Promise<EstadoDoModelo> {
-  const funcao = texto(formData, "funcao");
+  const tipo = texto(formData, "tipo");
   const publicar = formData.get("publicar") !== null;
   const nome = texto(formData, "nome");
-  // O envio de formulário normaliza a quebra de linha do `textarea` para CRLF
-  // — é o que a especificação manda. Sem desfazer isso, o corpo gravado nunca
-  // é igual ao da tela: o diff da próxima versão apareceria inteiro alterado, e
-  // o selo "salvo", que compara o que voltou com o que está escrito, ficaria
-  // eternamente em "não salvo".
+  // O envio de formulário normaliza a quebra de linha do `textarea` para CRLF —
+  // é o que a especificação manda, e sem desfazer isso o corpo gravado nunca é
+  // igual ao da tela (VACINA-048).
   const corpo = String(formData.get("corpo") ?? "").replace(/\r\n/g, "\n");
   const modeloId = texto(formData, "modeloId") || null;
   const versao = Number(formData.get("versao") ?? 0);
+  const visivelAoCliente = formData.get("clienteVe") !== null;
 
   const base: EstadoDoModelo = { ...anterior, modeloId, nome, versao };
 
-  const { erros } = validarModelo({ nome, corpo, funcao, publicar });
+  const { erros } = validarModelo({ nome, corpo, tipo, publicar });
   if (erros.length > 0) {
     return falha(base, publicar ? "Não deu para publicar." : "Não deu para salvar.", erros);
   }
 
-  const moduleKey = moduloDaFuncao(funcao);
-  if (!moduleKey) return falha(base, "Este tipo de documento não pertence a nenhum aplicativo.");
+  const context = await requireCapability(MODULO, publicar ? "approve" : "update");
 
-  // Publicar é ato da organização, salvar é do autor: exigem capacidades
-  // diferentes do mesmo módulo. `requireCapability` redireciona quem não tem
-  // acesso nenhum ao aplicativo; a RLS é quem decide de novo na gravação.
-  const context = await requireCapability(moduleKey, publicar ? "approve" : "update");
-
-
-  // Estado atual antes de decidir o próximo. Salvar um modelo **publicado** não
-  // pode rebaixá-lo a rascunho em silêncio: quem emite documento continuaria
-  // vendo a versão antiga, ou nenhuma, sem ninguém ter pedido isso. Editar o
-  // publicado é editar o que a organização usa, e por isso pede a mesma alçada
-  // de publicar — que é o que a política do banco também exige.
+  // Estado atual antes de decidir o próximo. Salvar um modelo publicado não
+  // pode rebaixá-lo a rascunho em silêncio (VACINA-049); e modelo da plataforma
+  // não é editável por empresa nenhuma — a cópia é o caminho.
   let jaPublicado = false;
+  let daPlataforma = false;
   if (modeloId) {
     const { data: atual } = await context.supabase
       .from("document_templates")
-      .select("status")
+      .select("status, scope")
       .eq("id", modeloId)
       .maybeSingle();
     jaPublicado = atual?.status === "PUBLISHED";
+    daPlataforma = atual?.scope === "PLATAFORMA";
   }
-  const publicado = publicar || jaPublicado;
 
-  // Editar o que já está publicado exige a mesma alçada de publicar. Sem esta
-  // conferência a política do banco recusaria de qualquer forma — mas o usuário
-  // leria "sem permissão para gravar" depois de escrever, em vez de saber
-  // antes que aquele modelo não é dele para mexer.
-  if (publicado && !(await hasCapability(moduleKey, "approve", null, context))) {
+  if (daPlataforma) {
     return falha(
       base,
-      "Este modelo está publicado: alterá-lo muda o documento que toda a organização emite, e isso exige acesso total ao aplicativo. Use Salvar como… para trabalhar numa cópia sua."
+      "Este modelo é da biblioteca da plataforma e vale para todas as empresas. Use Duplicar para a minha empresa e edite a cópia."
     );
   }
 
+  const publicado = publicar || jaPublicado;
+  if (publicado && !(await hasCapability(MODULO, "approve", null, context))) {
+    return falha(
+      base,
+      "Este modelo está publicado: alterá-lo muda o documento que toda a empresa emite, e isso exige acesso total à biblioteca. Use Salvar como… para trabalhar numa cópia sua."
+    );
+  }
+
+  const agora = new Date().toISOString();
   const linha = {
     name: nome,
+    document_type: tipo,
     body_markdown: corpo,
     variables: extrairVariaveis(corpo),
+    client_visible: visivelAoCliente,
     status: publicado ? ("PUBLISHED" as const) : ("DRAFT" as const),
     updated_by: context.userId,
-    updated_at: new Date().toISOString(),
-    ...(publicar ? { published_by: context.userId, published_at: new Date().toISOString() } : {})
+    updated_at: agora,
+    ...(publicar ? { published_by: context.userId, published_at: agora } : {})
   };
+
+  const devolver = (
+    data: { id: unknown; version_number: unknown; status: EstadoDoModelo["status"]; updated_at: unknown }
+  ): EstadoDoModelo => ({
+    ok: true,
+    mensagem: publicar ? "Modelo publicado." : jaPublicado ? "Modelo publicado atualizado." : "Modelo salvo.",
+    erros: [],
+    modeloId: String(data.id),
+    nome,
+    versao: Number(data.version_number),
+    status: data.status,
+    salvoEm: String(data.updated_at),
+    escopo: "ORGANIZACAO",
+    corpoSalvo: corpo
+  });
 
   if (!modeloId) {
     const { data, error } = await context.supabase
       .from("document_templates")
       .insert({
         organization_id: context.organizationId,
-        module_key: moduleKey,
-        purpose: funcao,
+        scope: "ORGANIZACAO",
         created_by: context.userId,
         version_number: 1,
         ...linha
@@ -124,18 +140,8 @@ export async function salvarModelo(
       .select("id, version_number, status, updated_at")
       .single();
     if (error || !data) return falha(base, traduzirFalhaDoBanco(error));
-    revalidatePath("/app/documentos/modelos");
-    return {
-      ok: true,
-      mensagem: publicar ? "Modelo publicado." : jaPublicado ? "Modelo publicado atualizado." : "Modelo salvo.",
-      erros: [],
-      modeloId: String(data.id),
-      nome,
-      versao: Number(data.version_number),
-      status: data.status,
-      salvoEm: String(data.updated_at),
-      corpoSalvo: corpo
-    };
+    revalidatePath(ROTA);
+    return devolver(data);
   }
 
   const { data, error } = await context.supabase
@@ -149,12 +155,12 @@ export async function salvarModelo(
   if (error) return falha(base, traduzirFalhaDoBanco(error));
 
   if (!data) {
-    // Zero linhas tem três causas e elas pedem respostas diferentes. Dizer
-    // "erro ao salvar" para as três é o que faz o usuário tentar de novo no
+    // Zero linhas tem causas diferentes e elas pedem respostas diferentes.
+    // Dizer "erro ao salvar" para todas é o que faz o usuário tentar de novo no
     // caso em que tentar de novo destrói o trabalho de outra pessoa.
     const { data: atual } = await context.supabase
       .from("document_templates")
-      .select("version_number, updated_at")
+      .select("version_number")
       .eq("id", modeloId)
       .maybeSingle();
     if (!atual) {
@@ -167,46 +173,95 @@ export async function salvarModelo(
     );
   }
 
-  revalidatePath("/app/documentos/modelos");
+  revalidatePath(ROTA);
+  return devolver(data);
+}
+
+/**
+ * Copia um modelo da plataforma para a empresa.
+ *
+ * É o caminho que o responsável descreveu: o que ele define na plataforma se
+ * repete para todas as empresas, e o que muda é o que o administrador de cada
+ * uma edita. Editar por cima do padrão comum mudaria o de todo mundo; copiar
+ * deixa a empresa dona da versão dela, com `derived_from` guardando de onde
+ * veio — é o que permite depois mostrar no que ela divergiu do padrão.
+ */
+export async function duplicarModelo(
+  anterior: EstadoDoModelo,
+  formData: FormData
+): Promise<EstadoDoModelo> {
+  const modeloId = texto(formData, "modeloId");
+  if (!modeloId) return falha(anterior, "Abra um modelo antes de duplicar.");
+  const context = await requireCapability(MODULO, "create");
+
+  const { data: origem } = await context.supabase
+    .from("document_templates")
+    .select("name, document_type, body_markdown, variables, client_visible, scope")
+    .eq("id", modeloId)
+    .maybeSingle();
+  if (!origem) return falha(anterior, "Este modelo não está mais disponível para você.");
+
+  const { data, error } = await context.supabase
+    .from("document_templates")
+    .insert({
+      organization_id: context.organizationId,
+      scope: "ORGANIZACAO",
+      name: `${origem.name} (da minha empresa)`.slice(0, 120),
+      document_type: origem.document_type,
+      body_markdown: origem.body_markdown,
+      variables: origem.variables,
+      client_visible: origem.client_visible,
+      status: "DRAFT",
+      version_number: 1,
+      derived_from: origem.scope === "PLATAFORMA" ? modeloId : null,
+      created_by: context.userId,
+      updated_by: context.userId
+    })
+    .select("id, version_number, status, updated_at, name, body_markdown")
+    .single();
+  if (error || !data) return falha(anterior, traduzirFalhaDoBanco(error));
+
+  revalidatePath(ROTA);
   return {
     ok: true,
-    mensagem: publicar ? "Modelo publicado." : jaPublicado ? "Modelo publicado atualizado." : "Modelo salvo.",
+    mensagem: "Cópia criada na biblioteca da sua empresa. Edite à vontade: o padrão da plataforma continua intacto.",
     erros: [],
     modeloId: String(data.id),
-    nome,
+    nome: String(data.name),
     versao: Number(data.version_number),
-    status: data.status,
+    status: "DRAFT",
     salvoEm: String(data.updated_at),
-    corpoSalvo: corpo
+    escopo: "ORGANIZACAO",
+    corpoSalvo: String(data.body_markdown)
   };
 }
 
 /**
  * Exclui rascunho nunca publicado; arquiva o resto.
  *
- * A política de `delete` já exige `published_at is null`, e o comentário da
- * migration diz o motivo: modelo que gerou documento não some, porque a
- * auditoria precisa chegar no molde que originou o que foi assinado.
+ * A política de `delete` exige `published_at is null`: modelo que gerou
+ * documento não some, porque a auditoria precisa chegar ao molde que originou o
+ * que foi assinado.
  */
 export async function excluirModelo(
   anterior: EstadoDoModelo,
   formData: FormData
 ): Promise<EstadoDoModelo> {
-  const funcao = texto(formData, "funcao");
   const modeloId = texto(formData, "modeloId");
   const base: EstadoDoModelo = { ...anterior, modeloId: modeloId || null };
   if (!modeloId) return falha(base, "Abra um modelo salvo antes de excluir.");
 
-  const moduleKey = moduloDaFuncao(funcao);
-  if (!moduleKey) return falha(base, "Este tipo de documento não pertence a nenhum aplicativo.");
-  const context = await requireCapability(moduleKey, "delete");
+  const context = await requireCapability(MODULO, "delete");
 
   const { data: alvo } = await context.supabase
     .from("document_templates")
-    .select("published_at")
+    .select("published_at, scope")
     .eq("id", modeloId)
     .maybeSingle();
   if (!alvo) return falha(base, "Este modelo não está mais disponível para você.");
+  if (alvo.scope === "PLATAFORMA") {
+    return falha(base, "Modelo da plataforma não é excluído por uma empresa: ele vale para todas.");
+  }
 
   if (alvo.published_at) {
     const { error } = await context.supabase
@@ -214,11 +269,12 @@ export async function excluirModelo(
       .update({ status: "ARCHIVED", archived_at: new Date().toISOString(), updated_by: context.userId })
       .eq("id", modeloId);
     if (error) return falha(base, traduzirFalhaDoBanco(error));
-    revalidatePath("/app/documentos/modelos");
+    revalidatePath(ROTA);
     return {
       ...ESTADO_INICIAL,
       ok: true,
-      mensagem: "Modelo já publicado: foi arquivado, não excluído. Ele para de aparecer para quem emite documento, e continua disponível para auditoria.",
+      mensagem:
+        "Modelo já publicado: foi arquivado, não excluído. Ele para de aparecer para quem emite documento, e continua disponível para auditoria.",
       status: "ARCHIVED",
       modeloId
     };
@@ -229,8 +285,57 @@ export async function excluirModelo(
     .delete({ count: "exact" })
     .eq("id", modeloId);
   if (error) return falha(base, traduzirFalhaDoBanco(error));
-  if (!count) return falha(base, "Você não tem permissão para excluir modelos deste aplicativo.");
+  if (!count) return falha(base, "Você não tem permissão para excluir modelos da biblioteca.");
 
-  revalidatePath("/app/documentos/modelos");
+  revalidatePath(ROTA);
   return { ...ESTADO_INICIAL, ok: true, mensagem: "Modelo excluído." };
+}
+
+/**
+ * Marca quais tipos um aplicativo oferece.
+ *
+ * É **disponibilização, não segurança**: quem pode ler a biblioteca continua
+ * sendo quem tem acesso ao aplicativo de modelos. Isto decide o que aparece na
+ * lista de dentro de cada aplicativo, para o usuário não escolher entre trinta
+ * e cinco tipos quando o que ele faz ali são três.
+ */
+export async function definirTiposDoAplicativo(
+  _anterior: { ok: boolean; mensagem: string },
+  formData: FormData
+): Promise<{ ok: boolean; mensagem: string }> {
+  const moduleKey = texto(formData, "aplicativo");
+  if (!moduleKey) return { ok: false, mensagem: "Aplicativo não informado." };
+
+  const escolhidos = formData
+    .getAll("tipo")
+    .map(v => String(v))
+    .filter(v => tipoDoCatalogo(v) !== null);
+
+  const context = await requireCapability("administracao", "manage");
+
+  const { error: erroApagando } = await context.supabase
+    .from("document_module_types")
+    .delete()
+    .eq("organization_id", context.organizationId)
+    .eq("module_key", moduleKey);
+  if (erroApagando) return { ok: false, mensagem: traduzirFalhaDoBanco(erroApagando) };
+
+  if (escolhidos.length > 0) {
+    const { error } = await context.supabase.from("document_module_types").insert(
+      escolhidos.map(document_type => ({
+        organization_id: context.organizationId,
+        module_key: moduleKey,
+        document_type,
+        created_by: context.userId
+      }))
+    );
+    if (error) return { ok: false, mensagem: traduzirFalhaDoBanco(error) };
+  }
+
+  revalidatePath("/app/administracao/modelos");
+  revalidatePath(ROTA);
+  return {
+    ok: true,
+    mensagem: `${escolhidos.length} tipo(s) disponíveis neste aplicativo.`
+  };
 }

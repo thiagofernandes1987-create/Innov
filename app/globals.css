@@ -3475,6 +3475,9 @@ tbody tr:hover { background: var(--surface-muted); }
 .editor-doc-nome:hover { border-color: var(--border); }
 .editor-doc-nome:focus { border-color: var(--brand); background: var(--surface); }
 .editor-doc-nome.invalido, .editor-doc-nome[aria-invalid="true"] { border-color: var(--danger, #b4453c); }
+.editor-doc-tipo { width: auto; max-width: 26ch; min-height: 44px; padding: 0 8px; border: 1px solid var(--border); border-radius: 7px; background: var(--paper); color: var(--text); font-size: 0.8rem; }
+.editor-status-cliente { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; cursor: pointer; }
+.editor-status-cliente input { width: 16px; min-width: 16px; height: 16px; min-height: 16px; padding: 0; accent-color: var(--brand-strong); }
 
 /* Aviso de gravação. Fica na largura toda, acima do editor, porque o que ele
    informa muda o que a pessoa faz em seguida — conflito de versão não pode
@@ -3518,6 +3521,12 @@ tbody tr:hover { background: var(--surface-muted); }
 .editor-explorador > header button { min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 1rem; cursor: pointer; }
 .editor-pasta { padding: 8px 10px; }
 .editor-pasta h3 { margin: 0 0 4px; color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: .07em; }
+/* Três níveis no explorador — categoria, tipo, modelo — porque é assim que o
+   acervo é organizado: o módulo escolhe por tipo, e o tipo pertence a uma
+   categoria. Sem o nível do meio, "Proposta" e "Termo de entrega" ficariam
+   lado a lado numa lista só. */
+.editor-grupo-de-tipo { margin: 6px 0 10px; }
+.editor-grupo-de-tipo h4 { margin: 0 0 2px 6px; color: var(--text); font-size: 0.72rem; font-weight: 600; }
 .editor-arquivo { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font-size: 0.78rem; text-align: left; cursor: pointer; }
 .editor-arquivo:disabled { color: var(--muted); cursor: not-allowed; }
 .editor-arquivo:hover:not(:disabled) { background: var(--surface-muted); }
@@ -3576,3 +3585,30 @@ tbody tr:hover { background: var(--surface-muted); }
 
 .editor-status { display: flex; align-items: center; gap: 18px; padding: 7px 14px; border-top: 1px solid var(--border); background: var(--surface-muted); color: var(--muted); font-size: 0.72rem; }
 .editor-status-direita { margin-left: auto; }
+
+
+/* Disponibilização de modelos por aplicativo — Administração.
+   Um aplicativo por vez: 19 × 35 numa grade seriam 665 caixas na tela, e
+   ninguém confere 665 caixas. */
+.disponibilizacao { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 900px) { .disponibilizacao { grid-template-columns: minmax(0, 1fr); } }
+.disponibilizacao-aplicativos { display: grid; gap: 2px; align-content: start; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--paper); max-height: 70vh; overflow-y: auto; }
+.disponibilizacao-aplicativos h2 { margin: 0 0 6px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.disponibilizacao-aplicativo { display: grid; gap: 1px; width: 100%; min-height: 48px; padding: 6px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text); text-align: left; cursor: pointer; }
+.disponibilizacao-aplicativo:hover { background: var(--surface-muted); }
+.disponibilizacao-aplicativo.ativo { background: var(--brand-soft); font-weight: 600; }
+.disponibilizacao-aplicativo small { color: var(--muted); font-size: 0.7rem; }
+/* Na linha ativa o fundo clareia, e `--muted` sobre ele mede 4,43:1 — abaixo
+   do mínimo de 4,5. A linha selecionada usa a cor de texto. */
+.disponibilizacao-aplicativo.ativo small { color: var(--text); }
+.disponibilizacao-tipos { min-width: 0; padding: 16px 18px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--paper); }
+.disponibilizacao-tipos > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.disponibilizacao-tipos h2 { margin: 0; font-size: 1.05rem; }
+.disponibilizacao-tipos fieldset { margin: 0 0 14px; padding: 0; border: 0; }
+.disponibilizacao-tipos legend { padding: 0; margin-bottom: 6px; color: var(--muted); font-size: 0.7rem; text-transform: uppercase; letter-spacing: .07em; }
+.disponibilizacao-tipo { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+.disponibilizacao-tipo:hover { background: var(--surface-muted); }
+.disponibilizacao-tipo input { width: 16px; min-width: 16px; height: 16px; min-height: 16px; margin-top: 4px; padding: 0; accent-color: var(--brand-strong); }
+.disponibilizacao-tipo span { display: grid; gap: 1px; min-width: 0; }
+.disponibilizacao-tipo strong { font-size: 0.82rem; font-weight: 600; }
+.disponibilizacao-tipo small { color: var(--muted); font-size: 0.72rem; }
