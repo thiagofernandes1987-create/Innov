@@ -1067,9 +1067,9 @@ reconstruir o que funciona:
 ### Tarefas
 
 - [ ] T-32.0 — **Catálogo de valores usados** por `(organização, escopo, valor)`, com contagem e último uso. Uma tabela e um componente de campo servem a EAP, funil, marcador, disciplina, unidade, motivo de perda e motivo de parada
-  - [ ] T-32.0.1 — Ordenar por frequência recente e cortar em 8; digitar filtra. Sugestão com 300 valores é ruído
-  - [ ] T-32.0.2 — Valor usado uma vez só há mais de 6 meses sai da lista: erro de digitação antigo não vira sugestão para sempre
-  - [ ] T-32.0.3 — **Sugestão nunca é lista fechada.** É campo de texto com apoio, e valor novo sempre passa
+  - [x] T-32.0.1 — Ordenar por frequência recente e cortar em 8; digitar filtra. Sugestão com 300 valores é ruído — `lib/sugestoes/catalogo.ts` com decaimento de meia-vida 90 dias; 18 testes em `tests/sugestoes.test.ts`; verificado no navegador (`verif28.mjs`, passo 4: digitar filtrou de 2 para 1)
+  - [x] T-32.0.2 — Valor usado uma vez só há mais de 6 meses sai da lista: erro de digitação antigo não vira sugestão para sempre — regra em `ordenarSugestoes`, com teste do caso simétrico (usado várias vezes há muito tempo permanece: é vocabulário sazonal, não erro)
+  - [x] T-32.0.3 — **Sugestão nunca é lista fechada.** É campo de texto com apoio, e valor novo sempre passa — `components/comum/campo-com-sugestao.tsx`, ligado à EAP e às atividades do cronograma; verificado no navegador: valor inédito gravou (passo 2) e voltou como sugestão no uso seguinte (passo 3)
   - [ ] T-32.0.4 — Limpar o catálogo é ação de administrador, porque o catálogo é da organização
 - [ ] T-32.1 — **Modelo de EAP**: sugerir o conjunto, não só a palavra. Quem cria "Fundação" pela terceira vez com as mesmas cinco atividades embaixo deveria poder trazer as cinco. É o "modelo de projeto" que o atlas mostra em 3 das 46 telas do capítulo Projetos
 - [~] T-32.2 — **Motor de documento por modelo**, um só para proposta, orçamento, contrato, laudo e ordem de serviço — corpo, variáveis e pré-visualização em 2 de agosto; **gravar, publicar, arquivar e importar em 3 de agosto**. Falta o dicionário sair de registro real sob RLS (T-32.2.5) e o documento emitido guardar o texto resolvido (T-32.2.7)
@@ -1131,6 +1131,25 @@ Quem depende, nominalmente:
 Ordem vigente: **motor de documento → sugestão → campo próprio.** Sugestão
 continua barata e entrega sozinha, mas não destrava ninguém; o motor destrava
 sete.
+
+---
+
+## Sprint S-33 — Defeitos silenciosos encontrados na verificação da S-32
+
+**Estado:** pendente
+
+Descobertos ao verificar T-32.0 no navegador, e registrados no fim conforme a
+R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
+
+- [x] T-33.0 — **Embed ambíguo derruba a consulta inteira** (VACINA-052). A tela de obras listava zero com duas obras no banco, e a obra existente respondia 404. Sete telas, quatro pares de tabelas. Corrigido com chave nomeada; falha de carga separada de registro inexistente; `pnpm validate:postgrest-embeds` reconstrói o grafo de chaves estrangeiras e reprova embed ambíguo sem chave — provado com teste negativo
+- [x] T-33.1 — **Chave de módulo inexistente nega todo mundo** (VACINA-053). `'dashboard'` não existe em `app_modules`, e o catálogo de valores nunca gravava. O mesmo validador encontrou `'modelos'`: dez guardas do acervo apoiados numa chave que nenhuma migration cria — o app inteiro nasceria negando todo mundo num ambiente novo. Corrigido com `is_org_member`, migration de semeadura e `pnpm validate:module-keys`
+- [x] T-33.2 — **`Escape` fechava o formulário junto com a lista de sugestão** (VACINA-054), descartando o preenchimento. Camada interna aberta consome a tecla; fechada, deixa passar
+- [x] T-33.3 — **Medidor de contraste não entendia `color(srgb …)`** e lia o fundo como preto, acusando 1,3:1 onde havia 15:1. Quarto ponto cego do instrumento, e o primeiro a errar acusando. Corrigido com conferência unitária dos dois lados
+- [x] T-33.4 — **Cronograma com 14 alvos de toque abaixo de 44px** — barra da obra em 43px, um pixel abaixo, e botões do planejador em 34px. Agora 0 nas três larguras e nos dois temas
+- [x] T-33.5 — **Barra de navegação da obra com fundo branco fixo no tema escuro**: 2,11:1 nos sete links. E `--muted` em 4,49:1, um centésimo abaixo do mínimo. Cronograma, início, obras, modelos, CRM e orçamentos fecham em 0/0 nos dois temas
+- [ ] T-33.6 — Herói da obra com título em `--text` sobre fundo escuro (1,12:1) e rótulo branco sobre trilha clara (1,23:1), na visão geral da obra
+- [ ] T-33.7 — Kanban de tarefas com colunas de fundo claro fixo no tema escuro: 12 reprovações, os seis nomes de coluna ilegíveis
+- [ ] T-33.8 — Um erro de console na tela de tarefas, nas seis combinações de largura e tema
 
 ---
 

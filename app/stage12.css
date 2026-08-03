@@ -6,12 +6,22 @@
   margin: 0 0 24px;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: rgba(255,255,255,.86);
+  /* Branco fixo. No tema escuro a barra continuava clara, com o texto `--muted`
+     claro por cima: 2,11:1 nos sete links de navegação da obra — a barra que
+     leva a todas as outras telas do módulo. Token de superfície, que segue o
+     tema. */
+  background: var(--surface);
   box-shadow: 0 10px 30px rgba(9,24,33,.05);
 }
 .project-nav a {
   white-space: nowrap;
-  padding: 9px 13px;
+  /* Media 43px com `padding: 9px` — um pixel abaixo do mínimo, que é a pior
+     forma de falhar: parece conforme e não é. Altura declarada em vez de
+     deduzida do padding. */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 13px;
   border-radius: 9px;
   color: var(--muted);
   font-weight: 750;

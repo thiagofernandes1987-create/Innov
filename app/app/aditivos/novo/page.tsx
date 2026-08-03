@@ -20,7 +20,7 @@ export default async function NewAmendmentPage({
       .order("updated_at", { ascending: false }),
     context.supabase
       .from("budget_versions")
-      .select("id,version_number,budgets(code,title)")
+      .select("id,version_number,budgets!budget_versions_budget_id_fkey(code,title)")
       .eq("organization_id", context.organizationId)
       .eq("status", "APPROVED")
       .order("approved_at", { ascending: false })

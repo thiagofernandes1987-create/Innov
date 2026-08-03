@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { proximoCodigo } from "@/lib/planejamento/eap";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 
 const scheduleRoles = [
   "SUPER_ADMIN",
@@ -125,6 +126,9 @@ export async function createScheduleWbs(formData: FormData) {
   });
 
   if (error) fail(projectId, error.message);
+  // Depois de gravar, e só depois: valor que o usuário digitou e abandonou não
+  // é vocabulário da empresa, e entraria na lista de todo mundo.
+  await registrarValorUsado(supabase, organizationId, ESCOPOS.etapaDaEap, title);
   revalidateSchedule(projectId);
 }
 
@@ -162,6 +166,7 @@ export async function createScheduleTask(formData: FormData) {
   });
 
   if (error) fail(projectId, error.message);
+  await registrarValorUsado(supabase, organizationId, ESCOPOS.atividadeDaEap, title);
   revalidateSchedule(projectId);
 }
 

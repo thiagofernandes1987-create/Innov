@@ -135,6 +135,10 @@ jobs:
         run: pnpm validate:docs
       - name: Validate server actions exports (VACINA-047)
         run: pnpm validate:server-actions
+      - name: Validate PostgREST embeds (VACINA-052)
+        run: pnpm validate:postgrest-embeds
+      - name: Validate module keys against app_modules (VACINA-053)
+        run: pnpm validate:module-keys
       - name: Validate auditable persona contracts
         run: pnpm validate:personas-audit
       - name: Validate extension function qualification

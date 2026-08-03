@@ -36,12 +36,38 @@ const AUDITORIA = sel => {
     });
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
-  const num = s => (String(s).match(/-?[\d.]+/g) || [0, 0, 0]).slice(0, 3).map(Number);
-  const alfa = s => (/rgba/.test(s) ? Number((s.match(/[\d.]+/g) || [])[3] ?? 1) : 1);
+  // Componentes 0–255, a partir de `rgb()`, `rgba()` ou `color(<espaço> …)`.
+  //
+  // v4 do instrumento. `color(srgb 0.95 0.97 0.99)` — que o Chromium devolve
+  // quando a cor veio de `color-mix()` ou de espaço declarado — era lido pelo
+  // regex de números como [0.95, 0.97, 0.99] em escala 0–255, ou seja, preto.
+  // Texto escuro sobre fundo claro aparecia como 1,3:1 e entrava no relatório
+  // como reprovação. Quarto ponto cego deste medidor, e o primeiro a errar para
+  // o lado de acusar em vez de absolver — o que corrompe a medição do mesmo
+  // jeito, porque manda corrigir o que não está quebrado.
+  //
+  // O nome do espaço é descartado antes de ler os números: `display-p3` contém
+  // um `3` que o regex captaria como componente.
+  const num = s => {
+    const texto = String(s);
+    const espaco = /^\s*color\(\s*([a-z0-9-]+)/i.exec(texto);
+    const corpo = espaco ? texto.slice(texto.indexOf(espaco[1]) + espaco[1].length) : texto;
+    const partes = (corpo.split("/")[0].match(/-?[\d.]+/g) || [0, 0, 0]).slice(0, 3).map(Number);
+    while (partes.length < 3) partes.push(0);
+    return espaco ? partes.map(v => Math.max(0, Math.min(1, v)) * 255) : partes;
+  };
+  const alfa = s => {
+    const texto = String(s);
+    if (/^\s*color\(/i.test(texto)) {
+      const depoisDaBarra = texto.split("/")[1];
+      return depoisDaBarra ? Number((depoisDaBarra.match(/[\d.]+/) || [1])[0]) : 1;
+    }
+    return /rgba/.test(texto) ? Number((texto.match(/[\d.]+/g) || [])[3] ?? 1) : 1;
+  };
 
   // Todas as cores declaradas dentro de um background-image (gradientes).
   function coresDoGradiente(bgImage) {
-    const achados = bgImage.match(/rgba?\([^)]+\)/g) || [];
+    const achados = bgImage.match(/(?:rgba?|color)\([^)]+\)/g) || [];
     return achados.filter(c => alfa(c) >= 0.6);
   }
 
@@ -59,7 +85,7 @@ const AUDITORIA = sel => {
         // Gradiente sem cor legível (imagem, url()): cai para a cor de fundo.
       }
       const bg = c.backgroundColor;
-      if (bg && !/rgba\(0, 0, 0, 0\)|transparent/.test(bg) && alfa(bg) >= 0.6) return [bg];
+      if (bg && !/rgba\(0, 0, 0, 0\)|transparent|color\([a-z0-9-]+ 0 0 0 \/ 0\)/.test(bg) && alfa(bg) >= 0.6) return [bg];
       n = n.parentElement;
     }
     return ["rgb(255, 255, 255)"];

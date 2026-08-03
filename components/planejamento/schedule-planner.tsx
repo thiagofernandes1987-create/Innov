@@ -36,6 +36,8 @@ import {
 } from "@/lib/planejamento/cronograma";
 import { feriadosNaFaixa, regimePorChave } from "@/lib/planejamento/calendario";
 import styles from "./schedule-planner.module.css";
+import { CampoComSugestao } from "@/components/comum/campo-com-sugestao";
+import type { ValorDoCatalogo } from "@/lib/sugestoes/catalogo";
 
 const DAY = 86_400_000;
 const ROW_HEIGHT = 42;
@@ -252,7 +254,9 @@ export function SchedulePlanner({
   tasks,
   dependencies,
   today,
-  regime = "seg_sex"
+  regime = "seg_sex",
+  sugestoesDeEtapa = [],
+  sugestoesDeAtividade = []
 }: {
   projectId: string;
   projectStart: string | null;
@@ -263,6 +267,9 @@ export function SchedulePlanner({
   dependencies: PlannerDependency[];
   today: string;
   regime?: string;
+  /** Vocabulário da organização: o que já foi digitado em outras obras. */
+  sugestoesDeEtapa?: ValorDoCatalogo[];
+  sugestoesDeAtividade?: ValorDoCatalogo[];
 }) {
   const [zoom, setZoom] = useState<ZoomMode>("day");
   const [criticalVisible, setCriticalVisible] = useState(true);
@@ -693,7 +700,13 @@ export function SchedulePlanner({
             <div className={styles.formGrid}>
               <label className={styles.field}>Código EAP<input name="code" placeholder="automático" /><small className={styles.dica}>Deixe em branco para numerar sozinho: 1, 1.1, 1.2…</small></label>
               <label className={styles.field}>Etapa superior<select name="parentId" defaultValue=""><option value="">Etapa principal</option>{wbsItems.map(item => <option key={item.id} value={item.id}>{item.code} · {item.title}</option>)}</select></label>
-              <label className={styles.fullField}>Nome da etapa<input name="title" required /></label>
+              <label className={styles.fullField}>
+                Nome da etapa
+                {/* Campo com apoio, não lista fechada: o que a construtora já
+                    chamou de "Fundação" em outras obras aparece, e um nome
+                    inédito continua passando. */}
+                <CampoComSugestao name="title" sugestoes={sugestoesDeEtapa} required maxLength={160} />
+              </label>
               <label className={styles.fullField}>Descrição<textarea name="description" /></label>
               <label className={styles.field}>Início planejado<input type="date" name="plannedStart" defaultValue={projectStart ?? ""} /></label>
               <label className={styles.field}>Término planejado<input type="date" name="plannedEnd" defaultValue={projectEnd ?? ""} /></label>
@@ -714,7 +727,10 @@ export function SchedulePlanner({
             <div className={styles.formGrid}>
               <label className={styles.field}>Código<input name="code" placeholder="automático" /><small className={styles.dica}>Em branco, segue a numeração da etapa escolhida.</small></label>
               <label className={styles.field}>Etapa da EAP<select name="wbsId" defaultValue=""><option value="">Sem etapa</option>{wbsItems.map(item => <option key={item.id} value={item.id}>{item.code} · {item.title}</option>)}</select></label>
-              <label className={styles.fullField}>Nome da atividade<input name="title" required /></label>
+              <label className={styles.fullField}>
+                Nome da atividade
+                <CampoComSugestao name="title" sugestoes={sugestoesDeAtividade} required maxLength={160} />
+              </label>
               <label className={styles.fullField}>Descrição<textarea name="description" /></label>
               <label className={styles.field}>Duração (dias úteis)<input type="number" min="0" step="0.5" name="durationDays" defaultValue="1" required /></label>
               <label className={styles.field}>Atividade superior<select name="parentTaskId" defaultValue=""><option value="">Nenhuma</option>{tasks.map(task => <option key={task.id} value={task.id}>{task.code} · {task.title}</option>)}</select></label>
