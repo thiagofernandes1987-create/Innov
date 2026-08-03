@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { describe, expect, it } from "vitest";
-import { PERSONAS_OPERACIONAIS } from "../lib/personas/catalog";
+import { PERSONAS_OPERACIONAIS } from "../lib/personas/runtime";
 
 const MIGRATION =
   "supabase/migrations/20260728103000_operational_events_notifications.sql";
