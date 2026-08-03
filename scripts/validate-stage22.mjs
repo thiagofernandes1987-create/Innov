@@ -6,9 +6,14 @@ const schemaMigration =
   "supabase/migrations/20260803190000_stage22_whatsapp_omnichannel.sql";
 const hardeningMigration =
   "supabase/migrations/20260803191000_stage22_whatsapp_hardening.sql";
+const statusGuardMigration =
+  "supabase/migrations/20260803192000_stage22_whatsapp_status_guard.sql";
+const analysisDocument =
+  "docs/ANALISE-REFERENCIAS-WHATSAPP-OPEN-SOURCE-2026-08-03.md";
 const requiredFiles = [
   schemaMigration,
   hardeningMigration,
+  statusGuardMigration,
   "lib/whatsapp/domain.ts",
   "lib/whatsapp/client.ts",
   "lib/whatsapp/source-resolver.ts",
@@ -17,7 +22,8 @@ const requiredFiles = [
   "app/api/webhooks/whatsapp/route.ts",
   "app/app/whatsapp/page.tsx",
   "tests/whatsapp-domain.test.ts",
-  "docs/ETAPA-22-WHATSAPP-OMNICHANNEL.md"
+  "docs/ETAPA-22-WHATSAPP-OMNICHANNEL.md",
+  analysisDocument
 ];
 
 const failures = [];
@@ -32,10 +38,14 @@ function read(file) {
 
 const migration = read(schemaMigration);
 const hardening = read(hardeningMigration);
+const statusGuard = read(statusGuardMigration);
+const analysis = read(analysisDocument);
 const registry = read("lib/modules/registry.ts");
 const webhook = read("app/api/webhooks/whatsapp/route.ts");
 const resolver = read("lib/whatsapp/source-resolver.ts");
 const client = read("lib/whatsapp/client.ts");
+const domain = read("lib/whatsapp/domain.ts");
+const tests = read("tests/whatsapp-domain.test.ts");
 const actions = read("app/actions/whatsapp.ts");
 const env = read(".env.example");
 const page = read("app/app/whatsapp/page.tsx");
@@ -88,6 +98,41 @@ for (const token of [
   if (!hardening.toLowerCase().includes(token.toLowerCase())) {
     failures.push(`Hardening ausente: ${token}`);
   }
+}
+
+for (const token of [
+  "guard_whatsapp_message_delivery_status",
+  "whatsapp_messages_guard_delivery_status",
+  "old.status='FAILED'",
+  "new.status='FAILED' and old.status not in ('QUEUED','SENT')"
+]) {
+  if (!statusGuard.includes(token)) failures.push(`Máquina de estados ausente: ${token}`);
+}
+
+for (const token of [
+  "canAdvanceWhatsAppDeliveryStatus",
+  "DELIVERY_LADDER",
+  "currentStatus === \"FAILED\""
+]) {
+  if (!domain.includes(token)) failures.push(`Domínio sem proteção de status: ${token}`);
+}
+for (const token of [
+  "impede regressão e falha tardia",
+  'canAdvanceWhatsAppDeliveryStatus("READ", "DELIVERED")',
+  'canAdvanceWhatsAppDeliveryStatus("DELIVERED", "FAILED")'
+]) {
+  if (!tests.includes(token)) failures.push(`Teste de status ausente: ${token}`);
+}
+
+for (const token of [
+  "wacrm",
+  "Evolution API",
+  "WhatsControl",
+  "whatsapp-web.js",
+  "META_CLOUD_DIRECT",
+  "Não adicionar `whatsapp-web.js`"
+]) {
+  if (!analysis.includes(token)) failures.push(`Análise de referência sem decisão: ${token}`);
 }
 
 if (!registry.includes('key:"whatsapp"') && !registry.includes('key: "whatsapp"')) {
@@ -162,7 +207,9 @@ console.log(
       relations: 7,
       webhookSignature: "HMAC_SHA256",
       freeFormWindowHours: 24,
-      directHistoryDeletion: false
+      directHistoryDeletion: false,
+      monotonicDeliveryStatuses: true,
+      unofficialWebSessionProvider: false
     },
     null,
     2
