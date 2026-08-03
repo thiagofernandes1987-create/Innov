@@ -56,17 +56,18 @@ async function requestMeta<T>(
   const { version, token } = configuration();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20_000);
+  const headers = new Headers(init.headers);
+  headers.set("authorization", `Bearer ${token}`);
+  if (init.body && !headers.has("content-type")) {
+    headers.set("content-type", "application/json");
+  }
 
   try {
     const response = await fetch(
       `https://graph.facebook.com/${version}/${resource.replace(/^\/+/, "")}`,
       {
         ...init,
-        headers: {
-          authorization: `Bearer ${token}`,
-          ...(init.body ? { "content-type": "application/json" } : {}),
-          ...init.headers
-        },
+        headers,
         cache: "no-store",
         signal: controller.signal
       }
