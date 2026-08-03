@@ -277,10 +277,6 @@ export function SchedulePlanner({
   const selectedTask = editorTaskId ? taskById.get(editorTaskId) ?? null : null;
 
   useEffect(() => {
-    setEditorTab("general");
-  }, [editorTaskId]);
-
-  useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setCreationModal(null);
@@ -403,6 +399,11 @@ export function SchedulePlanner({
   useEffect(() => {
     scrollToToday();
   }, [scrollToToday]);
+
+  function openTaskEditor(taskId: string): void {
+    setEditorTab("general");
+    setEditorTaskId(taskId);
+  }
 
   function toggleWbs(id: string): void {
     setCollapsed(current => {
@@ -536,7 +537,7 @@ export function SchedulePlanner({
                   <div className={styles.cell}>
                     <span className={styles.treeIndent} style={{ "--depth": row.depth } as CSSProperties} />
                     <span className={styles.taskDot} />
-                    <button className={styles.nameButton} type="button" onClick={() => setEditorTaskId(row.task.id)} title="Abrir informações da atividade">
+                    <button className={styles.nameButton} type="button" onClick={() => openTaskEditor(row.task.id)} title="Abrir informações da atividade">
                       {row.task.title}
                     </button>
                   </div>
@@ -624,7 +625,7 @@ export function SchedulePlanner({
                           ].filter(Boolean).join(" ")}
                           type="button"
                           style={{ left: (start - range.start) * dayWidth, width: (end - start + 1) * dayWidth }}
-                          onClick={() => setEditorTaskId(row.task.id)}
+                          onClick={() => openTaskEditor(row.task.id)}
                           title={`${row.task.code} · ${row.task.title}: ${formatShortDate(bar.inicio)} a ${formatShortDate(bar.termino)}`}
                         >
                           <span className={styles.progressFill} style={{ width: `${Math.round(row.task.progress * 100)}%` }} />
