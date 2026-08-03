@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   LIMITE_DE_SUGESTOES,
   chaveNormalizada,
+  comPadroes,
   mesmoValor,
   ordenarSugestoes,
   pontuacao,
@@ -173,5 +174,59 @@ describe("descrição de escopo", () => {
   it("nenhuma chave de escopo se repete", () => {
     const chaves = ESCOPOS_DESCRITOS.map(e => e.chave);
     expect(new Set(chaves).size).toBe(chaves.length);
+  });
+});
+
+describe("sugestão padrão da plataforma — o dia zero", () => {
+  it("empresa sem vocabulário nenhum ainda recebe sugestão", () => {
+    // Campo sem sugestão alguma é pior que a lista fechada que ele substituiu.
+    const lista = ordenarSugestoes(comPadroes([], ["Arquitetura", "Estrutural"]), { agora: AGORA });
+    expect(lista.map(v => v.rotulo)).toEqual(["Arquitetura", "Estrutural"]);
+  });
+
+  it("o que a empresa usa vem antes do padrão", () => {
+    // Padrão é ponto de partida, não preferência.
+    const lista = ordenarSugestoes(
+      comPadroes([valor("Impermeabilização", 9, 3)], ["Arquitetura"]),
+      { agora: AGORA }
+    );
+    expect(lista[0].rotulo).toBe("Impermeabilização");
+  });
+
+  it("padrão que a empresa já usou não aparece duas vezes", () => {
+    const lista = comPadroes([valor("Arquitetura", 4, 10)], ["Arquitetura", "arquitetura", "ARQUITETURA"]);
+    expect(lista.filter(v => chaveNormalizada(v.rotulo) === "arquitetura")).toHaveLength(1);
+    expect(lista[0].usos).toBe(4);
+  });
+
+  it("padrão nunca é descartado como engano antigo", () => {
+    // Ele não tem histórico para envelhecer: `usos: 0` e sem data de uso
+    // cairiam no corte de engano se a regra não o isentasse.
+    const padrao = comPadroes([], ["Paisagismo"])[0];
+    expect(situacaoDoValor(padrao, AGORA)).toBe("sugerido");
+    expect(ordenarSugestoes([padrao], { agora: AGORA })).toHaveLength(1);
+  });
+
+  it("padrão também obedece ao filtro do que foi digitado", () => {
+    const catalogo = comPadroes([], ["Arquitetura", "Estrutural", "Elétrica"]);
+    expect(ordenarSugestoes(catalogo, { agora: AGORA, filtro: "estrut" }).map(v => v.rotulo))
+      .toEqual(["Estrutural"]);
+  });
+
+  it("lista de padrões vazia não muda nada", () => {
+    const catalogo = [valor("Alvenaria", 5, 1)];
+    expect(comPadroes(catalogo, [])).toEqual(catalogo);
+  });
+});
+
+describe("chave gravada que divergiu do rótulo", () => {
+  it("não faz o mesmo valor aparecer duas vezes", () => {
+    // Linha com `normalized` desalinhado do `label` — importação, correção
+    // manual ou versão anterior da normalização. Comparar só pela chave
+    // gravada deixava passar o duplicado: "m²" do uso e "m²" do padrão.
+    const gravadoTorto: ValorDoCatalogo = { rotulo: "m²", chave: "m2", usos: 31, ultimoUso: diasAtras(3) };
+    const lista = ordenarSugestoes(comPadroes([gravadoTorto], ["m²", "m³"]), { agora: AGORA });
+    expect(lista.filter(v => v.rotulo === "m²")).toHaveLength(1);
+    expect(lista.find(v => v.rotulo === "m²")?.usos).toBe(31);
   });
 });

@@ -9,7 +9,10 @@ import {
   updateBudgetPricing
 } from "@/app/actions/budgets";
 import { requireOrganizationContext } from "@/lib/auth";
+import { CampoComSugestao } from "@/components/comum/campo-com-sugestao";
 import { budgetStatusLabels, formatCurrency, formatPercent, type BudgetStatus } from "@/lib/domain";
+import { padroesDoEscopo } from "@/lib/sugestoes/escopos";
+import { ESCOPOS, sugestoesDoEscopo } from "@/lib/sugestoes/servidor";
 
 type BudgetDetailProps = {
   params: Promise<{ id: string }>;
@@ -72,6 +75,13 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
     .maybeSingle();
 
   if (!budget || !budget.current_version_id) notFound();
+
+  // "m2", "M²" e "m ²" viram três unidades no mesmo orçamento, e o total por
+  // unidade deixa de fechar. É o campo em que a divergência de grafia custa
+  // mais caro, e o que a empresa usa vem antes do padrão da plataforma.
+  const sugestoesDeUnidade = await sugestoesDoEscopo(supabase, organizationId, ESCOPOS.unidade, {
+    padroes: padroesDoEscopo(ESCOPOS.unidade)
+  });
 
   const { data: version } = await supabase
     .from("budget_versions")
@@ -231,7 +241,9 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
                     <label>Descrição<input name="description" placeholder="Cimento CP II 50 kg" required disabled={frozen} /></label>
                   </div>
                   <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))" }}>
-                    <label>Unidade<input name="unit" placeholder="m², h, un, mês" required disabled={frozen} /></label>
+                    <label>Unidade
+                      <CampoComSugestao name="unit" sugestoes={sugestoesDeUnidade} placeholder="m², h, un, mês" required />
+                    </label>
                     <label>Quantidade/metragem<input name="quantity" type="number" min="0.000001" step="0.000001" required disabled={frozen} /></label>
                     <label>Custo unitário<input name="unitCost" type="number" min="0.0001" step="0.0001" required disabled={frozen} /></label>
                   </div>

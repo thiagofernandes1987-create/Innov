@@ -19,6 +19,15 @@ export type ValorDoCatalogo = {
   usos: number;
   /** ISO. Nulo em catálogo importado sem histórico. */
   ultimoUso: string | null;
+  /**
+   * Sugestão que a plataforma oferece antes de existir uso.
+   *
+   * Existe para o dia zero: catálogo de uma empresa nova está vazio, e um campo
+   * de disciplina sem nenhuma sugestão é pior que a lista fechada que ele
+   * substituiu. O padrão **nunca é filtrado como engano** — ele não tem
+   * histórico para envelhecer — e a tela diz que é padrão, não que foi usado.
+   */
+  padrao?: boolean;
 };
 
 /** Quantos aparecem de uma vez. Lista longa não é ajuda, é ruído. */
@@ -84,7 +93,31 @@ export function pontuacao(valor: ValorDoCatalogo, agora: Date): number {
  * por isso o corte exige as duas coisas ao mesmo tempo.
  */
 function ehEngano(valor: ValorDoCatalogo, agora: Date): boolean {
+  if (valor.padrao) return false;
   return valor.usos <= 1 && diasDesde(valor.ultimoUso, agora) > IDADE_DO_ENGANO_EM_DIAS;
+}
+
+/**
+ * Junta o vocabulário da organização com as sugestões padrão da plataforma.
+ *
+ * O que a empresa usa vem primeiro, sempre: padrão é ponto de partida, não
+ * preferência. E padrão que a empresa já usou não entra duas vezes — a entrada
+ * do catálogo vence, porque carrega a grafia que a empresa escolheu.
+ */
+export function comPadroes(
+  doCatalogo: readonly ValorDoCatalogo[],
+  padroes: readonly string[]
+): ValorDoCatalogo[] {
+  // Compara pela chave gravada **e** pela chave recalculada do rótulo. A chave
+  // vem pronta do banco, e se ela divergir do rótulo — linha antiga, importação,
+  // correção manual — a comparação por um lado só deixa passar o duplicado. Foi
+  // o que aconteceu com "m²" gravado sob a chave "m2": a lista ofereceu o mesmo
+  // valor duas vezes, uma como uso e outra como padrão.
+  const jaTem = new Set(doCatalogo.flatMap(v => [v.chave, chaveNormalizada(v.rotulo)]));
+  const novos = padroes
+    .map(rotulo => ({ rotulo, chave: chaveNormalizada(rotulo), usos: 0, ultimoUso: null, padrao: true }))
+    .filter(v => v.chave !== "" && !jaTem.has(v.chave));
+  return [...doCatalogo, ...novos];
 }
 
 export type SituacaoDoValor = "sugerido" | "oculto_por_desuso";

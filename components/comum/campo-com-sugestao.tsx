@@ -15,28 +15,49 @@ import { ordenarSugestoes, type ValorDoCatalogo } from "@/lib/sugestoes/catalogo
 // escolher. Teclado funciona: setas percorrem, Enter escolhe — sem isso, quem
 // preenche EAP inteira sem tirar a mão do teclado ignora a sugestão.
 
+// Dois modos, e o segundo não é luxo: nem toda tela envia por formulário. A
+// coluna nova do funil, por exemplo, guarda o nome em estado do React e chama
+// a ação com o valor na mão. Sem o modo controlado, ou o campo com sugestão
+// ficava de fora dessa tela, ou aquela tela teria que virar formulário só para
+// caber no componente — e é o componente que serve a tela, não o contrário.
 export function CampoComSugestao({
   name,
   sugestoes,
   defaultValue = "",
+  value,
+  onValueChange,
   placeholder,
   id,
   required,
   maxLength,
+  disabled,
+  autoFocus,
   className = "",
   ariaLabel
 }: {
-  name: string;
+  name?: string;
   sugestoes: ValorDoCatalogo[];
+  /** Modo não controlado: o valor vive no componente e sai pelo `name`. */
   defaultValue?: string;
+  /** Modo controlado: quem chama é dono do valor. Exige `onValueChange`. */
+  value?: string;
+  onValueChange?: (valor: string) => void;
   placeholder?: string;
   id?: string;
   required?: boolean;
   maxLength?: number;
+  disabled?: boolean;
+  autoFocus?: boolean;
   className?: string;
   ariaLabel?: string;
 }) {
-  const [valor, setValor] = useState(defaultValue);
+  const controlado = value !== undefined;
+  const [interno, setInterno] = useState(defaultValue);
+  const valor = controlado ? value : interno;
+  const setValor = (proximo: string) => {
+    if (!controlado) setInterno(proximo);
+    onValueChange?.(proximo);
+  };
   const [aberta, setAberta] = useState(false);
   const [destacado, setDestacado] = useState(-1);
   const raiz = useRef<HTMLDivElement>(null);
@@ -71,6 +92,8 @@ export function CampoComSugestao({
         value={valor}
         required={required}
         maxLength={maxLength}
+        disabled={disabled}
+        autoFocus={autoFocus}
         placeholder={placeholder}
         aria-label={ariaLabel}
         autoComplete="off"
@@ -131,7 +154,11 @@ export function CampoComSugestao({
                 onClick={() => escolher(s.rotulo)}
               >
                 <span>{s.rotulo}</span>
-                <small>{s.usos === 1 ? "usado 1 vez" : `usado ${s.usos} vezes`}</small>
+                {/* Padrão da plataforma não foi "usado 0 vezes" — dizer isso
+                    seria informação falsa sobre o histórico da empresa. */}
+                <small>
+                  {s.padrao ? "sugestão padrão" : s.usos === 1 ? "usado 1 vez" : `usado ${s.usos} vezes`}
+                </small>
               </button>
             </li>
           ))}

@@ -1,6 +1,9 @@
 import { uploadProjectDocument } from "@/app/actions/projects";
 import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
+import { CampoComSugestao } from "@/components/comum/campo-com-sugestao";
 import { requireCapability } from "@/lib/authorization";
+import { padroesDoEscopo } from "@/lib/sugestoes/escopos";
+import { ESCOPOS, sugestoesDoEscopo } from "@/lib/sugestoes/servidor";
 
 export default async function NewGlobalDocumentPage({
   searchParams
@@ -15,6 +18,15 @@ export default async function NewGlobalDocumentPage({
     .eq("organization_id", context.organizationId)
     .is("archived_at", null)
     .order("name");
+
+  // Vocabulário de disciplina da organização. Carregado no servidor porque a
+  // leitura passa pela RLS: quem não tem acesso não recebe catálogo nenhum.
+  const sugestoesDeDisciplina = await sugestoesDoEscopo(
+    context.supabase,
+    context.organizationId,
+    ESCOPOS.disciplina,
+    { padroes: padroesDoEscopo(ESCOPOS.disciplina) }
+  );
 
   return (
     <main className="content">
@@ -38,7 +50,9 @@ export default async function NewGlobalDocumentPage({
             </select>
           </label>
           <label>Código<input name="code" required placeholder="ARQ-PE-001" /></label>
-          <label>Disciplina<input name="discipline" required placeholder="Arquitetura" /></label>
+          <label>Disciplina
+            <CampoComSugestao name="discipline" sugestoes={sugestoesDeDisciplina} required placeholder="Arquitetura" />
+          </label>
           <label className="span-2">Título<input name="title" required placeholder="Projeto executivo — pavimento térreo" /></label>
           <label>Categoria<input name="category" required placeholder="Projeto executivo" /></label>
           <label>Resumo da alteração<input name="changeSummary" placeholder="Emissão inicial" /></label>

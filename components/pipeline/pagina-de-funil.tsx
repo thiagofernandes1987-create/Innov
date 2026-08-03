@@ -1,6 +1,8 @@
 import { PipelineView } from "@/components/pipeline/pipeline-view";
 import { hasCapability } from "@/lib/authorization";
+import { requireOrganizationContext } from "@/lib/auth";
 import type { Trilha } from "@/lib/pipeline/domain";
+import { ESCOPOS, sugestoesDoEscopo } from "@/lib/sugestoes/servidor";
 import { carregarPipeline, funisDaTrilha, registrosDisponiveis } from "@/lib/pipeline/server";
 
 const MODULO_DA_TRILHA: Record<Trilha, string> = {
@@ -54,6 +56,14 @@ export async function PaginaDeFunil({ trilha: trilhaValida, funil }: { trilha: T
   const podeEditar = await hasCapability(MODULO_DA_TRILHA[trilhaValida], "update");
   const funis = carregado ? await funisDaTrilha(trilhaValida) : [];
 
+  // Vocabulário de etapas da organização. Só para quem pode editar: quem lê não
+  // cria coluna, e a consulta seria tráfego para alimentar um campo que não
+  // aparece — mesmo critério já usado para a lista de registros logo abaixo.
+  const { supabase, organizationId } = await requireOrganizationContext();
+  const sugestoesDeEtapa = carregado && podeEditar
+    ? await sugestoesDoEscopo(supabase, organizationId, ESCOPOS.etapaDoFunil)
+    : [];
+
   // Projeto e chamado nascem presos a um cliente, então o formulário de
   // cadastro precisa da lista mesmo fora da trilha de cliente.
   const clientes =
@@ -91,6 +101,7 @@ export async function PaginaDeFunil({ trilha: trilhaValida, funil }: { trilha: T
           clientes={trilhaValida === "cliente" ? registros : clientes}
           rotuloRegistro={ROTULO_REGISTRO[trilhaValida]}
           funis={funis}
+          sugestoesDeEtapa={sugestoesDeEtapa}
           funilAtual={
             funis.find(item => item.id === carregado.pipeline.id) ?? {
               id: carregado.pipeline.id,

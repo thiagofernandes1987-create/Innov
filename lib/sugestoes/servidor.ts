@@ -3,7 +3,7 @@
 // Fica separado das ações porque é leitura de página — um Server Component
 // chama direto, sem passar por `"use server"`.
 
-import { chaveNormalizada, ordenarSugestoes, type ValorDoCatalogo } from "./catalogo";
+import { chaveNormalizada, comPadroes, ordenarSugestoes, type ValorDoCatalogo } from "./catalogo";
 
 type Cliente = Awaited<ReturnType<typeof import("@/lib/supabase/server").createSupabaseServerClient>>;
 
@@ -38,7 +38,7 @@ export async function sugestoesDoEscopo(
   supabase: Cliente,
   organizationId: string,
   escopo: string,
-  filtro = ""
+  opcoes: { filtro?: string; padroes?: readonly string[] } = {}
 ): Promise<ValorDoCatalogo[]> {
   const { data } = await supabase
     .from("value_catalog")
@@ -55,7 +55,7 @@ export async function sugestoesDoEscopo(
     ultimoUso: String(l.last_used_at)
   }));
 
-  return ordenarSugestoes(catalogo, { filtro });
+  return ordenarSugestoes(comPadroes(catalogo, opcoes.padroes ?? []), { filtro: opcoes.filtro ?? "" });
 }
 
 /**

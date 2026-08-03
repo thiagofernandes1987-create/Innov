@@ -4,6 +4,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 
 const managementRoles = [
   "SUPER_ADMIN",
@@ -402,6 +403,9 @@ export async function uploadProjectDocument(formData: FormData) {
     }).select("id").single();
     if (error || !data) fail(errorPath, error?.message ?? "Falha ao criar documento.");
     documentId = data.id;
+    // Só depois de o documento existir: disciplina digitada e abandonada não
+    // vira vocabulário da empresa.
+    await registrarValorUsado(supabase, organizationId, ESCOPOS.disciplina, text(formData, "discipline"));
   }
 
   const { count } = await supabase

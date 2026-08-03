@@ -1071,7 +1071,12 @@ reconstruir o que funciona:
   - [x] T-32.0.2 — Valor usado uma vez só há mais de 6 meses sai da lista: erro de digitação antigo não vira sugestão para sempre — regra em `ordenarSugestoes`, com teste do caso simétrico (usado várias vezes há muito tempo permanece: é vocabulário sazonal, não erro)
   - [x] T-32.0.3 — **Sugestão nunca é lista fechada.** É campo de texto com apoio, e valor novo sempre passa — `components/comum/campo-com-sugestao.tsx`, ligado à EAP e às atividades do cronograma; verificado no navegador: valor inédito gravou (passo 2) e voltou como sugestão no uso seguinte (passo 3)
   - [x] T-32.0.4 — Limpar o catálogo é ação de administrador, porque o catálogo é da organização — `/app/administracao/vocabulario` com `requireCapability("administracao","manage")` na tela e `has_module_permission(…,'administracao','DELETE')` na função do banco. Teste negativo executado contra a API: limpar catálogo de outra organização recusa (`P0001`), gravar em outra organização recusa, sem autenticação recusa no `grant` (`42501`), e na própria organização devolve 204. Verificado no navegador que remover tira da tela **e** da sugestão do cronograma
-  - [ ] T-32.0.5 — Ligar o campo com sugestão nos seis escopos restantes: etapa do funil, marcador de cartão, disciplina de documento, unidade de medida, motivo de perda e motivo de parada. Hoje só EAP e atividade do cronograma gravam e leem — os outros aparecem na administração marcados como não ligados, que é o estado honesto, mas é metade do que a tarefa mãe promete
+  - [x] T-32.0.5 — Ligar o campo com sugestão nos escopos que têm campo real: **etapa do funil** (coluna nova, em modo controlado), **disciplina de documento** (no acervo geral e na obra) e **unidade de medida** (item manual de orçamento). Os três gravam e leem, verificados no navegador
+    - Disciplina na obra era `select` de nove opções fixas — lista fechada, que a diretriz proíbe. As nove viraram sugestão padrão da plataforma e qualquer outra passa: verificado que "Paisagismo" é aceito
+    - `comPadroes` existe para o dia zero: catálogo vazio com campo sem sugestão nenhuma seria pior que a lista fechada substituída. Padrão nunca envelhece como engano e a tela diz "sugestão padrão", não "usado 0 vezes"
+    - **Marcador de cartão** e **motivo de parada** não foram ligados porque os campos não existem no produto — parada de obra é da S-28
+    - **Motivo de perda** não foi ligado por decisão, não por falta: o único campo é a mesma caixa de "Motivo/observação" de toda mudança de estágio, prosa sobre uma negociação. Sugerir ali empurraria a reutilizar um motivo genérico — dado errado com aparência de arrumado. Registrado em T-33.13
+  - [ ] T-32.0.6 — Campo curto e próprio de motivo de perda no funil, separado da observação livre da mudança de estágio; só então ligar `negocio.motivo_perda`
 - [ ] T-32.1 — **Modelo de EAP**: sugerir o conjunto, não só a palavra. Quem cria "Fundação" pela terceira vez com as mesmas cinco atividades embaixo deveria poder trazer as cinco. É o "modelo de projeto" que o atlas mostra em 3 das 46 telas do capítulo Projetos
 - [~] T-32.2 — **Motor de documento por modelo**, um só para proposta, orçamento, contrato, laudo e ordem de serviço — corpo, variáveis e pré-visualização em 2 de agosto; **gravar, publicar, arquivar e importar em 3 de agosto**. Falta o dicionário sair de registro real sob RLS (T-32.2.5) e o documento emitido guardar o texto resolvido (T-32.2.7)
   - [x] T-32.2.1 — Corpo em **Markdown**, não editor proprietário: versiona em diff legível, converte para PDF e DOCX e sobrevive à plataforma. O editor é visual, o que grava é Markdown
@@ -1156,6 +1161,10 @@ R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
 - [ ] T-33.11 — Duas paletas de tema escuro convivem em `app/globals.css`: a antiga (superfícies `#161b25`, linhas 68–118) está morta, vencida pela nova (`#102238`). Editar a errada não produz efeito nenhum — unificar
 
 - [ ] T-33.12 — Tabela em tela estreita: as 20 telas do produto rolam na horizontal dentro de `.table-wrap`, sem indicar que há coluna fora de vista. Em 390px a coluna de ação some. Decidir um padrão único para o produto — cartão por linha, coluna prioritária ou indicação de rolagem — em vez de resolver tela a tela
+
+- [ ] T-33.13 — Página de orçamento transborda em todas as larguras (1627px contra 1366 disponíveis), inclusive no desktop. Medido com e sem a alteração desta sprint: idêntico nos dois, é anterior
+- [ ] T-33.14 — Cartão do funil com alvo de toque de 19px em 390px de largura — o título do cartão, que é o alvo principal do kanban no telefone. Também anterior, confirmado por medição com e sem alteração
+- [ ] T-33.15 — `chaveNormalizada` não funde "m2" e "m²", que são a mesma unidade escrita de dois jeitos e as duas serão digitadas. Fundir expoentes ajudaria unidade e poderia atrapalhar outros escopos — decidir por escopo, não globalmente
 
 ---
 

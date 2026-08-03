@@ -6,6 +6,7 @@ import { ehTipoAtividade } from "@/lib/pipeline/atividades";
 import { checarCamposBR } from "@/lib/validacao/formulario";
 import { CODIGOS_DATA, type CodigoData } from "@/lib/pipeline/datas";
 import { TRILHAS, type Trilha } from "@/lib/pipeline/domain";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 
 // Escrita do pipeline.
 //
@@ -340,6 +341,9 @@ export async function criarEtapa(pipelineId: string, nome: string): Promise<Resu
     return falha("Não foi possível criar a etapa. Talvez você não tenha permissão de edição nesta trilha.");
   }
 
+  // Depois de gravar, e só depois: nome que a pessoa digitou e abandonou não é
+  // vocabulário da empresa, e entraria na lista de todo mundo.
+  await registrarValorUsado(supabase, pipeline.organization_id, ESCOPOS.etapaDoFunil, titulo);
   revalidar(pipeline.trilha as Trilha);
   return { ok: true };
 }

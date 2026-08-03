@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 
 const internalRoles = ["SUPER_ADMIN", "DIRECAO", "ADMINISTRADOR", "ORCAMENTISTA", "FINANCEIRO"] as const;
 const editableCostTypes = new Set(["DIRECT", "INDIRECT", "FIXED", "ADMINISTRATIVE"]);
@@ -218,6 +219,10 @@ export async function addManualBudgetItem(formData: FormData) {
   });
 
   if (error) budgetError(budgetId, error.message);
+  // Depois da gravação: "m²", "vb", "cj" e "mês" são o vocabulário de medida da
+  // construtora, e são o caso em que a divergência de grafia mais custa —
+  // "m2", "M²" e "m ²" viram três unidades no mesmo orçamento.
+  await registrarValorUsado(supabase, organizationId, ESCOPOS.unidade, unit);
   await recalculate(supabase, budgetId, versionId);
 }
 

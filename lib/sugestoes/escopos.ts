@@ -35,37 +35,43 @@ export const ESCOPOS_DESCRITOS: readonly DescricaoDeEscopo[] = [
   {
     chave: ESCOPOS.etapaDoFunil,
     nome: "Etapa do funil",
-    origem: "Etapas do funil comercial.",
-    emUso: false
+    origem: "Gravada ao criar uma coluna nova em qualquer trilha do funil.",
+    emUso: true
   },
   {
     chave: ESCOPOS.marcador,
     nome: "Marcador de cartão",
-    origem: "Marcadores usados nos cartões do CRM.",
+    origem: "Não há marcador de cartão no produto ainda — o escopo existe reservado.",
     emUso: false
   },
   {
     chave: ESCOPOS.disciplina,
     nome: "Disciplina de documento",
-    origem: "Disciplina informada ao enviar documento da obra.",
-    emUso: false
+    origem: "Gravada ao enviar documento, na obra ou no acervo geral.",
+    emUso: true
   },
   {
     chave: ESCOPOS.unidade,
     nome: "Unidade de medida",
-    origem: "Unidades digitadas em orçamento e medição.",
-    emUso: false
+    origem: "Gravada ao incluir item manual no orçamento.",
+    emUso: true
   },
   {
     chave: ESCOPOS.motivoDePerda,
     nome: "Motivo de perda",
-    origem: "Motivo informado ao marcar um negócio como perdido.",
+    // Deliberadamente não ligado. O único campo existente é a mesma caixa de
+    // "Motivo/observação" usada em toda mudança de estágio — prosa sobre uma
+    // negociação, não vocabulário repetido. Sugerir ali empurraria a pessoa a
+    // reaproveitar um motivo genérico, que é o defeito que a diretriz nomeia:
+    // dado errado com aparência de arrumado. Ligar depende de existir um campo
+    // curto e próprio de motivo de perda.
+    origem: "Campo próprio ainda não existe: hoje o motivo é prosa livre da mudança de estágio.",
     emUso: false
   },
   {
     chave: ESCOPOS.motivoDeParada,
     nome: "Motivo de parada",
-    origem: "Motivo informado ao registrar parada de obra.",
+    origem: "Parada de obra ainda não existe no produto — é da S-28.",
     emUso: false
   }
 ];
@@ -89,4 +95,35 @@ export function descreverEscopo(chave: string): DescricaoDeEscopo {
       emUso: false
     }
   );
+}
+
+/**
+ * Sugestões que a plataforma oferece antes de a empresa ter histórico.
+ *
+ * Existem só onde o campo **já tinha uma lista fixa** e ela foi trocada por
+ * campo com sugestão: sem elas, a troca seria uma piora no primeiro dia — de
+ * nove opções para nenhuma. Onde o campo sempre foi livre, não há padrão: a
+ * plataforma não tem opinião sobre como uma construtora nomeia as etapas dela.
+ *
+ * São ponto de partida, não preferência: a primeira vez que a empresa usa um
+ * valor próprio, ele passa à frente.
+ */
+export const PADROES_POR_ESCOPO: Readonly<Record<string, readonly string[]>> = {
+  [ESCOPOS.disciplina]: [
+    "Arquitetura",
+    "Estrutural",
+    "Elétrica",
+    "Hidráulica",
+    "Climatização",
+    "Interiores",
+    "Planejamento",
+    "Qualidade",
+    "Administrativo"
+  ],
+  [ESCOPOS.unidade]: ["m²", "m³", "m", "un", "h", "kg", "vb", "cj", "mês"]
+};
+
+/** Os padrões de um escopo, ou nada quando a plataforma não tem opinião. */
+export function padroesDoEscopo(chave: string): readonly string[] {
+  return PADROES_POR_ESCOPO[chave] ?? [];
 }
