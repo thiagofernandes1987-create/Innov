@@ -1083,7 +1083,7 @@ reconstruir o que funciona:
     - `comPadroes` existe para o dia zero: catálogo vazio com campo sem sugestão nenhuma seria pior que a lista fechada substituída. Padrão nunca envelhece como engano e a tela diz "sugestão padrão", não "usado 0 vezes"
     - **Marcador de cartão** e **motivo de parada** não foram ligados porque os campos não existem no produto — parada de obra é da S-28
     - **Motivo de perda** não foi ligado por decisão, não por falta: o único campo é a mesma caixa de "Motivo/observação" de toda mudança de estágio, prosa sobre uma negociação. Sugerir ali empurraria a reutilizar um motivo genérico — dado errado com aparência de arrumado. Registrado em T-33.13
-  - [x] T-32.0.6 — Campo curto e próprio de motivo de perda no funil, separado da observação livre da mudança de estágio; só então ligar `negocio.motivo_perda` — a caixa única "Motivo/observação" virou dois campos: **motivo** curto, com sugestão, que só aparece ao escolher "Perdida"; e **observação** livre, em toda mudança. Coluna `note` em `crm_opportunity_stage_history` e quarto parâmetro em `move_crm_opportunity_stage`, com a assinatura antiga de três argumentos removida para não sobrar caminho que grava sem observação em silêncio. Linhas antigas não são reclassificadas: o que está em `reason` foi escrito sob a regra antiga e decidir por elas seria inventar dado. Verificado no navegador — motivo escondido fora de "Perdida", obrigatório dentro, perda sem motivo recusada, e o par gravado separado (`lost_reason` + `note`) com o motivo entrando no vocabulário
+  - [x] T-32.0.6 — Campo curto e próprio de motivo de perda no funil, separado da observação livre da mudança de estágio; só então ligar `negocio.motivo_perda` — a caixa única "Motivo/observação" virou dois campos: **motivo** curto, com sugestão, que só aparece ao escolher "Perdida"; e **observação** livre, em toda mudança. Coluna `note` em `crm_opportunity_stage_history` e quarto parâmetro em `move_crm_opportunity_stage`, com a assinatura antiga de três argumentos removida para não sobrar caminho que grava sem observação em silêncio. Linhas antigas não são reclassificadas: o que está em `reason` foi escrito sob a regra antiga e decidir por elas seria inventar dado. Verificado no navegador — motivo escondido fora de "Perdida", obrigatório dentro, perda sem motivo recusada, e o par gravado separado (`lost_reason` + `note`) com o motivo entrando no vocabulário. **Corrigido na S-34 no mesmo dia**: o responsável pediu lista cadastrada, não campo livre com sugestão, e está certo — motivo de perda alimenta contagem, e contagem não fecha sobre texto que cada pessoa escreve do seu jeito
 - [ ] T-32.1 — **Modelo de EAP**: sugerir o conjunto, não só a palavra. Quem cria "Fundação" pela terceira vez com as mesmas cinco atividades embaixo deveria poder trazer as cinco. É o "modelo de projeto" que o atlas mostra em 3 das 46 telas do capítulo Projetos
 - [~] T-32.2 — **Motor de documento por modelo**, um só para proposta, orçamento, contrato, laudo e ordem de serviço — corpo, variáveis e pré-visualização em 2 de agosto; **gravar, publicar, arquivar e importar em 3 de agosto**. Falta o dicionário sair de registro real sob RLS (T-32.2.5) e o documento emitido guardar o texto resolvido (T-32.2.7)
   - [x] T-32.2.1 — Corpo em **Markdown**, não editor proprietário: versiona em diff legível, converte para PDF e DOCX e sobrevive à plataforma. O editor é visual, o que grava é Markdown
@@ -1178,6 +1178,45 @@ R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
 - [x] T-33.18 — Aritmética de cor do medidor de contraste extraída para `scripts/qa/cor.mjs` e coberta por 19 testes, um por defeito que o instrumento já teve. Antes não tinha nenhum: função serializada para o navegador não é importável, e foi assim que quatro versões erradas entraram
 - [x] T-33.19 — `--exigir` nos dois scripts que saíam 0 quando o banco faltava (VACINA-056). "Não rodou" deixou de ter o mesmo código de saída de "passou"
 - [ ] T-33.20 — Sete server actions e um módulo de `lib/` sem nenhum uso, listados no débito do mapa. Decidir, um a um, entre ligar à tela que os justifica e remover — são superfície exposta sem função
+
+## Sprint S-34 — Listas cadastradas: o que a empresa decide que existe como opção
+
+**Estado:** pendente
+
+> **Nota de estado, para não parecer contradição.** As tarefas marcadas abaixo já estão
+> entregues, e a sprint segue `pendente` porque a R3 admite **uma** sprint em andamento e a
+> vigente é a S-23. O mesmo vale para a S-32 e a S-33: o trabalho vem sendo dirigido pelo
+> responsável tarefa a tarefa, fora da ordem formal do inventário. Regularizar isso — abrir e
+> fechar sprint conforme a R5 — é decisão dele, não da sessão.
+
+Correção de rota do responsável em 3 de agosto de 2026, sobre a T-32.0.6 entregue no
+mesmo dia:
+
+> "quando for para perdido precisa abrir um formulário com os motivos da perca do lead, tipo
+> parou de responder, praça errada, Produto errado, etc… esses itens tem que ser possível
+> cadastrar no menu"
+
+Ele está certo, e a razão é a mesma que fez o campo livre não servir: **motivo de perda
+alimenta contagem.** "Quantos perdemos por preço neste trimestre" não fecha sobre texto que
+cada pessoa escreve do seu jeito — nem com sugestão, porque sugestão não obriga.
+
+Isto **não contraria** a diretriz de reúso, e vale escrever a diferença para não ser confundida
+depois. `value_catalog` é **observado**: nasce do uso, serve para lembrar a grafia que a empresa
+já escolheu, e ali lista fechada seria uma piora. `managed_list_values` é **curado**: alguém
+decidiu quais opções existem, em que ordem e quais saíram de circulação. Etapa de EAP é
+vocabulário; motivo de perda é dimensão de análise. São campos de naturezas diferentes, e tratar
+os dois igual foi o erro de T-32.0.6.
+
+- [x] T-34.1 — Tabela `managed_list_values` **por escopo**, não uma tabela de motivos: marcador de cartão e etapa de funil vão pedir a mesma tela, e três tabelas quase iguais é três vezes a mesma correção
+- [x] T-34.2 — **Desativar em vez de excluir.** Excluir apagaria a opção de negócios que já a escolheram, e a contagem do trimestre passado mudaria sozinha
+- [x] T-34.3 — Cadastro em `/app/administracao/motivos-de-perda`, no menu de Administração: acrescentar, renomear, reordenar e tirar de circulação. Reordenação troca vizinhos, não renumera a lista — duas pessoas mexendo ao mesmo tempo embaralhariam a ordem uma da outra
+- [x] T-34.4 — Nove motivos semeados como ponto de partida, começando pelos três que o responsável nomeou. Empresa nova nasce com a lista por trigger, como a semeadura de modelos
+- [x] T-34.5 — **O funil abre o formulário de perda** ao escolher "Perdida", com os motivos cadastrados em rádio aberto — poucas opções curtas, e a lista visível deixa comparar antes de escolher. Nenhum vem marcado
+- [x] T-34.6 — **Conferência no servidor**, não só no `required` do rádio: o que chega é um POST, e um POST montado à mão gravaria qualquer texto em `lost_reason`, que é justamente a coluna que precisa ser contável
+- [x] T-34.7 — Lista vazia **bloqueia o envio** e diz onde cadastrar, em vez de mostrar um seletor sem opção; a mensagem muda conforme quem está olhando pode ou não administrar
+- [x] T-34.8 — `negocio.motivo_perda` deixa de gravar em `value_catalog`: duas fontes para o mesmo campo fariam o mesmo valor aparecer em duas telas de administração como se fossem coisas diferentes
+- [ ] T-34.9 — Contagem de perdas por motivo, que é a razão de a lista ser curada. Sem o relatório, a curadoria custa e não devolve
+- [ ] T-34.10 — Avaliar a mesma tela para marcador de cartão e etapa de funil, que hoje são texto com sugestão
 
 ---
 

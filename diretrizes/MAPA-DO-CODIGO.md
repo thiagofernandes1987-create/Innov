@@ -29,15 +29,15 @@ a ignorar.
 | | |
 |---|---|
 | Aplicativos no registro | 23 |
-| Rotas | 151 (135 páginas, 16 de API) |
-| Server actions | 174 em 29 arquivos |
-| Módulos de `lib/` | 78 |
-| Funções do banco declaradas | 220 |
+| Rotas | 152 (136 páginas, 16 de API) |
+| Server actions | 178 em 30 arquivos |
+| Módulos de `lib/` | 79 |
+| Funções do banco declaradas | 222 |
 | Funções do banco chamadas do código | 113 |
-| Suítes de teste | 37, com 391 casos |
-| Migrations | 151 |
+| Suítes de teste | 38, com 397 casos |
+| Migrations | 152 |
 | Validadores de CI | 27 |
-| Módulos de `lib/` citados por algum teste | 36 de 78 |
+| Módulos de `lib/` citados por algum teste | 37 de 79 |
 
 ## 1. Aplicativos
 
@@ -98,6 +98,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/administracao` | página | administracao:manage | `app/app/administracao/page.tsx` |
 | `/app/administracao/aplicativos` | página | administracao:manage | `app/app/administracao/aplicativos/page.tsx` |
 | `/app/administracao/modelos` | página | administracao:manage | `app/app/administracao/modelos/page.tsx` |
+| `/app/administracao/motivos-de-perda` | página | administracao:manage | `app/app/administracao/motivos-de-perda/page.tsx` |
 | `/app/administracao/perfis` | página | administracao:manage | `app/app/administracao/perfis/page.tsx` |
 | `/app/administracao/responsabilidades` | página | administracao:manage | `app/app/administracao/responsabilidades/page.tsx` |
 | `/app/administracao/usuarios` | página | administracao:manage | `app/app/administracao/usuarios/page.tsx` |
@@ -353,6 +354,15 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `submitInventoryStocktake` | estoque:update |
 | `updateInventoryItem` | estoque:update |
 
+### `app/actions/listas.ts`
+
+| Função | Guarda |
+|---|---|
+| `alternarItemDeLista` | administracao:manage |
+| `criarItemDeLista` | administracao:manage |
+| `moverItemDeLista` | administracao:manage |
+| `renomearItemDeLista` | administracao:manage |
+
 ### `app/actions/observability.ts`
 
 | Função | Guarda |
@@ -584,6 +594,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/forms/project-creation-state` | não | `INITIAL_PROJECT_CREATION_STATE`, `projectCreationError` |
 | `@/lib/inventory/domain` | não | `formatInventoryCurrency`, `formatInventoryQuantity`, `movementLabel`, `movementRequiresNegative`, `movementRequiresPositive`, `normalizeInventoryDashboard` |
 | `@/lib/inventory/server` | não | `loadInventoryDashboard` |
+| `@/lib/listas/servidor` | sim | `listaDoEscopo`, `pertenceALista` |
 | `@/lib/modules/registry` | sim | `MODULE_BY_KEY`, `MODULE_REGISTRY`, `capabilitiesForLevel`, `moduleForPath`, `toDatabaseAccessLevel`, `toUiAccessLevel` |
 | `@/lib/object-runtime/spec` | sim | `FIELD_TYPES`, `MAX_FIELDS`, `OBJECT_CLASSES`, `OBJECT_SCOPES`, `SLOT_BUDGET`, `TRAITS`, `allocateSlots`, `canonicalSpecJson`, `slotFamilyFor`, `specFingerprint`, `validateSpec` |
 | `@/lib/observability/domain` | não | `dateTime`, `healthLabel`, `nullableText`, `number`, `parseDashboard`, `parseEvents`, `record`, `records`, `severityLabel`, `text` |
@@ -827,6 +838,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `search_sinapi_references` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/app/orcamentos/sinapi/page.tsx` |
 | `select_procurement_quote` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
 | `semear_modelos_da_empresa` | `supabase/migrations/20260803160000_semear_modelos_da_empresa.sql` | `app/actions/documentos.ts` |
+| `semear_motivos_de_perda` | `supabase/migrations/20260803235000_listas_cadastradas_por_escopo.sql` | — (só por SQL ou trigger) |
 | `set_organization_module_status` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
 | `set_project_module_capability_override` | `supabase/migrations/20260720043300_stage12_1_project_capability_override.sql` | `app/actions/access-control.ts` |
 | `set_user_module_capability_override` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
@@ -848,6 +860,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `task_dependency_cria_ciclo` | `supabase/migrations/20260727180000_planejamento_ciclo_dependencia.sql` | — (só por SQL ou trigger) |
 | `task_dependency_sem_ciclo` | `supabase/migrations/20260727180000_planejamento_ciclo_dependencia.sql` | — (só por SQL ou trigger) |
 | `tg_semear_modelos_da_empresa` | `supabase/migrations/20260803160000_semear_modelos_da_empresa.sql` | — (só por SQL ou trigger) |
+| `tg_semear_motivos_de_perda` | `supabase/migrations/20260803235000_listas_cadastradas_por_escopo.sql` | — (só por SQL ou trigger) |
 | `touch_updated_at` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |
 | `transition_sac_ticket` | `supabase/migrations/20260721013654_stage18_sac_functions.sql` | `app/actions/relationship.ts` |
 | `validate_finance_child_organization` | `supabase/migrations/20260720123300_stage15_finance_hardening.sql` | — (só por SQL ou trigger) |
@@ -879,6 +892,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/file-security.test.ts` | 10 | file security domain |
 | `tests/interface-foundation-contract.test.ts` | 11 | S-23 — fundação de interface |
 | `tests/inventory-validator.test.ts` | 1 | validador do inventário de execução |
+| `tests/listas.test.ts` | 6 | motivo escolhido pertence à lista |
 | `tests/module-navigation.test.tsx` | 2 | NavegacaoDoModulo |
 | `tests/moeda.test.ts` | 15 | leitura de valor digitado; máscara de digitação, no padrão de caixa; exibição |
 | `tests/object-runtime-spec.test.ts` | 24 | canonicalSpecJson; specFingerprint; slotFamilyFor; allocateSlots |
@@ -941,7 +955,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 1 |
 | Server action nunca referenciada | 7 |
-| Módulo de `lib/` sem teste que o cite | 42 de 78 |
+| Módulo de `lib/` sem teste que o cite | 42 de 79 |
 
 ### Módulos sem teste que os cite
 

@@ -59,12 +59,14 @@ export const ESCOPOS_DESCRITOS: readonly DescricaoDeEscopo[] = [
   {
     chave: ESCOPOS.motivoDePerda,
     nome: "Motivo de perda",
-    // Só passou a ser ligado depois de o campo existir de verdade (T-32.0.6).
-    // Enquanto motivo e observação dividiam a mesma caixa, sugerir ali
-    // empurraria a pessoa a reaproveitar um texto genérico — dado errado com
-    // aparência de arrumado.
-    origem: "Gravado ao marcar uma oportunidade como perdida, no campo curto de motivo.",
-    emUso: true
+    // **Não usa sugestão: usa lista cadastrada.** O responsável pediu
+    // formulário com os motivos, cadastráveis pelo menu, e está certo — motivo
+    // de perda alimenta contagem, e contagem não fecha sobre texto que cada
+    // pessoa escreve do seu jeito. Registrar aqui *também* criaria duas fontes
+    // para o mesmo campo, com o mesmo valor aparecendo em duas telas de
+    // administração como se fossem coisas diferentes.
+    origem: "Curado em Administração → Motivos de perda, não observado do uso.",
+    emUso: false
   },
   {
     chave: ESCOPOS.motivoDeParada,
