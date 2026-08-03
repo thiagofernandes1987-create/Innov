@@ -172,6 +172,13 @@ describe("S-23 — fundação de interface", () => {
 
     expect(authErrors).toContain("invalid_credentials");
     expect(authErrors).toContain("email_not_confirmed");
-    expect(fs.existsSync(path.join(root, "app/icon.svg"))).toBe(true);
+    // O invariante é **existir ícone de aplicação**, não o formato dele. A
+    // primeira versão fixava `app/icon.svg` e reprovou quando o ícone passou a
+    // ser a marca real em PNG — teste que descreve a implementação em vez da
+    // garantia quebra na melhoria, e é a mesma armadilha já corrigida neste
+    // arquivo no contrato do planejamento.
+    const formatos = ["icon.svg", "icon.png", "icon.ico", "favicon.ico"];
+    const encontrados = formatos.filter(nome => fs.existsSync(path.join(root, "app", nome)));
+    expect(encontrados.length, "nenhum ícone de aplicação em app/").toBeGreaterThan(0);
   });
 });

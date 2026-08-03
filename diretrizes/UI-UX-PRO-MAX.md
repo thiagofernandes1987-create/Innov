@@ -71,10 +71,22 @@ solidez, sofisticação, inovação e confiança.
 Arquivos em `public/marca/`:
 
 ```text
-innovar-icone.png         símbolo iN em quadrado, para a barra e o favicon
-innovar-icone-grande.png  o mesmo em resolução maior
-innovar-horizontal.png    lockup completo com assinatura, para documento e login
+innovar-icone.png          claro: quadrado marinho, iN em off-white, cantos transparentes
+innovar-icone-escuro.png   escuro: só o iN em bronze, sem quadrado
+innovar-icone-grande.png   o mesmo símbolo em resolução maior
+innovar-horizontal.png     lockup completo com assinatura, para documento e e-mail
 ```
+
+**Duas variantes, e o motivo é físico.** No tema escuro o quadrado marinho do
+símbolo encosta no fundo e desaparece — sobra um retângulo vazio onde deveria
+estar a marca. A variante escura larga o quadrado e fica só com o **iN em
+bronze** `#C59A5B`, que é cor da própria marca: 6,3:1 sobre o azul-marinho da
+barra. Foi escolha do responsável entre cinza e dourado, em 3 de agosto.
+
+A troca é por `display: none`, nunca por opacidade: o que está escondido não
+deve ocupar espaço nem ser lido. O componente `MarcaInnovar` carrega as duas e
+serve barra, login e portal do cliente — cópia solta de `<Image>` em cada
+superfície seria uma chance a mais de alguém apontar para o arquivo errado.
 
 **O símbolo é imagem, não letra.** Até 3 de agosto a barra desenhava as letras
 "IN" em cobre sobre o azul-marinho: 2,87:1, e era a **única reprovação de

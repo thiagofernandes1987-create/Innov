@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { signIn } from "@/app/actions/auth";
+import { MarcaInnovar } from "@/components/casca/marca";
 
 export const metadata: Metadata = { title: "Entrar" };
 
@@ -14,7 +15,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="login-title">
         <div className="brand" style={{ color: "var(--text)" }}>
-          <div className="brand-mark" aria-hidden="true">I</div>
+          <MarcaInnovar className="brand-mark" />
           <div>
             <strong>INNOVAR</strong>
             <small style={{ color: "var(--muted)" }}>Portal seguro</small>
