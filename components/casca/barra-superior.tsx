@@ -1,4 +1,5 @@
 import { CaretDown } from "@phosphor-icons/react/dist/ssr";
+import Image from "next/image";
 import Link from "next/link";
 import type { Avisos } from "@/lib/casca/avisos";
 import type { Tema } from "@/lib/tema";
@@ -29,7 +30,20 @@ export function BarraSuperior({
     <header className="barra-superior">
       <div className="barra-esquerda">
         <Link className="barra-logo" href="/app" title="Tela inicial" aria-label="Ir para a tela inicial de aplicativos">
-          <span className="barra-logo-marca" aria-hidden="true">IN</span>
+          {/* Marca real, do manual entregue pelo responsável em 3 de agosto.
+              Antes eram as letras "IN" em cobre sobre a barra escura — 2,87:1,
+              a única reprovação de contraste que sobrava em toda tela medida.
+              O símbolo é imagem, e imagem não tem contraste de texto a cumprir;
+              o nome ao lado continua em texto, e é ele que os leitores de tela
+              e a busca do navegador encontram. */}
+          <Image
+            className="barra-logo-marca"
+            src="/marca/innovar-icone.png"
+            alt=""
+            width={151}
+            height={153}
+            priority
+          />
           <span className="barra-logo-nome">INNOVAR</span>
         </Link>
 

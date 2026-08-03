@@ -53,6 +53,36 @@ marca. O portão de fidelidade está em `diretrizes/ALVO-VISUAL.md` e na
 
 O cobre é acento, não cor dominante. Rosa, fúcsia, neon e gradientes chamativos não pertencem à identidade canônica.
 
+## 2.1 Marca — manual oficial
+
+O responsável entregou o manual da marca em 3 de agosto. Ele é a fonte, e o que
+estiver escrito aqui cede a ele em caso de divergência.
+
+| Cor | HEX | RGB | Uso |
+|---|---|---|---|
+| Azul-marinho profundo | `#0F1E3A` | 15 30 58 | superfície institucional, barra superior, símbolo |
+| Bronze dourado | `#C59A5B` | 197 154 91 | acento, filete, assinatura — nunca corpo de texto |
+| Off-white | `#F6F4F1` | 246 244 241 | papel, fundo do símbolo sobre a barra escura |
+| Grafite | `#2D3137` | 45 49 55 | texto de apoio e estruturas secundárias |
+
+Assinatura verbal: **"Um novo jeito de construir!"** Essência declarada:
+solidez, sofisticação, inovação e confiança.
+
+Arquivos em `public/marca/`:
+
+```text
+innovar-icone.png         símbolo iN em quadrado, para a barra e o favicon
+innovar-icone-grande.png  o mesmo em resolução maior
+innovar-horizontal.png    lockup completo com assinatura, para documento e login
+```
+
+**O símbolo é imagem, não letra.** Até 3 de agosto a barra desenhava as letras
+"IN" em cobre sobre o azul-marinho: 2,87:1, e era a **única reprovação de
+contraste que restava em todas as telas medidas**. Imagem não tem contraste de
+texto a cumprir, e o nome ao lado continua em texto de verdade — é ele que o
+leitor de tela anuncia e a busca do navegador encontra. Depois da troca, a
+auditoria fecha em **0 reprovação nos dois temas**.
+
 ## 3. Tipografia
 
 - usar pilha local e segura, sem depender de fonte remota para renderizar;
