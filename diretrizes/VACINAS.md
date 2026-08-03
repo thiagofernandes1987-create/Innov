@@ -149,6 +149,7 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-048` | `textarea` enviado por formulário chega com CRLF e nunca bate com o que está na tela | aplicada | normalização para `\n` na entrada da action, antes de gravar, comparar ou versionar |
 | `VACINA-049` | Salvar rebaixava modelo publicado a rascunho em silêncio | aplicada | estado seguinte decidido a partir do atual, e mudança de publicação exigida também na política do banco |
 | `VACINA-050` | Acervo compartilhado amarrado ao módulo que o emite transforma toda circulação legítima em exceção | aplicada | aplicativo próprio para o acervo, tipo classifica, disponibilização por aplicativo separada da permissão, e teste que exige o mesmo documento em mais de um módulo |
+| `VACINA-051` | `select` controlado perde a seleção no DOM na volta da server action, e é o DOM que o formulário envia | aplicada | efeito que reencosta o DOM no estado após cada renderização, e comparação por número entre o que foi conferido e o que foi gravado |
 
 ## 4. Arquivos
 
@@ -203,7 +204,8 @@ diretrizes/vacinas/
 ├── VACINA-047-USE-SERVER-SO-EXPORTA-FUNCAO.md
 ├── VACINA-048-TEXTAREA-ENVIA-CRLF.md
 ├── VACINA-049-SALVAR-NAO-MUDA-ESTADO-DE-PUBLICACAO.md
-└── VACINA-050-ACERVO-COMPARTILHADO-NAO-SE-PRENDE-AO-EMISSOR.md
+├── VACINA-050-ACERVO-COMPARTILHADO-NAO-SE-PRENDE-AO-EMISSOR.md
+└── VACINA-051-SELECT-PERDE-O-DOM-NA-VOLTA-DA-SERVER-ACTION.md
 ```
 
 ## 5. Critérios para nova vacina

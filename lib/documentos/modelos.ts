@@ -146,3 +146,23 @@ export const ESTADO_INICIAL: EstadoDoModelo = {
   escopo: null,
   corpoSalvo: null
 };
+
+export type EstadoDaEmissao = {
+  ok: boolean;
+  mensagem: string;
+  documentoId: string | null;
+  /** Texto como saiu, para a tela mostrar antes e depois de gravar. */
+  texto: string;
+  lacunas: { variavel: string; motivo: string }[];
+  /** Escopos pedidos que não voltaram registro — inclui o que a RLS negou. */
+  vazios: string[];
+};
+
+export const EMISSAO_INICIAL: EstadoDaEmissao = {
+  ok: false,
+  mensagem: "",
+  documentoId: null,
+  texto: "",
+  lacunas: [],
+  vazios: []
+};

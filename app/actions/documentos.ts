@@ -4,15 +4,18 @@
 // constante ficam em `lib/documentos/modelos`.
 import { revalidatePath } from "next/cache";
 import { hasCapability, requireCapability } from "@/lib/authorization";
-import { extrairVariaveis } from "@/lib/documentos/modelo";
+import { extrairVariaveis, renderizar } from "@/lib/documentos/modelo";
 import {
   ESTADO_INICIAL,
   traduzirFalhaDoBanco,
   validarModelo,
   type ErroDeCampo,
+  type EstadoDaEmissao,
   type EstadoDoModelo
 } from "@/lib/documentos/modelos";
+import { resolverDicionario, type AlvoDaEmissao } from "@/lib/documentos/resolucao";
 import { tipo as tipoDoCatalogo } from "@/lib/documentos/tipos";
+import { sha256 } from "@/lib/signatures/crypto";
 
 // Gravação na biblioteca de Modelos e Documentações.
 //
@@ -369,5 +372,120 @@ export async function definirTiposDoAplicativo(
   return {
     ok: true,
     mensagem: `${escolhidos.length} tipo(s) disponíveis neste aplicativo.`
+  };
+}
+
+
+/**
+ * Gera o documento a partir do modelo e dos registros escolhidos.
+ *
+ * Duas coisas que este fluxo faz e que quase todo gerador de documento não faz:
+ *
+ * **Resolve sob a RLS de quem gera** (T-32.2.5). O dicionário sai de
+ * `resolverDicionario`, que consulta com o cliente da sessão. Modelo não é
+ * caminho para contornar permissão: quem não pode ler o cliente recebe lacuna
+ * no lugar do nome dele.
+ *
+ * **Grava o texto resolvido, não a referência ao molde** (T-32.2.7). O contrato
+ * que saiu hoje continua sendo o de hoje mesmo que o modelo mude amanhã.
+ *
+ * A prévia é o mesmo caminho da gravação, sem o `insert`: o que a pessoa vê
+ * antes de emitir é literalmente o que vai ser gravado, não uma aproximação.
+ */
+export async function emitirDocumento(
+  anterior: EstadoDaEmissao,
+  formData: FormData
+): Promise<EstadoDaEmissao> {
+  const modeloId = texto(formData, "modeloId");
+  const gravar = formData.get("gravar") !== null;
+  if (!modeloId) return { ...anterior, ok: false, mensagem: "Escolha um modelo." };
+
+  const context = await requireCapability(MODULO, "read");
+
+  const { data: modelo } = await context.supabase
+    .from("document_templates")
+    .select("id, name, document_type, body_markdown, version_number, status")
+    .eq("id", modeloId)
+    .maybeSingle();
+  if (!modelo) return { ...anterior, ok: false, mensagem: "Este modelo não está disponível para você." };
+
+  if (modelo.status !== "PUBLISHED") {
+    return {
+      ...anterior,
+      ok: false,
+      mensagem: "Este modelo é rascunho. Só modelo publicado gera documento — rascunho é trabalho em andamento de alguém."
+    };
+  }
+
+  const alvo: AlvoDaEmissao = {
+    clienteId: texto(formData, "clienteId") || null,
+    obraId: texto(formData, "obraId") || null,
+    orcamentoId: texto(formData, "orcamentoId") || null,
+    propostaId: texto(formData, "propostaId") || null
+  };
+
+  const { data: autor } = await context.supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", context.userId)
+    .maybeSingle();
+
+  const { dicionario, vazios } = await resolverDicionario(
+    context.supabase,
+    { organizationId: context.organizationId, userId: context.userId, nomeDoAutor: autor?.full_name ?? context.email },
+    alvo
+  );
+
+  const { texto: resolvido, lacunas } = renderizar(String(modelo.body_markdown ?? ""), dicionario);
+
+  if (!gravar) {
+    return {
+      ok: true,
+      mensagem: lacunas.length
+        ? `Prévia gerada com ${lacunas.length} lacuna(s). O que estiver faltando aparece marcado no texto.`
+        : "Prévia gerada sem lacuna.",
+      documentoId: null,
+      texto: resolvido,
+      lacunas: lacunas.map(l => ({ variavel: l.variavel, motivo: l.motivo })),
+      vazios
+    };
+  }
+
+  const { data, error } = await context.supabase
+    .from("emitted_documents")
+    .insert({
+      organization_id: context.organizationId,
+      template_id: modelo.id,
+      template_version: modelo.version_number,
+      template_name: modelo.name,
+      document_type: modelo.document_type,
+      title: texto(formData, "titulo") || String(modelo.name),
+      resolved_markdown: resolvido,
+      variables_used: dicionario,
+      gaps: lacunas,
+      client_id: alvo.clienteId,
+      project_id: alvo.obraId,
+      budget_id: alvo.orcamentoId,
+      proposal_id: alvo.propostaId,
+      sha256: sha256(resolvido),
+      emitted_by: context.userId
+    })
+    .select("id")
+    .single();
+
+  if (error || !data) {
+    return { ...anterior, ok: false, texto: resolvido, mensagem: traduzirFalhaDoBanco(error), lacunas: [], vazios };
+  }
+
+  revalidatePath("/app/modelos/emitir");
+  return {
+    ok: true,
+    mensagem: lacunas.length
+      ? `Documento emitido com ${lacunas.length} lacuna(s), registradas junto com ele. O texto gravado é este e não muda se o modelo mudar.`
+      : "Documento emitido. O texto gravado é este e não muda se o modelo mudar.",
+    documentoId: String(data.id),
+    texto: resolvido,
+    lacunas: lacunas.map(l => ({ variavel: l.variavel, motivo: l.motivo })),
+    vazios
   };
 }

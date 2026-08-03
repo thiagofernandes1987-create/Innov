@@ -133,6 +133,8 @@ jobs:
         run: pnpm validate:vaccines
       - name: Validate canonical documentation
         run: pnpm validate:docs
+      - name: Validate server actions exports (VACINA-047)
+        run: pnpm validate:server-actions
       - name: Validate auditable persona contracts
         run: pnpm validate:personas-audit
       - name: Validate extension function qualification

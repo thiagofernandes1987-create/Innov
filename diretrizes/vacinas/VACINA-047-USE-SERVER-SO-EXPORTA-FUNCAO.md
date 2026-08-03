@@ -83,7 +83,15 @@ duas definições para divergir.
 
 ## Prevenção automática
 
-`pnpm typecheck` **não pega** — e é importante que esteja escrito, porque a
-primeira reação é confiar nele. O que pega é abrir a tela: qualquer rota que use
-a action passa a devolver 500 na primeira renderização, então o loop de QA
-visual reprova com `status=500` antes de qualquer captura.
+`pnpm validate:server-actions` (`scripts/validate-server-actions.mjs`), no CI.
+Reprova qualquer `export` de arquivo `"use server"` que não seja
+`export async function`; `export type` passa, porque some na compilação.
+
+O validador só existe porque **a vacina escrita não bastou**: no mesmo dia em
+que ela foi registrada, eu repeti o erro num segundo arquivo — exportei o estado
+inicial de outro `useActionState` do mesmo módulo de ações. Documentar uma
+armadilha não desarma a armadilha.
+
+`pnpm typecheck` **não pega**, e é importante que esteja escrito, porque a
+primeira reação é confiar nele. Abrir a tela pega: a rota devolve 500 na
+primeira renderização, e o loop de QA visual reprova com `status=500`.
