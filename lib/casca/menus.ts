@@ -104,6 +104,7 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
     { rotulo: "Compras", href: "/app/relatorios/compras" },
     { rotulo: "Financeiro", href: "/app/relatorios/financeiro" },
     { rotulo: "Qualidade", href: "/app/relatorios/qualidade" },
+    { rotulo: "Perdas", href: "/app/relatorios/perdas" },
     { rotulo: "Metas", href: "/app/relatorios/metas" },
     { rotulo: "Salvos", href: "/app/relatorios/salvos" }
   ],

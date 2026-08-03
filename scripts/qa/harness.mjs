@@ -50,6 +50,17 @@ async function medirAlvos(p) {
     // clicável de 220x90 não é um alvo de 19px, é o cartão. Contar o filho
     // produzia reprovação em todo card do kanban e mandava aumentar o que já
     // era grande. Só conta quando não há ancestral clicável maior.
+    /** Há texto irmão em volta do link, dentro de um bloco de texto? */
+    function dentroDeTextoCorrido(el) {
+      if (el.tagName !== "A") return false;
+      const pai = el.parentElement;
+      if (!pai || !pai.matches("p,li,small,td,dd,figcaption,blockquote,span,label")) return false;
+      const proprio = (el.textContent || "").trim().length;
+      const doPai = (pai.textContent || "").trim().length;
+      // Precisa haver frase em volta, e não só o link mais um espaço.
+      return doPai - proprio >= 20;
+    }
+
     function dentroDeAlvoMaior(el) {
       let n = el.parentElement;
       while (n && n !== document.body) {
@@ -67,6 +78,14 @@ async function medirAlvos(p) {
       const est = getComputedStyle(el);
       if (est.visibility === "hidden" || est.display === "none") continue;
       if (dentroDeAlvoMaior(el)) continue;
+      // Link **dentro de frase** é isento, e não por conveniência: a WCAG 2.5.5
+      // exclui alvo "in a sentence or block of text", porque aumentá-lo exigiria
+      // quebrar a linha do parágrafo. Sem a isenção, o medidor reprova a marcação
+      // correta — e validador que reprova o certo ensina a ignorar o vermelho.
+      //
+      // O critério é ter texto irmão ao redor: um link sozinho num `<p>` não é
+      // texto corrido, é um botão mal vestido, e continua sendo medido.
+      if (dentroDeTextoCorrido(el)) continue;
       // Área EFETIVA, não o retângulo do elemento: quando um `::after` estende
       // a região clicável para todo o cartão, `getBoundingClientRect` continua
       // devolvendo a linha de texto. `elementFromPoint` é a verdade sobre o que

@@ -1215,8 +1215,16 @@ os dois igual foi o erro de T-32.0.6.
 - [x] T-34.6 — **Conferência no servidor**, não só no `required` do rádio: o que chega é um POST, e um POST montado à mão gravaria qualquer texto em `lost_reason`, que é justamente a coluna que precisa ser contável
 - [x] T-34.7 — Lista vazia **bloqueia o envio** e diz onde cadastrar, em vez de mostrar um seletor sem opção; a mensagem muda conforme quem está olhando pode ou não administrar
 - [x] T-34.8 — `negocio.motivo_perda` deixa de gravar em `value_catalog`: duas fontes para o mesmo campo fariam o mesmo valor aparecer em duas telas de administração como se fossem coisas diferentes
-- [ ] T-34.9 — Contagem de perdas por motivo, que é a razão de a lista ser curada. Sem o relatório, a curadoria custa e não devolve
+- [x] T-34.9 — Contagem de perdas por motivo, que é a razão de a lista ser curada — `/app/relatorios/perdas`, Pareto **ordenado por valor e não por contagem**: doze perdas de R$ 5 mil somam menos que uma de R$ 400 mil, e ordenar por contagem mandaria resolver o problema errado. Classificação A/B/C na convenção de `QUALIDADE-CAUSA-RAIZ.md` §2, com teste que reproduz os oito valores da tabela de lá — se ela mudar, ou a diretriz mudou junto, ou a implementação divergiu
+  - [x] T-34.9.1 — Perda **sem motivo** entra na conta como linha própria. Esconder produziria um relatório bonito e falso: os percentuais fechariam em 100% sobre uma base que não é o total perdido
+  - [x] T-34.9.2 — Seção dos motivos cadastrados que ninguém escolheu no período. É o outro lado da curadoria: motivo que ninguém escolhe em doze meses ou não descreve a realidade da empresa, ou está escrito de um jeito que ninguém reconhece — e o que não aparece não chama atenção
+  - [x] T-34.9.3 — A classificação A/B/C **some abaixo de cinco motivos**. Medido na tela: com dois, "praça errada" com 44% da perda saía como classe C, que é o rótulo de desprezível. ABC pressupõe cauda longa; sem ela, a ordem por valor já é a mensagem inteira
+  - [x] T-34.9.4 — Regra da tabela canônica corrigida num caso que ela não previa: com um motivo só, o acumulado da primeira linha já é 100% e a maior causa sairia como C. A primeira linha é sempre A — ela é, por definição, a prioridade
 - [ ] T-34.10 — Avaliar a mesma tela para marcador de cartão e etapa de funil, que hoje são texto com sugestão
+
+- [x] T-34.11 — Medidor de alvo de toque passa a aplicar a isenção da WCAG 2.5.5 para link **dentro de frase**: aumentar um link em texto corrido exigiria quebrar a linha do parágrafo, e reprovar a marcação correta ensina a ignorar o vermelho. Só isenta quando há frase em volta — link sozinho num parágrafo é botão mal vestido e continua medido. Provado com teste negativo: encolhendo a barra de relatórios de propósito, a reprovação volta
+- [x] T-34.12 — Barra de navegação dos relatórios em 41px, três abaixo do mínimo. Executivo, obras, financeiro, compras, qualidade, perdas, metas, salvos e snapshots fecham em 0
+- [ ] T-34.13 — Relatório executivo (`/app/relatorios`) transborda em 390px (681 contra 390) e tem quatro alvos abaixo de 44px. Anterior a esta sprint — a correção da barra melhorou as outras oito telas de relatório e não esta
 
 ---
 

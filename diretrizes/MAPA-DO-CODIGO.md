@@ -29,15 +29,15 @@ a ignorar.
 | | |
 |---|---|
 | Aplicativos no registro | 23 |
-| Rotas | 152 (136 páginas, 16 de API) |
+| Rotas | 153 (137 páginas, 16 de API) |
 | Server actions | 178 em 30 arquivos |
-| Módulos de `lib/` | 79 |
+| Módulos de `lib/` | 80 |
 | Funções do banco declaradas | 222 |
 | Funções do banco chamadas do código | 113 |
-| Suítes de teste | 38, com 397 casos |
+| Suítes de teste | 39, com 417 casos |
 | Migrations | 152 |
 | Validadores de CI | 27 |
-| Módulos de `lib/` citados por algum teste | 37 de 79 |
+| Módulos de `lib/` citados por algum teste | 38 de 80 |
 
 ## 1. Aplicativos
 
@@ -199,6 +199,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/relatorios/metas` | página | relatorios:read | `app/app/relatorios/metas/page.tsx` |
 | `/app/relatorios/obras` | página | — | `app/app/relatorios/obras/page.tsx` |
 | `/app/relatorios/obras/[id]` | página | — | `app/app/relatorios/obras/[id]/page.tsx` |
+| `/app/relatorios/perdas` | página | relatorios:read | `app/app/relatorios/perdas/page.tsx` |
 | `/app/relatorios/qualidade` | página | — | `app/app/relatorios/qualidade/page.tsx` |
 | `/app/relatorios/salvos` | página | relatorios:read | `app/app/relatorios/salvos/page.tsx` |
 | `/app/relatorios/snapshots` | página | relatorios:read | `app/app/relatorios/snapshots/page.tsx` |
@@ -621,6 +622,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/quality/forms` | não | `evaluateQualityResponse`, `parseQualityFormSchema`, `schemaSummary` |
 | `@/lib/relationship/domain` | não | `LEAD_STAGE_LABELS`, `OPPORTUNITY_STAGE_LABELS`, `TICKET_PRIORITY_LABELS`, `TICKET_STATUS_LABELS`, `formatRelationshipCurrency`, `formatRelationshipDate`, `formatRelationshipDateTime`, `normalizeClient360`, `normalizeCrmPipeline`, `normalizeSacDashboard`, `normalizeSacTicketDetail`, `safeText` |
 | `@/lib/relationship/server` | não | `loadClient360`, `loadClientDirectory`, `loadClientPortalRelationship`, `loadClientSacTicket`, `loadCrmDashboard`, `loadLead`, `loadOpportunity`, `loadRelationshipOptions`, `loadSacDashboard`, `loadSacTicket` |
+| `@/lib/relatorios/perdas` | sim | `MINIMO_PARA_CLASSIFICAR`, `SEM_MOTIVO`, `classificacaoUtil`, `motivosSemUso`, `pareto`, `totalPerdido` |
 | `@/lib/reports/metrics` | não | `buildProjectCsv`, `evaluateMetric`, `formatReportNumber`, `normalizeReportDashboard`, `targetFor` |
 | `@/lib/reports/server` | não | `defaultReportPeriod`, `loadReportDashboard` |
 | `@/lib/signatures/crypto` | não | `canonicalJson`, `createSigningToken`, `hashCanonical`, `safeFileName`, `sha256` |
@@ -904,6 +906,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/pipeline-domain.test.ts` | 17 | montarColunas; prazoPrincipal; ordenarPorUrgencia; ordenarCodigos |
 | `tests/project-creation-contract.test.ts` | 6 | criação segura de projetos |
 | `tests/qa-contraste.test.ts` | 19 | aritmética de cor; v4 — notação color(srgb …) lida como preto; opacidade nas três notações; mínimo exigido — 3:1 só para texto grande |
+| `tests/relatorio-perdas.test.ts` | 20 | Pareto ordena por valor, não por contagem; fatia e acumulado; casos que quebrariam a divisão; perda sem motivo entra na conta |
 | `tests/sinapi-official-reference-parser.test.ts` | 4 | parser dos relatórios oficiais SINAPI por UF |
 | `tests/sinapi-source-catalog.test.ts` | 4 | catálogo oficial SINAPI da CAIXA |
 | `tests/sinapi-xlsx-parser.test.ts` | 4 | parser automático do pacote SINAPI |
@@ -955,7 +958,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 1 |
 | Server action nunca referenciada | 7 |
-| Módulo de `lib/` sem teste que o cite | 42 de 79 |
+| Módulo de `lib/` sem teste que o cite | 42 de 80 |
 
 ### Módulos sem teste que os cite
 
