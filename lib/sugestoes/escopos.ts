@@ -59,14 +59,12 @@ export const ESCOPOS_DESCRITOS: readonly DescricaoDeEscopo[] = [
   {
     chave: ESCOPOS.motivoDePerda,
     nome: "Motivo de perda",
-    // Deliberadamente não ligado. O único campo existente é a mesma caixa de
-    // "Motivo/observação" usada em toda mudança de estágio — prosa sobre uma
-    // negociação, não vocabulário repetido. Sugerir ali empurraria a pessoa a
-    // reaproveitar um motivo genérico, que é o defeito que a diretriz nomeia:
-    // dado errado com aparência de arrumado. Ligar depende de existir um campo
-    // curto e próprio de motivo de perda.
-    origem: "Campo próprio ainda não existe: hoje o motivo é prosa livre da mudança de estágio.",
-    emUso: false
+    // Só passou a ser ligado depois de o campo existir de verdade (T-32.0.6).
+    // Enquanto motivo e observação dividiam a mesma caixa, sugerir ali
+    // empurraria a pessoa a reaproveitar um texto genérico — dado errado com
+    // aparência de arrumado.
+    origem: "Gravado ao marcar uma oportunidade como perdida, no campo curto de motivo.",
+    emUso: true
   },
   {
     chave: ESCOPOS.motivoDeParada,

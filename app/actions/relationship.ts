@@ -6,6 +6,7 @@ import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireClientContext}from"@/lib/auth";
 import{requireCapability}from"@/lib/authorization";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 import{
  FILE_SECURITY_SAC_MIME_TYPES,
  FileSecurityError,
@@ -75,10 +76,24 @@ export async function createCrmOpportunity(data:FormData){
  if(error)fail(path,error.message);const row=resultRow(opportunity as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/app/crm/oportunidades/${row?.id??""}`);
 }
 
+// Motivo e observação são dois campos, não um (T-32.0.6). Motivo é curto, se
+// repete entre negócios e serve para contar; observação é prosa daquele
+// negócio. Num campo só, nenhum dos dois funciona: não se soma motivo por
+// trimestre quando cada linha é uma frase diferente, e quem quer somar acaba
+// padronizando a frase e perdendo o relato.
 export async function moveCrmOpportunityStage(data:FormData){
  const id=text(data,"opportunityId");const context=await requireCapability("crm","update");
- const{error}=await context.supabase.rpc("move_crm_opportunity_stage",{p_opportunity_id:id,p_to_stage:text(data,"stage"),p_reason:optional(data,"reason")});
- if(error)fail(`/app/crm/oportunidades/${id}`,error.message);revalidatePath(`/app/crm/oportunidades/${id}`);revalidatePath("/app/crm");
+ const estagio=text(data,"stage");
+ const motivo=optional(data,"reason");
+ const{error}=await context.supabase.rpc("move_crm_opportunity_stage",{
+  p_opportunity_id:id,p_to_stage:estagio,p_reason:motivo,p_note:optional(data,"note")
+ });
+ if(error)fail(`/app/crm/oportunidades/${id}`,error.message);
+ // Só o motivo entra no vocabulário, e só depois de a mudança ter sido
+ // gravada: motivo digitado numa tentativa que o banco recusou não é
+ // vocabulário da empresa.
+ if(estagio==="LOST"&&motivo)await registrarValorUsado(context.supabase,context.organizationId,ESCOPOS.motivoDePerda,motivo);
+ revalidatePath(`/app/crm/oportunidades/${id}`);revalidatePath("/app/crm");
 }
 
 export async function createRelationshipClient(data:FormData){

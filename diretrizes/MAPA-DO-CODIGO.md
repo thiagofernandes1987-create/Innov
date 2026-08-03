@@ -35,7 +35,7 @@ a ignorar.
 | Funções do banco declaradas | 220 |
 | Funções do banco chamadas do código | 113 |
 | Suítes de teste | 37, com 391 casos |
-| Migrations | 150 |
+| Migrations | 151 |
 | Validadores de CI | 27 |
 | Módulos de `lib/` citados por algum teste | 36 de 78 |
 
@@ -755,7 +755,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `mark_advanced_signer_complete` | `supabase/migrations/20260720054210_stage12_2_external_signing.sql` | `app/actions/public-signing.ts` |
 | `mark_quality_response_submitted` | `supabase/migrations/20260720080150_stage13_quality_forms_hardening.sql` | `app/actions/quality.ts` |
 | `move_crm_lead_stage` | `supabase/migrations/20260721020003_stage18_workflow_privilege_hardening.sql` | `app/actions/relationship.ts` |
-| `move_crm_opportunity_stage` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/relationship.ts` |
+| `move_crm_opportunity_stage` | `supabase/migrations/20260803230000_motivo_de_perda_separado_da_observacao.sql` | `app/actions/relationship.ts` |
 | `move_project_task` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | `app/actions/projects.ts` |
 | `normalize_profile_module_permission_booleans` | `supabase/migrations/20260720143150_stage16_permission_boolean_guard.sql` | — (só por SQL ou trigger) |
 | `object_definition_versions_freeze` | `supabase/migrations/20260726090000_object_runtime_definition_catalog.sql` | — (só por SQL ou trigger) |
