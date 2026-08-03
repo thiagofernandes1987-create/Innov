@@ -18,6 +18,7 @@
 
 import { chromium } from "playwright";
 import { credencial } from "./credencial.mjs";
+import { FONTE } from "./cor.mjs";
 
 const BASE = process.env.QA_BASE || "http://localhost:3000";
 const EXEC = process.env.QA_CHROMIUM || "/opt/pw-browsers/chromium";
@@ -28,43 +29,11 @@ const SELETOR = [
   "h1", "h2", "h3", "h4", "h5", "h6", "div", "option"
 ].join(",");
 
-const AUDITORIA = sel => {
-  function lum(c) {
-    const [r, g, b] = c.map(v => {
-      v /= 255;
-      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
-    });
-    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  }
-  // Componentes 0–255, a partir de `rgb()`, `rgba()` ou `color(<espaço> …)`.
-  //
-  // v4 do instrumento. `color(srgb 0.95 0.97 0.99)` — que o Chromium devolve
-  // quando a cor veio de `color-mix()` ou de espaço declarado — era lido pelo
-  // regex de números como [0.95, 0.97, 0.99] em escala 0–255, ou seja, preto.
-  // Texto escuro sobre fundo claro aparecia como 1,3:1 e entrava no relatório
-  // como reprovação. Quarto ponto cego deste medidor, e o primeiro a errar para
-  // o lado de acusar em vez de absolver — o que corrompe a medição do mesmo
-  // jeito, porque manda corrigir o que não está quebrado.
-  //
-  // O nome do espaço é descartado antes de ler os números: `display-p3` contém
-  // um `3` que o regex captaria como componente.
-  const num = s => {
-    const texto = String(s);
-    const espaco = /^\s*color\(\s*([a-z0-9-]+)/i.exec(texto);
-    const corpo = espaco ? texto.slice(texto.indexOf(espaco[1]) + espaco[1].length) : texto;
-    const partes = (corpo.split("/")[0].match(/-?[\d.]+/g) || [0, 0, 0]).slice(0, 3).map(Number);
-    while (partes.length < 3) partes.push(0);
-    return espaco ? partes.map(v => Math.max(0, Math.min(1, v)) * 255) : partes;
-  };
-  const alfa = s => {
-    const texto = String(s);
-    if (/^\s*color\(/i.test(texto)) {
-      const depoisDaBarra = texto.split("/")[1];
-      return depoisDaBarra ? Number((depoisDaBarra.match(/[\d.]+/) || [1])[0]) : 1;
-    }
-    return /rgba/.test(texto) ? Number((texto.match(/[\d.]+/g) || [])[3] ?? 1) : 1;
-  };
-
+// O corpo abaixo vai ao navegador com o prelúdio de `cor.mjs` colado na frente.
+// A aritmética de cor mora lá porque função serializada para o Chromium não é
+// importável — e o que não é importável não tem teste. Quatro versões erradas
+// deste medidor entraram assim, e nenhuma foi encontrada por teste.
+const CORPO_DA_AUDITORIA = String(function auditar(sel) {
   // Todas as cores declaradas dentro de um background-image (gradientes).
   function coresDoGradiente(bgImage) {
     const achados = bgImage.match(/(?:rgba?|color)\([^)]+\)/g) || [];
@@ -114,7 +83,7 @@ const AUDITORIA = sel => {
       if (cr < pior) { pior = cr; piorFundo = f; }
     }
     const fs = parseFloat(cs.fontSize);
-    const min = (fs >= 24 || (fs >= 18.66 && Number(cs.fontWeight) >= 700)) ? 3 : 4.5;
+    const min = minimoExigido(fs, cs.fontWeight);
     if (pior < min) {
       falhas.push({
         txt: txt.slice(0, 40), tag: el.tagName.toLowerCase(),
@@ -124,7 +93,12 @@ const AUDITORIA = sel => {
     }
   }
   return { falhas, medidos, semFundo };
-};
+})
+  // Só o corpo: a assinatura vem do `new Function`.
+  .replace(/^function auditar\(sel\) \{/, "")
+  .replace(/\}$/, "");
+
+const AUDITORIA = new Function("sel", `${FONTE}\n${CORPO_DA_AUDITORIA}`);
 
 async function main() {
   const rota = process.argv[2] || "/app";

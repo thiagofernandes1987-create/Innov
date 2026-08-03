@@ -139,6 +139,8 @@ jobs:
         run: pnpm validate:postgrest-embeds
       - name: Validate module keys against app_modules (VACINA-053)
         run: pnpm validate:module-keys
+      - name: Validate code map against the code
+        run: pnpm validate:code-map
       - name: Validate auditable persona contracts
         run: pnpm validate:personas-audit
       - name: Validate extension function qualification

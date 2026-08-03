@@ -154,6 +154,7 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-053` | Chave de módulo ausente de `app_modules` faz o guarda negar todo mundo em silêncio, inclusive `SUPER_ADMIN` | aplicada | guarda por participação na organização onde a intenção é universal, migration de semeadura para o módulo `modelos`, log em falha silenciosa e validador de chaves citadas em SQL |
 | `VACINA-054` | `Escape` com lista de sugestão aberta fechava o formulário inteiro e descartava o preenchimento | aplicada | camada interna aberta consome a tecla e barra a propagação, e roteiro que exige formulário aberto no primeiro `Escape` e fechado no segundo |
 | `VACINA-055` | Embed sem chave estrangeira devolve PGRST200 e derruba a consulta; e validador aprova tanto por estar certo quanto por não enxergar | aplicada | leitura em duas consultas com `lib/pessoas/nomes.ts`, ramo de PGRST200 no validador de embeds, leitor de `select` sensível a profundidade e universo de tabelas vindo dos `create table` |
+| `VACINA-056` | Verificação que sai 0 quando a dependência falta, e que não está em workflow nenhum, é indistinguível de verificação que passou | aplicada | `--exigir` nos dois scripts que se autodispensavam, e confronto de RPCs chamadas contra declaradas no `validate:code-map`, com débito congelado e responsável nomeado |
 
 ## 4. Arquivos
 
@@ -213,7 +214,8 @@ diretrizes/vacinas/
 ├── VACINA-052-EMBED-AMBIGUO-DEVOLVE-PGRST201-E-DERRUBA-A-CONSULTA-INTEIRA.md
 ├── VACINA-053-CHAVE-DE-MODULO-INEXISTENTE-NEGA-TODO-MUNDO.md
 ├── VACINA-054-ESCAPE-FECHA-UMA-CAMADA-POR-VEZ.md
-└── VACINA-055-EMBED-DE-RELACAO-INEXISTENTE-E-O-VALIDADOR-QUE-NAO-ENXERGA.md
+├── VACINA-055-EMBED-DE-RELACAO-INEXISTENTE-E-O-VALIDADOR-QUE-NAO-ENXERGA.md
+└── VACINA-056-VERIFICACAO-QUE-SE-AUTODISPENSA-PARECE-VERIFICACAO-QUE-PASSOU.md
 ```
 
 ## 5. Critérios para nova vacina

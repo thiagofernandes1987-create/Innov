@@ -392,6 +392,13 @@ Descoberto em 25 de julho de 2026, ao executar o replay pedido pela T-21.3.3. En
 
 **O repositório não reconstrói o banco. Replay em base limpa: 0 de 111 migrations.**
 
+> **Medição refeita em 3 de agosto de 2026, com PostgreSQL 16 subido para isso: 0 de 150.**
+> Falha na primeira migration aplicada, em `20260719214500_stage10_homologation_hardening.sql`,
+> por `function public.touch_updated_at() does not exist`. Quarenta dias depois, o que mudou foi
+> o denominador. `has_module_permission` continua sendo chamada por 346 trechos de migration e
+> criada por nenhum; a única definição no repositório é um dublê de teste que sempre concede.
+> Registrado também em `diretrizes/mapa-do-codigo.debito.json` e na VACINA-056.
+
 O achado central é este:
 
 > **`has_module_permission` não existe em nenhum arquivo do repositório.** É a função no centro do modelo de autorização, chamada por **41 dos 111** arquivos de migration, e a definição dela só existe dentro do banco de homologação.
@@ -408,7 +415,7 @@ Dois modos de falha distintos, que pedem soluções distintas:
 - [ ] T-22.3 — `pnpm test:db:replay` verde: 100% das migrations aplicando em base limpa
 - [ ] T-22.4 — Comparar o esquema reconstruído com o da homologação, objeto a objeto — tabelas, colunas, funções, policies, índices e privilégios
 - [ ] T-22.5 — Completar o bootstrap de fronteira conforme o replay for descobrindo lacunas, distinguindo defeito da fixture de defeito do repositório
-- [ ] T-22.6 — Ligar o replay ao CI, para que a promessa de recuperação passe a ser verificada a cada mudança e não uma vez por descoberta
+- [ ] T-22.6 — Ligar o replay ao CI, para que a promessa de recuperação passe a ser verificada a cada mudança e não uma vez por descoberta. **Pré-requisito já feito:** `--exigir` faz o script reprovar quando o banco falta, em vez de sair 0 dizendo que não rodou (VACINA-056) — sem isso, ligar ao CI produziria um passo verde que não verifica nada
 - [ ] T-22.7 — Propor a substituição da prevenção da VACINA-003: comparação viva contra o ledger remoto e replay executável, no lugar da lista fixa de quatro arquivos
   - [ ] T-22.7.1 — Portão 1, eliminatório: cobre a mesma causa raiz com garantia maior — detecta divergência em qualquer direção, e não só nos quatro arquivos congelados
   - [ ] T-22.7.2 — Portão 2: retorno material — a detecção atual é zero para tudo criado depois da vacina, e deixou passar 102 migrations
@@ -1165,6 +1172,12 @@ R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
 - [ ] T-33.13 — Página de orçamento transborda em todas as larguras (1627px contra 1366 disponíveis), inclusive no desktop. Medido com e sem a alteração desta sprint: idêntico nos dois, é anterior
 - [ ] T-33.14 — Cartão do funil com alvo de toque de 19px em 390px de largura — o título do cartão, que é o alvo principal do kanban no telefone. Também anterior, confirmado por medição com e sem alteração
 - [ ] T-33.15 — `chaveNormalizada` não funde "m2" e "m²", que são a mesma unidade escrita de dois jeitos e as duas serão digitadas. Fundir expoentes ajudaria unidade e poderia atrapalhar outros escopos — decidir por escopo, não globalmente
+
+- [x] T-33.16 — **Mapa do código gerado**, não escrito à mão: `diretrizes/MAPA-DO-CODIGO.md` com aplicativos, 151 rotas e a guarda de cada uma, 174 server actions por arquivo, 78 módulos de `lib/` com exportados e cobertura, 220 funções do banco com quem as declara e quem as chama, suítes de teste e validadores. `pnpm validate:code-map` reprova no CI quando o arquivo diverge do código
+- [x] T-33.17 — O mapa **confronta** em vez de listar: RPC chamada sem migration, módulo nunca importado e server action que nenhuma tela referencia. O débito conhecido está congelado em `diretrizes/mapa-do-codigo.debito.json` com responsável nomeado, e o validador reprova tanto item novo quanto item já consertado que continue na lista — provado nos três casos
+- [x] T-33.18 — Aritmética de cor do medidor de contraste extraída para `scripts/qa/cor.mjs` e coberta por 19 testes, um por defeito que o instrumento já teve. Antes não tinha nenhum: função serializada para o navegador não é importável, e foi assim que quatro versões erradas entraram
+- [x] T-33.19 — `--exigir` nos dois scripts que saíam 0 quando o banco faltava (VACINA-056). "Não rodou" deixou de ter o mesmo código de saída de "passou"
+- [ ] T-33.20 — Sete server actions e um módulo de `lib/` sem nenhum uso, listados no débito do mapa. Decidir, um a um, entre ligar à tela que os justifica e remover — são superfície exposta sem função
 
 ---
 

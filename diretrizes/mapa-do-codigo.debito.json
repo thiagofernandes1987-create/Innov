@@ -1,0 +1,23 @@
+{
+  "_leia": "Débito conhecido do mapa do código, congelado para que o CI reprove apenas o que for novo. Conferido por `pnpm validate:code-map`. Item que deixa de ser problema tem que sair daqui — o próprio validador reprova lista desatualizada.",
+  "rpc": [
+    "has_module_permission",
+    "list_my_modules",
+    "set_profile_module_permission"
+  ],
+  "_rpc_responsavel": "S-22 — o repositório não reconstrói o banco. Replay em base limpa medido em 3 de agosto de 2026: 0 de 150 migrations. `has_module_permission` é chamada por 346 trechos de migration e não é criada por nenhuma; a única definição no repositório é um dublê de teste em supabase/tests/*/fixture.sql, que sempre concede.",
+  "libs": [
+    "@/lib/planejamento/server"
+  ],
+  "_libs_responsavel": "Módulo sem importador. Decidir entre ligar à tela de planejamento ou remover.",
+  "acoes": [
+    "app/actions/commercial-documents.ts#createProposalFromBudget",
+    "app/actions/inventory-extra.ts#createInventoryCategory",
+    "app/actions/inventory-extra.ts#createInventoryUnit",
+    "app/actions/pipeline.ts#instalarTrilha",
+    "app/actions/pipeline.ts#trilhaEhValida",
+    "app/actions/projects.ts#createDependency",
+    "app/actions/projects.ts#createProjectFromContract"
+  ],
+  "_acoes_responsavel": "Server actions que nenhuma tela importa. São superfície exposta sem uso: decidir entre ligar à tela que as justifica ou remover."
+}

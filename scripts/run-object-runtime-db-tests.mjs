@@ -48,8 +48,14 @@ try {
     connection = ["-U", "postgres", "-d", database];
   }
 } catch (error) {
+  // Ver VACINA-056: com `--exigir`, faltar a dependência reprova, porque
+  // "não rodou" e "passou" não podem sair com o mesmo código.
   console.log("PostgreSQL indisponível neste ambiente: testes de banco do Object Runtime NÃO foram executados.");
   console.log(`Motivo: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
+  if (process.argv.includes("--exigir")) {
+    console.error("`--exigir` foi pedido: sem banco não há verificação, e sem verificação não há aprovação.");
+    process.exit(1);
+  }
   process.exit(0);
 }
 

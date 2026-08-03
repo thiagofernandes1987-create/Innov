@@ -17,6 +17,8 @@
     "validate:server-actions": "node scripts/validate-server-actions.mjs",
     "validate:postgrest-embeds": "node scripts/validate-postgrest-embeds.mjs",
     "validate:module-keys": "node scripts/validate-module-keys.mjs",
+    "mapa:codigo": "node scripts/gerar-mapa-do-codigo.mjs",
+    "validate:code-map": "node scripts/gerar-mapa-do-codigo.mjs --verificar",
     "qa:visual": "node scripts/qa/harness.mjs",
     "qa:contraste": "node scripts/qa/contraste.mjs",
     "validate:vaccines": "node scripts/validate-vaccines.mjs",
