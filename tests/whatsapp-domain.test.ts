@@ -1,6 +1,7 @@
 import { createHmac } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import {
+  canAdvanceWhatsAppDeliveryStatus,
   isSupportWindowOpen,
   normalizePhone,
   orderedTemplateParameters,
@@ -40,6 +41,16 @@ describe("WhatsApp domain", () => {
     expect(isSupportWindowOpen("2026-08-02T18:00:01-03:00", now)).toBe(true);
     expect(isSupportWindowOpen("2026-08-02T17:59:59-03:00", now)).toBe(false);
     expect(isSupportWindowOpen(null, now)).toBe(false);
+  });
+
+  it("impede regressão e falha tardia no status de entrega", () => {
+    expect(canAdvanceWhatsAppDeliveryStatus("QUEUED", "SENT")).toBe(true);
+    expect(canAdvanceWhatsAppDeliveryStatus("SENT", "DELIVERED")).toBe(true);
+    expect(canAdvanceWhatsAppDeliveryStatus("DELIVERED", "READ")).toBe(true);
+    expect(canAdvanceWhatsAppDeliveryStatus("READ", "DELIVERED")).toBe(false);
+    expect(canAdvanceWhatsAppDeliveryStatus("DELIVERED", "FAILED")).toBe(false);
+    expect(canAdvanceWhatsAppDeliveryStatus("SENT", "FAILED")).toBe(true);
+    expect(canAdvanceWhatsAppDeliveryStatus("FAILED", "DELIVERED")).toBe(false);
   });
 
   it("valida token de origem e campo permitido", () => {
