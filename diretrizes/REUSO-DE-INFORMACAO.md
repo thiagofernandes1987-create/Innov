@@ -131,10 +131,15 @@ diff legível, converte para PDF e para DOCX, e sobrevive à plataforma. O edito
 é visual, o que grava é Markdown.
 
 **A variável é escolhida, não decorada.** Ninguém deve memorizar
-`{{Cliente_tel_pessoal}}`. O editor tem um painel com as variáveis disponíveis
-para aquele escopo, com nome legível e valor de exemplo do registro atual;
-clicar insere. Decorar nome de variável é a razão de esse tipo de recurso morrer
-sem uso.
+`{{Cliente_tel_pessoal}}`. O editor oferece as variáveis daquele escopo com nome
+legível e valor de exemplo do registro atual; clicar insere no cursor. Decorar
+nome de variável é a razão de esse tipo de recurso morrer sem uso.
+
+A lista fica atrás de um **botão na barra de ferramentas**, com busca, e não num
+painel fixo na lateral — correção do responsável em 3 de agosto sobre o layout
+que ele mesmo desenhou. O motivo é de largura: painel fixo cobra 250px
+permanentes de quem escreve por uma ação que é ocasional, e a 1366px isso é
+metade da coluna de texto.
 
 **Variável não resolvida aparece, nunca some.** Se `{{Cliente_email_comercial}}`
 está vazio, o documento mostra a lacuna marcada — e o envio avisa quantas
@@ -148,6 +153,28 @@ pode ver.
 
 **O dicionário respeita a RLS.** A variável só resolve o que o usuário que
 gerou o documento pode ler. Modelo não é caminho para contornar permissão.
+
+**O modelo mora no módulo que emite o documento.** Proposta em `propostas`,
+contrato em `contratos`, FVS e FVM em `qualidade`. Não é organização de pastas:
+`module_key` na linha é a **chave de permissão**, e a RLS reaproveita
+`has_module_permission`, que já é o mecanismo de toda a plataforma. Um depósito
+comum de modelos obrigaria uma segunda régua de acesso — duas réguas que
+divergem no primeiro ajuste.
+
+**Salvar é do autor; publicar é da organização.** Rascunho aceita corpo
+incompleto e variável ainda errada, porque é trabalho em andamento. Publicado
+passa a valer para todo mundo que emite aquele documento, e por isso exige a
+alçada mais alta do módulo — na tela e na política do banco, não só na tela
+(`VACINA-049`). Arquivar, ao contrário, exige apenas `EDIT`: tirar de circulação
+um modelo com defeito tem de ser mais barato do que colocá-lo.
+
+**Importar é conversão local, sem dependência e sem servidor.** `.docx` e
+`.xlsx` são ZIP com XML dentro, e o navegador descomprime sozinho
+(`DecompressionStream`). O arquivo **não sai da máquina de quem importa** — um
+modelo de proposta traz preço, nome de cliente e margem, e nada disso precisa
+trafegar para virar texto. O que não dá para converter honestamente é recusado
+com o motivo e o que fazer: `.doc` e `.xls` são formatos binários dos anos 1990,
+`.pdf` é o único da lista que pediria biblioteca de verdade.
 
 ### Nomenclatura das variáveis
 
@@ -180,6 +207,10 @@ primeira.
 | Documento gerado com lacuna | Contagem de lacunas no envio, e bloqueio para documento que vai para assinatura |
 | Modelo de outra organização | Modelo é da organização, sempre; biblioteca compartilhada é cópia, não referência |
 | Usuário cola HTML no Markdown | Renderização escapa HTML por padrão |
+| Dois responsáveis editando o mesmo modelo | `version_number` confere a versão na gravação. Quem chega depois recebe "alguém salvou depois de você", **com o texto preservado** — o último a salvar não apaga o trabalho do primeiro em silêncio |
+| Nome de modelo repetido | Índice único por organização, módulo e função. A falha vira frase de domínio, e o corpo digitado continua no editor (`VACINA-042`) |
+| Salvar um modelo já publicado | Não rebaixa para rascunho. O estado seguinte é lido do atual, e alterar o publicado exige a alçada de publicar (`VACINA-049`) |
+| Documento importado com imagem | Cada imagem vira uma marca visível no corpo e a contagem aparece no aviso. Sumir com ela em silêncio faria a perda aparecer só na frente do cliente |
 
 ---
 

@@ -3457,7 +3457,9 @@ tbody tr:hover { background: var(--surface-muted); }
    Layout desenhado pelo responsável em 3 de agosto: barra do documento, barra
    de menu, barra de ferramentas, corpo com explorador ⟷ editor ⟷ prévia, e
    barra de status. Explorador e prévia ligam e desligam pelo menu View. */
-.editor-doc { display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--paper); }
+/* Linhas automáticas: a faixa de aviso só existe quando há aviso, e uma grade
+   de faixas fixas deixaria um vão do tamanho dela o resto do tempo. */
+.editor-doc { display: grid; grid-auto-rows: max-content; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--paper); }
 
 .editor-doc-barra { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
 .editor-doc-identidade { display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -3467,6 +3469,20 @@ tbody tr:hover { background: var(--surface-muted); }
 .editor-doc-estado::before { content: ""; width: 7px; height: 7px; border-radius: 999px; background: var(--brand); }
 .editor-doc-estado.salvo::before { background: var(--success, #3f9d7c); }
 .editor-doc-acoes { display: flex; gap: 8px; }
+/* O nome do modelo é campo, não rótulo: é ele que vai para `name` na gravação,
+   e é por ele que o modelo é encontrado depois. */
+.editor-doc-nome { width: auto; min-width: 22ch; max-width: 46ch; min-height: 44px; padding: 4px 8px; border: 1px solid transparent; border-radius: 7px; background: transparent; font-weight: 650; font-size: 0.94rem; }
+.editor-doc-nome:hover { border-color: var(--border); }
+.editor-doc-nome:focus { border-color: var(--brand); background: var(--surface); }
+.editor-doc-nome.invalido, .editor-doc-nome[aria-invalid="true"] { border-color: var(--danger, #b4453c); }
+
+/* Aviso de gravação. Fica na largura toda, acima do editor, porque o que ele
+   informa muda o que a pessoa faz em seguida — conflito de versão não pode
+   aparecer como um traço fino num canto. */
+.editor-aviso { display: grid; gap: 4px; margin: 0; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 0.82rem; }
+.editor-aviso.ok { background: var(--success-soft); }
+.editor-aviso.erro { background: var(--danger-soft); }
+.editor-aviso span { font-size: 0.78rem; }
 
 .editor-menubar { display: flex; gap: 2px; padding: 0 10px; border-bottom: 1px solid var(--border); background: var(--surface-muted); }
 .editor-menu { position: relative; }
@@ -3504,6 +3520,12 @@ tbody tr:hover { background: var(--surface-muted); }
 .editor-pasta h3 { margin: 0 0 4px; color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: .07em; }
 .editor-arquivo { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font-size: 0.78rem; text-align: left; cursor: pointer; }
 .editor-arquivo:disabled { color: var(--muted); cursor: not-allowed; }
+.editor-arquivo:hover:not(:disabled) { background: var(--surface-muted); }
+.editor-arquivo.aberto { background: var(--brand-soft); font-weight: 600; }
+/* Ponto de publicado: distingue o que já vale para a organização do rascunho,
+   sem gastar uma coluna de estado numa lista estreita. */
+.editor-arquivo em { margin-left: auto; color: var(--brand-strong); font-style: normal; }
+.editor-pasta-vazia { margin: 2px 8px 8px; color: var(--muted); font-size: 0.74rem; }
 
 .editor-painel { display: flex; flex-direction: column; min-width: 0; }
 .com-previa .editor-painel { border-right: 1px solid var(--border); }

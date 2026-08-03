@@ -145,6 +145,9 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-044` | Grade de faixa única sem `minmax(0, …)` não encolhe e a página rola de lado | aplicada | faixa declarada como `minmax(0, 1fr)`, tabela com rolagem própria e verificação de transbordo nos três breakpoints |
 | `VACINA-045` | Numeração de linha contada por `\n` erra assim que a linha quebra sozinha | aplicada | numeração por espelho, com fonte, largura de conteúdo e rolagem compartilhadas com o campo |
 | `VACINA-046` | Medidor de alvo de toque reprova a caixa de marcar em vez de medir o rótulo que responde ao toque | aplicada | o medidor resolve a associação de rótulo antes de reprovar, e a correção é verificada nos dois sentidos |
+| `VACINA-047` | Constante exportada de módulo `"use server"` chega ao cliente como `undefined` | aplicada | tipo e valor inicial moram no módulo puro, e a action importa de lá |
+| `VACINA-048` | `textarea` enviado por formulário chega com CRLF e nunca bate com o que está na tela | aplicada | normalização para `\n` na entrada da action, antes de gravar, comparar ou versionar |
+| `VACINA-049` | Salvar rebaixava modelo publicado a rascunho em silêncio | aplicada | estado seguinte decidido a partir do atual, e mudança de publicação exigida também na política do banco |
 
 ## 4. Arquivos
 
@@ -195,7 +198,10 @@ diretrizes/vacinas/
 ├── VACINA-043-COR-AMOSTRADA-DA-REFERENCIA-ESCURA.md
 ├── VACINA-044-GRADE-DE-FAIXA-UNICA-NAO-ENCOLHE.md
 ├── VACINA-045-NUMERO-DE-LINHA-ACOMPANHA-A-LINHA-QUE-QUEBRA.md
-└── VACINA-046-ALVO-DE-TOQUE-E-O-ROTULO-NAO-A-CAIXA.md
+├── VACINA-046-ALVO-DE-TOQUE-E-O-ROTULO-NAO-A-CAIXA.md
+├── VACINA-047-USE-SERVER-SO-EXPORTA-FUNCAO.md
+├── VACINA-048-TEXTAREA-ENVIA-CRLF.md
+└── VACINA-049-SALVAR-NAO-MUDA-ESTADO-DE-PUBLICACAO.md
 ```
 
 ## 5. Critérios para nova vacina
