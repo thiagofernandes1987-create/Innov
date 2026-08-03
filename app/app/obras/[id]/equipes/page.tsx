@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createProjectResource, createTeam } from "@/app/actions/projects";
 import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
+import { nomesDosUsuarios } from "@/lib/pessoas/nomes";
 import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
 
 export default async function TeamsPage({
@@ -19,7 +20,9 @@ export default async function TeamsPage({
     supabase.from("projects").select("id,code,name").eq("id", id).eq("organization_id", organizationId).maybeSingle(),
     supabase.from("project_teams").select("id,name,specialty,leader_user_id,active,project_team_members(id,display_name,role_label,active)").eq("project_id", id).order("name"),
     supabase.from("project_resources").select("id,resource_type,code,name,unit,hourly_cost,daily_cost,active").eq("project_id", id).order("resource_type").order("name"),
-    supabase.from("project_memberships").select("user_id,role,profiles(full_name)").eq("project_id", id).eq("active", true)
+    // Sem embed de `profiles`: `user_id` aponta para `auth.users`, e o embed
+    // devolvia PGRST200, derrubando a lista de membros inteira.
+    supabase.from("project_memberships").select("user_id,role").eq("project_id", id).eq("active", true)
   ]);
 
   reportDataAccessError("project-teams.project", projectResult.error);
@@ -43,6 +46,7 @@ export default async function TeamsPage({
   const teams = teamsResult.data ?? [];
   const resources = resourcesResult.data ?? [];
   const memberships = membershipsResult.data ?? [];
+  const nomePorUsuario = await nomesDosUsuarios(supabase, memberships.map(m => m.user_id));
   const teamsLoadFailed = Boolean(teamsResult.error);
   const resourcesLoadFailed = Boolean(resourcesResult.error);
   const membershipsLoadFailed = Boolean(membershipsResult.error);
@@ -101,10 +105,11 @@ export default async function TeamsPage({
               <label>Nome<input name="name" placeholder="Equipe de estrutura" required /></label>
               <label>Especialidade<input name="specialty" placeholder="Formas e armação" /></label>
               <label>Líder
-                <select name="leaderUserId"><option value="">Não definido</option>{memberships.map((membership) => {
-                  const profile = Array.isArray(membership.profiles) ? membership.profiles[0] : membership.profiles;
-                  return <option key={membership.user_id} value={membership.user_id}>{profile?.full_name || membership.user_id.slice(0, 8)} · {membership.role}</option>;
-                })}</select>
+                <select name="leaderUserId"><option value="">Não definido</option>{memberships.map((membership) => (
+                  <option key={membership.user_id} value={membership.user_id}>
+                    {nomePorUsuario.get(membership.user_id) || membership.user_id.slice(0, 8)} · {membership.role}
+                  </option>
+                ))}</select>
               </label>
               <button className="button button-primary" type="submit">Criar equipe</button>
             </form>

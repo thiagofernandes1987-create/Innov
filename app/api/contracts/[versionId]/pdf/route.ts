@@ -22,7 +22,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     .select(`
       id, contract_id, version_number, rendered_body, value, currency,
       document_path, document_sha256, frozen_at, client_released_at,
-      contracts!inner(
+      contracts!contract_versions_contract_id_fkey!inner(
         id, organization_id, client_id, code, title, status, starts_at, ends_at,
         clients!inner(legal_name, trade_name)
       )

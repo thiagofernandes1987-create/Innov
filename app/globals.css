@@ -29,7 +29,10 @@
   --border-strong: #bdc9d0;
   --success: #2f6d55;
   --success-soft: #eaf5ef;
-  --warning: #a6620c;
+  /* #a6620c media 4,38:1 sobre o próprio `--warning-soft` — e é sobre ele que
+     o aviso quase sempre aparece. Cor de aviso ilegível é contradição de
+     função: o texto existe justamente para ser lido antes de alguém seguir. */
+  --warning: #96590a;
   --warning-soft: #fff3df;
   --danger: #a93642;
   --danger-soft: #fbecef;
@@ -458,7 +461,10 @@ h3 { margin: 0; font-size: 19px; line-height: 1.25; }
 .text-link { color: var(--brand-strong); font-size: 13px; font-weight: 820; }
 .module-arrow { color: var(--copper-strong); font-size: 18px; transition: transform var(--transition-fast); }
 .module-card:hover .module-arrow { transform: translateX(3px); }
-.empty-state { padding: 34px; text-align: center; border-style: dashed; background: rgba(255,255,255,.72); }
+/* Branco fixo: no tema escuro o estado vazio virava um retângulo claro com
+   título e texto claros por cima — 1,09:1 e 2,11:1. E estado vazio é
+   justamente a tela que precisa explicar o que fazer a seguir. */
+.empty-state { padding: 34px; text-align: center; border-style: dashed; background: var(--surface); }
 .empty-state p { color: var(--muted); margin: 8px auto 0; max-width: 52ch; }
 
 .table-wrap { overflow-x: auto; border-radius: var(--radius); }
@@ -2271,7 +2277,10 @@ tbody tr:hover { background: #fafcfd; }
     --muted: #a6b4c5;
     --border: #263d56;
     --border-strong: #35516f;
-    --brand: #4d80d8;
+    /* #4d80d8 media 3,50:1 sobre `--surface-strong` e 3,47:1 sobre
+       `--brand-soft` — e é sobre esses dois que o link do tema escuro quase
+       sempre cai. #6396e6 fecha 4,5:1 nas quatro superfícies escuras. */
+    --brand: #6396e6;
     --brand-strong: #72a8f3;
     --brand-soft: #152f50;
     --ink: #061728;
@@ -2290,7 +2299,7 @@ tbody tr:hover { background: #fafcfd; }
   --muted: #a6b4c5;
   --border: #263d56;
   --border-strong: #35516f;
-  --brand: #4d80d8;
+  --brand: #6396e6;
   --brand-strong: #72a8f3;
   --brand-soft: #152f50;
   --ink: #061728;
@@ -3319,8 +3328,8 @@ main.content {
 }
 
 
-/* Botão primário no tema escuro: `--brand` clareia para #4d80d8 e o branco cai
-   para 3,89:1, abaixo do mínimo. Um azul um passo mais escuro devolve a
+/* Botão primário no tema escuro: `--brand` clareia — hoje #6396e6 — e o branco
+   por cima cai abaixo do mínimo. Um azul um passo mais escuro devolve a
    legibilidade sem mudar a identidade. Só `.button-primary` existe no
    repositório — verificado no navegador antes de escrever a regra. */
 :root[data-tema="escuro"] .button-primary,

@@ -1147,9 +1147,12 @@ R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
 - [x] T-33.3 — **Medidor de contraste não entendia `color(srgb …)`** e lia o fundo como preto, acusando 1,3:1 onde havia 15:1. Quarto ponto cego do instrumento, e o primeiro a errar acusando. Corrigido com conferência unitária dos dois lados
 - [x] T-33.4 — **Cronograma com 14 alvos de toque abaixo de 44px** — barra da obra em 43px, um pixel abaixo, e botões do planejador em 34px. Agora 0 nas três larguras e nos dois temas
 - [x] T-33.5 — **Barra de navegação da obra com fundo branco fixo no tema escuro**: 2,11:1 nos sete links. E `--muted` em 4,49:1, um centésimo abaixo do mínimo. Cronograma, início, obras, modelos, CRM e orçamentos fecham em 0/0 nos dois temas
-- [ ] T-33.6 — Herói da obra com título em `--text` sobre fundo escuro (1,12:1) e rótulo branco sobre trilha clara (1,23:1), na visão geral da obra
-- [ ] T-33.7 — Kanban de tarefas com colunas de fundo claro fixo no tema escuro: 12 reprovações, os seis nomes de coluna ilegíveis
-- [ ] T-33.8 — Um erro de console na tela de tarefas, nas seis combinações de largura e tema
+- [x] T-33.6 — Herói da obra com título em `--text` sobre fundo escuro (1,12:1) e percentual branco sobre miolo branco, invisível também no portal do cliente — o único dado do cartão. Título em branco, anel com miolo escuro declarado no elemento que carrega o número (pseudo-elemento não é enxergado por auditoria de contraste)
+- [x] T-33.7 — Kanban de tarefas com colunas de fundo claro fixo no tema escuro: 12 reprovações, os seis nomes de coluna ilegíveis. Todo fundo de `app/stage12.css` passou a token de superfície — kanban, cartão, trilha, barra do Gantt, nó da EAP, mídia, alerta e barra de ações
+- [x] T-33.8 — Um erro de console na tela de tarefas, nas seis combinações de largura e tema: `PGRST200` no embed `profiles(full_name)` a partir de `project_memberships`, cuja `user_id` aponta para `auth.users`. O seletor de responsável mostrava um pedaço de UUID no lugar do nome. Corrigido em tarefas e equipes com `lib/pessoas/nomes.ts` (VACINA-055)
+- [x] T-33.9 — Ramo de PGRST200 no validador de embeds, com leitor de `select` sensível à profundidade da árvore e universo de tabelas vindo dos `create table`. A versão achatada acusou 22 embeds válidos e escondeu cinco ambíguos reais — contratos, propostas, orçamentos, qualidade e assinaturas, todos corrigidos
+- [x] T-33.10 — `--muted`, `--warning` e o `--brand` do tema escuro abaixo de 4,5:1 sobre as próprias superfícies; estado vazio e link de voltar com fundo e alvo fixos. Onze rotas fecham em 0/0 de contraste nos dois temas e 0 alvo abaixo de 44px
+- [ ] T-33.11 — Duas paletas de tema escuro convivem em `app/globals.css`: a antiga (superfícies `#161b25`, linhas 68–118) está morta, vencida pela nova (`#102238`). Editar a errada não produz efeito nenhum — unificar
 
 ---
 

@@ -3,6 +3,7 @@ import { createTask, moveTask } from "@/app/actions/projects";
 import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
 import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
+import { nomesDosUsuarios } from "@/lib/pessoas/nomes";
 import { formatDate, formatPercent, taskColumns, taskStatusLabels } from "@/lib/stage12";
 
 export default async function TasksPage({
@@ -19,7 +20,12 @@ export default async function TasksPage({
     supabase.from("projects").select("id,code,name").eq("id", id).eq("organization_id", organizationId).maybeSingle(),
     supabase.from("project_tasks").select("id,code,title,description,status,priority,progress,weight,planned_start,planned_end,responsible_id,blocked_reason,client_visible,wbs_id").eq("project_id", id).order("sequence"),
     supabase.from("work_breakdown_items").select("id,code,title").eq("project_id", id).order("sequence"),
-    supabase.from("project_memberships").select("user_id,role,profiles(full_name)").eq("project_id", id).eq("active", true)
+    // Sem embed de `profiles`: `project_memberships.user_id` aponta para
+    // `auth.users`, não para `public.profiles`, então `profiles(full_name)`
+    // devolvia PGRST200 — relação inexistente — e a consulta inteira falhava.
+    // O nome vem numa segunda leitura, como nas outras cinco telas que já
+    // resolvem pessoa assim.
+    supabase.from("project_memberships").select("user_id,role").eq("project_id", id).eq("active", true)
   ]);
 
   reportDataAccessError("project-tasks.project", projectResult.error);
@@ -43,6 +49,7 @@ export default async function TasksPage({
   const tasks = tasksResult.data ?? [];
   const wbs = wbsResult.data ?? [];
   const memberships = membershipsResult.data ?? [];
+  const nomePorUsuario = await nomesDosUsuarios(supabase, memberships.map(m => m.user_id));
   const tasksLoadFailed = Boolean(tasksResult.error);
   const supportLoadFailed = Boolean(wbsResult.error || membershipsResult.error);
 
@@ -118,10 +125,11 @@ export default async function TasksPage({
                 <select name="wbsId"><option value="">Sem pacote</option>{wbs.map((item) => <option key={item.id} value={item.id}>{item.code} · {item.title}</option>)}</select>
               </label>
               <label>Responsável
-                <select name="responsibleId"><option value="">Não definido</option>{memberships.map((membership) => {
-                  const profile = Array.isArray(membership.profiles) ? membership.profiles[0] : membership.profiles;
-                  return <option key={membership.user_id} value={membership.user_id}>{profile?.full_name || membership.user_id.slice(0, 8)} · {membership.role}</option>;
-                })}</select>
+                <select name="responsibleId"><option value="">Não definido</option>{memberships.map((membership) => (
+                  <option key={membership.user_id} value={membership.user_id}>
+                    {nomePorUsuario.get(membership.user_id) || membership.user_id.slice(0, 8)} · {membership.role}
+                  </option>
+                ))}</select>
               </label>
               <label>Prioridade<select name="priority" defaultValue="NORMAL"><option value="LOW">Baixa</option><option value="NORMAL">Normal</option><option value="HIGH">Alta</option><option value="CRITICAL">Crítica</option></select></label>
               <label>Status<select name="status" defaultValue="BACKLOG">{Object.entries(taskStatusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>

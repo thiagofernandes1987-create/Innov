@@ -1,3 +1,7 @@
+/* Todo fundo deste arquivo passa por token de superfície. Cor clara fixa,
+   escrita quando só existia tema claro, é a causa raiz de todas as reprovações
+   de contraste no tema escuro deste módulo: a regra continua "correta" e a
+   tela fica ilegível. */
 .project-nav {
   display: flex;
   gap: 8px;
@@ -26,8 +30,8 @@
   color: var(--muted);
   font-weight: 750;
 }
-.project-nav a:hover { color: var(--brand); background: #eff6ff; }
-.progress-track { height: 10px; overflow: hidden; border-radius: 999px; background: #e2e8f0; }
+.project-nav a:hover { color: var(--brand); background: var(--brand-soft); }
+.progress-track { height: 10px; overflow: hidden; border-radius: 999px; background: var(--surface-strong); }
 .progress-fill { height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--brand),#4b7bc5); }
 .progress-row { display: grid; gap: 7px; }
 .progress-row > div:first-child { display: flex; justify-content: space-between; gap: 16px; }
@@ -42,38 +46,62 @@
     linear-gradient(135deg,#091821,#142e5f);
   box-shadow: var(--shadow);
 }
+/* O `h1` global declara `color: var(--text)`, que vence a herança do herói —
+   e `--text` é escuro no tema claro. O nome da obra, que é o maior texto da
+   tela, media 1,12:1 sobre o gradiente escuro: ilegível no lugar de mais
+   destaque da página. */
+.project-hero h1 { color: white; }
 .project-hero .muted { color: rgba(255,255,255,.68); }
 .project-meta { display: flex; flex-wrap: wrap; gap: 9px 22px; margin-top: 18px; color: rgba(255,255,255,.78); }
 .project-meta strong { color: white; }
 .kanban { display: grid; grid-template-columns: repeat(6,minmax(260px,1fr)); gap: 14px; overflow-x: auto; padding-bottom: 10px; }
-.kanban-column { min-height: 360px; padding: 13px; border-radius: 15px; background: #eef2f6; border: 1px solid #dce4ed; }
+/* Fundo e borda fixos claros: no tema escuro as seis colunas ficavam claras
+   com o nome da coluna em texto claro por cima — 1,04:1, os seis rótulos
+   ilegíveis. Tokens de superfície seguem o tema. */
+.kanban-column { min-height: 360px; padding: 13px; border-radius: 15px; background: var(--surface-strong); border: 1px solid var(--border); }
 .kanban-head { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 12px; font-weight: 850; }
-.task-card { padding: 15px; margin-bottom: 10px; border-radius: 12px; background: white; border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(9,24,33,.05); }
+.task-card { padding: 15px; margin-bottom: 10px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); box-shadow: 0 4px 16px rgba(9,24,33,.05); }
 .task-card h3 { margin: 7px 0; font-size: 16px; }
 .task-card form { display: grid; gap: 8px; margin-top: 12px; }
 .timeline { display: grid; gap: 10px; }
 .timeline-row { display: grid; grid-template-columns: 210px minmax(240px,1fr) 130px; gap: 16px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-.timeline-bar { position: relative; height: 28px; overflow: hidden; border-radius: 8px; background: #eef2f6; }
+.timeline-bar { position: relative; height: 28px; overflow: hidden; border-radius: 8px; background: var(--surface-strong); }
 .timeline-bar > span { position: absolute; inset-block: 0; border-radius: 8px; background: linear-gradient(90deg,var(--brand),#6b94cf); min-width: 4px; }
 .wbs-tree { display: grid; gap: 10px; }
-.wbs-node { padding: 14px; border-left: 4px solid var(--brand); border-radius: 0 12px 12px 0; background: white; box-shadow: 0 1px 4px rgba(9,24,33,.05); }
+.wbs-node { padding: 14px; border-left: 4px solid var(--brand); border-radius: 0 12px 12px 0; background: var(--surface); box-shadow: 0 1px 4px rgba(9,24,33,.05); }
 .wbs-node[data-level="1"] { margin-left: 24px; border-left-color: var(--copper); }
 .wbs-node[data-level="2"] { margin-left: 48px; border-left-color: #6b94cf; }
 .field-form { display: grid; gap: 18px; }
 .field-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
 .field-grid .span-2 { grid-column: 1 / -1; }
-.field-actions { display: flex; flex-wrap: wrap; gap: 10px; position: sticky; bottom: 12px; z-index: 5; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: rgba(255,255,255,.94); backdrop-filter: blur(12px); box-shadow: var(--shadow); }
+.field-actions { display: flex; flex-wrap: wrap; gap: 10px; position: sticky; bottom: 12px; z-index: 5; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); backdrop-filter: blur(12px); box-shadow: var(--shadow); }
 .media-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(190px,1fr)); gap: 14px; }
-.media-card { overflow: hidden; border-radius: 14px; background: white; border: 1px solid var(--border); }
-.media-preview { aspect-ratio: 4/3; display: grid; place-items: center; color: var(--muted); background: #eef2f6; }
+.media-card { overflow: hidden; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); }
+.media-preview { aspect-ratio: 4/3; display: grid; place-items: center; color: var(--muted); background: var(--surface-strong); }
 .media-card .card-pad { padding: 14px; }
-.schedule-alert { padding: 13px 15px; border-radius: 12px; border-left: 4px solid var(--warning); background: #fff8eb; }
+.schedule-alert { padding: 13px 15px; border-radius: 12px; border-left: 4px solid var(--warning); background: var(--warning-soft); }
 .split-layout { display: grid; grid-template-columns: minmax(0,1fr) 360px; gap: 20px; align-items: start; }
 .form-card { padding: 22px; position: sticky; top: 92px; }
 .form-card form { display: grid; gap: 14px; }
-.client-progress-ring { width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--brand) var(--progress),#e2e8f0 0); }
-.client-progress-ring::before { content: ""; width: 82px; height: 82px; border-radius: 50%; background: white; position: absolute; }
-.client-progress-ring strong { position: relative; z-index: 1; font-size: 22px; }
+/* O anel vive dentro do herói escuro, e vivia com o miolo branco e o número
+   branco por cima: o percentual — que é o único dado do cartão — não aparecia
+   em tela nenhuma, nem na do cliente. Trilha e miolo passam a ser tons do
+   próprio herói, e o número fica branco sobre escuro.
+
+   `position: relative` conserta de passagem um defeito latente: o `::before`
+   era absoluto sem âncora posicionada, e só ficava centralizado por acidente
+   do `place-items`. */
+.client-progress-ring { position: relative; width: 112px; height: 112px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--brand) var(--progress),rgba(255,255,255,.22) 0); }
+/* O miolo escuro é do próprio número, e não de um `::before`. Pseudo-elemento
+   não é enxergado por auditoria de contraste — a medição encontrava o branco
+   sobre o azul do anel (2,98:1) enquanto na tela o branco está sobre quase
+   preto. Fundo declarado no elemento que carrega o texto faz medição e
+   realidade coincidirem. */
+.client-progress-ring strong {
+  position: relative; z-index: 1; display: grid; place-items: center;
+  width: 82px; height: 82px; border-radius: 50%;
+  background: rgba(9,24,33,.86); color: white; font-size: 22px;
+}
 
 @media (max-width: 1000px) {
   .split-layout { grid-template-columns: 1fr; }
