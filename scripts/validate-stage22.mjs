@@ -18,10 +18,15 @@ const requiredFiles = [
   "lib/whatsapp/client.ts",
   "lib/whatsapp/source-resolver.ts",
   "lib/whatsapp/server.ts",
+  "lib/personas/runtime.ts",
+  "lib/operations/routines.ts",
+  "lib/casca/menus.ts",
   "app/actions/whatsapp.ts",
   "app/api/webhooks/whatsapp/route.ts",
   "app/app/whatsapp/page.tsx",
   "tests/whatsapp-domain.test.ts",
+  "tests/personas-catalog.test.ts",
+  "tests/operational-routines.test.ts",
   "docs/ETAPA-22-WHATSAPP-OMNICHANNEL.md",
   analysisDocument
 ];
@@ -41,11 +46,16 @@ const hardening = read(hardeningMigration);
 const statusGuard = read(statusGuardMigration);
 const analysis = read(analysisDocument);
 const registry = read("lib/modules/registry.ts");
+const menus = read("lib/casca/menus.ts");
+const personas = read("lib/personas/runtime.ts");
+const routines = read("lib/operations/routines.ts");
 const webhook = read("app/api/webhooks/whatsapp/route.ts");
 const resolver = read("lib/whatsapp/source-resolver.ts");
 const client = read("lib/whatsapp/client.ts");
 const domain = read("lib/whatsapp/domain.ts");
 const tests = read("tests/whatsapp-domain.test.ts");
+const personaTests = read("tests/personas-catalog.test.ts");
+const routineTests = read("tests/operational-routines.test.ts");
 const actions = read("app/actions/whatsapp.ts");
 const env = read(".env.example");
 const page = read("app/app/whatsapp/page.tsx");
@@ -144,6 +154,30 @@ if (!registry.includes('routePrefix:"/app/whatsapp"') &&
 }
 
 for (const token of [
+  "whatsapp: [",
+  'rotulo: "Caixa de entrada", href: "/app/whatsapp"',
+  'rotulo: "Clientes", href: "/app/clientes"',
+  'rotulo: "SAC", href: "/app/ocorrencias"'
+]) {
+  if (!menus.includes(token)) failures.push(`Navegação interna ausente: ${token}`);
+}
+
+for (const token of [
+  'P1: ["whatsapp"]',
+  'P5: ["whatsapp"]',
+  "MODULOS_ADICIONAIS_POR_PERSONA"
+]) {
+  if (!personas.includes(token)) failures.push(`Cobertura de persona ausente: ${token}`);
+}
+if (!routines.includes('whatsapp: "ticket"')) {
+  failures.push("Rotina operacional do WhatsApp não está vinculada ao atendimento.");
+}
+if (!personaTests.includes('../lib/personas/runtime') ||
+    !routineTests.includes('../lib/personas/runtime')) {
+  failures.push("Testes de personas/rotinas não usam o catálogo operacional efetivo.");
+}
+
+for (const token of [
   "x-hub-signature-256",
   "verifyMetaWebhookSignature",
   "whatsapp_business_account",
@@ -182,6 +216,13 @@ if (!client.includes("WHATSAPP_GRAPH_API_VERSION") ||
     client.includes("v23.0") || client.includes("v24.0")) {
   failures.push("Versão da Graph API precisa ser configurável e não fixada.");
 }
+for (const token of [
+  "verifyWhatsAppPhoneNumber",
+  "registerWhatsAppPhoneNumber",
+  "subscribeWhatsAppBusinessAccount"
+]) {
+  if (!client.includes(token)) failures.push(`Provisionamento oficial ausente: ${token}`);
+}
 
 for (const variable of [
   "WHATSAPP_GRAPH_API_VERSION",
@@ -209,6 +250,8 @@ console.log(
       freeFormWindowHours: 24,
       directHistoryDeletion: false,
       monotonicDeliveryStatuses: true,
+      officialPhoneProvisioning: true,
+      operationalPersonas: ["P1", "P5"],
       unofficialWebSessionProvider: false
     },
     null,
