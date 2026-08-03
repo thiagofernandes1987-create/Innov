@@ -2,8 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
+const schemaMigration =
+  "supabase/migrations/20260803190000_stage22_whatsapp_omnichannel.sql";
+const hardeningMigration =
+  "supabase/migrations/20260803191000_stage22_whatsapp_hardening.sql";
 const requiredFiles = [
-  "supabase/migrations/20260803190000_stage22_whatsapp_omnichannel.sql",
+  schemaMigration,
+  hardeningMigration,
   "lib/whatsapp/domain.ts",
   "lib/whatsapp/client.ts",
   "lib/whatsapp/source-resolver.ts",
@@ -25,7 +30,8 @@ function read(file) {
   return fs.existsSync(full) ? fs.readFileSync(full, "utf8") : "";
 }
 
-const migration = read(requiredFiles[0]);
+const migration = read(schemaMigration);
+const hardening = read(hardeningMigration);
 const registry = read("lib/modules/registry.ts");
 const webhook = read("app/api/webhooks/whatsapp/route.ts");
 const resolver = read("lib/whatsapp/source-resolver.ts");
@@ -63,6 +69,24 @@ for (const token of [
 ]) {
   if (!migration.toLowerCase().includes(token.toLowerCase())) {
     failures.push(`Controle de banco ausente: ${token}`);
+  }
+}
+
+for (const token of [
+  "whatsapp_accounts_created_by_idx",
+  "whatsapp_conversations_created_by_idx",
+  "whatsapp_content_bindings_created_by_idx",
+  "whatsapp_messages_org_idx",
+  "whatsapp_messages_created_by_idx",
+  "whatsapp_webhook_events_account_idx",
+  "revoke delete on public.whatsapp_accounts",
+  "revoke delete on public.whatsapp_contacts",
+  "revoke delete on public.whatsapp_conversations",
+  "revoke delete on public.whatsapp_content_bindings",
+  "default_enabled=true"
+]) {
+  if (!hardening.toLowerCase().includes(token.toLowerCase())) {
+    failures.push(`Hardening ausente: ${token}`);
   }
 }
 
@@ -137,7 +161,8 @@ console.log(
       canonicalSources: 5,
       relations: 7,
       webhookSignature: "HMAC_SHA256",
-      freeFormWindowHours: 24
+      freeFormWindowHours: 24,
+      directHistoryDeletion: false
     },
     null,
     2
