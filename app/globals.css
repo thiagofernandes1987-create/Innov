@@ -3612,3 +3612,8 @@ tbody tr:hover { background: var(--surface-muted); }
 .disponibilizacao-tipo span { display: grid; gap: 1px; min-width: 0; }
 .disponibilizacao-tipo strong { font-size: 0.82rem; font-weight: 600; }
 .disponibilizacao-tipo small { color: var(--muted); font-size: 0.72rem; }
+
+.trazer-padroes { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.trazer-padroes-aviso { font-size: 0.8rem; }
+.trazer-padroes-aviso.ok { color: var(--text); }
+.trazer-padroes-aviso.erro { color: var(--danger, #b4453c); }

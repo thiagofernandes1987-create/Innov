@@ -2,6 +2,7 @@ import { EditorDeModelo } from "@/components/documentos/editor-de-modelo";
 import { requireCapability } from "@/lib/authorization";
 import { modelosDisponiveis } from "@/lib/documentos/biblioteca";
 import { ROTULO_CATEGORIA, TIPOS, categorias, tipo as tipoDoCatalogo } from "@/lib/documentos/tipos";
+import { TrazerPadroes } from "@/components/documentos/trazer-padroes";
 
 export const dynamic = "force-dynamic";
 
@@ -110,6 +111,7 @@ export default async function BibliotecaDeModelosPage({
           lembrete, e-mail. O tipo é como cada aplicativo organiza o que oferece — e quem decide o que
           aparece em cada um é a <strong>Administração</strong>, com os checks de disponibilização.
         </p>
+        <TrazerPadroes />
       </section>
       <EditorDeModelo
         tipo={tipoAtual}

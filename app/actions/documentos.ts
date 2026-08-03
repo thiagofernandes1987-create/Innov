@@ -237,6 +237,37 @@ export async function duplicarModelo(
 }
 
 /**
+ * Traz para a empresa os modelos padrão da plataforma que ela ainda não tem.
+ *
+ * A empresa nova já nasce com eles — o gatilho de `organizations` semeia no
+ * cadastro. Este botão existe para dois casos: a empresa criada antes de um
+ * padrão novo ser publicado, e a que quer o padrão de volta depois de arquivar
+ * a cópia. A função no banco é idempotente, então repetir não duplica.
+ */
+export async function trazerPadroesDaPlataforma(
+  anterior: { ok: boolean; mensagem: string },
+  formData: FormData
+): Promise<{ ok: boolean; mensagem: string }> {
+  // A assinatura é a de `useActionState`; nenhum dos dois é lido aqui, porque a
+  // ação não depende do que veio antes nem de campo de formulário.
+  void anterior;
+  void formData;
+  const context = await requireCapability(MODULO, "create");
+  const { data, error } = await context.supabase.rpc("semear_modelos_da_empresa", {
+    p_organization_id: context.organizationId
+  });
+  if (error) return { ok: false, mensagem: traduzirFalhaDoBanco(error) };
+  revalidatePath(ROTA);
+  const copiados = Number(data ?? 0);
+  return {
+    ok: true,
+    mensagem: copiados
+      ? `${copiados} modelo(s) padrão copiados para a sua empresa. As cópias são suas: editar não muda o padrão nem o de nenhuma outra empresa.`
+      : "Sua empresa já tem todos os modelos padrão da plataforma."
+  };
+}
+
+/**
  * Exclui rascunho nunca publicado; arquiva o resto.
  *
  * A política de `delete` exige `published_at is null`: modelo que gerou
@@ -300,9 +331,10 @@ export async function excluirModelo(
  * e cinco tipos quando o que ele faz ali são três.
  */
 export async function definirTiposDoAplicativo(
-  _anterior: { ok: boolean; mensagem: string },
+  anterior: { ok: boolean; mensagem: string },
   formData: FormData
 ): Promise<{ ok: boolean; mensagem: string }> {
+  void anterior;
   const moduleKey = texto(formData, "aplicativo");
   if (!moduleKey) return { ok: false, mensagem: "Aplicativo não informado." };
 
