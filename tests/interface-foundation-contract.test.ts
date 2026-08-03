@@ -147,8 +147,14 @@ describe("S-23 — fundação de interface", () => {
 
     expect(schedule).toContain('import { SchedulePlanner }');
     expect(schedule).toContain("dependencies=");
-    expect(planner).toContain("calculationDependencies");
-    expect(planner).toMatch(/\bcalcular\([\s\S]*calculationDependencies,[\s\S]*calendar\)/);
+
+    const callStart = planner.indexOf("const result = calcular(");
+    const callEnd = planner.indexOf("\n    );", callStart);
+    expect(callStart).toBeGreaterThan(-1);
+    expect(callEnd).toBeGreaterThan(callStart);
+    const calculationCall = planner.slice(callStart, callEnd);
+    expect(calculationCall).toContain("calculationDependencies,");
+    expect(calculationCall).toContain("calendar");
     expect(planner).toContain("dependencySvg");
   });
 
