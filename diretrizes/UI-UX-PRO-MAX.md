@@ -68,25 +68,43 @@ estiver escrito aqui cede a ele em caso de divergência.
 Assinatura verbal: **"Um novo jeito de construir!"** Essência declarada:
 solidez, sofisticação, inovação e confiança.
 
+### Onde a marca aparece, e como
+
+**Símbolo sozinho, sem o nome ao lado, em toda tela do aplicativo.** Decisão do
+responsável em 3 de agosto: *"quero construir minha identidade, precisam olhar o
+logo e identificar a marca"*.
+
+A regra tem razão de ser e não é estética: **símbolo acompanhado do nome escrito
+nunca é aprendido.** Quem lê a palavra não precisa reconhecer a forma, e é a
+forma que se quer que fique. O nome por extenso aparece uma vez, no login.
+
+**Lockup horizontal — símbolo, nome e assinatura — só na tela de login.** É a
+primeira tela, e é onde o nome tem função: dizer de quem é a plataforma para
+quem ainda não sabe.
+
+O nome sai da tela, **não da acessibilidade**. O link do símbolo continua com
+`aria-label`, e é isso que o leitor de tela anuncia; o lockup do login tem `alt`
+com o nome e a assinatura. Símbolo sozinho sem rótulo é um botão mudo.
+
 Arquivos em `public/marca/`:
 
 ```text
-innovar-icone.png          claro: quadrado marinho, iN em off-white, cantos transparentes
-innovar-icone-escuro.png   escuro: só o iN em bronze, sem quadrado
-innovar-icone-grande.png   o mesmo símbolo em resolução maior
-innovar-horizontal.png     lockup completo com assinatura, para documento e e-mail
+innovar-icone-branco.png        símbolo branco — o da casca, sobre o azul-marinho
+innovar-icone.png               símbolo marinho sobre papel — portal e favicon
+innovar-icone-escuro.png        símbolo em bronze, para fundo escuro sem barra
+innovar-horizontal.png          lockup, nome em marinho — login no tema claro
+innovar-horizontal-escuro.png   lockup, nome em branco — login no tema escuro
+innovar-icone-grande.png        símbolo em resolução maior
 ```
 
-**Duas variantes, e o motivo é físico.** No tema escuro o quadrado marinho do
-símbolo encosta no fundo e desaparece — sobra um retângulo vazio onde deveria
-estar a marca. A variante escura larga o quadrado e fica só com o **iN em
-bronze** `#C59A5B`, que é cor da própria marca: 6,3:1 sobre o azul-marinho da
-barra. Foi escolha do responsável entre cinza e dourado, em 3 de agosto.
+O símbolo da casca é **um arquivo só**: branco serve nos dois temas, porque a
+barra é azul-marinho nos dois. Quem troca com o tema é o lockup do login, e a
+troca é por `display: none`, nunca por opacidade — o que está escondido não deve
+ocupar espaço nem ser lido.
 
-A troca é por `display: none`, nunca por opacidade: o que está escondido não
-deve ocupar espaço nem ser lido. O componente `MarcaInnovar` carrega as duas e
-serve barra, login e portal do cliente — cópia solta de `<Image>` em cada
-superfície seria uma chance a mais de alguém apontar para o arquivo errado.
+Os arquivos foram separados do papel do manual por distância de cor: cada pixel
+vira a tinta mais próxima com alfa proporcional à distância até o fundo. É o que
+preserva a suavização das letras sem deixar halo do off-white.
 
 **O símbolo é imagem, não letra.** Até 3 de agosto a barra desenhava as letras
 "IN" em cobre sobre o azul-marinho: 2,87:1, e era a **única reprovação de

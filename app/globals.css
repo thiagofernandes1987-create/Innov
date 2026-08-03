@@ -1284,8 +1284,10 @@ tbody tr:hover { background: #fafcfd; }
 .barra-logo:hover { background: rgba(255, 255, 255, 0.09); }
 .barra-logo:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .barra-logo-marca {
-  width: 34px;
-  height: 34px;
+  /* Sozinho na barra, o símbolo é o único portador da marca: ganha os poucos
+     pixels que o nome ao lado ocupava. */
+  width: 38px;
+  height: 38px;
   border-radius: 9px;
   object-fit: contain;
 }
@@ -1293,15 +1295,7 @@ tbody tr:hover { background: #fafcfd; }
 /* A barra é azul-marinho nos dois temas, mas o **entorno** muda; e no escuro o
    quadrado marinho do símbolo encosta no fundo e some. A variante escura é só
    o iN em bronze, sem quadrado. */
-.barra-logo-marca.escura { display: none; }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-tema="claro"]) .barra-logo-marca.clara { display: none; }
-  :root:not([data-tema="claro"]) .barra-logo-marca.escura { display: block; }
-}
-:root[data-tema="escuro"] .barra-logo-marca.clara { display: none; }
-:root[data-tema="escuro"] .barra-logo-marca.escura { display: block; }
-:root[data-tema="claro"] .barra-logo-marca.clara { display: block; }
-:root[data-tema="claro"] .barra-logo-marca.escura { display: none; }
+
 
 .barra-modulo {
   display: inline-flex;
@@ -2380,21 +2374,11 @@ tbody tr:hover { background: #fafcfd; }
   height: 34px;
   border-radius: 9px;
   object-fit: contain;
-  /* No claro, o quadrado marinho do símbolo encosta na barra marinho. O
-     off-white da marca entra por trás para separar os dois — é a mesma
-     aplicação do manual, símbolo sobre papel. A variante escura não precisa:
-     lá o símbolo é o iN em bronze, sem quadrado. */
-  background: var(--paper-brand, #f6f4f1);
-  padding: 2px;
+  /* Sem placa por trás: o símbolo é branco e a barra é azul-marinho nos dois
+     temas, então ele já se destaca sozinho. */
+  background: transparent;
 }
-.barra-logo-marca.escura { background: transparent; padding: 0; }
 
-.barra-logo-nome {
-  color: #fff;
-  font-size: 14px;
-  font-weight: 760;
-  letter-spacing: 0.13em;
-}
 
 .barra-organizacao {
   min-width: 192px;
@@ -2952,8 +2936,7 @@ tbody tr:hover { background: #fafcfd; }
 }
 
 @media (max-width: 680px) {
-  .barra-logo-nome { display: none; }
-  .pagina-launcher { padding: 20px 16px 36px; }
+    .pagina-launcher { padding: 20px 16px 36px; }
   .launcher-grade { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .launcher-app { min-height: 238px; padding: 14px; }
   .launcher-app-icone { width: 46px; height: 46px; }
@@ -3633,17 +3616,18 @@ tbody tr:hover { background: var(--surface-muted); }
 .trazer-padroes-aviso.erro { color: var(--danger, #b4453c); }
 
 
-/* Marca da Innovar. Uma variante por tema; a que não vale sai por
-   `display: none`, não por opacidade — o que está escondido não deve ocupar
-   espaço nem ser lido. */
-.marca-innovar { display: inline-grid; place-items: center; }
-.marca-innovar img { width: 100%; height: 100%; object-fit: contain; }
-.marca-innovar-escura { display: none; }
+/* Marca da Innovar. O símbolo é um arquivo só — branco sobre a casca escura,
+   marinho sobre papel. Quem troca com o tema é o lockup do login. */
+.marca-innovar { object-fit: contain; }
+
+.lockup-innovar { display: inline-block; max-width: 100%; }
+.lockup-innovar img { width: 100%; height: auto; }
+.lockup-innovar-escuro { display: none; }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-tema="claro"]) .marca-innovar-clara { display: none; }
-  :root:not([data-tema="claro"]) .marca-innovar-escura { display: block; }
+  :root:not([data-tema="claro"]) .lockup-innovar-claro { display: none; }
+  :root:not([data-tema="claro"]) .lockup-innovar-escuro { display: block; }
 }
-:root[data-tema="escuro"] .marca-innovar-clara { display: none; }
-:root[data-tema="escuro"] .marca-innovar-escura { display: block; }
-:root[data-tema="claro"] .marca-innovar-clara { display: block; }
-:root[data-tema="claro"] .marca-innovar-escura { display: none; }
+:root[data-tema="escuro"] .lockup-innovar-claro { display: none; }
+:root[data-tema="escuro"] .lockup-innovar-escuro { display: block; }
+:root[data-tema="claro"] .lockup-innovar-claro { display: block; }
+:root[data-tema="claro"] .lockup-innovar-escuro { display: none; }

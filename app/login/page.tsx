@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { signIn } from "@/app/actions/auth";
-import { MarcaInnovar } from "@/components/casca/marca";
+import { LockupInnovar } from "@/components/casca/marca";
 
 export const metadata: Metadata = { title: "Entrar" };
 
@@ -14,13 +14,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="login-title">
-        <div className="brand" style={{ color: "var(--text)" }}>
-          <MarcaInnovar className="brand-mark" />
-          <div>
-            <strong>INNOVAR</strong>
-            <small style={{ color: "var(--muted)" }}>Portal seguro</small>
-          </div>
-        </div>
+        {/* A única tela onde a marca aparece por extenso. É a primeira coisa
+            que se vê ao entrar, e é onde o nome e a assinatura têm função:
+            dizer de quem é a plataforma para quem ainda não sabe. */}
+        <LockupInnovar />
         <h1 id="login-title" style={{ fontSize: 34 }}>Acessar plataforma</h1>
         <p className="muted">Entre para acessar orçamentos, propostas, contratos e assinaturas.</p>
         {params.error ? (
