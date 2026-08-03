@@ -458,7 +458,21 @@ h3 { margin: 0; font-size: 19px; line-height: 1.25; }
 .module-card h3 { margin-top: 22px; }
 .module-card p { margin: 8px 0 22px; color: var(--muted); font-size: 14px; flex: 1; }
 .module-card-footer { min-height: 30px; padding-top: 13px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.text-link { color: var(--brand-strong); font-size: 13px; font-weight: 820; }
+/* `.text-link` é o "abrir/detalhar" que fecha um cartão — alvo de verdade, não
+   link em meio a frase, e a isenção da WCAG 2.5.5 não vale para ele. Media 40px
+   pela altura da linha; a altura passa a ser declarada. Continua em linha, para
+   não virar botão onde o desenho pede link. */
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--brand-strong);
+  font-size: 13px;
+  font-weight: 820;
+}
+/* Dentro de célula de tabela, a altura mínima infla toda a linha sem necessidade:
+   ali o alvo cresce pelo espaçamento da própria célula. */
+td > .text-link, th > .text-link { min-height: 0; padding-block: 12px; }
 .module-arrow { color: var(--copper-strong); font-size: 18px; transition: transform var(--transition-fast); }
 .module-card:hover .module-arrow { transform: translateX(3px); }
 /* Branco fixo: no tema escuro o estado vazio virava um retângulo claro com
