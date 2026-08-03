@@ -6,6 +6,7 @@ const cards = [
   ["Perfis", "/app/administracao/perfis", "Criar perfis e definir níveis por aplicativo."],
   ["Usuários", "/app/administracao/usuarios", "Atribuir perfis, escopos e exceções individuais."],
   ["Responsabilidades", "/app/administracao/responsabilidades", "Definir quem exerce cada profissão e recebe exceções por obra."],
+  ["Vocabulário", "/app/administracao/vocabulario", "Revisar as sugestões de preenchimento que a empresa acumulou pelo uso."],
   ["Auditoria", "/app/auditoria", "Consultar alterações administrativas e eventos de segurança."]
 ] as const;
 

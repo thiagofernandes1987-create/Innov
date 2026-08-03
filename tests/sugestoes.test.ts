@@ -5,8 +5,10 @@ import {
   mesmoValor,
   ordenarSugestoes,
   pontuacao,
+  situacaoDoValor,
   type ValorDoCatalogo
 } from "../lib/sugestoes/catalogo";
+import { ESCOPOS_DESCRITOS, descreverEscopo } from "../lib/sugestoes/escopos";
 
 const AGORA = new Date("2026-08-03T12:00:00Z");
 const diasAtras = (n: number) => new Date(AGORA.getTime() - n * 86_400_000).toISOString();
@@ -123,5 +125,53 @@ describe("o que entra na lista", () => {
 
   it("catálogo vazio não quebra", () => {
     expect(ordenarSugestoes([], { agora: AGORA })).toEqual([]);
+  });
+});
+
+describe("situação de um valor — o que a administração precisa distinguir", () => {
+  it("valor sugerido e valor já oculto por desuso são grupos diferentes", () => {
+    // Sem essa separação, a tela pediria ao administrador que removesse à mão
+    // o que o próprio corte já esconde.
+    expect(situacaoDoValor(valor("Fundação", 12, 10), AGORA)).toBe("sugerido");
+    expect(situacaoDoValor(valor("Fundacao", 1, 200), AGORA)).toBe("oculto_por_desuso");
+  });
+
+  it("a situação concorda com o que a lista de sugestão realmente mostra", () => {
+    // Duas regras que divergem seriam pior que uma só: a tela diria "sugerido"
+    // sobre um valor que a lista não oferece.
+    const catalogo = [
+      valor("Fundação", 12, 10),
+      valor("Fundacao", 1, 200),
+      valor("Fachada ventilada", 1, 5),
+      valor("Impermeabilização", 9, 300)
+    ];
+    const oferecidos = new Set(ordenarSugestoes(catalogo, { agora: AGORA }).map(v => v.rotulo));
+    for (const v of catalogo) {
+      expect(situacaoDoValor(v, AGORA) === "sugerido").toBe(oferecidos.has(v.rotulo));
+    }
+  });
+});
+
+describe("descrição de escopo", () => {
+  it("todo escopo em uso tem nome próprio, não a chave técnica", () => {
+    for (const escopo of ESCOPOS_DESCRITOS) {
+      expect(escopo.nome).not.toBe(escopo.chave);
+      expect(escopo.origem.length).toBeGreaterThan(10);
+    }
+  });
+
+  it("escopo desconhecido não some da tela — vem descrito como tal", () => {
+    // Escopo gravado por versão anterior do código continua no banco. Devolver
+    // `undefined` esconderia valores que existem, e vocabulário invisível é o
+    // que o administrador não consegue limpar.
+    const orfao = descreverEscopo("legado.qualquer");
+    expect(orfao.chave).toBe("legado.qualquer");
+    expect(orfao.emUso).toBe(false);
+    expect(orfao.origem).toMatch(/versão anterior/);
+  });
+
+  it("nenhuma chave de escopo se repete", () => {
+    const chaves = ESCOPOS_DESCRITOS.map(e => e.chave);
+    expect(new Set(chaves).size).toBe(chaves.length);
   });
 });

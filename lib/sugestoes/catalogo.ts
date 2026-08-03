@@ -87,6 +87,20 @@ function ehEngano(valor: ValorDoCatalogo, agora: Date): boolean {
   return valor.usos <= 1 && diasDesde(valor.ultimoUso, agora) > IDADE_DO_ENGANO_EM_DIAS;
 }
 
+export type SituacaoDoValor = "sugerido" | "oculto_por_desuso";
+
+/**
+ * Por que este valor aparece — ou não — na sugestão.
+ *
+ * A tela de administração precisa disto para não pedir trabalho à toa. Um
+ * valor que o próprio corte já esconde não precisa ser removido à mão, e
+ * mostrar os dois grupos misturados faria o administrador limpar o que já
+ * estava resolvido.
+ */
+export function situacaoDoValor(valor: ValorDoCatalogo, agora: Date = new Date()): SituacaoDoValor {
+  return ehEngano(valor, agora) ? "oculto_por_desuso" : "sugerido";
+}
+
 /**
  * A lista que a tela mostra: filtrada pelo que se digitou, sem enganos antigos,
  * ordenada por frequência recente e cortada em oito.

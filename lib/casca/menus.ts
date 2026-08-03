@@ -110,7 +110,8 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
   administracao: [
     { rotulo: "Usuários", href: "/app/administracao/usuarios" },
     { rotulo: "Perfis", href: "/app/administracao/perfis" },
-    { rotulo: "Aplicativos", href: "/app/administracao/aplicativos" }
+    { rotulo: "Aplicativos", href: "/app/administracao/aplicativos" },
+    { rotulo: "Vocabulário", href: "/app/administracao/vocabulario" }
   ],
   orcamentos: [
     { rotulo: "Carteira", href: "/app/orcamentos" },

@@ -1070,7 +1070,7 @@ reconstruir o que funciona:
   - [x] T-32.0.1 — Ordenar por frequência recente e cortar em 8; digitar filtra. Sugestão com 300 valores é ruído — `lib/sugestoes/catalogo.ts` com decaimento de meia-vida 90 dias; 18 testes em `tests/sugestoes.test.ts`; verificado no navegador (`verif28.mjs`, passo 4: digitar filtrou de 2 para 1)
   - [x] T-32.0.2 — Valor usado uma vez só há mais de 6 meses sai da lista: erro de digitação antigo não vira sugestão para sempre — regra em `ordenarSugestoes`, com teste do caso simétrico (usado várias vezes há muito tempo permanece: é vocabulário sazonal, não erro)
   - [x] T-32.0.3 — **Sugestão nunca é lista fechada.** É campo de texto com apoio, e valor novo sempre passa — `components/comum/campo-com-sugestao.tsx`, ligado à EAP e às atividades do cronograma; verificado no navegador: valor inédito gravou (passo 2) e voltou como sugestão no uso seguinte (passo 3)
-  - [ ] T-32.0.4 — Limpar o catálogo é ação de administrador, porque o catálogo é da organização
+  - [x] T-32.0.4 — Limpar o catálogo é ação de administrador, porque o catálogo é da organização — `/app/administracao/vocabulario` com `requireCapability("administracao","manage")` na tela e `has_module_permission(…,'administracao','DELETE')` na função do banco. Teste negativo executado contra a API: limpar catálogo de outra organização recusa (`P0001`), gravar em outra organização recusa, sem autenticação recusa no `grant` (`42501`), e na própria organização devolve 204. Verificado no navegador que remover tira da tela **e** da sugestão do cronograma
 - [ ] T-32.1 — **Modelo de EAP**: sugerir o conjunto, não só a palavra. Quem cria "Fundação" pela terceira vez com as mesmas cinco atividades embaixo deveria poder trazer as cinco. É o "modelo de projeto" que o atlas mostra em 3 das 46 telas do capítulo Projetos
 - [~] T-32.2 — **Motor de documento por modelo**, um só para proposta, orçamento, contrato, laudo e ordem de serviço — corpo, variáveis e pré-visualização em 2 de agosto; **gravar, publicar, arquivar e importar em 3 de agosto**. Falta o dicionário sair de registro real sob RLS (T-32.2.5) e o documento emitido guardar o texto resolvido (T-32.2.7)
   - [x] T-32.2.1 — Corpo em **Markdown**, não editor proprietário: versiona em diff legível, converte para PDF e DOCX e sobrevive à plataforma. O editor é visual, o que grava é Markdown
@@ -1153,6 +1153,8 @@ R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
 - [x] T-33.9 — Ramo de PGRST200 no validador de embeds, com leitor de `select` sensível à profundidade da árvore e universo de tabelas vindo dos `create table`. A versão achatada acusou 22 embeds válidos e escondeu cinco ambíguos reais — contratos, propostas, orçamentos, qualidade e assinaturas, todos corrigidos
 - [x] T-33.10 — `--muted`, `--warning` e o `--brand` do tema escuro abaixo de 4,5:1 sobre as próprias superfícies; estado vazio e link de voltar com fundo e alvo fixos. Onze rotas fecham em 0/0 de contraste nos dois temas e 0 alvo abaixo de 44px
 - [ ] T-33.11 — Duas paletas de tema escuro convivem em `app/globals.css`: a antiga (superfícies `#161b25`, linhas 68–118) está morta, vencida pela nova (`#102238`). Editar a errada não produz efeito nenhum — unificar
+
+- [ ] T-33.12 — Tabela em tela estreita: as 20 telas do produto rolam na horizontal dentro de `.table-wrap`, sem indicar que há coluna fora de vista. Em 390px a coluna de ação some. Decidir um padrão único para o produto — cartão por linha, coluna prioritária ou indicação de rolagem — em vez de resolver tela a tela
 
 ---
 
