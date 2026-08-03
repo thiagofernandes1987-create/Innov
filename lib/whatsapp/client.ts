@@ -2,14 +2,17 @@ import "server-only";
 
 import { WhatsAppDomainError } from "@/lib/whatsapp/domain";
 
+type ProviderError = {
+  code?: number;
+  message?: string;
+  error_subcode?: number;
+  type?: string;
+};
+
 type ProviderResponse = {
   messages?: Array<{ id?: string }>;
-  error?: {
-    code?: number;
-    message?: string;
-    error_subcode?: number;
-    type?: string;
-  };
+  success?: boolean;
+  error?: ProviderError;
 };
 
 type TemplateRequest = {
@@ -18,6 +21,13 @@ type TemplateRequest = {
   name: string;
   languageCode: string;
   parameters: string[];
+};
+
+export type WhatsAppPhoneInfo = {
+  id: string;
+  display_phone_number: string;
+  verified_name?: string;
+  quality_rating?: string;
 };
 
 function configuration() {
@@ -38,48 +48,50 @@ function configuration() {
   return { version, token };
 }
 
-async function send(phoneNumberId: string, payload: Record<string, unknown>) {
+async function requestMeta<T>(
+  resource: string,
+  init: RequestInit,
+  event: string
+): Promise<{ data: T; error: ProviderError | null }> {
   const { version, token } = configuration();
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 20_000);
 
   try {
     const response = await fetch(
-      `https://graph.facebook.com/${version}/${encodeURIComponent(phoneNumberId)}/messages`,
+      `https://graph.facebook.com/${version}/${resource.replace(/^\/+/, "")}`,
       {
-        method: "POST",
+        ...init,
         headers: {
           authorization: `Bearer ${token}`,
-          "content-type": "application/json"
+          ...(init.body ? { "content-type": "application/json" } : {}),
+          ...init.headers
         },
-        body: JSON.stringify(payload),
         cache: "no-store",
         signal: controller.signal
       }
     );
-    const result = (await response.json().catch(() => ({}))) as ProviderResponse;
-    const providerMessageId = result.messages?.[0]?.id;
-    if (!response.ok || !providerMessageId) {
-      const code = String(result.error?.code ?? response.status);
+    const result = (await response.json().catch(() => ({}))) as T & {
+      error?: ProviderError;
+    };
+    if (!response.ok) {
+      const providerError = result.error ?? null;
       console.error(
         JSON.stringify({
-          event: "whatsapp.provider.send_failed",
-          code,
-          subcode: result.error?.error_subcode ?? null,
-          type: result.error?.type ?? null
+          event,
+          code: String(providerError?.code ?? response.status),
+          subcode: providerError?.error_subcode ?? null,
+          type: providerError?.type ?? null
         })
       );
-      throw new WhatsAppDomainError(
-        "PROVIDER_ERROR",
-        "O WhatsApp não aceitou a mensagem. Verifique a configuração e tente novamente."
-      );
+      return { data: result, error: providerError ?? { code: response.status } };
     }
-    return providerMessageId;
+    return { data: result, error: null };
   } catch (error) {
     if (error instanceof WhatsAppDomainError) throw error;
     console.error(
       JSON.stringify({
-        event: "whatsapp.provider.unavailable",
+        event: `${event}.unavailable`,
         reason: error instanceof Error ? error.name : "UNKNOWN"
       })
     );
@@ -89,6 +101,74 @@ async function send(phoneNumberId: string, payload: Record<string, unknown>) {
     );
   } finally {
     clearTimeout(timeout);
+  }
+}
+
+async function send(phoneNumberId: string, payload: Record<string, unknown>) {
+  const result = await requestMeta<ProviderResponse>(
+    `${encodeURIComponent(phoneNumberId)}/messages`,
+    { method: "POST", body: JSON.stringify(payload) },
+    "whatsapp.provider.send_failed"
+  );
+  const providerMessageId = result.data.messages?.[0]?.id;
+  if (result.error || !providerMessageId) {
+    throw new WhatsAppDomainError(
+      "PROVIDER_ERROR",
+      "O WhatsApp não aceitou a mensagem. Verifique a configuração e tente novamente."
+    );
+  }
+  return providerMessageId;
+}
+
+export async function verifyWhatsAppPhoneNumber(phoneNumberId: string) {
+  const fields = "id,display_phone_number,verified_name,quality_rating";
+  const result = await requestMeta<WhatsAppPhoneInfo>(
+    `${encodeURIComponent(phoneNumberId)}?fields=${encodeURIComponent(fields)}`,
+    { method: "GET" },
+    "whatsapp.provider.verify_phone_failed"
+  );
+  if (result.error || !result.data.id) {
+    throw new WhatsAppDomainError(
+      "PROVIDER_ERROR",
+      "O número não pôde ser validado na Meta."
+    );
+  }
+  return result.data;
+}
+
+export async function registerWhatsAppPhoneNumber(input: {
+  phoneNumberId: string;
+  pin: string;
+}) {
+  const result = await requestMeta<ProviderResponse>(
+    `${encodeURIComponent(input.phoneNumberId)}/register`,
+    {
+      method: "POST",
+      body: JSON.stringify({ messaging_product: "whatsapp", pin: input.pin })
+    },
+    "whatsapp.provider.register_phone_failed"
+  );
+  if (!result.error) return { alreadyRegistered: false };
+  if (/already.*registered/i.test(String(result.error.message ?? ""))) {
+    return { alreadyRegistered: true };
+  }
+  throw new WhatsAppDomainError(
+    "PROVIDER_ERROR",
+    "O número foi validado, mas não pôde ser registrado para receber mensagens."
+  );
+}
+
+export async function subscribeWhatsAppBusinessAccount(wabaId: string) {
+  const result = await requestMeta<ProviderResponse>(
+    `${encodeURIComponent(wabaId)}/subscribed_apps`,
+    { method: "POST" },
+    "whatsapp.provider.subscribe_waba_failed"
+  );
+  if (result.error) {
+    throw new WhatsAppDomainError(
+      "PROVIDER_ERROR",
+      "A conta empresarial não pôde ser vinculada ao aplicativo da Meta."
+    );
   }
 }
 
