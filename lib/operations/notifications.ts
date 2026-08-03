@@ -1,7 +1,7 @@
 import {
   PERSONAS_OPERACIONAIS,
   type PersonaId
-} from "@/lib/personas/catalog";
+} from "@/lib/personas/runtime";
 
 export type OperationalScenario = "optimistic" | "normal" | "pessimistic";
 export type OperationalObjectType =
