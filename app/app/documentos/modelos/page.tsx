@@ -45,7 +45,22 @@ export default async function ModelosDeDocumentoPage() {
           escolhidas na lista, e a pré-visualização usa um registro de exemplo.
         </p>
       </section>
-      <EditorDeModelo funcao="PROPOSTA" corpoInicial={EXEMPLO} />
+      <EditorDeModelo
+        funcao="PROPOSTA"
+        corpoInicial={EXEMPLO}
+        nomeArquivo="proposta-comercial.md"
+        arquivos={[
+          { pasta: "Modelos", itens: [
+            { nome: "proposta-comercial.md", tipo: "md" },
+            { nome: "contrato-padrao.md", tipo: "md" },
+            { nome: "fvs-alvenaria.md", tipo: "md" }
+          ] },
+          { pasta: "Mensagens", itens: [
+            { nome: "cobranca.md", tipo: "md" },
+            { nome: "agendamento-medicao.md", tipo: "md" }
+          ] }
+        ]}
+      />
     </main>
   );
 }
