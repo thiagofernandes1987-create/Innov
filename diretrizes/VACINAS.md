@@ -143,6 +143,8 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-042` | Falha de formulário apaga preenchimento, mistura dependências e pode deixar o autor sem acesso | vigente | `useActionState`, erros por campo, dependências separadas, membership e papel preservado |
 | `VACINA-043` | Cor amostrada da referência escura vira texto invisível no tema claro | aplicada | token no lugar do hex em superfície que muda, e auditoria de contraste medida nos dois temas |
 | `VACINA-044` | Grade de faixa única sem `minmax(0, …)` não encolhe e a página rola de lado | aplicada | faixa declarada como `minmax(0, 1fr)`, tabela com rolagem própria e verificação de transbordo nos três breakpoints |
+| `VACINA-045` | Numeração de linha contada por `\n` erra assim que a linha quebra sozinha | aplicada | numeração por espelho, com fonte, largura de conteúdo e rolagem compartilhadas com o campo |
+| `VACINA-046` | Medidor de alvo de toque reprova a caixa de marcar em vez de medir o rótulo que responde ao toque | aplicada | o medidor resolve a associação de rótulo antes de reprovar, e a correção é verificada nos dois sentidos |
 
 ## 4. Arquivos
 
@@ -191,7 +193,9 @@ diretrizes/vacinas/
 ├── VACINA-041-ALCADA-NAO-E-SOMENTE-CAMPO.md
 ├── VACINA-042-FALHA-DE-FORMULARIO-NAO-APAGA-CONTEXTO.md
 ├── VACINA-043-COR-AMOSTRADA-DA-REFERENCIA-ESCURA.md
-└── VACINA-044-GRADE-DE-FAIXA-UNICA-NAO-ENCOLHE.md
+├── VACINA-044-GRADE-DE-FAIXA-UNICA-NAO-ENCOLHE.md
+├── VACINA-045-NUMERO-DE-LINHA-ACOMPANHA-A-LINHA-QUE-QUEBRA.md
+└── VACINA-046-ALVO-DE-TOQUE-E-O-ROTULO-NAO-A-CAIXA.md
 ```
 
 ## 5. Critérios para nova vacina

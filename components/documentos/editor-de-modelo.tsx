@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ROTULO_ESCOPO,
   dicionarioDeExemplo,
@@ -70,8 +70,30 @@ export function EditorDeModelo({
   const [tamanho, setTamanho] = useState(14);
   const [salvo, setSalvo] = useState(false);
   const [congelado, setCongelado] = useState(corpoInicial);
+  const [listaAberta, setListaAberta] = useState(false);
+  const [filtro, setFiltro] = useState("");
 
   const area = useRef<HTMLTextAreaElement>(null);
+  const espelho = useRef<HTMLDivElement>(null);
+
+  // A lista fecha no Escape e no clique fora, como todo menu suspenso.
+  useEffect(() => {
+    if (!listaAberta) return;
+    function fechar(evento: MouseEvent | KeyboardEvent) {
+      if (evento instanceof KeyboardEvent) {
+        if (evento.key === "Escape") setListaAberta(false);
+        return;
+      }
+      const alvo = evento.target as Node;
+      if (!(alvo instanceof Element) || !alvo.closest(".editor-inserir")) setListaAberta(false);
+    }
+    document.addEventListener("mousedown", fechar);
+    document.addEventListener("keydown", fechar);
+    return () => {
+      document.removeEventListener("mousedown", fechar);
+      document.removeEventListener("keydown", fechar);
+    };
+  }, [listaAberta]);
   const disponiveis = useMemo(() => variaveisDaFuncao(funcao), [funcao]);
   const exemplo = useMemo(() => dicionarioDeExemplo(funcao), [funcao]);
 
@@ -233,6 +255,65 @@ export function EditorDeModelo({
           <button type="button" title="Link (Ctrl+K)" onClick={acao((t, s) => inserirLink(t, s))}>🔗</button>
           <button type="button" title="Tabela" onClick={acao((t, s) => inserirTabela(t, s))}>▦</button>
         </span>
+        {/* Variáveis como botão que desce lista, na barra superior — não como
+            painel fixo na lateral. O painel fixo rouba largura permanente do
+            editor e da prévia para uma ação que é ocasional; a lista suspensa
+            aparece quando se precisa e some depois. */}
+        <span className="editor-grupo editor-inserir">
+          <button
+            type="button"
+            className="editor-inserir-botao"
+            aria-haspopup="menu"
+            aria-expanded={listaAberta}
+            onClick={() => setListaAberta(v => !v)}
+          >
+            Variáveis <span aria-hidden="true">▾</span>
+          </button>
+          {listaAberta ? (
+            <div className="editor-inserir-lista" role="menu">
+              <input
+                className="editor-inserir-busca"
+                value={filtro}
+                onChange={e => setFiltro(e.target.value)}
+                placeholder="Buscar variável…"
+                aria-label="Buscar variável"
+                autoFocus
+              />
+              <div className="editor-inserir-rolagem">
+                {porEscopo.map(([escopo, itens]) => {
+                  const visiveis = itens.filter(v =>
+                    !filtro ||
+                    v.rotulo.toLowerCase().includes(filtro.toLowerCase()) ||
+                    v.nome.includes(filtro.toLowerCase())
+                  );
+                  if (visiveis.length === 0) return null;
+                  return (
+                    <div key={escopo}>
+                      <h3>{ROTULO_ESCOPO[escopo as keyof typeof ROTULO_ESCOPO] ?? escopo}</h3>
+                      {visiveis.map(v => (
+                        <button
+                          key={v.nome}
+                          type="button"
+                          role="menuitem"
+                          className="editor-variavel"
+                          title={`{{${v.nome}}}`}
+                          onClick={() => {
+                            aplicar(inserir(corpo, selecao, `{{${v.nome}}}`));
+                            setListaAberta(false);
+                            setFiltro("");
+                          }}
+                        >
+                          <span>{v.rotulo}</span>
+                          <small>{v.exemplo}</small>
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+        </span>
       </div>
 
       <div className={`editor-corpo${mostrarExplorador ? " com-explorador" : ""}${mostrarPrevia ? " com-previa" : ""}`}>
@@ -275,14 +356,34 @@ export function EditorDeModelo({
               Tempo real
             </label>
           </div>
+          {/* Numeração por espelho: cada linha lógica é repetida invisível, com a
+              mesma fonte e a mesma largura do textarea, para que o número fique na
+              altura certa mesmo quando a linha quebra sozinha. Numerar por
+              contagem de "\n" erra assim que uma linha ocupa duas alturas — e no
+              editor de 1366px quase todo parágrafo ocupa. */}
           <div className="editor-area">
-            <pre className="editor-linhas" aria-hidden="true">
-              {corpo.split("\n").map((_, i) => `${i + 1}\n`).join("")}
-            </pre>
+            <div
+              className="editor-espelho"
+              ref={espelho}
+              aria-hidden="true"
+              style={{ fontFamily: fonte, fontSize: `${tamanho}px` }}
+            >
+              {corpo.split("\n").map((linha, i) => (
+                <p key={i}>
+                  <b>{i + 1}</b>
+                  {linha || "​"}
+                </p>
+              ))}
+            </div>
             <textarea
               ref={area}
               className="editor-texto"
               style={{ fontFamily: fonte, fontSize: `${tamanho}px` }}
+              onScroll={e => {
+                // O espelho está por baixo: sem acompanhar a rolagem, o número
+                // fica parado enquanto o texto anda.
+                if (espelho.current) espelho.current.scrollTop = e.currentTarget.scrollTop;
+              }}
               value={corpo}
               spellCheck
               aria-label="Corpo do documento em Markdown"
@@ -330,28 +431,6 @@ export function EditorDeModelo({
           </section>
         ) : null}
 
-        <aside className="editor-variaveis">
-          <header><strong>Inserir variável</strong></header>
-          <div className="editor-variaveis-lista">
-            {porEscopo.map(([escopo, itens]) => (
-              <div key={escopo}>
-                <h3>{ROTULO_ESCOPO[escopo as keyof typeof ROTULO_ESCOPO] ?? escopo}</h3>
-                {itens.map(v => (
-                  <button
-                    key={v.nome}
-                    type="button"
-                    className="editor-variavel"
-                    title={`{{${v.nome}}}`}
-                    onClick={acao((t, s) => inserir(t, s, `{{${v.nome}}}`))}
-                  >
-                    <span>{v.rotulo}</span>
-                    <small>{v.exemplo}</small>
-                  </button>
-                ))}
-              </div>
-            ))}
-          </div>
-        </aside>
       </div>
 
       <footer className="editor-status">

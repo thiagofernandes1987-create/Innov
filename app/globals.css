@@ -3487,31 +3487,45 @@ tbody tr:hover { background: var(--surface-muted); }
 .editor-ferramentas button:hover { border-color: var(--border); background: var(--surface-muted); }
 .editor-ferramentas select { min-height: 44px; padding: 0 8px; border: 1px solid var(--border); border-radius: 7px; background: var(--paper); color: var(--text); font-size: 0.8rem; }
 
-.editor-corpo { display: grid; grid-template-columns: minmax(0, 1fr) 250px; min-height: 520px; }
-.editor-corpo.com-explorador { grid-template-columns: 230px minmax(0, 1fr) 250px; }
-.editor-corpo.com-previa { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 250px; }
-.editor-corpo.com-explorador.com-previa { grid-template-columns: 230px minmax(0, 1fr) minmax(0, 1fr) 250px; }
+/* Três regiões, e só três: explorador ⟷ editor ⟷ pré-visualização. É o que o
+   layout entregue mostra; qualquer quarta coluna rouba largura permanente de
+   quem escreve para uma ação ocasional. */
+.editor-corpo { display: grid; grid-template-columns: minmax(0, 1fr); min-height: 520px; }
+.editor-corpo.com-explorador { grid-template-columns: 230px minmax(0, 1fr); }
+.editor-corpo.com-previa { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+.editor-corpo.com-explorador.com-previa { grid-template-columns: 230px minmax(0, 1fr) minmax(0, 1fr); }
 @media (max-width: 1280px) { .editor-corpo, .editor-corpo.com-explorador, .editor-corpo.com-previa, .editor-corpo.com-explorador.com-previa { grid-template-columns: minmax(0, 1fr); } }
 
-.editor-explorador, .editor-previa, .editor-variaveis { border-right: 1px solid var(--border); min-width: 0; display: flex; flex-direction: column; }
-.editor-variaveis { border-right: 0; border-left: 1px solid var(--border); }
-.editor-explorador > header, .editor-previa > header, .editor-variaveis > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--surface-muted); font-size: 0.74rem; letter-spacing: .05em; }
+.editor-explorador, .editor-previa { min-width: 0; display: flex; flex-direction: column; }
+.editor-explorador { border-right: 1px solid var(--border); }
+.editor-explorador > header, .editor-previa > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--surface-muted); font-size: 0.74rem; letter-spacing: .05em; }
 .editor-explorador > header button { min-width: 44px; min-height: 44px; border: 0; background: transparent; color: var(--muted); font-size: 1rem; cursor: pointer; }
 .editor-pasta { padding: 8px 10px; }
 .editor-pasta h3 { margin: 0 0 4px; color: var(--muted); font-size: 0.68rem; text-transform: uppercase; letter-spacing: .07em; }
 .editor-arquivo { width: 100%; min-height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; color: var(--text); font-size: 0.78rem; text-align: left; cursor: pointer; }
 .editor-arquivo:disabled { color: var(--muted); cursor: not-allowed; }
 
-.editor-painel { display: flex; flex-direction: column; min-width: 0; border-right: 1px solid var(--border); }
+.editor-painel { display: flex; flex-direction: column; min-width: 0; }
+.com-previa .editor-painel { border-right: 1px solid var(--border); }
 .editor-abas { display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-bottom: 1px solid var(--border); }
 .editor-abas > button { min-height: 44px; min-width: 44px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--muted); font-size: 0.8rem; cursor: pointer; }
 .editor-abas > button.ativa { border-bottom-color: var(--brand-strong); color: var(--text); }
 .editor-abas > button:disabled { cursor: not-allowed; }
-.editor-tempo-real { margin-left: auto; display: flex; align-items: center; gap: 7px; min-height: 44px; color: var(--muted); font-size: 0.76rem; }
+/* A caixa de marcar não é o alvo: o rótulo inteiro tem 44px de altura e é ele
+   que recebe o toque. A regra global de formulário dá 44px e largura total a
+   todo `input`, o que aqui viraria um quadrado azul do tamanho de um botão. */
+.editor-tempo-real { margin-left: auto; display: flex; align-items: center; gap: 7px; min-height: 44px; padding-right: 4px; color: var(--muted); font-size: 0.76rem; white-space: nowrap; cursor: pointer; }
+.editor-tempo-real input { width: 16px; min-width: 16px; height: 16px; min-height: 16px; padding: 0; accent-color: var(--brand-strong); }
 
-.editor-area { flex: 1; display: grid; grid-template-columns: auto minmax(0, 1fr); min-height: 0; }
-.editor-linhas { margin: 0; padding: 14px 8px 14px 14px; color: var(--muted); text-align: right; user-select: none; font: 400 0.82rem/1.65 "IBM Plex Mono", ui-monospace, monospace; background: var(--surface-muted); }
-.editor-texto { width: 100%; min-height: 420px; padding: 14px; border: 0; background: transparent; color: var(--text); line-height: 1.65; resize: none; }
+/* O espelho ocupa exatamente a mesma caixa do textarea, com a mesma fonte e a
+   mesma largura de conteúdo: é o que faz o número acompanhar a linha que
+   quebrou. A faixa da esquerda é pintada na área, não no espelho, para não
+   depender da altura do texto. */
+.editor-area { position: relative; flex: 1; min-height: 0; background: linear-gradient(to right, var(--surface-muted) 0 54px, transparent 54px); }
+.editor-espelho { position: absolute; inset: 0; overflow: hidden; padding: 14px 14px 14px 62px; line-height: 1.65; user-select: none; pointer-events: none; }
+.editor-espelho p { position: relative; margin: 0; color: transparent; white-space: pre-wrap; overflow-wrap: break-word; }
+.editor-espelho b { position: absolute; left: -54px; width: 40px; text-align: right; font-weight: 400; font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--muted); }
+.editor-texto { position: relative; width: 100%; height: 100%; min-height: 420px; padding: 14px 14px 14px 62px; border: 0; background: transparent; color: var(--text); line-height: 1.65; overflow-wrap: break-word; resize: none; }
 .editor-texto:focus { outline: none; }
 
 .editor-previa-corpo { flex: 1; overflow-y: auto; padding: 20px 22px; line-height: 1.65; }
@@ -3524,11 +3538,17 @@ tbody tr:hover { background: var(--surface-muted); }
 .editor-selo.aviso { background: var(--warning-soft); }
 .editor-selo.erro { background: var(--danger-soft); }
 
-.editor-variaveis-lista { flex: 1; overflow-y: auto; padding: 10px; display: grid; gap: 12px; align-content: start; }
-.editor-variaveis-lista h3 { margin: 0 0 5px; color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: .08em; }
-.editor-variavel { width: 100%; min-height: 44px; display: grid; gap: 1px; padding: 6px 9px; border: 1px solid var(--border); border-radius: 8px; background: var(--paper); color: var(--text); text-align: left; cursor: pointer; }
+/* Variáveis: botão na barra que desce lista. Ancorado pela borda direita para
+   a lista crescer para dentro da barra, nunca para fora da janela. */
+.editor-inserir { position: relative; }
+.editor-ferramentas .editor-inserir-botao { display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; border-color: var(--border); background: var(--paper); font-size: 0.8rem; }
+.editor-inserir-lista { position: absolute; top: calc(100% + 4px); right: 0; z-index: 40; width: min(320px, calc(100vw - 32px)); padding: 8px; border: 1px solid var(--border-strong); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow-md, 0 12px 32px rgba(0,0,0,.28)); }
+.editor-inserir-busca { width: 100%; min-height: 40px; padding: 0 10px; border: 1px solid var(--border); border-radius: 7px; background: var(--paper); color: var(--text); font-size: 0.8rem; }
+.editor-inserir-rolagem { max-height: 320px; overflow-y: auto; margin-top: 8px; display: grid; gap: 12px; align-content: start; }
+.editor-inserir-rolagem h3 { margin: 0 0 5px; color: var(--muted); font-size: 0.66rem; text-transform: uppercase; letter-spacing: .08em; }
+.editor-ferramentas .editor-variavel { width: 100%; min-height: 44px; display: grid; gap: 1px; padding: 6px 9px; border: 1px solid var(--border); border-radius: 8px; background: var(--paper); color: var(--text); text-align: left; cursor: pointer; }
 .editor-variavel + .editor-variavel { margin-top: 5px; }
-.editor-variavel:hover { border-color: var(--brand); }
+.editor-ferramentas .editor-variavel:hover { border-color: var(--brand); background: var(--paper); }
 .editor-variavel span { font-size: 0.76rem; font-weight: 600; }
 .editor-variavel small { color: var(--muted); font-size: 0.69rem; }
 

@@ -14,6 +14,8 @@
     "test:watch": "vitest",
     "test:python": "node scripts/run-python-tests.mjs",
     "validate:docs": "node scripts/validate-documentation.mjs",
+    "qa:visual": "node scripts/qa/harness.mjs",
+    "qa:contraste": "node scripts/qa/contraste.mjs",
     "validate:vaccines": "node scripts/validate-vaccines.mjs",
     "validate:inventory": "node scripts/validate-inventory.mjs",
     "validate:personas-audit": "node scripts/validate-personas-audit.mjs",
