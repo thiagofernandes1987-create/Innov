@@ -10,6 +10,16 @@ export const WHATSAPP_SOURCE_TYPES = [
 
 export type WhatsAppSourceType = typeof WHATSAPP_SOURCE_TYPES[number];
 
+export const WHATSAPP_DELIVERY_STATUSES = [
+  "QUEUED",
+  "SENT",
+  "DELIVERED",
+  "READ",
+  "FAILED"
+] as const;
+
+export type WhatsAppDeliveryStatus = typeof WHATSAPP_DELIVERY_STATUSES[number];
+
 export const SOURCE_FIELDS: Record<WhatsAppSourceType, readonly string[]> = {
   CONTRACT_TEMPLATE: ["BODY_TEMPLATE"],
   PROPOSAL_VERSION: [
@@ -139,6 +149,31 @@ export function isSupportWindowOpen(
   if (!Number.isFinite(timestamp)) return false;
   const elapsed = now.getTime() - timestamp;
   return elapsed >= 0 && elapsed <= 24 * 60 * 60 * 1000;
+}
+
+const DELIVERY_LADDER: readonly WhatsAppDeliveryStatus[] = [
+  "QUEUED",
+  "SENT",
+  "DELIVERED",
+  "READ"
+];
+
+/**
+ * Prevents replayed/out-of-order provider events from regressing a message.
+ * FAILED is terminal and is accepted only before successful delivery.
+ */
+export function canAdvanceWhatsAppDeliveryStatus(
+  current: string,
+  incoming: WhatsAppDeliveryStatus
+) {
+  const currentStatus = current as WhatsAppDeliveryStatus;
+  if (currentStatus === incoming || currentStatus === "FAILED") return false;
+  if (incoming === "FAILED") {
+    return currentStatus === "QUEUED" || currentStatus === "SENT";
+  }
+  const currentIndex = DELIVERY_LADDER.indexOf(currentStatus);
+  const incomingIndex = DELIVERY_LADDER.indexOf(incoming);
+  return incomingIndex >= 0 && (currentIndex < 0 || incomingIndex > currentIndex);
 }
 
 export function hashCanonicalSource(value: string) {
