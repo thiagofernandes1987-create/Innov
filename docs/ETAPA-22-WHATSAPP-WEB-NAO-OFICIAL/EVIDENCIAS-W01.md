@@ -19,7 +19,7 @@
   Evidência: [`MATRIZ-LICENCAS-E-REAPROVEITAMENTO.md`](./MATRIZ-LICENCAS-E-REAPROVEITAMENTO.md).
 
 - [x] **W-01.4 — Criar `THIRD_PARTY_NOTICES.md` antes de qualquer adaptação substancial**  
-  Evidência: [`../../../THIRD_PARTY_NOTICES.md`](../../../THIRD_PARTY_NOTICES.md). O arquivo registra que nenhum código foi copiado e Baileys ainda não foi instalado.
+  Evidência: [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md). O arquivo registra que nenhum código foi copiado e Baileys ainda não foi instalado.
 
 - [x] **W-01.5 — Definir critérios de número autorizado para homologação**  
   Evidência: [`POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md`](./POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md), seções 3 e 4.
