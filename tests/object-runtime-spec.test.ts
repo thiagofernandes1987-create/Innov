@@ -5,6 +5,7 @@ import {
   allocateSlots,
   canonicalSpecJson,
   slotFamilyFor,
+  slotUsage,
   specFingerprint,
   validateSpec,
   type ObjectFieldSpec,
@@ -180,5 +181,36 @@ describe("validateSpec", () => {
 
   it("exige module_key, porque é dele que a permissão do objeto é herdada", () => {
     expect(validateSpec(spec({ moduleKey: "" }))).not.toEqual([]);
+  });
+});
+
+describe("quanto do orçamento de campos filtráveis já foi gasto", () => {
+  it("conta por família, e só o que é filtrável", () => {
+    const uso = slotUsage([
+      field({ key: "titulo", type: "texto", indexed: true }),
+      field({ key: "apelido", type: "texto" }),
+      field({ key: "valor", type: "moeda", indexed: true }),
+      field({ key: "observacao", type: "texto_longo", indexed: true })
+    ]);
+    expect(uso.txt.used).toBe(1);
+    expect(uso.num.used).toBe(1);
+    // `texto_longo` não tem família de slot: marcar filtrável não gasta nada,
+    // e `validateSpec` já recusa a combinação.
+    expect(uso.dt.used).toBe(0);
+  });
+
+  it("o limite exibido é o mesmo que o motor aplica", () => {
+    const uso = slotUsage([]);
+    expect(uso.txt.budget).toBe(SLOT_BUDGET.txt);
+    expect(uso.ref.budget).toBe(SLOT_BUDGET.ref);
+  });
+
+  it("o que estourou não é contado como gasto", () => {
+    // Cinco textos filtráveis com teto de quatro: o quinto não ocupa slot, e a
+    // tela não pode dizer "5 de 4".
+    const fields = Array.from({ length: SLOT_BUDGET.txt + 1 }, (_, i) =>
+      field({ key: `t${i}`, type: "texto", indexed: true })
+    );
+    expect(slotUsage(fields).txt.used).toBe(SLOT_BUDGET.txt);
   });
 });

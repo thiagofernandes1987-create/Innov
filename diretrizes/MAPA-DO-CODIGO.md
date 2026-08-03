@@ -29,15 +29,15 @@ a ignorar.
 | | |
 |---|---|
 | Aplicativos no registro | 23 |
-| Rotas | 153 (137 páginas, 16 de API) |
-| Server actions | 178 em 30 arquivos |
-| Módulos de `lib/` | 82 |
-| Funções do banco declaradas | 222 |
-| Funções do banco chamadas do código | 113 |
-| Suítes de teste | 40, com 437 casos |
-| Migrations | 152 |
+| Rotas | 155 (139 páginas, 16 de API) |
+| Server actions | 184 em 31 arquivos |
+| Módulos de `lib/` | 84 |
+| Funções do banco declaradas | 224 |
+| Funções do banco chamadas do código | 116 |
+| Suítes de teste | 41, com 457 casos |
+| Migrations | 154 |
 | Validadores de CI | 28 |
-| Módulos de `lib/` citados por algum teste | 39 de 82 |
+| Módulos de `lib/` citados por algum teste | 40 de 84 |
 
 ## 1. Aplicativos
 
@@ -99,6 +99,8 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/administracao/aplicativos` | página | administracao:manage | `app/app/administracao/aplicativos/page.tsx` |
 | `/app/administracao/modelos` | página | administracao:manage | `app/app/administracao/modelos/page.tsx` |
 | `/app/administracao/motivos-de-perda` | página | administracao:manage | `app/app/administracao/motivos-de-perda/page.tsx` |
+| `/app/administracao/objetos` | página | administracao:manage | `app/app/administracao/objetos/page.tsx` |
+| `/app/administracao/objetos/[id]` | página | administracao:manage | `app/app/administracao/objetos/[id]/page.tsx` |
 | `/app/administracao/perfis` | página | administracao:manage | `app/app/administracao/perfis/page.tsx` |
 | `/app/administracao/responsabilidades` | página | administracao:manage | `app/app/administracao/responsabilidades/page.tsx` |
 | `/app/administracao/usuarios` | página | administracao:manage | `app/app/administracao/usuarios/page.tsx` |
@@ -364,6 +366,17 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `moverItemDeLista` | administracao:manage |
 | `renomearItemDeLista` | administracao:manage |
 
+### `app/actions/objetos.ts`
+
+| Função | Guarda |
+|---|---|
+| `acrescentarCampo` | — |
+| `alternarBuscaDoCampo` | — |
+| `criarObjeto` | administracao:manage |
+| `definirOpcoesDoCampo` | — |
+| `publicarObjeto` | — |
+| `removerCampo` | — |
+
 ### `app/actions/observability.ts`
 
 | Função | Guarda |
@@ -597,7 +610,9 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/inventory/server` | não | `loadInventoryDashboard` |
 | `@/lib/listas/servidor` | sim | `listaDoEscopo`, `pertenceALista` |
 | `@/lib/modules/registry` | sim | `MODULE_BY_KEY`, `MODULE_REGISTRY`, `capabilitiesForLevel`, `moduleForPath`, `toDatabaseAccessLevel`, `toUiAccessLevel` |
-| `@/lib/object-runtime/spec` | sim | `FIELD_TYPES`, `MAX_FIELDS`, `OBJECT_CLASSES`, `OBJECT_SCOPES`, `SLOT_BUDGET`, `TRAITS`, `allocateSlots`, `canonicalSpecJson`, `slotFamilyFor`, `specFingerprint`, `validateSpec` |
+| `@/lib/object-runtime/estudio` | não | `definicaoPorId`, `definicoesDaOrganizacao` |
+| `@/lib/object-runtime/proposito` | sim | `PROPOSITOS`, `campoDoProposito`, `chaveDeCampo`, `proposito`, `propositoDoTipo` |
+| `@/lib/object-runtime/spec` | sim | `FIELD_TYPES`, `MAX_FIELDS`, `OBJECT_CLASSES`, `OBJECT_SCOPES`, `SLOT_BUDGET`, `TRAITS`, `allocateSlots`, `canonicalSpecJson`, `slotFamilyFor`, `slotUsage`, `specFingerprint`, `validateSpec` |
 | `@/lib/observability/domain` | não | `dateTime`, `healthLabel`, `nullableText`, `number`, `parseDashboard`, `parseEvents`, `record`, `records`, `severityLabel`, `text` |
 | `@/lib/observability/server` | não | `loadObservabilityAlerts`, `loadObservabilityDashboard`, `loadObservabilityEvent`, `loadObservabilityEvents`, `loadObservabilityHealth`, `loadObservabilitySettings` |
 | `@/lib/operations/notifications` | sim | `agruparNotificacoesOperacionais`, `descreverNotificacaoOperacional`, `planejarNotificacoesOperacionais` |
@@ -698,6 +713,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `create_inventory_warehouse` | `supabase/migrations/20260720160650_stage17_inventory_creation_rpcs.sql` | `app/actions/inventory.ts` |
 | `create_modular_access_profile` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
 | `create_next_budget_version` | `supabase/migrations/20260729013000_budget_next_version.sql` | `app/actions/budget-versions.ts` |
+| `create_object_definition` | `supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql` | `app/actions/objetos.ts` |
 | `create_operational_event` | `supabase/migrations/20260728150000_operational_client_event_origin.sql` | — (só por SQL ou trigger) |
 | `create_project_from_contract` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | `app/actions/projects.ts` |
 | `create_project_from_contract_v2` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | `app/actions/project-creation.ts` |
@@ -808,7 +824,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `protect_inventory_stocktake_line` | `supabase/migrations/20260720160400_stage17_inventory_assets_stocktakes_01.sql` | — (só por SQL ou trigger) |
 | `protect_signature_document_version` | `supabase/migrations/20260720054220_stage12_2_finalization_delivery.sql` | — (só por SQL ou trigger) |
 | `protect_signature_field_layout` | `supabase/migrations/20260720054220_stage12_2_finalization_delivery.sql` | — (só por SQL ou trigger) |
-| `publish_object_definition` | `supabase/migrations/20260726093000_object_runtime_publication.sql` | — (só por SQL ou trigger) |
+| `publish_object_definition` | `supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql` | `app/actions/objetos.ts` |
 | `publish_quality_form_version` | `supabase/migrations/20260720080100_stage13_quality_forms_security.sql` | `app/actions/quality.ts` |
 | `quality_client_matches` | `supabase/migrations/20260720080100_stage13_quality_forms_security.sql` | — (só por SQL ou trigger) |
 | `queue_signature_copy_delivery` | `supabase/migrations/20260720054220_stage12_2_finalization_delivery.sql` | `app/actions/advanced-signatures.ts` |
@@ -839,6 +855,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `sandbox_signature_event` | `supabase/migrations/20260719234500_stage9_security_hardening.sql` | — (só por SQL ou trigger) |
 | `sandbox_signature_event_core` | `supabase/migrations/20260728234000_signature_business_completion.sql` | — (só por SQL ou trigger) |
 | `sanitize_audit_json` | `supabase/migrations/20260721122302_stage19_observability_functions.sql` | — (só por SQL ou trigger) |
+| `save_object_definition_draft` | `supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql` | `app/actions/objetos.ts` |
 | `search_sinapi_references` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/app/orcamentos/sinapi/page.tsx` |
 | `select_procurement_quote` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
 | `semear_modelos_da_empresa` | `supabase/migrations/20260803160000_semear_modelos_da_empresa.sql` | `app/actions/documentos.ts` |
@@ -900,7 +917,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/modelos-de-eap.test.ts` | 20 | o caso que a tarefa descreve; o que entra no modelo; grafia; achar o modelo do que está sendo digitado |
 | `tests/module-navigation.test.tsx` | 2 | NavegacaoDoModulo |
 | `tests/moeda.test.ts` | 15 | leitura de valor digitado; máscara de digitação, no padrão de caixa; exibição |
-| `tests/object-runtime-spec.test.ts` | 24 | canonicalSpecJson; specFingerprint; slotFamilyFor; allocateSlots |
+| `tests/object-runtime-proposito.test.ts` | 17 | o vocabulário cobre a biblioteca de tipos; o que a informação faz decide o tipo; nasce filtrável quando o tipo permite; o campo que sai da resposta é publicável |
+| `tests/object-runtime-spec.test.ts` | 27 | canonicalSpecJson; specFingerprint; slotFamilyFor; allocateSlots |
 | `tests/operational-notifications.test.ts` | 5 | notificações operacionais por exceção |
 | `tests/operational-routines.test.ts` | 3 | runner das rotinas profissionais |
 | `tests/personas-catalog.test.ts` | 5 | catálogo operacional de personas |
@@ -962,7 +980,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 1 |
 | Server action nunca referenciada | 7 |
-| Módulo de `lib/` sem teste que o cite | 43 de 82 |
+| Módulo de `lib/` sem teste que o cite | 44 de 84 |
 
 ### Módulos sem teste que os cite
 
@@ -982,6 +1000,7 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/forms/project-creation-state`
 - `@/lib/inventory/domain`
 - `@/lib/inventory/server`
+- `@/lib/object-runtime/estudio`
 - `@/lib/observability/domain`
 - `@/lib/observability/server`
 - `@/lib/organization-context`

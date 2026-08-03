@@ -1,4 +1,8 @@
-// Prevenção executável da VACINA-053-CHAVE-DE-MODULO-INEXISTENTE-NEGA-TODO-MUNDO.md.
+// Prevenção executável da VACINA-053-CHAVE-DE-MODULO-INEXISTENTE-NEGA-TODO-MUNDO.md
+// e da VACINA-058-ACAO-INEXISTENTE-EM-HAS-MODULE-PERMISSION-NEGA-TODO-MUNDO.md.
+//
+// Os dois argumentos de `has_module_permission` que negam em silêncio quando
+// não existem: a **chave do módulo** e a **ação**.
 //
 // `has_module_permission(org, 'chave', 'READ')` resolve a chave contra
 // `public.app_modules`. Chave que não existe lá **não devolve nível `NONE`** —
@@ -78,14 +82,110 @@ for (const { texto } of arquivos) {
   // criam — não entram como semeadura.
 }
 
-/* Chaves exigidas: segundo argumento de has_module_permission em qualquer SQL. */
-const exigidas = [];
+/**
+ * Vocabulário fechado de ações de `has_module_permission`.
+ *
+ * O `case` da função resolve estas seis e tem `else false` — **ação que não
+ * está aqui nega todo mundo, inclusive SUPER_ADMIN**, sem erro nenhum. Foi o
+ * que aconteceu com `'configure'`, que é nome de *capacidade* na camada de
+ * aplicação (`lib/authorization.ts` traduz `configure` para a ação
+ * `administer`) e não existe como ação no banco.
+ *
+ * A lista está escrita aqui, e não derivada do SQL, porque a definição de
+ * `has_module_permission` **não tem arquivo de migration no repositório**: é
+ * uma das 55 aplicações sem arquivo que a S-22 precisa reconstruir. Lida da
+ * função real em 03/08/2026. Quando a S-22 devolver a definição para o
+ * repositório, esta lista passa a ser derivada dela.
+ */
+const ACOES = new Set(["approve", "release", "sign", "export", "administer", "sensitive"]);
+
+/** Argumentos de uma chamada, separados no nível de parêntese de fora. */
+function argumentosDaChamada(texto, inicio) {
+  const argumentos = [];
+  let atual = "";
+  let profundidade = 0;
+  let aspas = false;
+  for (let i = inicio; i < texto.length; i += 1) {
+    const c = texto[i];
+    if (aspas) {
+      atual += c;
+      if (c === "'") aspas = texto[i + 1] === "'" ? (atual += texto[(i += 1)], true) : false;
+      continue;
+    }
+    if (c === "'") { aspas = true; atual += c; continue; }
+    if (c === "(") { profundidade += 1; if (profundidade === 1) continue; }
+    if (c === ")") {
+      profundidade -= 1;
+      if (profundidade === 0) { argumentos.push(atual.trim()); return argumentos; }
+    }
+    if (c === "," && profundidade === 1) { argumentos.push(atual.trim()); atual = ""; continue; }
+    atual += c;
+  }
+  return argumentos;
+}
+
+/**
+ * Blocos de definição de função dentro de um arquivo.
+ *
+ * Serve para saber a **qual** função pertence cada chamada, e é o que permite
+ * conferir o estado final em vez do histórico: uma função redefinida por
+ * `create or replace` numa migration posterior substitui a anterior, e a
+ * versão antiga não existe mais em banco nenhum. Reprovar por ela seria
+ * reprovar por um defeito já corrigido — e obrigaria a reescrever migrations
+ * já aplicadas, que é justamente o que a VACINA-057 mostra que quebra a
+ * reconstrução.
+ */
+function blocosDeFuncao(texto) {
+  const marcas = [...texto.matchAll(/create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?([a-z0-9_]+)\s*\(/gi)];
+  return marcas.map((marca, i) => ({
+    nome: marca[1],
+    inicio: marca.index,
+    fim: i + 1 < marcas.length ? marcas[i + 1].index : texto.length
+  }));
+}
+
+/* Chaves e ações exigidas: argumentos de has_module_permission em qualquer SQL. */
+const ocorrencias = [];
+const ultimaDefinicao = new Map();
 for (const { nome, texto } of arquivos) {
   const limpo = texto.replace(/--[^\n]*/g, "");
-  for (const uso of limpo.matchAll(/has_module_permission\s*\(\s*[^,]+,\s*'([a-z0-9_]+)'/gi)) {
+  const blocos = blocosDeFuncao(limpo);
+  for (const bloco of blocos) ultimaDefinicao.set(bloco.nome, nome);
+
+  for (const uso of limpo.matchAll(/has_module_permission\s*\(/gi)) {
     const linha = limpo.slice(0, uso.index).split("\n").length;
-    exigidas.push({ chave: uso[1], arquivo: nome, linha });
+    const argumentos = argumentosDaChamada(limpo, uso.index + uso[0].length - 1);
+    const dentroDe = blocos.find(b => uso.index > b.inicio && uso.index < b.fim);
+
+    ocorrencias.push({
+      arquivo: nome,
+      linha,
+      funcao: dentroDe?.nome ?? null,
+      chave: /^'([a-z0-9_]+)'$/.exec(argumentos[1] ?? "")?.[1] ?? null,
+      acao: /^'([a-z0-9_]+)'$/.exec(argumentos[4] ?? "")?.[1] ?? null
+    });
   }
+}
+
+/** Só o que ainda vale: chamada dentro de função redefinida depois não vale mais. */
+const vigentes = ocorrencias.filter(
+  o => o.funcao === null || ultimaDefinicao.get(o.funcao) === o.arquivo
+);
+
+const exigidas = vigentes.filter(o => o.chave).map(o => ({ ...o, chave: o.chave }));
+const acoesUsadas = vigentes.filter(o => o.acao).map(o => ({ ...o, acao: o.acao }));
+
+const acoesInvalidas = acoesUsadas.filter(({ acao }) => !ACOES.has(acao));
+if (acoesInvalidas.length) {
+  console.error("Ações que `has_module_permission` não reconhece:\n");
+  for (const { acao, arquivo, linha } of acoesInvalidas) {
+    console.error(`  - '${acao}' em ${arquivo}:${linha}`);
+  }
+  console.error(
+    `\nO \`case\` da função tem \`else false\`: ação desconhecida nega todo mundo, inclusive SUPER_ADMIN,\n` +
+      `sem erro e sem falha de teste. Ações válidas: ${[...ACOES].sort().join(", ")}.`
+  );
+  process.exit(1);
 }
 
 const problemas = exigidas.filter(({ chave }) => !semeadas.has(chave));
@@ -109,5 +209,6 @@ if (problemas.length) {
 
 console.log(
   `Chaves de módulo conferidas: ${exigidas.length} uso(s) de has_module_permission sobre ` +
-    `${semeadas.size} chave(s) semeada(s) em app_modules, nenhuma inexistente.`
+    `${semeadas.size} chave(s) semeada(s) em app_modules, nenhuma inexistente. ` +
+    `Ações conferidas: ${acoesUsadas.length} uso(s), todas no vocabulário da função.`
 );

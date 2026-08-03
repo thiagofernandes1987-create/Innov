@@ -156,6 +156,7 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-055` | Embed sem chave estrangeira devolve PGRST200 e derruba a consulta; e validador aprova tanto por estar certo quanto por não enxergar | aplicada | leitura em duas consultas com `lib/pessoas/nomes.ts`, ramo de PGRST200 no validador de embeds, leitor de `select` sensível a profundidade e universo de tabelas vindo dos `create table` |
 | `VACINA-056` | Verificação que sai 0 quando a dependência falta, e que não está em workflow nenhum, é indistinguível de verificação que passou | aplicada | `--exigir` nos dois scripts que se autodispensavam, e confronto de RPCs chamadas contra declaradas no `validate:code-map`, com débito congelado e responsável nomeado |
 | `VACINA-057` | Validador que confere o arquivo aprova enquanto o efeito não existe — três tabelas do Object Runtime passaram 40 dias ausentes do banco com o CI verde | aplicada | `validate:migrations-applied` cruza arquivos com o ledger de aplicadas, por nome lógico, com instantâneo datado e débito congelado |
+| `VACINA-058` | Ação inexistente em `has_module_permission` cai no `else false` e nega todo mundo, inclusive SUPER_ADMIN — `publish_object_definition` nunca foi executável, e a fixture de teste era mais permissiva que a função real | aplicada | as três RPCs pedem `administer`, a fixture honra o vocabulário fechado das seis ações e `validate:module-keys` confere o quinto argumento sobre o estado final das funções |
 
 ## 4. Arquivos
 
@@ -217,7 +218,8 @@ diretrizes/vacinas/
 ├── VACINA-054-ESCAPE-FECHA-UMA-CAMADA-POR-VEZ.md
 ├── VACINA-055-EMBED-DE-RELACAO-INEXISTENTE-E-O-VALIDADOR-QUE-NAO-ENXERGA.md
 ├── VACINA-056-VERIFICACAO-QUE-SE-AUTODISPENSA-PARECE-VERIFICACAO-QUE-PASSOU.md
-└── VACINA-057-VALIDADOR-CONFERE-O-ARTEFATO-E-NAO-O-EFEITO.md
+├── VACINA-057-VALIDADOR-CONFERE-O-ARTEFATO-E-NAO-O-EFEITO.md
+└── VACINA-058-ACAO-INEXISTENTE-EM-HAS-MODULE-PERMISSION-NEGA-TODO-MUNDO.md
 ```
 
 ## 5. Critérios para nova vacina

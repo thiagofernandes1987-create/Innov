@@ -168,6 +168,31 @@ export function allocateSlots(fields: readonly ObjectFieldSpec[]): SlotAllocatio
   return { slots, overflow };
 }
 
+export type SlotUsage = Readonly<Record<SlotFamily, { used: number; budget: number }>>;
+
+/**
+ * Quanto do orçamento de campos filtráveis já foi gasto, por família.
+ *
+ * Existe para a tela poder dizer "3 de 4 campos de texto filtráveis" **antes**
+ * de o administrador declarar o quarto e o quinto. Descobrir o teto na hora de
+ * publicar, com trinta campos já digitados, é descobrir tarde.
+ */
+export function slotUsage(fields: readonly ObjectFieldSpec[]): SlotUsage {
+  const used: Record<SlotFamily, number> = { num: 0, txt: 0, dt: 0, bool: 0, ref: 0 };
+  for (const [key, slot] of Object.entries(allocateSlots(fields).slots)) {
+    void key;
+    const family = slot.split("_")[0] as SlotFamily;
+    used[family] += 1;
+  }
+  return {
+    num: { used: used.num, budget: SLOT_BUDGET.num },
+    txt: { used: used.txt, budget: SLOT_BUDGET.txt },
+    dt: { used: used.dt, budget: SLOT_BUDGET.dt },
+    bool: { used: used.bool, budget: SLOT_BUDGET.bool },
+    ref: { used: used.ref, budget: SLOT_BUDGET.ref }
+  };
+}
+
 /**
  * Erros da definição, em linguagem que orienta quem declarou. Lista vazia
  * significa definição publicável. Recusar cedo é deliberado: definição
