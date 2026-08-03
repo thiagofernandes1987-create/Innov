@@ -19,6 +19,8 @@
     "validate:module-keys": "node scripts/validate-module-keys.mjs",
     "mapa:codigo": "node scripts/gerar-mapa-do-codigo.mjs",
     "validate:code-map": "node scripts/gerar-mapa-do-codigo.mjs --verificar",
+    "validate:migrations-applied": "node scripts/validate-migrations-applied.mjs",
+    "ledger:atualizar": "node scripts/atualizar-ledger-de-migrations.mjs",
     "qa:visual": "node scripts/qa/harness.mjs",
     "qa:contraste": "node scripts/qa/contraste.mjs",
     "validate:vaccines": "node scripts/validate-vaccines.mjs",

@@ -141,6 +141,8 @@ jobs:
         run: pnpm validate:module-keys
       - name: Validate code map against the code
         run: pnpm validate:code-map
+      - name: Validate migrations against the applied ledger (VACINA-057)
+        run: pnpm validate:migrations-applied
       - name: Validate auditable persona contracts
         run: pnpm validate:personas-audit
       - name: Validate extension function qualification
