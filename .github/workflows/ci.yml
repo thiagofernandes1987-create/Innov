@@ -77,6 +77,10 @@ jobs:
         run: |
           set -o pipefail
           node scripts/validate-messaging-storage.mjs 2>&1 | tee messaging-storage-validation.txt
+      - name: Validate messaging gateway skeleton
+        run: |
+          set -o pipefail
+          node scripts/validate-messaging-gateway.mjs 2>&1 | tee messaging-gateway-validation.txt
       - name: Upload structural validation reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -96,6 +100,7 @@ jobs:
             stage20-validation.txt
             stage22-validation.txt
             messaging-storage-validation.txt
+            messaging-gateway-validation.txt
           if-no-files-found: warn
           retention-days: 7
       - name: Upload recent migrations
@@ -181,6 +186,8 @@ jobs:
         run: pnpm validate:stage22
       - name: Validate messaging multiprovider storage
         run: pnpm validate:messaging-storage
+      - name: Validate messaging gateway skeleton
+        run: pnpm validate:messaging-gateway
       - name: Validate execution inventory
         run: pnpm validate:inventory
       - name: Validate Object Runtime invariants
@@ -201,6 +208,8 @@ jobs:
         run: pnpm test:db:commercial-documents
       - name: Messaging multiprovider database tests
         run: pnpm test:db:messaging-multiprovider
+      - name: Messaging gateway unit tests
+        run: pnpm test:messaging-gateway
       - name: Lint
         run: |
           set -o pipefail
@@ -229,5 +238,7 @@ jobs:
         run: pnpm test
       - name: Python quality form tests
         run: pnpm test:python
+      - name: Build messaging gateway
+        run: pnpm build:messaging-gateway
       - name: Build
         run: pnpm build
