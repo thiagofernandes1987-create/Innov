@@ -14,7 +14,9 @@ const allowedMimeTypes: Readonly<Record<MediaType, readonly string[]>> = {
 export function sanitizeMediaFileName(fileName: string): string {
   const normalized = fileName.normalize("NFKC").replace(/[\\/\0\r\n]/g, "_").trim();
   const safe = normalized.replace(/[^a-zA-Z0-9._ -]/g, "_").replace(/\s+/g, " ");
-  if (!safe || safe === "." || safe === "..") return "attachment.bin";
+  if (!safe || safe === "." || safe === ".." || !/[a-zA-Z0-9]/.test(safe)) {
+    return "attachment.bin";
+  }
   return safe.slice(0, 180);
 }
 
