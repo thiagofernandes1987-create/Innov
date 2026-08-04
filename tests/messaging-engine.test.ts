@@ -288,7 +288,9 @@ describe("MockMessagingEngine", () => {
   it("implementa sessão, pairing e event source determinísticos", async () => {
     const engine = new MockMessagingEngine();
     const received: string[] = [];
-    const unsubscribe = engine.subscribe(event => received.push(event.kind));
+    const unsubscribe = engine.subscribe(event => {
+      received.push(event.kind);
+    });
 
     const connected = await engine.connect(channelAccountId);
     expect(connected.state).toBe("READY");
