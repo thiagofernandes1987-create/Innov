@@ -7,6 +7,7 @@ const files = [
   "supabase/migrations/20260804011500_stage22_multiprovider_storage.sql",
   "supabase/migrations/20260804151000_stage22_outbox_delivery.sql",
   "supabase/migrations/20260804151500_stage22_outbox_delivery_compat.sql",
+  "supabase/migrations/20260804152000_stage22_outbox_terminal_circuit.sql",
   "supabase/tests/messaging-outbox/outbox.test.sql"
 ];
 for (const file of files) {
