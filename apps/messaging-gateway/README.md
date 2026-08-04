@@ -1,8 +1,8 @@
 # Innov Messaging Gateway
 
-Serviço Node.js persistente e isolado criado na Sprint W-05 e ampliado com o adapter confinado da W-06. O processo ativo continua usando somente `FakeChannelClient`.
+Serviço Node.js persistente e isolado criado na W-05, ampliado com o adapter confinado da W-06 e com o armazenamento criptográfico da W-07. O processo ativo continua usando somente `FakeChannelClient`.
 
-`@whiskeysockets/baileys@7.0.0-rc13` está instalado exclusivamente no workspace do gateway para tipagem, adapter anticorrupção e contract tests. O bootstrap não importa nem registra o adapter, não conecta WhatsApp e não cria QR, pairing, sessão, credencial ou número real.
+`@whiskeysockets/baileys@7.0.0-rc13` está instalado exclusivamente no workspace do gateway para tipagem, adapter anticorrupção e testes. O bootstrap não importa nem registra o adapter ou o session store, não conecta WhatsApp e não cria QR, pairing, sessão ou número real.
 
 ## Fronteiras
 
@@ -10,15 +10,13 @@ Serviço Node.js persistente e isolado criado na Sprint W-05 e ampliado com o ad
 - exige HMAC-SHA256, timestamp, nonce e correlation ID;
 - rejeita replay dentro da janela configurada;
 - não recebe `DATABASE_URL` nem credenciais do Supabase;
-- não acessa o banco principal;
-- o runtime HTTP base não importa SDK de canal;
+- não acessa o banco principal no runtime ativo;
 - Baileys fica confinado a `src/engines/baileys/`;
+- o store provider-neutral fica em `src/session-store/`;
 - a fábrica oficial falha com `EXTERNAL_SOCKET_BLOCKED` sem autorização explícita;
-- persiste zero material de sessão;
 - health, readiness e métricas não expõem segredo ou payload;
-- cliente fake devolve somente digest SHA-256 do payload recebido;
-- lifecycle scripts de dependências são bloqueados;
-- o lockfile regenerado deve corresponder ao SHA-256 aprovado da W-06.
+- lifecycle scripts de dependências permanecem bloqueados;
+- o lockfile regenerado deve corresponder ao SHA-256 aprovado.
 
 ## Runtime ativo
 
@@ -30,7 +28,7 @@ createGatewayRuntime
 FakeChannelClient
 ```
 
-Não existe import de `engines/baileys` no bootstrap. A presença do pacote no workspace não equivale a provider registrado.
+Não existe import do adapter ou do store no bootstrap. A presença do pacote, do adapter e do armazenamento testado não equivale a provider registrado ou sessão operacional.
 
 ## Adapter W-06
 
@@ -42,9 +40,27 @@ O diretório `src/engines/baileys/` contém:
 - eventos inbound e receipts;
 - taxonomia de erros;
 - capability matrix;
-- fábrica oficial lazy e bloqueada por padrão.
+- fábrica oficial lazy e bloqueada por padrão;
+- bridge `AuthenticationState` para o store cifrado, ainda sem bootstrap.
 
-O adapter só é exercitado por doubles nos testes. QR recebido em um double é convertido apenas em `pairingChallengeAvailable: true` e `qrPersisted: false`; o valor não é propagado.
+## Session store W-07
+
+O diretório `src/session-store/` contém:
+
+- `SessionCredentialStore` provider-neutral;
+- contratos de credenciais, keys, versões e auditoria;
+- AES-256-GCM com AAD;
+- DEK aleatória por sessão;
+- porta `KeyEnvelopeProvider` para KEK externa;
+- compare-and-swap por geração;
+- transações e rollback;
+- rotação completa da DEK;
+- rewrap sob nova KEK;
+- backup e restore cifrados;
+- exclusão criptográfica;
+- repositório em memória exclusivo para testes sintéticos.
+
+A persistência SQL da W-07 guarda somente envelopes e ciphertext. O gateway ativo continua sem conexão ao banco principal. Single writer, lease, fencing e lifecycle pertencem à W-08.
 
 ## Endpoints
 
@@ -57,20 +73,18 @@ O adapter só é exercitado por doubles nos testes. QR recebido em um double é 
 
 ## Assinatura
 
-A assinatura hexadecimal é:
-
 ```text
 HMAC-SHA256(secret, timestamp.nonce.METHOD.path.sha256(body))
 ```
 
 Headers obrigatórios:
 
-- `x-innov-timestamp` — epoch em segundos ou milissegundos;
-- `x-innov-nonce` — valor único de 8 a 128 caracteres seguros;
-- `x-innov-signature` — HMAC hexadecimal de 64 caracteres;
-- `x-correlation-id` — identificador interno de 3 a 128 caracteres.
+- `x-innov-timestamp`;
+- `x-innov-nonce`;
+- `x-innov-signature`;
+- `x-correlation-id`.
 
-`x-causation-id` é opcional. Quando informado no header e no envelope, os valores devem coincidir.
+`x-causation-id` é opcional e deve coincidir entre header e envelope quando presente.
 
 ## Environment
 
@@ -87,38 +101,18 @@ Headers obrigatórios:
 | `GATEWAY_REQUEST_TIMEOUT_MS` | não | `15000` |
 | `GATEWAY_HEADERS_TIMEOUT_MS` | não | `10000` |
 
-Não existem variáveis para ativar socket, QR ou sessão Baileys nesta etapa.
+Não existem variáveis para ativar socket, QR, sessão Baileys, lease ou KEK de produção nesta etapa.
 
 ## Supply chain
-
-Instalação no CI e Docker:
 
 ```text
 pnpm install --no-frozen-lockfile --ignore-scripts
 ```
 
-Após a resolução, `scripts/verify-w06-lockfile.mjs` exige:
-
-```text
-d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9
-```
-
-Qualquer alteração na árvore requer revisão explícita do lockfile, licença e segurança.
+`scripts/verify-w06-lockfile.mjs` exige o SHA-256 aprovado da árvore resolvida. Qualquer alteração requer revisão explícita do lockfile, licença e segurança.
 
 ## Container
 
-`compose.yaml` aplica:
+`compose.yaml` aplica usuário `10001:10001`, filesystem somente leitura, capabilities removidas, `no-new-privileges`, limites de recursos, `/tmp` restrito e rede interna. O smoke test executa a imagem com `--network none`, confirma o cliente fake e prova shutdown por SIGTERM.
 
-- usuário `10001:10001`;
-- filesystem somente leitura;
-- `cap_drop: ALL`;
-- `no-new-privileges`;
-- limite de processos, memória, CPU e descritores;
-- `/tmp` pequeno, `noexec`, `nosuid` e `nodev`;
-- rede Docker `internal`;
-- exposição apenas em `127.0.0.1`;
-- nenhuma variável de banco principal.
-
-O smoke test executa a imagem com `--network none`, confirma o cliente fake e prova o shutdown por SIGTERM.
-
-O acesso do aplicativo principal deverá ocorrer futuramente por rota interna explicitamente controlada. As W-05 e W-06 não realizam deploy nem conectam esse serviço ao ambiente de produção.
+As W-05 a W-07 não realizam deploy nem conectam o serviço ao ambiente de produção.
