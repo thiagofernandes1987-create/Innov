@@ -120,6 +120,7 @@ export async function loadMessagingBotsWorkspace() {
       readiness: deriveBotReadiness({
         profile,
         providerConfigured: provider.configured,
+        providerModel: provider.model,
         dailyBudgetMicros: budget.maximumCostMicros,
         consentPluginEnabled: consentEnabled,
         aiPluginEnabled: aiEnabled
