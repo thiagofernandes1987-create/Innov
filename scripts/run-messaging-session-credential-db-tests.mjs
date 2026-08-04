@@ -47,9 +47,9 @@ try {
     connection = ["-U", "postgres", "-d", database];
   }
 } catch (error) {
-  console.log("PostgreSQL indisponível: testes W-07 NÃO foram executados.");
-  console.log(`Motivo: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
-  process.exit(0);
+  console.error("PostgreSQL indisponível: testes W-07 NÃO foram executados.");
+  console.error(`Motivo: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
+  process.exit(1);
 }
 
 let failed = false;
