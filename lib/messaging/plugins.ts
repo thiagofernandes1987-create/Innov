@@ -163,7 +163,7 @@ export function createAntiSpamPlugin(options: { priority?: number; maximumRecent
     id: "ANTI_SPAM",
     priority: options.priority ?? 20,
     requiredPermission: null,
-    featureFlag: "MESSAGING_ANTI_SPAM",
+    featureFlag: null,
     category: "SAFETY",
     async evaluate(context) {
       if (context.recentInboundCount > maximum) {
