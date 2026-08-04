@@ -3,19 +3,27 @@ import path from "node:path";
 
 const root = process.cwd();
 const migrationPath = "supabase/migrations/20260804011500_stage22_multiprovider_storage.sql";
+const sessionMigrationPath = "supabase/migrations/20260804123000_stage22_session_credential_store.sql";
+const sessionFixPath = "supabase/migrations/20260804123500_stage22_session_credential_store_function_fix.sql";
 const fixturePath = "supabase/tests/messaging-multiprovider/fixture.sql";
 const seedPath = "supabase/tests/messaging-multiprovider/legacy-seed.sql";
 const testPath = "supabase/tests/messaging-multiprovider/storage.test.sql";
 const runnerPath = "scripts/run-messaging-multiprovider-db-tests.mjs";
+const sessionStorePath = "apps/messaging-gateway/src/session-store/session-credential-store.ts";
+const sessionContractsPath = "apps/messaging-gateway/src/session-store/contracts.ts";
 const gatewayPackagePath = "apps/messaging-gateway/package.json";
 const gatewayIndexPath = "apps/messaging-gateway/src/index.ts";
 
 const requiredFiles = [
   migrationPath,
+  sessionMigrationPath,
+  sessionFixPath,
   fixturePath,
   seedPath,
   testPath,
   runnerPath,
+  sessionStorePath,
+  sessionContractsPath,
   gatewayPackagePath,
   gatewayIndexPath
 ];
@@ -30,12 +38,17 @@ function read(file) {
 }
 
 const migration = read(migrationPath);
+const sessionMigration = read(sessionMigrationPath);
+const sessionFix = read(sessionFixPath);
+const sessionStore = read(sessionStorePath);
+const sessionContracts = read(sessionContractsPath);
 const test = read(testPath);
 const runner = read(runnerPath);
 const rootPackage = JSON.parse(read("package.json") || "{}");
 const gatewayPackage = JSON.parse(read(gatewayPackagePath) || "{}");
 const gatewayIndex = read(gatewayIndexPath);
 const lower = migration.toLowerCase();
+const sessionLower = `${sessionMigration}\n${sessionFix}`.toLowerCase();
 
 for (const relation of [
   "channel_contact_identities",
@@ -107,20 +120,53 @@ if (gatewayPackage.dependencies?.["@whiskeysockets/baileys"] !== "7.0.0-rc13") {
   failures.push("Gateway não fixa @whiskeysockets/baileys@7.0.0-rc13.");
 }
 if (gatewayIndex.includes("BaileysEngineAdapter") || gatewayIndex.includes("engines/baileys")) {
-  failures.push("Runtime Baileys foi registrado antes do armazenamento de sessão e lifecycle.");
+  failures.push("Runtime Baileys foi registrado antes do lifecycle W-08.");
 }
 
-const forbiddenSessionRelations = [
+for (const relation of [
+  "channel_session_secret_envelopes",
   "channel_session_credentials",
   "channel_session_keys",
-  "channel_session_secrets",
-  "session_runtime_leases"
-];
-for (const relation of forbiddenSessionRelations) {
-  if (lower.includes(`create table public.${relation}`)) {
-    failures.push(`Persistência de sessão prematura encontrada: ${relation}`);
+  "channel_session_secret_audit"
+]) {
+  if (!sessionLower.includes(`public.${relation}`)) {
+    failures.push(`Relação criptográfica W-07 ausente: ${relation}`);
   }
 }
+for (const token of [
+  "wrapped_dek bytea",
+  "ciphertext bytea",
+  "compare_and_swap_channel_session_credentials",
+  "delete_channel_session_secrets",
+  "force row level security"
+]) {
+  if (!sessionLower.includes(token)) failures.push(`Controle criptográfico SQL ausente: ${token}`);
+}
+for (const forbidden of [
+  "master_key bytea",
+  "kek_plaintext",
+  "dek_plaintext",
+  "credentials_plaintext",
+  "raw_credentials",
+  "pairing_code text",
+  "qr text"
+]) {
+  if (sessionLower.includes(forbidden)) failures.push(`Material sensível persistente proibido: ${forbidden}`);
+}
+if (sessionLower.includes("create table public.session_runtime_leases")) {
+  failures.push("Lease W-08 foi implementado prematuramente.");
+}
+for (const token of [
+  "createEncryptedSessionCredentialStore",
+  "compareAndSwapCredentials",
+  "rotateSessionDataKey",
+  "exportEncryptedBackup",
+  "deleteSessionSecrets"
+]) {
+  if (!sessionStore.includes(token)) failures.push(`Store W-07 incompleto: ${token}`);
+}
+for (const token of ["KeyEnvelopeProvider", "EncryptedSessionBackup", "SessionSecretAuditEvent"])
+  if (!sessionContracts.includes(token)) failures.push(`Contrato W-07 incompleto: ${token}`);
 
 if (failures.length) {
   console.error(failures.join("\n"));
@@ -129,16 +175,18 @@ if (failures.length) {
 
 console.log(JSON.stringify({
   ok: true,
-  contract: "messaging-storage-boundary-v2",
+  contract: "messaging-storage-boundary-v3",
   legacyDomainRelations: 7,
   technicalRelations: 7,
+  encryptedSessionRelations: 4,
   behaviorControls: 11,
   rawPayloadColumns: 0,
   parallelContactConversationMessageTables: 0,
   baileysPackageInstalledInGateway: true,
   baileysVersion: "7.0.0-rc13",
   baileysRuntimeRegistered: false,
-  sessionStorageImplemented: false,
+  encryptedSessionStorageImplemented: true,
+  masterKeyInDatabase: false,
   sessionLeaseImplemented: false,
   realSessionMaterialPresent: false
 }, null, 2));
