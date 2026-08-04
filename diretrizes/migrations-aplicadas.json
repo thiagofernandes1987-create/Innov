@@ -1,7 +1,7 @@
 {
   "_leia": "Instantâneo do que está aplicado no banco, para o CI comparar sem alcançar o banco. A comparação é pelo NOME LÓGICO: o ledger carimba a versão no momento da aplicação, então o número do arquivo e o da versão aplicada não coincidem — comparar por número produziria um resultado sem sentido. Atualize com `SUPABASE_DB_URL=... pnpm ledger:atualizar` (scripts/atualizar-ledger-de-migrations.mjs) e commite junto da migration.",
   "projeto": "wyeojufebtwblsubkunr",
-  "atualizado_em": "2026-08-04T10:58:25Z",
+  "atualizado_em": "2026-08-04T11:42:51Z",
   "aplicadas": [
     "accept_proposal_client_audit",
     "aplicativo_modelos_e_documentacoes",
@@ -196,7 +196,8 @@
     "stage9_frozen_version_rules",
     "stage9_security_hardening",
     "stage9_workflows",
-    "typed_enum_state_transitions"
+    "typed_enum_state_transitions",
+    "unidade_funde_expoente"
   ],
   "debito": {
     "_responsavel": "S-22 — o repositório não reconstrói o banco. Divergência medida em 3 de agosto de 2026; qualquer divergência NOVA reprova.",

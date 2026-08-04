@@ -59,6 +59,58 @@ export function chaveNormalizada(valor: string): string {
     .trim();
 }
 
+
+/**
+ * Escopos de sugestão em uso.
+ *
+ * Vale escrever a lista: escopo digitado à mão em cada tela vira "eap_etapa" num
+ * lugar e "etapa_eap" noutro, e os dois catálogos ficam pela metade sem ninguém
+ * perceber — o campo continua sugerindo alguma coisa.
+ *
+ * Fica neste módulo, e não no de servidor, porque é dado puro e a regra de
+ * chave por escopo precisa dele.
+ */
+export const ESCOPOS = {
+  etapaDaEap: "eap.etapa",
+  atividadeDaEap: "eap.atividade",
+  etapaDoFunil: "funil.etapa",
+  marcador: "cartao.marcador",
+  disciplina: "documento.disciplina",
+  unidade: "medida.unidade",
+  motivoDePerda: "negocio.motivo_perda",
+  motivoDeParada: "obra.motivo_parada"
+} as const;
+
+export type EscopoDeSugestao = (typeof ESCOPOS)[keyof typeof ESCOPOS];
+
+/**
+ * Forma canônica de uma **unidade de medida**.
+ *
+ * `m²` e `m2` são a mesma unidade escrita de dois jeitos, e as duas vão ser
+ * digitadas: uma sai do teclado do telefone, a outra de quem sabe o atalho.
+ * Sem fundir, a mesma unidade ocupa duas linhas da sugestão e as contagens de
+ * área ficam divididas em duas.
+ *
+ * A fusão é feita com NFKD, a forma de **compatibilidade**: é ela que sabe que
+ * `²` é um `2` e que `₂` também. Escrever a tabela à mão daria o mesmo
+ * resultado para dois casos e erraria no terceiro.
+ */
+export function chaveDeUnidade(valor: string): string {
+  return chaveNormalizada(String(valor ?? "").normalize("NFKD"));
+}
+
+/**
+ * A chave que vale naquele escopo.
+ *
+ * **Por escopo, e não globalmente**: fundir expoente ajuda a unidade de medida
+ * e atrapalharia o resto. "H²" no nome de uma etapa é o nome da etapa, não uma
+ * unidade escrita torto — e trocar a regra global re-escreveria o sentido de
+ * toda chave já gravada. Escopo que não pediu nada continua com a regra de
+ * sempre, inclusive escopo desconhecido.
+ */
+export function chaveDoEscopo(escopo: string, valor: string): string {
+  return escopo === ESCOPOS.unidade ? chaveDeUnidade(valor) : chaveNormalizada(valor);
+}
 /** Dois textos são o mesmo valor do catálogo? */
 export function mesmoValor(a: string, b: string): boolean {
   const ca = chaveNormalizada(a);
@@ -106,16 +158,19 @@ function ehEngano(valor: ValorDoCatalogo, agora: Date): boolean {
  */
 export function comPadroes(
   doCatalogo: readonly ValorDoCatalogo[],
-  padroes: readonly string[]
+  padroes: readonly string[],
+  escopo = ""
 ): ValorDoCatalogo[] {
   // Compara pela chave gravada **e** pela chave recalculada do rótulo. A chave
   // vem pronta do banco, e se ela divergir do rótulo — linha antiga, importação,
   // correção manual — a comparação por um lado só deixa passar o duplicado. Foi
   // o que aconteceu com "m²" gravado sob a chave "m2": a lista ofereceu o mesmo
   // valor duas vezes, uma como uso e outra como padrão.
-  const jaTem = new Set(doCatalogo.flatMap(v => [v.chave, chaveNormalizada(v.rotulo)]));
+  const jaTem = new Set(
+    doCatalogo.flatMap(v => [v.chave, chaveDoEscopo(escopo, v.chave), chaveDoEscopo(escopo, v.rotulo)])
+  );
   const novos = padroes
-    .map(rotulo => ({ rotulo, chave: chaveNormalizada(rotulo), usos: 0, ultimoUso: null, padrao: true }))
+    .map(rotulo => ({ rotulo, chave: chaveDoEscopo(escopo, rotulo), usos: 0, ultimoUso: null, padrao: true }))
     .filter(v => v.chave !== "" && !jaTem.has(v.chave));
   return [...doCatalogo, ...novos];
 }
@@ -140,11 +195,16 @@ export function situacaoDoValor(valor: ValorDoCatalogo, agora: Date = new Date()
  */
 export function ordenarSugestoes(
   catalogo: readonly ValorDoCatalogo[],
-  opcoes: { agora?: Date; filtro?: string; limite?: number } = {}
+  opcoes: { agora?: Date; filtro?: string; limite?: number; escopo?: string } = {}
 ): ValorDoCatalogo[] {
   const agora = opcoes.agora ?? new Date();
   const limite = opcoes.limite ?? LIMITE_DE_SUGESTOES;
-  const filtro = chaveNormalizada(opcoes.filtro ?? "");
+  const escopo = opcoes.escopo ?? "";
+  const filtro = chaveDoEscopo(escopo, opcoes.filtro ?? "");
+  // A chave gravada pode ser anterior à regra do escopo — `m²` gravado antes de
+  // a fusão existir. Comparar pela chave recalculada é o que faz a linha antiga
+  // continuar encontrável sem depender de o banco já ter sido reescrito.
+  const chaveDe = (v: ValorDoCatalogo) => chaveDoEscopo(escopo, v.chave);
 
   return catalogo
     .filter(v => v.chave !== "")
@@ -152,10 +212,10 @@ export function ordenarSugestoes(
     // Filtro por trecho, não por começo: quem digita "estrut" quer encontrar
     // "Alvenaria estrutural", e exigir o início da palavra esconderia
     // justamente o valor composto que mais se repete.
-    .filter(v => (filtro === "" ? true : v.chave.includes(filtro)))
+    .filter(v => (filtro === "" ? true : chaveDe(v).includes(filtro)))
     // O que já está escrito por extenso não é sugerido de volta: ocuparia uma
     // linha da lista para não oferecer nada.
-    .filter(v => v.chave !== filtro)
+    .filter(v => chaveDe(v) !== filtro)
     .sort((a, b) => pontuacao(b, agora) - pontuacao(a, agora) || a.rotulo.localeCompare(b.rotulo, "pt-BR"))
     .slice(0, limite);
 }

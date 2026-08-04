@@ -4,7 +4,7 @@
 // constante ficam em `lib/sugestoes`.
 import { revalidatePath } from "next/cache";
 import { requireCapability } from "@/lib/authorization";
-import { chaveNormalizada } from "@/lib/sugestoes/catalogo";
+import { chaveDoEscopo } from "@/lib/sugestoes/catalogo";
 
 const ROTA = "/app/administracao/vocabulario";
 
@@ -24,7 +24,9 @@ export async function limparValorDoCatalogo(formData: FormData): Promise<void> {
   const contexto = await requireCapability("administracao", "manage");
   const escopo = String(formData.get("escopo") ?? "").trim();
   const valor = String(formData.get("valor") ?? "").trim();
-  const chave = chaveNormalizada(valor);
+  // A chave depende do escopo: em unidade de medida, `m²` e `m2` são a mesma
+  // linha, e limpar uma tem de limpar a certa.
+  const chave = chaveDoEscopo(escopo, valor);
   if (!escopo || !chave) return;
 
   const { error } = await contexto.supabase.rpc("limpar_valor_do_catalogo", {

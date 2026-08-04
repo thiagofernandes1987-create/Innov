@@ -3,29 +3,13 @@
 // Fica separado das ações porque é leitura de página — um Server Component
 // chama direto, sem passar por `"use server"`.
 
-import { chaveNormalizada, comPadroes, ordenarSugestoes, type ValorDoCatalogo } from "./catalogo";
+import { chaveDoEscopo, comPadroes, ordenarSugestoes, type ValorDoCatalogo } from "./catalogo";
 
 type Cliente = Awaited<ReturnType<typeof import("@/lib/supabase/server").createSupabaseServerClient>>;
 
-/**
- * Escopos de sugestão em uso.
- *
- * Vale escrever a lista: escopo digitado à mão em cada tela vira "eap_etapa" num
- * lugar e "etapa_eap" noutro, e os dois catálogos ficam pela metade sem ninguém
- * perceber — o campo continua sugerindo alguma coisa.
- */
-export const ESCOPOS = {
-  etapaDaEap: "eap.etapa",
-  atividadeDaEap: "eap.atividade",
-  etapaDoFunil: "funil.etapa",
-  marcador: "cartao.marcador",
-  disciplina: "documento.disciplina",
-  unidade: "medida.unidade",
-  motivoDePerda: "negocio.motivo_perda",
-  motivoDeParada: "obra.motivo_parada"
-} as const;
-
-export type EscopoDeSugestao = (typeof ESCOPOS)[keyof typeof ESCOPOS];
+// `ESCOPOS` mudou de casa: é dado puro e a regra de chave por escopo precisa
+// dele em `catalogo.ts`. Reexportado aqui porque as telas importam daqui.
+export { ESCOPOS, type EscopoDeSugestao } from "./catalogo";
 
 /**
  * O vocabulário da organização naquele escopo, já ordenado e cortado.
@@ -55,7 +39,10 @@ export async function sugestoesDoEscopo(
     ultimoUso: String(l.last_used_at)
   }));
 
-  return ordenarSugestoes(comPadroes(catalogo, opcoes.padroes ?? []), { filtro: opcoes.filtro ?? "" });
+  return ordenarSugestoes(comPadroes(catalogo, opcoes.padroes ?? [], escopo), {
+    filtro: opcoes.filtro ?? "",
+    escopo
+  });
 }
 
 /**
@@ -76,7 +63,7 @@ export async function registrarValorUsado(
   valor: string
 ): Promise<void> {
   const rotulo = String(valor ?? "").trim();
-  const chave = chaveNormalizada(rotulo);
+  const chave = chaveDoEscopo(escopo, rotulo);
   if (!chave) return;
   const { error } = await supabase.rpc("registrar_valor_usado", {
     p_organization_id: organizationId,

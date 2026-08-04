@@ -34,8 +34,8 @@ a ignorar.
 | Módulos de `lib/` | 84 |
 | Funções do banco declaradas | 227 |
 | Funções do banco chamadas do código | 114 |
-| Suítes de teste | 42, com 473 casos |
-| Migrations | 157 |
+| Suítes de teste | 43, com 486 casos |
+| Migrations | 158 |
 | Validadores de CI | 28 |
 | Módulos de `lib/` citados por algum teste | 41 de 84 |
 
@@ -650,9 +650,9 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/sinapi/source-catalog` | sim | `parseSinapiBaseDate`, `selectLatestSinapiXlsxFile` |
 | `@/lib/sinapi/xlsx-parser` | sim | `parseSinapiZipPackage`, `parseWorksheetXml` |
 | `@/lib/stage12` | não | `dailyLogStatusLabels`, `daysBetween`, `formatDate`, `formatPercent`, `statusBadge`, `taskColumns`, `taskStatusLabels` |
-| `@/lib/sugestoes/catalogo` | sim | `LIMITE_DE_SUGESTOES`, `chaveNormalizada`, `comPadroes`, `mesmoValor`, `ordenarSugestoes`, `pontuacao`, `situacaoDoValor` |
+| `@/lib/sugestoes/catalogo` | sim | `ESCOPOS`, `LIMITE_DE_SUGESTOES`, `chaveDeUnidade`, `chaveDoEscopo`, `chaveNormalizada`, `comPadroes`, `mesmoValor`, `ordenarSugestoes`, `pontuacao`, `situacaoDoValor` |
 | `@/lib/sugestoes/escopos` | sim | `ESCOPOS_DESCRITOS`, `PADROES_POR_ESCOPO`, `descreverEscopo`, `padroesDoEscopo` |
-| `@/lib/sugestoes/servidor` | não | `ESCOPOS`, `registrarValorUsado`, `sugestoesDoEscopo` |
+| `@/lib/sugestoes/servidor` | não | `registrarValorUsado`, `sugestoesDoEscopo` |
 | `@/lib/supabase/admin` | não | `createSupabaseAdminClient` |
 | `@/lib/supabase/relations` | não | `isUnknownRecord`, `relationField`, `relationRecord`, `relationRecords`, `singleRelation` |
 | `@/lib/supabase/server` | não | `createSupabaseServerClient` |
@@ -936,6 +936,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/sinapi-xlsx-parser.test.ts` | 4 | parser automático do pacote SINAPI |
 | `tests/sinduscon-cub.test.ts` | 3 | SindusCon-SP CUB |
 | `tests/stage20-validator.test.ts` | 2 | validador semântico da Etapa 20 |
+| `tests/sugestoes-unidade.test.ts` | 13 | m² e m2 são a mesma unidade; a fusão vale por escopo, não globalmente; o efeito na lista de sugestão |
 | `tests/sugestoes.test.ts` | 30 | chave normalizada — o que faz três grafias serem um valor só; frequência recente; o que entra na lista; situação de um valor — o que a administração precisa distinguir |
 | `tests/theme-contrast-contract.test.ts` | 1 | contrato de contraste dos estados |
 | `tests/vaccine-validator.test.ts` | 1 | validador de vacinas |
