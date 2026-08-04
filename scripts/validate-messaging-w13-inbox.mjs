@@ -5,6 +5,7 @@ const files = {
   loader: "lib/messaging/inbox.server.ts",
   actions: "app/actions/messaging-inbox.ts",
   page: "app/app/whatsapp/inbox/page.tsx",
+  heartbeat: "app/app/whatsapp/inbox/presence-heartbeat.tsx",
   migration: "supabase/migrations/20260804180000_stage22_multiprovider_inbox.sql",
   compat: "supabase/migrations/20260804180500_stage22_inbox_fixture_compat.sql",
   dbTest: "supabase/tests/messaging-inbox/inbox.test.sql",
@@ -18,23 +19,29 @@ const page = read("page");
 
 for (const token of [
   "UnifiedInboxConversation", "buildUnifiedInbox", "filterUnifiedInbox",
-  "deriveInboxActionAvailability", "InboxChannelState", "OperatorPresence",
+  "deriveInboxActionAvailability", "resolveEffectiveOperatorPresence",
+  "InboxChannelState", "OperatorPresence", "canViewConversation",
   "conflictingOwnership", "providerTypes", "capabilities"
 ]) if (!read("model").includes(token)) failures.push(`View model W-13 sem ${token}`);
 for (const token of [
   "loadMultiproviderInbox", "channel_inbox_queues", "channel_operator_presence",
   "channel_conversation_notes", "resolveMetaCloudRuntimePolicy",
-  "BAILEYS_PLANNED_CAPABILITY_MATRIX", "hasCapability"
+  "BAILEYS_PLANNED_CAPABILITY_MATRIX", "organization_memberships",
+  "resolveEffectiveOperatorPresence", "hasCapability"
 ]) if (!read("loader").includes(token)) failures.push(`Loader W-13 sem ${token}`);
 for (const token of [
   "assignMessagingConversation", "addMessagingConversationNote",
-  "updateMessagingOperatorPresence", "ownershipVersion", "assign_channel_conversation"
+  "updateMessagingOperatorPresence", "refreshMessagingOperatorPresence",
+  "ownershipVersion", "assign_channel_conversation", "returnQuery"
 ]) if (!read("actions").includes(token)) failures.push(`Action W-13 sem ${token}`);
 for (const token of [
   "Inbox multiprovider", "repeat(auto-fit", "messagingProviderLabel", "channelStateLabel",
   "deriveInboxActionAvailability", "Ownership divergente", "Nota interna",
-  "Somente não lidas", "Abrir conversa"
+  "Somente não lidas", "Ver conversa", "Responsável", "PresenceHeartbeat"
 ]) if (!page.includes(token)) failures.push(`UI W-13 sem ${token}`);
+for (const token of [
+  "refreshMessagingOperatorPresence", "setInterval", "visibilitychange", "Presença sincronizada"
+]) if (!read("heartbeat").includes(token)) failures.push(`Heartbeat W-13 sem ${token}`);
 for (const token of [
   "channel_inbox_queues", "channel_conversation_assignment_events",
   "channel_conversation_notes", "channel_operator_presence", "channel_workspace_events",
@@ -60,7 +67,8 @@ for (const token of [
 ]) if (!read("dbTest").includes(token)) failures.push(`Teste PostgreSQL W-13 ausente: ${token}`);
 for (const token of [
   "unifica threads do mesmo contato", "ownership conflitante", "filtra por provider",
-  "canal está offline", "presença do operador", "capability matrix", "rotula providers"
+  "threads elegíveis", "leitura da conversa", "presença do operador",
+  "presença expirada", "capability matrix", "rotula providers"
 ]) if (!read("tests").includes(token)) failures.push(`Teste TypeScript W-13 ausente: ${token}`);
 
 if (failures.length) {
@@ -69,16 +77,21 @@ if (failures.length) {
 }
 console.log(JSON.stringify({
   ok: true,
-  contract: "messaging-multiprovider-inbox-boundary-v1",
+  contract: "messaging-multiprovider-inbox-boundary-v2",
   unifiedByCanonicalContact: true,
   providerOriginPreserved: true,
   filtersOperational: true,
+  unreadScopedToEligibleThreads: true,
   assignmentVersioned: true,
+  assigneeSelectionAvailable: true,
   notesInternal: true,
   operatorPresenceSeparated: true,
+  operatorPresenceExpiryEnforced: true,
+  operatorPresenceHeartbeat: true,
   backendRealtimeOnly: true,
   degradedStatesSupported: true,
   capabilityActionsGated: true,
+  readOnlyConversationAvailable: true,
   responsiveLayout: true,
   concurrentAgentsProtected: true,
   parallelConversationDomainCreated: false
