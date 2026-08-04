@@ -8,36 +8,64 @@ Este arquivo registra componentes, referências e adaptações de terceiros util
 
 ## 1. Estado do provider WhatsApp Web não oficial
 
-Na data de 03 de agosto de 2026:
+Na data de 04 de agosto de 2026:
 
-- nenhum código dos repositórios abaixo foi copiado para o novo provider;
-- Baileys ainda não foi adicionado às dependências do Innov;
-- nenhum arquivo MPL foi incorporado;
+- `@whiskeysockets/baileys@7.0.0-rc13` foi adicionado somente ao workspace `apps/messaging-gateway`;
+- a versão é exata, sem `latest`, `^`, `~` ou wildcard;
+- nenhum código-fonte dos projetos de referência foi copiado para o Innov;
+- o adapter próprio usa contratos e traduções desenvolvidos no repositório Innov;
+- imports e tipos nativos Baileys ficam confinados a `apps/messaging-gateway/src/engines/baileys/`;
+- nenhum arquivo MPL de projeto de referência foi incorporado;
 - nenhum código de projeto sem licença clara foi incorporado;
-- a implementação do provider não oficial ainda não foi iniciada;
-- os projetos foram utilizados apenas para análise arquitetural e planejamento.
+- lifecycle scripts de dependências são bloqueados por `--ignore-scripts` no CI e no Docker;
+- o runtime ativo do gateway continua sendo `FakeChannelClient`;
+- a fábrica oficial de socket falha fechado sem autorização explícita;
+- nenhuma conexão externa, sessão, credencial, QR persistido, pairing, número real, deploy ou produção foi criada;
+- revisão jurídica continua obrigatória antes de piloto ou produção.
 
 ---
 
-## 2. Dependências planejadas, ainda não incorporadas
+## 2. Dependência incorporada no gateway
 
 ### WhiskeySockets/Baileys
 
+- Pacote: `@whiskeysockets/baileys`
+- Versão fixada: `7.0.0-rc13`
+- Tag upstream revisada: `v7.0.0-rc13`
 - Repositório: `https://github.com/WhiskeySockets/Baileys`
-- Licença observada: MIT
-- Copyright observado: `Copyright (c) 2025 Rajeh Taher/WhiskeySockets`
-- Estado: **planejada para avaliação como dependência do gateway; ainda não instalada**
-- Uso previsto: engine WhatsApp Web Multi-Device, restrito ao adapter do gateway
-- Condição: fixar versão exata, anexar SBOM, preservar licença e avisos e concluir os gates da Sprint W-01 antes da instalação
+- Licença declarada pelo pacote/tag: MIT
+- Autor declarado: Rajeh Taher
+- Caminho de uso: `apps/messaging-gateway/src/engines/baileys/`
+- Escopo: tipos oficiais confinados, fábrica lazy de socket, tradução por adapter anticorrupção e contract tests sem rede
+- Runtime registrado no Innov: **não**
+- Sessão real: **não**
+- Lifecycle scripts executados: **não**
+- Lockfile resolvido em CI: artefato `pnpm-lock-w06`
+- SHA-256 do lockfile resolvido: `d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9`
+- SHA-256 do ZIP do artefato GitHub Actions: `4261c27746f362710344c066cf919fd9b15bd6932b894052782ad3c4e065baed`
+- CI funcional de referência: `30904107383`
 
-Quando a dependência for efetivamente adicionada, este arquivo deverá registrar:
+#### Dependências transitivas críticas observadas
 
-- versão/tag;
-- commit resolvido no lockfile;
-- checksum/lockfile;
-- caminho de uso;
-- dependências transitivas críticas;
-- data da revisão de licença e segurança.
+O manifesto upstream da tag fixa ou declara, entre outras:
+
+- `libsignal@^6.0.0`;
+- `whatsapp-rust-bridge@0.5.4`;
+- `ws@^8.13.0`;
+- `protobufjs@^7.5.6`;
+- `pino@^9.6`;
+- peer opcional `sharp`.
+
+Há histórico público de preocupação dos mantenedores com a licença GPLv3 associada à cadeia `libsignal`. A licença MIT declarada pelo pacote principal não elimina automaticamente obrigações ou incompatibilidades de dependências transitivas. Portanto:
+
+- a incorporação atual é experimental e confinada;
+- o adapter não está autorizado para piloto ou produção;
+- uma revisão jurídica/SBOM da árvore efetivamente resolvida é gate obrigatório antes de qualquer promoção;
+- se a revisão concluir incompatibilidade com o modelo de distribuição, o provider deverá ser substituído, isolado por serviço com política específica ou removido.
+
+#### Lifecycle scripts bloqueados
+
+O pacote upstream declara `preinstall`, `prepare` e `prepack`. A Innov não aprova nem executa esses scripts durante CI ou build do container. A instalação usa `--ignore-scripts`, e a integridade do lockfile regenerado é comparada ao SHA-256 aprovado da W-06.
 
 ---
 
@@ -153,7 +181,8 @@ A entrada não substitui a obrigação de incluir o texto integral da licença q
 - afirmar que uma técnica conceitualmente semelhante é código original quando houve derivação textual;
 - usar marca ou logo de projeto externo como se integrasse oficialmente a Innov;
 - sugerir endosso dos mantenedores;
-- confundir licença open source com autorização do WhatsApp para operar um cliente não oficial.
+- confundir licença open source com autorização do WhatsApp para operar um cliente não oficial;
+- interpretar a licença MIT do pacote principal como aprovação automática de toda a árvore transitiva.
 
 ---
 
