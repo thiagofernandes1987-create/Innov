@@ -97,6 +97,45 @@ describe("retrieval canônico escopado", () => {
     expect(ranked[0]?.id).toBe(status.id);
   });
 
+  it("aceita fonte sem janela de validade explícita", async () => {
+    const source = createProjectStatusAiSource({
+      organizationId: "org-1",
+      projectId: "project-1",
+      code: "OB-001",
+      name: "Residência Alpha",
+      status: "EXECUTION"
+    });
+    const store: AiRetrievalStore = { lexicalSearch: async () => [source] };
+    const context = await new ContextBuilder(store).build({
+      organizationId: "org-1",
+      projectId: "project-1",
+      query: "status",
+      at: new Date("2026-08-04T20:00:00.000Z")
+    });
+    expect(context.citations).toHaveLength(1);
+    expect(context.citations[0]?.sourceId).toBe(source.id);
+  });
+
+  it("rejeita fonte com data de validade inválida", async () => {
+    const source = {
+      ...createProjectStatusAiSource({
+        organizationId: "org-1",
+        projectId: "project-1",
+        code: "OB-001",
+        name: "Residência Alpha",
+        status: "EXECUTION"
+      }),
+      validFrom: "data-invalida"
+    };
+    const store: AiRetrievalStore = { lexicalSearch: async () => [source] };
+    const context = await new ContextBuilder(store).build({
+      organizationId: "org-1",
+      projectId: "project-1",
+      query: "status"
+    });
+    expect(context.citations).toHaveLength(0);
+  });
+
   it("ContextBuilder remove instrução maliciosa e rejeita outra organização", async () => {
     const malicious = createProjectStatusAiSource({
       organizationId: "org-1",
