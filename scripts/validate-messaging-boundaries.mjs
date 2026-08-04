@@ -34,11 +34,14 @@ const requiredFiles = [
   "apps/messaging-gateway/src/engines/baileys/content.ts",
   "apps/messaging-gateway/src/engines/baileys/adapter.ts",
   "apps/messaging-gateway/src/engines/baileys/official-factory.ts",
+  "apps/messaging-gateway/src/engines/baileys/stored-auth-state.ts",
   "apps/messaging-gateway/src/engines/baileys/index.ts",
+  "apps/messaging-gateway/src/session-store/session-credential-store.ts",
   "tests/messaging-domain.test.ts",
   "tests/messaging-engine.test.ts",
   "tests/messaging-boundary.test.ts",
   "tests/messaging-baileys-adapter.test.ts",
+  "tests/messaging-session-credential-store.test.ts",
   "app/actions/whatsapp.ts",
   "app/app/whatsapp/page.tsx",
   "lib/whatsapp/server.ts"
@@ -95,14 +98,18 @@ const meta = read("lib/messaging/engines/meta-cloud.ts");
 const mock = read("lib/messaging/engines/mock.ts");
 const tests = read("tests/messaging-engine.test.ts");
 const baileysTests = read("tests/messaging-baileys-adapter.test.ts");
+const sessionTests = read("tests/messaging-session-credential-store.test.ts");
 const baileysAdapter = read("apps/messaging-gateway/src/engines/baileys/adapter.ts");
 const baileysFactory = read("apps/messaging-gateway/src/engines/baileys/official-factory.ts");
 const baileysContracts = read("apps/messaging-gateway/src/engines/baileys/contracts.ts");
 const baileysJid = read("apps/messaging-gateway/src/engines/baileys/jid.ts");
 const baileysContent = read("apps/messaging-gateway/src/engines/baileys/content.ts");
+const storedAuthState = read("apps/messaging-gateway/src/engines/baileys/stored-auth-state.ts");
+const sessionStore = read("apps/messaging-gateway/src/session-store/session-credential-store.ts");
 const actions = read("app/actions/whatsapp.ts");
 const page = read("app/app/whatsapp/page.tsx");
 const server = read("lib/whatsapp/server.ts");
+const gatewayIndex = read("apps/messaging-gateway/src/index.ts");
 const env = read(".env.example");
 const rootPackage = JSON.parse(read("package.json") || "{}");
 const gatewayPackage = JSON.parse(read("apps/messaging-gateway/package.json") || "{}");
@@ -174,6 +181,24 @@ for (const token of [
 ]) if (!baileysTests.includes(token)) violations.push(`teste Baileys W-06 ausente: ${token}`);
 
 for (const token of [
+  "createStoredBaileysAuthenticationState", "BufferJSON", "initAuthCreds",
+  "JSON_BUFFER_V1", "currentGeneration"
+]) if (!storedAuthState.includes(token)) violations.push(`auth state W-07 incompleto: ${token}`);
+
+for (const token of [
+  "createEncryptedSessionCredentialStore", "compareAndSwapCredentials",
+  "rotateSessionDataKey", "rewrapSessionDataKey", "exportEncryptedBackup",
+  "restoreEncryptedBackup", "deleteSessionSecrets"
+]) if (!sessionStore.includes(token)) violations.push(`session store W-07 incompleto: ${token}`);
+
+for (const token of [
+  "permite somente um vencedor em escritas concorrentes",
+  "rotaciona a DEK e recriptografa todos os registros",
+  "exporta backup cifrado e restaura sem plaintext",
+  "integra AuthenticationState sem arquivos nem socket"
+]) if (!sessionTests.includes(token)) violations.push(`teste W-07 ausente: ${token}`);
+
+for (const token of [
   "createMetaCloudMessagingEngine", "requireMetaCloudCapability", "capabilityForSendCommand",
   "EngineSendCommand", "engine.send", "provider_type: sendResult.providerType"
 ]) if (!actions.includes(token)) violations.push(`server action fora do engine/policy: ${token}`);
@@ -203,8 +228,13 @@ if (!workspace.includes("apps/messaging-gateway")) violations.push("gateway ause
 if (!baileysAdapter.includes("qrPersisted: false") || baileysAdapter.includes("snapshot.qr")) {
   violations.push("adapter não comprova descarte do valor QR");
 }
+if (gatewayIndex.includes("BaileysEngineAdapter")
+  || gatewayIndex.includes("createStoredBaileysAuthenticationState")
+  || gatewayIndex.includes("session-store")) {
+  violations.push("Baileys/session store foi registrado no bootstrap antes do lifecycle W-08");
+}
 if (/WHATSAPP_WEB_BAILEYS["']?\s*[,\]]/.test(read("lib/messaging/domain.ts").split("IMPLEMENTED_CHANNEL_PROVIDER_TYPES")[1]?.split(";")[0] || "")) {
-  violations.push("Baileys foi registrado como runtime implementado antes das sprints de sessão/lifecycle");
+  violations.push("Baileys foi registrado como runtime implementado antes das sprints de lifecycle");
 }
 
 if (violations.length) {
@@ -214,7 +244,7 @@ if (violations.length) {
 
 console.log(JSON.stringify({
   ok: true,
-  contract: "messaging-engine-boundary-v4",
+  contract: "messaging-engine-boundary-v5",
   scannedRoots: sourceRoots.filter(item => fs.existsSync(path.join(root, item))),
   requiredFiles: requiredFiles.length,
   allowedEngineDirectories,
@@ -223,10 +253,13 @@ console.log(JSON.stringify({
   baileysVersion: "7.0.0-rc13",
   installedOnlyInGateway: true,
   adapterImplemented: true,
+  encryptedSessionStoreImplemented: true,
+  sessionPersistence: true,
   runtimeRegistered: false,
   externalSocketBlockedByDefault: true,
   qrValueDiscarded: true,
-  sessionPersistence: false,
+  sessionLeaseImplemented: false,
+  realSessionMaterialPresent: false,
   realNumberUsed: false,
   productionEnabled: false,
   implementedProviders: ["META_CLOUD"]
