@@ -1,8 +1,8 @@
 # Provider WhatsApp Web não oficial — índice de governança
 
-**Status atual:** Sprints W-01, W-02 e W-03 concluídas; engine Baileys e runtime não iniciados  
+**Status atual:** Sprints W-01 a W-04 concluídas; engine Baileys e runtime não iniciados  
 **Produção:** bloqueada  
-**Próxima sprint:** W-04 — Evolução do banco sem domínio paralelo
+**Próxima sprint:** W-05 — Esqueleto do gateway
 
 ---
 
@@ -14,17 +14,19 @@
 4. [`MATRIZ-LICENCAS-E-REAPROVEITAMENTO.md`](./MATRIZ-LICENCAS-E-REAPROVEITAMENTO.md) — permissões, bloqueios e técnicas por projeto/arquivo.
 5. [`POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md`](./POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md) — número autorizado, aceite, opt-out, casos proibidos e remoção de sessão.
 6. [`CONTRATOS-CANONICOS-V1.md`](./CONTRATOS-CANONICOS-V1.md) — modelo provider-neutral concluído na W-02.
-7. [`EVIDENCIAS-W01.md`](./EVIDENCIAS-W01.md) — evidências de governança.
-8. [`EVIDENCIAS-W02.md`](./EVIDENCIAS-W02.md) — evidências dos contratos canônicos.
-9. [`EVIDENCIAS-W03.md`](./EVIDENCIAS-W03.md) — contratos de engine, capabilities, policy gates e CI.
-10. [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) — avisos e estado de dependências/adaptações externas.
+7. [`SCHEMA-W04.md`](./SCHEMA-W04.md) — decisão de persistência multiprovider sem domínio paralelo.
+8. [`EVIDENCIAS-W01.md`](./EVIDENCIAS-W01.md) — evidências de governança.
+9. [`EVIDENCIAS-W02.md`](./EVIDENCIAS-W02.md) — evidências dos contratos canônicos.
+10. [`EVIDENCIAS-W03.md`](./EVIDENCIAS-W03.md) — contratos de engine, capabilities, policy gates e CI.
+11. [`EVIDENCIAS-W04.md`](./EVIDENCIAS-W04.md) — migration, RLS, testes PostgreSQL e rollback lógico.
+12. [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) — avisos e estado de dependências/adaptações externas.
 
 ---
 
 ## Decisões já fixadas
 
 - o provider não oficial é opcional e revogável;
-- Meta Cloud API permanece o provider oficial e padrão;
+- Meta Cloud API permanece o provider oficial e o único runtime implementado;
 - providers compartilham domínio, mas não runtime;
 - `channelAccountId` interno e `providerAccountId` externo são campos distintos;
 - identidades PN, LID, grupos, newsletters e usuários web possuem namespaces próprios;
@@ -35,7 +37,13 @@
 - configuração inválida falha fechada;
 - provider sem runtime não pode ser ativado por feature flag;
 - Meta Cloud está encapsulada no contrato de engine;
-- Baileys ficará confinado a um adapter em gateway persistente separado;
+- as sete relações `whatsapp_*` existentes permanecem o domínio operacional único;
+- relações `channel_*` guardam somente identidades externas, comandos, outbox, inbox, tentativas, DLQ e rollback;
+- não existem tabelas paralelas de contatos, conversas ou mensagens;
+- a inbox técnica persiste somente eventos sanitizados;
+- tabelas técnicas usam RLS forçada e escrita por portas controladas;
+- rollback do provider é lógico e não apaga histórico;
+- Baileys ficará confinado a um adapter em gateway separado;
 - o CI bloqueia imports e tipos Baileys fora dos adapters autorizados;
 - nenhum código de projeto sem licença clara será copiado;
 - nenhum mecanismo de evasão, spam ou rotação de contas será implementado;
@@ -64,9 +72,14 @@
 | Feature flags por organização | concluídas — W-03 |
 | Gates UI e backend | concluídos — W-03 |
 | Gate de imports Baileys v3 | concluído e testado |
-| CI da W-03 | verde |
+| Evolução aditiva do banco | concluída — W-04 |
+| Identidades externas e aliases | concluídos — W-04 |
+| Comandos, outbox, inbox e DLQ | fundação persistente concluída — W-04 |
+| Ledger de tentativas | fundação persistente concluída — W-04 |
+| RLS e testes multiempresa | concluídos — W-04 |
+| Rollback lógico | concluído — W-04 |
+| CI da W-04 | verde |
 | File Security E2E | verde |
-| Evolução do banco multiprovider | pendente — W-04 |
 | Baileys instalado | não |
 | Gateway criado | não |
 | Número autorizado | não |
