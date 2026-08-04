@@ -6,6 +6,7 @@ const files = [
   "supabase/tests/messaging-multiprovider/legacy-seed.sql",
   "supabase/migrations/20260804011500_stage22_multiprovider_storage.sql",
   "supabase/migrations/20260804123000_stage22_session_credential_store.sql",
+  "supabase/migrations/20260804123500_stage22_session_credential_store_function_fix.sql",
   "supabase/tests/messaging-session-credentials/storage.test.sql"
 ];
 
