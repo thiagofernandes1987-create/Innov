@@ -3,17 +3,17 @@
 **Projeto pai:** Etapa 22 — WhatsApp e atendimento omnichannel  
 **Branch de execução:** `feature/etapa-22-provider-whatsapp-web-baileys`  
 **PR:** #40  
-**Status:** W-06 concluída; adapter confinado, runtime e sessão real ainda bloqueados  
-**Provider não oficial estudado:** `@whiskeysockets/baileys@7.0.0-rc13`, somente por adapter próprio  
+**Status:** W-00 a W-07 concluídas; 8 de 23 sprints concluídas e 15 pendentes  
+**Provider estudado:** `@whiskeysockets/baileys@7.0.0-rc13`, somente por adapter próprio  
+**Runtime Baileys:** não registrado  
 **Produção:** bloqueada  
-**Última atualização:** 04 de agosto de 2026  
-**Documentos complementares:** [`SPEC.md`](./SPEC.md), [`SCHEMA-W04.md`](./SCHEMA-W04.md), [`GATEWAY-W05.md`](./GATEWAY-W05.md), [`ADAPTER-BAILEYS-W06.md`](./ADAPTER-BAILEYS-W06.md)
+**Última atualização:** 04 de agosto de 2026
+
+Documentos principais: [`SPEC.md`](./SPEC.md), [`README.md`](./README.md), [`ADAPTER-BAILEYS-W06.md`](./ADAPTER-BAILEYS-W06.md), [`SESSION-STORE-W07.md`](./SESSION-STORE-W07.md) e evidências W-01 a W-07.
 
 ---
 
 ## 1. Objetivo e fronteira
-
-Este inventário governa a construção incremental de uma arquitetura multiprovider própria para o Innov. O objetivo é reaproveitar técnicas, invariantes, abstrações, padrões de persistência, retries, eventos e handoff estudados em projetos de referência, sem copiar produtos inteiros nem criar um domínio paralelo.
 
 ```text
 engine de canal
@@ -27,28 +27,23 @@ contas, contatos, conversas e mensagens existentes
 CRM, Cliente 360, obras, contratos, SAC e documentos
 ```
 
-O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #40 adiciona a arquitetura multiprovider de forma incremental. Até a W-06 foram concluídos contratos canônicos, contratos de engine, capabilities, adapter Meta, mock, policy gates, armazenamento técnico durável, gateway isolado com cliente fake e adapter Baileys confinado. O pacote está presente apenas no workspace do gateway, mas não foi registrado como runtime e não possui sessão, credenciais, QR operacional, número real ou autorização de produção.
-
----
+O domínio oficial da Etapa 22 permanece compartilhado. Meta Cloud API continua sendo o único runtime de canal registrado. O provider não oficial é opcional, revogável e isolado no gateway. A conclusão de código ou testes não autoriza automaticamente conexão, sessão real, número, deploy, piloto ou produção.
 
 ## 2. Regras obrigatórias
 
 1. No máximo uma sprint em andamento.
 2. Check exige arquivo, migration, teste, log, métrica ou decisão verificável.
-3. Nenhum segredo, QR, cookie, token, número real ou material de sessão no repositório.
-4. Técnica externa só pode ser adaptada após licença, origem, vantagem, testes e aviso de terceiros.
-5. Tipos nativos do provider não atravessam o adapter.
-6. Escala horizontal futura exige single writer, lease e fencing token.
-7. Inbound deve ser validado, normalizado, deduplicado e persistido antes de workflow ou IA.
-8. Ordem obrigatória: política → consentimento → workflow → regra → fatos → IA → aprovação/handoff.
-9. São proibidos spam, evasão, spoofing e rotação de contas.
-10. Kill switch será obrigatório antes de qualquer runtime real.
-11. Na dúvida, falhar fechado, preservar evidência e encaminhar para humano.
-12. Uma execução isolada não prova homologação.
-13. Lifecycle scripts de dependências externas permanecem bloqueados salvo revisão específica.
-14. Licença do pacote principal não substitui revisão da árvore transitiva.
-
----
+3. Nenhum segredo, QR, cookie, token, número real ou material real de sessão no repositório.
+4. Tipos nativos do provider não atravessam o adapter.
+5. Escala horizontal exige single writer, lease e fencing token.
+6. Inbound deve ser validado, normalizado, deduplicado e persistido antes de workflow ou IA.
+7. Ordem obrigatória: política → consentimento → workflow → regra → fatos → IA → aprovação/handoff.
+8. Spam, evasão, spoofing e rotação de contas são proibidos.
+9. Kill switch é obrigatório antes de qualquer runtime real.
+10. Na dúvida, falhar fechado, preservar evidência e encaminhar para humano.
+11. Lifecycle scripts externos permanecem bloqueados sem revisão específica.
+12. Licença do pacote principal não substitui revisão da árvore transitiva.
+13. Uma execução isolada não prova homologação.
 
 ## 3. Baseline da Etapa 22
 
@@ -71,8 +66,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-00 — Pesquisa e consolidação arquitetural
 
-**Estado:** concluída  
-**Dependências:** nenhuma
+**Estado:** concluída
 
 - [x] W-00.1 — Analisar `WhiskeySockets/Baileys`
 - [x] W-00.2 — Analisar `rmyndharis/OpenWA`
@@ -86,16 +80,13 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - [x] W-00.10 — Analisar `mruniquehacker/Knightbot-MD`
 - [x] W-00.11 — Analisar `sigalor/whatsapp-web-reveng`
 - [x] W-00.12 — Classificar biblioteca, driver, gateway, CRM, bot e pesquisa
-- [x] W-00.13 — Selecionar Baileys como primeiro engine não oficial estudado
+- [x] W-00.13 — Selecionar Baileys como primeiro engine estudado
 - [x] W-00.14 — Definir técnicas reaproveitáveis sem copiar produtos completos
 - [x] W-00.15 — Criar inventário e SPEC
 
-**Evidência:** análise de referências, `SPEC.md` e este inventário.
-
 ## Sprint W-01 — ADR, licença e modelo de risco
 
-**Estado:** concluída  
-**Dependências:** W-00
+**Estado:** concluída
 
 - [x] W-01.1 — ADR do provider opcional
 - [x] W-01.2 — Domínio compartilhado e runtimes separados
@@ -108,9 +99,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - [x] W-01.9 — Processo de desligamento e remoção de sessão
 - [x] W-01.10 — Critérios de cancelamento do projeto
 
-**Evidência:** ADR-001, matriz de licenças, política de risco e `EVIDENCIAS-W01.md`.
-
-**Gate W-G01:** concluído no escopo documental; nenhum runtime foi autorizado.
+**Gate W-G01:** concluído apenas no escopo documental.
 
 ---
 
@@ -118,14 +107,13 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-02 — Modelo canônico de canal, identidade e mensagem
 
-**Estado:** concluída  
-**Dependências:** W-01
+**Estado:** concluída
 
 - [x] W-02.1 — Definir `ChannelProviderType`
-  - [x] W-02.1.1 — `META_CLOUD`
-  - [x] W-02.1.2 — `WHATSAPP_WEB_BAILEYS`
-  - [x] W-02.1.3 — `WEB_CHAT`
-  - [x] W-02.1.4 — Providers futuros reservados
+- [x] W-02.1.1 — `META_CLOUD`
+- [x] W-02.1.2 — `WHATSAPP_WEB_BAILEYS`
+- [x] W-02.1.3 — `WEB_CHAT`
+- [x] W-02.1.4 — Providers futuros reservados
 - [x] W-02.2 — Definir `CanonicalIdentity`
 - [x] W-02.3 — Namespaces PHONE, PN, LID, GROUP, NEWSLETTER e WEB_USER
 - [x] W-02.4 — Definir `CanonicalMessage`
@@ -138,14 +126,9 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - [x] W-02.11 — Mapear estruturas existentes para o modelo neutro
 - [x] W-02.12 — Compatibilidade retroativa com Meta
 
-**Evidência:** `lib/messaging/domain.ts`, compatibilidade, testes, scanner, `CONTRATOS-CANONICOS-V1.md` e `EVIDENCIAS-W02.md`.
-
-**Gate W-G02:** concluído; Baileys ainda não estava instalado nessa sprint.
-
 ## Sprint W-03 — Contrato de engine e matriz de capacidades
 
-**Estado:** concluída  
-**Dependências:** W-02
+**Estado:** concluída
 
 - [x] W-03.1 — Criar `MessagingEngine`
 - [x] W-03.2 — Criar `SessionEngine`
@@ -159,14 +142,9 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - [x] W-03.10 — Feature flags por provider e organização
 - [x] W-03.11 — Ocultar e bloquear ações não suportadas
 
-**Evidência:** engines, capabilities, policy server, testes, gate v3 e `EVIDENCIAS-W03.md`.
-
-**Gate W-G03:** concluído; apenas Meta possui runtime registrado.
-
 ## Sprint W-04 — Evolução do banco sem domínio paralelo
 
-**Estado:** concluída  
-**Dependências:** W-02 e W-03
+**Estado:** concluída
 
 - [x] W-04.1 — Inventariar tabelas `whatsapp_*`
 - [x] W-04.2 — Decidir evolução compatível e papel técnico de `channel_*`
@@ -182,30 +160,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - [x] W-04.12 — Criar testes negativos multiempresa
 - [x] W-04.13 — Criar rollback lógico sem perda histórica
 
-**Evidências:**
-
-- `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql`;
-- `supabase/tests/messaging-multiprovider/fixture.sql`;
-- `supabase/tests/messaging-multiprovider/legacy-seed.sql`;
-- `supabase/tests/messaging-multiprovider/storage.test.sql`;
-- `scripts/run-messaging-multiprovider-db-tests.mjs`;
-- `scripts/validate-messaging-storage.mjs`;
-- `SCHEMA-W04.md` e `EVIDENCIAS-W04.md`;
-- head funcional `3768aabed65710dd2a9c7684fa2f36956921feb6`;
-- CI `30868484609` verde;
-- File Security E2E `30868484604` verde;
-- Vercel verde.
-
-**Decisões fixadas:**
-
-- as sete relações `whatsapp_*` continuam sendo o domínio operacional único;
-- `channel_*` guarda somente aliases, comandos, outbox, inbox, tentativas, DLQ e rollback;
-- não existem `channel_contacts`, `channel_conversations` ou `channel_messages`;
-- identificadores externos são escopados por organização, provider e conta;
-- inbox técnica persiste somente representação sanitizada;
-- rollback desativa a conta e cancela trabalho pendente sem apagar histórico.
-
-**Gate W-G04:** concluído. Nenhum contato, conversa, mensagem, documento ou vínculo de negócio foi duplicado por provider.
+**Gate W-G04:** domínio operacional único preservado; 11 controles PostgreSQL verdes.
 
 ---
 
@@ -213,8 +168,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-05 — Esqueleto do gateway
 
-**Estado:** concluída  
-**Dependências:** W-03 e W-04
+**Estado:** concluída
 
 - [x] W-05.1 — Criar `apps/messaging-gateway`
 - [x] W-05.2 — Definir Node.js compatível
@@ -230,44 +184,9 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - [x] W-05.12 — Isolar rede e banco principal
 - [x] W-05.13 — Cliente fake sem WhatsApp
 
-**Evidências:**
-
-- `apps/messaging-gateway/package.json` e `tsconfig.json`;
-- `apps/messaging-gateway/src/config.ts`;
-- `apps/messaging-gateway/src/contracts.ts`;
-- `apps/messaging-gateway/src/security.ts`;
-- `apps/messaging-gateway/src/replay-guard.ts`;
-- `apps/messaging-gateway/src/metrics.ts`;
-- `apps/messaging-gateway/src/fake-client.ts`;
-- `apps/messaging-gateway/src/server.ts` e `index.ts`;
-- `apps/messaging-gateway/Dockerfile` e `compose.yaml`;
-- `tests/messaging-gateway.test.ts`;
-- `scripts/validate-messaging-gateway.mjs`;
-- `scripts/run-messaging-gateway-container-smoke.sh`;
-- `GATEWAY-W05.md` e `EVIDENCIAS-W05.md`;
-- head funcional `9bb75e77dfe0421378d94e6474614fbc7185d03e`;
-- CI `30896714160` verde;
-- File Security E2E `30896714116` verde;
-- Vercel verde.
-
-**Decisões fixadas:**
-
-- o gateway é um processo Node.js 24 separado do Next.js;
-- o único cliente disponível na W-05 é `FakeChannelClient`;
-- nenhum SDK de WhatsApp ou dependência própria foi incorporado naquela sprint;
-- o gateway não recebe credenciais nem acesso ao banco principal;
-- comandos internos exigem HMAC-SHA256, timestamp, nonce e correlation ID;
-- replay, body excessivo e configuração inválida falham fechado;
-- health, readiness e métricas não expõem payload ou segredo;
-- o container executa como `10001:10001`, com filesystem somente leitura e capabilities removidas;
-- o smoke test executa a imagem com `--network none`, limites de recursos e shutdown por SIGTERM.
-
-**Gate W-G05:** concluído. O serviço isolado, os testes HTTP, o build e o container endurecido foram executados em CI. O gate não autorizou conexão com WhatsApp, sessão, QR, número real, deploy ou produção.
-
 ## Sprint W-06 — Adapter Baileys
 
-**Estado:** concluída  
-**Dependências:** W-05
+**Estado:** concluída
 
 - [x] W-06.1 — Fixar versão exata; proibir `latest`
 - [x] W-06.2 — Criar `BaileysEngineAdapter`
@@ -284,73 +203,47 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - [x] W-06.13 — Criar contract tests
 - [x] W-06.14 — Falhar se tipo Baileys escapar do adapter
 
-**Evidências:**
-
-- `apps/messaging-gateway/package.json` com `@whiskeysockets/baileys@7.0.0-rc13`;
-- `apps/messaging-gateway/src/engines/baileys/contracts.ts`;
-- `apps/messaging-gateway/src/engines/baileys/jid.ts`;
-- `apps/messaging-gateway/src/engines/baileys/content.ts`;
-- `apps/messaging-gateway/src/engines/baileys/errors.ts`;
-- `apps/messaging-gateway/src/engines/baileys/capabilities.ts`;
-- `apps/messaging-gateway/src/engines/baileys/official-factory.ts`;
-- `apps/messaging-gateway/src/engines/baileys/adapter.ts`;
-- `apps/messaging-gateway/src/engines/baileys/index.ts`;
-- `tests/messaging-baileys-adapter.test.ts` — 25 testes;
-- `tests/messaging-boundary.test.ts`;
-- `scripts/validate-messaging-boundaries.mjs` — `messaging-engine-boundary-v4`;
-- `scripts/validate-messaging-gateway.mjs` — `messaging-gateway-boundary-v4`;
-- `scripts/validate-messaging-storage.mjs` — `messaging-storage-boundary-v2`;
-- `scripts/verify-w06-lockfile.mjs` — `messaging-w06-lockfile-v1`;
-- `THIRD_PARTY_NOTICES.md`;
-- `ADAPTER-BAILEYS-W06.md` e `EVIDENCIAS-W06.md`;
-- head funcional `9e94603cbd9e50dc44e5f848a2aa5e195a8d9a43`;
-- CI `30904107383` verde;
-- File Security E2E `30904107397` verde.
-
-**Decisões fixadas:**
-
-- o pacote existe somente no workspace do gateway;
-- a versão é exata e sem faixa flutuante;
-- lifecycle scripts externos permanecem bloqueados;
-- o lockfile regenerado deve possuir SHA-256 `d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9`;
-- tipos nativos permanecem confinados ao diretório do adapter;
-- a fábrica oficial usa import dinâmico e autorização explícita;
-- `DENIED` é o estado padrão e lança `EXTERNAL_SOCKET_BLOCKED`;
-- o gateway ativo continua usando `FakeChannelClient`;
-- Baileys não está registrado em `IMPLEMENTED_CHANNEL_PROVIDER_TYPES`;
-- QR recebido é reduzido a `pairingChallengeAvailable: true` e `qrPersisted: false`; o valor não é propagado;
-- mídia outbound exige URL HTTPS assinada;
-- mídia inbound permanece referência do provider, sem download;
-- grupos e newsletters são bloqueados por padrão;
-- a licença MIT do pacote principal não elimina revisão da árvore transitiva;
-- `libsignal` e `whatsapp-rust-bridge` permanecem sob revisão jurídica/SBOM antes de piloto ou produção.
-
-**Gate W-G06:** concluído no escopo de adapter e testes sem rede. Nenhum socket oficial foi aberto, nenhuma autenticação foi resolvida e nenhum material de sessão foi criado. A conclusão não autoriza runtime, QR/pairing, número real, deploy, piloto ou produção.
+**Gate W-G06:** adapter e testes sem rede concluídos; runtime não registrado.
 
 ## Sprint W-07 — Armazenamento criptográfico da sessão
 
-**Estado:** pendente  
-**Dependências:** W-05 e W-06
+**Estado:** concluída no escopo sintético
 
-- [ ] W-07.1 — Criar `SessionCredentialStore`
-- [ ] W-07.2 — Modelar credenciais, keys e versões
-- [ ] W-07.3 — Implementar transações
-- [ ] W-07.4 — Implementar optimistic concurrency
-- [ ] W-07.5 — Implementar envelope encryption
-- [ ] W-07.6 — Separar DEK por sessão
-- [ ] W-07.7 — Manter chave-mestra fora do banco
-- [ ] W-07.8 — Impedir logs de material criptográfico
-- [ ] W-07.9 — Criar rotação e recriptografia
-- [ ] W-07.10 — Criar backup e restore testados
-- [ ] W-07.11 — Criar exclusão criptográfica
-- [ ] W-07.12 — Auditar acesso às credenciais
-- [ ] W-07.13 — Testar corrupção, versão e concorrência
-- [ ] W-07.14 — Proibir `useMultiFileAuthState` fora de testes descartáveis
+- [x] W-07.1 — Criar `SessionCredentialStore`
+- [x] W-07.2 — Modelar credenciais, keys e versões
+- [x] W-07.3 — Implementar transações
+- [x] W-07.4 — Implementar optimistic concurrency
+- [x] W-07.5 — Implementar envelope encryption
+- [x] W-07.6 — Separar DEK por sessão
+- [x] W-07.7 — Manter chave-mestra fora do banco
+- [x] W-07.8 — Impedir logs de material criptográfico
+- [x] W-07.9 — Criar rotação e recriptografia
+- [x] W-07.10 — Criar backup e restore testados
+- [x] W-07.11 — Criar exclusão criptográfica
+- [x] W-07.12 — Auditar acesso às credenciais
+- [x] W-07.13 — Testar corrupção, versão e concorrência
+- [x] W-07.14 — Proibir `useMultiFileAuthState` fora de testes descartáveis
+
+**Evidências:**
+
+- `apps/messaging-gateway/src/session-store/**`;
+- `apps/messaging-gateway/src/engines/baileys/stored-auth-state.ts`;
+- migrations `20260804123000` e `20260804123500`;
+- 8 controles PostgreSQL W-07 verdes;
+- 13 testes específicos verdes;
+- `messaging-session-store-boundary-v1` verde;
+- `messaging-engine-boundary-v5` verde;
+- `messaging-storage-boundary-v3` verde;
+- CI `30910897339` verde;
+- File Security E2E `30910899334` verde;
+- lint, typecheck, suíte global, Python, builds e container sem rede verdes;
+- `SESSION-STORE-W07.md` e `EVIDENCIAS-W07.md`.
+
+**Gate W-G07:** concluído somente com dados sintéticos. Nenhum socket, QR, pairing, número ou sessão real foi criado.
 
 ## Sprint W-08 — Single writer, lease e lifecycle
 
-**Estado:** pendente  
-**Dependências:** W-07
+**Estado:** pendente — próxima sprint autorizada
 
 - [ ] W-08.1 — Criar `session_runtime_leases`
 - [ ] W-08.2 — Lease com expiração
@@ -375,8 +268,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-09 — Ingress e normalização
 
-**Estado:** pendente  
-**Dependências:** W-06 e W-08
+**Estado:** pendente
 
 - [ ] W-09.1 — Criar envelope canônico
 - [ ] W-09.2 — Persistir antes do dispatch
@@ -395,8 +287,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-10 — Outbox, comandos e entrega
 
-**Estado:** pendente  
-**Dependências:** W-09
+**Estado:** pendente
 
 - [ ] W-10.1 — Criar comando canônico
 - [ ] W-10.2 — Persistir antes do envio
@@ -417,8 +308,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-11 — Identidades, contatos e deduplicação
 
-**Estado:** pendente  
-**Dependências:** W-09
+**Estado:** pendente
 
 - [ ] W-11.1 — Normalizar JIDs
 - [ ] W-11.2 — Persistir PN
@@ -434,8 +324,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-12 — Mídia segura
 
-**Estado:** pendente  
-**Dependências:** W-09 e W-10
+**Estado:** pendente
 
 - [ ] W-12.1 — Criar `MediaReference`
 - [ ] W-12.2 — Streaming; evitar base64 persistente
@@ -458,8 +347,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-13 — Inbox multiprovider e atendimento
 
-**Estado:** pendente  
-**Dependências:** W-09, W-10 e W-11
+**Estado:** pendente
 
 - [ ] W-13.1 — Exibir provider e estado sem poluir UX
 - [ ] W-13.2 — Unificar conversas do mesmo contato
@@ -477,8 +365,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-14 — Playbooks e fontes canônicas
 
-**Estado:** pendente  
-**Dependências:** W-13
+**Estado:** pendente
 
 - [ ] W-14.1 — Reaproveitar `whatsapp_content_bindings`
 - [ ] W-14.2 — Não duplicar mensagens padrão
@@ -495,8 +382,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-15 — Ponte de IA
 
-**Estado:** pendente  
-**Dependências:** W-09, W-13 e W-14
+**Estado:** pendente
 
 - [ ] W-15.1 — Criar `AiProvider`
 - [ ] W-15.2 — Criar `AiOrchestrator` independente do canal
@@ -519,8 +405,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-16 — Plugins e automações governadas
 
-**Estado:** pendente  
-**Dependências:** W-14 e W-15
+**Estado:** pendente
 
 - [ ] W-16.1 — Criar `MessagePlugin`
 - [ ] W-16.2 — Prioridade e short-circuit
@@ -541,8 +426,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-17 — Segurança e threat model
 
-**Estado:** pendente  
-**Dependências:** W-08, W-10, W-12 e W-15
+**Estado:** pendente
 
 - [ ] W-17.1 — Criar STRIDE
 - [ ] W-17.2 — Mapear ativos
@@ -562,8 +446,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-18 — Observabilidade e operação
 
-**Estado:** pendente  
-**Dependências:** W-10 e W-17
+**Estado:** pendente
 
 - [ ] W-18.1 — Métricas de sessão
 - [ ] W-18.2 — Métricas ingress e egress
@@ -583,8 +466,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-19 — Testes funcionais, chaos e performance
 
-**Estado:** pendente  
-**Dependências:** W-17 e W-18
+**Estado:** pendente
 
 - [ ] W-19.1 — Unit tests canônicos
 - [ ] W-19.2 — Contract tests
@@ -615,8 +497,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-20 — Homologação interna
 
-**Estado:** pendente  
-**Dependências:** W-19
+**Estado:** pendente
 
 - [ ] W-20.1 — Número dedicado e autorizado
 - [ ] W-20.2 — Organização de homologação
@@ -633,8 +514,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-21 — Piloto restrito
 
-**Estado:** pendente  
-**Dependências:** W-20
+**Estado:** pendente
 
 - [ ] W-21.1 — Definir escopo e usuários
 - [ ] W-21.2 — Definir SLOs e abort criteria
@@ -649,8 +529,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-22 — Encerramento da etapa
 
-**Estado:** pendente  
-**Dependências:** W-21
+**Estado:** pendente
 
 - [ ] W-22.1 — Atualizar `diretrizes/SPEC.md`
 - [ ] W-22.2 — Atualizar `diretrizes/INVENTARIO.md`
@@ -679,7 +558,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - [x] Rollback lógico sem perda histórica
 - [x] Adapter Baileys confinado
 - [x] Runtime separado do Next.js
-- [ ] Session store criptografado e transacional
+- [x] Session store criptografado e transacional
 - [ ] Single writer e fencing comprovados
 - [ ] Ingress operacional durável e idempotente
 - [ ] Worker de outbox e retry operacional comprovados
@@ -690,56 +569,49 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - [ ] IA independente e inicialmente em rascunho
 - [ ] Handoff persistente
 - [ ] Threat model aprovado
-- [ ] Logs sem segredos
+- [ ] Logs operacionais sem segredos
 - [ ] Métricas, alertas e runbooks
-- [ ] Restart, concorrência e restore verdes
+- [ ] Restart, concorrência e restore de runtime verdes
 - [ ] Piloto restrito concluído
 - [ ] Decisão explícita de produção
 - [ ] Documentação canônica final atualizada
 - [ ] CI e E2E finais verdes
 
----
-
 ## 5. Dependências externas
 
 | Controle | Estado | Próxima ação |
 |---|---|---|
-| Revisão transitiva/SBOM Baileys | pendente | antes de piloto ou distribuição operacional |
 | Aceite operacional | não executado | antes de número real |
-| Revisão jurídica | dependência externa | antes de piloto ou produção |
+| Revisão jurídica/SBOM | dependência externa | antes de piloto ou produção |
+| KMS/HSM de produção | não definido | antes de dados reais |
 | Número autorizado | não executado | somente W-20 |
 | Produção | bloqueada | decisão específica posterior |
 
----
-
 ## 6. Próxima ação autorizada
 
-A próxima sprint autorizada é **W-07 — Armazenamento criptográfico da sessão**.
+A próxima e única sprint autorizada é **W-08 — Single writer, lease e lifecycle**.
 
 É permitido:
 
-- criar a porta `SessionCredentialStore` sem conectar o provider;
-- modelar credenciais, signal keys, versões e metadata mínima;
-- criar migration aditiva para storage técnico, sem duplicar contatos, conversas ou mensagens;
-- aplicar RLS forçada, privilégios mínimos e funções controladas;
-- implementar envelope encryption com DEK por sessão;
-- manter KEK/chave-mestra fora do banco e fora do repositório;
-- implementar transações e optimistic concurrency;
-- criar rotação, recriptografia e exclusão criptográfica;
-- criar auditoria de acesso sem registrar material secreto;
-- criar backup/restore e testes de corrupção, concorrência e versão somente com fixtures sintéticas;
-- criar adapter de auth-state contra a porta, usando doubles e sem abrir socket;
-- ampliar scanners para bloquear logs, dumps, QR e `useMultiFileAuthState` produtivo.
+- criar `session_runtime_leases`;
+- implementar lease com expiração e renovação;
+- implementar fencing token monotônico;
+- impedir dois escritores simultâneos;
+- modelar state machine de conexão;
+- representar QR e pairing somente como eventos efêmeros sintéticos;
+- aplicar backoff e jitter em doubles;
+- classificar logout, restrição, transitório e ação humana;
+- takeover somente após expiração comprovada;
+- implementar kill switch global e por sessão;
+- testar processo zumbi, restart durante atualização e restore sintético.
 
 Ainda não está autorizado:
 
 - abrir socket externo;
-- chamar autenticação real do WhatsApp;
-- gerar ou exibir QR/pairing;
-- utilizar credenciais ou keys reais;
+- executar autenticação real;
+- produzir ou exibir QR/pairing real;
+- persistir dados reais de sessão;
 - usar número real;
-- registrar Baileys como runtime implementado;
-- criar lease, fencing ou reconexão operacional antes da W-08;
-- implantar o gateway;
+- conectar o gateway ao ambiente produtivo;
 - habilitar automação ou IA;
-- promover para piloto ou produção.
+- deploy, piloto ou produção.
