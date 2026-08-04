@@ -31,13 +31,13 @@ a ignorar.
 | Aplicativos no registro | 23 |
 | Rotas | 159 (141 páginas, 18 de API) |
 | Server actions | 182 em 31 arquivos |
-| Módulos de `lib/` | 90 |
+| Módulos de `lib/` | 92 |
 | Funções do banco declaradas | 229 |
 | Funções do banco chamadas do código | 116 |
-| Suítes de teste | 53, com 608 casos |
+| Suítes de teste | 54, com 614 casos |
 | Migrations | 161 |
 | Validadores de CI | 28 |
-| Módulos de `lib/` citados por algum teste | 51 de 90 |
+| Módulos de `lib/` citados por algum teste | 52 de 92 |
 
 ## 1. Aplicativos
 
@@ -586,6 +586,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/casca/avisos` | não | `COOKIE_VISTO_ATIVIDADES`, `COOKIE_VISTO_MENSAGENS`, `carregarAvisos` |
 | `@/lib/casca/indicadores` | não | `carregarIndicadores` |
 | `@/lib/casca/menus` | sim | `MENUS_DO_MODULO`, `menusDe` |
+| `@/lib/cost-sources/cub-fonte` | sim | `PAGINA_DO_CUB`, `buscarSerieHistoricaDoCub`, `encontrarLinkDaSerie` |
 | `@/lib/cost-sources/cub-serie-historica` | sim | `TIPOLOGIAS_CUB`, `TOLERANCIA_DA_SERIE`, `dataDoSerial`, `familiaDaTipologia`, `lerSerieHistoricaDoCub`, `padraoDeAcabamento` |
 | `@/lib/cost-sources/sinduscon` | sim | `SINDUSCON_CUB_FEED_URL`, `SINDUSCON_CUB_SOURCE_KEY`, `fetchLatestSindusconCub`, `findLatestCubArticleUrl`, `parseSindusconCubPublication` |
 | `@/lib/documentos/biblioteca` | sim | `modelosDisponiveis`, `porTipo`, `tiposDoAplicativo` |
@@ -638,6 +639,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/planejamento/eap` | sim | `compararCodigos`, `diferencas`, `partes`, `proximoCodigo`, `renumerar` |
 | `@/lib/planejamento/modelos-de-eap` | sim | `MINIMO_DE_OCORRENCIAS`, `modeloPara`, `modelosDeEtapa` |
 | `@/lib/planejamento/modelos-servidor` | não | `modelosDeEap` |
+| `@/lib/planilhas/xlsx` | não | `LIMITES_XLSX`, `extractZipEntry`, `listZipEntries`, `parseWorkbook` |
 | `@/lib/procurement/comparison` | não | `compareProcurementQuotes`, `formatCurrency` |
 | `@/lib/projects/project-creation` | sim | `PROJECT_ENTRY_MODES`, `PROJECT_STATUSES_BY_MODE`, `classifyProjectCreationProviderError`, `validateContractProject`, `validateFlexibleProject` |
 | `@/lib/public-errors` | sim | `mapPublicOperationError` |
@@ -916,6 +918,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/busca-cobre-funis.test.ts` | 2 | busca da barra cobre as telas de funil |
 | `tests/cep-busca.test.ts` | 11 | interpretarRespostaViaCEP; buscarCEP |
 | `tests/cronograma.test.ts` | 24 | vocabulário; Término-Início (TI); Início-Início (II); Término-Término (TT) |
+| `tests/cub-fonte.test.ts` | 6 | o link da série histórica é descoberto, não fixado |
 | `tests/cub-serie-historica.test.ts` | 12 | o serial do Excel vira data; as tipologias da NBR 12721; leitura da série histórica |
 | `tests/documentos-edicao.test.ts` | 18 | negrito, itálico e afins; prefixo por linha; inserções; barra de status |
 | `tests/documentos-importacao.test.ts` | 32 | analisador de XML; estilos do Word; DOCX para Markdown; CSV |
@@ -1005,7 +1008,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 39 de 90 |
+| Módulo de `lib/` sem teste que o cite | 40 de 92 |
 
 ### Módulos sem teste que os cite
 
@@ -1034,6 +1037,7 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/pipeline/server`
 - `@/lib/planejamento/curvas`
 - `@/lib/planejamento/modelos-servidor`
+- `@/lib/planilhas/xlsx`
 - `@/lib/procurement/comparison`
 - `@/lib/quality/database`
 - `@/lib/quality/forms`

@@ -244,6 +244,29 @@ else{
  if(/coalesce\(nullif\(v_item ->> 'unitCost'/.test(sqlExecutavel))errors.push("A importação voltou a converter custo ausente em zero.");
 }
 if(fs.existsSync("lib/sinapi/automatic-update-v2.ts"))errors.push("`automatic-update-v2.ts` voltou: o leitor do SINAPI tem um caminho só.");
+// Um leitor de planilha só (T-37.14). Duas cópias do mesmo ZIP endurecido
+// divergindo em silêncio é o defeito da T-37.7 com outro nome.
+const planilhaComum="lib/planilhas/xlsx.ts";
+if(!fs.existsSync(planilhaComum))errors.push(`Leitor comum de planilha ausente: ${planilhaComum}`);
+else{
+ const comum=read(planilhaComum);
+ for(const token of["listZipEntries","extractZipEntry","parseWorkbook","maxCompressionRatio"])
+  if(!comum.includes(token))errors.push(`Leitor comum de planilha sem ${token}.`);
+}
+for(const arquivo of ["lib/sinapi/official-reference-parser.ts","lib/cost-sources/cub-fonte.ts"]){
+ if(!fs.existsSync(arquivo)){errors.push(`Consumidor do leitor de planilha ausente: ${arquivo}`);continue;}
+ const conteudo=read(arquivo);
+ if(!/from "(?:\.\.\/)+planilhas\/xlsx"/.test(conteudo))errors.push(`${arquivo} não usa o leitor comum de planilha.`);
+ if(/function listZipEntries\s*\(/.test(conteudo))errors.push(`${arquivo} reintroduziu uma cópia do leitor de ZIP.`);
+}
+// O CUB agendado tem de sincronizar as dezenove, não só a notícia (T-37.14).
+const cronCub="app/api/cron/cost-sources/sinduscon/route.ts";
+if(!fs.existsSync(cronCub))errors.push(`Rota agendada do CUB ausente: ${cronCub}`);
+else{
+ const rota=read(cronCub);
+ for(const token of["buscarSerieHistoricaDoCub","linhasDaSerie"])
+  if(!rota.includes(token))errors.push(`A sincronização do CUB voltou a gravar só a notícia: falta ${token}.`);
+}
 const conferenciaAoVivo="tests/sinapi-layout-publicado.test.ts";
 if(!fs.existsSync(conferenciaAoVivo))errors.push(`Conferência do layout publicado ausente: ${conferenciaAoVivo}`);
 if(fs.existsSync("package.json")){
