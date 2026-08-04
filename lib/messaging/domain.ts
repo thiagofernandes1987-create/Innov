@@ -109,7 +109,8 @@ export type CanonicalIdentity = {
   id?: string | null;
   organizationId: string;
   providerType: ChannelProviderType;
-  providerAccountId: string;
+  channelAccountId: string;
+  providerAccountId?: string | null;
   namespace: CanonicalIdentityNamespace;
   externalId: string;
   normalizedId: string;
@@ -175,7 +176,8 @@ export type CanonicalMessage = {
   organizationId: string;
   conversationId: string;
   providerType: ChannelProviderType;
-  providerAccountId: string;
+  channelAccountId: string;
+  providerAccountId?: string | null;
   providerMessageId?: string | null;
   idempotencyKey?: string | null;
   direction: CanonicalMessageDirection;
@@ -203,7 +205,8 @@ export type CanonicalReceipt = {
   organizationId: string;
   messageId: string;
   providerType: ChannelProviderType;
-  providerAccountId: string;
+  channelAccountId: string;
+  providerAccountId?: string | null;
   providerMessageId?: string | null;
   receiptType: CanonicalReceiptType;
   occurredAt: string;
@@ -222,9 +225,10 @@ export type CanonicalConversation = {
   organizationId: string;
   status: CanonicalConversationStatus;
   participants: readonly CanonicalIdentity[];
-  providerAccounts: readonly {
+  channelAccounts: readonly {
     providerType: ChannelProviderType;
-    providerAccountId: string;
+    channelAccountId: string;
+    providerAccountId?: string | null;
   }[];
   assignedTo?: string | null;
   unreadCount: number;
@@ -287,12 +291,12 @@ export function normalizeCanonicalPhone(value: string) {
 
 export function canonicalIdentityKey(identity: Pick<
   CanonicalIdentity,
-  "organizationId" | "providerType" | "providerAccountId" | "namespace" | "normalizedId"
+  "organizationId" | "providerType" | "channelAccountId" | "namespace" | "normalizedId"
 >) {
   return [
     identity.organizationId,
     identity.providerType,
-    identity.providerAccountId,
+    identity.channelAccountId,
     identity.namespace,
     identity.normalizedId
   ].join(":");
@@ -301,12 +305,14 @@ export function canonicalIdentityKey(identity: Pick<
 export function createCanonicalPhoneIdentity(input: {
   organizationId: string;
   providerType: ChannelProviderType;
-  providerAccountId: string;
+  channelAccountId: string;
+  providerAccountId?: string | null;
   externalId: string;
   phone: string;
   displayName?: string | null;
   observedAt: string;
   id?: string | null;
+  isSelf?: boolean;
 }): CanonicalIdentity {
   const phoneE164 = normalizeCanonicalPhone(input.phone);
   return {
@@ -314,12 +320,14 @@ export function createCanonicalPhoneIdentity(input: {
     id: input.id,
     organizationId: input.organizationId,
     providerType: input.providerType,
+    channelAccountId: input.channelAccountId,
     providerAccountId: input.providerAccountId,
     namespace: input.providerType === "WEB_CHAT" ? "PHONE" : "WHATSAPP_PN",
     externalId: input.externalId,
     normalizedId: phoneE164,
     phoneE164,
     displayName: input.displayName,
+    isSelf: input.isSelf,
     observedAt: input.observedAt
   };
 }
@@ -328,7 +336,7 @@ export function assertCanonicalIdentity(identity: CanonicalIdentity) {
   if (
     identity.schemaVersion !== MESSAGING_CONTRACT_VERSION ||
     !identity.organizationId ||
-    !identity.providerAccountId ||
+    !identity.channelAccountId ||
     !identity.externalId ||
     !identity.normalizedId ||
     !isChannelProviderType(identity.providerType) ||
@@ -354,7 +362,7 @@ export function assertCanonicalMessage(message: CanonicalMessage) {
     !message.id ||
     !message.organizationId ||
     !message.conversationId ||
-    !message.providerAccountId ||
+    !message.channelAccountId ||
     !isChannelProviderType(message.providerType) ||
     !CANONICAL_MESSAGE_DIRECTIONS.includes(message.direction) ||
     !CANONICAL_MESSAGE_TYPES.includes(message.messageType) ||
@@ -379,7 +387,7 @@ export function assertCanonicalReceipt(receipt: CanonicalReceipt) {
     receipt.schemaVersion !== MESSAGING_CONTRACT_VERSION ||
     !receipt.organizationId ||
     !receipt.messageId ||
-    !receipt.providerAccountId ||
+    !receipt.channelAccountId ||
     !isChannelProviderType(receipt.providerType) ||
     !CANONICAL_RECEIPT_TYPES.includes(receipt.receiptType) ||
     !receipt.occurredAt
