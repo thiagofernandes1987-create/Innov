@@ -3,8 +3,9 @@ import { createHash } from "node:crypto";
 
 const lockfilePath = "pnpm-lock.yaml";
 const gatewayPackagePath = "apps/messaging-gateway/package.json";
+const workspacePath = "pnpm-workspace.yaml";
 const expectedVersion = "7.0.0-rc13";
-const expectedSemanticSha256 = "32ab30145c9c045d8f04860ccb52b85934f0327313099f2e837ec502d4977ff4";
+const expectedSemanticSha256 = "0cde0111db365366ede392ae715baa4575440af43bfd82d6083638c0af130d57";
 const approvedFullArtifactSha256 = "d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9";
 const failures = [];
 
@@ -29,17 +30,25 @@ function twoSpaceBlock(text, marker) {
   return text.slice(start, end).trim();
 }
 
-if (!fs.existsSync(lockfilePath)) failures.push(`Lockfile ausente: ${lockfilePath}`);
-if (!fs.existsSync(gatewayPackagePath)) failures.push(`Manifesto do gateway ausente: ${gatewayPackagePath}`);
+for (const required of [lockfilePath, gatewayPackagePath, workspacePath]) {
+  if (!fs.existsSync(required)) failures.push(`Arquivo obrigatório ausente: ${required}`);
+}
 
 let semanticSha256 = "";
 if (failures.length === 0) {
   const text = normalize(fs.readFileSync(lockfilePath, "utf8"));
+  const workspace = normalize(fs.readFileSync(workspacePath, "utf8"));
   const gatewayPackage = JSON.parse(fs.readFileSync(gatewayPackagePath, "utf8"));
   const declared = gatewayPackage.dependencies?.["@whiskeysockets/baileys"];
 
   if (declared !== expectedVersion) {
     failures.push(`Gateway deve declarar Baileys exatamente ${expectedVersion}; encontrado ${String(declared)}`);
+  }
+  if (!/overrides:\n(?:[ \t].*\n)*?\s{2}ws:\s*8\.21\.1(?:\n|$)/.test(workspace)) {
+    failures.push("Workspace não fixa override ws@8.21.1.");
+  }
+  if (!text.includes("  ws@8.21.1:")) {
+    failures.push("Lockfile regenerado não contém resolução ws@8.21.1.");
   }
 
   const blocks = [
@@ -71,8 +80,7 @@ if (failures.length === 0) {
     "libsignal: 6.0.0",
     "whatsapp-rust-bridge: 0.5.4",
     "protobufjs: 7.6.5",
-    "pino: 9.14.0",
-    "ws: 8.21.1"
+    "pino: 9.14.0"
   ]) {
     if (!semanticText.includes(token)) failures.push(`Cadeia W-06 sem entrada aprovada: ${token}`);
   }
@@ -96,11 +104,12 @@ if (failures.length) {
 console.log(JSON.stringify({
   ok: true,
   contract: "messaging-w06-lockfile-v2",
-  validationScope: "gateway_importer_baileys_package_integrities_and_snapshot",
+  validationScope: "gateway_importer_baileys_package_integrities_snapshot_and_ws_override",
   semanticSha256,
   approvedFullArtifactSha256,
   package: "@whiskeysockets/baileys",
   version: expectedVersion,
+  wsOverride: "8.21.1",
   lifecycleScriptsExecuted: false,
   importer: "apps/messaging-gateway",
   unrelatedWorkspaceResolutionDriftIgnored: true
