@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:messaging-gateway": "vitest run tests/messaging-gateway.test.ts",
+    "test:container:messaging-gateway": "bash scripts/run-messaging-gateway-container-smoke.sh",
     "test:watch": "vitest",
     "test:python": "node scripts/run-python-tests.mjs",
     "validate:docs": "node scripts/validate-documentation.mjs",
