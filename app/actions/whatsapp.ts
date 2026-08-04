@@ -8,7 +8,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { UnsupportedCapabilityError } from "@/lib/messaging/capabilities";
 import {
   MESSAGING_CONTRACT_VERSION,
-  createCanonicalPhoneIdentity
+  createCanonicalPhoneIdentity,
+  type ChannelProviderType
 } from "@/lib/messaging/domain";
 import {
   MessagingEngineError,
@@ -32,6 +33,11 @@ import {
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const IDEMPOTENCY_PATTERN = /^[A-Za-z0-9:_-]{16,160}$/;
+const SUPPORTED_PROVIDER_TYPES = new Set<ChannelProviderType>([
+  "META_CLOUD",
+  "WHATSAPP_WEB_BAILEYS",
+  "WEB_CHAT"
+]);
 
 function text(data: FormData, key: string) {
   return String(data.get(key) ?? "").trim();
@@ -79,13 +85,22 @@ function assertMetaCloudAccount(account: Record<string, unknown> | null) {
   if (!account) {
     throw new WhatsAppDomainError("INVALID_SOURCE", "Conta do WhatsApp não encontrada.");
   }
-  if (String(account.provider_type ?? "META_CLOUD") !== "META_CLOUD") {
-    throw new UnsupportedCapabilityError(
-      "CONVERSATION_START",
-      "Esta ação pertence ao runtime Meta Cloud. O provider WhatsApp Web está isolado e não autorizado para envio real."
+  const rawProviderType = String(account.provider_type ?? "");
+  if (!SUPPORTED_PROVIDER_TYPES.has(rawProviderType as ChannelProviderType)) {
+    throw new WhatsAppDomainError(
+      "INVALID_SOURCE",
+      "A conta possui um provider inválido ou não migrado. Atualize a configuração antes de enviar."
     );
   }
-  if (String(account.provider_status ?? "ENABLED") !== "ENABLED") {
+  const providerType = rawProviderType as ChannelProviderType;
+  if (providerType !== "META_CLOUD") {
+    throw new UnsupportedCapabilityError(
+      providerType,
+      "CONVERSATION_START",
+      "Esta ação pertence ao runtime Meta Cloud. O provider selecionado está isolado e não autorizado para envio real."
+    );
+  }
+  if (String(account.provider_status ?? "") !== "ENABLED") {
     throw new WhatsAppDomainError("INVALID_SOURCE", "A conta selecionada não está disponível para envio.");
   }
 }
