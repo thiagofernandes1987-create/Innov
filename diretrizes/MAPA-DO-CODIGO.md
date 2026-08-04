@@ -29,7 +29,7 @@ a ignorar.
 | | |
 |---|---|
 | Aplicativos no registro | 23 |
-| Rotas | 157 (140 páginas, 17 de API) |
+| Rotas | 158 (140 páginas, 18 de API) |
 | Server actions | 182 em 31 arquivos |
 | Módulos de `lib/` | 88 |
 | Funções do banco declaradas | 229 |
@@ -83,6 +83,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/api/documents/signatures/[envelopeId]` | API | — | `app/api/documents/signatures/[envelopeId]/route.ts` |
 | `/api/financeiro/anexos/[id]` | API | — | `app/api/financeiro/anexos/[id]/route.ts` |
 | `/api/internal/file-security/health` | API | — | `app/api/internal/file-security/health/route.ts` |
+| `/api/internal/sinapi-atualizacao` | API | — | `app/api/internal/sinapi-atualizacao/route.ts` |
 | `/api/internal/sinapi-leitura-real` | API | — | `app/api/internal/sinapi-leitura-real/route.ts` |
 | `/api/internal/sinapi-source-probe` | API | — | `app/api/internal/sinapi-source-probe/route.ts` |
 | `/api/internal/sinapi-source-probe-v2` | API | — | `app/api/internal/sinapi-source-probe-v2/route.ts` |
