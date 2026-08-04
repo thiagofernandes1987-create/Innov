@@ -165,12 +165,12 @@ describe("Messaging outbox W-10", () => {
   });
 
   it("reconcilia crash depois do claim e antes da confirmação", async () => {
-    let current = new Date("2026-08-04T15:00:00Z");
+    let current = new Date("2026-08-04T15:02:00Z");
     const repository = new InMemoryDeliveryRepository(() => current);
     repository.enqueue(command("crash", 1));
     await repository.claimOrdered("worker-crash", 1);
-    repository.simulateCrashAfterClaim("crash", "2026-08-04T15:00:01Z");
-    current = new Date("2026-08-04T15:00:02Z");
+    repository.simulateCrashAfterClaim("crash", "2026-08-04T15:02:01Z");
+    current = new Date("2026-08-04T15:02:02Z");
     expect(await repository.reconcile(current.toISOString())).toBe(1);
     expect(repository.get("crash")?.state).toBe("FAILED");
   });
@@ -185,7 +185,7 @@ describe("Messaging outbox W-10", () => {
   });
 
   it("não envia quando rate limiter rejeita", async () => {
-    const repository = new InMemoryDeliveryRepository(() => new Date("2026-08-04T15:00:00Z"));
+    const repository = new InMemoryDeliveryRepository(() => new Date("2026-08-04T15:02:00Z"));
     repository.enqueue(command("rate", 1));
     const provider = new QueueProvider();
     const reserve = vi.fn(() => false);
@@ -195,7 +195,7 @@ describe("Messaging outbox W-10", () => {
       provider,
       circuitBreaker: new InMemoryDeliveryCircuitBreaker(),
       rateLimiter: { reserve },
-      now: () => new Date("2026-08-04T15:00:00Z"),
+      now: () => new Date("2026-08-04T15:02:00Z"),
       random: () => 0.5
     });
     expect(await worker.runOnce()).toMatchObject({ rateLimited: 1, succeeded: 0 });
