@@ -6,7 +6,7 @@
 **Estado:** concluída no escopo de adapter sem conexão externa  
 **Data:** 04 de agosto de 2026  
 **Head funcional validado:** `9e94603cbd9e50dc44e5f848a2aa5e195a8d9a43`  
-**Head de fechamento validado:** `61a633425dcd1a355d8859e880b10b8cdb917c6e`
+**Head documental validado antes do registro final:** `61a633425dcd1a355d8859e880b10b8cdb917c6e`
 
 ---
 
@@ -142,14 +142,14 @@ O CI regenerou o lockfile sem lifecycle scripts.
 | SHA-256 do ZIP inicial | `4261c27746f362710344c066cf919fd9b15bd6932b894052782ad3c4e065baed` |
 | lifecycle scripts | não executados |
 
-O gate falha se o hash, importer, versão, `libsignal@6.0.0` ou `whatsapp-rust-bridge@0.5.4` divergirem. O head de fechamento executou esse gate no CI e no build Docker.
+O gate falha se o hash, importer, versão, `libsignal@6.0.0` ou `whatsapp-rust-bridge@0.5.4` divergirem. O head documental validado executou esse gate no CI e no build Docker.
 
-## 7. Validação final
+## 7. Validação final registrada
 
 ### Runs
 
-- CI final: `30905550656`;
-- Stage 20 File Security E2E final: `30905550643`.
+- CI: `30905550656`;
+- Stage 20 File Security E2E: `30905550643`.
 
 ### Resultados
 
