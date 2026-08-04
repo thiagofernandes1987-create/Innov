@@ -214,3 +214,44 @@ describe("quanto do orçamento de campos filtráveis já foi gasto", () => {
     expect(slotUsage(fields).txt.used).toBe(SLOT_BUDGET.txt);
   });
 });
+
+describe("arquivar em vez de excluir", () => {
+  it("campo arquivado devolve o slot que ocupava", () => {
+    // A versão publicada guarda a alocação dela; registro antigo continua
+    // sendo lido pela versão com que nasceu. Segurar o slot para sempre
+    // gastaria o orçamento com campo que ninguém preenche mais.
+    const fields = [
+      field({ key: "antigo", type: "data", indexed: true, archived: true }),
+      field({ key: "atual", type: "data", indexed: true })
+    ];
+    expect(allocateSlots(fields).slots).toEqual({ atual: "dt_1" });
+    expect(slotUsage(fields).dt.used).toBe(1);
+  });
+
+  it("campo arquivado não pode ser obrigatório", () => {
+    // Obrigatório e fora do formulário ao mesmo tempo é registro que nunca
+    // pode ser salvo.
+    const errors = validateSpec(
+      spec({ fields: [field({ key: "antigo", archived: true, required: true })] })
+    );
+    expect(errors.some(e => e.includes("antigo"))).toBe(true);
+  });
+
+  it("seleção arquivada não é cobrada pelas opções", () => {
+    // Ela saiu do formulário: exigir opções de um campo que ninguém mais
+    // preenche travaria a publicação por causa do passado.
+    expect(
+      validateSpec(spec({ fields: [
+        field({ key: "situacao", type: "selecao", archived: true }),
+        field({ key: "titulo" })
+      ] }))
+    ).toEqual([]);
+  });
+
+  it("objeto só com campos arquivados não é publicável", () => {
+    // Publicar um formulário sem nenhum campo para preencher é publicar nada.
+    const errors = validateSpec(spec({ fields: [field({ key: "antigo", archived: true })] }));
+    expect(errors.length).toBeGreaterThan(0);
+  });
+});
+

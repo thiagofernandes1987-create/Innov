@@ -13,8 +13,11 @@ const files = [
   "supabase/migrations/20260726093000_object_runtime_publication.sql",
   "supabase/migrations/20260804000000_object_runtime_rascunho_de_definicao.sql",
   "supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql",
+  "supabase/migrations/20260804002000_object_runtime_campo_arquivado.sql",
+  "supabase/migrations/20260804003000_object_runtime_registros.sql",
   "supabase/tests/object-runtime/catalog.test.sql",
-  "supabase/tests/object-runtime/rascunho.test.sql"
+  "supabase/tests/object-runtime/rascunho.test.sql",
+  "supabase/tests/object-runtime/registros.test.sql"
 ];
 
 for (const file of files) {
@@ -87,7 +90,7 @@ for (const file of files) {
 
 // Sucesso silencioso é o modo de falha mais caro: o script sairia 0 se o
 // arquivo de teste não tivesse executado nenhum bloco.
-const EXPECTED_APPROVALS = 3;
+const EXPECTED_APPROVALS = 5;
 if (!failed && approvals < EXPECTED_APPROVALS) {
   console.error(
     `\nO script terminou sem erro mas produziu ${approvals} confirmação(ões) de ${EXPECTED_APPROVALS}. Os testes não executaram.`

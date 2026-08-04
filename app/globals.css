@@ -3900,3 +3900,27 @@ tbody tr:hover { background: var(--surface-muted); }
 .orcamento-de-slots strong { font-size: 14px; font-weight: 650; }
 .orcamento-de-slots span { font-size: 12.5px; color: var(--muted); }
 .orcamento-de-slots li[data-cheio="sim"] span { color: inherit; }
+
+/* Campo parecido, oferecido antes de criar. Não é erro — é uma pergunta feita
+   uma vez, com as duas saídas visíveis no mesmo lugar: usar o que existe ou
+   seguir. Sugestão que vira obstáculo ensina a ignorar sugestões. */
+.campo-parecido { border-color: color-mix(in srgb, var(--info) 38%, var(--border)); }
+.campo-parecido ul { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.campo-parecido li {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-muted);
+  min-width: 0;
+}
+.campo-parecido-acoes { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.campo-parecido-acoes form { margin: 0; }
+
+/* Campo arquivado continua na lista, e continua legível: ele explica o dado
+   antigo. O que muda é o peso — ele não é mais o que se preenche. */
+.data-table tr[data-arquivado="sim"] > td { opacity: 0.72; }
+.data-table tr[data-arquivado="sim"] > td:first-child strong { font-weight: 500; }

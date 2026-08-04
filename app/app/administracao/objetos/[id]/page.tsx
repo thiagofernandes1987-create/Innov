@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   acrescentarCampo,
+  alternarArquivoDoCampo,
   alternarBuscaDoCampo,
   definirOpcoesDoCampo,
   publicarObjeto,
@@ -10,6 +11,7 @@ import {
 import { requireCapability } from "@/lib/authorization";
 import { MODULE_REGISTRY } from "@/lib/modules/registry";
 import { definicaoPorId } from "@/lib/object-runtime/estudio";
+import { camposParecidos } from "@/lib/object-runtime/parecidos";
 import { PROPOSITOS, propositoDoTipo } from "@/lib/object-runtime/proposito";
 import { slotFamilyFor, slotUsage, validateSpec } from "@/lib/object-runtime/spec";
 
@@ -42,16 +44,23 @@ export default async function ObjetoPage({
   searchParams
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    parecido?: string;
+    rotulo?: string;
+    proposito?: string;
+    obrigatorio?: string;
+  }>;
 }) {
   const contexto = await requireCapability("administracao", "manage");
   const { id } = await params;
-  const { error } = await searchParams;
+  const { error, parecido, rotulo, proposito: propositoPedido, obrigatorio } = await searchParams;
 
   const definicao = await definicaoPorId(contexto.supabase, contexto.organizationId, id);
   if (!definicao) notFound();
 
   const campos = definicao.rascunho.fields;
+  const parecidos = parecido && rotulo ? camposParecidos(rotulo, campos) : [];
   const uso = slotUsage(campos);
   const pendencias = validateSpec(definicao.rascunho);
   const publicado = definicao.versaoAtual !== null;
@@ -98,9 +107,10 @@ export default async function ObjetoPage({
                 const escolhido = propositoDoTipo(campo.type);
                 const filtravel = Boolean(campo.indexed);
                 return (
-                  <tr key={campo.key}>
+                  <tr key={campo.key} data-arquivado={campo.archived ? "sim" : "nao"}>
                     <td>
                       <strong>{campo.label}</strong>
+                      {campo.archived ? <> <span className="badge badge-warning">arquivado</span></> : null}
                       {campo.required ? <> <span className="badge badge-neutral">obrigatório</span></> : null}
                       <br />
                       <small className="muted">{campo.key}</small>
@@ -142,15 +152,16 @@ export default async function ObjetoPage({
                       )}
                     </td>
                     <td>
-                      {publicado ? (
-                        <small className="muted">publicado</small>
-                      ) : (
-                        <form action={removerCampo}>
-                          <input type="hidden" name="definitionId" value={definicao.id} />
-                          <input type="hidden" name="campo" value={campo.key} />
-                          <button className="button" type="submit">Remover</button>
-                        </form>
-                      )}
+                      {/* Publicado, só arquiva: excluir tornaria ilegível o que
+                          já foi registrado com o campo. Antes da primeira
+                          publicação não existe registro, e remover é honesto. */}
+                      <form action={publicado ? alternarArquivoDoCampo : removerCampo}>
+                        <input type="hidden" name="definitionId" value={definicao.id} />
+                        <input type="hidden" name="campo" value={campo.key} />
+                        <button className="button" type="submit">
+                          {publicado ? (campo.archived ? "Reativar" : "Arquivar") : "Remover"}
+                        </button>
+                      </form>
                     </td>
                   </tr>
                 );
@@ -174,6 +185,46 @@ export default async function ObjetoPage({
           </ul>
         </div>
       </section>
+
+      {parecidos.length ? (
+        <section className="card card-pad campo-parecido" style={{ marginTop: 22 }}>
+          <h2>Já existe algo parecido</h2>
+          <p className="muted">
+            Antes de criar <strong>{rotulo}</strong>: este objeto já tem{" "}
+            {parecidos.length === 1 ? "um campo parecido" : "campos parecidos"}. Dois campos quase
+            iguais viram o mesmo dado preenchido pela metade em dois lugares, e nenhuma contagem
+            que some os dois fecha.
+          </p>
+          <ul>
+            {parecidos.map(({ campo, motivo }) => (
+              <li key={campo.key}>
+                <strong>{campo.label}</strong>
+                {campo.archived ? <> <span className="badge badge-neutral">arquivado</span></> : null}
+                <small className="muted">
+                  {motivo === "mesmo_nome"
+                    ? "é o mesmo nome"
+                    : motivo === "um_contem_o_outro"
+                      ? "um nome está dentro do outro"
+                      : "quase o mesmo nome"}
+                </small>
+              </li>
+            ))}
+          </ul>
+          <div className="campo-parecido-acoes">
+            <Link className="button" href={`/app/administracao/objetos/${definicao.id}`}>
+              Usar o que já existe
+            </Link>
+            <form action={acrescentarCampo}>
+              <input type="hidden" name="definitionId" value={definicao.id} />
+              <input type="hidden" name="rotulo" value={rotulo} />
+              <input type="hidden" name="proposito" value={propositoPedido ?? ""} />
+              {obrigatorio === "sim" ? <input type="hidden" name="obrigatorio" value="on" /> : null}
+              <input type="hidden" name="confirmado" value="sim" />
+              <button className="button button-primary" type="submit">Criar assim mesmo</button>
+            </form>
+          </div>
+        </section>
+      ) : null}
 
       <section className="card card-pad" style={{ marginTop: 22 }}>
         <h2>Acrescentar campo</h2>

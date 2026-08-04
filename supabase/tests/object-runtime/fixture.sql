@@ -79,5 +79,26 @@ as $$
   and coalesce(nullif(current_setting('test.permission_granted', true), '')::boolean, true);
 $$;
 
+-- Catálogo de aplicativos. A RPC de registro valida `parent_kind` contra ele
+-- (§7.2: `parent_id` não tem chave estrangeira, porque não existe FK que aponte
+-- para várias tabelas).
+--
+-- **Sem esta tabela o teste do pai passava pelo motivo errado**: qualquer
+-- `parent_kind` era recusado, inclusive um válido, porque a consulta estourava
+-- em "relation app_modules does not exist". Teste que só prova recusa não
+-- distingue "recusa o inválido" de "recusa tudo" — mesma família da VACINA-058.
+create table if not exists public.app_modules (
+  id uuid primary key default gen_random_uuid(),
+  key text unique not null,
+  name text not null,
+  active boolean not null default true
+);
+
+insert into public.app_modules(key, name) values
+  ('qualidade', 'Qualidade'),
+  ('obras', 'Obras'),
+  ('administracao', 'Administração')
+on conflict (key) do nothing;
+
 grant usage on schema public to anon, authenticated, service_role;
 grant usage on schema auth to anon, authenticated, service_role;

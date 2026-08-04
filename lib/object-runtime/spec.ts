@@ -88,6 +88,15 @@ export type ObjectFieldSpec = {
   /** Campo filtrável e ordenável: consome uma coluna-slot. */
   indexed?: boolean;
   options?: readonly string[];
+  /**
+   * Fora do formulário, e **não** apagado.
+   *
+   * Excluir o campo tornaria ilegível o que já foi registrado com ele: o
+   * registro guarda a versão com que nasceu, e essa versão declara o campo.
+   * Arquivado sai da tela de preenchimento, continua legível no histórico e
+   * devolve a coluna-slot que ocupava.
+   */
+  archived?: boolean;
 };
 
 export type ObjectSpec = {
@@ -154,7 +163,10 @@ export function allocateSlots(fields: readonly ObjectFieldSpec[]): SlotAllocatio
   const overflow: string[] = [];
 
   for (const field of fields) {
-    if (!field.indexed) continue;
+    // Arquivado devolve o slot: a versão publicada guarda a alocação dela, e
+    // segurar a coluna para sempre gastaria o orçamento com campo que ninguém
+    // preenche mais.
+    if (!field.indexed || field.archived) continue;
     const family = slotFamilyFor(field.type);
     if (!family) continue;
     if (used[family] >= SLOT_BUDGET[family]) {
@@ -223,7 +235,11 @@ export function validateSpec(spec: ObjectSpec): string[] {
   }
 
   const fields = spec.fields ?? [];
-  if (fields.length === 0) errors.push("O objeto precisa de ao menos um campo.");
+  // Só os que ainda são preenchidos contam: publicar um formulário em que
+  // todos os campos estão arquivados é publicar nada.
+  if (fields.filter(field => !field?.archived).length === 0) {
+    errors.push("O objeto precisa de ao menos um campo.");
+  }
   if (fields.length > MAX_FIELDS) {
     errors.push(`O objeto declara ${fields.length} campos e o teto é ${MAX_FIELDS}.`);
   }
@@ -241,7 +257,16 @@ export function validateSpec(spec: ObjectSpec): string[] {
       errors.push(`Tipo desconhecido no campo "${field.key}": "${field.type}".`);
       continue;
     }
-    if ((field.type === "selecao" || field.type === "selecao_multipla") && !(field.options?.length)) {
+    if (field.archived && field.required) {
+      errors.push(
+        `O campo "${field.key}" está arquivado e obrigatório ao mesmo tempo: nenhum registro novo poderia ser salvo.`
+      );
+    }
+    if (
+      !field.archived &&
+      (field.type === "selecao" || field.type === "selecao_multipla") &&
+      !field.options?.length
+    ) {
       errors.push(`O campo "${field.key}" é de seleção e precisa declarar as opções.`);
     }
     if (field.indexed && !slotFamilyFor(field.type)) {

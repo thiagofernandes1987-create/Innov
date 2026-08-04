@@ -30,14 +30,14 @@ a ignorar.
 |---|---|
 | Aplicativos no registro | 23 |
 | Rotas | 155 (139 páginas, 16 de API) |
-| Server actions | 184 em 31 arquivos |
-| Módulos de `lib/` | 84 |
-| Funções do banco declaradas | 224 |
+| Server actions | 185 em 31 arquivos |
+| Módulos de `lib/` | 85 |
+| Funções do banco declaradas | 227 |
 | Funções do banco chamadas do código | 116 |
-| Suítes de teste | 41, com 457 casos |
-| Migrations | 154 |
+| Suítes de teste | 42, com 473 casos |
+| Migrations | 156 |
 | Validadores de CI | 28 |
-| Módulos de `lib/` citados por algum teste | 40 de 84 |
+| Módulos de `lib/` citados por algum teste | 41 de 85 |
 
 ## 1. Aplicativos
 
@@ -371,6 +371,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | Função | Guarda |
 |---|---|
 | `acrescentarCampo` | — |
+| `alternarArquivoDoCampo` | — |
 | `alternarBuscaDoCampo` | — |
 | `criarObjeto` | administracao:manage |
 | `definirOpcoesDoCampo` | — |
@@ -611,6 +612,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/listas/servidor` | sim | `listaDoEscopo`, `pertenceALista` |
 | `@/lib/modules/registry` | sim | `MODULE_BY_KEY`, `MODULE_REGISTRY`, `capabilitiesForLevel`, `moduleForPath`, `toDatabaseAccessLevel`, `toUiAccessLevel` |
 | `@/lib/object-runtime/estudio` | não | `definicaoPorId`, `definicoesDaOrganizacao` |
+| `@/lib/object-runtime/parecidos` | sim | `camposParecidos`, `distancia` |
 | `@/lib/object-runtime/proposito` | sim | `PROPOSITOS`, `campoDoProposito`, `chaveDeCampo`, `proposito`, `propositoDoTipo` |
 | `@/lib/object-runtime/spec` | sim | `FIELD_TYPES`, `MAX_FIELDS`, `OBJECT_CLASSES`, `OBJECT_SCOPES`, `SLOT_BUDGET`, `TRAITS`, `allocateSlots`, `canonicalSpecJson`, `slotFamilyFor`, `slotUsage`, `specFingerprint`, `validateSpec` |
 | `@/lib/observability/domain` | não | `dateTime`, `healthLabel`, `nullableText`, `number`, `parseDashboard`, `parseEvents`, `record`, `records`, `severityLabel`, `text` |
@@ -789,8 +791,11 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `move_crm_opportunity_stage` | `supabase/migrations/20260803230000_motivo_de_perda_separado_da_observacao.sql` | `app/actions/relationship.ts` |
 | `move_project_task` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | `app/actions/projects.ts` |
 | `normalize_profile_module_permission_booleans` | `supabase/migrations/20260720143150_stage16_permission_boolean_guard.sql` | — (só por SQL ou trigger) |
+| `object_definition_versions_exige_campo_ativo` | `supabase/migrations/20260804002000_object_runtime_campo_arquivado.sql` | — (só por SQL ou trigger) |
 | `object_definition_versions_freeze` | `supabase/migrations/20260726090000_object_runtime_definition_catalog.sql` | — (só por SQL ou trigger) |
-| `object_runtime_allocate_slots` | `supabase/migrations/20260726093000_object_runtime_publication.sql` | — (só por SQL ou trigger) |
+| `object_record_upsert` | `supabase/migrations/20260804003000_object_runtime_registros.sql` | — (só por SQL ou trigger) |
+| `object_runtime_active_field_count` | `supabase/migrations/20260804002000_object_runtime_campo_arquivado.sql` | — (só por SQL ou trigger) |
+| `object_runtime_allocate_slots` | `supabase/migrations/20260804002000_object_runtime_campo_arquivado.sql` | — (só por SQL ou trigger) |
 | `object_runtime_slot_budget` | `supabase/migrations/20260726093000_object_runtime_publication.sql` | — (só por SQL ou trigger) |
 | `object_runtime_slot_family` | `supabase/migrations/20260726093000_object_runtime_publication.sql` | — (só por SQL ou trigger) |
 | `object_runtime_spec_checksum` | `supabase/migrations/20260726093000_object_runtime_publication.sql` | — (só por SQL ou trigger) |
@@ -917,8 +922,9 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/modelos-de-eap.test.ts` | 20 | o caso que a tarefa descreve; o que entra no modelo; grafia; achar o modelo do que está sendo digitado |
 | `tests/module-navigation.test.tsx` | 2 | NavegacaoDoModulo |
 | `tests/moeda.test.ts` | 15 | leitura de valor digitado; máscara de digitação, no padrão de caixa; exibição |
+| `tests/object-runtime-parecidos.test.ts` | 12 | o caso que a tarefa descreve; parecido sem ser igual; o que não atrapalha quem está declarando; distância entre dois nomes |
 | `tests/object-runtime-proposito.test.ts` | 17 | o vocabulário cobre a biblioteca de tipos; o que a informação faz decide o tipo; nasce filtrável quando o tipo permite; o campo que sai da resposta é publicável |
-| `tests/object-runtime-spec.test.ts` | 27 | canonicalSpecJson; specFingerprint; slotFamilyFor; allocateSlots |
+| `tests/object-runtime-spec.test.ts` | 31 | canonicalSpecJson; specFingerprint; slotFamilyFor; allocateSlots |
 | `tests/operational-notifications.test.ts` | 5 | notificações operacionais por exceção |
 | `tests/operational-routines.test.ts` | 3 | runner das rotinas profissionais |
 | `tests/personas-catalog.test.ts` | 5 | catálogo operacional de personas |
@@ -980,7 +986,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 1 |
 | Server action nunca referenciada | 7 |
-| Módulo de `lib/` sem teste que o cite | 44 de 84 |
+| Módulo de `lib/` sem teste que o cite | 44 de 85 |
 
 ### Módulos sem teste que os cite
 

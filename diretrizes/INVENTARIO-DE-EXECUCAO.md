@@ -1113,15 +1113,16 @@ reconstruir o que funciona:
   - [x] T-32.2.8 — Validação do modelo lista variáveis inexistentes **antes** de publicar
   - [x] T-32.2.10 — **Interface no layout entregue pelo responsável**: barra do documento, barra de menu (File · Edit · Inserir · View), barra de ferramentas e três regiões — explorador ⟷ editor ⟷ pré-visualização — com explorador e prévia ligando e desligando pelo menu View. Conferido em navegador em 1366, 1440 e 1920: três regiões, sem transbordo, sem erro de console
   - [x] T-32.2.11 — **Numeração de linha por espelho**: cada linha lógica é repetida invisível com a mesma fonte e a mesma largura de conteúdo do campo, para o número ficar na altura certa quando a linha quebra sozinha. Contar `\n` erra assim que um parágrafo ocupa duas alturas, e na coluna de 474px do editor a 1366 quase todo parágrafo ocupa. Medido: linha que quebra ocupa 69px contra 23px, e o número seguinte cai abaixo dos 69px; a numeração acompanha o tamanho escolhido na barra e a rolagem do campo
-- [~] T-32.3 — **Campos próprios por objeto**, primeiro corte do Object Runtime. **A nota "nunca virou migration" estava errada e o erro era pior do que ela**: as duas migrations existiam desde 26 de julho, o validador de invariantes rodava verde no CI e os catorze testes de banco passavam — e as três tabelas **não existiam no banco**. Ninguém tinha aplicado. Registrado na VACINA-057
+- [x] T-32.3 — **Campos próprios por objeto**, primeiro corte do Object Runtime. **A nota "nunca virou migration" estava errada e o erro era pior do que ela**: as duas migrations existiam desde 26 de julho, o validador de invariantes rodava verde no CI e os catorze testes de banco passavam — e as três tabelas **não existiam no banco**. Ninguém tinha aplicado. Registrado na VACINA-057
   - [x] T-32.3.0b — **A guarda de permissão citava uma ação que não existe.** As três RPCs pediam a ação `configure`, e `has_module_permission` resolve a ação num `case` fechado com `else false`: negava todo mundo, inclusive SUPER_ADMIN. `publish_object_definition`, de 26 de julho, **nunca foi executável**. Descoberto ao rodar a tela com sessão de administrador de verdade. A fixture dos testes de banco era mais permissiva que a função real e por isso os catorze testes passavam. Corrigido para `administer`, fixture endurecida e `validate:module-keys` passou a conferir o quinto argumento. VACINA-058
   - [x] T-32.3.0a — **Faltava caminho de escrita para criar a definição**: a fundação tinha a tabela e a publicação, e nenhuma RPC que criasse a linha. `draft_spec`, `create_object_definition` e `save_object_definition_draft`, com 12 testes de comportamento novos
   - [x] T-32.3.0 — Fundação aplicada e conferida no banco: `object_definitions`, `object_definition_versions` e `object_field_slots` com RLS habilitada e forçada, escrita só por RPC, guarda de imutabilidade da versão publicada, projeção de slots derivada do spec pelo próprio banco e `publish_object_definition` com `security definer` e `search_path` fixo. As autoverificações embutidas nas migrations passaram na aplicação
   - [x] T-32.3.1 — A tela pergunta **o que a informação faz** — "é uma data?", "é uma pessoa da equipe?", "é dinheiro?" — e o tipo sai daí. O usuário não responde "qual tipo?" na forma técnica. `lib/object-runtime/proposito.ts` traduz quinze propósitos em quinze tipos, com exemplo de obra e o efeito de cada escolha; a chave técnica sai do rótulo (`Responsável pela vistoria` → `responsavel_pela_vistoria`, `2ª medição` → `campo_2a_medicao`). Medido no navegador: as quinze perguntas aparecem, nenhuma usa vocabulário do motor e a palavra "tipo" não aparece no bloco da pergunta. Teste negativo: acrescentar um tipo em `FIELD_TYPES` sem propósito reprova a suíte — tipo sem pergunta é tipo que nenhuma tela alcança
   - [x] T-32.3.2 — **Nasce filtrável**: campo que não entra na busca vira campo que ninguém lê. Todo tipo com coluna-slot nasce marcado, e o orçamento aparece na tela enquanto ainda dá para escolher — não na publicação, com trinta campos digitados. Medido: o terceiro campo de data foi recusado com "passou do limite de campos filtráveis desse tipo", e o campo de texto longo mostra "não entra na busca — este tipo não tem coluna filtrável"
-  - [ ] T-32.3.3 — Campo do tipo pessoa **inscreve como seguidor** quando preenchido — é o que faz "arquiteto do projeto" valer mais que texto
-  - [ ] T-32.3.4 — Sugestão de campo existente por nome parecido **antes** de criar, para não nascerem "Arquiteto" e "arquiteto"
-  - [ ] T-32.3.5 — Arquivar em vez de excluir, preservando o preenchido; obrigatoriedade vale para frente e não invalida registro antigo
+  - [x] T-32.3.0c — **A camada de registros não existia**, e sem registro não há "quando preenchido": T-32.3.3 não tinha onde acontecer. `object_records` particionada em 64 por `hash(organization_id)`, catorze índices parciais de slot, uma política de RLS e `object_record_upsert` — itens 2 e 3 da primeira fatia do contrato
+  - [x] T-32.3.3 — Campo do tipo pessoa **inscreve como seguidor** quando preenchido — é o que faz "arquiteto do projeto" valer mais que texto. `object_record_followers` guarda também **qual campo** inscreveu; regravar não duplica; uuid que não é usuário não vira seguidor e não derruba a gravação; e ninguém é desinscrito ao sair do campo — sair da lista é ato de quem segue
+  - [x] T-32.3.4 — Sugestão de campo existente por nome parecido **antes** de criar, para não nascerem "Arquiteto" e "arquiteto". Três motivos: mesmo nome, um nome dentro do outro e quase o mesmo nome (distância de edição ≤ 2, a partir de cinco caracteres — com três letras, duas trocas ligam qualquer palavra a qualquer outra). Medido na tela: "Arquiteto responsável" com "Arquiteto" já declarado abre a pergunta com as duas saídas, o campo **não** é criado enquanto ela está aberta, "usar o que já existe" volta sem criar e "criar assim mesmo" cria e limpa a pergunta
+  - [x] T-32.3.5 — Arquivar em vez de excluir, preservando o preenchido; obrigatoriedade vale para frente e não invalida registro antigo. Antes da primeira publicação o botão é **Remover** (não existe registro); depois, **Arquivar**. Arquivado sai do formulário, continua na lista, **devolve a coluna-slot** — medido: 1 de 2 em "pessoa e registro" volta para 0 de 2 — e perde a obrigatoriedade, porque arquivado e obrigatório ao mesmo tempo é registro que ninguém salva. A obrigatoriedade nova vale para frente porque a RPC valida contra a **versão do registro**, não a de hoje; provado com teste negativo — trocar por `current_version` reprova a suíte
 
 ### Ordem, e por que ela mudou
 
@@ -1235,6 +1236,30 @@ os dois igual foi o erro de T-32.0.6.
 - [x] T-34.12 — Barra de navegação dos relatórios em 41px, três abaixo do mínimo. Executivo, obras, financeiro, compras, qualidade, perdas, metas, salvos e snapshots fecham em 0
 - [x] T-34.13 — Relatório executivo: transbordo e alvos corrigidos. O transbordo era a **VACINA-044 outra vez** — `grid-template-columns:1fr` na consulta de mídia não encolhe abaixo do `min-content` do filho, e a tabela de desempenho por obra (621px) arrastava a página. Aplicada a solução já registrada (`minmax(0,1fr)` mais `min-width:0` no item), não uma nova
 - [x] T-34.14 — Tons do módulo de relatórios eram fixos do tema claro: no escuro o cartão de indicador ficava com fundo verde ou vermelho claro e o número em branco por cima — 1,03:1 no "0%". Mesma causa raiz de `stage12.css` e do estado vazio. **As nove telas de relatório fecham em 0/0** de contraste nos dois temas e 0 alvo abaixo de 44px nas três larguras
+
+---
+
+## Sprint S-35 — Object Runtime: o registro visto e lido
+
+**Estado:** pendente
+
+Descoberta ao fechar a T-32.3, e entra **no fim** conforme a R4. A fundação e o
+estúdio existem e foram exercitados; o que não existe é o outro lado do balcão.
+Hoje um objeto publicado só recebe registro por chamada de RPC — nenhuma tela
+cria, lista ou abre um registro, e o contrato (§12.3) ainda tem dois itens em
+aberto.
+
+O que fica de fora é tão importante quanto o que fica dentro: **nenhum número
+desta implementação foi medido sob carga.** Os limiares do contrato — 64
+partições, 14 slots, 64 KB, 200 campos, p95 de 300 ms — continuam sendo
+estimativas fundamentadas, exatamente como a §12.2 declara.
+
+- [ ] T-35.1 — Leitura com **paginação keyset**, nunca `OFFSET`, e recusa de filtro sobre campo não indexado com mensagem que orienta (item 4 da primeira fatia). Degradar em silêncio até a plataforma ficar lenta por causa de um objeto mal declarado é pior, e é invisível até ser tarde
+- [ ] T-35.2 — Tela de registros do objeto: listar, criar e abrir, com o formulário montado a partir da versão do registro — não da versão de hoje
+- [ ] T-35.3 — Campo de anexo passando por `secureUpload`, quarentena e varredura, sem caminho novo de arquivo
+- [ ] T-35.4 — Campo de referência declara o alvo. Hoje `ObjectFieldSpec` guarda o tipo `referencia` e não guarda para onde ele aponta; o §2.1 diz "uuid + alvo"
+- [ ] T-35.5 — POC de carga com **milhões** de registros (item 7). Antes disso, nenhuma promessa de escala pode ser feita a partir deste código
+- [ ] T-35.6 — Onde o seguidor aparece: `object_record_followers` é gravado e ninguém o lê ainda. Encaixar na T-29 (acompanhamento a distância) em vez de criar um segundo mecanismo de notificação
 
 ---
 

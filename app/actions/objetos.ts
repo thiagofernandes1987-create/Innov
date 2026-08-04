@@ -14,6 +14,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireCapability } from "@/lib/authorization";
 import { definicaoPorId } from "@/lib/object-runtime/estudio";
+import { camposParecidos } from "@/lib/object-runtime/parecidos";
 import { campoDoProposito, chaveDeCampo, proposito } from "@/lib/object-runtime/proposito";
 import {
   allocateSlots,
@@ -111,6 +112,23 @@ export async function acrescentarCampo(dados: FormData): Promise<void> {
     falhar(rota, `Este objeto já tem um campo chamado "${campo.label}".`);
   }
 
+  // **Antes de criar, e não depois.** Dois campos quase iguais no mesmo objeto
+  // não são erro de digitação: são o mesmo dado preenchido pela metade em dois
+  // lugares, e nenhuma contagem que os some fecha. A pergunta é feita uma vez;
+  // quem confirma segue, e é por isso que a sugestão não vira obrigação.
+  if (texto(dados, "confirmado") !== "sim") {
+    const parecidos = camposParecidos(rotulo, definicao.rascunho.fields);
+    if (parecidos.length) {
+      const consulta = new URLSearchParams({
+        parecido: "1",
+        rotulo,
+        proposito: propositoId,
+        obrigatorio: texto(dados, "obrigatorio") === "on" ? "sim" : "nao"
+      });
+      redirect(`${rota}?${consulta.toString()}`);
+    }
+  }
+
   const campos: ObjectFieldSpec[] = [...definicao.rascunho.fields, campo];
   // Só o campo novo importa aqui: se ele estourou o orçamento, é ele que a
   // mensagem precisa nomear — dizer "algo não coube" obriga a caçar.
@@ -122,6 +140,10 @@ export async function acrescentarCampo(dados: FormData): Promise<void> {
   }
 
   await guardar(contexto, definitionId, { ...definicao.rascunho, fields: campos }, rota);
+  // Limpa a pergunta da barra de endereço. Sem isto, quem respondeu "criar
+  // assim mesmo" volta para a mesma tela ainda perguntando se quer criar — e a
+  // pergunta já respondida reaparece a cada campo seguinte.
+  redirect(rota);
 }
 
 /**
@@ -172,6 +194,43 @@ export async function definirOpcoesDoCampo(dados: FormData): Promise<void> {
 }
 
 /**
+ * Arquiva o campo — ou o traz de volta.
+ *
+ * **Arquivar é o que existe no lugar de excluir**, depois que há versão
+ * publicada. O registro guarda a versão com que nasceu, e essa versão declara
+ * o campo: apagá-lo da definição tornaria ilegível o que já foi registrado com
+ * ele. Arquivado sai do formulário, continua legível no histórico e devolve a
+ * coluna-slot que ocupava.
+ *
+ * Arquivado e obrigatório ao mesmo tempo é registro que ninguém consegue
+ * salvar; a obrigatoriedade cai junto.
+ */
+export async function alternarArquivoDoCampo(dados: FormData): Promise<void> {
+  const definitionId = texto(dados, "definitionId");
+  const rota = `${LISTA}/${definitionId}`;
+  const { contexto, definicao } = await rascunhoEditavel(definitionId, rota);
+  const chave = texto(dados, "campo");
+
+  const campos = definicao.rascunho.fields.map(campo =>
+    campo.key === chave
+      ? { ...campo, archived: !campo.archived, required: campo.archived ? campo.required : false }
+      : campo
+  );
+  if (!campos.some(campo => campo.key === chave)) falhar(rota, "Campo não encontrado.");
+
+  // Reativar pode não caber: o slot foi devolvido e outro campo pode ter
+  // ocupado a vaga enquanto isso.
+  if (allocateSlots(campos).overflow.includes(chave)) {
+    falhar(
+      rota,
+      "Não dá para reativar este campo com a busca ligada: o limite de campos filtráveis desse tipo está cheio. Desligue a busca de outro campo antes."
+    );
+  }
+
+  await guardar(contexto, definitionId, { ...definicao.rascunho, fields: campos }, rota);
+}
+
+/**
  * Tira o campo do rascunho.
  *
  * Só antes da primeira publicação. Depois que existe versão publicada, remover
@@ -187,7 +246,7 @@ export async function removerCampo(dados: FormData): Promise<void> {
   if (definicao.versaoAtual !== null) {
     falhar(
       rota,
-      "Este objeto já foi publicado: remover um campo tornaria ilegível o que já foi registrado com ele. Publique uma versão nova sem o campo quando houver plano de migração."
+      "Este objeto já foi publicado: remover um campo tornaria ilegível o que já foi registrado com ele. Arquive o campo — ele sai do formulário e o histórico continua legível."
     );
   }
 
