@@ -52,37 +52,51 @@
 }
 
 
-/* ── Tema escuro ───────────────────────────────────────────────────────────
-   Só troca de token. A tela inteira lê `--surface`, `--text`, `--border`, então
-   escurecer é redefinir o vocabulário, não reescrever componente por
-   componente.
-
+/* ── Tema escuro: um bloco só ────────────────────────────────────────────────
    Três regras que a versão escura precisa respeitar e a clara não:
 
    1. Superfície que sobe, clareia. No claro a hierarquia vem de sombra; no
       escuro, de luminosidade — sombra preta sobre fundo preto não existe.
-   2. Nada de preto puro. `#0d1117` em vez de `#000`: preto absoluto com texto
+   2. Nada de preto puro. `#071729` em vez de `#000`: preto absoluto com texto
       branco cansa a vista e faz o texto "vibrar" em tela OLED.
    3. Cor de estado perde saturação e ganha claridade. O mesmo vermelho do tema
       claro, sobre fundo escuro, vira um borrão que não se lê.
 
-   A paleta clara continua sendo a base; aqui só o que muda. */
+   A paleta clara continua sendo a base; aqui só o que muda.
+
+   **Isto era dois blocos.** O redesenho de 28/07 acrescentou uma segunda
+   paleta no fim do arquivo em vez de editar a primeira, e o resultado não era
+   "a antiga morreu": as superfícies, o texto e a marca passaram a vir da nova,
+   e as cores de estado — sucesso, aviso, perigo, informação, cobre — e as
+   sombras continuavam vindo da antiga. Meia paleta morta é pior que uma
+   inteira: quem edita `--surface` no lugar errado não vê efeito nenhum, e
+   quem edita `--danger` no mesmo lugar vê. Os valores abaixo são exatamente os
+   que venciam antes desta unificação, medidos no navegador nos dois caminhos
+   de ativação. */
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-tema="claro"]) {
     color-scheme: dark;
-    --page: #0d1117;
-    --paper: #0d1117;
-    --surface: #161b25;
-    --surface-muted: #1b212c;
-    --surface-strong: #222936;
-    --text: #e6edf5;
-    --muted: #94a3b4;
-    --border: #2a3240;
-    --border-strong: #3b4552;
-    --brand: #5c9ce0;
-    --brand-strong: #7cb2ea;
-    --brand-soft: #1a2637;
+    --page: #071729;
+    --paper: #071729;
+    /* A superfície do redesenho de 28/07. O valor anterior (#161b25) vivia
+       num segundo bloco e era vencido por este — dois lugares para a mesma
+       cor, e só um com efeito. */
+    --surface: #102238;
+    --surface-muted: #132941;
+    --surface-strong: #172f49;
+    --text: #f2f6fb;
+    --muted: #a6b4c5;
+    --border: #263d56;
+    --border-strong: #35516f;
+    /* #4d80d8 media 3,50:1 sobre `--surface-strong` e 3,47:1 sobre
+       `--brand-soft`, e é sobre esses dois que o link do tema escuro quase
+       sempre cai. #6396e6 fecha 4,5:1 nas quatro superfícies escuras. */
+    --brand: #6396e6;
+    --brand-strong: #72a8f3;
+    --brand-soft: #152f50;
+    --ink: #061728;
+    --navy: #0a2037;
     --copper: #d19a68;
     --copper-strong: #e0b183;
     --copper-soft: #2c2118;
@@ -94,27 +108,37 @@
     --danger-soft: #2e1519;
     --info: #6faae6;
     --info-soft: #14212f;
-    --ring: rgba(124, 178, 234, 0.5);
+    --ring: rgba(98, 164, 245, 0.42);
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
     --shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.45);
     --shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
   }
 }
 
+/* O mesmo, quando a pessoa escolheu escuro à mão. Um bloco não pode herdar do
+   outro: `@media` e atributo são caminhos independentes de ativação. */
 :root[data-tema="escuro"] {
   color-scheme: dark;
-  --page: #0d1117;
-  --paper: #0d1117;
-  --surface: #161b25;
-  --surface-muted: #1b212c;
-  --surface-strong: #222936;
-  --text: #e6edf5;
-  --muted: #94a3b4;
-  --border: #2a3240;
-  --border-strong: #3b4552;
-  --brand: #5c9ce0;
-  --brand-strong: #7cb2ea;
-  --brand-soft: #1a2637;
+  --page: #071729;
+  --paper: #071729;
+  /* A superfície do redesenho de 28/07. O valor anterior (#161b25) vivia
+     num segundo bloco e era vencido por este — dois lugares para a mesma
+     cor, e só um com efeito. */
+  --surface: #102238;
+  --surface-muted: #132941;
+  --surface-strong: #172f49;
+  --text: #f2f6fb;
+  --muted: #a6b4c5;
+  --border: #263d56;
+  --border-strong: #35516f;
+  /* #4d80d8 media 3,50:1 sobre `--surface-strong` e 3,47:1 sobre
+     `--brand-soft`, e é sobre esses dois que o link do tema escuro quase
+     sempre cai. #6396e6 fecha 4,5:1 nas quatro superfícies escuras. */
+  --brand: #6396e6;
+  --brand-strong: #72a8f3;
+  --brand-soft: #152f50;
+  --ink: #061728;
+  --navy: #0a2037;
   --copper: #d19a68;
   --copper-strong: #e0b183;
   --copper-soft: #2c2118;
@@ -126,7 +150,7 @@
   --danger-soft: #2e1519;
   --info: #6faae6;
   --info-soft: #14212f;
-  --ring: rgba(124, 178, 234, 0.5);
+  --ring: rgba(98, 164, 245, 0.42);
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
   --shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.45);
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.55);
@@ -2279,47 +2303,6 @@ tbody tr:hover { background: #fafcfd; }
    A Imagem 3 gerada é o alvo da casca e do launcher. O bloco fica ao fim para
    tornar a reconciliação explícita enquanto os estilos históricos continuam
    atendendo as páginas antigas. */
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-tema="claro"]) {
-    --page: #071729;
-    --paper: #071729;
-    --surface: #102238;
-    --surface-muted: #132941;
-    --surface-strong: #172f49;
-    --text: #f2f6fb;
-    --muted: #a6b4c5;
-    --border: #263d56;
-    --border-strong: #35516f;
-    /* #4d80d8 media 3,50:1 sobre `--surface-strong` e 3,47:1 sobre
-       `--brand-soft` — e é sobre esses dois que o link do tema escuro quase
-       sempre cai. #6396e6 fecha 4,5:1 nas quatro superfícies escuras. */
-    --brand: #6396e6;
-    --brand-strong: #72a8f3;
-    --brand-soft: #152f50;
-    --ink: #061728;
-    --navy: #0a2037;
-    --ring: rgba(98, 164, 245, 0.42);
-  }
-}
-
-:root[data-tema="escuro"] {
-  --page: #071729;
-  --paper: #071729;
-  --surface: #102238;
-  --surface-muted: #132941;
-  --surface-strong: #172f49;
-  --text: #f2f6fb;
-  --muted: #a6b4c5;
-  --border: #263d56;
-  --border-strong: #35516f;
-  --brand: #6396e6;
-  --brand-strong: #72a8f3;
-  --brand-soft: #152f50;
-  --ink: #061728;
-  --navy: #0a2037;
-  --ring: rgba(98, 164, 245, 0.42);
-}
 
 .casca {
   background:
