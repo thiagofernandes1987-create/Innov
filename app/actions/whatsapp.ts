@@ -30,6 +30,9 @@ import {
   resolveWhatsAppBinding
 } from "@/lib/whatsapp/source-resolver";
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const IDEMPOTENCY_PATTERN = /^[A-Za-z0-9:_-]{16,160}$/;
+
 function text(data: FormData, key: string) {
   return String(data.get(key) ?? "").trim();
 }
@@ -38,12 +41,29 @@ function optional(data: FormData, key: string) {
   return text(data, key) || null;
 }
 
+function optionalUuid(data: FormData, key: string) {
+  const value = optional(data, key);
+  if (value && !UUID_PATTERN.test(value)) {
+    throw new WhatsAppDomainError("INVALID_SOURCE", `Identificador inválido: ${key}.`);
+  }
+  return value;
+}
+
+function requiredUuid(value: string, label: string) {
+  if (!UUID_PATTERN.test(value)) {
+    throw new WhatsAppDomainError("INVALID_SOURCE", `${label} inválida.`);
+  }
+  return value;
+}
+
 function resultRow<T extends Record<string, unknown>>(value: T | T[] | null) {
   return Array.isArray(value) ? value[0] ?? null : value;
 }
 
 function returnPath(conversationId?: string | null) {
-  return conversationId ? `/app/whatsapp?conversation=${conversationId}` : "/app/whatsapp";
+  return conversationId && UUID_PATTERN.test(conversationId)
+    ? `/app/whatsapp?conversation=${conversationId}`
+    : "/app/whatsapp";
 }
 
 function fail(path: string, message: string): never {
@@ -53,6 +73,21 @@ function fail(path: string, message: string): never {
 function firstRelation(value: unknown): Record<string, unknown> | null {
   if (Array.isArray(value)) return firstRelation(value[0]);
   return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
+}
+
+function assertMetaCloudAccount(account: Record<string, unknown> | null) {
+  if (!account) {
+    throw new WhatsAppDomainError("INVALID_SOURCE", "Conta do WhatsApp não encontrada.");
+  }
+  if (String(account.provider_type ?? "META_CLOUD") !== "META_CLOUD") {
+    throw new UnsupportedCapabilityError(
+      "CONVERSATION_START",
+      "Esta ação pertence ao runtime Meta Cloud. O provider WhatsApp Web está isolado e não autorizado para envio real."
+    );
+  }
+  if (String(account.provider_status ?? "ENABLED") !== "ENABLED") {
+    throw new WhatsAppDomainError("INVALID_SOURCE", "A conta selecionada não está disponível para envio.");
+  }
 }
 
 function errorCode(error: unknown, fallback: string) {
@@ -103,7 +138,8 @@ export async function saveWhatsAppAccount(data: FormData) {
     await context.supabase
       .from("whatsapp_accounts")
       .update({ is_default: false, updated_at: new Date().toISOString() })
-      .eq("organization_id", context.organizationId);
+      .eq("organization_id", context.organizationId)
+      .eq("provider_type", "META_CLOUD");
   }
 
   const { error } = await context.supabase.from("whatsapp_accounts").upsert(
@@ -115,6 +151,9 @@ export async function saveWhatsAppAccount(data: FormData) {
       business_name: optional(data, "businessName"),
       active: true,
       is_default: isDefault,
+      provider_type: "META_CLOUD",
+      provider_account_id: phoneNumberId,
+      provider_status: "ENABLED",
       created_by: context.userId,
       updated_at: new Date().toISOString()
     },
@@ -126,37 +165,36 @@ export async function saveWhatsAppAccount(data: FormData) {
     fail(path, "A conta do WhatsApp não pôde ser salva.");
   }
   revalidatePath(path);
-  redirect(`${path}?success=${encodeURIComponent("Conta do WhatsApp salva.")}`);
+  redirect(`${path}?success=${encodeURIComponent("Conta Meta Cloud salva.")}`);
 }
 
 export async function startWhatsAppConversation(data: FormData) {
-  const context = await requireCapability("whatsapp", "create", optional(data, "projectId"));
+  const projectId = optionalUuid(data, "projectId");
+  const context = await requireCapability("whatsapp", "create", projectId);
   const path = "/app/whatsapp";
 
   try {
     requireMetaCloudCapability(context.organizationId, "CONVERSATION_START");
-    const accountId = text(data, "accountId");
+    const accountId = requiredUuid(text(data, "accountId"), "Conta");
     const phone = normalizePhone(text(data, "phone"));
-    const clientId = optional(data, "clientId");
-    const projectId = optional(data, "projectId");
+    const clientId = optionalUuid(data, "clientId");
 
     const { data: account, error: accountError } = await context.supabase
       .from("whatsapp_accounts")
-      .select("id")
+      .select("id,provider_type,provider_status")
       .eq("id", accountId)
       .eq("organization_id", context.organizationId)
       .eq("active", true)
       .maybeSingle();
-    if (accountError || !account) {
-      throw new WhatsAppDomainError("INVALID_SOURCE", "Conta do WhatsApp não encontrada.");
-    }
+    if (accountError) throw accountError;
+    assertMetaCloudAccount(account as Record<string, unknown> | null);
 
     const { data: contact, error: contactError } = await context.supabase
       .from("whatsapp_contacts")
       .upsert(
         {
           organization_id: context.organizationId,
-          account_id: account.id,
+          account_id: accountId,
           client_id: clientId,
           wa_id: phone,
           phone_e164: phone,
@@ -172,7 +210,8 @@ export async function startWhatsAppConversation(data: FormData) {
     const { data: existing } = await context.supabase
       .from("whatsapp_conversations")
       .select("id")
-      .eq("account_id", account.id)
+      .eq("organization_id", context.organizationId)
+      .eq("account_id", accountId)
       .eq("contact_id", contact.id)
       .in("status", ["OPEN", "PENDING"])
       .maybeSingle();
@@ -183,13 +222,13 @@ export async function startWhatsAppConversation(data: FormData) {
       .from("whatsapp_conversations")
       .insert({
         organization_id: context.organizationId,
-        account_id: account.id,
+        account_id: accountId,
         contact_id: contact.id,
         client_id: clientId ?? contact.client_id,
         project_id: projectId,
-        contract_id: optional(data, "contractId"),
-        opportunity_id: optional(data, "opportunityId"),
-        sac_ticket_id: optional(data, "sacTicketId"),
+        contract_id: optionalUuid(data, "contractId"),
+        opportunity_id: optionalUuid(data, "opportunityId"),
+        sac_ticket_id: optionalUuid(data, "sacTicketId"),
         status: "OPEN",
         assigned_to: context.userId,
         created_by: context.userId
@@ -259,10 +298,16 @@ export async function createWhatsAppContentBinding(data: FormData) {
 }
 
 export async function sendWhatsAppMessage(data: FormData) {
-  const conversationId = text(data, "conversationId");
-  const projectId = optional(data, "projectId");
-  const path = returnPath(conversationId);
-  const context = await requireCapability("whatsapp", "update", projectId);
+  const rawConversationId = text(data, "conversationId");
+  const path = returnPath(rawConversationId);
+  let conversationId: string;
+  try {
+    conversationId = requiredUuid(rawConversationId, "Conversa");
+  } catch (error) {
+    fail("/app/whatsapp", safeActionMessage(error));
+  }
+  const requestedProjectId = optionalUuid(data, "projectId");
+  const context = await requireCapability("whatsapp", "update", requestedProjectId);
 
   let queuedMessageId: string | null = null;
 
@@ -270,7 +315,7 @@ export async function sendWhatsAppMessage(data: FormData) {
     const { data: conversation, error: conversationError } = await context.supabase
       .from("whatsapp_conversations")
       .select(
-        "id,account_id,organization_id,project_id,last_customer_message_at,whatsapp_accounts!inner(phone_number_id),whatsapp_contacts!inner(wa_id,phone_e164)"
+        "id,account_id,organization_id,project_id,last_customer_message_at,whatsapp_accounts!inner(phone_number_id,provider_type,provider_account_id,provider_status),whatsapp_contacts!inner(wa_id,phone_e164)"
       )
       .eq("id", conversationId)
       .eq("organization_id", context.organizationId)
@@ -280,13 +325,23 @@ export async function sendWhatsAppMessage(data: FormData) {
       throw new WhatsAppDomainError("INVALID_SOURCE", "Conversa não encontrada.");
     }
 
+    const actualProjectId = conversation.project_id ? String(conversation.project_id) : null;
+    if (requestedProjectId && requestedProjectId !== actualProjectId) {
+      throw new WhatsAppDomainError("INVALID_SOURCE", "A obra informada não corresponde à conversa.");
+    }
+    await requireCapability("whatsapp", "update", actualProjectId);
+
     const account = firstRelation(conversation.whatsapp_accounts);
+    assertMetaCloudAccount(account);
     const contact = firstRelation(conversation.whatsapp_contacts);
     const phoneNumberId = String(account?.phone_number_id ?? "");
+    if (!/^\d{5,30}$/.test(phoneNumberId)) {
+      throw new WhatsAppDomainError("INVALID_SOURCE", "A conta Meta Cloud não possui um identificador de número válido.");
+    }
     const to = normalizePhone(String(contact?.wa_id ?? contact?.phone_e164 ?? ""));
     const supportWindowOpen = isSupportWindowOpen(conversation.last_customer_message_at);
     const variables = parseVariables(optional(data, "variables"));
-    const bindingId = optional(data, "bindingId");
+    const bindingId = optionalUuid(data, "bindingId");
 
     let body = text(data, "body");
     let caption: string | null = null;
@@ -332,7 +387,11 @@ export async function sendWhatsAppMessage(data: FormData) {
       : useTemplate
         ? "TEMPLATE"
         : "TEXT";
-    const idempotencyKey = text(data, "idempotencyKey") || randomUUID();
+    const requestedIdempotencyKey = text(data, "idempotencyKey");
+    const idempotencyKey = requestedIdempotencyKey || randomUUID();
+    if (!IDEMPOTENCY_PATTERN.test(idempotencyKey)) {
+      throw new WhatsAppDomainError("INVALID_SOURCE", "A chave de idempotência da mensagem é inválida.");
+    }
     const recipient = createCanonicalPhoneIdentity({
       organizationId: context.organizationId,
       providerType: "META_CLOUD",
@@ -375,6 +434,10 @@ export async function sendWhatsAppMessage(data: FormData) {
     );
     queuedMessageId = String(queuedRow?.id ?? "");
     if (!queuedMessageId) throw new Error("queued_message_missing");
+    if (String(queuedRow?.status ?? "") === "SENT" || queuedRow?.provider_message_id) {
+      revalidatePath(path);
+      redirect(`${path}&success=${encodeURIComponent("Mensagem já processada anteriormente.")}`);
+    }
 
     let content: EngineSendCommand["content"];
     if (resolved?.kind === "DOCUMENT") {
