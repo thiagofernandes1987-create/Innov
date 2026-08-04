@@ -78,9 +78,9 @@ for (const token of ["read_only: true", "cap_drop:", "no-new-privileges:true", "
 for (const token of ["--network none", "--read-only", "--cap-drop ALL", "10001:10001", "gateway_shutdown_completed"])
   if (!smoke.includes(token)) failures.push(`Smoke test de container incompleto: ${token}`);
 for (const token of [
-  "0cde0111db365366ede392ae715baa4575440af43bfd82d6083638c0af130d57",
+  "3a00d4b9e53cd7d2ce9ad1de1f1cb5aa40aeac4189f6eb5003227e29d8e52add",
   "messaging-w06-lockfile-v2", "validationScope", "unrelatedWorkspaceResolutionDriftIgnored",
-  "wsOverride", "libsignal@6.0.0", "whatsapp-rust-bridge@0.5.4"
+  "expectedWsOverride", "wsOverride", "libsignal@6.0.0", "whatsapp-rust-bridge@0.5.4"
 ]) if (!lockGate.includes(token)) failures.push(`Gate semântico de lockfile incompleto: ${token}`);
 for (const token of ["bloqueia comando sem HMAC", "rejeita replay", "limita o tamanho do corpo", "preserva correlação e causalidade"])
   if (!tests.includes(token)) failures.push(`Teste W-05 ausente: ${token}`);
@@ -115,7 +115,7 @@ console.log(JSON.stringify({
   externalSocketBlockedByDefault: true,
   lifecycleScriptsExecuted: false,
   resolvedLockfileValidation: "semantic_fingerprint_v2",
-  semanticLockfileSha256: "0cde0111db365366ede392ae715baa4575440af43bfd82d6083638c0af130d57",
+  semanticLockfileSha256: "3a00d4b9e53cd7d2ce9ad1de1f1cb5aa40aeac4189f6eb5003227e29d8e52add",
   wsOverride: "8.21.1",
   databaseAccess: false,
   nonRootUid: 10001,
