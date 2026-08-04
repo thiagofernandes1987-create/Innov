@@ -67,6 +67,12 @@ export default async function WhatsAppPage({
   const selected = workspace.conversations.find(
     item => item.id === workspace.selectedConversationId
   ) as Record<string, unknown> | undefined;
+  const selectedCapabilities = workspace.selectedMessagingCapabilities;
+  const availableAccounts = workspace.accounts.filter(
+    account =>
+      account.active &&
+      workspace.accountCapabilities[account.id]?.canStartConversation
+  );
 
   return (
     <main className="content">
@@ -93,6 +99,12 @@ export default async function WhatsAppPage({
           Algumas fontes não puderam ser carregadas. Códigos: {workspace.errors.join(", ")}.
         </div>
       ) : null}
+      {!workspace.providerPolicy.enabled ? (
+        <div className="validation warning" role="status">
+          O provider Meta Cloud está desabilitado para esta organização. Ações de envio e
+          abertura de conversa foram ocultadas pela política de capacidades.
+        </div>
+      ) : null}
 
       <section className="stats-grid">
         <article className="card card-pad">
@@ -106,9 +118,9 @@ export default async function WhatsAppPage({
           <p>Atendimentos abertos ou históricos.</p>
         </article>
         <article className="card card-pad">
-          <span className="eyebrow">MENSAGENS PADRÃO</span>
-          <strong>{workspace.bindings.length}</strong>
-          <p>Vínculos com fontes canônicas.</p>
+          <span className="eyebrow">PROVIDER</span>
+          <strong>{workspace.providerPolicy.enabled ? "ATIVO" : "DESATIVADO"}</strong>
+          <p>Meta Cloud · capabilities efetivas por organização.</p>
         </article>
       </section>
 
@@ -156,7 +168,7 @@ export default async function WhatsAppPage({
             <>
               <div className="section-heading">
                 <div>
-                  <span className="eyebrow">ATENDIMENTO</span>
+                  <span className="eyebrow">ATENDIMENTO · META CLOUD</span>
                   <h2>{conversationName(selected)}</h2>
                   <p>
                     {projectName(selected)} · última mensagem do cliente:{" "}
@@ -187,9 +199,7 @@ export default async function WhatsAppPage({
                       </small>
                       {message.body ? <p style={{ whiteSpace: "pre-wrap" }}>{message.body}</p> : null}
                       {message.caption ? <p>{message.caption}</p> : null}
-                      {provenance ? (
-                        <small>Fonte canônica: {provenance}</small>
-                      ) : null}
+                      {provenance ? <small>Fonte canônica: {provenance}</small> : null}
                       {message.error_code ? (
                         <small role="alert">Falha: {String(message.error_code)}</small>
                       ) : null}
@@ -199,53 +209,74 @@ export default async function WhatsAppPage({
                 {!workspace.messages.length ? (
                   <div className="empty-state">
                     <h3>Conversa sem mensagens</h3>
-                    <p>Use uma mensagem livre dentro da janela ou um template aprovado.</p>
+                    <p>Use uma ação suportada pelo provider desta conta.</p>
                   </div>
                 ) : null}
               </div>
 
-              <form action={sendWhatsAppMessage} className="card card-pad field-form">
-                <input type="hidden" name="conversationId" value={String(selected.id)} />
-                <input
-                  type="hidden"
-                  name="projectId"
-                  value={String(selected.project_id ?? "")}
-                />
-                <input type="hidden" name="idempotencyKey" value={randomUUID()} />
-                <div className="field-grid">
-                  <label className="span-2">
-                    Mensagem padrão vinculada
-                    <select name="bindingId" defaultValue="">
-                      <option value="">Mensagem livre</option>
-                      {workspace.bindings.map(binding => (
-                        <option key={binding.id} value={binding.id}>
-                          {binding.name}
-                          {binding.meta_template_name
-                            ? ` · template ${binding.meta_template_name}`
-                            : ""}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="span-2">
-                    Variáveis do modelo em JSON
-                    <textarea
-                      name="variables"
-                      rows={3}
-                      placeholder={'{"cliente_nome":"Marcos","obra_codigo":"OB-0026"}'}
-                    />
-                  </label>
-                  <label className="span-2">
-                    Mensagem livre
-                    <textarea
-                      name="body"
-                      rows={5}
-                      placeholder="Utilizada somente quando nenhuma mensagem padrão for selecionada."
-                    />
-                  </label>
+              {selectedCapabilities.canSendAny ? (
+                <form action={sendWhatsAppMessage} className="card card-pad field-form">
+                  <input type="hidden" name="conversationId" value={String(selected.id)} />
+                  <input
+                    type="hidden"
+                    name="projectId"
+                    value={String(selected.project_id ?? "")}
+                  />
+                  <input type="hidden" name="idempotencyKey" value={randomUUID()} />
+                  <div className="field-grid">
+                    {selectedCapabilities.canSendTemplate ||
+                    selectedCapabilities.canSendDocument ? (
+                      <label className="span-2">
+                        Mensagem padrão vinculada
+                        <select name="bindingId" defaultValue="">
+                          {selectedCapabilities.canSendText ? (
+                            <option value="">Mensagem livre</option>
+                          ) : (
+                            <option value="" disabled>Selecione uma fonte</option>
+                          )}
+                          {workspace.bindings.map(binding => (
+                            <option key={binding.id} value={binding.id}>
+                              {binding.name}
+                              {binding.meta_template_name
+                                ? ` · template ${binding.meta_template_name}`
+                                : ""}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ) : null}
+                    {selectedCapabilities.canSendTemplate ||
+                    selectedCapabilities.canSendDocument ? (
+                      <label className="span-2">
+                        Variáveis do modelo em JSON
+                        <textarea
+                          name="variables"
+                          rows={3}
+                          placeholder={'{"cliente_nome":"Marcos","obra_codigo":"OB-0026"}'}
+                        />
+                      </label>
+                    ) : null}
+                    {selectedCapabilities.canSendText ? (
+                      <label className="span-2">
+                        Mensagem livre
+                        <textarea
+                          name="body"
+                          rows={5}
+                          placeholder="Utilizada somente quando nenhuma mensagem padrão for selecionada."
+                        />
+                      </label>
+                    ) : null}
+                  </div>
+                  <button className="button button-primary" type="submit">
+                    Enviar pelo WhatsApp
+                  </button>
+                </form>
+              ) : (
+                <div className="validation warning" role="status">
+                  Esta conta não possui capability outbound habilitada. O histórico permanece
+                  disponível, mas as ações de envio foram ocultadas.
                 </div>
-                <button className="button button-primary" type="submit">Enviar pelo WhatsApp</button>
-              </form>
+              )}
             </>
           ) : (
             <div className="empty-state">
@@ -256,60 +287,62 @@ export default async function WhatsAppPage({
         </div>
       </section>
 
-      <section className="card card-pad">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">NOVO ATENDIMENTO</span>
-            <h2>Abrir conversa</h2>
+      {availableAccounts.length ? (
+        <section className="card card-pad">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">NOVO ATENDIMENTO</span>
+              <h2>Abrir conversa</h2>
+            </div>
           </div>
-        </div>
-        <form action={startWhatsAppConversation} className="field-form">
-          <div className="field-grid">
-            <label>
-              Conta
-              <select name="accountId" required defaultValue="">
-                <option value="" disabled>Selecione</option>
-                {workspace.accounts.filter(item => item.active).map(account => (
-                  <option key={account.id} value={account.id}>
-                    {account.business_name || account.display_phone_number || account.phone_number_id}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Telefone com país e DDD
-              <input name="phone" required placeholder="5512999999999" />
-            </label>
-            <label>
-              Nome exibido
-              <input name="displayName" placeholder="Contato" />
-            </label>
-            <label>
-              Cliente
-              <select name="clientId" defaultValue="">
-                <option value="">Sem vínculo</option>
-                {workspace.clients.map(client => (
-                  <option key={client.id} value={client.id}>
-                    {client.trade_name || client.legal_name}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="span-2">
-              Obra
-              <select name="projectId" defaultValue="">
-                <option value="">Sem obra vinculada</option>
-                {workspace.projects.map(project => (
-                  <option key={project.id} value={project.id}>
-                    {project.code} · {project.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <button className="button button-primary" type="submit">Abrir atendimento</button>
-        </form>
-      </section>
+          <form action={startWhatsAppConversation} className="field-form">
+            <div className="field-grid">
+              <label>
+                Conta
+                <select name="accountId" required defaultValue="">
+                  <option value="" disabled>Selecione</option>
+                  {availableAccounts.map(account => (
+                    <option key={account.id} value={account.id}>
+                      {account.business_name || account.display_phone_number || account.phone_number_id}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Telefone com país e DDD
+                <input name="phone" required placeholder="5512999999999" />
+              </label>
+              <label>
+                Nome exibido
+                <input name="displayName" placeholder="Contato" />
+              </label>
+              <label>
+                Cliente
+                <select name="clientId" defaultValue="">
+                  <option value="">Sem vínculo</option>
+                  {workspace.clients.map(client => (
+                    <option key={client.id} value={client.id}>
+                      {client.trade_name || client.legal_name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="span-2">
+                Obra
+                <select name="projectId" defaultValue="">
+                  <option value="">Sem obra vinculada</option>
+                  {workspace.projects.map(project => (
+                    <option key={project.id} value={project.id}>
+                      {project.code} · {project.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <button className="button button-primary" type="submit">Abrir atendimento</button>
+          </form>
+        </section>
+      ) : null}
 
       {workspace.canManage ? (
         <>
