@@ -2,6 +2,7 @@ import {
   MESSAGING_CONTRACT_VERSION,
   MessagingDomainError,
   assertCanonicalMessage,
+  assertCanonicalReceipt,
   createCanonicalPhoneIdentity,
   normalizeCanonicalPhone,
   type CanonicalChannelAccount,
@@ -104,6 +105,11 @@ function record(value: unknown): Readonly<Record<string, unknown>> {
     : {};
 }
 
+function normalizedPhoneOrNull(value: string | null | undefined) {
+  const digits = String(value ?? "").replace(/\D/g, "");
+  return digits.length >= 10 && digits.length <= 15 ? digits : null;
+}
+
 function optionalSourceSnapshot(value: unknown): CanonicalSourceSnapshot | null {
   const candidate = record(value);
   if (
@@ -146,23 +152,26 @@ function accountIdentity(
   account: LegacyWhatsAppAccount,
   observedAt: string
 ): CanonicalIdentity {
-  const phone = String(account.display_phone_number ?? "").replace(/\D/g, "");
-  if (phone.length >= 10 && phone.length <= 15) {
+  const phone = normalizedPhoneOrNull(account.display_phone_number);
+  if (phone) {
     return createCanonicalPhoneIdentity({
       organizationId: account.organization_id,
       providerType: "META_CLOUD",
-      providerAccountId: account.id,
+      channelAccountId: account.id,
+      providerAccountId: account.phone_number_id,
       externalId: account.phone_number_id,
       phone,
       displayName: account.business_name,
-      observedAt
+      observedAt,
+      isSelf: true
     });
   }
   return {
     schemaVersion: MESSAGING_CONTRACT_VERSION,
     organizationId: account.organization_id,
     providerType: "META_CLOUD",
-    providerAccountId: account.id,
+    channelAccountId: account.id,
+    providerAccountId: account.phone_number_id,
     namespace: "CUSTOM",
     externalId: account.phone_number_id,
     normalizedId: `meta-phone-number-id:${account.phone_number_id}`,
@@ -174,13 +183,15 @@ function accountIdentity(
 
 export function legacyWhatsAppContactToCanonicalIdentity(
   contact: LegacyWhatsAppContact,
-  observedAt = contact.updated_at ?? contact.created_at ?? new Date(0).toISOString()
+  observedAt = contact.updated_at ?? contact.created_at ?? new Date(0).toISOString(),
+  providerAccountId?: string | null
 ): CanonicalIdentity {
   return createCanonicalPhoneIdentity({
     id: contact.id,
     organizationId: contact.organization_id,
     providerType: "META_CLOUD",
-    providerAccountId: contact.account_id,
+    channelAccountId: contact.account_id,
+    providerAccountId,
     externalId: contact.wa_id,
     phone: contact.phone_e164,
     displayName: contact.display_name ?? contact.profile_name,
@@ -191,9 +202,7 @@ export function legacyWhatsAppContactToCanonicalIdentity(
 export function legacyWhatsAppAccountToCanonical(
   account: LegacyWhatsAppAccount
 ): CanonicalChannelAccount {
-  const displayAddress = account.display_phone_number
-    ? normalizeCanonicalPhone(account.display_phone_number)
-    : null;
+  const displayAddress = normalizedPhoneOrNull(account.display_phone_number);
   return {
     schemaVersion: MESSAGING_CONTRACT_VERSION,
     id: account.id,
@@ -230,12 +239,17 @@ export function legacyWhatsAppConversationToCanonical(input: {
     status: input.conversation.status,
     participants: [
       accountIdentity(input.account, observedAt),
-      legacyWhatsAppContactToCanonicalIdentity(input.contact, observedAt)
+      legacyWhatsAppContactToCanonicalIdentity(
+        input.contact,
+        observedAt,
+        input.account.phone_number_id
+      )
     ],
-    providerAccounts: [
+    channelAccounts: [
       {
         providerType: "META_CLOUD",
-        providerAccountId: input.account.id
+        channelAccountId: input.account.id,
+        providerAccountId: input.account.phone_number_id
       }
     ],
     assignedTo: input.conversation.assigned_to,
@@ -296,7 +310,8 @@ export function legacyWhatsAppMessageToCanonical(input: {
 }): CanonicalMessage {
   const contact = legacyWhatsAppContactToCanonicalIdentity(
     input.contact,
-    input.message.occurred_at
+    input.message.occurred_at,
+    input.account.phone_number_id
   );
   const business = accountIdentity(input.account, input.message.occurred_at);
   const inbound = input.message.direction === "INBOUND";
@@ -306,7 +321,8 @@ export function legacyWhatsAppMessageToCanonical(input: {
     organizationId: input.message.organization_id,
     conversationId: input.message.conversation_id,
     providerType: "META_CLOUD",
-    providerAccountId: input.account.id,
+    channelAccountId: input.account.id,
+    providerAccountId: input.account.phone_number_id,
     providerMessageId: input.message.provider_message_id,
     idempotencyKey: input.message.idempotency_key,
     direction: input.message.direction,
@@ -367,13 +383,14 @@ export function legacyWhatsAppStatusEventToCanonical(input: {
   event: LegacyWhatsAppStatusEvent;
   providerMessageId?: string | null;
 }): CanonicalReceipt {
-  return {
+  return assertCanonicalReceipt({
     schemaVersion: MESSAGING_CONTRACT_VERSION,
     id: input.event.id,
     organizationId: input.event.organization_id,
     messageId: input.event.message_id,
     providerType: "META_CLOUD",
-    providerAccountId: input.account.id,
+    channelAccountId: input.account.id,
+    providerAccountId: input.account.phone_number_id,
     providerMessageId: input.providerMessageId,
     receiptType: receiptType(input.event.status),
     occurredAt: input.event.provider_timestamp ?? input.event.created_at,
@@ -389,5 +406,5 @@ export function legacyWhatsAppStatusEventToCanonical(input: {
       providerTimestamp: input.event.provider_timestamp,
       attributes: input.event.metadata
     })
-  };
+  });
 }
