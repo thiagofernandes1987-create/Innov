@@ -144,7 +144,7 @@ create table public.whatsapp_webhook_events (
 );
 
 -- Políticas mínimas das relações legadas para que FORCE RLS da W-04 possa ser testado.
-foreach_table: do $$
+do $$
 declare
   relation text;
 begin
