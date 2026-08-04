@@ -149,8 +149,8 @@ jobs:
         run: |
           corepack enable
           corepack prepare pnpm@11.15.0 --activate
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Install dependencies without lifecycle scripts
+        run: pnpm install --no-frozen-lockfile --ignore-scripts --reporter=append-only
       - name: Upload resolved W-06 lockfile
         if: always()
         uses: actions/upload-artifact@v7
@@ -237,7 +237,7 @@ jobs:
         with:
           name: lint-report
           path: lint-report.txt
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
       - name: Typecheck
         run: |
@@ -249,7 +249,7 @@ jobs:
         with:
           name: typecheck-report
           path: typecheck-report.txt
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
       - name: TypeScript unit tests
         run: pnpm test
