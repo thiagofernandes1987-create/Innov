@@ -3,7 +3,8 @@
 **Documento:** plano executável do subprojeto de mensageria não oficial  
 **Projeto pai:** Etapa 22 — WhatsApp e atendimento omnichannel  
 **Branch de planejamento:** `feature/etapa-22-whatsapp-omnichannel`  
-**Status:** W-01 concluída; implementação do provider não iniciada  
+**Branch de execução:** `feature/etapa-22-provider-whatsapp-web-baileys`  
+**Status:** W-02 concluída; engine Baileys e runtime ainda não iniciados  
 **Provider inicial planejado:** Baileys 7.x, encapsulado por adapter próprio  
 **Última atualização:** 03 de agosto de 2026  
 **Documento complementar:** [`SPEC.md`](./SPEC.md)
@@ -30,7 +31,7 @@ domínio existente de conversas, CRM, obras, contratos, SAC e documentos
 
 ---
 
-## 2. Relação com o PR #39
+## 2. Relação com os PRs
 
 O PR #39 permanece responsável pela base da Etapa 22:
 
@@ -43,11 +44,9 @@ O PR #39 permanece responsável pela base da Etapa 22:
 - RLS, auditoria e proteção do histórico;
 - provider oficial Meta Cloud API.
 
-Este inventário não autoriza ampliar silenciosamente o PR #39 com um runtime Baileys. A implantação deverá ocorrer em branch própria depois da aprovação dos pré-requisitos do Marco M-0.
+O PR #40 executa a arquitetura multiprovider de forma incremental, tendo a branch do PR #39 como base. Nesta fase contém apenas contratos canônicos, compatibilidade Meta, testes e gates arquiteturais.
 
-```text
-feature/etapa-22-provider-whatsapp-web-baileys
-```
+Nenhum dos dois PRs autoriza silenciosamente um runtime Baileys, número real ou produção.
 
 ---
 
@@ -178,15 +177,7 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [x] W-01.9 — Definir processo de desligamento e remoção de sessão
 - [x] W-01.10 — Registrar critérios que cancelariam o projeto antes da implantação
 
-**Evidências:**
-
-- `ADR-001-PROVIDER-WHATSAPP-WEB-NAO-OFICIAL.md`;
-- `MATRIZ-LICENCAS-E-REAPROVEITAMENTO.md`;
-- `POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md`;
-- `/THIRD_PARTY_NOTICES.md`;
-- `EVIDENCIAS-W01.md`.
-
-**Classificação:** documentação e fontes verificadas; aceite assinado, número real, revisão jurídica e produção continuam não executados/bloqueados.
+**Evidências:** ADR-001, matriz de licenças, política de risco, `THIRD_PARTY_NOTICES.md` e `EVIDENCIAS-W01.md`.
 
 **Gate W-G01:** concluído somente em seu escopo documental. Nenhuma sessão real ou produção foi autorizada.
 
@@ -196,27 +187,42 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 
 ## Sprint W-02 — Modelo canônico de canal, identidade e mensagem
 
-**Estado:** pendente  
+**Estado:** concluída  
 **Dependências:** W-01
 
-- [ ] W-02.1 — Definir `ChannelProviderType`
-  - [ ] W-02.1.1 — `META_CLOUD`
-  - [ ] W-02.1.2 — `WHATSAPP_WEB_BAILEYS`
-  - [ ] W-02.1.3 — `WEB_CHAT`
-  - [ ] W-02.1.4 — providers futuros sem implementação
-- [ ] W-02.2 — Definir `CanonicalIdentity`
-- [ ] W-02.3 — Definir namespaces `PHONE`, `WHATSAPP_PN`, `WHATSAPP_LID`, `GROUP`, `NEWSLETTER` e `WEB_USER`
-- [ ] W-02.4 — Definir `CanonicalMessage`
-- [ ] W-02.5 — Definir `CanonicalMedia`
-- [ ] W-02.6 — Definir `CanonicalReceipt`
-- [ ] W-02.7 — Definir `CanonicalConversation`
-- [ ] W-02.8 — Definir `ProviderMetadata` separado do domínio
-- [ ] W-02.9 — Definir versionamento dos contratos
-- [ ] W-02.10 — Criar testes que proíbam imports de Baileys fora do adapter
-- [ ] W-02.11 — Mapear objetos atuais da Etapa 22 para o modelo neutro
-- [ ] W-02.12 — Garantir compatibilidade retroativa com Meta
+- [x] W-02.1 — Definir `ChannelProviderType`
+  - [x] W-02.1.1 — `META_CLOUD`
+  - [x] W-02.1.2 — `WHATSAPP_WEB_BAILEYS`
+  - [x] W-02.1.3 — `WEB_CHAT`
+  - [x] W-02.1.4 — providers futuros sem implementação
+- [x] W-02.2 — Definir `CanonicalIdentity`
+- [x] W-02.3 — Definir namespaces `PHONE`, `WHATSAPP_PN`, `WHATSAPP_LID`, `GROUP`, `NEWSLETTER` e `WEB_USER`
+- [x] W-02.4 — Definir `CanonicalMessage`
+- [x] W-02.5 — Definir `CanonicalMedia`
+- [x] W-02.6 — Definir `CanonicalReceipt`
+- [x] W-02.7 — Definir `CanonicalConversation`
+- [x] W-02.8 — Definir `ProviderMetadata` separado do domínio
+- [x] W-02.9 — Definir versionamento dos contratos
+- [x] W-02.10 — Criar testes que proíbam imports de Baileys fora do adapter
+- [x] W-02.11 — Mapear objetos atuais da Etapa 22 para o modelo neutro
+- [x] W-02.12 — Garantir compatibilidade retroativa com Meta
 
-**Gate W-G02:** nenhum tipo nativo de engine atravessa o adapter.
+**Evidências:**
+
+- `lib/messaging/domain.ts`;
+- `lib/messaging/whatsapp-compatibility.ts`;
+- `tests/messaging-domain.test.ts`;
+- `tests/messaging-boundary.test.ts`;
+- `scripts/validate-messaging-boundaries.mjs`;
+- `CONTRATOS-CANONICOS-V1.md`;
+- `EVIDENCIAS-W02.md`;
+- PR #40;
+- CI run `30864989008` verde;
+- File Security E2E run `30864988991` verde.
+
+**Decisão adicional:** `channelAccountId` identifica a conta interna do Innov; `providerAccountId` identifica a conta externa do provider. A distinção é obrigatória.
+
+**Gate W-G02:** concluído. O scanner e os testes bloqueiam imports ou tipos nativos Baileys fora dos adapters autorizados. Baileys continua não instalado.
 
 ## Sprint W-03 — Contrato de engine e matriz de capacidades
 
@@ -674,7 +680,8 @@ apps/messaging-gateway/
 └── tests/
 
 lib/messaging/
-├── domain.ts
+├── domain.ts                  # criado na W-02
+├── whatsapp-compatibility.ts  # criado na W-02
 ├── contracts.ts
 ├── capabilities.ts
 ├── events.ts
@@ -695,8 +702,8 @@ supabase/migrations/
 
 ## 8. Critérios globais de conclusão
 
-- [ ] Contratos provider-neutral implementados
-- [ ] Provider Meta preservado sem regressão
+- [x] Contratos provider-neutral implementados
+- [x] Provider Meta preservado sem regressão
 - [ ] Adapter Baileys confinado
 - [ ] Runtime separado do Next.js
 - [ ] Session store criptografado/transacional
@@ -704,9 +711,9 @@ supabase/migrations/
 - [ ] Ingress durável/idempotente
 - [ ] Outbox/retry ledger comprovados
 - [ ] PN/LID sem duplicação
-- [ ] Mídia com quarentena/antivírus
+- [ ] Mídia com quarentena/antivírus específica do canal
 - [ ] Inbox multiprovider homologada
-- [ ] Fontes canônicas preservadas
+- [x] Fontes canônicas preservadas na projeção
 - [ ] IA independente e inicialmente em rascunho
 - [ ] Handoff persistente
 - [ ] Threat model aprovado
@@ -715,8 +722,8 @@ supabase/migrations/
 - [ ] Restart, concorrência e restore verdes
 - [ ] Piloto restrito concluído
 - [ ] Decisão explícita de promover/restringir/encerrar
-- [ ] Documentação canônica atualizada
-- [ ] CI/E2E verdes
+- [ ] Documentação canônica final atualizada
+- [ ] CI/E2E finais verdes
 
 ---
 
@@ -732,7 +739,7 @@ supabase/migrations/
 
 | Sprint/controle | Estado | Evidência | Próxima ação |
 |---|---|---|---|
-| Aceite operacional | não executado | `POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md` define o modelo | somente antes de número real |
+| Aceite operacional | não executado | política define o modelo | somente antes de número real |
 | Revisão jurídica | dependência externa | ADR declara ausência | executar antes de piloto/produção |
 | Número autorizado | não executado | nenhum número registrado | somente W-20 |
 | Produção | bloqueada | ADR-001 | exige decisão posterior específica |
@@ -741,10 +748,11 @@ supabase/migrations/
 
 ## 11. Próxima ação autorizada
 
-A próxima sprint autorizada é **W-02 — Modelo canônico de canal, identidade e mensagem**.
+A próxima sprint autorizada é **W-03 — Contrato de engine e matriz de capacidades**.
 
-É permitido criar contratos neutros, mocks e testes arquiteturais. Ainda não está autorizado:
+É permitido criar interfaces provider-neutral, capability matrix, mock engine, feature flags e adapter Meta. Ainda não está autorizado:
 
+- instalar ou conectar Baileys;
 - criar sessão real;
 - usar número comercial;
 - liberar provider;
