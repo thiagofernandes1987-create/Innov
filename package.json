@@ -21,6 +21,7 @@
     "validate:operational-qa": "node scripts/validate-operational-qa-guards.mjs",
     "validate:flexible-workflows": "node scripts/validate-flexible-commercial-workflows.mjs",
     "validate:object-runtime": "node scripts/validate-object-runtime.mjs",
+    "validate:messaging-boundaries": "node scripts/validate-messaging-boundaries.mjs",
     "test:db:object-runtime": "node scripts/run-object-runtime-db-tests.mjs",
     "validate:pipeline": "node scripts/validate-pipeline.mjs",
     "validate:menus": "node scripts/validate-menus.mjs",
