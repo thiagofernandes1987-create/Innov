@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const root = process.cwd();
+const validatorPath = "scripts/validate-messaging-session-store.mjs";
 const files = {
   contracts: "apps/messaging-gateway/src/session-store/contracts.ts",
   crypto: "apps/messaging-gateway/src/session-store/envelope-crypto.ts",
@@ -119,6 +120,7 @@ const codeFiles = [];
 walk(root, codeFiles);
 for (const file of codeFiles) {
   const relative = path.relative(root, file).replaceAll("\\", "/");
+  if (relative === validatorPath) continue;
   if (relative.startsWith("tests/disposable-baileys-lab/")) continue;
   const source = fs.readFileSync(file, "utf8");
   if (source.includes("useMultiFileAuthState")) {
