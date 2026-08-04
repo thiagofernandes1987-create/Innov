@@ -5,6 +5,7 @@ import {
   assumeMessagingConversation,
   updateMessagingOperatorPresence
 } from "@/app/actions/messaging-inbox";
+import type { ChannelProviderType } from "@/lib/messaging/domain";
 import {
   channelStateLabel,
   deriveInboxActionAvailability,
@@ -13,8 +14,33 @@ import {
 } from "@/lib/messaging/inbox";
 import { loadMultiproviderInbox } from "@/lib/messaging/inbox.server";
 
+const FILTERABLE_PROVIDERS = new Set<ChannelProviderType>([
+  "META_CLOUD",
+  "WHATSAPP_WEB_BAILEYS",
+  "WEB_CHAT"
+]);
+const FILTERABLE_STATES = new Set<InboxChannelState>([
+  "ONLINE",
+  "OFFLINE",
+  "RECONNECTING",
+  "DEGRADED",
+  "ACTION_REQUIRED"
+]);
+
 function value(input: string | string[] | undefined): string {
   return Array.isArray(input) ? input[0] ?? "" : input ?? "";
+}
+
+function providerFilter(input: string): ChannelProviderType | null {
+  return FILTERABLE_PROVIDERS.has(input as ChannelProviderType)
+    ? input as ChannelProviderType
+    : null;
+}
+
+function channelStateFilter(input: string): InboxChannelState | null {
+  return FILTERABLE_STATES.has(input as InboxChannelState)
+    ? input as InboxChannelState
+    : null;
 }
 
 function stateTone(state: InboxChannelState) {
@@ -42,12 +68,12 @@ export default async function MultiproviderInboxPage({
   const data = await loadMultiproviderInbox({
     conversationId,
     filters: {
-      providerType: value(params.provider) as never || null,
+      providerType: providerFilter(value(params.provider)),
       accountId: value(params.account) || null,
       queueId: value(params.queue) || null,
       assignedTo: value(params.assignee) || null,
       projectId: value(params.project) || null,
-      channelState: value(params.state) as InboxChannelState || null,
+      channelState: channelStateFilter(value(params.state)),
       unreadOnly: value(params.unread) === "1",
       search: value(params.q) || null
     }
