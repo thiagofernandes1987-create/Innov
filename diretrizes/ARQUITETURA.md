@@ -1,7 +1,7 @@
 # Arquitetura canônica — Innovar Platform
 
-**Versão:** 0.19.0  
-**Atualizado em:** 21 de julho de 2026
+**Versão estável:** 0.19.0  
+**Atualizado em:** 04 de agosto de 2026
 
 ## 1. Visão geral
 
@@ -23,17 +23,11 @@ Supabase
   ├─ RPCs transacionais
   └─ Storage privado
 
-Workers
+Workers e serviços isolados
   ├─ DOCX → PDF
-  └─ entrega de assinatura
-
-Observabilidade
-  ├─ trilhas de domínio
-  ├─ audit_events transversal
-  ├─ fluxo unificado
-  ├─ alertas
-  ├─ health checks
-  └─ diagnósticos
+  ├─ entrega de assinatura
+  ├─ antimalware
+  └─ messaging-gateway
 ```
 
 ## 2. Organização do repositório
@@ -42,24 +36,21 @@ Observabilidade
 app/                    rotas, páginas, actions e APIs
 components/             componentes de interface
 lib/                    domínio, autorização e integrações
+apps/messaging-gateway/ gateway isolado de mensagens
 python/                 motor auxiliar de Qualidade
-scripts/                validadores, workers e homologação
+scripts/                validadores, workers e testes
 supabase/migrations/     evolução append-only do banco
-supabase/tests/          testes SQL reproduzíveis com ROLLBACK
+supabase/tests/          testes SQL reproduzíveis
 docs/                   histórico técnico e evidências
-diretrizes/             especificação canônica e recuperação
+diretrizes/             especificação canônica
 .github/workflows/       CI e homologação
 ```
 
-## 3. Modularidade plug-and-play
+## 3. Modularidade e autorização
 
-O catálogo existe em `lib/modules/registry.ts` e `app_modules`. Cada aplicativo possui chave estável, rota, categoria, dependências, versão, estado por organização, configurações e matriz de permissões.
+O catálogo existe em `lib/modules/registry.ts` e `app_modules`. Cada aplicativo possui chave estável, rota, dependências, versão, estado por organização, configurações e matriz de permissões.
 
-Desabilitar módulo preserva dados e bloqueia o acesso funcional. Instaladores atualizam apenas perfis canônicos e nunca sobrescrevem perfis personalizados.
-
-## 4. Autorização
-
-Camadas:
+Camadas de autorização:
 
 1. sessão autenticada;
 2. organização ativa;
@@ -72,262 +63,176 @@ Camadas:
 9. política de Storage;
 10. autorização interna em RPC privilegiada.
 
-Negação explícita prevalece. Cliente não herda permissões internas. Ações críticas podem exigir MFA AAL2, justificativa, separação de funções, alçada, idempotency key e auditoria.
+Negação explícita prevalece. Ações críticas podem exigir AAL2, justificativa, separação de funções, alçada, idempotency key, aprovação de uso único e auditoria.
 
-## 5. Banco e migrations
+## 4. Banco e migrations
 
 Convenções:
 
-- UUID;
-- timestamps UTC;
+- UUID e timestamps UTC;
 - `organization_id` em dados multiempresa;
-- `project_id` quando houver obra;
-- `client_id` quando houver contexto de cliente;
+- `project_id` e `client_id` quando aplicáveis;
 - constraints para invariantes locais;
 - triggers para regras centrais;
 - RPC para operações multi-tabela;
 - índices em FKs e filtros de RLS;
-- migrations append-only em ordem lexical.
+- migrations append-only em ordem lexical;
+- `SECURITY DEFINER` com `search_path` explícito e privilégio mínimo.
 
-Arquivo aplicado nunca é reescrito. Timestamp e nome local precisam coincidir com o ledger remoto. O validador bloqueia timestamp, nome ou conteúdo duplicado e divergência do ledger.
+Migration aplicada nunca é reescrita. O replay integral continua requisito de recuperação.
 
-Função `SECURITY DEFINER` usa `search_path` explícito, valida autorização internamente e recebe privilégio mínimo. Helper interno não é exposto como RPC operacional.
+## 5. Domínios operacionais consolidados
 
-## 6. Estoque — Etapa 17
+### Estoque
 
-O estoque usa razão imutável:
+Razão imutável, saldos derivados, reversão, advisory lock por posição, reservas, ativos e inventário físico.
 
-```text
-inventory_movements 1 ── N inventory_movement_lines
-saldo físico = movimentos válidos
-saldo reservado = reservado - consumido - liberado
-saldo disponível = físico - reservado
-```
+### CRM, Cliente 360 e SAC
 
-Movimento concluído não é editado; correção ocorre por reversão. A postagem adquire advisory lock por organização, depósito, localização, item e lote. Depósito exclusivo de obra não pode ser usado por outra obra.
+Pipeline interno, múltiplas obras por cliente, consentimentos, SAC interno/portal, mensagens públicas/internas, anexos privados e eventos append-only.
 
-## 7. CRM, Cliente 360 e SAC — Etapa 18
+### Auditoria e observabilidade
 
-```text
-lead → qualificação → oportunidade → cliente 360
-→ múltiplas obras e contratos → atendimento → pós-venda → avaliação
-```
+Fluxo unificado sem duplicar trilhas, `correlation_id`, sanitização, idempotência, alertas, health checks, diagnósticos e retenção configurável.
 
-- leads e conversão idempotentes;
-- pipeline exclusivamente interno;
-- cliente pode possuir diversas obras abertas ou concluídas;
-- portal mostra somente obras liberadas;
-- mensagens e anexos `INTERNAL` não aparecem ao cliente;
-- anexos possuem SHA-256;
-- estados críticos mudam somente por RPC;
-- eventos e históricos são append-only.
+## 6. Arquitetura de mensagens — Etapa 22
 
-## 8. Auditoria e Observabilidade — Etapa 19
+### 6.1 Princípio provider-neutral
 
-### 8.1 Princípio
-
-A Etapa 19 não copia nem substitui as trilhas de domínio. Ela normaliza as origens em leitura e usa `audit_events` somente para eventos transversais que não possuem trilha própria.
-
-Fontes unificadas:
+O domínio não importa tipos nativos de provider. Contatos, conversas, mensagens, mídias, receipts, contas e identidades permanecem canônicos.
 
 ```text
-audit_events
-permission_change_events
-signature_events
-document_access_logs
-quality_form_events
-procurement_events
-finance_events
-report_events
-inventory_events
-sac_ticket_events
-crm_opportunity_stage_history
-crm_activities
+UI / workflows / plugins / IA
+              ↓
+       contratos canônicos
+              ↓
+ MessagingEngine + capability matrix
+      ├─ Meta Cloud
+      └─ gateway isolado / adapter Baileys experimental
 ```
 
-### 8.2 Contrato comum
+Meta Cloud permanece o único runtime WhatsApp implementado no monólito. `WHATSAPP_WEB_BAILEYS` não é registrado no bootstrap produtivo.
+
+### 6.2 Gateway isolado
+
+O `apps/messaging-gateway` é um serviço Node.js separado do Next.js. Possui:
+
+- HMAC-SHA256 e replay guard;
+- limites de corpo, headers e timeout;
+- health, readiness e métricas;
+- graceful shutdown;
+- container non-root, filesystem read-only, capabilities removidas e limites de recursos;
+- `FakeChannelClient` como runtime padrão;
+- adapter Baileys confinado e sem conexão externa automática.
+
+O gateway não acessa diretamente o domínio de negócio nem o banco principal por credenciais amplas.
+
+### 6.3 Pipeline de ingresso
 
 ```text
-id
-organization_id
-project_id
-client_id
-module_key
-event_type
-severity
-source
-actor_user_id
-actor_type
-resource_type
-resource_id
-action
-result
-message
-metadata
-correlation_id
-occurred_at
-origin_table
+evento do provider
+→ sanitização e envelope canônico
+→ persist-before-dispatch
+→ idempotência
+→ resolução de organização/conta/identidade
+→ mídia segura quando aplicável
+→ dispatch para inbox, plugins e workflows
 ```
 
-Filtros: organização, módulo, severidade, texto, período, correlação e paginação.
+IA e automações são bloqueadas antes do estado persistido.
 
-### 8.3 Correlação e idempotência
-
-- `correlation_id` conecta eventos da mesma operação distribuída;
-- `request_id` identifica a requisição técnica;
-- `deduplication_key` é única por organização;
-- repetição retorna o evento existente;
-- obra, cliente, ator e recurso permanecem disponíveis para investigação.
-
-### 8.4 Sanitização
-
-`sanitize_audit_json` percorre objetos e arrays antes da persistência e da leitura normalizada. Chaves relacionadas a senha, token, authorization, secret, Service Role, private key, access key, refresh token ou cookie recebem `[REDACTED]`.
-
-Não armazenar:
-
-- senha;
-- token bruto;
-- Service Role;
-- cookie;
-- IP em texto puro;
-- user-agent em texto puro;
-- payload bruto do provider de assinatura;
-- documento pessoal integral sem necessidade explícita.
-
-IP e user-agent podem ser registrados somente como SHA-256.
-
-### 8.5 Imutabilidade
-
-- `audit_events`: append-only para usuários;
-- `observability_health_checks`: append-only;
-- diagnósticos não podem ser apagados por usuários;
-- reconhecimento e resolução de alertas ocorrem por RPC;
-- cada transição de alerta cria novo evento de auditoria.
-
-### 8.6 Alertas
-
-Regras possuem:
-
-- módulo opcional;
-- padrão de evento;
-- severidade mínima;
-- quantidade mínima;
-- janela temporal;
-- cooldown.
-
-Workflow:
+### 6.4 Pipeline de saída
 
 ```text
-OPEN → ACKNOWLEDGED → RESOLVED
+comando canônico
+→ outbox durável
+→ ordenação por conversa
+→ política/capability/consentimento
+→ rate limit e circuit breaker
+→ adapter
+→ ledger de tentativa
+→ receipt/reconciliação
+→ retry limitado ou DLQ
 ```
 
-Eventos críticos criam alerta mesmo sem regra específica. Reconhecimento e resolução exigem motivo e capacidade administrativa.
+Não há envio automático por IA. O modo é `DRAFT_ONLY`.
 
-### 8.7 Health checks
+### 6.5 Sessões e concorrência
 
-O snapshot atual verifica:
+O modelo experimental prevê:
 
-1. conectividade do banco;
-2. conversão de documentos de assinatura;
-3. entrega de cópias assinadas;
-4. geração de relatórios;
-5. SLA do SAC;
-6. diagnósticos pendentes.
+- credenciais cifradas e versionadas;
+- key updates transacionais;
+- lease por sessão;
+- single writer;
+- fencing token em toda escrita sensível;
+- takeover somente após expiração;
+- purge auditado;
+- restore sintético em infraestrutura nova.
 
-Estados:
+Esses controles foram testados com fixtures; nenhuma sessão real foi criada.
 
-```text
-HEALTHY
-DEGRADED
-UNHEALTHY
-UNKNOWN
-```
+### 6.6 Identidades e mídia
 
-### 8.8 Diagnósticos
+- PN e LID são aliases técnicos de identidade canônica;
+- observação não equivale a confirmação;
+- merges preservam aliases e histórico;
+- mídia usa streaming limitado, quarentena privada, antivírus, MIME real, SHA-256 e URL assinada somente após `CLEAN`;
+- base64 persistente é proibido.
 
-`observability_diagnostics` recebe achados reproduzíveis de:
+### 6.7 Inbox, playbooks, plugins e IA
 
-- FK sem índice;
-- RLS com avaliação repetida;
-- políticas permissivas sobrepostas;
-- privilégio indevido de função;
-- divergência de migration;
-- outros advisors estruturados.
+- inbox unificada por contato, mantendo origem do provider;
+- atribuição versionada, notas internas e presença separada;
+- playbooks versionados apontam para fontes canônicas;
+- conteúdo contratual é `HUMAN_ONLY` ou `CANONICAL_ONLY`;
+- plugins têm prioridade determinística e short-circuit;
+- consentimento e anti-spam precedem automações;
+- IA é último recurso, independente do canal e `DRAFT_ONLY`;
+- handoff humano persistente desabilita IA na conversa.
 
-O registro é idempotente por organização, tipo, objeto e código.
+### 6.8 Segurança e observabilidade
 
-### 8.9 Retenção
+Trust boundaries: navegador/Next.js, Supabase, gateway, adapter/provider, KMS/HSM e serviços externos.
 
-A política aceita 30 a 3650 dias. `audit_events` recebe `retention_until`. A exclusão automática não pertence à Etapa 19; será implementada na Etapa 20 com dry-run, preservação de eventos críticos, exportação e retenção legal.
+Controles:
 
-### 8.10 Autorização
+- STRIDE e allowlist de ferramentas;
+- aprovação para escritas críticas;
+- redaction de logs;
+- scanner de segredos e SBOM;
+- retenção, purge e auditoria de leitura sensível;
+- incidentes e resposta a comprometimento;
+- métricas de baixa cardinalidade;
+- traces por correlação/causação;
+- alertas de reconnect loop, DLQ, perda de lease e persistência de keys;
+- dashboard e runbooks.
 
-- leitura: módulo `auditoria`, capacidade `read`;
-- configuração e transições: capacidade `administer`;
-- perfis padrão: Super Administrador, Direção e Administrador;
-- cliente: sem acesso;
-- RPCs: sem execução para `anon`;
-- Service Role: somente operações técnicas explicitamente concedidas.
+## 7. Estado de promoção
 
-## 9. Dados sensíveis
+- W-19 comprovou chaos e performance apenas em ambiente sintético;
+- W-20 definiu homologação fail-closed, mas não executou homologação real;
+- W-21 definiu piloto e rollback, porém a decisão é `HOLD`;
+- W-22 encerra o escopo técnico/documental;
+- produção é `NOT_AUTHORIZED`;
+- QR, pairing, número, sessão, tráfego, deploy e piloto reais não foram executados;
+- PR `#40` permanece draft até revisão técnica e de segurança.
 
-Proteção em camadas:
+## 8. Storage e dados sensíveis
 
-1. capacidade `sensitive`;
-2. RLS;
-3. privilégio por coluna;
-4. RPC com mascaramento/sanitização;
-5. Server Components;
-6. logs sem valor sensível.
+Buckets permanecem privados. Upload valida sessão, módulo, tipo, tamanho, contexto e hash. Downloads usam URL assinada curta ou rota autenticada. Segredos, tokens, credenciais, payload bruto, telefone e conteúdo de mensagem não entram em logs ou labels de métrica.
 
-Custos, valores financeiros, documentos pessoais, observações internas e payloads de integração não possuem exposição ampla.
-
-## 10. Storage e documentos
-
-- buckets privados;
-- caminho por organização e recurso;
-- upload valida sessão, módulo, tipo, tamanho, contexto e hash;
-- download por URL assinada curta ou rota autenticada;
-- falha remove objeto órfão quando possível;
-- antimalware é requisito da Etapa 20.
-
-A Etapa 19 não cria bucket nem armazena arquivo de log.
-
-## 11. Frontend
+## 9. Frontend
 
 - TypeScript estrito;
 - Server Components por padrão;
 - Server Actions para mutações;
-- Client Components apenas quando necessários;
 - validação server-side;
-- erro sem SQL ou secrets;
 - acessibilidade e responsividade;
-- estados vazios e acesso negado explícitos.
+- estados vazios, degradados e acesso negado explícitos.
 
-## 12. CI e testes
+## 10. CI e recuperação
 
-Ordem mínima:
+Ordem mínima: documentação, vacinas, ledger, validadores estruturais, testes PostgreSQL, lint, typecheck, TypeScript, Python, build do gateway, smoke do container e build Next.js.
 
-1. documentação;
-2. vacinas;
-3. ledger de migrations;
-4. validadores estruturais;
-5. lint;
-6. typecheck;
-7. testes TypeScript;
-8. testes Python;
-9. build.
-
-Testes SQL:
-
-```text
-supabase/tests/stage17_inventory_homologation.sql
-supabase/tests/stage18_relationship_homologation.sql
-supabase/tests/stage19_observability_homologation.sql
-```
-
-Usam dados artificiais e terminam com `ROLLBACK`.
-
-## 13. Recuperabilidade
-
-A reconstrução exige clone do GitHub, secrets externos, migrations ordenadas, ledger compatível, dependências, validadores, workers e smoke tests. Procedimento detalhado: [`RECUPERACAO.md`](./RECUPERACAO.md).
+A reconstrução exige clone do GitHub, secrets externos, migrations ordenadas, ledger compatível, dependências, validadores e smoke tests. Procedimento: `diretrizes/RECUPERACAO.md`.
