@@ -6,6 +6,7 @@ import {
   deriveInboxActionAvailability,
   filterUnifiedInbox,
   messagingProviderLabel,
+  resolveEffectiveOperatorPresence,
   type InboxThread
 } from "../lib/messaging/inbox";
 
@@ -136,23 +137,45 @@ describe("Messaging inbox W-13", () => {
     expect(filterUnifiedInbox(unified, { search: "inexistente" })).toHaveLength(0);
   });
 
-  it("desabilita envio quando canal está offline ou degradado", () => {
+  it("aplica unread somente às threads elegíveis após os demais filtros", () => {
+    const unified = buildUnifiedInbox([
+      thread({ unreadCount: 3 }),
+      thread({
+        conversationId: "conversation-web",
+        providerType: "WHATSAPP_WEB_BAILEYS",
+        accountId: "account-web",
+        unreadCount: 0,
+        capabilities: capabilities("WHATSAPP_WEB_BAILEYS")
+      })
+    ]);
+    expect(filterUnifiedInbox(unified, {
+      providerType: "WHATSAPP_WEB_BAILEYS",
+      unreadOnly: true
+    })).toHaveLength(0);
+    expect(filterUnifiedInbox(unified, {
+      providerType: "META_CLOUD",
+      unreadOnly: true
+    })).toHaveLength(1);
+  });
+
+  it("permite leitura da conversa mesmo quando envio está indisponível", () => {
     const offline = deriveInboxActionAvailability({
       thread: thread({ channelState: "OFFLINE" }),
       canManage: true,
       operatorPresence: "ONLINE"
     });
+    expect(offline.canViewConversation).toBe(true);
     expect(offline.canSend).toBe(false);
     expect(offline.canAssign).toBe(true);
     expect(offline.reason).toBe("Offline");
 
-    const degraded = deriveInboxActionAvailability({
-      thread: thread({ channelState: "DEGRADED" }),
-      canManage: false,
+    const disabledProvider = deriveInboxActionAvailability({
+      thread: thread({ capabilities: capabilities("META_CLOUD", false) }),
+      canManage: true,
       operatorPresence: "ONLINE"
     });
-    expect(degraded.canSend).toBe(false);
-    expect(degraded.reason).toBe("Degradado");
+    expect(disabledProvider.canViewConversation).toBe(true);
+    expect(disabledProvider.canSend).toBe(false);
   });
 
   it("distingue presença do operador da presença do canal", () => {
@@ -161,10 +184,31 @@ describe("Messaging inbox W-13", () => {
       canManage: true,
       operatorPresence: "OFFLINE"
     });
+    expect(actions.canViewConversation).toBe(true);
     expect(actions.canSend).toBe(false);
     expect(actions.canAddNote).toBe(false);
     expect(actions.canAssign).toBe(true);
     expect(actions.reason).toBe("Operador offline");
+  });
+
+  it("considera presença expirada como offline e rejeita valores inválidos", () => {
+    const now = new Date("2026-08-04T20:00:00.000Z");
+    expect(resolveEffectiveOperatorPresence({
+      presence: "ONLINE",
+      expiresAt: "2026-08-04T20:01:00.000Z",
+      now
+    })).toBe("ONLINE");
+    expect(resolveEffectiveOperatorPresence({
+      presence: "BUSY",
+      expiresAt: "2026-08-04T19:59:59.000Z",
+      now
+    })).toBe("OFFLINE");
+    expect(resolveEffectiveOperatorPresence({
+      presence: "INVALID",
+      expiresAt: "2026-08-04T20:01:00.000Z",
+      now
+    })).toBe("OFFLINE");
+    expect(resolveEffectiveOperatorPresence({ presence: "AWAY", now })).toBe("OFFLINE");
   });
 
   it("respeita capability matrix por thread", () => {
@@ -176,6 +220,7 @@ describe("Messaging inbox W-13", () => {
       canManage: true,
       operatorPresence: "ONLINE"
     });
+    expect(actions.canViewConversation).toBe(true);
     expect(actions.canSend).toBe(false);
     expect(actions.canStartConversation).toBe(false);
     expect(actions.canAddNote).toBe(true);
