@@ -1,6 +1,12 @@
 import "server-only";
 
 import { hasCapability, requireCapability } from "@/lib/authorization";
+import {
+  META_CLOUD_CAPABILITY_MATRIX,
+  applyCapabilityOverrides,
+  deriveMessagingUiCapabilities
+} from "@/lib/messaging/capabilities";
+import { resolveProviderPolicy } from "@/lib/messaging/feature-flags";
 
 function relationName(value: unknown, fallback: string) {
   if (Array.isArray(value)) return relationName(value[0], fallback);
@@ -35,7 +41,7 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
     context.supabase
       .from("whatsapp_conversations")
       .select(
-        "id,status,client_id,project_id,contract_id,sac_ticket_id,assigned_to,last_customer_message_at,last_message_at,unread_count,whatsapp_contacts(display_name,profile_name,phone_e164,wa_id),clients(legal_name,trade_name),projects(code,name)"
+        "id,account_id,status,client_id,project_id,contract_id,sac_ticket_id,assigned_to,last_customer_message_at,last_message_at,unread_count,whatsapp_contacts(display_name,profile_name,phone_e164,wa_id),clients(legal_name,trade_name),projects(code,name)"
       )
       .eq("organization_id", context.organizationId)
       .order("last_message_at", { ascending: false, nullsFirst: false })
@@ -94,11 +100,34 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
       .limit(50)
   ]);
 
+  const accounts = accountsResult.data ?? [];
   const conversations = conversationsResult.data ?? [];
   const selectedId =
     selectedConversationId && conversations.some(item => item.id === selectedConversationId)
       ? selectedConversationId
       : conversations[0]?.id ?? null;
+  const selectedConversation = conversations.find(item => item.id === selectedId);
+
+  const providerPolicy = resolveProviderPolicy({
+    organizationId: context.organizationId,
+    providerType: "META_CLOUD",
+    rawOverrides: process.env.MESSAGING_PROVIDER_FLAGS_JSON
+  });
+  const effectiveMatrix = applyCapabilityOverrides(
+    META_CLOUD_CAPABILITY_MATRIX,
+    providerPolicy.disabledCapabilities
+  );
+  const metaUiCapabilities = deriveMessagingUiCapabilities(
+    effectiveMatrix,
+    providerPolicy.enabled
+  );
+  const accountCapabilities = Object.fromEntries(
+    accounts.map(account => [account.id, metaUiCapabilities])
+  );
+  const selectedMessagingCapabilities = selectedConversation?.account_id
+    ? accountCapabilities[selectedConversation.account_id] ??
+      deriveMessagingUiCapabilities(effectiveMatrix, false)
+    : metaUiCapabilities;
 
   const messagesResult = selectedId
     ? await context.supabase
@@ -174,7 +203,7 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
   return {
     context,
     canManage,
-    accounts: accountsResult.data ?? [],
+    accounts,
     conversations,
     bindings: bindingsResult.data ?? [],
     clients: clientsResult.data ?? [],
@@ -182,6 +211,9 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
     sourceCatalog,
     selectedConversationId: selectedId,
     messages: messagesResult.data ?? [],
+    providerPolicy,
+    accountCapabilities,
+    selectedMessagingCapabilities,
     errors: [
       accountsResult.error,
       conversationsResult.error,
@@ -193,7 +225,10 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
       contractVersionsResult.error,
       amendmentVersionsResult.error,
       projectDocumentVersionsResult.error,
-      messagesResult.error
+      messagesResult.error,
+      ...(!providerPolicy.configurationValid
+        ? [{ code: "MESSAGING_PROVIDER_FLAGS_INVALID" }]
+        : [])
     ]
       .filter(Boolean)
       .map(error => String(error?.code ?? "QUERY_FAILED"))
