@@ -94,15 +94,18 @@ do $$ declare audit_id uuid; begin
   raise notice 'W-17 eventos de segurança imutáveis aprovados';
 end $$;
 
+begin;
+set local role authenticated;
+select set_config('test.organization_id','22222222-2222-2222-2222-222222222222',true);
 do $$ begin
-  select set_config('test.organization_id','22222222-2222-2222-2222-222222222222',true);
   if exists (
     select 1 from public.channel_sensitive_access_audit
     where organization_id='11111111-1111-1111-1111-111111111111'
   ) then raise exception 'W-17 leitura cross tenant permitida'; end if;
-  perform set_config('test.organization_id','11111111-1111-1111-1111-111111111111',true);
   raise notice 'W-17 isolamento multiempresa aprovado';
 end $$;
+rollback;
+select set_config('test.organization_id','11111111-1111-1111-1111-111111111111',false);
 
 do $$ declare forced_count integer; begin
   select count(*) into forced_count from pg_class
