@@ -137,11 +137,19 @@
     "deploymentExecuted": false,
     "aiMode": "DRAFT_ONLY",
     "automaticSending": false,
+    "functionalEvidence": {
+      "head": "ad7bdcd4097d70190848c180eedc22b1feb35204",
+      "messagingIncrementalLoopRunId": 30950331567,
+      "ciRunId": 30950327715,
+      "fileSecurityE2ERunId": 30950331506,
+      "outboxRunId": 30950327612,
+      "conclusion": "success"
+    },
     "evidence": {
       "w19": "SYNTHETIC_SCOPE_APPROVED_REAL_E2E_BLOCKED",
       "w20": "TECHNICAL_CONTROLS_APPROVED_REAL_HOMOLOGATION_BLOCKED",
       "w21": "TECHNICAL_CONTROLS_APPROVED_REAL_PILOT_HOLD",
-      "w22": "CANONICAL_RECONCILIATION_IN_VALIDATION"
+      "w22": "TECHNICAL_AND_CANONICAL_SCOPE_APPROVED_EXTERNAL_GATES_PENDING"
     },
     "externalBlockers": [
       "LEGAL_AND_PRIVACY_REVIEW",
