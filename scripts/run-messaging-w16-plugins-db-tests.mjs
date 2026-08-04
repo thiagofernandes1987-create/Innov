@@ -19,6 +19,7 @@ try {
     "supabase/tests/messaging-multiprovider/legacy-seed.sql",
     "supabase/migrations/20260804011500_stage22_multiprovider_storage.sql",
     "supabase/migrations/20260804210000_stage22_message_plugins.sql",
+    "supabase/migrations/20260805005000_stage22_plugin_policy_canonical_order.sql",
     "supabase/tests/messaging-plugins/plugins.test.sql"
   ]) psql(["-d", database, "-v", "ON_ERROR_STOP=1", "-f", file]);
 } finally {
