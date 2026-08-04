@@ -1,6 +1,7 @@
 import fs from "node:fs";
 
 const root = "apps/messaging-gateway";
+const smokeFile = "scripts/run-messaging-gateway-container-smoke.sh";
 const requiredFiles = [
   `${root}/package.json`,
   `${root}/tsconfig.json`,
@@ -15,7 +16,8 @@ const requiredFiles = [
   `${root}/src/fake-client.ts`,
   `${root}/src/server.ts`,
   `${root}/src/index.ts`,
-  "tests/messaging-gateway.test.ts"
+  "tests/messaging-gateway.test.ts",
+  smokeFile
 ];
 const failures = [];
 for (const file of requiredFiles) {
@@ -33,6 +35,7 @@ const fakeClient = read(`${root}/src/fake-client.ts`);
 const dockerfile = read(`${root}/Dockerfile`);
 const compose = read(`${root}/compose.yaml`);
 const tests = read("tests/messaging-gateway.test.ts");
+const smoke = read(smokeFile);
 const ci = read(".github/workflows/ci.yml");
 
 if (packageJson.engines?.node !== ">=24 <25") failures.push("Gateway não fixa compatibilidade com Node.js 24.");
@@ -59,12 +62,18 @@ for (const token of ["USER 10001:10001", "STOPSIGNAL SIGTERM"])
   if (!dockerfile.includes(token)) failures.push(`Container sem hardening: ${token}`);
 for (const token of ["read_only: true", "cap_drop:", "no-new-privileges:true", "pids_limit: 128", "mem_limit: 256m", "cpus: 0.50", "internal: true"])
   if (!compose.includes(token)) failures.push(`Limite/isolamento ausente: ${token}`);
+for (const token of ["--network none", "--read-only", "--cap-drop ALL", "10001:10001", "gateway_shutdown_completed"])
+  if (!smoke.includes(token)) failures.push(`Smoke test de container incompleto: ${token}`);
 for (const token of ["bloqueia comando sem HMAC", "rejeita replay", "limita o tamanho do corpo", "preserva correlação e causalidade"])
   if (!tests.includes(token)) failures.push(`Teste W-05 ausente: ${token}`);
-for (const script of ["validate:messaging-gateway", "test:messaging-gateway", "build:messaging-gateway"])
-  if (!rootPackage.scripts?.[script]) failures.push(`Script raiz ausente: ${script}`);
-for (const token of ["Validate messaging gateway skeleton", "Messaging gateway unit tests", "Build messaging gateway"])
-  if (!ci.includes(token)) failures.push(`CI sem gate explícito: ${token}`);
+for (const script of [
+  "validate:messaging-gateway", "test:messaging-gateway",
+  "test:container:messaging-gateway", "build:messaging-gateway"
+]) if (!rootPackage.scripts?.[script]) failures.push(`Script raiz ausente: ${script}`);
+for (const token of [
+  "Validate messaging gateway skeleton", "Messaging gateway unit tests",
+  "Messaging gateway container smoke test", "Build messaging gateway"
+]) if (!ci.includes(token)) failures.push(`CI sem gate explícito: ${token}`);
 
 if (failures.length) {
   console.error(failures.join("\n"));
@@ -72,7 +81,7 @@ if (failures.length) {
 }
 console.log(JSON.stringify({
   ok: true,
-  contract: "messaging-gateway-boundary-v1",
+  contract: "messaging-gateway-boundary-v2",
   node: packageJson.engines.node,
   endpoints: 4,
   ownDependencies: 0,
@@ -80,5 +89,6 @@ console.log(JSON.stringify({
   databaseAccess: false,
   nonRootUid: 10001,
   internalNetwork: true,
+  containerSmokeRequired: true,
   fakeClientOnly: true
 }, null, 2));
