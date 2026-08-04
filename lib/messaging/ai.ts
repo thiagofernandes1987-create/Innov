@@ -161,9 +161,15 @@ function sanitizeRetrievedContent(value: string) {
 
 function isValidAt(document: AiSourceDocument, at: Date) {
   const timestamp = at.getTime();
-  const from = document.validFrom ? new Date(document.validFrom).getTime() : Number.NEGATIVE_INFINITY;
-  const until = document.validUntil ? new Date(document.validUntil).getTime() : Number.POSITIVE_INFINITY;
-  return Number.isFinite(from) && Number.isFinite(until) && timestamp >= from && timestamp <= until;
+  if (!Number.isFinite(timestamp)) return false;
+
+  const from = document.validFrom ? new Date(document.validFrom).getTime() : null;
+  const until = document.validUntil ? new Date(document.validUntil).getTime() : null;
+  if ((from !== null && !Number.isFinite(from)) || (until !== null && !Number.isFinite(until))) {
+    return false;
+  }
+  return timestamp >= (from ?? Number.NEGATIVE_INFINITY) &&
+    timestamp <= (until ?? Number.POSITIVE_INFINITY);
 }
 
 function deduplicateSources(documents: readonly AiSourceDocument[]) {
