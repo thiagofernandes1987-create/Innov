@@ -1,142 +1,71 @@
 # Inventário de execução — Provider WhatsApp Web não oficial
 
-**Documento:** plano executável do subprojeto de mensageria não oficial  
 **Projeto pai:** Etapa 22 — WhatsApp e atendimento omnichannel  
-**Branch de planejamento:** `feature/etapa-22-whatsapp-omnichannel`  
 **Branch de execução:** `feature/etapa-22-provider-whatsapp-web-baileys`  
-**Status:** W-03 concluída; engine Baileys e runtime ainda não iniciados  
-**Provider inicial planejado:** Baileys 7.x, encapsulado por adapter próprio  
+**PR:** #40  
+**Status:** W-04 concluída; engine Baileys e runtime ainda não iniciados  
+**Provider não oficial inicialmente planejado:** Baileys 7.x, somente por adapter próprio  
+**Produção:** bloqueada  
 **Última atualização:** 03 de agosto de 2026  
-**Documento complementar:** [`SPEC.md`](./SPEC.md)
+**Documentos complementares:** [`SPEC.md`](./SPEC.md), [`SCHEMA-W04.md`](./SCHEMA-W04.md)
 
 ---
 
-## 1. Objetivo deste inventário
+## 1. Objetivo e fronteira
 
-Este documento transforma a análise dos projetos open source em um plano de execução verificável para construir, dentro do ecossistema Innov, um provider de mensagens baseado no WhatsApp Web Multi-Device por API não oficial.
-
-O objetivo não é copiar ou incorporar integralmente qualquer produto analisado. O objetivo é reaproveitar técnicas, invariantes, abstrações, padrões de persistência, estratégias de retry, contratos de eventos, mecanismos de handoff e boas práticas operacionais para desenvolver uma implementação própria.
-
-O provider não oficial será uma extensão do domínio já criado na Etapa 22. Ele não poderá criar um segundo CRM, uma segunda caixa de entrada, uma segunda base de contatos ou uma segunda fonte de mensagens padrão.
+Este inventário governa a construção incremental de uma arquitetura multiprovider própria para o Innov. O objetivo é reaproveitar técnicas, invariantes, abstrações, padrões de persistência, retries, eventos e handoff estudados em projetos de referência, sem copiar produtos inteiros nem criar um domínio paralelo.
 
 ```text
-Baileys / outro engine
-        ↓
-adapter anticorrupção do Innov
-        ↓
-modelo canônico de canal e mensagem
-        ↓
-domínio existente de conversas, CRM, obras, contratos, SAC e documentos
+engine de canal
+      ↓
+adapter anticorrupção
+      ↓
+contratos canônicos
+      ↓
+contas, contatos, conversas e mensagens existentes
+      ↓
+CRM, Cliente 360, obras, contratos, SAC e documentos
 ```
 
----
-
-## 2. Relação com os PRs
-
-O PR #39 permanece responsável pela base da Etapa 22:
-
-- rota `/app/whatsapp`;
-- inbox e histórico;
-- contas, contatos e conversas;
-- vínculos com Cliente 360, CRM, obra, contrato, oportunidade e SAC;
-- mensagens e eventos de status;
-- fontes canônicas e `whatsapp_content_bindings`;
-- RLS, auditoria e proteção do histórico;
-- provider oficial Meta Cloud API.
-
-O PR #40 executa a arquitetura multiprovider de forma incremental, tendo a branch do PR #39 como base. Até a W-03 contém contratos canônicos, contratos de engine, capability matrix, adapter Meta, mock engine, feature flags, policy gates, testes e gates arquiteturais.
-
-Nenhum dos dois PRs autoriza silenciosamente um runtime Baileys, número real ou produção.
+O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #40 adiciona a arquitetura multiprovider de forma incremental. Até a W-04 foram concluídos contratos canônicos, contratos de engine, capabilities, adapter Meta, mock, policy gates e armazenamento técnico durável. Nenhum desses artefatos autoriza silenciosamente Baileys, número real ou produção.
 
 ---
 
-## 3. Regras obrigatórias de execução
+## 2. Regras obrigatórias
 
-### R1 — Uma sprint ativa
-
-No máximo uma sprint poderá estar em estado `em andamento`.
-
-### R2 — Check exige evidência
-
-Uma tarefa só recebe `[x]` quando houver evidência objetiva: arquivo/commit, migration aplicada, teste verde, log, métrica, relatório ou decisão registrada. “Código escrito” isoladamente não prova funcionamento.
-
-### R3 — Nenhum segredo no repositório
-
-São proibidos QR Codes persistidos, `creds.json`, chaves Signal, tokens, cookies, números reais, payloads de produção ou chaves de providers.
-
-### R4 — Reutilizar técnica, não importar produto sem decisão
-
-Adaptação substancial exige origem, commit, licença, vantagem material, `THIRD_PARTY_NOTICES.md`, testes, segurança e aprovação no PR.
-
-### R5 — O domínio não conhece Baileys
-
-`WAMessage`, `BinaryNode`, `WAMessageKey`, `proto.Message` e JIDs específicos permanecem no adapter.
-
-### R6 — Um escritor por sessão
-
-Escala horizontal exige lease, fencing token e reatribuição controlada.
-
-### R7 — Inbound antes de automação
-
-Nenhum evento aciona workflow ou IA antes de validação, normalização, deduplicação, persistência, tenancy e classificação de segurança.
-
-### R8 — Determinístico antes de IA
-
-```text
-política → consentimento → workflow → regra de negócio
-→ recuperação de fatos → IA → aprovação/handoff
-```
-
-### R9 — Sem automação de abuso
-
-Não implementar evasão, spoofing, spam, cold blast, criação/rotação de contas ou manipulação de fingerprint.
-
-### R10 — Kill switch obrigatório
-
-Deve interromper sessão, organização, provider, automações, IA, mídia e workers.
-
-### R11 — Falha segura
-
-Na dúvida: não enviar, não repetir indefinidamente, preservar evidência e encaminhar para humano.
-
-### R12 — Nada é promovido por “funcionou uma vez”
-
-Homologação exige repetição de reconexão, concorrência, mídia, identidade, retry, upgrade e restauração.
+1. No máximo uma sprint em andamento.
+2. Check exige arquivo, migration, teste, log, métrica ou decisão verificável.
+3. Nenhum segredo, QR, cookie, token, número real ou material de sessão no repositório.
+4. Técnica externa só pode ser adaptada após licença, origem, vantagem, testes e aviso de terceiros.
+5. Tipos nativos do provider não atravessam o adapter.
+6. Escala horizontal futura exige single writer, lease e fencing token.
+7. Inbound deve ser validado, normalizado, deduplicado e persistido antes de workflow ou IA.
+8. Ordem obrigatória: política → consentimento → workflow → regra → fatos → IA → aprovação/handoff.
+9. São proibidos spam, evasão, spoofing e rotação de contas.
+10. Kill switch será obrigatório antes de qualquer runtime real.
+11. Na dúvida, falhar fechado, preservar evidência e encaminhar para humano.
+12. Uma execução isolada não prova homologação.
 
 ---
 
-## 4. Estados das sprints
+## 3. Baseline da Etapa 22
 
-| Estado | Significado |
-|---|---|
-| `pendente` | ainda não iniciada |
-| `em andamento` | sprint atualmente em execução |
-| `concluída` | todas as tarefas concluídas com evidência |
-| `bloqueada` | impedimento registrado e verificável |
-| `cancelada` | removida por decisão arquitetural documentada |
-
----
-
-## 5. Baseline já existente
-
-- [x] B-01 — Aplicativo `/app/whatsapp` registrado no launcher
-- [x] B-02 — Caixa de entrada e histórico iniciais
+- [x] B-01 — Aplicativo `/app/whatsapp`
+- [x] B-02 — Caixa de entrada e histórico
 - [x] B-03 — Contas, contatos e conversas
-- [x] B-04 — Mensagens e eventos monotônicos de status
+- [x] B-04 — Mensagens e status monotônicos
 - [x] B-05 — Vínculos com cliente, obra, contrato, oportunidade e SAC
-- [x] B-06 — `whatsapp_content_bindings` apontando para fontes canônicas
-- [x] B-07 — Resolução de propostas, contratos, aditivos e documentos versionados
-- [x] B-08 — Snapshot e SHA-256 da fonte usada no envio
-- [x] B-09 — RLS, RPCs e proteção contra exclusão do histórico
-- [x] B-10 — Provider Meta Cloud API como implementação inicial
+- [x] B-06 — `whatsapp_content_bindings` com fontes canônicas
+- [x] B-07 — Resolução de documentos versionados
+- [x] B-08 — Snapshot e SHA-256 da fonte usada
+- [x] B-09 — RLS, RPCs e histórico protegido
+- [x] B-10 — Meta Cloud API como implementação oficial inicial
 - [x] B-11 — Webhook oficial com HMAC e idempotência
-- [x] B-12 — Validador `validate:stage22` no CI
-
-**Evidência:** PR #39 e `docs/ETAPA-22-WHATSAPP-OMNICHANNEL.md`.
+- [x] B-12 — Validador da Etapa 22 no CI
 
 ---
 
-# Marco M-0 — Governança, decisão e fronteiras
+# Marco M-0 — Governança e fronteiras
 
 ## Sprint W-00 — Pesquisa e consolidação arquitetural
 
@@ -154,36 +83,36 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [x] W-00.9 — Analisar `lyfe00011/whatsapp-bot`
 - [x] W-00.10 — Analisar `mruniquehacker/Knightbot-MD`
 - [x] W-00.11 — Analisar `sigalor/whatsapp-web-reveng`
-- [x] W-00.12 — Classificar por biblioteca, driver, gateway, CRM, bot e pesquisa
-- [x] W-00.13 — Definir Baileys como primeiro engine não oficial estudado
+- [x] W-00.12 — Classificar biblioteca, driver, gateway, CRM, bot e pesquisa
+- [x] W-00.13 — Selecionar Baileys como primeiro engine não oficial estudado
 - [x] W-00.14 — Definir técnicas reaproveitáveis sem copiar produtos completos
 - [x] W-00.15 — Criar inventário e SPEC
 
-**Evidência:** análise open source, este arquivo e `SPEC.md`.
+**Evidência:** análise de referências, `SPEC.md` e este inventário.
 
 ## Sprint W-01 — ADR, licença e modelo de risco
 
 **Estado:** concluída  
 **Dependências:** W-00
 
-- [x] W-01.1 — Criar ADR para adoção do provider não oficial como extensão opcional
-- [x] W-01.2 — Registrar que provider oficial e não oficial compartilham domínio, mas não runtime
-- [x] W-01.3 — Criar matriz de licença por projeto, arquivo e técnica potencialmente adaptável
-- [x] W-01.4 — Criar `THIRD_PARTY_NOTICES.md` antes de qualquer adaptação substancial
-- [x] W-01.5 — Definir critérios de número autorizado para homologação
-- [x] W-01.6 — Definir termo interno de aceite de risco operacional
-- [x] W-01.7 — Definir política de consentimento, opt-out e bloqueio
-- [x] W-01.8 — Definir casos proibidos: spam, prospecção indiscriminada, fraude e evasão
-- [x] W-01.9 — Definir processo de desligamento e remoção de sessão
-- [x] W-01.10 — Registrar critérios que cancelariam o projeto antes da implantação
+- [x] W-01.1 — ADR do provider opcional
+- [x] W-01.2 — Domínio compartilhado e runtimes separados
+- [x] W-01.3 — Matriz de licenças
+- [x] W-01.4 — `THIRD_PARTY_NOTICES.md`
+- [x] W-01.5 — Critérios de número autorizado
+- [x] W-01.6 — Termo interno de aceite de risco
+- [x] W-01.7 — Consentimento, opt-out e bloqueio
+- [x] W-01.8 — Casos proibidos
+- [x] W-01.9 — Processo de desligamento e remoção de sessão
+- [x] W-01.10 — Critérios de cancelamento do projeto
 
-**Evidências:** ADR-001, matriz de licenças, política de risco, `THIRD_PARTY_NOTICES.md` e `EVIDENCIAS-W01.md`.
+**Evidência:** ADR-001, matriz de licenças, política de risco e `EVIDENCIAS-W01.md`.
 
-**Gate W-G01:** concluído somente em seu escopo documental. Nenhuma sessão real ou produção foi autorizada.
+**Gate W-G01:** concluído no escopo documental; nenhum runtime foi autorizado.
 
 ---
 
-# Marco M-1 — Domínio canônico e arquitetura multiprovider
+# Marco M-1 — Domínio canônico e persistência multiprovider
 
 ## Sprint W-02 — Modelo canônico de canal, identidade e mensagem
 
@@ -194,104 +123,87 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
   - [x] W-02.1.1 — `META_CLOUD`
   - [x] W-02.1.2 — `WHATSAPP_WEB_BAILEYS`
   - [x] W-02.1.3 — `WEB_CHAT`
-  - [x] W-02.1.4 — providers futuros sem implementação
+  - [x] W-02.1.4 — Providers futuros reservados
 - [x] W-02.2 — Definir `CanonicalIdentity`
-- [x] W-02.3 — Definir namespaces `PHONE`, `WHATSAPP_PN`, `WHATSAPP_LID`, `GROUP`, `NEWSLETTER` e `WEB_USER`
+- [x] W-02.3 — Namespaces PHONE, PN, LID, GROUP, NEWSLETTER e WEB_USER
 - [x] W-02.4 — Definir `CanonicalMessage`
 - [x] W-02.5 — Definir `CanonicalMedia`
 - [x] W-02.6 — Definir `CanonicalReceipt`
 - [x] W-02.7 — Definir `CanonicalConversation`
-- [x] W-02.8 — Definir `ProviderMetadata` separado do domínio
-- [x] W-02.9 — Definir versionamento dos contratos
-- [x] W-02.10 — Criar testes que proíbam imports de Baileys fora do adapter
-- [x] W-02.11 — Mapear objetos atuais da Etapa 22 para o modelo neutro
-- [x] W-02.12 — Garantir compatibilidade retroativa com Meta
+- [x] W-02.8 — Metadata específica separada do domínio
+- [x] W-02.9 — Versionamento dos contratos
+- [x] W-02.10 — Gate contra imports Baileys fora do adapter
+- [x] W-02.11 — Mapear estruturas existentes para o modelo neutro
+- [x] W-02.12 — Compatibilidade retroativa com Meta
 
-**Evidências:**
+**Evidência:** `lib/messaging/domain.ts`, compatibilidade, testes, scanner, `CONTRATOS-CANONICOS-V1.md` e `EVIDENCIAS-W02.md`.
 
-- `lib/messaging/domain.ts`;
-- `lib/messaging/whatsapp-compatibility.ts`;
-- `tests/messaging-domain.test.ts`;
-- `tests/messaging-boundary.test.ts`;
-- `scripts/validate-messaging-boundaries.mjs`;
-- `CONTRATOS-CANONICOS-V1.md`;
-- `EVIDENCIAS-W02.md`;
-- PR #40;
-- CI run `30864989008` verde;
-- File Security E2E run `30864988991` verde.
-
-**Decisão adicional:** `channelAccountId` identifica a conta interna do Innov; `providerAccountId` identifica a conta externa do provider. A distinção é obrigatória.
-
-**Gate W-G02:** concluído. O scanner e os testes bloqueiam imports ou tipos nativos Baileys fora dos adapters autorizados. Baileys continua não instalado.
+**Gate W-G02:** concluído; Baileys continua não instalado.
 
 ## Sprint W-03 — Contrato de engine e matriz de capacidades
 
 **Estado:** concluída  
 **Dependências:** W-02
 
-- [x] W-03.1 — Criar interface `MessagingEngine`
-- [x] W-03.2 — Criar interface `SessionEngine`
-- [x] W-03.3 — Criar interface `EngineEventSource`
+- [x] W-03.1 — Criar `MessagingEngine`
+- [x] W-03.2 — Criar `SessionEngine`
+- [x] W-03.3 — Criar `EngineEventSource`
 - [x] W-03.4 — Criar `EngineCapabilityMatrix`
-- [x] W-03.5 — Definir capacidades de texto, mídia, reação, resposta, grupo, presença, histórico e edição
-- [x] W-03.6 — Definir `UnsupportedCapabilityError`
-- [x] W-03.7 — Encapsular provider Meta no mesmo contrato sem regressão
+- [x] W-03.5 — Capacidades de texto, mídia, reação, resposta, grupo, presença, histórico e edição
+- [x] W-03.6 — Criar `UnsupportedCapabilityError`
+- [x] W-03.7 — Encapsular Meta no contrato sem regressão
 - [x] W-03.8 — Criar `MockMessagingEngine`
-- [x] W-03.9 — Criar contract tests para todos os engines
-- [x] W-03.10 — Criar feature flags por provider e organização
-- [x] W-03.11 — Ocultar ações não suportadas na interface
+- [x] W-03.9 — Contract tests dos engines
+- [x] W-03.10 — Feature flags por provider e organização
+- [x] W-03.11 — Ocultar e bloquear ações não suportadas
 
-**Evidências:**
+**Evidência:** engines, capabilities, policy server, testes, gate v3 e `EVIDENCIAS-W03.md`.
 
-- `lib/messaging/engine.ts`;
-- `lib/messaging/capabilities.ts`;
-- `lib/messaging/feature-flags.ts`;
-- `lib/messaging/policy.server.ts`;
-- `lib/messaging/engines/meta-cloud.ts`;
-- `lib/messaging/engines/meta-cloud.server.ts`;
-- `lib/messaging/engines/mock.ts`;
-- `tests/messaging-engine.test.ts`;
-- `tests/messaging-boundary.test.ts`;
-- `scripts/validate-messaging-boundaries.mjs`;
-- `app/actions/whatsapp.ts`;
-- `app/app/whatsapp/page.tsx`;
-- `EVIDENCIAS-W03.md`;
-- PR #40;
-- head funcional `edb80e369f2ffde61f1e558aee5318027a02d7d3`;
-- CI run `30866943997` verde;
-- File Security E2E run `30866944005` verde;
-- Vercel verde.
-
-**Decisões adicionais:**
-
-- capabilities representam somente o que o adapter Innov efetivamente encapsula;
-- UI e server actions aplicam a mesma política;
-- configuração inválida falha fechada;
-- Baileys não pode ser ativado por flag sem runtime registrado;
-- o envio oficial é roteado por `MetaCloudMessagingEngine`, preservando outbox, fontes e auditoria.
-
-**Gate W-G03:** concluído. Os contratos, matriz, mock, adapter Meta, policy gates e contract tests foram aprovados. Baileys continua não instalado.
+**Gate W-G03:** concluído; apenas Meta possui runtime registrado.
 
 ## Sprint W-04 — Evolução do banco sem domínio paralelo
 
-**Estado:** pendente  
+**Estado:** concluída  
 **Dependências:** W-02 e W-03
 
-- [ ] W-04.1 — Inventariar tabelas `whatsapp_*`
-- [ ] W-04.2 — Decidir evolução compatível ou futura nomenclatura `channel_*`
-- [ ] W-04.3 — Adicionar `provider_type` e `provider_account_id` onde necessário
-- [ ] W-04.4 — Criar identidades externas sem duplicar Cliente 360
-- [ ] W-04.5 — Criar aliases e mapeamentos PN/LID
-- [ ] W-04.6 — Criar comandos e idempotência
-- [ ] W-04.7 — Criar outbox durável
-- [ ] W-04.8 — Criar inbox de eventos sanitizados
-- [ ] W-04.9 — Criar DLQ
-- [ ] W-04.10 — Criar ledger de tentativas
-- [ ] W-04.11 — Aplicar RLS e revogar escrita direta
-- [ ] W-04.12 — Criar testes negativos multiempresa
-- [ ] W-04.13 — Criar rollback lógico sem perda histórica
+- [x] W-04.1 — Inventariar tabelas `whatsapp_*`
+- [x] W-04.2 — Decidir evolução compatível e papel técnico de `channel_*`
+- [x] W-04.3 — Adicionar `provider_type` e `provider_account_id`
+- [x] W-04.4 — Criar identidades externas sem duplicar Cliente 360
+- [x] W-04.5 — Criar aliases e mapeamentos PN/LID
+- [x] W-04.6 — Criar comandos e idempotência
+- [x] W-04.7 — Criar outbox durável
+- [x] W-04.8 — Criar inbox de eventos sanitizados
+- [x] W-04.9 — Criar DLQ
+- [x] W-04.10 — Criar ledger de tentativas
+- [x] W-04.11 — Aplicar RLS forçada e revogar escrita direta
+- [x] W-04.12 — Criar testes negativos multiempresa
+- [x] W-04.13 — Criar rollback lógico sem perda histórica
 
-**Gate W-G04:** nenhum contato, conversa, mensagem ou documento duplicado por provider.
+**Evidências:**
+
+- `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql`;
+- `supabase/tests/messaging-multiprovider/fixture.sql`;
+- `supabase/tests/messaging-multiprovider/legacy-seed.sql`;
+- `supabase/tests/messaging-multiprovider/storage.test.sql`;
+- `scripts/run-messaging-multiprovider-db-tests.mjs`;
+- `scripts/validate-messaging-storage.mjs`;
+- `SCHEMA-W04.md` e `EVIDENCIAS-W04.md`;
+- head funcional `3768aabed65710dd2a9c7684fa2f36956921feb6`;
+- CI `30868484609` verde;
+- File Security E2E `30868484604` verde;
+- Vercel verde.
+
+**Decisões fixadas:**
+
+- as sete relações `whatsapp_*` continuam sendo o domínio operacional único;
+- `channel_*` guarda somente aliases, comandos, outbox, inbox, tentativas, DLQ e rollback;
+- não existem `channel_contacts`, `channel_conversations` ou `channel_messages`;
+- identificadores externos são escopados por organização, provider e conta;
+- inbox técnica persiste somente representação sanitizada;
+- rollback desativa a conta e cancela trabalho pendente sem apagar histórico.
+
+**Gate W-G04:** concluído. Nenhum contato, conversa, mensagem, documento ou vínculo de negócio foi duplicado por provider. Baileys continua não instalado.
 
 ---
 
@@ -304,17 +216,17 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 
 - [ ] W-05.1 — Criar `apps/messaging-gateway`
 - [ ] W-05.2 — Definir Node.js compatível
-- [ ] W-05.3 — Criar configuração tipada e validação de environment
-- [ ] W-05.4 — Criar health, readiness e metrics
-- [ ] W-05.5 — Criar API interna autenticada
-- [ ] W-05.6 — Criar assinatura HMAC de comandos/eventos
-- [ ] W-05.7 — Criar proteção contra replay
-- [ ] W-05.8 — Criar correlation e causation IDs
-- [ ] W-05.9 — Criar shutdown gracioso
-- [ ] W-05.10 — Criar container não-root
-- [ ] W-05.11 — Criar limites de CPU, memória e arquivo
+- [ ] W-05.3 — Configuração tipada e validação de environment
+- [ ] W-05.4 — Health, readiness e metrics
+- [ ] W-05.5 — API interna autenticada
+- [ ] W-05.6 — Assinatura HMAC de comandos e eventos
+- [ ] W-05.7 — Proteção contra replay
+- [ ] W-05.8 — Correlation e causation IDs
+- [ ] W-05.9 — Shutdown gracioso
+- [ ] W-05.10 — Container não-root
+- [ ] W-05.11 — Limites de CPU, memória e arquivo
 - [ ] W-05.12 — Isolar rede e banco principal
-- [ ] W-05.13 — Criar cliente fake sem WhatsApp
+- [ ] W-05.13 — Cliente fake sem WhatsApp
 
 ## Sprint W-06 — Adapter Baileys
 
@@ -331,8 +243,8 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [ ] W-06.8 — Encapsular replies, reactions e quoted messages
 - [ ] W-06.9 — Condicionar grupos à capability matrix
 - [ ] W-06.10 — Normalizar erros
-- [ ] W-06.11 — Mapear PN/LID/grupo/newsletter
-- [ ] W-06.12 — Preservar payload técnico sanitizado
+- [ ] W-06.11 — Mapear PN, LID, grupo e newsletter
+- [ ] W-06.12 — Preservar metadata técnica sanitizada
 - [ ] W-06.13 — Criar contract tests
 - [ ] W-06.14 — Falhar se tipo Baileys escapar do adapter
 
@@ -349,7 +261,7 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [ ] W-07.6 — Separar DEK por sessão
 - [ ] W-07.7 — Manter chave-mestra fora do banco
 - [ ] W-07.8 — Impedir logs de material criptográfico
-- [ ] W-07.9 — Criar rotação/recriptografia
+- [ ] W-07.9 — Criar rotação e recriptografia
 - [ ] W-07.10 — Criar backup e restore testados
 - [ ] W-07.11 — Criar exclusão criptográfica
 - [ ] W-07.12 — Auditar acesso às credenciais
@@ -362,21 +274,21 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 **Dependências:** W-07
 
 - [ ] W-08.1 — Criar `session_runtime_leases`
-- [ ] W-08.2 — Implementar lease com expiração
-- [ ] W-08.3 — Implementar fencing token crescente
+- [ ] W-08.2 — Lease com expiração
+- [ ] W-08.3 — Fencing token crescente
 - [ ] W-08.4 — Impedir duas instâncias escritoras
-- [ ] W-08.5 — Criar state machine de conexão
-- [ ] W-08.6 — Implementar QR/pairing efêmeros
+- [ ] W-08.5 — State machine de conexão
+- [ ] W-08.6 — QR e pairing efêmeros
 - [ ] W-08.7 — Proibir persistência de QR
-- [ ] W-08.8 — Implementar reconnect com backoff/jitter
+- [ ] W-08.8 — Reconnect com backoff e jitter
 - [ ] W-08.9 — Classificar logout, restrição, transitório e ação humana
-- [ ] W-08.10 — Implementar takeover após lease expirado
-- [ ] W-08.11 — Criar kill switch global e por sessão
+- [ ] W-08.10 — Takeover após lease expirado
+- [ ] W-08.11 — Kill switch global e por sessão
 - [ ] W-08.12 — Testar processo zumbi
 - [ ] W-08.13 — Testar reinício durante atualização de credenciais
 - [ ] W-08.14 — Testar restauração em nova instância
 
-**Gate W-G08:** nenhuma escala horizontal antes de single writer e fencing passarem.
+**Gate W-G08:** escala horizontal somente após single writer e fencing aprovados.
 
 ---
 
@@ -391,9 +303,9 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [ ] W-09.2 — Persistir antes do dispatch
 - [ ] W-09.3 — Criar idempotency key
 - [ ] W-09.4 — Normalizar wrappers, efêmeras e view-once conforme política
-- [ ] W-09.5 — Normalizar replies/quoted
+- [ ] W-09.5 — Normalizar replies e quoted
 - [ ] W-09.6 — Normalizar receipts
-- [ ] W-09.7 — Normalizar contato/grupo
+- [ ] W-09.7 — Normalizar contato e grupo
 - [ ] W-09.8 — Resolver organização e conta
 - [ ] W-09.9 — Criar estados do ingress
 - [ ] W-09.10 — Criar DLQ
@@ -414,15 +326,15 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [ ] W-10.5 — Ordenar por conversa
 - [ ] W-10.6 — Criar idempotência
 - [ ] W-10.7 — Criar ledger de tentativas
-- [ ] W-10.8 — Classificar retryable/terminal
-- [ ] W-10.9 — Implementar backoff limitado
-- [ ] W-10.10 — Implementar circuit breaker
+- [ ] W-10.8 — Classificar retryable e terminal
+- [ ] W-10.9 — Backoff limitado
+- [ ] W-10.10 — Circuit breaker
 - [ ] W-10.11 — Impedir regressão de status
 - [ ] W-10.12 — Reconciliar comando sem confirmação
-- [ ] W-10.13 — Criar DLQ outbound
+- [ ] W-10.13 — DLQ outbound
 - [ ] W-10.14 — Reprocessar com justificativa
-- [ ] W-10.15 — Limitar volume por organização/sessão
-- [ ] W-10.16 — Testar crash antes/depois do envio
+- [ ] W-10.15 — Limitar volume por organização e sessão
+- [ ] W-10.16 — Testar crash antes e depois do envio
 
 ## Sprint W-11 — Identidades, contatos e deduplicação
 
@@ -432,12 +344,12 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [ ] W-11.1 — Normalizar JIDs
 - [ ] W-11.2 — Persistir PN
 - [ ] W-11.3 — Persistir LID
-- [ ] W-11.4 — Persistir aliases/confiança
-- [ ] W-11.5 — Reconciliar LID/telefone sem duplicação
+- [ ] W-11.4 — Persistir aliases e confiança
+- [ ] W-11.5 — Reconciliar LID e telefone sem duplicação
 - [ ] W-11.6 — Separar identidade observada de vínculo confirmado
 - [ ] W-11.7 — Merge transacional de duplicados
-- [ ] W-11.8 — Preservar histórico/aliases
-- [ ] W-11.9 — Criar cache com invalidação
+- [ ] W-11.8 — Preservar histórico e aliases
+- [ ] W-11.9 — Cache com invalidação
 - [ ] W-11.10 — Testar mudança de identidade
 - [ ] W-11.11 — Testar conflito entre organizações
 
@@ -447,39 +359,39 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 **Dependências:** W-09 e W-10
 
 - [ ] W-12.1 — Criar `MediaReference`
-- [ ] W-12.2 — Fazer streaming; evitar base64 persistente
-- [ ] W-12.3 — Limitar tipo/tamanho
-- [ ] W-12.4 — Criar quarentena privada
-- [ ] W-12.5 — Criar antivírus/classificação
+- [ ] W-12.2 — Streaming; evitar base64 persistente
+- [ ] W-12.3 — Limitar tipo e tamanho
+- [ ] W-12.4 — Quarentena privada
+- [ ] W-12.5 — Antivírus e classificação
 - [ ] W-12.6 — Validar MIME real
-- [ ] W-12.7 — Hash/deduplicação
+- [ ] W-12.7 — Hash e deduplicação
 - [ ] W-12.8 — Thumbnail isolada
 - [ ] W-12.9 — Transcrição sob política
 - [ ] W-12.10 — OCR sob política
-- [ ] W-12.11 — Remover metadados sensíveis quando aplicável
+- [ ] W-12.11 — Remover metadata sensível quando aplicável
 - [ ] W-12.12 — URL assinada
 - [ ] W-12.13 — Retry sem duplicar
 - [ ] W-12.14 — Testar malware, truncado, enorme e MIME falso
 
 ---
 
-# Marco M-4 — Produto, mensagens padrão e IA
+# Marco M-4 — Produto, conteúdo e IA
 
 ## Sprint W-13 — Inbox multiprovider e atendimento
 
 **Estado:** pendente  
 **Dependências:** W-09, W-10 e W-11
 
-- [ ] W-13.1 — Exibir provider/estado sem poluir UX
+- [ ] W-13.1 — Exibir provider e estado sem poluir UX
 - [ ] W-13.2 — Unificar conversas do mesmo contato
 - [ ] W-13.3 — Preservar origem da mensagem
 - [ ] W-13.4 — Filtrar por conta, fila, responsável, obra e estado
-- [ ] W-13.5 — Atribuição/transferência
+- [ ] W-13.5 — Atribuição e transferência
 - [ ] W-13.6 — Notas internas
-- [ ] W-13.7 — Indicadores humano/automação/IA
-- [ ] W-13.8 — Presença de operador distinta da presença WhatsApp
+- [ ] W-13.7 — Indicadores humano, automação e IA
+- [ ] W-13.8 — Presença do operador distinta da presença do canal
 - [ ] W-13.9 — Realtime pelo backend Innov
-- [ ] W-13.10 — Estados offline/reconnecting/degraded/action required
+- [ ] W-13.10 — Estados offline, reconnecting, degraded e action required
 - [ ] W-13.11 — Desabilitar ações incompatíveis
 - [ ] W-13.12 — Validar responsividade
 - [ ] W-13.13 — Testar agentes concorrentes
@@ -495,7 +407,7 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [ ] W-14.4 — Vincular fontes canônicas
 - [ ] W-14.5 — Definir schema de variáveis
 - [ ] W-14.6 — Validar variáveis
-- [ ] W-14.7 — Registrar snapshot/versão/SHA
+- [ ] W-14.7 — Registrar snapshot, versão e SHA
 - [ ] W-14.8 — Classificar autonomia
 - [ ] W-14.9 — Bloquear reescrita contratual livre
 - [ ] W-14.10 — Aprovação humana para conteúdo sensível
@@ -509,15 +421,15 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 
 - [ ] W-15.1 — Criar `AiProvider`
 - [ ] W-15.2 — Criar `AiOrchestrator` independente do canal
-- [ ] W-15.3 — Criar `ContextBuilder` com minimização
+- [ ] W-15.3 — `ContextBuilder` com minimização
 - [ ] W-15.4 — Busca lexical
 - [ ] W-15.5 — Busca vetorial opcional
-- [ ] W-15.6 — Retrieval híbrido/fallback
+- [ ] W-15.6 — Retrieval híbrido e fallback
 - [ ] W-15.7 — Filtros de tenancy, obra, versão e validade
 - [ ] W-15.8 — Precedência de workflow
 - [ ] W-15.9 — Limite atômico por conversa
-- [ ] W-15.10 — Limite por organização/custo
-- [ ] W-15.11 — Estados persistentes de handoff
+- [ ] W-15.10 — Limite por organização e custo
+- [ ] W-15.11 — Handoff persistente
 - [ ] W-15.12 — Desativar IA quando humano assumir
 - [ ] W-15.13 — Resumo de handoff
 - [ ] W-15.14 — Citações internas de fontes
@@ -532,7 +444,7 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 **Dependências:** W-14 e W-15
 
 - [ ] W-16.1 — Criar `MessagePlugin`
-- [ ] W-16.2 — Prioridade/short-circuit
+- [ ] W-16.2 — Prioridade e short-circuit
 - [ ] W-16.3 — Plugin de consentimento
 - [ ] W-16.4 — Plugin anti-spam
 - [ ] W-16.5 — Plugin de qualificação
@@ -541,8 +453,8 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [ ] W-16.8 — Plugin de SAC
 - [ ] W-16.9 — Plugin de handoff
 - [ ] W-16.10 — IA como último recurso
-- [ ] W-16.11 — Permissões/flags
-- [ ] W-16.12 — Testar ordem/conflito
+- [ ] W-16.11 — Permissões e flags
+- [ ] W-16.12 — Testar ordem e conflito
 
 ---
 
@@ -562,7 +474,7 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [ ] W-17.7 — Allowlist de ferramentas
 - [ ] W-17.8 — Aprovação para escritas críticas
 - [ ] W-17.9 — Redaction de logs
-- [ ] W-17.10 — Retenção/expurgo
+- [ ] W-17.10 — Retenção e expurgo
 - [ ] W-17.11 — Auditoria de leitura sensível
 - [ ] W-17.12 — Teste cross-tenant
 - [ ] W-17.13 — Resposta a comprometimento de sessão
@@ -575,20 +487,20 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 **Dependências:** W-10 e W-17
 
 - [ ] W-18.1 — Métricas de sessão
-- [ ] W-18.2 — Métricas ingress/egress
-- [ ] W-18.3 — Métricas retry/DLQ
+- [ ] W-18.2 — Métricas ingress e egress
+- [ ] W-18.3 — Métricas retry e DLQ
 - [ ] W-18.4 — Métricas de mídia
-- [ ] W-18.5 — Métricas de IA/custo
+- [ ] W-18.5 — Métricas de IA e custo
 - [ ] W-18.6 — Logs estruturados
 - [ ] W-18.7 — Traces
 - [ ] W-18.8 — Dashboard
-- [ ] W-18.9 — Alerta reconnect loop
-- [ ] W-18.10 — Alerta DLQ
-- [ ] W-18.11 — Alerta perda de lease
+- [ ] W-18.9 — Alerta de reconnect loop
+- [ ] W-18.10 — Alerta de DLQ
+- [ ] W-18.11 — Alerta de perda de lease
 - [ ] W-18.12 — Alerta de persistência de keys
-- [ ] W-18.13 — Runbook desconexão
-- [ ] W-18.14 — Runbook upgrade Baileys
-- [ ] W-18.15 — Runbook rollback
+- [ ] W-18.13 — Runbook de desconexão
+- [ ] W-18.14 — Runbook de upgrade Baileys
+- [ ] W-18.15 — Runbook de rollback
 
 ## Sprint W-19 — Testes funcionais, chaos e performance
 
@@ -599,7 +511,7 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [ ] W-19.2 — Contract tests
 - [ ] W-19.3 — Integration tests PostgreSQL
 - [ ] W-19.4 — E2E com número de homologação
-- [ ] W-19.5 — QR/pairing
+- [ ] W-19.5 — QR e pairing
 - [ ] W-19.6 — Restart durante mensagem
 - [ ] W-19.7 — Restart durante key update
 - [ ] W-19.8 — Perda de rede
@@ -609,14 +521,14 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [ ] W-19.12 — Banco indisponível
 - [ ] W-19.13 — Processo zumbi
 - [ ] W-19.14 — Réplicas disputando sessão
-- [ ] W-19.15 — Upgrade/downgrade
+- [ ] W-19.15 — Upgrade e downgrade
 - [ ] W-19.16 — Restore em infraestrutura nova
-- [ ] W-19.17 — Benchmark memória/sessão
+- [ ] W-19.17 — Benchmark memória por sessão
 - [ ] W-19.18 — Benchmark throughput
 - [ ] W-19.19 — Benchmark latência
 - [ ] W-19.20 — Registrar limites medidos
 
-**Gate W-G19:** nenhum número real de operação antes dos testes P0 repetidos.
+**Gate W-G19:** nenhum número real antes da repetição dos testes P0.
 
 ---
 
@@ -627,17 +539,17 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 **Estado:** pendente  
 **Dependências:** W-19
 
-- [ ] W-20.1 — Número dedicado/autorizado
+- [ ] W-20.1 — Número dedicado e autorizado
 - [ ] W-20.2 — Organização de homologação
 - [ ] W-20.3 — Usuários autorizados
 - [ ] W-20.4 — Campanhas desabilitadas
 - [ ] W-20.5 — Auto-reply IA desabilitado
-- [ ] W-20.6 — Somente texto/mídia aprovada
-- [ ] W-20.7 — Roteiro diário de conexão/envio/recebimento/restart
-- [ ] W-20.8 — Validar métricas/alertas
-- [ ] W-20.9 — Validar expurgo/exclusão de sessão
-- [ ] W-20.10 — Validar handoff/multiagente
-- [ ] W-20.11 — Incidentes/vacinas
+- [ ] W-20.6 — Somente texto e mídia aprovada
+- [ ] W-20.7 — Roteiro diário de conexão, envio, recebimento e restart
+- [ ] W-20.8 — Validar métricas e alertas
+- [ ] W-20.9 — Validar expurgo e exclusão de sessão
+- [ ] W-20.10 — Validar handoff e multiagente
+- [ ] W-20.11 — Registrar incidentes e vacinas
 - [ ] W-20.12 — Relatório de homologação
 
 ## Sprint W-21 — Piloto restrito
@@ -645,14 +557,14 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 **Estado:** pendente  
 **Dependências:** W-20
 
-- [ ] W-21.1 — Definir escopo/usuários
-- [ ] W-21.2 — Definir SLOs/abort criteria
+- [ ] W-21.1 — Definir escopo e usuários
+- [ ] W-21.2 — Definir SLOs e abort criteria
 - [ ] W-21.3 — Rollout por feature flag
 - [ ] W-21.4 — Rollback de um clique
-- [ ] W-21.5 — Monitorar falhas/reconnects/bloqueios/duplicações
+- [ ] W-21.5 — Monitorar falhas, reconnects, bloqueios e duplicações
 - [ ] W-21.6 — Comparar com provider oficial
 - [ ] W-21.7 — Medir custo operacional
-- [ ] W-21.8 — Validar suporte/runbooks
+- [ ] W-21.8 — Validar suporte e runbooks
 - [ ] W-21.9 — Revisar riscos jurídicos, contratuais e de privacidade
 - [ ] W-21.10 — Decidir promover, restringir ou encerrar
 
@@ -669,88 +581,33 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 - [ ] W-22.6 — Atualizar `diretrizes/RECUPERACAO.md`
 - [ ] W-22.7 — Atualizar `diretrizes/VACINAS.md`
 - [ ] W-22.8 — Atualizar `diretrizes/ESTADO-ATUAL.json`
-- [ ] W-22.9 — Registrar dependências/licenças
-- [ ] W-22.10 — Garantir CI/E2E verdes
+- [ ] W-22.9 — Registrar dependências e licenças
+- [ ] W-22.10 — Garantir CI e E2E verdes
 - [ ] W-22.11 — Registrar decisão final de produção
-- [ ] W-22.12 — Encerrar PR após revisão técnica/segurança
+- [ ] W-22.12 — Encerrar PR após revisão técnica e de segurança
 
 ---
 
-## 6. Mapa de reaproveitamento
+## 4. Critérios globais de conclusão
 
-| Projeto | Reaproveitar | Forma no Innov | Não reaproveitar |
-|---|---|---|---|
-| Baileys | sockets, eventos, auth state, mutexes, retries, PN/LID, mídia | adapter/runtime persistente | storage por arquivos em produção; tipos no domínio |
-| OpenWA | engine interface, modelo neutro, capabilities, HMAC/health/audit | contratos internos | gateway/banco paralelo inteiro |
-| whatsmeow | SQL session store, migrations, LID map | modelagem transacional TS/PostgreSQL | introduzir Go sem justificativa |
-| wacrm | RAG, workflow primeiro, handoff, limites | AI Orchestrator | CRM/contas/visual paralelo |
-| Evolution | adapters/eventos/filas/storage | portas substituíveis | instalar todos os brokers antecipadamente |
-| whatsapp-web.js | comportamento do Web | oracle/laboratório | engine principal ou Chromium no app |
-| wechat-bot | separação canal/IA | `ChannelProvider`/`AiProvider` | segurança simplificada |
-| WhatsControl | inbox/multiagente/handoff | UX | código sem licença clara |
-| Knightbot/userbots | registry/plugins | contrato governado | plugins inseguros/downloads |
-| reveng | história do protocolo | referência | implementação atual |
-
----
-
-## 7. Artefatos planejados
-
-```text
-apps/messaging-gateway/
-├── src/config/
-├── src/api/
-├── src/engines/{contracts,baileys,mock}/
-├── src/sessions/
-├── src/identity/
-├── src/ingress/
-├── src/outbox/
-├── src/media/
-├── src/events/
-├── src/security/
-├── src/observability/
-└── tests/
-
-lib/messaging/
-├── domain.ts                  # criado na W-02
-├── whatsapp-compatibility.ts  # criado na W-02
-├── capabilities.ts            # criado na W-03
-├── engine.ts                  # criado na W-03
-├── feature-flags.ts           # criado na W-03
-├── policy.server.ts           # criado na W-03
-├── engines/
-│   ├── meta-cloud.ts          # criado na W-03
-│   ├── meta-cloud.server.ts   # criado na W-03
-│   └── mock.ts                # criado na W-03
-├── playbooks.ts
-└── ai/
-
-supabase/migrations/
-├── *_channel_provider_abstraction.sql
-├── *_channel_session_store.sql
-├── *_channel_identity_mapping.sql
-├── *_channel_outbox_and_dlq.sql
-└── *_communication_playbooks_ai.sql
-```
-
----
-
-## 8. Critérios globais de conclusão
-
-- [x] Contratos provider-neutral implementados
-- [x] Provider Meta preservado sem regressão
-- [x] Contratos de engine e capability matrix implementados
-- [x] Policy gates aplicados na UI e no backend
-- [x] Mock engine disponível para testes sem provider real
+- [x] Contratos provider-neutral
+- [x] Meta preservado sem regressão
+- [x] Contratos de engine e capability matrix
+- [x] Policy gates na UI e backend
+- [x] Mock engine sem provider real
+- [x] Storage multiprovider aditivo sem domínio paralelo
+- [x] RLS forçada e escrita técnica controlada
+- [x] Rollback lógico sem perda histórica
 - [ ] Adapter Baileys confinado
 - [ ] Runtime separado do Next.js
-- [ ] Session store criptografado/transacional
-- [ ] Single writer/fencing comprovados
-- [ ] Ingress durável/idempotente
-- [ ] Outbox/retry ledger comprovados
-- [ ] PN/LID sem duplicação
-- [ ] Mídia com quarentena/antivírus específica do canal
+- [ ] Session store criptografado e transacional
+- [ ] Single writer e fencing comprovados
+- [ ] Ingress operacional durável e idempotente
+- [ ] Worker de outbox e retry operacional comprovados
+- [ ] Reconciliação PN/LID completa
+- [ ] Mídia específica do canal protegida
 - [ ] Inbox multiprovider homologada
-- [x] Fontes canônicas preservadas na projeção
+- [x] Fontes canônicas preservadas
 - [ ] IA independente e inicialmente em rascunho
 - [ ] Handoff persistente
 - [ ] Threat model aprovado
@@ -758,41 +615,44 @@ supabase/migrations/
 - [ ] Métricas, alertas e runbooks
 - [ ] Restart, concorrência e restore verdes
 - [ ] Piloto restrito concluído
-- [ ] Decisão explícita de promover/restringir/encerrar
+- [ ] Decisão explícita de produção
 - [ ] Documentação canônica final atualizada
-- [ ] CI/E2E finais verdes
+- [ ] CI e E2E finais verdes
 
 ---
 
-## 9. Registro de reordenação
+## 5. Dependências externas
 
-| Data | Alteração | Justificativa | Aprovado por |
-|---|---|---|---|
-| — | Nenhuma | Ordem inicial mantida | — |
-
----
-
-## 10. Registro de bloqueios e dependências externas
-
-| Sprint/controle | Estado | Evidência | Próxima ação |
-|---|---|---|---|
-| Aceite operacional | não executado | política define o modelo | somente antes de número real |
-| Revisão jurídica | dependência externa | ADR declara ausência | executar antes de piloto/produção |
-| Número autorizado | não executado | nenhum número registrado | somente W-20 |
-| Produção | bloqueada | ADR-001 | exige decisão posterior específica |
+| Controle | Estado | Próxima ação |
+|---|---|---|
+| Aceite operacional | não executado | antes de número real |
+| Revisão jurídica | dependência externa | antes de piloto ou produção |
+| Número autorizado | não executado | somente W-20 |
+| Produção | bloqueada | decisão específica posterior |
 
 ---
 
-## 11. Próxima ação autorizada
+## 6. Próxima ação autorizada
 
-A próxima sprint autorizada é **W-04 — Evolução do banco sem domínio paralelo**.
+A próxima sprint autorizada é **W-05 — Esqueleto do gateway**.
 
-É permitido inventariar e evoluir o schema de modo aditivo, criar provider/account identities, comandos, outbox, inbox sanitizada, DLQ, ledger, RLS, testes multiempresa e rollback lógico. Ainda não está autorizado:
+É permitido:
+
+- criar `apps/messaging-gateway`;
+- definir runtime Node.js compatível;
+- criar configuração tipada;
+- criar health, readiness e metrics;
+- criar API interna autenticada;
+- implementar HMAC, replay guard, correlation e causation IDs;
+- implementar shutdown gracioso;
+- criar container não-root e limites operacionais;
+- usar somente cliente fake sem WhatsApp.
+
+Ainda não está autorizado:
 
 - instalar ou conectar Baileys;
-- criar gateway persistente;
-- criar sessão real ou pairing;
-- usar número comercial;
-- liberar provider não oficial;
-- habilitar auto-reply;
+- criar `BaileysEngineAdapter`;
+- criar sessão, QR ou pairing;
+- usar número real;
+- habilitar automação ou IA;
 - promover para produção.
