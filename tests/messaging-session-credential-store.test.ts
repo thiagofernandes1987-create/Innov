@@ -17,13 +17,13 @@ const scope: SessionSecretScope = {
   providerType: "WHATSAPP_WEB_BAILEYS"
 };
 
-function fixture() {
+function fixture(input?: { keyId?: string; keyVersion?: number; fill?: number }) {
   const repository = new TransactionalMemorySessionCredentialRepository();
   const keyEnvelopeProvider = new TestOnlyInMemoryKeyEnvelopeProvider({
     allowTestOnly: true,
-    keyId: "test-kek-a",
-    keyVersion: 1,
-    keyMaterial: new Uint8Array(32).fill(7)
+    keyId: input?.keyId ?? "test-kek-a",
+    keyVersion: input?.keyVersion ?? 1,
+    keyMaterial: new Uint8Array(32).fill(input?.fill ?? 7)
   });
   const store = createEncryptedSessionCredentialStore({
     repository,
@@ -314,9 +314,10 @@ describe("SessionCredentialStore W-07", () => {
       material: bytes(SECRET_TEXT)
     });
     const backup = await source.store.exportEncryptedBackup(scope);
-    const target = fixture();
+    const target = fixture({ keyId: "test-kek-a", keyVersion: 1, fill: 11 });
     await expect(target.store.restoreEncryptedBackup(backup, null))
       .rejects.toBeInstanceOf(SessionStoreError);
+    expect(await target.store.loadCredentials(scope)).toBeNull();
   });
 
   it("realiza exclusão criptográfica e preserva somente auditoria sanitizada", async () => {
