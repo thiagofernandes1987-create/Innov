@@ -5,7 +5,8 @@ const lockfilePath = "pnpm-lock.yaml";
 const gatewayPackagePath = "apps/messaging-gateway/package.json";
 const workspacePath = "pnpm-workspace.yaml";
 const expectedVersion = "7.0.0-rc13";
-const expectedSemanticSha256 = "0cde0111db365366ede392ae715baa4575440af43bfd82d6083638c0af130d57";
+const expectedWsOverride = "8.21.1";
+const expectedSemanticSha256 = "3a00d4b9e53cd7d2ce9ad1de1f1cb5aa40aeac4189f6eb5003227e29d8e52add";
 const approvedFullArtifactSha256 = "d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9";
 const failures = [];
 
@@ -44,11 +45,11 @@ if (failures.length === 0) {
   if (declared !== expectedVersion) {
     failures.push(`Gateway deve declarar Baileys exatamente ${expectedVersion}; encontrado ${String(declared)}`);
   }
-  if (!/overrides:\n(?:[ \t].*\n)*?\s{2}ws:\s*8\.21\.1(?:\n|$)/.test(workspace)) {
-    failures.push("Workspace não fixa override ws@8.21.1.");
+  if (!new RegExp(`overrides:\\n(?:[ \\t].*\\n)*?\\s{2}ws:\\s*${expectedWsOverride.replaceAll(".", "\\.")}(?:\\n|$)`).test(workspace)) {
+    failures.push(`Workspace não fixa override ws@${expectedWsOverride}.`);
   }
-  if (!text.includes("  ws@8.21.1:")) {
-    failures.push("Lockfile regenerado não contém resolução ws@8.21.1.");
+  if (!text.includes(`  ws@${expectedWsOverride}:`)) {
+    failures.push(`Lockfile regenerado não contém resolução ws@${expectedWsOverride}.`);
   }
 
   const blocks = [
@@ -70,7 +71,7 @@ if (failures.length === 0) {
     if (!block) failures.push(`Bloco semântico ausente no lockfile: ${blockNames[index]}`);
   });
 
-  const semanticText = `${blocks.join("\n---\n")}\n`;
+  const rawSemanticText = `${blocks.join("\n---\n")}\n`;
   for (const token of [
     "specifier: 7.0.0-rc13",
     "version: 7.0.0-rc13(sharp@0.34.5)(supports-color@7.2.0)",
@@ -80,9 +81,10 @@ if (failures.length === 0) {
     "libsignal: 6.0.0",
     "whatsapp-rust-bridge: 0.5.4",
     "protobufjs: 7.6.5",
-    "pino: 9.14.0"
+    "pino: 9.14.0",
+    `ws: ${expectedWsOverride}`
   ]) {
-    if (!semanticText.includes(token)) failures.push(`Cadeia W-06 sem entrada aprovada: ${token}`);
+    if (!rawSemanticText.includes(token)) failures.push(`Cadeia W-06 sem entrada aprovada: ${token}`);
   }
 
   const gatewayImporter = blocks[0] || "";
@@ -90,6 +92,9 @@ if (failures.length === 0) {
     failures.push("Importer do gateway contém versão flutuante ou latest.");
   }
 
+  const canonicalBlocks = [...blocks];
+  canonicalBlocks[4] = canonicalBlocks[4].replace(/^      ws: .+$/m, "      ws: <workspace-override>");
+  const semanticText = `${canonicalBlocks.join("\n---\n")}\n`;
   semanticSha256 = createHash("sha256").update(semanticText).digest("hex");
   if (semanticSha256 !== expectedSemanticSha256) {
     failures.push(`Fingerprint semântico W-06 divergiu: esperado ${expectedSemanticSha256}, obtido ${semanticSha256}`);
@@ -104,12 +109,12 @@ if (failures.length) {
 console.log(JSON.stringify({
   ok: true,
   contract: "messaging-w06-lockfile-v2",
-  validationScope: "gateway_importer_baileys_package_integrities_snapshot_and_ws_override",
+  validationScope: "gateway_importer_baileys_integrities_snapshot_and_independent_ws_override",
   semanticSha256,
   approvedFullArtifactSha256,
   package: "@whiskeysockets/baileys",
   version: expectedVersion,
-  wsOverride: "8.21.1",
+  wsOverride: expectedWsOverride,
   lifecycleScriptsExecuted: false,
   importer: "apps/messaging-gateway",
   unrelatedWorkspaceResolutionDriftIgnored: true
