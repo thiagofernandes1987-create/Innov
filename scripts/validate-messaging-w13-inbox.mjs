@@ -13,7 +13,6 @@ const files = {
 const failures = [];
 for (const file of Object.values(files)) if (!fs.existsSync(file)) failures.push(`Arquivo W-13 ausente: ${file}`);
 const read = key => fs.existsSync(files[key]) ? fs.readFileSync(files[key], "utf8") : "";
-const all = Object.keys(files).map(read).join("\n");
 const migration = `${read("migration")}\n${read("compat")}`.toLowerCase();
 const page = read("page");
 
