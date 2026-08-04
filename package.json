@@ -28,6 +28,7 @@
     "validate:messaging-boundaries": "node scripts/validate-messaging-boundaries.mjs",
     "validate:messaging-storage": "node scripts/validate-messaging-storage.mjs",
     "validate:messaging-gateway": "node scripts/validate-messaging-gateway.mjs",
+    "validate:messaging-lockfile": "node scripts/verify-w06-lockfile.mjs",
     "test:db:object-runtime": "node scripts/run-object-runtime-db-tests.mjs",
     "test:db:messaging-multiprovider": "node scripts/run-messaging-multiprovider-db-tests.mjs",
     "validate:pipeline": "node scripts/validate-pipeline.mjs",
