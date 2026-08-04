@@ -28,3 +28,7 @@ export {
   normalizeBaileysError,
   type BaileysAdapterErrorCode
 } from "./errors.js";
+export {
+  createStoredBaileysAuthenticationState,
+  type StoredBaileysAuthenticationState
+} from "./stored-auth-state.js";
