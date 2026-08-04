@@ -274,18 +274,23 @@ begin
 end;
 $$;
 
-for table_name in
-  select unnest(array[
+do $$
+declare
+  table_name text;
+begin
+  foreach table_name in array array[
     'channel_session_secret_envelopes',
     'channel_session_credentials',
     'channel_session_keys',
     'channel_session_secret_audit'
-  ])
-loop
-  execute format('alter table public.%I enable row level security',table_name);
-  execute format('alter table public.%I force row level security',table_name);
-  execute format('revoke all on table public.%I from public,anon,authenticated',table_name);
-end loop;
+  ]
+  loop
+    execute format('alter table public.%I enable row level security',table_name);
+    execute format('alter table public.%I force row level security',table_name);
+    execute format('revoke all on table public.%I from public,anon,authenticated',table_name);
+  end loop;
+end;
+$$;
 
 revoke all on function public.compare_and_swap_channel_session_credentials(
   uuid,uuid,uuid,text,text,bigint,bigint,text,bigint,bytea,bytea,bytea,text,
