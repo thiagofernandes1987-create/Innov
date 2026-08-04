@@ -11,59 +11,100 @@ do $$ begin
   raise notice 'W-16 persistência de plugins aprovada';
 end $$;
 
-select public.set_channel_message_plugin_policy(
-  '11111111-1111-1111-1111-111111111111','CONSENT',true,10,null,null,'{}'::jsonb
-);
-select public.set_channel_message_plugin_policy(
-  '11111111-1111-1111-1111-111111111111','ANTI_SPAM',true,20,null,'MESSAGING_ANTI_SPAM','{"maximumRecentInbound":12}'::jsonb
-);
-select public.set_channel_message_plugin_policy(
-  '11111111-1111-1111-1111-111111111111','QUALIFICATION',true,30,'messaging.qualification','MESSAGING_QUALIFICATION','{}'::jsonb
-);
-select public.set_channel_message_plugin_policy(
-  '11111111-1111-1111-1111-111111111111','AI_FALLBACK',true,1000,'messaging.ai.draft','MESSAGING_AI_DRAFT','{"mode":"DRAFT_ONLY"}'::jsonb
-);
-
 do $$ begin
-  if (select count(*) from public.channel_message_plugin_policies where organization_id='11111111-1111-1111-1111-111111111111') <> 4 then
-    raise exception 'W-16 políticas não persistidas';
+  if (select count(*) from public.channel_message_plugin_policies
+      where organization_id='11111111-1111-1111-1111-111111111111') <> 8 then
+    raise exception 'Catálogo canônico não inicializado';
   end if;
-  raise notice 'W-16 prioridade e políticas persistentes aprovadas';
+  raise notice 'W-16 catálogo canônico completo aprovado';
+end $$;
+
+select public.set_channel_message_plugin_policy(
+  '11111111-1111-1111-1111-111111111111','ANTI_SPAM',true,9999,'admin.all','FLAG_FORJADA',
+  '{"maximumRecentInbound":12}'::jsonb
+);
+select public.set_channel_message_plugin_policy(
+  '11111111-1111-1111-1111-111111111111','QUALIFICATION',true,9998,'admin.all','FLAG_FORJADA','{}'::jsonb
+);
+select public.set_channel_message_plugin_policy(
+  '11111111-1111-1111-1111-111111111111','AI_FALLBACK',true,1,'admin.all','FLAG_FORJADA',
+  '{"mode":"DRAFT_ONLY"}'::jsonb
+);
+
+do $$ begin
+  if not exists (
+    select 1 from public.channel_message_plugin_policies
+    where organization_id='11111111-1111-1111-1111-111111111111'
+      and plugin_id='ANTI_SPAM' and enabled and priority=20
+      and required_permission is null and feature_flag is null
+  ) then raise exception 'Anti-spam aceitou metadados forjados'; end if;
+  if not exists (
+    select 1 from public.channel_message_plugin_policies
+    where organization_id='11111111-1111-1111-1111-111111111111'
+      and plugin_id='QUALIFICATION' and enabled and priority=30
+      and required_permission='messaging.qualification'
+      and feature_flag='MESSAGING_QUALIFICATION'
+  ) then raise exception 'Qualificação aceitou metadados forjados'; end if;
+  if not exists (
+    select 1 from public.channel_message_plugin_policies
+    where organization_id='11111111-1111-1111-1111-111111111111'
+      and plugin_id='AI_FALLBACK' and enabled and priority=1000
+      and required_permission='messaging.ai.draft'
+      and feature_flag='MESSAGING_AI_DRAFT'
+  ) then raise exception 'IA aceitou metadados forjados'; end if;
+  raise notice 'W-16 metadados canônicos imunes à UI aprovados';
+end $$;
+
+do $$ declare plugin text; begin
+  foreach plugin in array array['CONSENT','ANTI_SPAM','HANDOFF'] loop
+    begin
+      perform public.set_channel_message_plugin_policy(
+        '11111111-1111-1111-1111-111111111111',plugin,false,9999,'forjado','forjado','{}'::jsonb
+      );
+      raise exception 'Plugin obrigatório desabilitado: %',plugin;
+    exception when others then
+      if sqlerrm not like '%MANDATORY_PLUGIN_REQUIRED:%' then raise; end if;
+    end;
+  end loop;
+  raise notice 'W-16 plugins críticos obrigatórios aprovados';
+end $$;
+
+do $$ begin
+  if (select count(distinct priority) from public.channel_message_plugin_policies
+      where organization_id='11111111-1111-1111-1111-111111111111') <> 8 then
+    raise exception 'Prioridades canônicas não são únicas';
+  end if;
+  if (select array_agg(plugin_id order by priority) from public.channel_message_plugin_policies
+      where organization_id='11111111-1111-1111-1111-111111111111') <>
+    array['CONSENT','ANTI_SPAM','QUALIFICATION','PROJECT_STATUS','DOCUMENT','SAC','HANDOFF','AI_FALLBACK']::text[] then
+    raise exception 'Ordem canônica divergente';
+  end if;
+  raise notice 'W-16 prioridade e ordem canônicas aprovadas';
 end $$;
 
 do $$ begin
   begin
     perform public.set_channel_message_plugin_policy(
-      '11111111-1111-1111-1111-111111111111','CONSENT',false,10,null,null,'{}'::jsonb
+      '11111111-1111-1111-1111-111111111111','PLUGIN_INEXISTENTE',true,1,null,null,'{}'::jsonb
     );
-    raise exception 'W-16 consentimento desativado';
+    raise exception 'Plugin inexistente aceito';
   exception when others then
-    if sqlerrm not like '%CONSENT_PLUGIN_REQUIRED%' then raise; end if;
+    if sqlerrm not like '%PLUGIN_ID_INVALID%' then raise; end if;
   end;
-  raise notice 'W-16 consentimento obrigatório aprovado';
+  raise notice 'W-16 identificador de plugin fail-closed aprovado';
 end $$;
 
 do $$ begin
   begin
     perform public.set_channel_message_plugin_policy(
-      '11111111-1111-1111-1111-111111111111','AI_FALLBACK',true,50,'messaging.ai.draft','MESSAGING_AI_DRAFT','{}'::jsonb
+      '11111111-1111-1111-1111-111111111111','DOCUMENT',true,50,null,null,
+      '{"token":"segredo"}'::jsonb
     );
-    raise exception 'W-16 IA fora da última posição aceita';
+    raise exception 'Segredo em configuração aceito';
   exception when others then
-    if sqlerrm not like '%AI_PLUGIN_MUST_BE_LAST_AND_FLAGGED%' then raise; end if;
+    if sqlerrm not like '%PLUGIN_CONFIGURATION_SECRET_DETECTED%' and sqlstate <> '23514' then raise; end if;
   end;
-  raise notice 'W-16 IA como último recurso aprovada';
-end $$;
-
-do $$ begin
-  begin
-    perform public.set_channel_message_plugin_policy(
-      '11111111-1111-1111-1111-111111111111','DOCUMENT',true,20,'documents.read','MESSAGING_DOCUMENTS','{}'::jsonb
-    );
-    raise exception 'W-16 prioridade duplicada aceita';
-  exception when unique_violation then null;
-  end;
-  raise notice 'W-16 conflito de prioridade bloqueado aprovado';
+  raise notice 'W-16 segredo em configuração bloqueado aprovado';
 end $$;
 
 do $$ declare item public.channel_message_plugin_decisions; begin
@@ -140,4 +181,4 @@ do $$ declare forced_count integer; begin
   raise notice 'W-16 RLS e privilégio mínimo aprovados';
 end $$;
 
-\echo 'Testes PostgreSQL W-16 aprovados: 10 controles.'
+\echo 'Testes PostgreSQL W-16 aprovados: 12 controles.'
