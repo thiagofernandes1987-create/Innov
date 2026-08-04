@@ -4,7 +4,7 @@
 **Projeto pai:** Etapa 22 — WhatsApp e atendimento omnichannel  
 **Branch de planejamento:** `feature/etapa-22-whatsapp-omnichannel`  
 **Branch de execução:** `feature/etapa-22-provider-whatsapp-web-baileys`  
-**Status:** W-02 concluída; engine Baileys e runtime ainda não iniciados  
+**Status:** W-03 concluída; engine Baileys e runtime ainda não iniciados  
 **Provider inicial planejado:** Baileys 7.x, encapsulado por adapter próprio  
 **Última atualização:** 03 de agosto de 2026  
 **Documento complementar:** [`SPEC.md`](./SPEC.md)
@@ -44,7 +44,7 @@ O PR #39 permanece responsável pela base da Etapa 22:
 - RLS, auditoria e proteção do histórico;
 - provider oficial Meta Cloud API.
 
-O PR #40 executa a arquitetura multiprovider de forma incremental, tendo a branch do PR #39 como base. Nesta fase contém apenas contratos canônicos, compatibilidade Meta, testes e gates arquiteturais.
+O PR #40 executa a arquitetura multiprovider de forma incremental, tendo a branch do PR #39 como base. Até a W-03 contém contratos canônicos, contratos de engine, capability matrix, adapter Meta, mock engine, feature flags, policy gates, testes e gates arquiteturais.
 
 Nenhum dos dois PRs autoriza silenciosamente um runtime Baileys, número real ou produção.
 
@@ -226,20 +226,51 @@ Homologação exige repetição de reconexão, concorrência, mídia, identidade
 
 ## Sprint W-03 — Contrato de engine e matriz de capacidades
 
-**Estado:** pendente  
+**Estado:** concluída  
 **Dependências:** W-02
 
-- [ ] W-03.1 — Criar interface `MessagingEngine`
-- [ ] W-03.2 — Criar interface `SessionEngine`
-- [ ] W-03.3 — Criar interface `EngineEventSource`
-- [ ] W-03.4 — Criar `EngineCapabilityMatrix`
-- [ ] W-03.5 — Definir capacidades de texto, mídia, reação, resposta, grupo, presença, histórico e edição
-- [ ] W-03.6 — Definir `UnsupportedCapabilityError`
-- [ ] W-03.7 — Encapsular provider Meta no mesmo contrato sem regressão
-- [ ] W-03.8 — Criar `MockMessagingEngine`
-- [ ] W-03.9 — Criar contract tests para todos os engines
-- [ ] W-03.10 — Criar feature flags por provider e organização
-- [ ] W-03.11 — Ocultar ações não suportadas na interface
+- [x] W-03.1 — Criar interface `MessagingEngine`
+- [x] W-03.2 — Criar interface `SessionEngine`
+- [x] W-03.3 — Criar interface `EngineEventSource`
+- [x] W-03.4 — Criar `EngineCapabilityMatrix`
+- [x] W-03.5 — Definir capacidades de texto, mídia, reação, resposta, grupo, presença, histórico e edição
+- [x] W-03.6 — Definir `UnsupportedCapabilityError`
+- [x] W-03.7 — Encapsular provider Meta no mesmo contrato sem regressão
+- [x] W-03.8 — Criar `MockMessagingEngine`
+- [x] W-03.9 — Criar contract tests para todos os engines
+- [x] W-03.10 — Criar feature flags por provider e organização
+- [x] W-03.11 — Ocultar ações não suportadas na interface
+
+**Evidências:**
+
+- `lib/messaging/engine.ts`;
+- `lib/messaging/capabilities.ts`;
+- `lib/messaging/feature-flags.ts`;
+- `lib/messaging/policy.server.ts`;
+- `lib/messaging/engines/meta-cloud.ts`;
+- `lib/messaging/engines/meta-cloud.server.ts`;
+- `lib/messaging/engines/mock.ts`;
+- `tests/messaging-engine.test.ts`;
+- `tests/messaging-boundary.test.ts`;
+- `scripts/validate-messaging-boundaries.mjs`;
+- `app/actions/whatsapp.ts`;
+- `app/app/whatsapp/page.tsx`;
+- `EVIDENCIAS-W03.md`;
+- PR #40;
+- head funcional `edb80e369f2ffde61f1e558aee5318027a02d7d3`;
+- CI run `30866943997` verde;
+- File Security E2E run `30866944005` verde;
+- Vercel verde.
+
+**Decisões adicionais:**
+
+- capabilities representam somente o que o adapter Innov efetivamente encapsula;
+- UI e server actions aplicam a mesma política;
+- configuração inválida falha fechada;
+- Baileys não pode ser ativado por flag sem runtime registrado;
+- o envio oficial é roteado por `MetaCloudMessagingEngine`, preservando outbox, fontes e auditoria.
+
+**Gate W-G03:** concluído. Os contratos, matriz, mock, adapter Meta, policy gates e contract tests foram aprovados. Baileys continua não instalado.
 
 ## Sprint W-04 — Evolução do banco sem domínio paralelo
 
@@ -682,11 +713,14 @@ apps/messaging-gateway/
 lib/messaging/
 ├── domain.ts                  # criado na W-02
 ├── whatsapp-compatibility.ts  # criado na W-02
-├── contracts.ts
-├── capabilities.ts
-├── events.ts
-├── commands.ts
-├── identity.ts
+├── capabilities.ts            # criado na W-03
+├── engine.ts                  # criado na W-03
+├── feature-flags.ts           # criado na W-03
+├── policy.server.ts           # criado na W-03
+├── engines/
+│   ├── meta-cloud.ts          # criado na W-03
+│   ├── meta-cloud.server.ts   # criado na W-03
+│   └── mock.ts                # criado na W-03
 ├── playbooks.ts
 └── ai/
 
@@ -704,6 +738,9 @@ supabase/migrations/
 
 - [x] Contratos provider-neutral implementados
 - [x] Provider Meta preservado sem regressão
+- [x] Contratos de engine e capability matrix implementados
+- [x] Policy gates aplicados na UI e no backend
+- [x] Mock engine disponível para testes sem provider real
 - [ ] Adapter Baileys confinado
 - [ ] Runtime separado do Next.js
 - [ ] Session store criptografado/transacional
@@ -748,13 +785,14 @@ supabase/migrations/
 
 ## 11. Próxima ação autorizada
 
-A próxima sprint autorizada é **W-03 — Contrato de engine e matriz de capacidades**.
+A próxima sprint autorizada é **W-04 — Evolução do banco sem domínio paralelo**.
 
-É permitido criar interfaces provider-neutral, capability matrix, mock engine, feature flags e adapter Meta. Ainda não está autorizado:
+É permitido inventariar e evoluir o schema de modo aditivo, criar provider/account identities, comandos, outbox, inbox sanitizada, DLQ, ledger, RLS, testes multiempresa e rollback lógico. Ainda não está autorizado:
 
 - instalar ou conectar Baileys;
-- criar sessão real;
+- criar gateway persistente;
+- criar sessão real ou pairing;
 - usar número comercial;
-- liberar provider;
+- liberar provider não oficial;
 - habilitar auto-reply;
 - promover para produção.
