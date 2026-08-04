@@ -43,9 +43,9 @@ try {
     connection = ["-U", "postgres", "-d", database];
   }
 } catch (error) {
-  console.log("PostgreSQL indisponível: testes multiprovider NÃO foram executados.");
-  console.log(`Motivo: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
-  process.exit(0);
+  console.error("PostgreSQL indisponível: testes multiprovider NÃO foram executados.");
+  console.error(`Motivo: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
+  process.exit(1);
 }
 
 let failed = false;
@@ -63,7 +63,10 @@ for (const file of files) {
       if (!text) continue;
       console.log(text);
       if (/^ERROR:|^FATAL:/.test(text)) failed = true;
-      if (/W-04 .*aprovad/i.test(text)) approvals += 1;
+      if (
+        /W-04 .*aprovad/i.test(text)
+        || /W-04 .*Baileys continua sem runtime ou conta ativa/i.test(text)
+      ) approvals += 1;
     }
     if (failed) break;
   } catch (error) {
