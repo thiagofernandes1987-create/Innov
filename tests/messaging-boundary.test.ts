@@ -16,11 +16,29 @@ describe("Messaging engine boundary", () => {
       contract: string;
       forbiddenPackages: string[];
       forbiddenNativeTypes: string[];
+      engineContracts: string[];
+      implementedProviders: string[];
+      baileysInstalled: boolean;
+      uiCapabilityGate: boolean;
+      serverCapabilityGate: boolean;
+      metaRoutedThroughEngine: boolean;
+      organizationProviderFlags: boolean;
     };
     expect(result.ok).toBe(true);
-    expect(result.contract).toBe("messaging-engine-boundary-v1");
+    expect(result.contract).toBe("messaging-engine-boundary-v3");
     expect(result.forbiddenPackages).toContain("@whiskeysockets/baileys");
     expect(result.forbiddenNativeTypes).toContain("WAMessage");
     expect(result.forbiddenNativeTypes).toContain("BinaryNode");
+    expect(result.engineContracts).toEqual([
+      "MessagingEngine",
+      "SessionEngine",
+      "EngineEventSource"
+    ]);
+    expect(result.implementedProviders).toEqual(["META_CLOUD"]);
+    expect(result.baileysInstalled).toBe(false);
+    expect(result.uiCapabilityGate).toBe(true);
+    expect(result.serverCapabilityGate).toBe(true);
+    expect(result.metaRoutedThroughEngine).toBe(true);
+    expect(result.organizationProviderFlags).toBe(true);
   });
 });
