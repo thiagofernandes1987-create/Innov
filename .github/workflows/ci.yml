@@ -240,5 +240,7 @@ jobs:
         run: pnpm test:python
       - name: Build messaging gateway
         run: pnpm build:messaging-gateway
+      - name: Messaging gateway container smoke test
+        run: pnpm test:container:messaging-gateway
       - name: Build
         run: pnpm build
