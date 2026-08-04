@@ -48,7 +48,8 @@ function messageEvent(): Extract<BaileysEngineEvent, { kind: "MESSAGE_RECEIVED" 
 function normalize(event: BaileysEngineEvent) {
   return normalizeBaileysEngineEvent(event, {
     receivedAt,
-    resolveProviderAccountId: () => "provider-account-1"
+    resolveProviderAccountId: () => "provider-account-1",
+    resolveOrganizationId: () => "org-1"
   });
 }
 
@@ -66,7 +67,8 @@ describe("Messaging ingress W-09", () => {
       viewOnceMaterialPersisted: false,
       rawPayloadPersisted: false
     });
-    expect(JSON.stringify(envelope)).not.toContain("123@lid\"");
+    expect(envelope.sanitizedMetadata.payloadSanitized).toBe(true);
+    expect(JSON.stringify(envelope)).not.toContain("raw_payload");
   });
 
   it("normaliza receipt sem depender do payload nativo", () => {
@@ -141,6 +143,19 @@ describe("Messaging ingress W-09", () => {
     });
     expect(dispatch).not.toHaveBeenCalled();
     expect(repository.getDeadLetter(unknown.idempotencyKey)?.failure.code).toBe("UNKNOWN_PAYLOAD");
+  });
+
+  it("falha fechado quando organização não é resolvida", async () => {
+    const repository = new InMemoryIngressRepository(() => new Date(receivedAt));
+    const pipeline = createIngressPipeline({ repository, dispatch: async () => undefined });
+    const unresolved = {
+      ...normalize(messageEvent()),
+      organizationId: "UNRESOLVED",
+      idempotencyKey: "d".repeat(64)
+    };
+    await expect(pipeline.process(unresolved)).rejects.toMatchObject({
+      code: "TENANT_UNRESOLVED"
+    });
   });
 
   it("proíbe workflow e IA antes de PERSISTED", () => {
