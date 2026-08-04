@@ -16,6 +16,7 @@ try {
   psql(["-d", "postgres", "-v", "ON_ERROR_STOP=1", "-c", `create database ${database}`]);
   for (const file of [
     "supabase/tests/messaging-multiprovider/fixture.sql",
+    "supabase/tests/messaging-dispatch/fixture.sql",
     "supabase/tests/messaging-multiprovider/legacy-seed.sql",
     "supabase/migrations/20260803190000_stage22_whatsapp_omnichannel.sql",
     "supabase/migrations/20260803191000_stage22_whatsapp_hardening.sql",
