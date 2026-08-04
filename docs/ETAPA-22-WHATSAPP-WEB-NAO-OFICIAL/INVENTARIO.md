@@ -3,11 +3,11 @@
 **Projeto pai:** Etapa 22 — WhatsApp e atendimento omnichannel  
 **Branch de execução:** `feature/etapa-22-provider-whatsapp-web-baileys`  
 **PR:** #40  
-**Status:** W-05 concluída; Baileys ainda não instalado e nenhuma sessão real iniciada  
-**Provider não oficial inicialmente planejado:** Baileys 7.x, somente por adapter próprio  
+**Status:** W-06 concluída; adapter confinado, runtime e sessão real ainda bloqueados  
+**Provider não oficial estudado:** `@whiskeysockets/baileys@7.0.0-rc13`, somente por adapter próprio  
 **Produção:** bloqueada  
 **Última atualização:** 04 de agosto de 2026  
-**Documentos complementares:** [`SPEC.md`](./SPEC.md), [`SCHEMA-W04.md`](./SCHEMA-W04.md), [`GATEWAY-W05.md`](./GATEWAY-W05.md)
+**Documentos complementares:** [`SPEC.md`](./SPEC.md), [`SCHEMA-W04.md`](./SCHEMA-W04.md), [`GATEWAY-W05.md`](./GATEWAY-W05.md), [`ADAPTER-BAILEYS-W06.md`](./ADAPTER-BAILEYS-W06.md)
 
 ---
 
@@ -27,7 +27,7 @@ contas, contatos, conversas e mensagens existentes
 CRM, Cliente 360, obras, contratos, SAC e documentos
 ```
 
-O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #40 adiciona a arquitetura multiprovider de forma incremental. Até a W-05 foram concluídos contratos canônicos, contratos de engine, capabilities, adapter Meta, mock, policy gates, armazenamento técnico durável e o esqueleto isolado do gateway com cliente fake. Nenhum desses artefatos autoriza silenciosamente Baileys, sessão real, número real ou produção.
+O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #40 adiciona a arquitetura multiprovider de forma incremental. Até a W-06 foram concluídos contratos canônicos, contratos de engine, capabilities, adapter Meta, mock, policy gates, armazenamento técnico durável, gateway isolado com cliente fake e adapter Baileys confinado. O pacote está presente apenas no workspace do gateway, mas não foi registrado como runtime e não possui sessão, credenciais, QR operacional, número real ou autorização de produção.
 
 ---
 
@@ -45,6 +45,8 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 10. Kill switch será obrigatório antes de qualquer runtime real.
 11. Na dúvida, falhar fechado, preservar evidência e encaminhar para humano.
 12. Uma execução isolada não prova homologação.
+13. Lifecycle scripts de dependências externas permanecem bloqueados salvo revisão específica.
+14. Licença do pacote principal não substitui revisão da árvore transitiva.
 
 ---
 
@@ -138,7 +140,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 **Evidência:** `lib/messaging/domain.ts`, compatibilidade, testes, scanner, `CONTRATOS-CANONICOS-V1.md` e `EVIDENCIAS-W02.md`.
 
-**Gate W-G02:** concluído; Baileys continua não instalado.
+**Gate W-G02:** concluído; Baileys ainda não estava instalado nessa sprint.
 
 ## Sprint W-03 — Contrato de engine e matriz de capacidades
 
@@ -203,7 +205,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - inbox técnica persiste somente representação sanitizada;
 - rollback desativa a conta e cancela trabalho pendente sem apagar histórico.
 
-**Gate W-G04:** concluído. Nenhum contato, conversa, mensagem, documento ou vínculo de negócio foi duplicado por provider. Baileys continua não instalado.
+**Gate W-G04:** concluído. Nenhum contato, conversa, mensagem, documento ou vínculo de negócio foi duplicado por provider.
 
 ---
 
@@ -252,7 +254,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 - o gateway é um processo Node.js 24 separado do Next.js;
 - o único cliente disponível na W-05 é `FakeChannelClient`;
-- nenhum SDK de WhatsApp ou dependência própria foi incorporado;
+- nenhum SDK de WhatsApp ou dependência própria foi incorporado naquela sprint;
 - o gateway não recebe credenciais nem acesso ao banco principal;
 - comandos internos exigem HMAC-SHA256, timestamp, nonce e correlation ID;
 - replay, body excessivo e configuração inválida falham fechado;
@@ -260,27 +262,70 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - o container executa como `10001:10001`, com filesystem somente leitura e capabilities removidas;
 - o smoke test executa a imagem com `--network none`, limites de recursos e shutdown por SIGTERM.
 
-**Gate W-G05:** concluído. O serviço isolado, os testes HTTP, o build e o container endurecido foram executados em CI. O gate não autoriza conexão com WhatsApp, sessão, QR, número real, deploy ou produção.
+**Gate W-G05:** concluído. O serviço isolado, os testes HTTP, o build e o container endurecido foram executados em CI. O gate não autorizou conexão com WhatsApp, sessão, QR, número real, deploy ou produção.
 
 ## Sprint W-06 — Adapter Baileys
 
-**Estado:** pendente  
+**Estado:** concluída  
 **Dependências:** W-05
 
-- [ ] W-06.1 — Fixar versão exata; proibir `latest`
-- [ ] W-06.2 — Criar `BaileysEngineAdapter`
-- [ ] W-06.3 — Encapsular criação do socket
-- [ ] W-06.4 — Encapsular eventos de conexão
-- [ ] W-06.5 — Encapsular texto
-- [ ] W-06.6 — Encapsular mídia
-- [ ] W-06.7 — Encapsular receipts
-- [ ] W-06.8 — Encapsular replies, reactions e quoted messages
-- [ ] W-06.9 — Condicionar grupos à capability matrix
-- [ ] W-06.10 — Normalizar erros
-- [ ] W-06.11 — Mapear PN, LID, grupo e newsletter
-- [ ] W-06.12 — Preservar metadata técnica sanitizada
-- [ ] W-06.13 — Criar contract tests
-- [ ] W-06.14 — Falhar se tipo Baileys escapar do adapter
+- [x] W-06.1 — Fixar versão exata; proibir `latest`
+- [x] W-06.2 — Criar `BaileysEngineAdapter`
+- [x] W-06.3 — Encapsular criação do socket
+- [x] W-06.4 — Encapsular eventos de conexão
+- [x] W-06.5 — Encapsular texto
+- [x] W-06.6 — Encapsular mídia
+- [x] W-06.7 — Encapsular receipts
+- [x] W-06.8 — Encapsular replies, reactions e quoted messages
+- [x] W-06.9 — Condicionar grupos à capability matrix
+- [x] W-06.10 — Normalizar erros
+- [x] W-06.11 — Mapear PN, LID, grupo e newsletter
+- [x] W-06.12 — Preservar metadata técnica sanitizada
+- [x] W-06.13 — Criar contract tests
+- [x] W-06.14 — Falhar se tipo Baileys escapar do adapter
+
+**Evidências:**
+
+- `apps/messaging-gateway/package.json` com `@whiskeysockets/baileys@7.0.0-rc13`;
+- `apps/messaging-gateway/src/engines/baileys/contracts.ts`;
+- `apps/messaging-gateway/src/engines/baileys/jid.ts`;
+- `apps/messaging-gateway/src/engines/baileys/content.ts`;
+- `apps/messaging-gateway/src/engines/baileys/errors.ts`;
+- `apps/messaging-gateway/src/engines/baileys/capabilities.ts`;
+- `apps/messaging-gateway/src/engines/baileys/official-factory.ts`;
+- `apps/messaging-gateway/src/engines/baileys/adapter.ts`;
+- `apps/messaging-gateway/src/engines/baileys/index.ts`;
+- `tests/messaging-baileys-adapter.test.ts` — 25 testes;
+- `tests/messaging-boundary.test.ts`;
+- `scripts/validate-messaging-boundaries.mjs` — `messaging-engine-boundary-v4`;
+- `scripts/validate-messaging-gateway.mjs` — `messaging-gateway-boundary-v4`;
+- `scripts/validate-messaging-storage.mjs` — `messaging-storage-boundary-v2`;
+- `scripts/verify-w06-lockfile.mjs` — `messaging-w06-lockfile-v1`;
+- `THIRD_PARTY_NOTICES.md`;
+- `ADAPTER-BAILEYS-W06.md` e `EVIDENCIAS-W06.md`;
+- head funcional `9e94603cbd9e50dc44e5f848a2aa5e195a8d9a43`;
+- CI `30904107383` verde;
+- File Security E2E `30904107397` verde.
+
+**Decisões fixadas:**
+
+- o pacote existe somente no workspace do gateway;
+- a versão é exata e sem faixa flutuante;
+- lifecycle scripts externos permanecem bloqueados;
+- o lockfile regenerado deve possuir SHA-256 `d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9`;
+- tipos nativos permanecem confinados ao diretório do adapter;
+- a fábrica oficial usa import dinâmico e autorização explícita;
+- `DENIED` é o estado padrão e lança `EXTERNAL_SOCKET_BLOCKED`;
+- o gateway ativo continua usando `FakeChannelClient`;
+- Baileys não está registrado em `IMPLEMENTED_CHANNEL_PROVIDER_TYPES`;
+- QR recebido é reduzido a `pairingChallengeAvailable: true` e `qrPersisted: false`; o valor não é propagado;
+- mídia outbound exige URL HTTPS assinada;
+- mídia inbound permanece referência do provider, sem download;
+- grupos e newsletters são bloqueados por padrão;
+- a licença MIT do pacote principal não elimina revisão da árvore transitiva;
+- `libsignal` e `whatsapp-rust-bridge` permanecem sob revisão jurídica/SBOM antes de piloto ou produção.
+
+**Gate W-G06:** concluído no escopo de adapter e testes sem rede. Nenhum socket oficial foi aberto, nenhuma autenticação foi resolvida e nenhum material de sessão foi criado. A conclusão não autoriza runtime, QR/pairing, número real, deploy, piloto ou produção.
 
 ## Sprint W-07 — Armazenamento criptográfico da sessão
 
@@ -632,7 +677,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - [x] Storage multiprovider aditivo sem domínio paralelo
 - [x] RLS forçada e escrita técnica controlada
 - [x] Rollback lógico sem perda histórica
-- [ ] Adapter Baileys confinado
+- [x] Adapter Baileys confinado
 - [x] Runtime separado do Next.js
 - [ ] Session store criptografado e transacional
 - [ ] Single writer e fencing comprovados
@@ -659,6 +704,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 | Controle | Estado | Próxima ação |
 |---|---|---|
+| Revisão transitiva/SBOM Baileys | pendente | antes de piloto ou distribuição operacional |
 | Aceite operacional | não executado | antes de número real |
 | Revisão jurídica | dependência externa | antes de piloto ou produção |
 | Número autorizado | não executado | somente W-20 |
@@ -668,26 +714,32 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## 6. Próxima ação autorizada
 
-A próxima sprint autorizada é **W-06 — Adapter Baileys**.
+A próxima sprint autorizada é **W-07 — Armazenamento criptográfico da sessão**.
 
 É permitido:
 
-- verificar e fixar uma versão exata do pacote, sem `latest` ou faixa flutuante;
-- registrar a licença e atualizar avisos de terceiros;
-- adicionar o pacote somente ao gateway isolado;
-- criar `BaileysEngineAdapter` confinado ao diretório autorizado;
-- encapsular construção do socket e eventos por fábricas injetáveis;
-- mapear texto, mídia, receipts, replies, reactions, PN, LID, grupos e newsletters para contratos canônicos;
-- normalizar erros e metadata sanitizada;
-- criar contract tests e doubles sem conexão externa;
-- ampliar o scanner para falhar quando tipo Baileys escapar do adapter.
+- criar a porta `SessionCredentialStore` sem conectar o provider;
+- modelar credenciais, signal keys, versões e metadata mínima;
+- criar migration aditiva para storage técnico, sem duplicar contatos, conversas ou mensagens;
+- aplicar RLS forçada, privilégios mínimos e funções controladas;
+- implementar envelope encryption com DEK por sessão;
+- manter KEK/chave-mestra fora do banco e fora do repositório;
+- implementar transações e optimistic concurrency;
+- criar rotação, recriptografia e exclusão criptográfica;
+- criar auditoria de acesso sem registrar material secreto;
+- criar backup/restore e testes de corrupção, concorrência e versão somente com fixtures sintéticas;
+- criar adapter de auth-state contra a porta, usando doubles e sem abrir socket;
+- ampliar scanners para bloquear logs, dumps, QR e `useMultiFileAuthState` produtivo.
 
 Ainda não está autorizado:
 
-- conectar o socket à infraestrutura externa do WhatsApp;
-- criar sessão, QR ou pairing;
-- persistir credenciais ou keys;
+- abrir socket externo;
+- chamar autenticação real do WhatsApp;
+- gerar ou exibir QR/pairing;
+- utilizar credenciais ou keys reais;
 - usar número real;
+- registrar Baileys como runtime implementado;
+- criar lease, fencing ou reconexão operacional antes da W-08;
 - implantar o gateway;
 - habilitar automação ou IA;
-- promover para produção.
+- promover para piloto ou produção.
