@@ -78,6 +78,7 @@ export function validateBotProfile(input: Omit<BotProfile, "id" | "organizationI
 export function deriveBotReadiness(input: {
   profile: BotProfile;
   providerConfigured: boolean;
+  providerModel?: string | null;
   dailyBudgetMicros: number;
   consentPluginEnabled: boolean;
   aiPluginEnabled: boolean;
@@ -87,9 +88,15 @@ export function deriveBotReadiness(input: {
   if (input.profile.providerId === "DISABLED") blockers.push("Provedor não selecionado");
   if (!input.profile.modelId) blockers.push("Modelo não configurado");
   if (!input.providerConfigured) blockers.push("Credencial ou preço do provedor ausente no ambiente");
+  if (input.providerModel && input.profile.modelId && input.profile.modelId !== input.providerModel) {
+    blockers.push("Modelo do perfil diverge do modelo autorizado no ambiente");
+  }
   if (input.dailyBudgetMicros <= 0) blockers.push("Orçamento diário de IA não configurado");
   if (!input.consentPluginEnabled) blockers.push("Plugin obrigatório de consentimento desabilitado");
   if (!input.aiPluginEnabled) blockers.push("Plugin AI_FALLBACK desabilitado");
+  if (input.profile.retrievalMode === "HYBRID") {
+    blockers.push("Retrieval híbrido ainda não possui índice vetorial autorizado");
+  }
   const implementedTools = new Set<string>(BOT_TEST_IMPLEMENTED_TOOLS);
   const unavailableTools = input.profile.allowedTools.filter(tool => !implementedTools.has(tool));
   if (unavailableTools.length) {
