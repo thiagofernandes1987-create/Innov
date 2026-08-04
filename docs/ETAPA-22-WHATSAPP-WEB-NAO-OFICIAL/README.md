@@ -1,8 +1,8 @@
 # Provider WhatsApp Web não oficial — índice de governança
 
-**Status atual:** Sprints W-01 e W-02 concluídas; engine e runtime não iniciados  
+**Status atual:** Sprints W-01, W-02 e W-03 concluídas; engine Baileys e runtime não iniciados  
 **Produção:** bloqueada  
-**Próxima sprint:** W-03 — Contrato de engine e matriz de capacidades
+**Próxima sprint:** W-04 — Evolução do banco sem domínio paralelo
 
 ---
 
@@ -15,8 +15,9 @@
 5. [`POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md`](./POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md) — número autorizado, aceite, opt-out, casos proibidos e remoção de sessão.
 6. [`CONTRATOS-CANONICOS-V1.md`](./CONTRATOS-CANONICOS-V1.md) — modelo provider-neutral concluído na W-02.
 7. [`EVIDENCIAS-W01.md`](./EVIDENCIAS-W01.md) — evidências de governança.
-8. [`EVIDENCIAS-W02.md`](./EVIDENCIAS-W02.md) — evidências de código, testes e CI dos contratos canônicos.
-9. [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) — avisos e estado de dependências/adaptações externas.
+8. [`EVIDENCIAS-W02.md`](./EVIDENCIAS-W02.md) — evidências dos contratos canônicos.
+9. [`EVIDENCIAS-W03.md`](./EVIDENCIAS-W03.md) — contratos de engine, capabilities, policy gates e CI.
+10. [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) — avisos e estado de dependências/adaptações externas.
 
 ---
 
@@ -28,6 +29,12 @@
 - `channelAccountId` interno e `providerAccountId` externo são campos distintos;
 - identidades PN, LID, grupos, newsletters e usuários web possuem namespaces próprios;
 - metadata específica do provider não governa o domínio;
+- `MessagingEngine`, `SessionEngine` e `EngineEventSource` são as portas canônicas;
+- capabilities descrevem somente recursos efetivamente encapsulados;
+- UI e server actions aplicam a mesma policy por organização;
+- configuração inválida falha fechada;
+- provider sem runtime não pode ser ativado por feature flag;
+- Meta Cloud está encapsulada no contrato de engine;
 - Baileys ficará confinado a um adapter em gateway persistente separado;
 - o CI bloqueia imports e tipos Baileys fora dos adapters autorizados;
 - nenhum código de projeto sem licença clara será copiado;
@@ -50,10 +57,16 @@
 | THIRD_PARTY_NOTICES preventivo | concluído |
 | Contratos canônicos v1 | concluídos — W-02 |
 | Compatibilidade Meta | concluída e validada |
-| Gate de imports Baileys | concluído e testado |
-| CI da W-02 | verde |
+| Contratos de engine | concluídos — W-03 |
+| Capability matrix | concluída — W-03 |
+| Meta roteada pelo engine | concluída — W-03 |
+| Mock engine | concluído — W-03 |
+| Feature flags por organização | concluídas — W-03 |
+| Gates UI e backend | concluídos — W-03 |
+| Gate de imports Baileys v3 | concluído e testado |
+| CI da W-03 | verde |
 | File Security E2E | verde |
-| Contratos de engine/capabilities | pendentes — W-03 |
+| Evolução do banco multiprovider | pendente — W-04 |
 | Baileys instalado | não |
 | Gateway criado | não |
 | Número autorizado | não |
