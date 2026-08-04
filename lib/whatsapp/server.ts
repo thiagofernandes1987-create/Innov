@@ -1,12 +1,8 @@
 import "server-only";
 
 import { hasCapability, requireCapability } from "@/lib/authorization";
-import {
-  META_CLOUD_CAPABILITY_MATRIX,
-  applyCapabilityOverrides,
-  deriveMessagingUiCapabilities
-} from "@/lib/messaging/capabilities";
-import { resolveProviderPolicy } from "@/lib/messaging/feature-flags";
+import { deriveMessagingUiCapabilities } from "@/lib/messaging/capabilities";
+import { resolveMetaCloudRuntimePolicy } from "@/lib/messaging/policy.server";
 
 function relationName(value: unknown, fallback: string) {
   if (Array.isArray(value)) return relationName(value[0], fallback);
@@ -108,25 +104,15 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
       : conversations[0]?.id ?? null;
   const selectedConversation = conversations.find(item => item.id === selectedId);
 
-  const providerPolicy = resolveProviderPolicy({
-    organizationId: context.organizationId,
-    providerType: "META_CLOUD",
-    rawOverrides: process.env.MESSAGING_PROVIDER_FLAGS_JSON
-  });
-  const effectiveMatrix = applyCapabilityOverrides(
-    META_CLOUD_CAPABILITY_MATRIX,
-    providerPolicy.disabledCapabilities
-  );
-  const metaUiCapabilities = deriveMessagingUiCapabilities(
-    effectiveMatrix,
-    providerPolicy.enabled
-  );
+  const runtimePolicy = resolveMetaCloudRuntimePolicy(context.organizationId);
+  const providerPolicy = runtimePolicy.policy;
+  const metaUiCapabilities = runtimePolicy.ui;
   const accountCapabilities = Object.fromEntries(
     accounts.map(account => [account.id, metaUiCapabilities])
   );
   const selectedMessagingCapabilities = selectedConversation?.account_id
     ? accountCapabilities[selectedConversation.account_id] ??
-      deriveMessagingUiCapabilities(effectiveMatrix, false)
+      deriveMessagingUiCapabilities(runtimePolicy.matrix, false)
     : metaUiCapabilities;
 
   const messagesResult = selectedId
