@@ -93,6 +93,10 @@ jobs:
         run: |
           set -o pipefail
           node scripts/validate-messaging-runtime-lifecycle.mjs 2>&1 | tee messaging-runtime-validation.txt
+      - name: Validate messaging ingress
+        run: |
+          set -o pipefail
+          node scripts/validate-messaging-ingress.mjs 2>&1 | tee messaging-ingress-validation.txt
       - name: Upload structural validation reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -116,6 +120,7 @@ jobs:
             messaging-gateway-validation.txt
             messaging-session-store-validation.txt
             messaging-runtime-validation.txt
+            messaging-ingress-validation.txt
           if-no-files-found: warn
           retention-days: 7
       - name: Upload recent migrations
@@ -228,6 +233,8 @@ jobs:
         run: pnpm validate:messaging-session-store
       - name: Validate messaging runtime lifecycle
         run: pnpm validate:messaging-runtime
+      - name: Validate messaging ingress
+        run: pnpm validate:messaging-ingress
       - name: Validate execution inventory
         run: pnpm validate:inventory
       - name: Validate Object Runtime invariants
@@ -252,6 +259,8 @@ jobs:
         run: pnpm test:db:messaging-session-store
       - name: Messaging runtime lease database tests
         run: pnpm test:db:messaging-runtime
+      - name: Messaging ingress database tests
+        run: pnpm test:db:messaging-ingress
       - name: Messaging gateway unit tests
         run: pnpm test:messaging-gateway
       - name: Baileys adapter contract tests
@@ -260,6 +269,8 @@ jobs:
         run: pnpm test:messaging-session-store
       - name: Messaging runtime lifecycle tests
         run: pnpm test:messaging-runtime
+      - name: Messaging ingress tests
+        run: pnpm test:messaging-ingress
       - name: Lint
         run: |
           set -o pipefail
