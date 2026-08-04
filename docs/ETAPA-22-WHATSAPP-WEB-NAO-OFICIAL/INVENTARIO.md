@@ -3,11 +3,11 @@
 **Projeto pai:** Etapa 22 — WhatsApp e atendimento omnichannel  
 **Branch de execução:** `feature/etapa-22-provider-whatsapp-web-baileys`  
 **PR:** #40  
-**Status:** W-04 concluída; engine Baileys e runtime ainda não iniciados  
+**Status:** W-05 concluída; Baileys ainda não instalado e nenhuma sessão real iniciada  
 **Provider não oficial inicialmente planejado:** Baileys 7.x, somente por adapter próprio  
 **Produção:** bloqueada  
-**Última atualização:** 03 de agosto de 2026  
-**Documentos complementares:** [`SPEC.md`](./SPEC.md), [`SCHEMA-W04.md`](./SCHEMA-W04.md)
+**Última atualização:** 04 de agosto de 2026  
+**Documentos complementares:** [`SPEC.md`](./SPEC.md), [`SCHEMA-W04.md`](./SCHEMA-W04.md), [`GATEWAY-W05.md`](./GATEWAY-W05.md)
 
 ---
 
@@ -27,7 +27,7 @@ contas, contatos, conversas e mensagens existentes
 CRM, Cliente 360, obras, contratos, SAC e documentos
 ```
 
-O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #40 adiciona a arquitetura multiprovider de forma incremental. Até a W-04 foram concluídos contratos canônicos, contratos de engine, capabilities, adapter Meta, mock, policy gates e armazenamento técnico durável. Nenhum desses artefatos autoriza silenciosamente Baileys, número real ou produção.
+O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #40 adiciona a arquitetura multiprovider de forma incremental. Até a W-05 foram concluídos contratos canônicos, contratos de engine, capabilities, adapter Meta, mock, policy gates, armazenamento técnico durável e o esqueleto isolado do gateway com cliente fake. Nenhum desses artefatos autoriza silenciosamente Baileys, sessão real, número real ou produção.
 
 ---
 
@@ -211,22 +211,56 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## Sprint W-05 — Esqueleto do gateway
 
-**Estado:** pendente  
+**Estado:** concluída  
 **Dependências:** W-03 e W-04
 
-- [ ] W-05.1 — Criar `apps/messaging-gateway`
-- [ ] W-05.2 — Definir Node.js compatível
-- [ ] W-05.3 — Configuração tipada e validação de environment
-- [ ] W-05.4 — Health, readiness e metrics
-- [ ] W-05.5 — API interna autenticada
-- [ ] W-05.6 — Assinatura HMAC de comandos e eventos
-- [ ] W-05.7 — Proteção contra replay
-- [ ] W-05.8 — Correlation e causation IDs
-- [ ] W-05.9 — Shutdown gracioso
-- [ ] W-05.10 — Container não-root
-- [ ] W-05.11 — Limites de CPU, memória e arquivo
-- [ ] W-05.12 — Isolar rede e banco principal
-- [ ] W-05.13 — Cliente fake sem WhatsApp
+- [x] W-05.1 — Criar `apps/messaging-gateway`
+- [x] W-05.2 — Definir Node.js compatível
+- [x] W-05.3 — Configuração tipada e validação de environment
+- [x] W-05.4 — Health, readiness e metrics
+- [x] W-05.5 — API interna autenticada
+- [x] W-05.6 — Assinatura HMAC de comandos e eventos
+- [x] W-05.7 — Proteção contra replay
+- [x] W-05.8 — Correlation e causation IDs
+- [x] W-05.9 — Shutdown gracioso
+- [x] W-05.10 — Container não-root
+- [x] W-05.11 — Limites de CPU, memória e arquivo
+- [x] W-05.12 — Isolar rede e banco principal
+- [x] W-05.13 — Cliente fake sem WhatsApp
+
+**Evidências:**
+
+- `apps/messaging-gateway/package.json` e `tsconfig.json`;
+- `apps/messaging-gateway/src/config.ts`;
+- `apps/messaging-gateway/src/contracts.ts`;
+- `apps/messaging-gateway/src/security.ts`;
+- `apps/messaging-gateway/src/replay-guard.ts`;
+- `apps/messaging-gateway/src/metrics.ts`;
+- `apps/messaging-gateway/src/fake-client.ts`;
+- `apps/messaging-gateway/src/server.ts` e `index.ts`;
+- `apps/messaging-gateway/Dockerfile` e `compose.yaml`;
+- `tests/messaging-gateway.test.ts`;
+- `scripts/validate-messaging-gateway.mjs`;
+- `scripts/run-messaging-gateway-container-smoke.sh`;
+- `GATEWAY-W05.md` e `EVIDENCIAS-W05.md`;
+- head funcional `9bb75e77dfe0421378d94e6474614fbc7185d03e`;
+- CI `30896714160` verde;
+- File Security E2E `30896714116` verde;
+- Vercel verde.
+
+**Decisões fixadas:**
+
+- o gateway é um processo Node.js 24 separado do Next.js;
+- o único cliente disponível na W-05 é `FakeChannelClient`;
+- nenhum SDK de WhatsApp ou dependência própria foi incorporado;
+- o gateway não recebe credenciais nem acesso ao banco principal;
+- comandos internos exigem HMAC-SHA256, timestamp, nonce e correlation ID;
+- replay, body excessivo e configuração inválida falham fechado;
+- health, readiness e métricas não expõem payload ou segredo;
+- o container executa como `10001:10001`, com filesystem somente leitura e capabilities removidas;
+- o smoke test executa a imagem com `--network none`, limites de recursos e shutdown por SIGTERM.
+
+**Gate W-G05:** concluído. O serviço isolado, os testes HTTP, o build e o container endurecido foram executados em CI. O gate não autoriza conexão com WhatsApp, sessão, QR, número real, deploy ou produção.
 
 ## Sprint W-06 — Adapter Baileys
 
@@ -599,7 +633,7 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 - [x] RLS forçada e escrita técnica controlada
 - [x] Rollback lógico sem perda histórica
 - [ ] Adapter Baileys confinado
-- [ ] Runtime separado do Next.js
+- [x] Runtime separado do Next.js
 - [ ] Session store criptografado e transacional
 - [ ] Single writer e fencing comprovados
 - [ ] Ingress operacional durável e idempotente
@@ -634,25 +668,26 @@ O PR #39 contém a base oficial Meta Cloud API e o domínio da Etapa 22. O PR #4
 
 ## 6. Próxima ação autorizada
 
-A próxima sprint autorizada é **W-05 — Esqueleto do gateway**.
+A próxima sprint autorizada é **W-06 — Adapter Baileys**.
 
 É permitido:
 
-- criar `apps/messaging-gateway`;
-- definir runtime Node.js compatível;
-- criar configuração tipada;
-- criar health, readiness e metrics;
-- criar API interna autenticada;
-- implementar HMAC, replay guard, correlation e causation IDs;
-- implementar shutdown gracioso;
-- criar container não-root e limites operacionais;
-- usar somente cliente fake sem WhatsApp.
+- verificar e fixar uma versão exata do pacote, sem `latest` ou faixa flutuante;
+- registrar a licença e atualizar avisos de terceiros;
+- adicionar o pacote somente ao gateway isolado;
+- criar `BaileysEngineAdapter` confinado ao diretório autorizado;
+- encapsular construção do socket e eventos por fábricas injetáveis;
+- mapear texto, mídia, receipts, replies, reactions, PN, LID, grupos e newsletters para contratos canônicos;
+- normalizar erros e metadata sanitizada;
+- criar contract tests e doubles sem conexão externa;
+- ampliar o scanner para falhar quando tipo Baileys escapar do adapter.
 
 Ainda não está autorizado:
 
-- instalar ou conectar Baileys;
-- criar `BaileysEngineAdapter`;
+- conectar o socket à infraestrutura externa do WhatsApp;
 - criar sessão, QR ou pairing;
+- persistir credenciais ou keys;
 - usar número real;
+- implantar o gateway;
 - habilitar automação ou IA;
 - promover para produção.
