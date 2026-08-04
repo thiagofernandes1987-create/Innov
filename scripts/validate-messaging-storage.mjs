@@ -7,8 +7,18 @@ const fixturePath = "supabase/tests/messaging-multiprovider/fixture.sql";
 const seedPath = "supabase/tests/messaging-multiprovider/legacy-seed.sql";
 const testPath = "supabase/tests/messaging-multiprovider/storage.test.sql";
 const runnerPath = "scripts/run-messaging-multiprovider-db-tests.mjs";
+const gatewayPackagePath = "apps/messaging-gateway/package.json";
+const gatewayIndexPath = "apps/messaging-gateway/src/index.ts";
 
-const requiredFiles = [migrationPath, fixturePath, seedPath, testPath, runnerPath];
+const requiredFiles = [
+  migrationPath,
+  fixturePath,
+  seedPath,
+  testPath,
+  runnerPath,
+  gatewayPackagePath,
+  gatewayIndexPath
+];
 const failures = [];
 for (const file of requiredFiles) {
   if (!fs.existsSync(path.join(root, file))) failures.push(`Arquivo ausente: ${file}`);
@@ -22,7 +32,9 @@ function read(file) {
 const migration = read(migrationPath);
 const test = read(testPath);
 const runner = read(runnerPath);
-const packageJson = read("package.json");
+const rootPackage = JSON.parse(read("package.json") || "{}");
+const gatewayPackage = JSON.parse(read(gatewayPackagePath) || "{}");
+const gatewayIndex = read(gatewayIndexPath);
 const lower = migration.toLowerCase();
 
 for (const relation of [
@@ -88,8 +100,26 @@ if (!runner.includes("EXPECTED_APPROVALS = 11")) {
   failures.push("Runner não prova a execução dos 11 controles W-04.");
 }
 
-if (packageJson.includes("@whiskeysockets/baileys") || packageJson.includes('"baileys"')) {
-  failures.push("Baileys foi instalado antes da sprint autorizada.");
+if (rootPackage.dependencies?.["@whiskeysockets/baileys"] || rootPackage.devDependencies?.["@whiskeysockets/baileys"]) {
+  failures.push("Baileys não pode ser instalado no pacote raiz.");
+}
+if (gatewayPackage.dependencies?.["@whiskeysockets/baileys"] !== "7.0.0-rc13") {
+  failures.push("Gateway não fixa @whiskeysockets/baileys@7.0.0-rc13.");
+}
+if (gatewayIndex.includes("BaileysEngineAdapter") || gatewayIndex.includes("engines/baileys")) {
+  failures.push("Runtime Baileys foi registrado antes do armazenamento de sessão e lifecycle.");
+}
+
+const forbiddenSessionRelations = [
+  "channel_session_credentials",
+  "channel_session_keys",
+  "channel_session_secrets",
+  "session_runtime_leases"
+];
+for (const relation of forbiddenSessionRelations) {
+  if (lower.includes(`create table public.${relation}`)) {
+    failures.push(`Persistência de sessão prematura encontrada: ${relation}`);
+  }
 }
 
 if (failures.length) {
@@ -99,11 +129,16 @@ if (failures.length) {
 
 console.log(JSON.stringify({
   ok: true,
-  contract: "messaging-storage-boundary-v1",
+  contract: "messaging-storage-boundary-v2",
   legacyDomainRelations: 7,
   technicalRelations: 7,
   behaviorControls: 11,
   rawPayloadColumns: 0,
   parallelContactConversationMessageTables: 0,
-  baileysInstalled: false
+  baileysPackageInstalledInGateway: true,
+  baileysVersion: "7.0.0-rc13",
+  baileysRuntimeRegistered: false,
+  sessionStorageImplemented: false,
+  sessionLeaseImplemented: false,
+  realSessionMaterialPresent: false
 }, null, 2));
