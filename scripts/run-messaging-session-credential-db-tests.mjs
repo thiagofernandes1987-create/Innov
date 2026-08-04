@@ -36,6 +36,14 @@ function psqlWithNotices(args) {
   });
 }
 
+function commandFailureDetails(error) {
+  if (!(error instanceof Error)) return String(error);
+  const candidate = error;
+  const stdout = typeof candidate.stdout === "string" ? candidate.stdout.trim() : "";
+  const stderr = typeof candidate.stderr === "string" ? candidate.stderr.trim() : "";
+  return [error.message, stdout, stderr].filter(Boolean).join("\n");
+}
+
 let connection;
 try {
   if (url) {
@@ -48,7 +56,7 @@ try {
   }
 } catch (error) {
   console.error("PostgreSQL indisponível: testes W-07 NÃO foram executados.");
-  console.error(`Motivo: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
+  console.error(commandFailureDetails(error));
   process.exit(1);
 }
 
@@ -72,9 +80,7 @@ for (const file of files) {
     if (failed) break;
   } catch (error) {
     failed = true;
-    console.error(
-      `Falha ao aplicar ${file}:\n${error instanceof Error ? error.message : String(error)}`
-    );
+    console.error(`Falha ao aplicar ${file}:\n${commandFailureDetails(error)}`);
     break;
   }
 }
