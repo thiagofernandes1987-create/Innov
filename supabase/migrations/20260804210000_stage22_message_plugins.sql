@@ -161,4 +161,4 @@ end $$;
 revoke all on function public.set_channel_message_plugin_policy(uuid,text,boolean,integer,text,text,jsonb) from public,anon;
 revoke all on function public.record_channel_message_plugin_decision(uuid,uuid,uuid,text,integer,text,text,boolean,jsonb) from public,anon;
 grant execute on function public.set_channel_message_plugin_policy(uuid,text,boolean,integer,text,text,jsonb) to authenticated,service_role;
-grant execute on function public.record_channel_message_plugin_decision(uuid,uuid,uuid,text,integer,text,text,text,boolean,jsonb) to authenticated,service_role;
+grant execute on function public.record_channel_message_plugin_decision(uuid,uuid,uuid,text,integer,text,text,boolean,jsonb) to authenticated,service_role;
