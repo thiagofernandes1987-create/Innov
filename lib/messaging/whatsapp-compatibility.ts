@@ -107,7 +107,9 @@ function record(value: unknown): Readonly<Record<string, unknown>> {
 
 function normalizedPhoneOrNull(value: string | null | undefined) {
   const digits = String(value ?? "").replace(/\D/g, "");
-  return digits.length >= 10 && digits.length <= 15 ? digits : null;
+  return digits.length >= 10 && digits.length <= 15
+    ? normalizeCanonicalPhone(digits)
+    : null;
 }
 
 function optionalSourceSnapshot(value: unknown): CanonicalSourceSnapshot | null {
@@ -202,14 +204,13 @@ export function legacyWhatsAppContactToCanonicalIdentity(
 export function legacyWhatsAppAccountToCanonical(
   account: LegacyWhatsAppAccount
 ): CanonicalChannelAccount {
-  const displayAddress = normalizedPhoneOrNull(account.display_phone_number);
   return {
     schemaVersion: MESSAGING_CONTRACT_VERSION,
     id: account.id,
     organizationId: account.organization_id,
     providerType: "META_CLOUD",
     providerAccountId: account.phone_number_id,
-    displayAddress,
+    displayAddress: normalizedPhoneOrNull(account.display_phone_number),
     displayName: account.business_name,
     active: account.active,
     isDefault: account.is_default,
@@ -268,7 +269,9 @@ export function legacyWhatsAppConversationToCanonical(input: {
   };
 }
 
-const LEGACY_MESSAGE_TYPES: Readonly<Record<LegacyWhatsAppMessage["message_type"], CanonicalMessageType>> = {
+const LEGACY_MESSAGE_TYPES: Readonly<
+  Record<LegacyWhatsAppMessage["message_type"], CanonicalMessageType>
+> = {
   TEXT: "TEXT",
   TEMPLATE: "TEMPLATE",
   DOCUMENT: "DOCUMENT",
@@ -308,14 +311,14 @@ export function legacyWhatsAppMessageToCanonical(input: {
   contact: LegacyWhatsAppContact;
   message: LegacyWhatsAppMessage;
 }): CanonicalMessage {
-  const contact = legacyWhatsAppContactToCanonicalIdentity(
+  const contactIdentity = legacyWhatsAppContactToCanonicalIdentity(
     input.contact,
     input.message.occurred_at,
     input.account.phone_number_id
   );
-  const business = accountIdentity(input.account, input.message.occurred_at);
+  const businessIdentity = accountIdentity(input.account, input.message.occurred_at);
   const inbound = input.message.direction === "INBOUND";
-  const message: CanonicalMessage = {
+  return assertCanonicalMessage({
     schemaVersion: MESSAGING_CONTRACT_VERSION,
     id: input.message.id,
     organizationId: input.message.organization_id,
@@ -328,8 +331,8 @@ export function legacyWhatsAppMessageToCanonical(input: {
     direction: input.message.direction,
     messageType: LEGACY_MESSAGE_TYPES[input.message.message_type],
     status: legacyWhatsAppStatusToCanonical(input.message.status),
-    sender: inbound ? contact : business,
-    recipients: [inbound ? business : contact],
+    sender: inbound ? contactIdentity : businessIdentity,
+    recipients: [inbound ? businessIdentity : contactIdentity],
     content: {
       text: input.message.body,
       caption: input.message.caption
@@ -352,8 +355,7 @@ export function legacyWhatsAppMessageToCanonical(input: {
         legacyTable: "whatsapp_messages"
       }
     })
-  };
-  return assertCanonicalMessage(message);
+  });
 }
 
 function receiptType(status: string): CanonicalReceiptType {
