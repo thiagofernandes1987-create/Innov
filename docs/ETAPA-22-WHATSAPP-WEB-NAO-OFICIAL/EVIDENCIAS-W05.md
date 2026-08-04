@@ -5,8 +5,7 @@
 **PR:** #40  
 **Estado:** concluída  
 **Data:** 04 de agosto de 2026  
-**Head funcional validado:** `9bb75e77dfe0421378d94e6474614fbc7185d03e`  
-**Head documental de fechamento:** `fe8f9004b118c0e550bbe253c927533b640d793b`
+**Head funcional validado:** `9bb75e77dfe0421378d94e6474614fbc7185d03e`
 
 ---
 
