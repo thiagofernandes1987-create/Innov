@@ -5,6 +5,18 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { UnsupportedCapabilityError } from "@/lib/messaging/capabilities";
+import {
+  MESSAGING_CONTRACT_VERSION,
+  createCanonicalPhoneIdentity
+} from "@/lib/messaging/domain";
+import {
+  MessagingEngineError,
+  capabilityForSendCommand,
+  type EngineSendCommand
+} from "@/lib/messaging/engine";
+import { createMetaCloudMessagingEngine } from "@/lib/messaging/engines/meta-cloud.server";
+import { requireMetaCloudCapability } from "@/lib/messaging/policy.server";
 import {
   isSupportWindowOpen,
   normalizePhone,
@@ -13,11 +25,6 @@ import {
   parseVariables,
   WhatsAppDomainError
 } from "@/lib/whatsapp/domain";
-import {
-  sendWhatsAppDocument,
-  sendWhatsAppTemplate,
-  sendWhatsAppText
-} from "@/lib/whatsapp/client";
 import {
   loadWhatsAppBinding,
   resolveWhatsAppBinding
@@ -48,8 +55,20 @@ function firstRelation(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
 }
 
+function errorCode(error: unknown, fallback: string) {
+  return error && typeof error === "object" && "code" in error
+    ? String((error as { code?: unknown }).code ?? fallback)
+    : fallback;
+}
+
 function safeActionMessage(error: unknown) {
-  if (error instanceof WhatsAppDomainError) return error.message;
+  if (
+    error instanceof WhatsAppDomainError ||
+    error instanceof MessagingEngineError ||
+    error instanceof UnsupportedCapabilityError
+  ) {
+    return error.message;
+  }
   return "A operação não pôde ser concluída. Tente novamente.";
 }
 
@@ -60,12 +79,10 @@ function recordFailure(operation: string, error: unknown) {
       event: "whatsapp.action_failed",
       operation,
       correlationId,
-      errorCode:
-        error && typeof error === "object" && "code" in error
-          ? String((error as { code?: unknown }).code ?? "UNKNOWN")
-          : error instanceof Error
-            ? error.name
-            : "UNKNOWN"
+      errorCode: errorCode(
+        error,
+        error instanceof Error ? error.name : "UNKNOWN"
+      )
     })
   );
   return correlationId;
@@ -117,6 +134,7 @@ export async function startWhatsAppConversation(data: FormData) {
   const path = "/app/whatsapp";
 
   try {
+    requireMetaCloudCapability(context.organizationId, "CONVERSATION_START");
     const accountId = text(data, "accountId");
     const phone = normalizePhone(text(data, "phone"));
     const clientId = optional(data, "clientId");
@@ -252,7 +270,7 @@ export async function sendWhatsAppMessage(data: FormData) {
     const { data: conversation, error: conversationError } = await context.supabase
       .from("whatsapp_conversations")
       .select(
-        "id,organization_id,project_id,last_customer_message_at,whatsapp_accounts!inner(phone_number_id),whatsapp_contacts!inner(wa_id,phone_e164)"
+        "id,account_id,organization_id,project_id,last_customer_message_at,whatsapp_accounts!inner(phone_number_id),whatsapp_contacts!inner(wa_id,phone_e164)"
       )
       .eq("id", conversationId)
       .eq("organization_id", context.organizationId)
@@ -315,6 +333,29 @@ export async function sendWhatsAppMessage(data: FormData) {
         ? "TEMPLATE"
         : "TEXT";
     const idempotencyKey = text(data, "idempotencyKey") || randomUUID();
+    const recipient = createCanonicalPhoneIdentity({
+      organizationId: context.organizationId,
+      providerType: "META_CLOUD",
+      channelAccountId: String(conversation.account_id),
+      providerAccountId: phoneNumberId,
+      externalId: to,
+      phone: to,
+      observedAt: new Date().toISOString()
+    });
+
+    const commandBase = {
+      idempotencyKey,
+      organizationId: context.organizationId,
+      conversationId: conversation.id,
+      channelAccountId: String(conversation.account_id),
+      providerAccountId: phoneNumberId,
+      to: recipient,
+      messageType
+    } satisfies Omit<EngineSendCommand, "content">;
+    requireMetaCloudCapability(
+      context.organizationId,
+      capabilityForSendCommand(commandBase)
+    );
 
     const { data: queued, error: queueError } = await context.supabase.rpc(
       "queue_whatsapp_outbound_message",
@@ -335,7 +376,7 @@ export async function sendWhatsAppMessage(data: FormData) {
     queuedMessageId = String(queuedRow?.id ?? "");
     if (!queuedMessageId) throw new Error("queued_message_missing");
 
-    let providerMessageId: string;
+    let content: EngineSendCommand["content"];
     if (resolved?.kind === "DOCUMENT") {
       const admin = createSupabaseAdminClient();
       const { data: signed, error: signedError } = await admin.storage
@@ -347,24 +388,37 @@ export async function sendWhatsAppMessage(data: FormData) {
           "O documento não pôde ser preparado para envio."
         );
       }
-      providerMessageId = await sendWhatsAppDocument({
-        phoneNumberId,
-        to,
-        link: signed.signedUrl,
-        fileName: resolved.fileName,
-        caption: resolved.caption
-      });
+      content = {
+        caption: resolved.caption,
+        media: [
+          {
+            schemaVersion: MESSAGING_CONTRACT_VERSION,
+            mediaType: "DOCUMENT",
+            referenceType: "SIGNED_URL",
+            reference: signed.signedUrl,
+            fileName: resolved.fileName,
+            declaredMimeType: resolved.mimeType,
+            caption: resolved.caption,
+            quarantineStatus: "APPROVED",
+            expiresAt: new Date(Date.now() + 300_000).toISOString()
+          }
+        ]
+      };
     } else if (useTemplate && binding?.meta_template_name) {
-      providerMessageId = await sendWhatsAppTemplate({
-        phoneNumberId,
-        to,
-        name: binding.meta_template_name,
-        languageCode: binding.language_code,
-        parameters: orderedTemplateParameters(binding.parameter_order, variables)
-      });
+      content = {
+        template: {
+          name: binding.meta_template_name,
+          languageCode: binding.language_code,
+          parameters: orderedTemplateParameters(binding.parameter_order, variables)
+        }
+      };
     } else {
-      providerMessageId = await sendWhatsAppText({ phoneNumberId, to, body });
+      content = { text: body };
     }
+
+    const engine = createMetaCloudMessagingEngine();
+    const sendResult = await engine.send({ ...commandBase, content });
+    const providerMessageId = sendResult.providerMessageId;
 
     const admin = createSupabaseAdminClient();
     const { error: completionError } = await admin.rpc(
@@ -392,7 +446,9 @@ export async function sendWhatsAppMessage(data: FormData) {
         conversation_id: conversation.id,
         source_binding_id: sourceBindingId,
         source_sha256: sourceSnapshot.sha256 ?? null,
-        provider_message_id: providerMessageId
+        provider_type: sendResult.providerType,
+        provider_message_id: providerMessageId,
+        engine_schema: sendResult.providerMetadata.schemaVersion
       }
     });
 
@@ -415,8 +471,7 @@ export async function sendWhatsAppMessage(data: FormData) {
         p_message_id: queuedMessageId,
         p_provider_message_id: null,
         p_status: "FAILED",
-        p_error_code:
-          error instanceof WhatsAppDomainError ? error.code : "SEND_FAILED",
+        p_error_code: errorCode(error, "SEND_FAILED"),
         p_error_message: `Falha de envio. Referência: ${correlationId}`
       });
     }
