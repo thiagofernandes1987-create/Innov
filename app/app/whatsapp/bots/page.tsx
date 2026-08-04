@@ -1,11 +1,12 @@
 import Link from "next/link";
 import {
   saveMessagingBotProfile,
-  setMessagingAiBudget,
-  setMessagingPluginPolicy
+  setMessagingAiBudget
 } from "@/app/actions/messaging-bots";
+import { setCanonicalMessagingPluginPolicy } from "@/app/actions/messaging-plugin-policy";
 import { BOT_ALLOWED_TOOLS } from "@/lib/messaging/bots";
 import { loadMessagingBotsWorkspace } from "@/lib/messaging/bots.server";
+import { CANONICAL_MESSAGE_PLUGIN_POLICIES } from "@/lib/messaging/plugin-policy";
 import { BotDraftTester } from "./bot-draft-tester";
 
 const pluginLabels: Record<string, string> = {
@@ -18,6 +19,9 @@ const pluginLabels: Record<string, string> = {
   HANDOFF: "Transferência para humano",
   AI_FALLBACK: "IA como último recurso"
 };
+const canonicalPluginMap = new Map(
+  CANONICAL_MESSAGE_PLUGIN_POLICIES.map(policy => [policy.pluginId, policy])
+);
 
 function micros(value: number) {
   return new Intl.NumberFormat("pt-BR").format(value);
@@ -106,7 +110,7 @@ export default async function MessagingBotsPage({
                 Recuperação
                 <select name="retrievalMode" defaultValue="LEXICAL">
                   <option value="LEXICAL">Lexical</option>
-                  <option value="HYBRID">Híbrida</option>
+                  <option value="HYBRID">Híbrida — bloqueada até índice autorizado</option>
                 </select>
               </label>
               <label>
@@ -132,7 +136,7 @@ export default async function MessagingBotsPage({
                 <input name="maxCostMicrosPerRun" type="number" min={0} max={1000000000} defaultValue={10000} required />
               </label>
               <label>
-                Prioridade
+                Prioridade do perfil
                 <input name="priority" type="number" min={1} max={10000} defaultValue={100} required />
               </label>
               <label style={{ alignSelf: "end" }}>
@@ -176,7 +180,13 @@ export default async function MessagingBotsPage({
             <article className="card card-pad" key={profile.id} style={{ display: "grid", gap: 8 }}>
               <div style={{ display: "flex", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
                 <strong>{profile.name}</strong>
-                <span className="badge">{profile.readiness.readyForDraftTest ? "PRONTO PARA TESTE" : "BLOQUEADO"}</span>
+                <span className="badge">
+                  {!profile.enabledForDrafts
+                    ? "PAUSADO"
+                    : profile.readiness.readyForDraftTest
+                      ? "PRONTO PARA TESTE"
+                      : "BLOQUEADO"}
+                </span>
               </div>
               <small>{profile.providerId} · {profile.modelId ?? "sem modelo"} · prioridade {profile.priority}</small>
               <small>{profile.retrievalMode} · {profile.maxOutputTokens} tokens · {micros(profile.maxCostMicrosPerRun)} micros</small>
@@ -188,6 +198,11 @@ export default async function MessagingBotsPage({
                 </div>
               ) : null}
               <small>Envio permitido: não · revisão humana: obrigatória.</small>
+              {workspace.canManage ? (
+                <Link className="button button-secondary" href={`/app/whatsapp/bots/${profile.id}`}>
+                  Editar ou pausar
+                </Link>
+              ) : null}
             </article>
           ))}
           {!workspace.profiles.length ? (
@@ -216,20 +231,46 @@ export default async function MessagingBotsPage({
 
       <section className="card card-pad">
         <div className="section-heading"><div><span className="eyebrow">PIPELINE</span><h2>Plugins e automações</h2></div></div>
-        <p>Consentimento e segurança executam antes de workflows; IA permanece obrigatoriamente por último.</p>
+        <p>
+          A ordem é um contrato do servidor: consentimento e segurança executam primeiro,
+          workflows ficam no meio, handoff antecede a IA e a IA permanece obrigatoriamente por último.
+        </p>
         <div style={{ display: "grid", gap: 10 }}>
-          {workspace.policies.map(policy => (
-            <form action={setMessagingPluginPolicy} key={policy.pluginId} className="card card-pad" style={{ display: "grid", gridTemplateColumns: "minmax(220px,1fr) 120px 140px auto", gap: 10, alignItems: "end" }}>
-              <input type="hidden" name="pluginId" value={policy.pluginId} />
-              <input type="hidden" name="requiredPermission" value={policy.requiredPermission ?? ""} />
-              <input type="hidden" name="featureFlag" value={policy.featureFlag ?? ""} />
-              <label>{pluginLabels[policy.pluginId] ?? policy.pluginId}<small style={{ display: "block" }}>{policy.pluginId}</small></label>
-              <label>Prioridade<input name="priority" type="number" min={1} max={10000} defaultValue={policy.priority} /></label>
-              <label><input name="enabled" type="checkbox" defaultChecked={policy.enabled} disabled={policy.pluginId === "CONSENT"} /> Habilitado</label>
-              {policy.pluginId === "CONSENT" ? <input type="hidden" name="enabled" value="on" /> : null}
-              <button className="button button-secondary" type="submit" disabled={!workspace.canManage}>Salvar</button>
-            </form>
-          ))}
+          {workspace.policies.map(policy => {
+            const canonical = canonicalPluginMap.get(policy.pluginId);
+            const mandatory = canonical?.mandatory ?? false;
+            return (
+              <form
+                action={setCanonicalMessagingPluginPolicy}
+                key={policy.pluginId}
+                className="card card-pad"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,180px),1fr))",
+                  gap: 10,
+                  alignItems: "end"
+                }}
+              >
+                <input type="hidden" name="pluginId" value={policy.pluginId} />
+                <div>
+                  <strong>{pluginLabels[policy.pluginId] ?? policy.pluginId}</strong>
+                  <small style={{ display: "block" }}>{policy.pluginId}</small>
+                </div>
+                <div>
+                  <span className="eyebrow">ORDEM CANÔNICA</span>
+                  <strong style={{ display: "block" }}>{canonical?.priority ?? policy.priority}</strong>
+                </div>
+                <label>
+                  <input name="enabled" type="checkbox" defaultChecked={mandatory || policy.enabled} disabled={mandatory} />
+                  {mandatory ? " Obrigatório" : " Habilitado"}
+                </label>
+                {mandatory ? <input type="hidden" name="enabled" value="on" /> : null}
+                <button className="button button-secondary" type="submit" disabled={!workspace.canManage || mandatory}>
+                  {mandatory ? "Protegido" : "Salvar estado"}
+                </button>
+              </form>
+            );
+          })}
           {!workspace.policies.length ? <div className="validation warning">Nenhuma política foi inicializada para a organização.</div> : null}
         </div>
       </section>
