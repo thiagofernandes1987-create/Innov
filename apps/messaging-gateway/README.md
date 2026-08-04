@@ -1,8 +1,8 @@
 # Innov Messaging Gateway
 
-Serviço Node.js persistente e isolado criado na W-05, ampliado com o adapter confinado da W-06 e com o armazenamento criptográfico da W-07. O processo ativo continua usando somente `FakeChannelClient`.
+Serviço Node.js persistente e isolado criado na W-05, ampliado com o adapter confinado da W-06, o armazenamento criptográfico da W-07 e a biblioteca de lifecycle fenced da W-08. O processo ativo continua usando somente `FakeChannelClient`.
 
-`@whiskeysockets/baileys@7.0.0-rc13` está instalado exclusivamente no workspace do gateway para tipagem, adapter anticorrupção e testes. O bootstrap não importa nem registra o adapter ou o session store, não conecta WhatsApp e não cria QR, pairing, sessão ou número real.
+`@whiskeysockets/baileys@7.0.0-rc13` está instalado exclusivamente no workspace do gateway para tipagem, adapter anticorrupção e testes. O bootstrap não importa nem registra o adapter, o session store ou o supervisor W-08; não conecta WhatsApp e não cria QR, pairing, sessão ou número real.
 
 ## Fronteiras
 
@@ -13,6 +13,7 @@ Serviço Node.js persistente e isolado criado na W-05, ampliado com o adapter co
 - não acessa o banco principal no runtime ativo;
 - Baileys fica confinado a `src/engines/baileys/`;
 - o store provider-neutral fica em `src/session-store/`;
+- contratos de lease e lifecycle ficam em `src/runtime/` sem importar o SDK Baileys;
 - a fábrica oficial falha com `EXTERNAL_SOCKET_BLOCKED` sem autorização explícita;
 - health, readiness e métricas não expõem segredo ou payload;
 - lifecycle scripts de dependências permanecem bloqueados;
@@ -28,7 +29,7 @@ createGatewayRuntime
 FakeChannelClient
 ```
 
-Não existe import do adapter ou do store no bootstrap. A presença do pacote, do adapter e do armazenamento testado não equivale a provider registrado ou sessão operacional.
+Não existe import do adapter, do store ou do supervisor no bootstrap. A presença dessas bibliotecas testadas não equivale a provider registrado ou sessão operacional.
 
 ## Adapter W-06
 
@@ -60,7 +61,26 @@ O diretório `src/session-store/` contém:
 - exclusão criptográfica;
 - repositório em memória exclusivo para testes sintéticos.
 
-A persistência SQL da W-07 guarda somente envelopes e ciphertext. O gateway ativo continua sem conexão ao banco principal. Single writer, lease, fencing e lifecycle pertencem à W-08.
+A persistência SQL da W-07 guarda somente envelopes e ciphertext. O gateway ativo continua sem conexão ao banco principal.
+
+## Runtime lifecycle W-08
+
+O diretório `src/runtime/` contém:
+
+- `SessionRuntimeLeaseRepository`;
+- lease com expiração;
+- fencing token monotônico;
+- bloqueio de dois writers;
+- `SessionLifecycleSupervisor` com state machine explícita;
+- pairing reduzido a metadados efêmeros com `persisted: false`;
+- reconnect com backoff exponencial limitado e jitter;
+- classificação de falha transitória, logout, restrição e ação humana;
+- kill switch global e por sessão;
+- operações de credenciais protegidas por `runFencedCredentialMutation`;
+- takeover e restore testados com nova instância;
+- repositório em memória exclusivo para doubles.
+
+A migration W-08 adiciona leases e uma porta de CAS fenced no PostgreSQL. Um token obsoleto não consegue gravar credenciais mesmo se o processo antigo continuar executando. O supervisor não está registrado no bootstrap e nenhum desafio de pairing real foi criado.
 
 ## Endpoints
 
@@ -101,7 +121,7 @@ Headers obrigatórios:
 | `GATEWAY_REQUEST_TIMEOUT_MS` | não | `15000` |
 | `GATEWAY_HEADERS_TIMEOUT_MS` | não | `10000` |
 
-Não existem variáveis para ativar socket, QR, sessão Baileys, lease ou KEK de produção nesta etapa.
+Não existem variáveis para ativar socket, QR, sessão Baileys, lease SQL ou KEK de produção nesta etapa.
 
 ## Supply chain
 
@@ -115,4 +135,4 @@ pnpm install --no-frozen-lockfile --ignore-scripts
 
 `compose.yaml` aplica usuário `10001:10001`, filesystem somente leitura, capabilities removidas, `no-new-privileges`, limites de recursos, `/tmp` restrito e rede interna. O smoke test executa a imagem com `--network none`, confirma o cliente fake e prova shutdown por SIGTERM.
 
-As W-05 a W-07 não realizam deploy nem conectam o serviço ao ambiente de produção.
+As W-05 a W-08 não realizam deploy nem conectam o serviço ao ambiente de produção.
