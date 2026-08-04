@@ -13,7 +13,7 @@ const pipeline = read("pipeline");
 const migration = read("migration").toLowerCase();
 
 for (const token of [
-  "MessagePlugin", "MessagePluginPipeline", "priority", "short-circuit",
+  "MessagePlugin", "MessagePluginPipeline", "priority", "decision.kind !== \"CONTINUE\"",
   "createConsentPlugin", "createAntiSpamPlugin", "createQualificationPlugin",
   "createProjectStatusPlugin", "createDocumentPlugin", "createSacPlugin",
   "createHandoffPlugin", "createAiFallbackPlugin", "requiredPermission",
