@@ -4018,3 +4018,19 @@ th.numero, td.numero { text-align: right; }
   min-width: 240px;
   max-width: 460px;
 }
+
+/* Seletor de UF da referência de custo (T-37.13a). A obra pode ser em outro
+   estado, e o CUB varia entre eles na casa das centenas por m² — trocar de UF
+   precisa estar à vista, não escondido num filtro de topo. */
+.cub-seletor-uf {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+  margin: 12px 0;
+}
+.cub-seletor-uf > * { min-width: 0; }
+.cub-seletor-uf button { min-height: 44px; }
+@media (max-width: 620px) {
+  .cub-seletor-uf { grid-template-columns: minmax(0, 1fr); }
+}

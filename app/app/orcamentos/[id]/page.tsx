@@ -13,6 +13,8 @@ import {
   familiaDaTipologia,
   type FamiliaDeCub
 } from "@/lib/cost-sources/cub-serie-historica";
+import { UFS_DO_BRASIL, referenciasDaUf, ufDaReferencia } from "@/lib/orcamentos/cub-por-uf";
+import { singleRelation } from "@/lib/supabase/relations";
 import { requireOrganizationContext } from "@/lib/auth";
 import { CampoComSugestao } from "@/components/comum/campo-com-sugestao";
 import { budgetStatusLabels, formatCurrency, formatPercent, type BudgetStatus } from "@/lib/domain";
@@ -35,7 +37,7 @@ function descricaoDaTipologia(codigo: string) {
 
 type BudgetDetailProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string; aviso?: string }>;
+  searchParams: Promise<{ error?: string; aviso?: string; uf?: string }>;
 };
 
 type CostReferenceSnapshot = {
@@ -88,7 +90,7 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
 
   const { data: budget } = await supabase
     .from("budgets")
-    .select("id, code, title, status, valid_until, client_id, current_version_id, clients(legal_name)")
+    .select("id, code, title, status, valid_until, client_id, project_id, current_version_id, clients(legal_name), projects(state, city)")
     .eq("organization_id", organizationId)
     .eq("id", id)
     .maybeSingle();
@@ -136,7 +138,9 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
     supabase
       .from("cost_reference_snapshots")
       .select("id, source_name, region, reference_code, base_date, publication_date, tax_relief, unit, total_cost, materials_cost, labor_cost, administrative_cost, source_url")
-      .eq("source_key", "SINDUSCON_SP_CUB")
+      // Sem `.eq("source_key", …)`: esta tabela é só de CUB, e fixar a chave de
+      // São Paulo era o que fazia a obra em Minas receber o preço paulista sem
+      // aviso. O recorte por UF é feito depois, em `referenciasDaUf`.
       .order("base_date", { ascending: false })
       .order("tax_relief", { ascending: true })
       .order("total_cost", { ascending: false }),
@@ -158,13 +162,21 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
   const frozen = Boolean(version.frozen_at);
   const snapshots = (referenceSnapshots ?? []) as CostReferenceSnapshot[];
 
+  // T-37.13a: a UF da obra manda; o que a pessoa escolher na tela ganha dela.
+  const obra = singleRelation(budget.projects as unknown);
+  const ufDoCub = ufDaReferencia({
+    ufDoProjeto: (obra as { state?: string } | null)?.state ?? null,
+    ufPedida: query.uf ?? null
+  });
+  const snapshotsDaUf = referenciasDaUf(snapshots, ufDoCub);
+
   // T-37.4: as dezenove tipologias agrupadas pela família que a NBR 12721
   // define. A família sai do **código**, não do `raw_payload`: as duas linhas
   // semeadas antes desta tarefa não têm o campo, e derivar do código dá a mesma
   // resposta para todas sem depender de quando a linha entrou.
   const cubPorFamilia = (() => {
-    const porFamilia = new Map<FamiliaDeCub, typeof snapshots>();
-    for (const snapshot of snapshots) {
+    const porFamilia = new Map<FamiliaDeCub, typeof snapshotsDaUf>();
+    for (const snapshot of snapshotsDaUf) {
       const familia = familiaDaTipologia(String(snapshot.reference_code));
       porFamilia.set(familia, [...(porFamilia.get(familia) ?? []), snapshot]);
     }
@@ -219,8 +231,28 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
             <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", alignItems: "start" }}>
               <article className="card card-pad">
                 <span className="badge">REFERÊNCIA OFICIAL</span>
-                <h3>CUB SindusCon-SP por m²</h3>
-                <p className="muted">Use como referência global de coerência. Para orçamento executivo, complemente com composições e cotações.</p>
+                <h3>CUB por m² · {ufDoCub}</h3>
+                <p className="muted">
+                  Use como referência global de coerência. Para orçamento executivo, complemente com composições e cotações.
+                </p>
+                {/* T-37.13a: trocar de UF é `GET`, não ação — a pessoa está
+                    consultando, e a URL passa a carregar o estado escolhido. */}
+                <form method="get" className="cub-seletor-uf">
+                  <label>
+                    Estado da referência
+                    <select name="uf" defaultValue={ufDoCub}>
+                      {UFS_DO_BRASIL.map(sigla => (
+                        <option key={sigla} value={sigla}>
+                          {sigla}
+                          {(obra as { state?: string } | null)?.state?.trim().toUpperCase() === sigla
+                            ? " · UF da obra"
+                            : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button className="button button-secondary" type="submit">Ver CUB deste estado</button>
+                </form>
                 <form action={addCubReferenceItem} className="grid">
                   <input type="hidden" name="budgetId" value={budget.id} />
                   <input type="hidden" name="versionId" value={version.id} />
@@ -247,16 +279,27 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
                     Metragem da obra
                     <input name="area" type="number" min="0.01" step="0.01" placeholder="100,00" required disabled={frozen} />
                   </label>
-                  <button className="button button-primary" type="submit" disabled={frozen || snapshots.length === 0}>
+                  <button className="button button-primary" type="submit" disabled={frozen || snapshotsDaUf.length === 0}>
                     Aplicar CUB à metragem
                   </button>
                 </form>
-                {snapshots[0] ? (
+                {snapshotsDaUf[0] ? (
                   <p className="muted" style={{ marginTop: 12 }}>
-                    Última publicação carregada: {formatDate(snapshots[0].publication_date)}. Fonte: {snapshots[0].source_name}.
+                    Última publicação carregada: {formatDate(snapshotsDaUf[0].publication_date)}. Fonte: {snapshotsDaUf[0].source_name}.
                   </p>
                 ) : (
-                  <div className="validation blocking">Nenhuma referência oficial carregada.</div>
+                  // "Este estado não tem" é diferente de "não há nenhum", e a
+                  // diferença decide o que a pessoa faz a seguir: importar o CUB
+                  // daquele Sinduscon, ou conferir a UF que ela escolheu.
+                  <div className="validation" role="status">
+                    <strong>Sem CUB importado para {ufDoCub}.</strong>
+                    <div>
+                      A referência é publicada por cada Sinduscon estadual, e a de {ufDoCub} ainda não foi carregada.
+                      {snapshots.length
+                        ? ` Há referência para ${[...new Set(snapshots.map(item => String(item.region).trim().toUpperCase()))].sort().join(", ")}.`
+                        : " Nenhum estado tem referência carregada ainda."}
+                    </div>
+                  </div>
                 )}
               </article>
 

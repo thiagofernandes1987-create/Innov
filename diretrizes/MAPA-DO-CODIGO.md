@@ -31,13 +31,13 @@ a ignorar.
 | Aplicativos no registro | 23 |
 | Rotas | 159 (141 páginas, 18 de API) |
 | Server actions | 182 em 31 arquivos |
-| Módulos de `lib/` | 92 |
+| Módulos de `lib/` | 93 |
 | Funções do banco declaradas | 229 |
 | Funções do banco chamadas do código | 116 |
-| Suítes de teste | 54, com 614 casos |
+| Suítes de teste | 55, com 623 casos |
 | Migrations | 163 |
 | Validadores de CI | 28 |
-| Módulos de `lib/` citados por algum teste | 52 de 92 |
+| Módulos de `lib/` citados por algum teste | 53 de 93 |
 
 ## 1. Aplicativos
 
@@ -623,6 +623,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/operations/notifications` | sim | `agruparNotificacoesOperacionais`, `descreverNotificacaoOperacional`, `planejarNotificacoesOperacionais` |
 | `@/lib/operations/routines` | sim | `ROTINAS_OPERACIONAIS`, `executarCenariosDasPersonas` |
 | `@/lib/orcamentos/composicao` | sim | `TOLERANCIA_DA_CONTA`, `motivoDoItem`, `reconciliacaoDaComposicao`, `situacaoDaPlanilhaEmPortugues` |
+| `@/lib/orcamentos/cub-por-uf` | sim | `UFS_DO_BRASIL`, `UF_PADRAO`, `referenciasDaUf`, `ufDaReferencia` |
 | `@/lib/orcamentos/cub` | sim | `linhasDoCub` |
 | `@/lib/orcamentos/naturezas` | sim | `custoDoItem`, `rotuloDaNatureza`, `totaisPorNatureza` |
 | `@/lib/organization-context` | sim | `ACTIVE_ORGANIZATION_COOKIE`, `safeInternalReturnPath` |
@@ -941,6 +942,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/operational-notifications.test.ts` | 5 | notificações operacionais por exceção |
 | `tests/operational-routines.test.ts` | 3 | runner das rotinas profissionais |
 | `tests/orcamento-composicao.test.ts` | 11 | por que o custo de um item falta; a soma dos itens fecha com o custo publicado? |
+| `tests/orcamento-cub-por-uf.test.ts` | 9 | qual UF a tela oferece; o que a tela mostra para a UF escolhida |
 | `tests/orcamento-cub.test.ts` | 14 | as tipologias semeadas da série histórica decompõem; o CUB entra decomposto quando a publicação traz a decomposição; sem decomposição publicada, nada é inventado; decomposição que não fecha não é usada |
 | `tests/orcamento-naturezas.test.ts` | 12 | o custo de um item é o mesmo que o banco calcula; totais por natureza; rótulo em português |
 | `tests/personas-catalog.test.ts` | 5 | catálogo operacional de personas |
@@ -1008,7 +1010,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 40 de 92 |
+| Módulo de `lib/` sem teste que o cite | 40 de 93 |
 
 ### Módulos sem teste que os cite
 
