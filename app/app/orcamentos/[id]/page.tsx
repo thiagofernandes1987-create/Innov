@@ -12,11 +12,12 @@ import { requireOrganizationContext } from "@/lib/auth";
 import { CampoComSugestao } from "@/components/comum/campo-com-sugestao";
 import { budgetStatusLabels, formatCurrency, formatPercent, type BudgetStatus } from "@/lib/domain";
 import { padroesDoEscopo } from "@/lib/sugestoes/escopos";
+import { totaisPorNatureza } from "@/lib/orcamentos/naturezas";
 import { ESCOPOS, sugestoesDoEscopo } from "@/lib/sugestoes/servidor";
 
 type BudgetDetailProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; aviso?: string }>;
 };
 
 type CostReferenceSnapshot = {
@@ -128,6 +129,12 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
   ]);
 
   const baseCost = Number(version.direct_cost) + Number(version.indirect_cost) + Number(version.fixed_cost) + Number(version.administrative_fee);
+
+  // T-37.6: o corte que decide equipe própria contra empreitada. O resumo ao
+  // lado soma por tipo de custo, que é a conta do BDI; esta soma por natureza,
+  // que é a conta da obra. A fórmula é a mesma do banco — ver
+  // `lib/orcamentos/naturezas.ts`.
+  const naturezas = totaisPorNatureza(items ?? []);
   const client = budget.clients as { legal_name?: string } | null;
   const frozen = Boolean(version.frozen_at);
   const snapshots = (referenceSnapshots ?? []) as CostReferenceSnapshot[];
@@ -157,6 +164,9 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
       </div>
 
       {query.error ? <div className="validation blocking" role="alert">{query.error}</div> : null}
+      {query.aviso ? (
+        <div className="validation" role="status">{query.aviso}</div>
+      ) : null}
       {frozen ? (
         <div className="validation" role="status">
           Esta versão está congelada desde {new Date(version.frozen_at).toLocaleString("pt-BR")}. Crie uma nova versão para alterar custos ou margem.
@@ -392,6 +402,20 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
           <div className="financial-row"><span>Custos fixos</span><strong className="mono">{formatCurrency(Number(version.fixed_cost))}</strong></div>
           <div className="financial-row"><span>Taxa administrativa</span><strong className="mono">{formatCurrency(Number(version.administrative_fee))}</strong></div>
           <div className="financial-row"><span>Custo-base</span><strong className="mono">{formatCurrency(baseCost)}</strong></div>
+          {naturezas.length ? (
+            <div className="financial-naturezas">
+              <small>DO QUE É FEITO O CUSTO</small>
+              {naturezas.map(natureza => (
+                <div className="financial-row" key={natureza.natureza}>
+                  <span>
+                    {natureza.rotulo}
+                    <em>{formatPercent(natureza.participacao)}</em>
+                  </span>
+                  <strong className="mono">{formatCurrency(natureza.total)}</strong>
+                </div>
+              ))}
+            </div>
+          ) : null}
           <div className="financial-row"><span>Impostos</span><strong className="mono">{formatPercent(Number(markupModel?.tax_rate ?? 0))}</strong></div>
           <div className="financial-row"><span>Margem desejada</span><strong className="mono">{formatPercent(Number(markupModel?.desired_margin_rate ?? 0))}</strong></div>
           <div className="financial-row"><span>BDI</span><strong className="mono">{formatPercent(Number(version.bdi_rate))}</strong></div>

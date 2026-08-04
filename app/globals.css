@@ -3920,3 +3920,34 @@ tbody tr:hover { background: var(--surface-muted); }
    O que muda é o peso — ela não é mais o que se oferece. */
 .data-table tr[data-inativo="sim"] > td { opacity: 0.72; }
 .data-table tr[data-inativo="sim"] > td:first-child strong { font-weight: 500; }
+
+/* Do que é feito o custo — a repartição por natureza, dentro do resumo
+   financeiro. Fica embaixo do custo-base porque é ele que ela reparte: soma
+   sempre 100% dele, e nunca do preço de venda. A participação vai colada ao
+   nome, não numa coluna própria, porque a leitura é "mão de obra, 55%", não
+   duas listas paralelas. */
+.financial-naturezas {
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--border-strong) 55%, transparent);
+}
+.financial-naturezas > small {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 10.5px;
+  font-weight: 820;
+  letter-spacing: 0.06em;
+  opacity: 0.72;
+}
+.financial-naturezas .financial-row > span {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  min-width: 0;
+}
+.financial-naturezas em {
+  font-style: normal;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}

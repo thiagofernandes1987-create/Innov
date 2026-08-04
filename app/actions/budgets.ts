@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { linhasDoCub } from "@/lib/orcamentos/cub";
 import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 
 const internalRoles = ["SUPER_ADMIN", "DIRECAO", "ADMINISTRADOR", "ORCAMENTISTA", "FINANCEIRO"] as const;
@@ -20,6 +21,11 @@ const editableItemCategories = new Set([
 
 function budgetError(budgetId: string, message: string): never {
   redirect(`/app/orcamentos/${budgetId}?error=${encodeURIComponent(message)}`);
+}
+
+/** Deu certo, e há algo que quem fez precisa saber. Não é erro, e não some. */
+function budgetNotice(budgetId: string, message: string): never {
+  redirect(`/app/orcamentos/${budgetId}?aviso=${encodeURIComponent(message)}`);
 }
 
 function requiredText(formData: FormData, key: string, label: string) {
@@ -121,7 +127,9 @@ export async function addCubReferenceItem(formData: FormData) {
   const { supabase, organizationId, userId } = await requireEditableVersion(budgetId, versionId);
   const { data: snapshot, error: snapshotError } = await supabase
     .from("cost_reference_snapshots")
-    .select("id, source_key, source_name, region, reference_code, base_date, tax_relief, unit, total_cost")
+    .select(
+      "id, source_key, source_name, region, reference_code, base_date, tax_relief, unit, total_cost, materials_cost, labor_cost, administrative_cost, equipment_cost"
+    )
     .eq("id", snapshotId)
     .maybeSingle();
 
@@ -129,28 +137,51 @@ export async function addCubReferenceItem(formData: FormData) {
     budgetError(budgetId, snapshotError?.message ?? "Referência oficial não encontrada.");
   }
 
-  const sequence = await nextItemSequence(supabase, versionId);
-  const reliefLabel = snapshot.tax_relief ? "com desoneração" : "sem desoneração";
-  const code = `CUB-${snapshot.reference_code}-${snapshot.region}-${snapshot.base_date}-${snapshot.tax_relief ? "CD" : "SD"}`;
+  // T-37.5: a referência entra separada por natureza quando a publicação traz
+  // a decomposição. `linhasDoCub` decide, e devolve o motivo quando não dá —
+  // "por que só apareceu uma linha" é a primeira pergunta de quem esperava ver
+  // a mão de obra separada.
+  const { linhas, decomposto, motivo } = linhasDoCub(
+    {
+      sourceName: String(snapshot.source_name),
+      referenceCode: String(snapshot.reference_code),
+      region: String(snapshot.region),
+      baseDate: String(snapshot.base_date),
+      taxRelief: Boolean(snapshot.tax_relief),
+      unit: String(snapshot.unit),
+      totalCost: Number(snapshot.total_cost),
+      materialsCost: snapshot.materials_cost === null ? null : Number(snapshot.materials_cost),
+      laborCost: snapshot.labor_cost === null ? null : Number(snapshot.labor_cost),
+      administrativeCost:
+        snapshot.administrative_cost === null ? null : Number(snapshot.administrative_cost),
+      equipmentCost: snapshot.equipment_cost === null ? null : Number(snapshot.equipment_cost)
+    },
+    area
+  );
 
-  const { error: insertError } = await supabase.from("budget_items").insert({
-    organization_id: organizationId,
-    budget_version_id: versionId,
-    cost_type: "DIRECT",
-    item_category: "REFERENCE",
-    code,
-    description: `Referência global ${snapshot.source_name} ${snapshot.reference_code} ${reliefLabel}`,
-    unit: snapshot.unit,
-    quantity: area,
-    unit_cost: Number(snapshot.total_cost),
-    loss_rate: 0,
-    freight_rate: 0,
-    source: `${snapshot.source_name} · ${snapshot.reference_code} · ${reliefLabel}`,
-    region: snapshot.region,
-    base_date: snapshot.base_date,
-    sequence,
-    created_by: userId
-  });
+  if (linhas.length === 0) budgetError(budgetId, "Informe a metragem da obra.");
+
+  const sequence = await nextItemSequence(supabase, versionId);
+  const { error: insertError } = await supabase.from("budget_items").insert(
+    linhas.map((linha, indice) => ({
+      organization_id: organizationId,
+      budget_version_id: versionId,
+      cost_type: linha.costType,
+      item_category: linha.itemCategory,
+      code: linha.code,
+      description: linha.description,
+      unit: linha.unit,
+      quantity: linha.quantity,
+      unit_cost: linha.unitCost,
+      loss_rate: linha.lossRate,
+      freight_rate: linha.freightRate,
+      source: linha.source,
+      region: snapshot.region,
+      base_date: snapshot.base_date,
+      sequence: sequence + indice,
+      created_by: userId
+    }))
+  );
 
   if (insertError) budgetError(budgetId, insertError.message);
 
@@ -163,6 +194,7 @@ export async function addCubReferenceItem(formData: FormData) {
 
   if (versionError) budgetError(budgetId, versionError.message);
   await recalculate(supabase, budgetId, versionId);
+  if (!decomposto && motivo) budgetNotice(budgetId, motivo);
 }
 
 export async function addManualBudgetItem(formData: FormData) {
