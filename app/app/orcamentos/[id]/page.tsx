@@ -8,12 +8,30 @@ import {
   removeBudgetItem,
   updateBudgetPricing
 } from "@/app/actions/budgets";
+import {
+  TIPOLOGIAS_CUB,
+  familiaDaTipologia,
+  type FamiliaDeCub
+} from "@/lib/cost-sources/cub-serie-historica";
 import { requireOrganizationContext } from "@/lib/auth";
 import { CampoComSugestao } from "@/components/comum/campo-com-sugestao";
 import { budgetStatusLabels, formatCurrency, formatPercent, type BudgetStatus } from "@/lib/domain";
 import { padroesDoEscopo } from "@/lib/sugestoes/escopos";
 import { totaisPorNatureza } from "@/lib/orcamentos/naturezas";
 import { ESCOPOS, sugestoesDoEscopo } from "@/lib/sugestoes/servidor";
+
+
+const ORDEM_DE_FAMILIA: readonly FamiliaDeCub[] = ["RESIDENCIAL", "COMERCIAL", "ESPECIAL"];
+const ROTULO_DE_FAMILIA: Record<FamiliaDeCub, string> = {
+  RESIDENCIAL: "Residencial",
+  COMERCIAL: "Comercial",
+  ESPECIAL: "Especiais"
+};
+
+/** O que a sigla quer dizer, para quem não decorou a NBR 12721. */
+function descricaoDaTipologia(codigo: string) {
+  return TIPOLOGIAS_CUB.find(item => item.codigo === codigo)?.descricao ?? "Referência oficial";
+}
 
 type BudgetDetailProps = {
   params: Promise<{ id: string }>;
@@ -120,7 +138,8 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
       .select("id, source_name, region, reference_code, base_date, publication_date, tax_relief, unit, total_cost, materials_cost, labor_cost, administrative_cost, source_url")
       .eq("source_key", "SINDUSCON_SP_CUB")
       .order("base_date", { ascending: false })
-      .order("tax_relief", { ascending: true }),
+      .order("tax_relief", { ascending: true })
+      .order("total_cost", { ascending: false }),
     supabase
       .from("markup_models")
       .select("id, method, tax_rate, commission_rate, variable_expense_rate, desired_margin_rate")
@@ -138,6 +157,22 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
   const client = budget.clients as { legal_name?: string } | null;
   const frozen = Boolean(version.frozen_at);
   const snapshots = (referenceSnapshots ?? []) as CostReferenceSnapshot[];
+
+  // T-37.4: as dezenove tipologias agrupadas pela família que a NBR 12721
+  // define. A família sai do **código**, não do `raw_payload`: as duas linhas
+  // semeadas antes desta tarefa não têm o campo, e derivar do código dá a mesma
+  // resposta para todas sem depender de quando a linha entrou.
+  const cubPorFamilia = (() => {
+    const porFamilia = new Map<FamiliaDeCub, typeof snapshots>();
+    for (const snapshot of snapshots) {
+      const familia = familiaDaTipologia(String(snapshot.reference_code));
+      porFamilia.set(familia, [...(porFamilia.get(familia) ?? []), snapshot]);
+    }
+    return ORDEM_DE_FAMILIA.filter(familia => porFamilia.has(familia)).map(
+      familia => [familia, porFamilia.get(familia)!] as const
+    );
+  })();
+
 
   return (
     <main className="content">
@@ -191,12 +226,20 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
                   <input type="hidden" name="versionId" value={version.id} />
                   <label>
                     Referência e data-base
+                    {/* Agrupado por família porque são dezenove tipologias da NBR
+                        12721 (T-37.4), e uma lista plana de vinte e uma linhas
+                        obriga a decorar sigla. A descrição vem junto: quem orça
+                        reconhece "R8-N", raramente "CSL-16A". */}
                     <select name="snapshotId" required defaultValue="" disabled={frozen}>
                       <option value="" disabled>Selecione o CUB</option>
-                      {snapshots.map((snapshot) => (
-                        <option key={snapshot.id} value={snapshot.id}>
-                          {snapshot.reference_code} · {snapshot.tax_relief ? "com" : "sem"} desoneração · {formatDate(snapshot.base_date)} · {formatCurrency(Number(snapshot.total_cost))}/{snapshot.unit}
-                        </option>
+                      {cubPorFamilia.map(([familia, itens]) => (
+                        <optgroup key={familia} label={ROTULO_DE_FAMILIA[familia]}>
+                          {itens.map((snapshot) => (
+                            <option key={snapshot.id} value={snapshot.id}>
+                              {snapshot.reference_code} · {descricaoDaTipologia(snapshot.reference_code)} · {snapshot.tax_relief ? "com" : "sem"} desoneração · {formatDate(snapshot.base_date)} · {formatCurrency(Number(snapshot.total_cost))}/{snapshot.unit}
+                            </option>
+                          ))}
+                        </optgroup>
                       ))}
                     </select>
                   </label>

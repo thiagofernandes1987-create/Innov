@@ -25,6 +25,37 @@ const R8N_SEM_DECOMPOSICAO: ReferenciaDeCusto = {
   equipmentCost: null
 };
 
+// T-37.4: a série histórica passou a semear as dezenove tipologias **com** a
+// decomposição, inclusive sem desoneração — que antes vinha só com o total e
+// caía na linha única de referência. Estes são os números publicados de
+// julho/2026, conferidos contra o arquivo oficial.
+const CSL16A_SEM_DESONERACAO: ReferenciaDeCusto = {
+  sourceName: "SindusCon-SP",
+  referenceCode: "CSL-16A",
+  region: "SP",
+  baseDate: "2026-07-01",
+  taxRelief: false,
+  unit: "m²",
+  totalCost: 3139.51,
+  materialsCost: 1317.19,
+  laborCost: 1748.58,
+  administrativeCost: 73.74,
+  equipmentCost: null
+};
+
+describe("as tipologias semeadas da série histórica decompõem", () => {
+  it("o que antes virava linha única de referência agora separa natureza", () => {
+    const { linhas, decomposto, motivo } = linhasDoCub(CSL16A_SEM_DESONERACAO, 250);
+    expect(decomposto).toBe(true);
+    expect(motivo).toBeUndefined();
+    expect(linhas.map(l => l.itemCategory)).toEqual(["MATERIAL", "LABOR", "OTHER"]);
+    // 1317,19 + 1748,58 + 73,74 fecha com os 3.139,51 publicados, e é essa
+    // conciliação que autoriza a decomposição.
+    const total = linhas.reduce((soma, linha) => soma + linha.unitCost * linha.quantity, 0);
+    expect(total).toBeCloseTo(3139.51 * 250, 6);
+  });
+});
+
 describe("o CUB entra decomposto quando a publicação traz a decomposição", () => {
   const { linhas, decomposto } = linhasDoCub(R8N_DESONERADO, 100);
 

@@ -31,13 +31,13 @@ a ignorar.
 | Aplicativos no registro | 23 |
 | Rotas | 159 (141 páginas, 18 de API) |
 | Server actions | 182 em 31 arquivos |
-| Módulos de `lib/` | 89 |
+| Módulos de `lib/` | 90 |
 | Funções do banco declaradas | 229 |
 | Funções do banco chamadas do código | 116 |
-| Suítes de teste | 52, com 595 casos |
-| Migrations | 160 |
+| Suítes de teste | 53, com 608 casos |
+| Migrations | 161 |
 | Validadores de CI | 28 |
-| Módulos de `lib/` citados por algum teste | 50 de 89 |
+| Módulos de `lib/` citados por algum teste | 51 de 90 |
 
 ## 1. Aplicativos
 
@@ -586,6 +586,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/casca/avisos` | não | `COOKIE_VISTO_ATIVIDADES`, `COOKIE_VISTO_MENSAGENS`, `carregarAvisos` |
 | `@/lib/casca/indicadores` | não | `carregarIndicadores` |
 | `@/lib/casca/menus` | sim | `MENUS_DO_MODULO`, `menusDe` |
+| `@/lib/cost-sources/cub-serie-historica` | sim | `TIPOLOGIAS_CUB`, `TOLERANCIA_DA_SERIE`, `dataDoSerial`, `familiaDaTipologia`, `lerSerieHistoricaDoCub`, `padraoDeAcabamento` |
 | `@/lib/cost-sources/sinduscon` | sim | `SINDUSCON_CUB_FEED_URL`, `SINDUSCON_CUB_SOURCE_KEY`, `fetchLatestSindusconCub`, `findLatestCubArticleUrl`, `parseSindusconCubPublication` |
 | `@/lib/documentos/biblioteca` | sim | `modelosDisponiveis`, `porTipo`, `tiposDoAplicativo` |
 | `@/lib/documentos/dicionario` | sim | `ROTULO_ESCOPO`, `VARIAVEIS`, `dicionarioDeExemplo`, `variaveisDoTipo` |
@@ -915,6 +916,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/busca-cobre-funis.test.ts` | 2 | busca da barra cobre as telas de funil |
 | `tests/cep-busca.test.ts` | 11 | interpretarRespostaViaCEP; buscarCEP |
 | `tests/cronograma.test.ts` | 24 | vocabulário; Término-Início (TI); Início-Início (II); Término-Término (TT) |
+| `tests/cub-serie-historica.test.ts` | 12 | o serial do Excel vira data; as tipologias da NBR 12721; leitura da série histórica |
 | `tests/documentos-edicao.test.ts` | 18 | negrito, itálico e afins; prefixo por linha; inserções; barra de status |
 | `tests/documentos-importacao.test.ts` | 32 | analisador de XML; estilos do Word; DOCX para Markdown; CSV |
 | `tests/documentos-modelo.test.ts` | 25 | nome da variável; extração de variáveis; renderização; markdown para HTML |
@@ -936,7 +938,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/operational-notifications.test.ts` | 5 | notificações operacionais por exceção |
 | `tests/operational-routines.test.ts` | 3 | runner das rotinas profissionais |
 | `tests/orcamento-composicao.test.ts` | 11 | por que o custo de um item falta; a soma dos itens fecha com o custo publicado? |
-| `tests/orcamento-cub.test.ts` | 13 | o CUB entra decomposto quando a publicação traz a decomposição; sem decomposição publicada, nada é inventado; decomposição que não fecha não é usada; área |
+| `tests/orcamento-cub.test.ts` | 14 | as tipologias semeadas da série histórica decompõem; o CUB entra decomposto quando a publicação traz a decomposição; sem decomposição publicada, nada é inventado; decomposição que não fecha não é usada |
 | `tests/orcamento-naturezas.test.ts` | 12 | o custo de um item é o mesmo que o banco calcula; totais por natureza; rótulo em português |
 | `tests/personas-catalog.test.ts` | 5 | catálogo operacional de personas |
 | `tests/personas-db-contract.test.ts` | 4 | contrato de personas no banco |
@@ -1003,7 +1005,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 39 de 89 |
+| Módulo de `lib/` sem teste que o cite | 39 de 90 |
 
 ### Módulos sem teste que os cite
 
