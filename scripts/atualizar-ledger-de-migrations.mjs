@@ -14,6 +14,12 @@
 // Sobre o débito congelado: entradas que **deixaram de divergir** são podadas
 // aqui e o script diz quais. Débito que continua congelado depois de resolvido
 // vira permissão silenciosa — se o arquivo sumir de novo, nada reprova.
+//
+// O instantâneo carrega também os **privilégios perigosos** — `TRUNCATE`,
+// `TRIGGER` e `REFERENCES` concedidos a `anon` ou `authenticated`. Eles não
+// aparecem em arquivo nenhum: vêm do padrão do fornecedor, e `TRUNCATE` não é
+// filtrado por RLS (VACINA-059). Sem instantâneo, o CI não tem como saber que
+// voltaram.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -54,6 +60,13 @@ function psql(sql) {
     );
   });
 }
+
+/** Privilégios que nenhum papel da aplicação usa e que a RLS não filtra. */
+const SQL_PRIVILEGIOS =
+  "select coalesce(string_agg(distinct table_name || ':' || privilege_type, ',' order by table_name || ':' || privilege_type), '') " +
+  "from information_schema.role_table_grants " +
+  "where table_schema = 'public' and grantee in ('anon','authenticated') " +
+  "and privilege_type in ('TRUNCATE','TRIGGER','REFERENCES');";
 
 // `name` é o nome lógico com que a migration foi aplicada; `version` é o
 // carimbo que o servidor gravou no instante da aplicação. Nome vazio acontece
@@ -102,18 +115,38 @@ const podadas = [
   ...(debitoAnterior.arquivos_sem_aplicacao ?? []).filter(n => !semAplicacao.includes(n))
 ];
 
+const brutoPrivilegios = await psql(SQL_PRIVILEGIOS).catch(e => {
+  console.error(`Falha ao ler os privilégios no banco: ${e.message}`);
+  process.exit(1);
+});
+const privilegiosPerigosos = brutoPrivilegios
+  .split("\n")
+  .map(l => l.trim())
+  .filter(Boolean)
+  .join(",")
+  .split(",")
+  .map(l => l.trim())
+  .filter(Boolean)
+  .sort();
+
 const ledger = {
   ...anterior,
   atualizado_em: new Date().toISOString().replace(/\.\d{3}Z$/, "Z"),
   aplicadas,
-  debito: { ...debitoAnterior, aplicadas_sem_arquivo: semArquivo, arquivos_sem_aplicacao: semAplicacao }
+  debito: { ...debitoAnterior, aplicadas_sem_arquivo: semArquivo, arquivos_sem_aplicacao: semAplicacao },
+  privilegios: {
+    _leia:
+      "TRUNCATE, TRIGGER e REFERENCES concedidos a anon ou authenticated. TRUNCATE não é filtrado por RLS (VACINA-059): a lista tem de continuar vazia.",
+    perigosos: privilegiosPerigosos
+  }
 };
 
 fs.writeFileSync(LEDGER, `${JSON.stringify(ledger, null, 2)}\n`, "utf8");
 
 console.log(
   `Ledger atualizado: ${aplicadas.length} aplicada(s), ${arquivos.size} arquivo(s), ` +
-    `débito congelado ${semArquivo.length} sem arquivo / ${semAplicacao.length} sem aplicação.`
+    `débito congelado ${semArquivo.length} sem arquivo / ${semAplicacao.length} sem aplicação, ` +
+    `${privilegiosPerigosos.length} privilégio(s) perigoso(s).`
 );
 if (podadas.length) {
   console.log(`Débito resolvido e retirado do congelamento (${podadas.length}):`);

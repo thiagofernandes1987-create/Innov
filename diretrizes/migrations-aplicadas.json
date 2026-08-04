@@ -1,7 +1,7 @@
 {
   "_leia": "Instantâneo do que está aplicado no banco, para o CI comparar sem alcançar o banco. A comparação é pelo NOME LÓGICO: o ledger carimba a versão no momento da aplicação, então o número do arquivo e o da versão aplicada não coincidem — comparar por número produziria um resultado sem sentido. Atualize com `SUPABASE_DB_URL=... pnpm ledger:atualizar` (scripts/atualizar-ledger-de-migrations.mjs) e commite junto da migration.",
   "projeto": "wyeojufebtwblsubkunr",
-  "atualizado_em": "2026-08-04T09:36:14Z",
+  "atualizado_em": "2026-08-04T10:58:25Z",
   "aplicadas": [
     "accept_proposal_client_audit",
     "aplicativo_modelos_e_documentacoes",
@@ -40,6 +40,7 @@
     "procurement_segregation_of_duties",
     "project_district_and_flexible_rpc_v2",
     "qualify_pgcrypto_functions",
+    "revogar_truncate_de_anon_e_authenticated",
     "revoke_legacy_project_creation_rpcs",
     "safe_project_creation_workflows",
     "seed_sinduscon_sp_cub_2026_06",
@@ -276,5 +277,9 @@
       "stage20_sac_attachment_security",
       "workflow_documental_descobrivel"
     ]
+  },
+  "privilegios": {
+    "_leia": "TRUNCATE, TRIGGER e REFERENCES concedidos a anon ou authenticated. TRUNCATE não é filtrado por RLS (VACINA-059): a lista tem de continuar vazia.",
+    "perigosos": []
   }
 }

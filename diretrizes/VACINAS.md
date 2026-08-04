@@ -157,6 +157,7 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-056` | Verificação que sai 0 quando a dependência falta, e que não está em workflow nenhum, é indistinguível de verificação que passou | aplicada | `--exigir` nos dois scripts que se autodispensavam, e confronto de RPCs chamadas contra declaradas no `validate:code-map`, com débito congelado e responsável nomeado |
 | `VACINA-057` | Validador que confere o arquivo aprova enquanto o efeito não existe — três tabelas do Object Runtime passaram 40 dias ausentes do banco com o CI verde | aplicada | `validate:migrations-applied` cruza arquivos com o ledger de aplicadas, por nome lógico, com instantâneo datado e débito congelado |
 | `VACINA-058` | Ação inexistente em `has_module_permission` cai no `else false` e nega todo mundo, inclusive SUPER_ADMIN — `publish_object_definition` nunca foi executável, e a fixture de teste era mais permissiva que a função real | aplicada | as três RPCs pedem `administer`, a fixture honra o vocabulário fechado das seis ações e `validate:module-keys` confere o quinto argumento sobre o estado final das funções |
+| `VACINA-059` | `TRUNCATE` não passa por RLS, e 213 tabelas o concediam a `anon` e `authenticated` — inclusive `emitted_documents`, cuja imutabilidade vinha só da ausência de política | aplicada | `revoke truncate, trigger, references` em todo o esquema e no padrão de privilégios, `revoke update, delete` no documento emitido, e o instantâneo do ledger passou a carregar os privilégios perigosos, conferidos no CI |
 
 ## 4. Arquivos
 
@@ -219,7 +220,8 @@ diretrizes/vacinas/
 ├── VACINA-055-EMBED-DE-RELACAO-INEXISTENTE-E-O-VALIDADOR-QUE-NAO-ENXERGA.md
 ├── VACINA-056-VERIFICACAO-QUE-SE-AUTODISPENSA-PARECE-VERIFICACAO-QUE-PASSOU.md
 ├── VACINA-057-VALIDADOR-CONFERE-O-ARTEFATO-E-NAO-O-EFEITO.md
-└── VACINA-058-ACAO-INEXISTENTE-EM-HAS-MODULE-PERMISSION-NEGA-TODO-MUNDO.md
+├── VACINA-058-ACAO-INEXISTENTE-EM-HAS-MODULE-PERMISSION-NEGA-TODO-MUNDO.md
+└── VACINA-059-RLS-NAO-COBRE-TRUNCATE.md
 ```
 
 ## 5. Critérios para nova vacina

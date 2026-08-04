@@ -101,6 +101,20 @@ for (const nome of aplicadas) {
   }
 }
 
+/* Privilégios que a RLS não filtra — VACINA-059.
+   `TRUNCATE` é comando de tabela, não de linha: política nenhuma o alcança.
+   Medido em banco local com RLS forçada e `for select using(false)`, o truncate
+   esvaziou a tabela sem erro. A lista tem de continuar vazia; se o campo não
+   existir no instantâneo, é instantâneo velho e o aviso de idade cobra. */
+const perigosos = ledger.privilegios?.perigosos;
+if (Array.isArray(perigosos) && perigosos.length) {
+  erros.push(
+    `${perigosos.length} concessão(ões) de TRUNCATE/TRIGGER/REFERENCES a anon ou authenticated: ` +
+      `${perigosos.slice(0, 6).join(", ")}${perigosos.length > 6 ? ", …" : ""}. ` +
+      "TRUNCATE não passa por RLS: quem tem o privilégio esvazia a tabela inteira, com política e tudo."
+  );
+}
+
 /* Idade do instantâneo — informação de revisão, não reprovação. */
 const atualizado = Date.parse(ledger.atualizado_em ?? "");
 if (!Number.isFinite(atualizado)) {
@@ -127,5 +141,6 @@ if (erros.length) {
 for (const aviso of avisos) console.warn(`aviso: ${aviso}`);
 console.log(
   `Migrations conferidas contra o ledger: ${arquivos.length} arquivo(s), ` +
-    `${aplicadas.size} aplicada(s), nenhuma divergência nova.`
+    `${aplicadas.size} aplicada(s), nenhuma divergência nova. ` +
+    `Privilégios perigosos no instantâneo: ${Array.isArray(perigosos) ? perigosos.length : "não medidos"}.`
 );

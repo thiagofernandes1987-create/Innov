@@ -35,7 +35,7 @@ a ignorar.
 | Funções do banco declaradas | 227 |
 | Funções do banco chamadas do código | 116 |
 | Suítes de teste | 42, com 473 casos |
-| Migrations | 156 |
+| Migrations | 157 |
 | Validadores de CI | 28 |
 | Módulos de `lib/` citados por algum teste | 41 de 85 |
 
