@@ -4,14 +4,16 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
-import { validateDraftClaims } from "@/lib/messaging/ai";
+import { ContextBuilder, validateDraftClaims } from "@/lib/messaging/ai";
 import {
+  deriveBotReadiness,
   normalizeBotTools,
   validateBotProfile,
   type BotProfile,
   type BotProviderId,
   type BotRetrievalMode
 } from "@/lib/messaging/bots";
+import { ConversationCanonicalRetrievalStore } from "@/lib/messaging/canonical-retrieval.server";
 import {
   OpenAiProviderError,
   openAiMessagingEnvironmentStatus
@@ -46,12 +48,18 @@ function safeMessage(error: unknown) {
   if (message.includes("BOT_SECRET_DETECTED")) return "As instruções não podem conter credenciais ou segredos.";
   if (message.includes("BOT_TOOL_NOT_ALLOWED")) return "Uma ferramenta selecionada não é permitida.";
   if (message.includes("BOT_NOT_READY")) return "Configure provedor, modelo, orçamento e limite por execução antes de habilitar o bot.";
-  if (message.includes("BOT_QUEUE_SCOPE_MISMATCH")) return "A fila selecionada não pertence à organização.";
-  if (message.includes("BOT_PROJECT_SCOPE_MISMATCH")) return "A obra selecionada não pertence à organização.";
+  if (message.includes("BOT_RUNTIME_NOT_READY")) return "O bot não está pronto no servidor. Revise provider, modelo, orçamento, plugins e ferramentas.";
+  if (message.includes("BOT_QUEUE_SCOPE_MISMATCH")) return "A conversa não pertence à fila autorizada para este bot.";
+  if (message.includes("BOT_PROJECT_SCOPE_MISMATCH")) return "A conversa não pertence à obra autorizada para este bot.";
+  if (message.includes("BOT_HYBRID_NOT_AVAILABLE")) return "O modo híbrido permanece bloqueado até existir índice vetorial autorizado.";
   if (message.includes("AI_BUDGET_BELOW_CURRENT_USAGE")) return "O novo orçamento é menor que o valor já reservado ou consumido hoje.";
   if (message.includes("HUMAN_ASSIGNED")) return "A conversa está sob controle humano; a IA foi bloqueada.";
   if (message.includes("BUDGET")) return "O orçamento de IA não permite esta execução.";
   if (message.includes("CONVERSATION_BUSY")) return "Já existe uma geração em andamento para esta conversa.";
+  if (message.includes("AI_AUDIT_FAILED")) return "A geração não foi liberada porque a auditoria não pôde ser registrada. Não repita até verificar o ambiente.";
+  if (message.includes("AI_CANONICAL_MESSAGES_FAILED") || message.includes("AI_PROJECT_STATUS_FAILED")) {
+    return "As fontes canônicas da conversa não puderam ser recuperadas.";
+  }
   return "A operação não pôde ser concluída. Revise os dados e tente novamente.";
 }
 
@@ -159,6 +167,14 @@ export type BotDraftTestState =
       requiresHumanReview: true;
       claimWarnings: string[];
       sourceWarning: string;
+      retrievalMode: "LEXICAL" | "HYBRID" | "LEXICAL_FALLBACK";
+      citations: Array<{
+        sourceId: string;
+        title: string;
+        version: number;
+        sha256: string;
+        trust: string;
+      }>;
     };
 
 export async function testMessagingBotDraft(data: FormData): Promise<BotDraftTestState> {
@@ -174,7 +190,13 @@ export async function testMessagingBotDraft(data: FormData): Promise<BotDraftTes
   let fencingToken: number | null = null;
   let reserved = 0;
   try {
-    const [{ data: profileRow, error: profileError }, { data: conversation, error: conversationError }] = await Promise.all([
+    const today = new Date().toISOString().slice(0, 10);
+    const [
+      { data: profileRow, error: profileError },
+      { data: conversation, error: conversationError },
+      { data: policyRows, error: policyError },
+      { data: budgetRow, error: budgetReadError }
+    ] = await Promise.all([
       context.supabase
         .from("channel_bot_profiles")
         .select("id,organization_id,name,enabled_for_drafts,provider_id,model_id,system_instructions,retrieval_mode,allowed_tools,max_output_tokens,max_cost_micros_per_run,queue_id,project_id")
@@ -183,13 +205,26 @@ export async function testMessagingBotDraft(data: FormData): Promise<BotDraftTes
         .maybeSingle(),
       context.supabase
         .from("whatsapp_conversations")
-        .select("id,organization_id,project_id,assigned_to,status")
+        .select("id,organization_id,project_id,queue_id,assigned_to,status")
         .eq("id", conversationId)
         .eq("organization_id", context.organizationId)
+        .maybeSingle(),
+      context.supabase
+        .from("channel_message_plugin_policies")
+        .select("plugin_id,enabled")
+        .eq("organization_id", context.organizationId)
+        .in("plugin_id", ["CONSENT", "AI_FALLBACK"]),
+      context.supabase
+        .from("channel_ai_budget_daily")
+        .select("maximum_cost_micros")
+        .eq("organization_id", context.organizationId)
+        .eq("usage_date", today)
         .maybeSingle()
     ]);
     if (profileError || !profileRow) throw new Error("BOT_PROFILE_NOT_FOUND");
     if (conversationError || !conversation) throw new Error("CONVERSATION_NOT_FOUND");
+    if (policyError) throw new Error("BOT_POLICY_QUERY_FAILED");
+    if (budgetReadError) throw new Error("AI_BUDGET_QUERY_FAILED");
     if (conversation.assigned_to) throw new Error("HUMAN_ASSIGNED");
 
     const profile: BotProfile = {
@@ -209,21 +244,55 @@ export async function testMessagingBotDraft(data: FormData): Promise<BotDraftTes
       queueId: profileRow.queue_id ? String(profileRow.queue_id) : null,
       projectId: profileRow.project_id ? String(profileRow.project_id) : null
     };
-    if (!profile.enabledForDrafts || profile.providerId !== "OPENAI") throw new Error("BOT_NOT_READY");
     if (profile.projectId && profile.projectId !== String(conversation.project_id ?? "")) {
       throw new Error("BOT_PROJECT_SCOPE_MISMATCH");
     }
+    if (profile.queueId && profile.queueId !== String(conversation.queue_id ?? "")) {
+      throw new Error("BOT_QUEUE_SCOPE_MISMATCH");
+    }
+
+    const environment = openAiMessagingEnvironmentStatus();
+    const policies = (policyRows ?? []).map(row => ({
+      pluginId: String(row.plugin_id),
+      enabled: Boolean(row.enabled)
+    }));
+    const readiness = deriveBotReadiness({
+      profile,
+      providerConfigured: environment.configured,
+      providerModel: environment.model,
+      dailyBudgetMicros: Number(budgetRow?.maximum_cost_micros ?? 0),
+      consentPluginEnabled: policies.some(policy => policy.pluginId === "CONSENT" && policy.enabled),
+      aiPluginEnabled: policies.some(policy => policy.pluginId === "AI_FALLBACK" && policy.enabled)
+    });
+    if (!readiness.readyForDraftTest) throw new Error(`BOT_RUNTIME_NOT_READY:${readiness.blockers.join("|")}`);
+    if (profile.retrievalMode === "HYBRID") throw new Error("BOT_HYBRID_NOT_AVAILABLE");
 
     lockOwner = `ui-test:${context.userId}:${randomUUID()}`;
     const { data: lock, error: lockError } = await context.supabase.rpc("claim_channel_ai_conversation", {
       p_organization_id: context.organizationId,
       p_conversation_id: conversationId,
       p_owner_id: lockOwner,
-      p_ttl_seconds: 30
+      p_ttl_seconds: 90
     });
     if (lockError) throw new Error(`${lockError.code ?? "AI_LOCK_FAILED"}:${lockError.message}`);
     fencingToken = Number(lock);
     if (!Number.isSafeInteger(fencingToken) || fencingToken < 1) throw new Error("CONVERSATION_BUSY");
+
+    const contextBuilder = new ContextBuilder(
+      new ConversationCanonicalRetrievalStore({
+        supabase: context.supabase,
+        organizationId: context.organizationId,
+        conversationId,
+        allowedTools: profile.allowedTools
+      }),
+      { maxSources: 6, maxCharacters: 8_000 }
+    );
+    const aiContext = await contextBuilder.build({
+      organizationId: context.organizationId,
+      projectId: conversation.project_id ? String(conversation.project_id) : null,
+      query: sampleMessage,
+      vectorEnabled: false
+    });
 
     reserved = profile.maxCostMicrosPerRun;
     const { data: budgetReserved, error: budgetError } = await context.supabase.rpc("reserve_channel_ai_budget", {
@@ -232,23 +301,16 @@ export async function testMessagingBotDraft(data: FormData): Promise<BotDraftTes
     });
     if (budgetError || !budgetReserved) throw new Error("BUDGET_EXCEEDED");
 
-    const environment = openAiMessagingEnvironmentStatus();
     const provider = environment.createProvider();
     const output = await provider.generateDraft({
       systemInstructions: profile.systemInstructions,
       customerMessage: sampleMessage,
-      context: {
-        query: sampleMessage,
-        citations: [],
-        minimizedCharacters: 0,
-        promptInjectionSignalsRemoved: 0,
-        retrievalMode: profile.retrievalMode
-      },
+      context: aiContext,
       allowedTools: [],
       maxOutputTokens: profile.maxOutputTokens
     });
     if (output.estimatedCostMicros > reserved) throw new Error("BUDGET_ACTUAL_EXCEEDED");
-    const claims = validateDraftClaims(output.text, []);
+    const claims = validateDraftClaims(output.text, aiContext.citations);
     const { data: committed, error: commitError } = await context.supabase.rpc("commit_channel_ai_budget", {
       p_organization_id: context.organizationId,
       p_reserved_micros: reserved,
@@ -257,20 +319,28 @@ export async function testMessagingBotDraft(data: FormData): Promise<BotDraftTes
     if (commitError || !committed) throw new Error("BUDGET_COMMIT_FAILED");
     reserved = 0;
 
-    await context.supabase.rpc("record_channel_ai_invocation", {
+    const citationAudit = aiContext.citations.map(citation => ({
+      sourceId: citation.sourceId,
+      version: citation.version,
+      title: citation.title,
+      sha256: citation.sha256,
+      trust: citation.trust
+    }));
+    const { error: auditError } = await context.supabase.rpc("record_channel_ai_invocation", {
       p_organization_id: context.organizationId,
       p_conversation_id: conversationId,
       p_provider_id: provider.providerId,
       p_model_id: output.model,
       p_status: "DRAFT_CREATED",
-      p_source_citations: [],
-      p_tools_used: [],
+      p_source_citations: citationAudit,
+      p_tools_used: profile.allowedTools,
       p_input_tokens: output.inputTokens,
       p_output_tokens: output.outputTokens,
       p_estimated_cost_micros: output.estimatedCostMicros,
       p_claim_validation: claims,
-      p_prompt_injection_signals_removed: 0
+      p_prompt_injection_signals_removed: aiContext.promptInjectionSignalsRemoved
     });
+    if (auditError) throw new Error(`AI_AUDIT_FAILED:${auditError.code ?? "UNKNOWN"}`);
 
     return {
       ok: true,
@@ -285,7 +355,11 @@ export async function testMessagingBotDraft(data: FormData): Promise<BotDraftTes
         ...claims.unsupportedDates.map(value => `Data sem fonte: ${value}`),
         ...claims.commitmentSignals.map(value => `Compromisso detectado: ${value}`)
       ],
-      sourceWarning: "Este teste ainda não recupera fontes canônicas; revise integralmente o conteúdo."
+      sourceWarning: aiContext.citations.length
+        ? "Contexto limitado às fontes canônicas desta conversa e da obra vinculada."
+        : "Nenhuma fonte canônica aplicável foi encontrada; revise integralmente o rascunho.",
+      retrievalMode: aiContext.retrievalMode,
+      citations: citationAudit
     };
   } catch (error) {
     return { ok: false, error: safeMessage(error) };
