@@ -57,6 +57,7 @@ export type InboxFilters = {
 };
 
 export type InboxActionAvailability = {
+  canViewConversation: boolean;
   canSend: boolean;
   canStartConversation: boolean;
   canAssign: boolean;
@@ -83,6 +84,24 @@ export function channelStateLabel(state: InboxChannelState): string {
     case "DEGRADED": return "Degradado";
     case "ACTION_REQUIRED": return "Ação necessária";
   }
+}
+
+export function resolveEffectiveOperatorPresence(input: {
+  presence?: unknown;
+  expiresAt?: unknown;
+  now?: Date;
+}): OperatorPresence {
+  const presence = String(input.presence ?? "ONLINE");
+  const normalized = (["ONLINE", "AWAY", "BUSY", "OFFLINE"] as const).includes(
+    presence as OperatorPresence
+  )
+    ? presence as OperatorPresence
+    : "OFFLINE";
+  if (normalized === "OFFLINE") return "OFFLINE";
+  if (!input.expiresAt) return "OFFLINE";
+  const expiresAt = new Date(String(input.expiresAt)).getTime();
+  const now = (input.now ?? new Date()).getTime();
+  return Number.isFinite(expiresAt) && expiresAt > now ? normalized : "OFFLINE";
 }
 
 export function buildUnifiedInbox(threads: readonly InboxThread[]): UnifiedInboxConversation[] {
@@ -130,7 +149,7 @@ export function filterUnifiedInbox(
       (!filters.channelState || thread.channelState === filters.channelState)
     );
     if (!eligibleThreads.length) return false;
-    if (filters.unreadOnly && conversation.unreadCount === 0) return false;
+    if (filters.unreadOnly && eligibleThreads.every(thread => thread.unreadCount <= 0)) return false;
     if (search && ![
       conversation.contactName,
       ...eligibleThreads.flatMap(item => [item.projectName ?? "", item.queueName ?? "", item.assignedName ?? ""])
@@ -148,6 +167,7 @@ export function deriveInboxActionAvailability(input: {
   const humanAvailable = input.operatorPresence !== "OFFLINE";
   if (!channelAvailable) {
     return {
+      canViewConversation: true,
       canSend: false,
       canStartConversation: false,
       canAssign: input.canManage,
@@ -157,6 +177,7 @@ export function deriveInboxActionAvailability(input: {
     };
   }
   return {
+    canViewConversation: true,
     canSend: input.thread.capabilities.canSendAny && humanAvailable,
     canStartConversation: input.thread.capabilities.canStartConversation && humanAvailable,
     canAssign: input.canManage,
