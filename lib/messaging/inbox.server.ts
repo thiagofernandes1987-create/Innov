@@ -11,6 +11,7 @@ import {
   buildUnifiedInbox,
   filterUnifiedInbox,
   messagingProviderLabel,
+  resolveEffectiveOperatorPresence,
   type InboxChannelState,
   type InboxFilters,
   type InboxThread
@@ -23,8 +24,9 @@ function firstRelation(value: unknown): Record<string, unknown> | null {
 }
 
 function providerType(value: unknown): ChannelProviderType {
-  const candidate = String(value ?? "META_CLOUD") as ChannelProviderType;
-  return candidate;
+  const candidate = String(value ?? "META_CLOUD");
+  if (candidate === "WHATSAPP_WEB_BAILEYS" || candidate === "WEB_CHAT") return candidate;
+  return "META_CLOUD";
 }
 
 function channelState(value: unknown, providerStatus: unknown): InboxChannelState {
@@ -57,11 +59,11 @@ export async function loadMultiproviderInbox(input: {
 }) {
   const context = await requireCapability("whatsapp", "read");
   const canManage = await hasCapability("whatsapp", "manage", null, context);
-  const [conversationResult, queueResult, presenceResult, noteResult] = await Promise.all([
+  const [conversationResult, queueResult, presenceResult, noteResult, membershipResult] = await Promise.all([
     context.supabase
       .from("whatsapp_conversations")
       .select(`
-        id, organization_id, account_id, contact_id, project_id, status,
+        id, organization_id, account_id, contact_id, client_id, project_id, status,
         last_message_at, unread_count, assigned_to, queue_id, ownership_version,
         channel_state, last_actor_kind,
         whatsapp_contacts(id, display_name, phone_e164),
@@ -92,13 +94,33 @@ export async function loadMultiproviderInbox(input: {
         .eq("conversation_id", input.conversationId)
         .order("created_at", { ascending: false })
         .limit(20)
-      : Promise.resolve({ data: [], error: null })
+      : Promise.resolve({ data: [], error: null }),
+    context.supabase
+      .from("organization_memberships")
+      .select("user_id")
+      .eq("organization_id", context.organizationId)
+      .eq("active", true)
   ]);
 
-  for (const result of [conversationResult, queueResult, presenceResult, noteResult]) {
+  for (const result of [conversationResult, queueResult, presenceResult, noteResult, membershipResult]) {
     if (result.error) throw new Error(`INBOX_QUERY_FAILED:${result.error.code ?? "UNKNOWN"}`);
   }
 
+  const memberIds = [...new Set((membershipResult.data ?? []).map(row => String(row.user_id)))];
+  const profileResult = memberIds.length
+    ? await context.supabase
+      .from("profiles")
+      .select("id, full_name, email")
+      .in("id", memberIds)
+    : { data: [], error: null };
+  if (profileResult.error) throw new Error(`INBOX_ASSIGNEES_FAILED:${profileResult.error.code ?? "UNKNOWN"}`);
+
+  const profiles = ((profileResult.data ?? []) as Array<Record<string, unknown>>).map(row => ({
+    id: String(row.id),
+    name: String(row.full_name ?? row.email ?? String(row.id).slice(0, 8)),
+    email: row.email ? String(row.email) : null
+  }));
+  const profileNames = new Map(profiles.map(profile => [profile.id, profile.name]));
   const queueRows = (queueResult.data ?? []) as Array<Record<string, unknown>>;
   const queueNames = new Map(queueRows.map(row => [String(row.id), String(row.name)]));
   const threads: InboxThread[] = ((conversationResult.data ?? []) as Array<Record<string, unknown>>)
@@ -108,9 +130,10 @@ export async function loadMultiproviderInbox(input: {
       const project = firstRelation(row.projects);
       const type = providerType(account?.provider_type);
       const queueId = row.queue_id ? String(row.queue_id) : null;
+      const assignedTo = row.assigned_to ? String(row.assigned_to) : null;
       return {
         conversationId: String(row.id),
-        contactId: String(row.contact_id),
+        contactId: String(row.client_id ?? row.contact_id),
         contactName: String(contact?.display_name ?? contact?.phone_e164 ?? "Contato"),
         accountId: String(row.account_id),
         providerType: type,
@@ -119,12 +142,12 @@ export async function loadMultiproviderInbox(input: {
         channelState: channelState(row.channel_state, account?.provider_status),
         queueId,
         queueName: queueId ? queueNames.get(queueId) ?? null : null,
-        assignedTo: row.assigned_to ? String(row.assigned_to) : null,
-        assignedName: row.assigned_to ? "Responsável atribuído" : null,
+        assignedTo,
+        assignedName: assignedTo ? profileNames.get(assignedTo) ?? "Responsável atribuído" : null,
         projectId: row.project_id ? String(row.project_id) : null,
         projectName: project?.name ? String(project.name) : null,
         status: String(row.status ?? "OPEN"),
-        unreadCount: Number(row.unread_count ?? 0),
+        unreadCount: Math.max(0, Number(row.unread_count ?? 0)),
         lastMessageAt: row.last_message_at ? String(row.last_message_at) : null,
         lastActorKind: String(row.last_actor_kind ?? "HUMAN") as InboxThread["lastActorKind"],
         capabilities: capabilitiesFor(context.organizationId, type)
@@ -134,6 +157,7 @@ export async function loadMultiproviderInbox(input: {
   const selectedThread = threads.find(item => item.conversationId === input.conversationId) ?? null;
   const selectedRow = ((conversationResult.data ?? []) as Array<Record<string, unknown>>)
     .find(row => String(row.id) === input.conversationId) ?? null;
+  const presenceRow = presenceResult.data as Record<string, unknown> | null;
 
   return {
     organizationId: context.organizationId,
@@ -148,7 +172,12 @@ export async function loadMultiproviderInbox(input: {
       description: row.description ? String(row.description) : null,
       priority: Number(row.priority ?? 100)
     })),
-    presence: String((presenceResult.data as Record<string, unknown> | null)?.presence ?? "ONLINE") as "ONLINE" | "AWAY" | "BUSY" | "OFFLINE",
+    assignees: profiles.sort((left, right) => left.name.localeCompare(right.name, "pt-BR")),
+    presence: resolveEffectiveOperatorPresence({
+      presence: presenceRow?.presence,
+      expiresAt: presenceRow?.expires_at
+    }),
+    presenceExpiresAt: presenceRow?.expires_at ? String(presenceRow.expires_at) : null,
     notes: ((noteResult.data ?? []) as Array<Record<string, unknown>>).map(row => ({
       id: String(row.id),
       body: String(row.body),
