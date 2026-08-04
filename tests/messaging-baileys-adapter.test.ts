@@ -336,7 +336,9 @@ describe("BaileysEngineAdapter inbound and lifecycle", () => {
       createEventId: () => "event-fixed"
     });
     const events: BaileysEngineEvent[] = [];
-    engine.subscribe(event => events.push(event));
+    engine.subscribe(event => {
+      events.push(event);
+    });
     await engine.connect(channelAccountId);
     ev.emit("connection.update", { qr: "SECRET-QR-VALUE" });
     await vi.waitFor(() => expect(events.some(event =>
@@ -349,7 +351,9 @@ describe("BaileysEngineAdapter inbound and lifecycle", () => {
   it("normaliza mensagem inbound e preserva somente metadata sanitizada", async () => {
     const { adapter, ev } = await readyAdapter();
     const events: BaileysEngineEvent[] = [];
-    adapter.subscribe(event => events.push(event));
+    adapter.subscribe(event => {
+      events.push(event);
+    });
     ev.emit("messages.upsert", {
       type: "notify",
       requestId: "request-secret",
@@ -386,7 +390,9 @@ describe("BaileysEngineAdapter inbound and lifecycle", () => {
   it("normaliza mídia inbound como referência do provider sem baixar conteúdo", async () => {
     const { adapter, ev } = await readyAdapter();
     const events: BaileysEngineEvent[] = [];
-    adapter.subscribe(event => events.push(event));
+    adapter.subscribe(event => {
+      events.push(event);
+    });
     ev.emit("messages.upsert", {
       type: "notify",
       messages: [{
@@ -415,7 +421,9 @@ describe("BaileysEngineAdapter inbound and lifecycle", () => {
   it("normaliza receipts e encerra o socket graciosamente", async () => {
     const { adapter, socket, ev } = await readyAdapter();
     const events: BaileysEngineEvent[] = [];
-    adapter.subscribe(event => events.push(event));
+    adapter.subscribe(event => {
+      events.push(event);
+    });
     ev.emit("message-receipt.update", [{
       key: { id: "outbound-001", remoteJid: "5512999999999@s.whatsapp.net" },
       receipt: {
