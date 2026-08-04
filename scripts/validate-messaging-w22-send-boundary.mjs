@@ -5,6 +5,7 @@ const files = {
   server: "lib/whatsapp/server.ts",
   page: "app/app/whatsapp/page.tsx",
   migration: "supabase/migrations/20260805004000_stage22_whatsapp_dispatch_claim.sql",
+  dbFixture: "supabase/tests/messaging-dispatch/fixture.sql",
   dbTest: "supabase/tests/messaging-dispatch/dispatch.test.sql",
   dbRunner: "scripts/run-messaging-w22-dispatch-db-tests.mjs"
 };
@@ -80,6 +81,17 @@ for (const token of [
 ]) if (!migration.includes(token)) failures.push(`Migration de dispatch sem ${token}`);
 
 for (const token of [
+  "public.clients",
+  "public.projects",
+  "public.app_modules",
+  "alter table public.whatsapp_contacts",
+  "client_id uuid",
+  "alter table public.whatsapp_messages",
+  "source_snapshot jsonb",
+  "sent_at timestamptz"
+]) if (!read("dbFixture").toLowerCase().includes(token.toLowerCase())) failures.push(`Fixture de dispatch sem ${token}`);
+
+for (const token of [
   "idempotência de persistência aprovada",
   "claim concorrente exclusivo aprovado",
   "fencing de conclusão aprovado",
@@ -87,9 +99,11 @@ for (const token of [
   "estado terminal não redispatchável aprovado",
   "privilégio mínimo do dispatch aprovado"
 ]) if (!read("dbTest").includes(token)) failures.push(`Teste PostgreSQL de dispatch ausente: ${token}`);
-if (!read("dbRunner").includes("20260805004000_stage22_whatsapp_dispatch_claim.sql")) {
-  failures.push("Runner não aplica migration de claim do dispatch.");
-}
+for (const token of [
+  "supabase/tests/messaging-dispatch/fixture.sql",
+  "20260803190000_stage22_whatsapp_omnichannel.sql",
+  "20260805004000_stage22_whatsapp_dispatch_claim.sql"
+]) if (!read("dbRunner").includes(token)) failures.push(`Runner de dispatch sem ${token}`);
 
 for (const token of [
   "accountCapabilities",
@@ -121,6 +135,7 @@ console.log(JSON.stringify({
   dispatchClaimedBeforeMetaEngine: true,
   dispatchCompletionFenced: true,
   staleClaimRecoveryFenced: true,
+  isolatedFixtureCompatibleWithOfficialMigration: true,
   invalidOrMissingProviderFailsClosed: true,
   disabledProviderFailsClosed: true,
   projectScopeRevalidated: true,
