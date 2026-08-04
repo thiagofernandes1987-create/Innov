@@ -1294,6 +1294,77 @@ tarefa sobre a página de orçamento, seria redesenhar a casca de lado.
 
 ---
 
+## Sprint S-37 — Orçamento analítico: SINAPI que importa, CUB completo e o corte material × mão de obra
+
+**Estado:** pendente
+
+Nasce de uma auditoria pedida pelo responsável em 04/08/2026 — *"no módulo de
+orçamento eu incluí um modo para sincronizar o Sinapi automaticamente para
+realizar o orçamento analítico, no CUB tem outros tipos de construção, também é
+necessário separar por mão de obra e material, valide para mim"*. Entra **no
+fim** conforme a R4. Os três pontos foram medidos, e os três têm defeito real.
+
+### O que foi medido
+
+**SINAPI nunca importou nada.** No banco: 0 lotes, 0 itens de catálogo, 0
+composições, 0 execuções de sincronização. O mecanismo está inteiro — descoberta
+pela API oficial da CAIXA, verificação de ZIP, trava de concorrência por
+`advisory lock`, SHA-256 obrigatório, domínio `caixa.gov.br` exigido, importação
+só por `service_role` — e falha antes de gravar a primeira linha. Medido com o
+pacote real de 06/2026, pelos dois caminhos que existem no código:
+
+- o botão da tela (`automatic-update.ts`): *"SINAPI_XLSX: somente 0 insumos
+  válidos foram encontrados; mínimo esperado: 500."*
+- a sonda v2 (`automatic-update-v2.ts`): *"relatório de insumos SP não
+  desonerado não encontrado."*
+
+**A causa está no formato da publicação.** `SINAPI-2026-06-formato-xlsx.zip`
+(15.715.816 bytes) traz quatro arquivos, e **nenhum deles tem UF ou regime no
+nome**: `SINAPI_familias_e_coeficientes_2026_06.xlsx`,
+`SINAPI_Manutenções_2026_06.xlsx`, `SINAPI_mao_de_obra_2026_06.xlsx` e
+`SINAPI_Referência_2026_06.xlsx`. O seletor
+(`official-reference-parser.ts#selectTargetFiles`) lê UF, regime e tipo **do
+nome do arquivo**, como era quando cada UF tinha o seu. Hoje a UF é **coluna** —
+o cabeçalho da planilha de coeficientes lista AC, AL, AM … SP, TO. O leitor está
+uma geração de formato atrás.
+
+**Há uma segunda parede atrás dessa.** `runSinapiAutomaticUpdate` exige
+`SUPABASE_SERVICE_ROLE_KEY` e `start_sinapi_import` recusa quem não é
+`service_role`. A decisão de segurança em vigor é que essa chave **não vai para
+o deploy público**; então, mesmo com o leitor corrigido, o caminho automático
+precisa de um lugar para rodar que a tenha — um trabalho agendado, não a
+aplicação web.
+
+**CUB tem um tipo de construção só.** O esquema aceita qualquer
+`reference_code`; o banco tem duas linhas, e as duas são **R8-N** (com e sem
+desoneração), só SP. Faltam R1, PP-4, R8, R16, PIS, RP1Q, GI, CAL e CSL, e os
+padrões de acabamento baixo/normal/alto. A tela lista o que existe na tabela —
+logo, oferece um item.
+
+**Material × mão de obra existe pela metade.** No item manual, sim: a coluna
+`item_category` aceita MATERIAL, LABOR, EQUIPMENT, SERVICE, SUBCONTRACT,
+FIXED_COST, REFERENCE e OTHER, e o campo "Natureza" do formulário grava.
+No CUB, não: `addCubReferenceItem` lê só `total_cost` e insere **uma linha
+`REFERENCE`**. E `cost_reference_snapshots` **já tem** `materials_cost`,
+`labor_cost`, `administrative_cost` e `equipment_cost` — a linha desonerada
+semeada traz 892,29 + 1.192,01 + 61,78, que fecha exatamente os 2.146,08 do
+total (55,5% mão de obra, 41,6% material). Ninguém lê essas colunas.
+E nos totais, não: `calculate_budget_version` soma por `cost_type`
+(direto/indireto/fixo/administrativo) e **não** por natureza — não existe total
+de material nem de mão de obra em tela nenhuma.
+
+### Tarefas
+
+- [ ] T-37.1 — Reescrever a seleção de arquivos do pacote SINAPI para o formato atual: um arquivo nacional por tipo de relatório, UF em coluna, regime em coluna ou em aba. O teste é o pacote real, não um exemplo — e a sonda `/api/internal/sinapi-source-probe` já baixa e descreve o pacote
+- [ ] T-37.2 — Onde a importação roda, já que a chave de serviço não pode ir para o deploy público. Decidir entre trabalho agendado com credencial própria e importação por arquivo enviado à mão, e escrever a decisão
+- [ ] T-37.3 — Teste de regressão do leitor contra o layout publicado, que reprove quando a CAIXA mudar o formato de novo — a falha de hoje passou despercebida porque nada exercita o leitor com arquivo real
+- [ ] T-37.4 — Semear os demais tipos de CUB do SindusCon-SP e permitir mais de uma UF, com a data-base de cada publicação
+- [ ] T-37.5 — CUB entra decomposto: material, mão de obra e administrativo viram linhas próprias com a natureza certa, em vez de uma linha `REFERENCE` com o total. As colunas já existem e já vêm preenchidas
+- [ ] T-37.6 — Total por natureza no resumo do orçamento e no relatório: material, mão de obra, equipamento, serviço. É o corte que o responsável pediu e o que separa orçamento analítico de estimativa
+- [ ] T-37.7 — Um leitor só. `automatic-update.ts` e `automatic-update-v2.ts` convivem, ligados a caminhos diferentes (o botão e a sonda), e falham em pontos diferentes pelo mesmo motivo
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.
