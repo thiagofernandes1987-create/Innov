@@ -82,15 +82,20 @@ begin
 end;
 $$;
 
-for table_name in
-  select unnest(array['channel_ai_conversation_locks','channel_ai_handoffs','channel_ai_invocations'])
-loop
-  execute format('drop trigger if exists %I on public.%I', table_name||'_scope_guard', table_name);
-  execute format(
-    'create trigger %I before insert or update on public.%I for each row execute function public.channel_ai_scope_guard()',
-    table_name||'_scope_guard', table_name
-  );
-end loop;
+do $$
+declare table_name text;
+begin
+  foreach table_name in array array[
+    'channel_ai_conversation_locks','channel_ai_handoffs','channel_ai_invocations'
+  ] loop
+    execute format('drop trigger if exists %I on public.%I', table_name||'_scope_guard', table_name);
+    execute format(
+      'create trigger %I before insert or update on public.%I for each row execute function public.channel_ai_scope_guard()',
+      table_name||'_scope_guard', table_name
+    );
+  end loop;
+end;
+$$;
 
 create or replace function public.channel_ai_immutable_invocation()
 returns trigger
