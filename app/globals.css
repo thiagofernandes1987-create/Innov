@@ -427,7 +427,15 @@ h3 { margin: 0; font-size: 19px; line-height: 1.25; }
   box-shadow: var(--shadow-xs);
 }
 .card-pad { padding: 22px; }
-.grid { display: grid; gap: 18px; }
+/* VACINA-044 outra vez, agora na trilha implícita. `.grid` sem colunas
+   declaradas cria uma coluna implícita de tamanho `auto`, que é
+   `minmax(auto,auto)` e não encolhe abaixo do `min-content` do filho. Medido na
+   página de orçamento: a coluna implícita ficou com 1602px dentro de uma faixa
+   de 966px, e a página inteira passou a rolar na horizontal em 1366 — no
+   desktop, não só no telefone. O piso `minmax(0,1fr)` e o `min-width:0` no
+   filho são a mesma dupla já registrada; o que muda é onde ela faltava. */
+.grid { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); }
+.grid > * { min-width: 0; }
 .grid-kpi { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .kpi { padding: 20px; }
 .kpi small, .stats-grid article small { color: var(--muted); font-weight: 820; letter-spacing: .06em; font-size: 11px; }

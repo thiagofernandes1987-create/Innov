@@ -1178,8 +1178,8 @@ R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
 
 - [ ] T-33.12 — Tabela em tela estreita: as 20 telas do produto rolam na horizontal dentro de `.table-wrap`, sem indicar que há coluna fora de vista. Em 390px a coluna de ação some. Decidir um padrão único para o produto — cartão por linha, coluna prioritária ou indicação de rolagem — em vez de resolver tela a tela
 
-- [ ] T-33.13 — Página de orçamento transborda em todas as larguras (1627px contra 1366 disponíveis), inclusive no desktop. Medido com e sem a alteração desta sprint: idêntico nos dois, é anterior
-- [ ] T-33.14 — Cartão do funil com alvo de toque de 19px em 390px de largura — o título do cartão, que é o alvo principal do kanban no telefone. Também anterior, confirmado por medição com e sem alteração
+- [x] T-33.13 — Página de orçamento transbordava em todas as larguras. **Causa: VACINA-044 outra vez, agora na trilha implícita.** `.grid` sem colunas declaradas cria uma coluna implícita de tamanho `auto`, que é `minmax(auto,auto)` e não encolhe abaixo do `min-content` do filho — medido, a coluna ficou com 1602px dentro de uma faixa de 966px. O piso `minmax(0,1fr)` mais `min-width:0` no filho são a mesma dupla já registrada; o que mudou foi onde ela faltava. **Varredura de 20 rotas em três larguras, antes e depois**: transbordos caíram de 11 para 8, e as três mudanças são exatamente o orçamento — 261px em 1366, 603px em 1024 e 1227px em 390, todas resolvidas. Nenhum transbordo novo, nenhuma contagem de cartão alterada. A tabela de 1601px continua larga e agora rola dentro do próprio contêiner, sem arrastar a página
+- [x] T-33.14 — Cartão do funil com alvo de 19px. **Já estava corrigido, e a nota é que envelheceu**: o commit `bf9e2e8` pôs `.pipeline-cartao-titulo::after { inset: 0 }`, e o alvo efetivo é o cartão inteiro — 248×91. Os 19px que eu media de novo eram do meu script de medição, não da tela: `getBoundingClientRect` devolve o retângulo do `<a>`, e a sobreposição absoluta não entra nele. O arnês do próprio repositório (`scripts/qa/harness.mjs`) já calcula o alvo **efetivo** e não cai nisso. Provado pelo efeito, não pela medida: `elementFromPoint` no rodapé do cartão devolve o link certo, e quatro toques — texto do título, meio e rodapé do cartão, por mouse e por toque — navegam todos para o cartão
 - [x] T-33.15 — `chaveNormalizada` não fundia "m2" e "m²". Resolvido **por escopo**, como a tarefa pedia: `chaveDoEscopo(escopo, valor)` funde expoente e índice só em `medida.unidade`; todo o resto — inclusive escopo desconhecido — continua com a regra de sempre, porque "H²" no nome de uma etapa é o nome da etapa, não uma unidade escrita torto. A fusão usa NFKD, a forma de compatibilidade, que já sabe que `²` é `2` e que `₂` também; tabela escrita à mão acertaria dois casos e erraria o terceiro. **O outro lado é o dado já gravado**: migration agrega sobre a chave nova e reinsere — a tabela tem chave natural `(organization_id, scope, normalized)`, então `update` na coluna de chave esbarraria na própria unicidade no meio do caminho. Exercitada em banco local com duplicata real: `m²` (31 usos, 31/07) e `m2` (4 usos, 01/08) viraram uma linha de **35 usos** com a grafia mais recente, `first_used_at` do mais antigo, outra empresa e outro escopo intocados. **A primeira fixture inventou uma coluna `id` que a tabela real não tem** e a migration passou verde contra um formato que não existe — VACINA-058 outra vez, agora do meu lado. Refeita fiel à tabela real, com os dois `check` e a chave natural. No banco de homologação: `m²` passou a ter a chave `m2`, mantendo o rótulo e os 31 usos, e a tela de vocabulário mostra a unidade uma vez só
 
 - [x] T-33.16 — **Mapa do código gerado**, não escrito à mão: `diretrizes/MAPA-DO-CODIGO.md` com aplicativos, 151 rotas e a guarda de cada uma, 174 server actions por arquivo, 78 módulos de `lib/` com exportados e cobertura, 220 funções do banco com quem as declara e quem as chama, suítes de teste e validadores. `pnpm validate:code-map` reprova no CI quando o arquivo diverge do código
@@ -1261,6 +1261,36 @@ estimativas fundamentadas, exatamente como a §12.2 declara.
 - [ ] T-35.4 — Campo de referência declara o alvo. Hoje `ObjectFieldSpec` guarda o tipo `referencia` e não guarda para onde ele aponta; o §2.1 diz "uuid + alvo"
 - [ ] T-35.5 — POC de carga com **milhões** de registros (item 7). Antes disso, nenhuma promessa de escala pode ser feita a partir deste código
 - [ ] T-35.6 — Onde o seguidor aparece: `object_record_followers` é gravado e ninguém o lê ainda. Encaixar na T-29 (acompanhamento a distância) em vez de criar um segundo mecanismo de notificação
+
+---
+
+## Sprint S-36 — A barra superior em largura de tablet
+
+**Estado:** pendente
+
+Descoberta ao medir a T-33.13, e entra **no fim** conforme a R4. Não é o
+defeito que a T-33.13 tratava: sobrou depois de resolvê-lo, e é de outro lugar.
+
+Medido em 20 rotas e três larguras: **oito telas transbordam em 1024px**, e a
+causa é a mesma em todas — `.barra-superior`. Em 1024 as trilhas ficam
+`434 / 260 / 265` e a `.barra-direita` precisa de 370: a soma dos mínimos passa
+da largura disponível, o navegador encolhe a trilha `auto` abaixo do conteúdo, e
+a barra vaza. Transbordo por tela: modelos 62px, financeiro 31px, estoque 87px,
+catálogo do estoque 87px, qualidade 43px, relatórios 42px, compras 38px,
+auditoria 73px.
+
+Existe uma regra elástica para 1261–1699px, onde a busca cede porque as ações
+da direita são todas alvos de toque. Entre 921 e 1260 não existe equivalente: a
+faixa herda `minmax(260px, auto) minmax(260px, 1fr) auto`, que não fecha.
+
+Fica para uma sprint própria porque **é a casca de todas as telas** e o mapa das
+duas barras é canônico (`PADRAO-DE-INTERFACE.md` §12): decidir o que cede em
+tablet é decisão de produto, não conserto de CSS. Improvisar aqui, dentro de uma
+tarefa sobre a página de orçamento, seria redesenhar a casca de lado.
+
+- [ ] T-36.1 — Decidir o que cede entre 921 e 1260px, com a mesma regra que já vale acima de 1261: a busca é elástica, as ações da direita são alvos de toque e não encolhem. Medir as oito telas antes e depois
+- [ ] T-36.2 — Em 390px o nome do aplicativo trunca colado no rótulo do menu — a barra lê "Orçamen..Menu". É a mesma disputa de espaço, na outra ponta
+- [ ] T-36.3 — Levar as três larguras para o arnês de QA visual como regressão fixa, para transbordo de casca não voltar sem ninguém ver
 
 ---
 
