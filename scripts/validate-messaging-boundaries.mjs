@@ -20,6 +20,7 @@ const requiredFiles = [
   "lib/messaging/capabilities.ts",
   "lib/messaging/engine.ts",
   "lib/messaging/feature-flags.ts",
+  "lib/messaging/policy.server.ts",
   "lib/messaging/engines/meta-cloud.ts",
   "lib/messaging/engines/meta-cloud.server.ts",
   "lib/messaging/engines/mock.ts",
@@ -27,6 +28,7 @@ const requiredFiles = [
   "tests/messaging-domain.test.ts",
   "tests/messaging-engine.test.ts",
   "tests/messaging-boundary.test.ts",
+  "app/actions/whatsapp.ts",
   "app/app/whatsapp/page.tsx",
   "lib/whatsapp/server.ts"
 ];
@@ -80,9 +82,11 @@ for (const sourceRoot of sourceRoots) {
 const capabilities = read("lib/messaging/capabilities.ts");
 const engine = read("lib/messaging/engine.ts");
 const flags = read("lib/messaging/feature-flags.ts");
+const policy = read("lib/messaging/policy.server.ts");
 const meta = read("lib/messaging/engines/meta-cloud.ts");
 const mock = read("lib/messaging/engines/mock.ts");
 const tests = read("tests/messaging-engine.test.ts");
+const actions = read("app/actions/whatsapp.ts");
 const page = read("app/app/whatsapp/page.tsx");
 const server = read("lib/whatsapp/server.ts");
 const env = read(".env.example");
@@ -125,6 +129,16 @@ for (const token of [
 }
 
 for (const token of [
+  "resolveMetaCloudRuntimePolicy",
+  "requireMetaCloudCapability",
+  "MESSAGING_PROVIDER_FLAGS_JSON",
+  "applyCapabilityOverrides",
+  "PROVIDER_NOT_AVAILABLE"
+]) {
+  if (!policy.includes(token)) violations.push(`policy server sem controle: ${token}`);
+}
+
+for (const token of [
   "class MetaCloudMessagingEngine",
   "META_CLOUD_CAPABILITY_MATRIX",
   "sendText",
@@ -153,6 +167,24 @@ for (const token of [
 }
 
 for (const token of [
+  "createMetaCloudMessagingEngine",
+  "requireMetaCloudCapability",
+  "capabilityForSendCommand",
+  "EngineSendCommand",
+  "engine.send",
+  "provider_type: sendResult.providerType"
+]) {
+  if (!actions.includes(token)) violations.push(`server action fora do engine/policy: ${token}`);
+}
+if (
+  actions.includes("sendWhatsAppText") ||
+  actions.includes("sendWhatsAppDocument") ||
+  actions.includes("sendWhatsAppTemplate")
+) {
+  violations.push("server action voltou a acoplar diretamente ao transporte Meta");
+}
+
+for (const token of [
   "selectedMessagingCapabilities",
   "canSendAny",
   "canSendText",
@@ -164,10 +196,9 @@ for (const token of [
 }
 
 for (const token of [
-  "MESSAGING_PROVIDER_FLAGS_JSON",
-  "applyCapabilityOverrides",
-  "deriveMessagingUiCapabilities",
-  "accountCapabilities"
+  "resolveMetaCloudRuntimePolicy",
+  "accountCapabilities",
+  "selectedMessagingCapabilities"
 ]) {
   if (!server.includes(token)) violations.push(`workspace sem policy gate: ${token}`);
 }
@@ -188,7 +219,7 @@ console.log(
   JSON.stringify(
     {
       ok: true,
-      contract: "messaging-engine-boundary-v2",
+      contract: "messaging-engine-boundary-v3",
       scannedRoots: sourceRoots.filter(item => fs.existsSync(path.join(root, item))),
       requiredFiles: requiredFiles.length,
       allowedEngineDirectories,
@@ -198,6 +229,8 @@ console.log(
       implementedProviders: ["META_CLOUD"],
       baileysInstalled: false,
       uiCapabilityGate: true,
+      serverCapabilityGate: true,
+      metaRoutedThroughEngine: true,
       organizationProviderFlags: true
     },
     null,
