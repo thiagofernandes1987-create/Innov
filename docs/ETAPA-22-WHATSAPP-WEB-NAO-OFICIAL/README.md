@@ -1,8 +1,8 @@
 # Provider WhatsApp Web não oficial — índice de governança
 
-**Status atual:** Sprints W-01 a W-05 concluídas; Baileys não instalado e nenhuma sessão real iniciada  
+**Status atual:** Sprints W-01 a W-06 concluídas; adapter confinado, runtime e sessão real não iniciados  
 **Produção:** bloqueada  
-**Próxima sprint:** W-06 — Adapter Baileys confinado e sem conexão real
+**Próxima sprint:** W-07 — armazenamento criptográfico com fixtures sintéticas e sem conexão real
 
 ---
 
@@ -16,12 +16,14 @@
 6. [`CONTRATOS-CANONICOS-V1.md`](./CONTRATOS-CANONICOS-V1.md) — modelo provider-neutral concluído na W-02.
 7. [`SCHEMA-W04.md`](./SCHEMA-W04.md) — persistência multiprovider sem domínio paralelo.
 8. [`GATEWAY-W05.md`](./GATEWAY-W05.md) — processo isolado, HMAC, replay, lifecycle e container endurecido.
-9. [`EVIDENCIAS-W01.md`](./EVIDENCIAS-W01.md) — evidências de governança.
-10. [`EVIDENCIAS-W02.md`](./EVIDENCIAS-W02.md) — evidências dos contratos canônicos.
-11. [`EVIDENCIAS-W03.md`](./EVIDENCIAS-W03.md) — contratos de engine, capabilities, policy gates e CI.
-12. [`EVIDENCIAS-W04.md`](./EVIDENCIAS-W04.md) — migration, RLS, testes PostgreSQL e rollback lógico.
-13. [`EVIDENCIAS-W05.md`](./EVIDENCIAS-W05.md) — testes HTTP/HMAC, build e smoke test do container.
-14. [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) — avisos e estado de dependências/adaptações externas.
+9. [`ADAPTER-BAILEYS-W06.md`](./ADAPTER-BAILEYS-W06.md) — adapter, fábrica, identidades, conteúdo, erros e supply chain.
+10. [`EVIDENCIAS-W01.md`](./EVIDENCIAS-W01.md) — evidências de governança.
+11. [`EVIDENCIAS-W02.md`](./EVIDENCIAS-W02.md) — evidências dos contratos canônicos.
+12. [`EVIDENCIAS-W03.md`](./EVIDENCIAS-W03.md) — contratos de engine, capabilities, policy gates e CI.
+13. [`EVIDENCIAS-W04.md`](./EVIDENCIAS-W04.md) — migration, RLS, testes PostgreSQL e rollback lógico.
+14. [`EVIDENCIAS-W05.md`](./EVIDENCIAS-W05.md) — testes HTTP/HMAC, build e smoke test do container.
+15. [`EVIDENCIAS-W06.md`](./EVIDENCIAS-W06.md) — versão exata, 25 contract tests, boundaries, lockfile e CI.
+16. [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) — licença, dependências transitivas e bloqueios jurídicos.
 
 ---
 
@@ -47,14 +49,23 @@
 - rollback do provider é lógico e não apaga histórico;
 - `apps/messaging-gateway` é um processo Node.js separado do Next.js;
 - o gateway exige HMAC, timestamp, nonce, correlation ID e replay guard;
-- o gateway não possui acesso ao banco principal nem SDK de WhatsApp na W-05;
+- o gateway não possui acesso ao banco principal;
 - health, readiness e métricas não carregam payload ou segredo;
 - o container executa como usuário não-root, com filesystem somente leitura e limites operacionais;
 - o smoke test do gateway executa com rede desabilitada;
-- o único cliente da W-05 é `FakeChannelClient`;
-- Baileys ficará confinado a um adapter no gateway separado;
-- o CI bloqueia imports e tipos Baileys fora dos adapters autorizados;
-- nenhum código de projeto sem licença clara será copiado;
+- o cliente ativo do gateway continua sendo `FakeChannelClient`;
+- `@whiskeysockets/baileys@7.0.0-rc13` existe somente no workspace do gateway;
+- tipos nativos Baileys ficam confinados ao adapter autorizado;
+- a fábrica oficial usa import dinâmico e falha fechado sem autorização;
+- o adapter não é importado pelo bootstrap do gateway;
+- QR não é persistido nem propagado como valor;
+- PN, LID, grupo e newsletter possuem tradução explícita;
+- grupos e newsletters são bloqueados por padrão;
+- mídia outbound exige URL HTTPS assinada;
+- mídia inbound não é baixada na W-06;
+- lifecycle scripts de dependências são bloqueados;
+- o lockfile regenerado deve possuir SHA-256 aprovado;
+- a árvore transitiva, incluindo `libsignal`, exige revisão jurídica/SBOM;
 - nenhum mecanismo de evasão, spam ou rotação de contas será implementado;
 - nenhuma IA será acoplada diretamente ao Baileys;
 - primeiro modo de IA será `draft_only`;
@@ -71,7 +82,7 @@
 | ADR | concluída |
 | Matriz de licenças | concluída |
 | Política de risco/consentimento | concluída |
-| THIRD_PARTY_NOTICES preventivo | concluído |
+| THIRD_PARTY_NOTICES | atualizado para dependência instalada |
 | Contratos canônicos v1 | concluídos — W-02 |
 | Compatibilidade Meta | concluída e validada |
 | Contratos de engine | concluídos — W-03 |
@@ -80,7 +91,7 @@
 | Mock engine | concluído — W-03 |
 | Feature flags por organização | concluídas — W-03 |
 | Gates UI e backend | concluídos — W-03 |
-| Gate de imports Baileys v3 | concluído e testado |
+| Engine boundary | `v4` verde — W-06 |
 | Evolução aditiva do banco | concluída — W-04 |
 | Identidades externas e aliases | concluídos — W-04 |
 | Comandos, outbox, inbox e DLQ | fundação persistente concluída — W-04 |
@@ -93,17 +104,23 @@
 | Correlation e causation IDs | concluídos — W-05 |
 | Shutdown gracioso | concluído — W-05 |
 | Container não-root e limites | concluídos e testados — W-05 |
-| Smoke test sem rede externa | verde — W-05 |
-| Cliente fake | concluído — W-05 |
-| CI da W-05 | verde |
-| File Security E2E | verde |
-| Baileys instalado | não |
-| Adapter Baileys | não |
-| Socket externo | não |
+| Smoke test sem rede externa | verde |
+| Cliente fake ativo | sim |
+| Baileys instalado | sim, somente no gateway e versão exata |
+| Adapter Baileys | concluído — W-06 |
+| Fábrica oficial | concluída, bloqueada por padrão |
+| Contract tests Baileys | 25 verdes — W-06 |
+| Tipos nativos confinados | comprovado pelo boundary v4 |
+| Lockfile resolvido | hash aprovado e verificado |
+| Lifecycle scripts externos | bloqueados |
+| Runtime Baileys registrado | não |
+| Socket externo aberto | não |
+| Storage de sessão | não |
+| QR/pairing operacional | não |
 | Número autorizado | não |
 | Sessão real | não |
 | Aceite operacional assinado | não |
-| Revisão jurídica | não |
+| Revisão jurídica transitiva | pendente |
 | Deploy do gateway | não |
 | Produção | bloqueada |
 
