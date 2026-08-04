@@ -85,6 +85,10 @@ jobs:
         run: |
           set -o pipefail
           node scripts/validate-messaging-gateway.mjs 2>&1 | tee messaging-gateway-validation.txt
+      - name: Validate messaging session credential store
+        run: |
+          set -o pipefail
+          node scripts/validate-messaging-session-store.mjs 2>&1 | tee messaging-session-store-validation.txt
       - name: Upload structural validation reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -106,6 +110,7 @@ jobs:
             messaging-boundaries-validation.txt
             messaging-storage-validation.txt
             messaging-gateway-validation.txt
+            messaging-session-store-validation.txt
           if-no-files-found: warn
           retention-days: 7
       - name: Upload recent migrations
@@ -205,6 +210,8 @@ jobs:
         run: pnpm validate:messaging-storage
       - name: Validate messaging gateway skeleton
         run: pnpm validate:messaging-gateway
+      - name: Validate messaging session credential store
+        run: pnpm validate:messaging-session-store
       - name: Validate execution inventory
         run: pnpm validate:inventory
       - name: Validate Object Runtime invariants
@@ -225,10 +232,14 @@ jobs:
         run: pnpm test:db:commercial-documents
       - name: Messaging multiprovider database tests
         run: pnpm test:db:messaging-multiprovider
+      - name: Messaging session credential database tests
+        run: pnpm test:db:messaging-session-store
       - name: Messaging gateway unit tests
         run: pnpm test:messaging-gateway
       - name: Baileys adapter contract tests
         run: pnpm test:messaging-baileys
+      - name: Messaging session credential store tests
+        run: pnpm test:messaging-session-store
       - name: Lint
         run: |
           set -o pipefail
