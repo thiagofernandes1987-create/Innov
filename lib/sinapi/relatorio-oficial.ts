@@ -252,6 +252,31 @@ export function lerInsumos(
   return itens;
 }
 
+/**
+ * Todos os códigos presentes na aba, **independentemente de preço**.
+ *
+ * `lerInsumos` e `lerComposicoes` só devolvem quem tem valor na UF pedida — é o
+ * que evita catálogo com preço zero. Mas quem some dali não some por um motivo
+ * só: pode não ter havido coleta naquele estado, ou o código pode não estar no
+ * relatório de jeito nenhum. São situações diferentes para quem lê o orçamento,
+ * e sem este conjunto as duas ficam indistinguíveis.
+ */
+export function codigosDaAba(
+  linhas: readonly (readonly string[])[],
+  cabecalho: { linha: number; codigo: number },
+  formulas?: ReadonlyMap<string, string>
+): Set<string> {
+  const codigos = new Set<string>();
+  for (let i = cabecalho.linha + 1; i < linhas.length; i += 1) {
+    const codigo = codigoDaCelula(
+      String(linhas[i][cabecalho.codigo] ?? ""),
+      formulas?.get(`${i}:${cabecalho.codigo}`)
+    );
+    if (codigo) codigos.add(codigo);
+  }
+  return codigos;
+}
+
 export type ComposicaoOficial = {
   codigo: string;
   descricao: string;
@@ -291,6 +316,37 @@ export function lerComposicoes(
   return itens;
 }
 
+/**
+ * A situação que a planilha declara para o item.
+ *
+ * **Atenção ao alcance.** A legenda da aba Analítico é explícita: COM PREÇO são
+ * "insumos com preço coletado ou obtidos por aplicação de coeficiente em **pelo
+ * menos uma UF**". É um estado **nacional**, não da UF que está sendo lida — um
+ * insumo COM PREÇO pode não ter preço nenhum em São Paulo. Medido no arquivo de
+ * 06/2026: 4.677 itens analíticos de SP são exatamente esse caso.
+ *
+ * Serve como contexto — separa "não coletaram aqui" de "não está no sistema de
+ * preços" —, nunca como resposta para "tenho o número?". Essa resposta vem da
+ * busca na aba da UF.
+ */
+export type SituacaoDaPlanilha =
+  | "COM_PRECO"
+  | "SEM_PRECO"
+  | "COM_CUSTO"
+  | "SEM_CUSTO"
+  | "EM_ESTUDO"
+  | "DESCONHECIDA";
+
+export function situacaoDaPlanilha(valor: string): SituacaoDaPlanilha {
+  const texto = normalizar(valor);
+  if (texto === "COM PRECO") return "COM_PRECO";
+  if (texto === "SEM PRECO") return "SEM_PRECO";
+  if (texto === "COM CUSTO") return "COM_CUSTO";
+  if (texto === "SEM CUSTO") return "SEM_CUSTO";
+  if (texto === "EM ESTUDO") return "EM_ESTUDO";
+  return "DESCONHECIDA";
+}
+
 export type ItemAnalitico = {
   composicao: string;
   tipo: "COMPOSICAO" | "INSUMO";
@@ -298,6 +354,7 @@ export type ItemAnalitico = {
   descricao: string;
   unidade: string;
   coeficiente: number;
+  situacao: SituacaoDaPlanilha;
 };
 
 /**
@@ -324,7 +381,8 @@ export function lerAnalitico(linhas: readonly (readonly string[])[]): ItemAnalit
           item,
           descricao: indiceDe(linha, c => c === "DESCRICAO"),
           unidade: indiceDe(linha, c => c === "UNIDADE"),
-          coeficiente
+          coeficiente,
+          situacao: indiceDe(linha, c => c.startsWith("SITUACAO"))
         };
       }
     }
@@ -347,7 +405,9 @@ export function lerAnalitico(linhas: readonly (readonly string[])[]): ItemAnalit
       codigo,
       descricao: cabecalho.descricao >= 0 ? String(linha[cabecalho.descricao] ?? "").trim() : "",
       unidade: cabecalho.unidade >= 0 ? String(linha[cabecalho.unidade] ?? "").trim() : "",
-      coeficiente
+      coeficiente,
+      situacao:
+        cabecalho.situacao >= 0 ? situacaoDaPlanilha(String(linha[cabecalho.situacao] ?? "")) : "DESCONHECIDA"
     });
   }
   return itens;

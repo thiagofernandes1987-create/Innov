@@ -132,7 +132,43 @@ leitor em uso. E `automatic-update-v2.ts` foi removido: existia porque a sonda
 foi corrigida sem o botão, e os dois módulos divergiram falhando em pontos
 diferentes pelo mesmo motivo.
 
-**Fica em aberto, com tarefa própria no inventário:** os 4.677 itens (10,6%)
-cujo insumo não tem preço na UF. Ali o número não existe na fonte, e representar
-isso como ausência — em vez de zero — exige coluna nova no banco, porque hoje o
-`coalesce` da migration converte qualquer `null` em zero.
+### E a última ausência, a que exigia o banco
+
+Os itens cujo insumo não tem preço na UF ficaram para depois porque o `null`
+honesto do leitor morria na porta de entrada:
+
+```sql
+greatest(coalesce(nullif(v_item ->> 'unitCost','')::numeric, 0), 0)
+```
+
+`unit_cost numeric not null` não deixava alternativa. Resolvido na T-37.9:
+`unit_cost` e `total_cost` passam a aceitar `null`, e um `price_status` de
+vocabulário fechado diz **por que** falta — `SEM_PRECO_NA_UF` (está no
+relatório, não houve coleta no estado) ou `FORA_DO_RELATORIO` (não aparece na
+aba). Um `check` amarra os dois: custo presente se e somente se o status for
+`COM_CUSTO`, para que `null` não vire um segundo jeito de dizer zero. A versão
+da composição carrega `items_without_cost`, que é o que permite dizer
+"incompleta" em vez de mostrar um preço que não fecha.
+
+Guardamos também a `Situação` que a planilha declara — e ela **não** substitui a
+de cima. A legenda da aba Analítico diz que COM PREÇO significa "coletado em
+pelo menos uma UF": é estado nacional, não do estado lido. Os 4.679 itens sem
+preço em SP são justamente COM PREÇO. Tratar a coluna da planilha como resposta
+para "tenho o número?" reintroduziria o zero por outro caminho.
+
+Medido no arquivo de 06/2026, SP sem desoneração, depois da correção:
+
+| | |
+|---|---|
+| itens analíticos | 43.923 |
+| com custo | 39.244 |
+| sem preço na UF | 4.679 (10,7%) |
+| fora do relatório | 0 |
+| **composições incompletas** | **2.859 de 8.403 (34%)** |
+
+Um terço do catálogo mostraria composição analítica com item de graça. Provado
+no banco, com round-trip pela RPC de importação e três testes negativos: o
+`check` recusa custo junto de status de ausência, recusa ausência junto de
+`COM_CUSTO`, e recusa status fora do vocabulário. Status inesperado no payload
+cai em ausência e **descarta o custo** — o produtor do payload não é conhecido,
+e número de origem desconhecida não entra em orçamento.

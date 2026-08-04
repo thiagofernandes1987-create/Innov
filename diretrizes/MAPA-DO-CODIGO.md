@@ -34,8 +34,8 @@ a ignorar.
 | Módulos de `lib/` | 88 |
 | Funções do banco declaradas | 229 |
 | Funções do banco chamadas do código | 116 |
-| Suítes de teste | 51, com 577 casos |
-| Migrations | 159 |
+| Suítes de teste | 51, com 584 casos |
+| Migrations | 160 |
 | Validadores de CI | 28 |
 | Módulos de `lib/` citados por algum teste | 49 de 88 |
 
@@ -651,7 +651,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/sinapi/archive-layout-diagnostic` | não | `inspectSinapiArchiveLayout` |
 | `@/lib/sinapi/automatic-update` | sim | `discoverLatestSinapiXlsxSource`, `discoverLatestSinapiXlsxUrl`, `inspectLatestSinapiOfficialPackage`, `runSinapiAutomaticUpdate` |
 | `@/lib/sinapi/official-reference-parser` | sim | `parseSinapiOfficialReferencePackage` |
-| `@/lib/sinapi/relatorio-oficial` | sim | `ABA_ANALITICA`, `UFS`, `abaDoRelatorio`, `cabecalhoDeComposicoes`, `cabecalhoDeInsumos`, `codigoDaCelula`, `lerAnalitico`, `lerComposicoes`, `lerInsumos`, `naturezaDaClassificacao`, `normalizar`, `precoDaCelula` |
+| `@/lib/sinapi/relatorio-oficial` | sim | `ABA_ANALITICA`, `UFS`, `abaDoRelatorio`, `cabecalhoDeComposicoes`, `cabecalhoDeInsumos`, `codigoDaCelula`, `codigosDaAba`, `lerAnalitico`, `lerComposicoes`, `lerInsumos`, `naturezaDaClassificacao`, `normalizar`, `precoDaCelula`, `situacaoDaPlanilha` |
 | `@/lib/sinapi/source-catalog` | sim | `parseSinapiBaseDate`, `selectLatestSinapiXlsxFile` |
 | `@/lib/sinapi/xlsx-parser` | sim | `parseSinapiZipPackage`, `parseWorksheetXml` |
 | `@/lib/stage12` | não | `dailyLogStatusLabels`, `daysBetween`, `formatDate`, `formatPercent`, `statusBadge`, `taskColumns`, `taskStatusLabels` |
@@ -765,7 +765,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `guard_official_cost_reference` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | — (só por SQL ou trigger) |
 | `has_org_role` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |
 | `import_procurement_receipt_to_inventory` | `supabase/migrations/20260729001500_inventory_receipt_line_order.sql` | `app/actions/inventory.ts` |
-| `import_sinapi_compositions_chunk` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
+| `import_sinapi_compositions_chunk` | `supabase/migrations/20260804040000_composicao_registra_custo_ausente.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
 | `import_sinapi_inputs_chunk` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
 | `install_finance_defaults` | `supabase/migrations/20260720123200_stage15_finance_module.sql` | — (só por SQL ou trigger) |
 | `install_finance_defaults_after_organization` | `supabase/migrations/20260720123200_stage15_finance_module.sql` | — (só por SQL ou trigger) |
@@ -944,9 +944,9 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/security-controls.test.ts` | 11 | safeInternalReturnPath; mapPublicOperationError |
 | `tests/signature-format.test.ts` | 9 | safeFileName; canonicalJson |
 | `tests/signature-webhook-state.test.ts` | 7 | shouldApplySignatureStatus |
-| `tests/sinapi-layout-publicado.test.ts` | 9 | — |
-| `tests/sinapi-official-reference-parser.test.ts` | 12 | leitor do relatório oficial, no formato publicado hoje |
-| `tests/sinapi-relatorio-oficial.test.ts` | 17 | qual aba responde por cada relatório; o código da composição está dentro da fórmula; preço em branco não é preço zero; insumos: UF é coluna |
+| `tests/sinapi-layout-publicado.test.ts` | 10 | — |
+| `tests/sinapi-official-reference-parser.test.ts` | 15 | leitor do relatório oficial, no formato publicado hoje |
+| `tests/sinapi-relatorio-oficial.test.ts` | 20 | qual aba responde por cada relatório; o código da composição está dentro da fórmula; preço em branco não é preço zero; insumos: UF é coluna |
 | `tests/sinapi-source-catalog.test.ts` | 4 | catálogo oficial SINAPI da CAIXA |
 | `tests/sinapi-xlsx-parser.test.ts` | 4 | parser automático do pacote SINAPI |
 | `tests/sinduscon-cub.test.ts` | 3 | SindusCon-SP CUB |

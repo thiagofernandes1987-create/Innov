@@ -223,6 +223,25 @@ if(!fs.existsSync(montadorSinapi))errors.push(`Montador do pacote SINAPI ausente
 else{
  const montador=read(montadorSinapi);
  if(!montador.includes("custoPorComposicao.get(filho.codigo)"))errors.push("Montador SINAPI voltou a gravar zero no custo da sub-composição.");
+ // Ausência é ausência: o custo que não existe na UF chega `null`, com motivo.
+ for(const token of["SEM_PRECO_NA_UF","FORA_DO_RELATORIO","itemsWithoutCost"])
+  if(!montador.includes(token))errors.push(`Montador SINAPI sem representação de ausência: ${token}`);
+ if(/unitCost:\s*custoUnitario\s*\?\?\s*0/.test(montador))errors.push("Montador SINAPI voltou a converter ausência de custo em zero.");
+}
+const custoAusente="supabase/migrations/20260804040000_composicao_registra_custo_ausente.sql";
+if(!fs.existsSync(custoAusente))errors.push(`Migration da ausência de custo ausente: ${custoAusente}`);
+else{
+ const migration=read(custoAusente);
+ for(const token of[
+  "cost_composition_items_price_status_check",
+  "cost_composition_items_custo_coerente_com_status",
+  "alter column unit_cost drop not null",
+  "items_without_cost"
+ ])if(!migration.includes(token))errors.push(`Migration da ausência de custo sem ${token}.`);
+ // O comentário do topo cita a expressão antiga como documentação; a busca é
+ // no SQL executável, não no texto que explica por que ela saiu.
+ const sqlExecutavel=migration.split("\n").filter(linha=>!linha.trimStart().startsWith("--")).join("\n");
+ if(/coalesce\(nullif\(v_item ->> 'unitCost'/.test(sqlExecutavel))errors.push("A importação voltou a converter custo ausente em zero.");
 }
 if(fs.existsSync("lib/sinapi/automatic-update-v2.ts"))errors.push("`automatic-update-v2.ts` voltou: o leitor do SINAPI tem um caminho só.");
 const conferenciaAoVivo="tests/sinapi-layout-publicado.test.ts";

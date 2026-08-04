@@ -113,12 +113,28 @@ describe.skipIf(!AO_VIVO)("layout publicado do SINAPI", () => {
         item.itemType === "INPUT" ? preco.has(item.code) : custo.has(item.code)
       );
       if (!completa) continue;
-      const soma = composicao.items.reduce((total, item) => total + item.unitCost * item.coefficient, 0);
+      const soma = composicao.items.reduce((total, item) => total + (item.unitCost ?? 0) * item.coefficient, 0);
       desvios.push(Math.abs(soma - composicao.unitCost) / composicao.unitCost);
     }
     expect(desvios.length).toBeGreaterThan(1_000);
     const fecham = desvios.filter(valor => valor <= 0.01).length;
     expect(fecham / desvios.length).toBeGreaterThan(0.95);
+  }, 120_000);
+
+  it("item sem custo na UF entra como ausência, e a composição diz quantos são", () => {
+    const itens = semDesoneracao.compositions.flatMap(item => item.items);
+    const semCusto = itens.filter(item => item.unitCost === null);
+    // A ordem de grandeza medida em 06/2026, SP: 4.677 de 43.923 (10,6%). Piso
+    // e teto largos — o que não pode é virar zero nem sumir.
+    expect(semCusto.length).toBeGreaterThan(1_000);
+    expect(semCusto.length / itens.length).toBeLessThan(0.3);
+    // Zero é preço; ausência é ausência. Nenhum item pode ter custo zero.
+    expect(itens.every(item => item.unitCost === null || item.unitCost > 0)).toBe(true);
+    // E todo item sem custo diz por quê.
+    expect(semCusto.every(item => item.priceStatus !== "COM_CUSTO")).toBe(true);
+    // O contador da composição bate com a contagem dos itens.
+    const somaDosContadores = semDesoneracao.compositions.reduce((total, item) => total + item.itemsWithoutCost, 0);
+    expect(somaDosContadores).toBe(semCusto.length);
   }, 120_000);
 
   it("os dois regimes existem e dão custos diferentes na mesma composição", () => {

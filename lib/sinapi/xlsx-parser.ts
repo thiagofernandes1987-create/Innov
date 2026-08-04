@@ -23,13 +23,35 @@ export type SinapiCompositionImportRow = {
     unit: string;
     itemType: "INPUT" | "COMPOSITION" | "OTHER";
     coefficient: number;
-    unitCost: number;
-    totalCost: number;
+    /**
+     * `null` quando o custo **não existe** para a UF lida. Zero seria um preço,
+     * e um preço plausível: o orçamento fecharia mais barato sem ninguém ver o
+     * buraco. Medido no arquivo de 06/2026, em SP: 4.677 dos 43.923 itens.
+     */
+    unitCost: number | null;
+    totalCost: number | null;
+    /** Por que o custo falta, quando falta. Ver `SinapiItemPriceStatus`. */
+    priceStatus: SinapiItemPriceStatus;
+    /** A situação que a planilha declara, que é **nacional**, não da UF. */
+    sinapiSituation: string;
   }>;
+  /** Quantos itens ficaram sem custo conhecido — a composição está incompleta. */
+  itemsWithoutCost: number;
   sourceFile: string;
   sourceSheet: string;
   sourceRow: number;
 };
+
+/**
+ * Por que o custo de um item existe ou não, **na UF que foi lida**.
+ *
+ * - `COM_CUSTO` — o número existe: preço do insumo ou custo da sub-composição.
+ * - `SEM_PRECO_NA_UF` — o código está no relatório e a célula do estado está
+ *   vazia: não houve coleta mínima de preços ali.
+ * - `FORA_DO_RELATORIO` — o código não aparece na aba do estado. Costuma ser
+ *   insumo em estudo, ainda fora do sistema de preços.
+ */
+export type SinapiItemPriceStatus = "COM_CUSTO" | "SEM_PRECO_NA_UF" | "FORA_DO_RELATORIO";
 
 export type ParsedSinapiPackage = {
   baseDate: string;
@@ -603,6 +625,7 @@ function mapCompositionRows(
       unit,
       unitCost,
       items: [],
+      itemsWithoutCost: 0,
       sourceFile,
       sourceSheet,
       sourceRow: index + 1

@@ -88,6 +88,12 @@ function folha(conteudo: string[]) {
   )}</sheetData></worksheet>`;
 }
 
+/**
+ * Um insumo que **está** no relatório e não tem preço na UF lida — a célula
+ * vazia que a planilha usa para dizer "não houve coleta mínima neste estado".
+ */
+const CODIGO_SEM_PRECO = "70000";
+
 /** Aba de insumos: UF é coluna, e cada estado tem preço próprio. */
 function abaDeInsumos(quantidade: number, base: number) {
   const linhas = [
@@ -115,6 +121,18 @@ function abaDeInsumos(quantidade: number, base: number) {
       ].join("")}</row>`
     );
   }
+  // A linha sem preço em UF nenhuma: existe, é lida, e não entra no catálogo.
+  const semPreco = quantidade + 4;
+  linhas.push(
+    `<row r="${semPreco}">${[
+      texto(semPreco, 0, "MATERIAL"),
+      texto(semPreco, 1, CODIGO_SEM_PRECO),
+      texto(semPreco, 2, "Insumo sem coleta neste estado"),
+      texto(semPreco, 3, "UN"),
+      texto(semPreco, 4, "C"),
+      ...UFS.map((_, u) => texto(semPreco, 5 + u, ""))
+    ].join("")}</row>`
+  );
   return folha(linhas);
 }
 
@@ -195,6 +213,32 @@ function abaAnalitica(quantidade: number) {
       ].join("")}</row>`
     );
   }
+  // A primeira composição ganha dois itens cujo custo **não existe** na UF: um
+  // insumo que está no relatório mas sem preço no estado, e um código que não
+  // está no relatório de jeito nenhum. São os dois casos que o zero escondia.
+  const semPreco = quantidade * 2 + 3;
+  linhas.push(
+    `<row r="${semPreco}">${[
+      texto(semPreco, 0, "Grupo A"),
+      texto(semPreco, 1, "100000"),
+      texto(semPreco, 2, "INSUMO"),
+      texto(semPreco, 3, CODIGO_SEM_PRECO),
+      texto(semPreco, 4, "Insumo sem coleta neste estado"),
+      texto(semPreco, 5, "UN"),
+      numero(semPreco, 6, 5),
+      texto(semPreco, 7, "COM PREÇO")
+    ].join("")}</row>`,
+    `<row r="${semPreco + 1}">${[
+      texto(semPreco + 1, 0, "Grupo A"),
+      texto(semPreco + 1, 1, "100000"),
+      texto(semPreco + 1, 2, "INSUMO"),
+      texto(semPreco + 1, 3, "999999"),
+      texto(semPreco + 1, 4, "Insumo fora do relatório"),
+      texto(semPreco + 1, 5, "UN"),
+      numero(semPreco + 1, 6, 7),
+      texto(semPreco + 1, 7, "EM ESTUDO")
+    ].join("")}</row>`
+  );
   return folha(linhas);
 }
 
@@ -277,7 +321,9 @@ describe("leitor do relatório oficial, no formato publicado hoje", () => {
   it("a composição carrega os itens da aba analítica, com coeficiente", () => {
     const lido = parseSinapiOfficialReferencePackage(pacoteOficial(), { sourceUrl: FONTE, region: "SP", taxRelief: false });
     const primeira = lido.compositions[0];
-    expect(primeira.items).toHaveLength(2);
+    // Dois itens da composição mais os dois sem custo conhecido, que a fixture
+    // pendura na primeira para exercitar a ausência.
+    expect(primeira.items).toHaveLength(4);
     expect(primeira.items[0]).toMatchObject({ code: "10000", itemType: "INPUT", coefficient: 2, unitCost: 35 });
     expect(primeira.items[0].totalCost).toBe(70);
   });
@@ -296,6 +342,49 @@ describe("leitor do relatório oficial, no formato publicado hoje", () => {
     const lido = parseSinapiOfficialReferencePackage(pacoteOficial(), { sourceUrl: FONTE, region: "SP", taxRelief: false });
     const zerados = lido.compositions.flatMap(item => item.items).filter(item => item.unitCost === 0);
     expect(zerados).toHaveLength(0);
+    // E ausência não vira zero: quem não tem custo tem `null`, não `0`.
+    const ausentes = lido.compositions.flatMap(item => item.items).filter(item => item.unitCost === null);
+    expect(ausentes).toHaveLength(2);
+  });
+
+  it("custo que não existe na UF entra como ausência, não como zero", () => {
+    const lido = parseSinapiOfficialReferencePackage(pacoteOficial(), { sourceUrl: FONTE, region: "SP", taxRelief: false });
+    const primeira = lido.compositions.find(item => item.code === "100000")!;
+
+    // Está no relatório, sem preço no estado.
+    const semColeta = primeira.items.find(item => item.code === "70000")!;
+    expect(semColeta.unitCost).toBeNull();
+    expect(semColeta.totalCost).toBeNull();
+    expect(semColeta.priceStatus).toBe("SEM_PRECO_NA_UF");
+    // O coeficiente continua valendo: o que falta é o preço, não a quantidade.
+    expect(semColeta.coefficient).toBe(5);
+
+    // Não está no relatório de jeito nenhum.
+    const foraDoRelatorio = primeira.items.find(item => item.code === "999999")!;
+    expect(foraDoRelatorio.unitCost).toBeNull();
+    expect(foraDoRelatorio.priceStatus).toBe("FORA_DO_RELATORIO");
+
+    // O que tem preço continua com preço.
+    expect(primeira.items.find(item => item.code === "10000")!.priceStatus).toBe("COM_CUSTO");
+  });
+
+  it("a composição diz quantos itens ficaram sem custo — é o que a torna incompleta", () => {
+    const lido = parseSinapiOfficialReferencePackage(pacoteOficial(), { sourceUrl: FONTE, region: "SP", taxRelief: false });
+    const primeira = lido.compositions.find(item => item.code === "100000")!;
+    expect(primeira.itemsWithoutCost).toBe(2);
+    // As demais fecham: insumo com preço mais sub-composição com custo.
+    expect(lido.compositions.filter(item => item.itemsWithoutCost > 0)).toHaveLength(1);
+  });
+
+  it("a situação declarada pela planilha é preservada, e é nacional — não da UF", () => {
+    const lido = parseSinapiOfficialReferencePackage(pacoteOficial(), { sourceUrl: FONTE, region: "SP", taxRelief: false });
+    const semColeta = lido.compositions
+      .find(item => item.code === "100000")!
+      .items.find(item => item.code === "70000")!;
+    // A planilha diz COM PREÇO porque há coleta em alguma UF; em SP não há.
+    // Guardar as duas leituras é o que distingue os casos na tela.
+    expect(semColeta.sinapiSituation).toBe("COM_PRECO");
+    expect(semColeta.priceStatus).toBe("SEM_PRECO_NA_UF");
   });
 
   it("falha fechado quando o volume é insuficiente", () => {

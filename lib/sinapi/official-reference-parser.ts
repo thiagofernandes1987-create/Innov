@@ -4,6 +4,7 @@ import {
   abaDoRelatorio,
   cabecalhoDeComposicoes,
   cabecalhoDeInsumos,
+  codigosDaAba,
   lerAnalitico,
   lerComposicoes,
   lerInsumos,
@@ -14,7 +15,8 @@ import { inflateRawSync } from "node:zlib";
 import type {
   ParsedSinapiPackage,
   SinapiCompositionImportRow,
-  SinapiInputImportRow
+  SinapiInputImportRow,
+  SinapiItemPriceStatus
 } from "./xlsx-parser";
 
 type ZipEntry = {
@@ -389,33 +391,57 @@ export function parseSinapiOfficialReferencePackage(
     sourceRow: cabecalhoInsumos.linha + 1 + indice
   }));
 
-  const compositionRows: SinapiCompositionImportRow[] = composicoes.map((item, indice) => ({
-    code: item.codigo,
-    description: item.descricao,
-    unit: item.unidade,
-    unitCost: item.custoUnitario,
-    items: (itensPorComposicao.get(item.codigo) ?? []).map(filho => {
-      // Insumo sem preço na UF continua caindo em zero — a planilha não publica
-      // preço para ele naquele estado, e são 4.677 itens em SP. Não é o mesmo
-      // problema: ali o número não existe. Está registrado como tarefa própria.
-      const custoUnitario =
-        filho.tipo === "INSUMO"
-          ? precoPorCodigo.get(filho.codigo) ?? 0
-          : custoPorComposicao.get(filho.codigo) ?? 0;
+  // Quem **está** no relatório, com preço ou sem. É o que separa "não houve
+  // coleta neste estado" de "não está no relatório" — dois motivos diferentes
+  // para o mesmo campo vazio, e só o primeiro é normal.
+  const codigosDeInsumo = codigosDaAba(abaDeInsumos.rows, cabecalhoInsumos);
+  const codigosDeComposicao = codigosDaAba(
+    abaDeComposicoes.rows,
+    cabecalhoComposicoes,
+    abaDeComposicoes.formulas
+  );
+
+  const compositionRows: SinapiCompositionImportRow[] = composicoes.map((item, indice) => {
+    const filhos = (itensPorComposicao.get(item.codigo) ?? []).map(filho => {
+      const ehInsumo = filho.tipo === "INSUMO";
+      const custoUnitario = ehInsumo
+        ? precoPorCodigo.get(filho.codigo) ?? null
+        : custoPorComposicao.get(filho.codigo) ?? null;
+      const conhecido = (ehInsumo ? codigosDeInsumo : codigosDeComposicao).has(filho.codigo);
+
+      // **Ausência não é zero.** O custo pode faltar por dois motivos, e o
+      // orçamento precisa dos dois: sem preço no estado é rotina do SINAPI —
+      // 4.677 dos 43.923 itens de SP —, e fora do relatório costuma ser insumo
+      // em estudo. Escrever zero nos dois casos fecharia a composição mais
+      // barata sem nada na tela denunciar.
+      const priceStatus: SinapiItemPriceStatus =
+        custoUnitario !== null ? "COM_CUSTO" : conhecido ? "SEM_PRECO_NA_UF" : "FORA_DO_RELATORIO";
+
       return {
         code: filho.codigo,
         description: filho.descricao,
         unit: filho.unidade,
-        itemType: filho.tipo === "INSUMO" ? ("INPUT" as const) : ("COMPOSITION" as const),
+        itemType: ehInsumo ? ("INPUT" as const) : ("COMPOSITION" as const),
         coefficient: filho.coeficiente,
         unitCost: custoUnitario,
-        totalCost: Number((custoUnitario * filho.coeficiente).toFixed(6))
+        totalCost: custoUnitario === null ? null : Number((custoUnitario * filho.coeficiente).toFixed(6)),
+        priceStatus,
+        sinapiSituation: filho.situacao
       };
-    }),
-    sourceFile: referencia.name,
-    sourceSheet: abaDeComposicoes.name,
-    sourceRow: cabecalhoComposicoes.linha + 1 + indice
-  }));
+    });
+
+    return {
+      code: item.codigo,
+      description: item.descricao,
+      unit: item.unidade,
+      unitCost: item.custoUnitario,
+      items: filhos,
+      itemsWithoutCost: filhos.filter(filho => filho.unitCost === null).length,
+      sourceFile: referencia.name,
+      sourceSheet: abaDeComposicoes.name,
+      sourceRow: cabecalhoComposicoes.linha + 1 + indice
+    };
+  });
 
   if (inputRows.length < 500) fail(`somente ${inputRows.length} insumos válidos foram encontrados; mínimo esperado: 500.`);
   if (compositionRows.length < 500) {

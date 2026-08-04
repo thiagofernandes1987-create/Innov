@@ -4,10 +4,12 @@ import {
   cabecalhoDeComposicoes,
   cabecalhoDeInsumos,
   codigoDaCelula,
+  codigosDaAba,
   lerAnalitico,
   lerComposicoes,
   lerInsumos,
   naturezaDaClassificacao,
+  situacaoDaPlanilha,
   precoDaCelula
 } from "../lib/sinapi/relatorio-oficial";
 
@@ -66,7 +68,12 @@ const ANALITICO: string[][] = [
   ["Grupo", "Código da\r\nComposição", "Tipo Item", "Código do\r\nItem", "Descrição", "Unidade", "Coeficiente", "Situação"],
   ["Acessibilidade", "104658", "5045", "", "", "M2", "88"],
   ["Acessibilidade", "104658", "COMPOSICAO", "88316", "SERVENTE COM ENCARGOS COMPLEMENTARES", "H", "1.279", "COM CUSTO"],
-  ["Acessibilidade", "104658", "INSUMO", "36178", "PISO TATIL / PODOTATIL", "UN", "6.4375", "COM PREÇO"]
+  ["Acessibilidade", "104658", "INSUMO", "36178", "PISO TATIL / PODOTATIL", "UN", "6.4375", "COM PREÇO"],
+  // "COM PREÇO" aqui é nacional: o insumo 11270 tem preço em algum estado e
+  // **não tem em SP** (a fixture ISD deixa a coluna de SP vazia). É o caso dos
+  // 4.677 itens medidos no arquivo real.
+  ["Acessibilidade", "104658", "INSUMO", "11270", "ABRACADEIRA DE LATAO", "UN", "2", "COM PREÇO"],
+  ["Acessibilidade", "104658", "INSUMO", "99999", "INSUMO QUE NÃO ESTÁ NO RELATÓRIO", "UN", "1", "EM ESTUDO"]
 ];
 
 describe("qual aba responde por cada relatório", () => {
@@ -163,13 +170,41 @@ describe("composições: cada UF ocupa duas colunas", () => {
 describe("analítico: os itens de cada composição", () => {
   it("lê tipo, código, coeficiente e descarta a linha de resumo", () => {
     const itens = lerAnalitico(ANALITICO);
-    expect(itens).toHaveLength(2);
+    expect(itens).toHaveLength(4);
     expect(itens[0]).toMatchObject({ composicao: "104658", tipo: "COMPOSICAO", codigo: "88316", coeficiente: 1.279 });
     expect(itens[1]).toMatchObject({ tipo: "INSUMO", codigo: "36178", coeficiente: 6.4375, unidade: "UN" });
   });
 
+  it("carrega a situação que a planilha declara, com vocabulário fechado", () => {
+    const itens = lerAnalitico(ANALITICO);
+    expect(itens.map(item => item.situacao)).toEqual([
+      "COM_CUSTO",
+      "COM_PRECO",
+      "COM_PRECO",
+      "EM_ESTUDO"
+    ]);
+  });
+
+  it("situação inédita não vira COM_PRECO por omissão", () => {
+    expect(situacaoDaPlanilha("SITUAÇÃO QUE A CAIXA INVENTAR")).toBe("DESCONHECIDA");
+    expect(situacaoDaPlanilha("")).toBe("DESCONHECIDA");
+    expect(situacaoDaPlanilha("sem preço")).toBe("SEM_PRECO");
+  });
+
   it("planilha sem o cabeçalho esperado devolve vazio em vez de lixo", () => {
     expect(lerAnalitico([["qualquer", "coisa"]])).toEqual([]);
+  });
+});
+
+describe("quem está no relatório mas sem preço na UF", () => {
+  it("os códigos da aba saem completos, mesmo os que não têm preço na UF", () => {
+    const cabecalho = cabecalhoDeInsumos(ISD)!;
+    // Em Alagoas o 11270 tem a célula vazia — recorte fiel do arquivo real —,
+    // então `lerInsumos` devolve só o 45333.
+    expect(lerInsumos(ISD, cabecalho, "AL").map(item => item.codigo)).toEqual(["45333"]);
+    // Já o conjunto de códigos traz os dois — é ele que separa "não há coleta
+    // naquele estado" de "não está no relatório".
+    expect([...codigosDaAba(ISD, cabecalho)].sort()).toEqual(["11270", "45333"]);
   });
 });
 
