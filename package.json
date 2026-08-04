@@ -5,7 +5,7 @@
   "packageManager": "pnpm@11.15.0",
   "scripts": {
     "dev": "next dev",
-    "prebuild": "vitest run tests/sinapi-xlsx-parser.test.ts tests/sinapi-source-catalog.test.ts",
+    "prebuild": "vitest run tests/sinapi-relatorio-oficial.test.ts tests/sinapi-official-reference-parser.test.ts tests/sinapi-source-catalog.test.ts",
     "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
@@ -61,7 +61,8 @@
     "test:drill:stage20:backup-restore": "node scripts/run-stage20-backup-restore-drill.mjs",
     "test:e2e:stage20:file-security": "node scripts/run-stage20-file-security-e2e.mjs",
     "test:e2e:stage20:file-security-gateway": "node scripts/run-stage20-file-security-gateway-e2e.mjs",
-    "test:health:stage20:file-security": "node scripts/run-stage20-file-security-provider-health.mjs"
+    "test:health:stage20:file-security": "node scripts/run-stage20-file-security-provider-health.mjs",
+    "sinapi:layout": "SINAPI_LAYOUT_AO_VIVO=1 NODE_OPTIONS=--use-env-proxy vitest run tests/sinapi-layout-publicado.test.ts"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

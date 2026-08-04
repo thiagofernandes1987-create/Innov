@@ -1,4 +1,15 @@
 import { posix as pathPosix } from "node:path";
+import {
+  ABA_ANALITICA,
+  abaDoRelatorio,
+  cabecalhoDeComposicoes,
+  cabecalhoDeInsumos,
+  lerAnalitico,
+  lerComposicoes,
+  lerInsumos,
+  naturezaDaClassificacao,
+  type RegimeSinapi
+} from "./relatorio-oficial";
 import { inflateRawSync } from "node:zlib";
 import type {
   ParsedSinapiPackage,
@@ -26,21 +37,6 @@ type ZipLimits = {
 type WorkbookSheet = {
   name: string;
   path: string;
-};
-
-type HeaderMap = {
-  rowIndex: number;
-  code: number;
-  description: number;
-  unit: number;
-  cost: number;
-  itemType: number | null;
-};
-
-type TargetFile = {
-  entry: ZipEntry;
-  kind: "INPUT" | "COMPOSITION";
-  baseDate: string;
 };
 
 const UFS = new Set([
@@ -85,14 +81,6 @@ function normalizeText(value: unknown) {
     .toUpperCase()
     .replace(/[^A-Z0-9]+/g, " ")
     .trim();
-}
-
-function compactText(value: unknown) {
-  return normalizeText(value).replace(/\s+/g, "");
-}
-
-function cleanText(value: unknown, maxLength: number) {
-  return String(value ?? "").replace(/\s+/g, " ").trim().slice(0, maxLength);
 }
 
 function safeArchivePath(value: string) {
@@ -217,6 +205,10 @@ function parseSharedStrings(xml: string) {
 
 function parseWorksheetRows(xml: string, sharedStrings: string[]) {
   const rows: string[][] = [];
+  // O código da composição vive **dentro** de uma fórmula `HYPERLINK(...)`,
+  // com valor em cache `0`. Sem guardar a fórmula, a importação grava dez mil
+  // composições com o código zero — e nada na tela denuncia.
+  const formulas = new Map<string, string>();
   let parsedRows = 0;
   for (const rowMatch of xml.matchAll(/<row\b[^>]*>([\s\S]*?)<\/row>/g)) {
     parsedRows += 1;
@@ -232,6 +224,8 @@ function parseWorksheetRows(xml: string, sharedStrings: string[]) {
       const index = reference ? columnIndex(reference) : sequentialColumn;
       sequentialColumn = index + 1;
       if (index > 250) fail("planilha excede 251 colunas úteis.");
+      const formula = cellXml.match(/<f\b[^>]*>([\s\S]*?)<\/f>/)?.[1];
+      if (formula) formulas.set(`${rows.length}:${index}`, xmlDecode(formula));
       const type = attributes.get("t") ?? "";
       let value = "";
       if (type === "inlineStr") {
@@ -244,7 +238,7 @@ function parseWorksheetRows(xml: string, sharedStrings: string[]) {
     }
     rows.push(row);
   }
-  return rows;
+  return { rows, formulas };
 }
 
 function resolveWorkbookTarget(target: string) {
@@ -295,197 +289,14 @@ function parseWorkbook(buffer: Buffer) {
   return workbookSheets(entries, buffer).map(sheet => {
     const entry = byName.get(sheet.path.toLowerCase());
     if (!entry) fail(`worksheet ${sheet.path} não encontrada.`);
-    return {
-      name: sheet.name,
-      rows: parseWorksheetRows(extractZipEntry(buffer, entry).toString("utf8"), sharedStrings)
-    };
+    const lido = parseWorksheetRows(extractZipEntry(buffer, entry).toString("utf8"), sharedStrings);
+    return { name: sheet.name, rows: lido.rows, formulas: lido.formulas };
   });
-}
-
-function fileRegion(value: string) {
-  const tokens = normalizeText(value).split(" ");
-  return tokens.find(token => UFS.has(token)) ?? null;
-}
-
-function fileRegime(value: string) {
-  const compact = compactText(value);
-  if (compact.includes("NAODESONERADO") || compact.includes("SEMDESONERACAO")) return false;
-  if (compact.includes("DESONERADO")) return true;
-  return null;
-}
-
-function fileKind(value: string): TargetFile["kind"] | null {
-  const normalized = normalizeText(value);
-  if (normalized.includes("PRECO REF INSUMOS") || normalized.includes("INSUMOS")) return "INPUT";
-  if (normalized.includes("CUSTO REF COMPOSICOES") || normalized.includes("COMPOSICOES")) return "COMPOSITION";
-  return null;
 }
 
 function baseDate(value: string) {
   const match = normalizeText(value).match(/(?:SINAPI\s*)?(20\d{2})\s*(0[1-9]|1[0-2])/);
   return match ? `${match[1]}-${match[2]}-01` : null;
-}
-
-function selectTargetFiles(entries: ZipEntry[], region: string, taxRelief: boolean) {
-  const targets: TargetFile[] = [];
-  for (const entry of entries) {
-    if (!entry.name.toLowerCase().endsWith(".xlsx")) continue;
-    if (fileRegion(entry.name) !== region) continue;
-    if (fileRegime(entry.name) !== taxRelief) continue;
-    const kind = fileKind(entry.name);
-    const date = baseDate(entry.name);
-    if (kind && date) targets.push({ entry, kind, baseDate: date });
-  }
-  const inputFiles = targets.filter(target => target.kind === "INPUT");
-  const compositionFiles = targets.filter(target => target.kind === "COMPOSITION");
-  if (!inputFiles.length) fail(`relatório de insumos ${region} ${taxRelief ? "desonerado" : "não desonerado"} não encontrado.`);
-  if (!compositionFiles.length) fail(`relatório de composições ${region} ${taxRelief ? "desonerado" : "não desonerado"} não encontrado.`);
-  const dates = new Set(targets.map(target => target.baseDate));
-  if (dates.size !== 1) fail("os relatórios selecionados possuem datas-base divergentes.");
-  return targets;
-}
-
-function findColumn(headers: string[], predicates: Array<(header: string) => boolean>, excluded: Set<number>) {
-  for (const predicate of predicates) {
-    const index = headers.findIndex((header, column) => !excluded.has(column) && predicate(header));
-    if (index >= 0) return index;
-  }
-  return -1;
-}
-
-function detectHeader(rows: string[][], kind: TargetFile["kind"]) {
-  const maximum = Math.min(rows.length, 120);
-  for (let rowIndex = 0; rowIndex < maximum; rowIndex += 1) {
-    const headers = rows[rowIndex].map(normalizeText);
-    const used = new Set<number>();
-    const code = findColumn(headers, [
-      header => header.includes("CODIGO") && (kind === "INPUT" ? header.includes("INSUMO") : header.includes("COMPOSICAO")),
-      header => header === "CODIGO",
-      header => header.startsWith("CODIGO ")
-    ], used);
-    if (code >= 0) used.add(code);
-    const description = findColumn(headers, [
-      header => header.includes("DESCRICAO") && (kind === "INPUT" ? header.includes("INSUMO") : header.includes("COMPOSICAO")),
-      header => header === "DESCRICAO",
-      header => header.startsWith("DESCRICAO ")
-    ], used);
-    if (description >= 0) used.add(description);
-    const unit = findColumn(headers, [
-      header => header === "UNIDADE",
-      header => header === "UNID",
-      header => header.startsWith("UNIDADE ")
-    ], used);
-    if (unit >= 0) used.add(unit);
-    const cost = findColumn(headers, kind === "INPUT" ? [
-      header => header.includes("PRECO MEDIANO"),
-      header => header.includes("PRECO UNITARIO"),
-      header => header === "PRECO",
-      header => header.includes("PRECO") && !header.includes("ORIGEM")
-    ] : [
-      header => header.includes("CUSTO TOTAL"),
-      header => header.includes("CUSTO UNITARIO"),
-      header => header === "CUSTO",
-      header => header.includes("CUSTO")
-    ], used);
-    if ([code, description, unit, cost].some(index => index < 0)) continue;
-    const itemType = findColumn(headers, [
-      header => header.includes("ORIGEM") && header.includes("PRECO"),
-      header => header.includes("TIPO") && header.includes("INSUMO"),
-      header => header === "TIPO"
-    ], used);
-    return { rowIndex, code, description, unit, cost, itemType: itemType >= 0 ? itemType : null } satisfies HeaderMap;
-  }
-  return null;
-}
-
-function parseNumber(value: unknown) {
-  const raw = String(value ?? "")
-    .replace(/\u00a0/g, " ")
-    .replace(/R\$/gi, "")
-    .replace(/\s+/g, "")
-    .trim();
-  if (!raw || raw === "-" || raw.toUpperCase() === "N/D") return null;
-  let normalized = raw;
-  if (normalized.includes(",")) normalized = normalized.replace(/\./g, "").replace(",", ".");
-  const parsed = Number(normalized);
-  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 1_000_000_000) return null;
-  return parsed;
-}
-
-function cleanCode(value: unknown) {
-  return cleanText(value, 80).replace(/\.0+$/, "");
-}
-
-function classifyInput(value: string, description: string): SinapiInputImportRow["itemType"] {
-  const normalized = `${normalizeText(value)} ${normalizeText(description)}`;
-  if (normalized.includes("MAO DE OBRA") || normalized.includes("HORISTA") || normalized.includes("MENSALISTA")) return "LABOR";
-  if (normalized.includes("EQUIPAMENTO") || normalized.includes("MAQUINA")) return "EQUIPMENT";
-  if (normalized.includes("SERVICO")) return "SERVICE";
-  if (normalized.includes("MATERIAL")) return "MATERIAL";
-  return "OTHER";
-}
-
-function mapInputRows(rows: string[][], header: HeaderMap, fileName: string, sheetName: string) {
-  const result: SinapiInputImportRow[] = [];
-  for (let index = header.rowIndex + 1; index < rows.length; index += 1) {
-    const row = rows[index];
-    const code = cleanCode(row[header.code]);
-    const description = cleanText(row[header.description], 1_000);
-    const unit = cleanText(row[header.unit], 30).toUpperCase();
-    const unitCost = parseNumber(row[header.cost]);
-    if (!code || !description || !unit || unitCost === null) continue;
-    result.push({
-      code,
-      description,
-      unit,
-      itemType: classifyInput(header.itemType === null ? "" : row[header.itemType] ?? "", description),
-      unitCost,
-      sourceFile: fileName,
-      sourceSheet: sheetName,
-      sourceRow: index + 1
-    });
-  }
-  return result;
-}
-
-function mapCompositionRows(rows: string[][], header: HeaderMap, fileName: string, sheetName: string) {
-  const result: SinapiCompositionImportRow[] = [];
-  for (let index = header.rowIndex + 1; index < rows.length; index += 1) {
-    const row = rows[index];
-    const code = cleanCode(row[header.code]);
-    const description = cleanText(row[header.description], 1_000);
-    const unit = cleanText(row[header.unit], 30).toUpperCase();
-    const unitCost = parseNumber(row[header.cost]);
-    if (!code || !description || !unit || unitCost === null) continue;
-    result.push({
-      code,
-      description,
-      unit,
-      unitCost,
-      items: [],
-      sourceFile: fileName,
-      sourceSheet: sheetName,
-      sourceRow: index + 1
-    });
-  }
-  return result;
-}
-
-function bestRowsForWorkbook(
-  workbook: Buffer,
-  target: TargetFile
-): { rows: SinapiInputImportRow[] | SinapiCompositionImportRow[]; worksheetCount: number } {
-  const sheets = parseWorkbook(workbook);
-  let best: SinapiInputImportRow[] | SinapiCompositionImportRow[] = [];
-  for (const sheet of sheets) {
-    const header = detectHeader(sheet.rows, target.kind);
-    if (!header) continue;
-    const mapped = target.kind === "INPUT"
-      ? mapInputRows(sheet.rows, header, target.entry.name, sheet.name)
-      : mapCompositionRows(sheet.rows, header, target.entry.name, sheet.name);
-    if (mapped.length > best.length) best = mapped;
-  }
-  return { rows: best, worksheetCount: sheets.length };
 }
 
 export function parseSinapiOfficialReferencePackage(
@@ -496,34 +307,130 @@ export function parseSinapiOfficialReferencePackage(
   if (!UFS.has(region)) fail("UF solicitada é inválida.");
   const archive = Buffer.isBuffer(archiveInput) ? archiveInput : Buffer.from(archiveInput);
   const entries = listZipEntries(archive, OUTER_LIMITS);
-  const targets = selectTargetFiles(entries, region, options.taxRelief);
-  const inputs = new Map<string, SinapiInputImportRow>();
-  const compositions = new Map<string, SinapiCompositionImportRow>();
-  let worksheets = 0;
 
-  for (const target of targets) {
-    const parsed = bestRowsForWorkbook(extractZipEntry(archive, target.entry), target);
-    worksheets += parsed.worksheetCount;
-    if (target.kind === "INPUT") {
-      for (const row of parsed.rows as SinapiInputImportRow[]) inputs.set(row.code, row);
-    } else {
-      for (const row of parsed.rows as SinapiCompositionImportRow[]) compositions.set(row.code, row);
+  // O pacote de hoje tem um arquivo só que importa — o de Referência —, com o
+  // regime em aba e a UF em coluna. A seleção por nome de arquivo, que lia UF e
+  // regime do nome, era do formato anterior. Ver `relatorio-oficial.ts`.
+  const referencia = entries.find(entry =>
+    entry.name.toLowerCase().endsWith(".xlsx") && normalizeText(entry.name).includes("REFERENCIA")
+  );
+  if (!referencia) {
+    fail(
+      `o pacote não traz o relatório de referência. Arquivos encontrados: ${entries
+        .filter(entry => entry.name.toLowerCase().endsWith(".xlsx"))
+        .map(entry => entry.name)
+        .join(", ") || "nenhum .xlsx"}.`
+    );
+  }
+
+  const regime: RegimeSinapi = options.taxRelief ? "COM_DESONERACAO" : "SEM_DESONERACAO";
+  const abas = parseWorkbook(extractZipEntry(archive, referencia));
+  const porNome = new Map(abas.map(aba => [normalizeText(aba.name), aba]));
+  const aba = (nome: string) => porNome.get(normalizeText(nome));
+
+  const abaDeInsumos = aba(abaDoRelatorio("INSUMOS", regime));
+  const abaDeComposicoes = aba(abaDoRelatorio("COMPOSICOES", regime));
+  if (!abaDeInsumos || !abaDeComposicoes) {
+    fail(
+      `o relatório não traz as abas ${abaDoRelatorio("INSUMOS", regime)} e ${abaDoRelatorio(
+        "COMPOSICOES",
+        regime
+      )}. Abas presentes: ${abas.map(item => item.name).join(", ")}.`
+    );
+  }
+
+  const cabecalhoInsumos = cabecalhoDeInsumos(abaDeInsumos.rows);
+  if (!cabecalhoInsumos) fail(`não encontrei o cabeçalho da aba ${abaDeInsumos.name}.`);
+  const cabecalhoComposicoes = cabecalhoDeComposicoes(abaDeComposicoes.rows);
+  if (!cabecalhoComposicoes) fail(`não encontrei o cabeçalho da aba ${abaDeComposicoes.name}.`);
+
+  const insumos = lerInsumos(abaDeInsumos.rows, cabecalhoInsumos, region);
+  const composicoes = lerComposicoes(
+    abaDeComposicoes.rows,
+    cabecalhoComposicoes,
+    region,
+    abaDeComposicoes.formulas
+  );
+
+  // Os itens de cada composição vêm da aba Analítica — é ela que torna o
+  // orçamento analítico, e é a única que traz o coeficiente.
+  const abaAnalitica = aba(ABA_ANALITICA);
+  const itensPorComposicao = new Map<string, ReturnType<typeof lerAnalitico>>();
+  if (abaAnalitica) {
+    for (const item of lerAnalitico(abaAnalitica.rows)) {
+      const lista = itensPorComposicao.get(item.composicao) ?? [];
+      lista.push(item);
+      itensPorComposicao.set(item.composicao, lista);
     }
   }
 
-  const inputRows = [...inputs.values()];
-  const compositionRows = [...compositions.values()];
+  const precoPorCodigo = new Map(insumos.map(item => [item.codigo, item.precoUnitario]));
+
+  // **Sub-composição tem custo, e ele está na mesma aba.** Dois terços dos itens
+  // analíticos não são insumo: são outra composição. Medido no arquivo oficial
+  // de 06/2026, em SP, sem desoneração — 26.773 dos 43.923 itens —, e 26.771
+  // deles têm custo publicado na aba CSD. Ignorar essa aba gravava zero em
+  // sessenta por cento da composição analítica: a tela mostraria o serviço
+  // desmontado, com quase tudo custando nada.
+  //
+  // Com o custo resolvido, a conta fecha: das 5.544 composições cujos itens têm
+  // todos custo conhecido, 5.433 — 98% — batem com o custo oficial dentro de 1%,
+  // desvio mediano de 0,02%. É essa reconciliação que o teste ao vivo cobra.
+  const custoPorComposicao = new Map(composicoes.map(item => [item.codigo, item.custoUnitario]));
+
+  const inputRows: SinapiInputImportRow[] = insumos.map((item, indice) => ({
+    code: item.codigo,
+    description: item.descricao,
+    unit: item.unidade,
+    itemType: naturezaDaClassificacao(item.classificacao),
+    unitCost: item.precoUnitario,
+    sourceFile: referencia.name,
+    sourceSheet: abaDeInsumos.name,
+    sourceRow: cabecalhoInsumos.linha + 1 + indice
+  }));
+
+  const compositionRows: SinapiCompositionImportRow[] = composicoes.map((item, indice) => ({
+    code: item.codigo,
+    description: item.descricao,
+    unit: item.unidade,
+    unitCost: item.custoUnitario,
+    items: (itensPorComposicao.get(item.codigo) ?? []).map(filho => {
+      // Insumo sem preço na UF continua caindo em zero — a planilha não publica
+      // preço para ele naquele estado, e são 4.677 itens em SP. Não é o mesmo
+      // problema: ali o número não existe. Está registrado como tarefa própria.
+      const custoUnitario =
+        filho.tipo === "INSUMO"
+          ? precoPorCodigo.get(filho.codigo) ?? 0
+          : custoPorComposicao.get(filho.codigo) ?? 0;
+      return {
+        code: filho.codigo,
+        description: filho.descricao,
+        unit: filho.unidade,
+        itemType: filho.tipo === "INSUMO" ? ("INPUT" as const) : ("COMPOSITION" as const),
+        coefficient: filho.coeficiente,
+        unitCost: custoUnitario,
+        totalCost: Number((custoUnitario * filho.coeficiente).toFixed(6))
+      };
+    }),
+    sourceFile: referencia.name,
+    sourceSheet: abaDeComposicoes.name,
+    sourceRow: cabecalhoComposicoes.linha + 1 + indice
+  }));
+
   if (inputRows.length < 500) fail(`somente ${inputRows.length} insumos válidos foram encontrados; mínimo esperado: 500.`);
-  if (compositionRows.length < 500) fail(`somente ${compositionRows.length} composições válidas foram encontradas; mínimo esperado: 500.`);
+  if (compositionRows.length < 500) {
+    fail(`somente ${compositionRows.length} composições válidas foram encontradas; mínimo esperado: 500.`);
+  }
   if (inputRows.length > 100_000 || compositionRows.length > 100_000) fail("volume de registros excede o limite técnico.");
 
-  const dates = new Set(targets.map(target => target.baseDate));
-  const selectedDate = [...dates][0];
+  const dataBase = baseDate(referencia.name) ?? baseDate(options.sourceUrl);
+  if (!dataBase) fail("não consegui identificar a data-base da publicação.");
+
   return {
-    baseDate: selectedDate,
+    baseDate: dataBase,
     inputs: inputRows,
     compositions: compositionRows,
-    xlsxFiles: targets.map(target => target.entry.name),
-    worksheets
+    xlsxFiles: [referencia.name],
+    worksheets: abas.length
   };
 }

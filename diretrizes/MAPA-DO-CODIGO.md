@@ -29,15 +29,15 @@ a ignorar.
 | | |
 |---|---|
 | Aplicativos no registro | 23 |
-| Rotas | 156 (140 páginas, 16 de API) |
+| Rotas | 157 (140 páginas, 17 de API) |
 | Server actions | 182 em 31 arquivos |
-| Módulos de `lib/` | 84 |
+| Módulos de `lib/` | 86 |
 | Funções do banco declaradas | 227 |
 | Funções do banco chamadas do código | 114 |
-| Suítes de teste | 43, com 486 casos |
+| Suítes de teste | 47, com 545 casos |
 | Migrations | 158 |
 | Validadores de CI | 28 |
-| Módulos de `lib/` citados por algum teste | 41 de 84 |
+| Módulos de `lib/` citados por algum teste | 45 de 86 |
 
 ## 1. Aplicativos
 
@@ -83,6 +83,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/api/documents/signatures/[envelopeId]` | API | — | `app/api/documents/signatures/[envelopeId]/route.ts` |
 | `/api/financeiro/anexos/[id]` | API | — | `app/api/financeiro/anexos/[id]/route.ts` |
 | `/api/internal/file-security/health` | API | — | `app/api/internal/file-security/health/route.ts` |
+| `/api/internal/sinapi-leitura-real` | API | — | `app/api/internal/sinapi-leitura-real/route.ts` |
 | `/api/internal/sinapi-source-probe` | API | — | `app/api/internal/sinapi-source-probe/route.ts` |
 | `/api/internal/sinapi-source-probe-v2` | API | — | `app/api/internal/sinapi-source-probe-v2/route.ts` |
 | `/api/proposals/[versionId]/pdf` | API | — | `app/api/proposals/[versionId]/pdf/route.ts` |
@@ -617,6 +618,8 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/observability/server` | não | `loadObservabilityAlerts`, `loadObservabilityDashboard`, `loadObservabilityEvent`, `loadObservabilityEvents`, `loadObservabilityHealth`, `loadObservabilitySettings` |
 | `@/lib/operations/notifications` | sim | `agruparNotificacoesOperacionais`, `descreverNotificacaoOperacional`, `planejarNotificacoesOperacionais` |
 | `@/lib/operations/routines` | sim | `ROTINAS_OPERACIONAIS`, `executarCenariosDasPersonas` |
+| `@/lib/orcamentos/cub` | sim | `linhasDoCub` |
+| `@/lib/orcamentos/naturezas` | sim | `custoDoItem`, `rotuloDaNatureza`, `totaisPorNatureza` |
 | `@/lib/organization-context` | não | `ACTIVE_ORGANIZATION_COOKIE`, `safeInternalReturnPath` |
 | `@/lib/pdf` | não | `generateCommercialPdf`, `sha256Hex` |
 | `@/lib/personas/catalog` | sim | `PERSONAS_OPERACIONAIS` |
@@ -644,9 +647,9 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/signatures/crypto` | não | `canonicalJson`, `createSigningToken`, `hashCanonical`, `safeFileName`, `sha256` |
 | `@/lib/signatures/index` | não | `getSignatureProvider` |
 | `@/lib/sinapi/archive-layout-diagnostic` | não | `inspectSinapiArchiveLayout` |
-| `@/lib/sinapi/automatic-update-v2` | não | `inspectLatestSinapiOfficialPackage`, `runSinapiAutomaticUpdate` |
-| `@/lib/sinapi/automatic-update` | não | `discoverLatestSinapiXlsxSource`, `discoverLatestSinapiXlsxUrl`, `inspectLatestSinapiOfficialPackage`, `runSinapiAutomaticUpdate` |
+| `@/lib/sinapi/automatic-update` | sim | `discoverLatestSinapiXlsxSource`, `discoverLatestSinapiXlsxUrl`, `inspectLatestSinapiOfficialPackage`, `runSinapiAutomaticUpdate` |
 | `@/lib/sinapi/official-reference-parser` | sim | `parseSinapiOfficialReferencePackage` |
+| `@/lib/sinapi/relatorio-oficial` | sim | `ABA_ANALITICA`, `UFS`, `abaDoRelatorio`, `cabecalhoDeComposicoes`, `cabecalhoDeInsumos`, `codigoDaCelula`, `lerAnalitico`, `lerComposicoes`, `lerInsumos`, `naturezaDaClassificacao`, `normalizar`, `precoDaCelula` |
 | `@/lib/sinapi/source-catalog` | sim | `parseSinapiBaseDate`, `selectLatestSinapiXlsxFile` |
 | `@/lib/sinapi/xlsx-parser` | sim | `parseSinapiZipPackage`, `parseWorksheetXml` |
 | `@/lib/stage12` | não | `dailyLogStatusLabels`, `daysBetween`, `formatDate`, `formatPercent`, `statusBadge`, `taskColumns`, `taskStatusLabels` |
@@ -738,7 +741,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `finalize_procurement_quote` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
 | `finalize_procurement_receipt` | `supabase/migrations/20260729000500_typed_enum_state_transitions.sql` | `app/actions/procurement.ts` |
 | `finance_create_installments` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | — (só por SQL ou trigger) |
-| `finish_sinapi_import` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update-v2.ts`, `lib/sinapi/automatic-update.ts` |
+| `finish_sinapi_import` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
 | `freeze_advanced_signature_layout` | `supabase/migrations/20260720054200_stage12_2_document_layout_workflow.sql` | `app/actions/advanced-signatures.ts` |
 | `freeze_budget_version` | `supabase/migrations/20260729010000_budget_readiness_and_cost_sources.sql` | `app/actions/budgets.ts` |
 | `freeze_quality_form_version` | `supabase/migrations/20260720080150_stage13_quality_forms_hardening.sql` | — (só por SQL ou trigger) |
@@ -760,8 +763,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `guard_official_cost_reference` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | — (só por SQL ou trigger) |
 | `has_org_role` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |
 | `import_procurement_receipt_to_inventory` | `supabase/migrations/20260729001500_inventory_receipt_line_order.sql` | `app/actions/inventory.ts` |
-| `import_sinapi_compositions_chunk` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update-v2.ts`, `lib/sinapi/automatic-update.ts` |
-| `import_sinapi_inputs_chunk` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update-v2.ts`, `lib/sinapi/automatic-update.ts` |
+| `import_sinapi_compositions_chunk` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
+| `import_sinapi_inputs_chunk` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
 | `install_finance_defaults` | `supabase/migrations/20260720123200_stage15_finance_module.sql` | — (só por SQL ou trigger) |
 | `install_finance_defaults_after_organization` | `supabase/migrations/20260720123200_stage15_finance_module.sql` | — (só por SQL ou trigger) |
 | `install_inventory_defaults` | `supabase/migrations/20260720160600_stage17_inventory_module.sql` | — (só por SQL ou trigger) |
@@ -874,7 +877,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `stage19_protect_append_only` | `supabase/migrations/20260721100159_stage19_observability_security.sql` | — (só por SQL ou trigger) |
 | `stage19_severity_rank` | `supabase/migrations/20260721122302_stage19_observability_functions.sql` | — (só por SQL ou trigger) |
 | `start_inventory_stocktake` | `supabase/migrations/20260720160410_stage17_inventory_assets_stocktakes_02.sql` | `app/actions/inventory.ts` |
-| `start_sinapi_import` | `supabase/migrations/20260729104500_sinapi_automatic_update_guard.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update-v2.ts`, `lib/sinapi/automatic-update.ts` |
+| `start_sinapi_import` | `supabase/migrations/20260729104500_sinapi_automatic_update_guard.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
 | `submit_daily_log` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | `app/actions/projects.ts` |
 | `submit_finance_entry` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | `app/actions/operational-finance.ts` |
 | `submit_finance_measurement` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | `app/actions/operational-finance.ts` |
@@ -924,6 +927,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/object-runtime-spec.test.ts` | 31 | canonicalSpecJson; specFingerprint; slotFamilyFor; allocateSlots |
 | `tests/operational-notifications.test.ts` | 5 | notificações operacionais por exceção |
 | `tests/operational-routines.test.ts` | 3 | runner das rotinas profissionais |
+| `tests/orcamento-cub.test.ts` | 13 | o CUB entra decomposto quando a publicação traz a decomposição; sem decomposição publicada, nada é inventado; decomposição que não fecha não é usada; área |
+| `tests/orcamento-naturezas.test.ts` | 12 | o custo de um item é o mesmo que o banco calcula; totais por natureza; rótulo em português |
 | `tests/personas-catalog.test.ts` | 5 | catálogo operacional de personas |
 | `tests/personas-db-contract.test.ts` | 4 | contrato de personas no banco |
 | `tests/pipeline-datas.test.ts` | 13 | catálogo de códigos; situacaoDoPrazo |
@@ -931,7 +936,9 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/project-creation-contract.test.ts` | 6 | criação segura de projetos |
 | `tests/qa-contraste.test.ts` | 19 | aritmética de cor; v4 — notação color(srgb …) lida como preto; opacidade nas três notações; mínimo exigido — 3:1 só para texto grande |
 | `tests/relatorio-perdas.test.ts` | 20 | Pareto ordena por valor, não por contagem; fatia e acumulado; casos que quebrariam a divisão; perda sem motivo entra na conta |
-| `tests/sinapi-official-reference-parser.test.ts` | 4 | parser dos relatórios oficiais SINAPI por UF |
+| `tests/sinapi-layout-publicado.test.ts` | 9 | — |
+| `tests/sinapi-official-reference-parser.test.ts` | 12 | leitor do relatório oficial, no formato publicado hoje |
+| `tests/sinapi-relatorio-oficial.test.ts` | 17 | qual aba responde por cada relatório; o código da composição está dentro da fórmula; preço em branco não é preço zero; insumos: UF é coluna |
 | `tests/sinapi-source-catalog.test.ts` | 4 | catálogo oficial SINAPI da CAIXA |
 | `tests/sinapi-xlsx-parser.test.ts` | 4 | parser automático do pacote SINAPI |
 | `tests/sinduscon-cub.test.ts` | 3 | SindusCon-SP CUB |
@@ -984,7 +991,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 43 de 84 |
+| Módulo de `lib/` sem teste que o cite | 41 de 86 |
 
 ### Módulos sem teste que os cite
 
@@ -1025,8 +1032,6 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/signatures/crypto`
 - `@/lib/signatures/index`
 - `@/lib/sinapi/archive-layout-diagnostic`
-- `@/lib/sinapi/automatic-update-v2`
-- `@/lib/sinapi/automatic-update`
 - `@/lib/stage12`
 - `@/lib/sugestoes/servidor`
 - `@/lib/supabase/admin`

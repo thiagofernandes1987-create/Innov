@@ -207,6 +207,35 @@ else{
   if(!guard.includes(token))errors.push(`Guard sensível incompleto: ${token}`);
 }
 
+// VACINA-060 — leitor que não entende o arquivo responde zero.
+const leitorSinapi="lib/sinapi/relatorio-oficial.ts";
+if(!fs.existsSync(leitorSinapi))errors.push(`Leitor do relatório oficial ausente: ${leitorSinapi}`);
+else{
+ const leitor=read(leitorSinapi);
+ // As três recusas do formato: código vindo do MATCH, preço vazio devolvendo
+ // null, e a contagem de colunas de custo conferida contra as 27 UFs.
+ if(!/MATCH\\\(/.test(leitor))errors.push("Leitor SINAPI não lê mais o código da composição do argumento do MATCH.");
+ if(!leitor.includes('if (cru === "" || cru === "-") return null;'))errors.push("Leitor SINAPI voltou a tratar preço vazio como número.");
+ if(!leitor.includes("colunasDeCusto.length !== UFS.length"))errors.push("Leitor SINAPI deixou de conferir as 27 colunas de custo antes do mapeamento posicional de UF.");
+}
+const montadorSinapi="lib/sinapi/official-reference-parser.ts";
+if(!fs.existsSync(montadorSinapi))errors.push(`Montador do pacote SINAPI ausente: ${montadorSinapi}`);
+else{
+ const montador=read(montadorSinapi);
+ if(!montador.includes("custoPorComposicao.get(filho.codigo)"))errors.push("Montador SINAPI voltou a gravar zero no custo da sub-composição.");
+}
+if(fs.existsSync("lib/sinapi/automatic-update-v2.ts"))errors.push("`automatic-update-v2.ts` voltou: o leitor do SINAPI tem um caminho só.");
+const conferenciaAoVivo="tests/sinapi-layout-publicado.test.ts";
+if(!fs.existsSync(conferenciaAoVivo))errors.push(`Conferência do layout publicado ausente: ${conferenciaAoVivo}`);
+if(fs.existsSync("package.json")){
+ const pacote=JSON.parse(read("package.json"));
+ if(!pacote.scripts?.["sinapi:layout"])errors.push("`pnpm sinapi:layout` ausente: o layout publicado deixou de ser conferível.");
+ const prebuild=pacote.scripts?.prebuild??"";
+ if(prebuild.includes("sinapi-xlsx-parser"))errors.push("O `prebuild` voltou a conferir o leitor antigo em vez do leitor em uso.");
+ if(!prebuild.includes("sinapi-relatorio-oficial")||!prebuild.includes("sinapi-official-reference-parser"))
+  errors.push("O `prebuild` não confere o leitor SINAPI em uso.");
+}
+
 if(errors.length){
  console.error(`Vacinas inválidas (${errors.length} falha(s)):`);
  for(const error of errors)console.error(`- ${error}`);
