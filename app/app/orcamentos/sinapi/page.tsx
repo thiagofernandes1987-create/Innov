@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { addSinapiBudgetItem, updateSinapiAutomatically } from "@/app/actions/sinapi";
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
@@ -171,7 +172,11 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
 
       <section className="card card-pad">
         <form method="get" className="grid">
-          <div className="grid" style={{ gridTemplateColumns: "minmax(220px,2fr) repeat(4,minmax(130px,1fr))" }}>
+          {/* Era `minmax(220px,2fr) repeat(4,minmax(130px,1fr))`: 740px de
+              largura mínima, medidos, que faziam a página inteira rolar de
+              lado em 390px. É a VACINA-044 na trilha explícita — pista que não
+              encolhe abaixo do conteúdo. */}
+          <div className="grid sinapi-filtros">
             <label>
               Código ou descrição
               <input name="q" defaultValue={search} placeholder="Ex.: alvenaria, cimento ou 88264" />
@@ -273,7 +278,18 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
                   </td>
                   <td>{reference.unit}</td>
                   <td className="mono">{formatCurrency(Number(reference.unit_cost))}</td>
-                  <td className="mono">{reference.kind === "COMPOSITION" ? Number(reference.component_count).toLocaleString("pt-BR") : "—"}</td>
+                  <td className="mono">
+                    {reference.kind === "COMPOSITION" ? (
+                      // Um clique da lista para a memória de cálculo (T-37.10).
+                      // A contagem já era o número que o orçamentista olhava
+                      // para decidir se valia abrir; só faltava poder abrir.
+                      <Link className="link-de-celula" href={`/app/orcamentos/sinapi/composicao/${reference.reference_id}`}>
+                        {Number(reference.component_count).toLocaleString("pt-BR")} itens
+                      </Link>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                   <td>
                     <form action={addSinapiBudgetItem} className="grid" style={{ minWidth: 260 }}>
                       <input type="hidden" name="kind" value={reference.kind} />

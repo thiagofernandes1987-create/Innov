@@ -29,15 +29,15 @@ a ignorar.
 | | |
 |---|---|
 | Aplicativos no registro | 23 |
-| Rotas | 158 (140 páginas, 18 de API) |
+| Rotas | 159 (141 páginas, 18 de API) |
 | Server actions | 182 em 31 arquivos |
-| Módulos de `lib/` | 88 |
+| Módulos de `lib/` | 89 |
 | Funções do banco declaradas | 229 |
 | Funções do banco chamadas do código | 116 |
-| Suítes de teste | 51, com 584 casos |
+| Suítes de teste | 52, com 595 casos |
 | Migrations | 160 |
 | Validadores de CI | 28 |
-| Módulos de `lib/` citados por algum teste | 49 de 88 |
+| Módulos de `lib/` citados por algum teste | 50 de 89 |
 
 ## 1. Aplicativos
 
@@ -185,6 +185,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/orcamentos/[id]` | página | sessão da organização | `app/app/orcamentos/[id]/page.tsx` |
 | `/app/orcamentos/novo` | página | papéis: SUPER_ADMIN, DIRECAO, ADMINISTRADOR, COMERCIAL, ORCAMENTISTA | `app/app/orcamentos/novo/page.tsx` |
 | `/app/orcamentos/sinapi` | página | papéis: SUPER_ADMIN, DIRECAO, ADMINISTRADOR, ORCAMENTISTA, FINANCEIRO | `app/app/orcamentos/sinapi/page.tsx` |
+| `/app/orcamentos/sinapi/composicao/[id]` | página | papéis: SUPER_ADMIN, DIRECAO, ADMINISTRADOR, ORCAMENTISTA, FINANCEIRO | `app/app/orcamentos/sinapi/composicao/[id]/page.tsx` |
 | `/app/pipeline/[trilha]` | página | — | `app/app/pipeline/[trilha]/page.tsx` |
 | `/app/pipeline/[trilha]/[cardId]` | página | — | `app/app/pipeline/[trilha]/[cardId]/page.tsx` |
 | `/app/planejamento` | página | sessão da organização | `app/app/planejamento/page.tsx` |
@@ -619,6 +620,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/observability/server` | não | `loadObservabilityAlerts`, `loadObservabilityDashboard`, `loadObservabilityEvent`, `loadObservabilityEvents`, `loadObservabilityHealth`, `loadObservabilitySettings` |
 | `@/lib/operations/notifications` | sim | `agruparNotificacoesOperacionais`, `descreverNotificacaoOperacional`, `planejarNotificacoesOperacionais` |
 | `@/lib/operations/routines` | sim | `ROTINAS_OPERACIONAIS`, `executarCenariosDasPersonas` |
+| `@/lib/orcamentos/composicao` | sim | `TOLERANCIA_DA_CONTA`, `motivoDoItem`, `reconciliacaoDaComposicao`, `situacaoDaPlanilhaEmPortugues` |
 | `@/lib/orcamentos/cub` | sim | `linhasDoCub` |
 | `@/lib/orcamentos/naturezas` | sim | `custoDoItem`, `rotuloDaNatureza`, `totaisPorNatureza` |
 | `@/lib/organization-context` | sim | `ACTIVE_ORGANIZATION_COOKIE`, `safeInternalReturnPath` |
@@ -933,6 +935,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/object-runtime-spec.test.ts` | 31 | canonicalSpecJson; specFingerprint; slotFamilyFor; allocateSlots |
 | `tests/operational-notifications.test.ts` | 5 | notificações operacionais por exceção |
 | `tests/operational-routines.test.ts` | 3 | runner das rotinas profissionais |
+| `tests/orcamento-composicao.test.ts` | 11 | por que o custo de um item falta; a soma dos itens fecha com o custo publicado? |
 | `tests/orcamento-cub.test.ts` | 13 | o CUB entra decomposto quando a publicação traz a decomposição; sem decomposição publicada, nada é inventado; decomposição que não fecha não é usada; área |
 | `tests/orcamento-naturezas.test.ts` | 12 | o custo de um item é o mesmo que o banco calcula; totais por natureza; rótulo em português |
 | `tests/personas-catalog.test.ts` | 5 | catálogo operacional de personas |
@@ -1000,7 +1003,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 39 de 88 |
+| Módulo de `lib/` sem teste que o cite | 39 de 89 |
 
 ### Módulos sem teste que os cite
 

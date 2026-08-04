@@ -3951,3 +3951,70 @@ tbody tr:hover { background: var(--surface-muted); }
   font-variant-numeric: tabular-nums;
   opacity: 0.7;
 }
+
+/* Composição analítica do SINAPI — T-37.10.
+
+   O que esta tela precisa deixar óbvio é a diferença entre "custou pouco" e
+   "não sabemos quanto custa". Por isso o veredito é texto com selo, e a linha
+   sem preço é marcada por borda **e** por palavra: `UI-UX-PRO-MAX.md` §6 proíbe
+   comunicar resultado só por cor, e aqui a cor sozinha faria a linha incompleta
+   parecer apenas destacada. */
+.composicao-veredito { border-left: 3px solid var(--warning); }
+.composicao-veredito:has(.badge-success) { border-left-color: var(--success); }
+
+.composicao-adicionar {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+  margin-top: 12px;
+}
+.composicao-adicionar > * { min-width: 0; }
+.composicao-adicionar button { min-height: 44px; }
+
+/* Alinhamento numérico à direita quando a coluna é comparativa
+   (`UI-UX-PRO-MAX.md` §6, Tabelas). */
+th.numero, td.numero { text-align: right; }
+
+.linha-sem-custo > td:first-child { box-shadow: inset 3px 0 0 var(--warning); }
+.linha-sem-custo { background: var(--warning-soft); }
+:root[data-tema="escuro"] .linha-sem-custo { background: color-mix(in srgb, var(--warning) 12%, transparent); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) .linha-sem-custo { background: color-mix(in srgb, var(--warning) 12%, transparent); }
+}
+
+@media (max-width: 720px) {
+  .composicao-adicionar { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Filtro do catálogo SINAPI. As pistas fixas de 220px e 130px somavam 740px de
+   largura mínima e derrubavam a página inteira para o lado em 390px — VACINA-044,
+   a mesma causa do transbordo do orçamento. `auto-fit` com mínimo em `min()`
+   deixa a pista encolher com a tela em vez de empurrá-la. */
+.sinapi-filtros {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+}
+.sinapi-filtros > * { min-width: 0; }
+.sinapi-filtros label:first-child { grid-column: 1 / -1; }
+@media (min-width: 900px) {
+  .sinapi-filtros label:first-child { grid-column: span 2; }
+}
+
+/* Link sozinho numa célula é botão mal vestido: a isenção de "texto corrido" da
+   WCAG 2.5.5 não vale aqui, e o medidor está certo em reprovar 67×19. */
+.link-de-celula {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Memória de cálculo da composição. O `white-space: nowrap` global das células
+   é bom para códigos e dinheiro e péssimo para descrição de insumo do SINAPI,
+   que tem 120 caracteres: ele empurrava "custo unit." e "custo total" para fora
+   da tela em 1366px, e são justamente as duas colunas que se compara. */
+.composicao-memoria td.descricao {
+  white-space: normal;
+  min-width: 240px;
+  max-width: 460px;
+}
