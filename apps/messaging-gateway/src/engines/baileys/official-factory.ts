@@ -24,8 +24,8 @@ export function createOfficialBaileysSocketFactory(input: {
   socketConfig?: Omit<UserFacingSocketConfig, "auth">;
 }): BaileysSocketFactory {
   const loadModule = input.moduleLoader ?? (async () => {
-    const module = await import("@whiskeysockets/baileys");
-    return { makeWASocket: module.makeWASocket };
+    const baileysModule = await import("@whiskeysockets/baileys");
+    return { makeWASocket: baileysModule.makeWASocket };
   });
 
   return async ({ channelAccountId }): Promise<BaileysSocketPort> => {
@@ -42,7 +42,7 @@ export function createOfficialBaileysSocketFactory(input: {
     }
 
     try {
-      const [auth, module] = await Promise.all([
+      const [auth, baileysModule] = await Promise.all([
         input.authResolver(channelAccountId),
         loadModule()
       ]);
@@ -54,7 +54,7 @@ export function createOfficialBaileysSocketFactory(input: {
         syncFullHistory: false,
         emitOwnEvents: false
       };
-      return module.makeWASocket(config) as unknown as BaileysSocketPort;
+      return baileysModule.makeWASocket(config) as unknown as BaileysSocketPort;
     } catch (error) {
       throw normalizeBaileysError(error, "SOCKET_FACTORY_FAILED");
     }
