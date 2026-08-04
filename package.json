@@ -96,6 +96,11 @@
     "typescript": "^5.9.3",
     "vitest": "^4.0.0"
   },
+  "pnpm": {
+    "overrides": {
+      "ws": "8.21.1"
+    }
+  },
   "engines": {
     "node": ">=24.0.0"
   }
