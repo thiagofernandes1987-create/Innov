@@ -12,8 +12,11 @@
 -- — porque `r3b_observability_security_hardening` está no débito congelado de
 -- `diretrizes/migrations-aplicadas.json`, sob a S-22. A função não é órfã: é
 -- load-bearing. Dropá-la agora abriria o diagnóstico global ou derrubaria a
--- policy, dependendo de o `drop` passar. Fica registrado na T-22.x do inventário,
--- junto do pré-requisito.
+-- policy, dependendo de o `drop` passar.
+--
+-- Resolvido depois, na ordem certa: o R3B foi aplicado e a remoção saiu em
+-- `20260804070000_remover_diagnostico_global_orfao.sql`, com as dependências
+-- conferidas em zero antes do `drop`. T-37.11.
 
 begin;
 

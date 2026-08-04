@@ -1,7 +1,7 @@
 {
   "_leia": "Instantâneo do que está aplicado no banco, para o CI comparar sem alcançar o banco. A comparação é pelo NOME LÓGICO: o ledger carimba a versão no momento da aplicação, então o número do arquivo e o da versão aplicada não coincidem — comparar por número produziria um resultado sem sentido. Atualize com `SUPABASE_DB_URL=... pnpm ledger:atualizar` (scripts/atualizar-ledger-de-migrations.mjs) e commite junto da migration.",
   "projeto": "wyeojufebtwblsubkunr",
-  "atualizado_em": "2026-08-04T22:09:32Z",
+  "atualizado_em": "2026-08-04T22:26:52Z",
   "aplicadas": [
     "accept_proposal_client_audit",
     "aplicativo_modelos_e_documentacoes",
@@ -42,7 +42,9 @@
     "procurement_segregation_of_duties",
     "project_district_and_flexible_rpc_v2",
     "qualify_pgcrypto_functions",
+    "r3b_observability_security_hardening",
     "referencia_oficial_nao_muda_de_dono",
+    "remover_diagnostico_global_orfao",
     "revogar_truncate_de_anon_e_authenticated",
     "revoke_legacy_project_creation_rpcs",
     "safe_project_creation_workflows",
@@ -266,7 +268,6 @@
       "biblioteca_de_modelos_e_documentacoes",
       "documentos_emitidos",
       "r2_stage14_procurement_parent_chain",
-      "r3b_observability_security_hardening",
       "stage10_homologation_hardening",
       "stage13_quality_forms_hardening",
       "stage13_quality_forms_seed",
