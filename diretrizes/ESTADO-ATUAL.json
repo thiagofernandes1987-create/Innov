@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "updatedAt": "2026-07-22",
+  "schemaVersion": 2,
+  "updatedAt": "2026-08-04",
   "repository": "thiagofernandes1987-create/Innov",
   "baseBranch": "main",
   "stableCommit": "55f4d56dba5995d9fb031dd84c724fd0f2e62902",
@@ -115,5 +115,42 @@
       "otherModuleUploads": "pending"
     },
     "nextWorkstream": "attachment_provider_homologation"
+  },
+  "stage22Execution": {
+    "status": "TECHNICAL_SCOPE_CLOSED_EXTERNAL_GATES_PENDING",
+    "branch": "feature/etapa-22-provider-whatsapp-web-baileys",
+    "pullRequest": 40,
+    "pullRequestState": "OPEN_DRAFT_UNMERGED",
+    "pullRequestDisposition": "DRAFT_PENDING_TECHNICAL_AND_SECURITY_REVIEW",
+    "officialProviderPreserved": "META_CLOUD",
+    "experimentalProvider": "WHATSAPP_WEB_BAILEYS",
+    "baileysVersion": "7.0.0-rc13",
+    "runtimeRegistered": false,
+    "externalConnectionExecuted": false,
+    "qrOrPairingExecuted": false,
+    "realSessionExecuted": false,
+    "authorizedNumberConfigured": false,
+    "realHomologation": "NOT_EXECUTED",
+    "pilotDecision": "HOLD",
+    "realPilot": "NOT_EXECUTED",
+    "productionDecision": "NOT_AUTHORIZED",
+    "deploymentExecuted": false,
+    "aiMode": "DRAFT_ONLY",
+    "automaticSending": false,
+    "evidence": {
+      "w19": "SYNTHETIC_SCOPE_APPROVED_REAL_E2E_BLOCKED",
+      "w20": "TECHNICAL_CONTROLS_APPROVED_REAL_HOMOLOGATION_BLOCKED",
+      "w21": "TECHNICAL_CONTROLS_APPROVED_REAL_PILOT_HOLD",
+      "w22": "CANONICAL_RECONCILIATION_IN_VALIDATION"
+    },
+    "externalBlockers": [
+      "LEGAL_AND_PRIVACY_REVIEW",
+      "TRANSITIVE_SBOM_REVIEW",
+      "KMS_HSM_DECISION",
+      "AUTHORIZED_DEDICATED_NUMBER",
+      "REAL_HOMOLOGATION_ORGANIZATION_AND_USERS",
+      "P0_RETEST_IN_AUTHORIZED_ENVIRONMENT",
+      "TECHNICAL_AND_SECURITY_PR_REVIEW"
+    ]
   }
 }
