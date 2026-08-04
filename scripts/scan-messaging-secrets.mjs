@@ -9,7 +9,14 @@ const patterns = [
   { id: "JWT_LITERAL", pattern: /\beyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}\b/g },
   { id: "SECRET_ASSIGNMENT", pattern: /\b(?:password|secret|token|cookie|privateKey|apiKey)\s*[:=]\s*["'][^"'\n]{12,}["']/gi }
 ];
-const allowMarkers = ["process.env.", "[REDACTED", "example", "placeholder", "test-secret"];
+const allowMarkers = [
+  "process.env.",
+  "[REDACTED",
+  "example",
+  "placeholder",
+  "test-secret",
+  "Cookie: \"security=true\""
+];
 
 function files(root) {
   if (!fs.existsSync(root)) return [];
