@@ -92,7 +92,7 @@ export function resolveProviderPolicy(input: {
 }): ResolvedProviderPolicy {
   const parsed = parseOrganizationProviderOverrides(input.rawOverrides);
   const override = parsed.overrides[input.organizationId]?.[input.providerType];
-  const runtimeProviderTypes =
+  const runtimeProviderTypes: readonly ChannelProviderType[] =
     input.runtimeProviderTypes ?? IMPLEMENTED_CHANNEL_PROVIDER_TYPES;
   const runtimeAvailable = runtimeProviderTypes.includes(input.providerType);
   const defaultEnabled = input.providerType === "META_CLOUD";
