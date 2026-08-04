@@ -81,11 +81,19 @@ export default async function WhatsAppPage({
           <span className="badge">APLICATIVO · ATENDIMENTO</span>
           <h1>WhatsApp e Atendimento</h1>
           <p>
-            Conversas oficiais ligadas ao Cliente 360, CRM, obras, contratos e SAC. Mensagens
-            padrão são resolvidas a partir dos modelos e documentos existentes; não existe
-            cópia editável do texto neste módulo.
+            Conversas ligadas ao Cliente 360, CRM, obras, contratos e SAC. Mensagens padrão
+            são resolvidas a partir dos modelos e documentos existentes; não existe cópia
+            editável do texto neste módulo.
           </p>
         </div>
+        <nav aria-label="Navegação do atendimento" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <Link className="button button-secondary" href="/app/whatsapp/inbox">
+            Inbox multiprovider
+          </Link>
+          <Link className="button button-secondary" href="/app/whatsapp/bots">
+            Bots e IA
+          </Link>
+        </nav>
       </section>
 
       {query.error ? (
@@ -101,7 +109,7 @@ export default async function WhatsAppPage({
       ) : null}
       {!workspace.providerPolicy.enabled ? (
         <div className="validation warning" role="status">
-          O provider Meta Cloud está desabilitado para esta organização. Ações de envio e
+          O runtime Meta Cloud está desabilitado para esta organização. Ações de envio e
           abertura de conversa foram ocultadas pela política de capacidades.
         </div>
       ) : null}
@@ -110,7 +118,7 @@ export default async function WhatsAppPage({
         <article className="card card-pad">
           <span className="eyebrow">CONTAS ATIVAS</span>
           <strong>{workspace.accounts.filter(item => item.active).length}</strong>
-          <p>Números empresariais cadastrados.</p>
+          <p>Contas de canal cadastradas.</p>
         </article>
         <article className="card card-pad">
           <span className="eyebrow">CONVERSAS</span>
@@ -118,15 +126,20 @@ export default async function WhatsAppPage({
           <p>Atendimentos abertos ou históricos.</p>
         </article>
         <article className="card card-pad">
-          <span className="eyebrow">PROVIDER</span>
+          <span className="eyebrow">RUNTIME OFICIAL</span>
           <strong>{workspace.providerPolicy.enabled ? "ATIVO" : "DESATIVADO"}</strong>
-          <p>Meta Cloud · capabilities efetivas por organização.</p>
+          <p>Meta Cloud · envios condicionados às capabilities efetivas.</p>
         </article>
       </section>
 
       <section
         className="card card-pad"
-        style={{ display: "grid", gridTemplateColumns: "minmax(250px, 0.8fr) minmax(360px, 1.5fr)", gap: "1rem" }}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,420px),1fr))",
+          gap: "1rem",
+          alignItems: "start"
+        }}
       >
         <aside>
           <div className="section-heading">
@@ -157,18 +170,18 @@ export default async function WhatsAppPage({
             {!workspace.conversations.length ? (
               <div className="empty-state">
                 <h3>Nenhuma conversa</h3>
-                <p>Cadastre a conta e abra um atendimento ou aguarde a primeira mensagem.</p>
+                <p>Cadastre uma conta, abra um atendimento ou aguarde a primeira mensagem.</p>
               </div>
             ) : null}
           </div>
         </aside>
 
-        <div>
+        <div style={{ minWidth: 0 }}>
           {selected ? (
             <>
               <div className="section-heading">
                 <div>
-                  <span className="eyebrow">ATENDIMENTO · META CLOUD</span>
+                  <span className="eyebrow">ATENDIMENTO · {workspace.selectedProviderLabel.toUpperCase()}</span>
                   <h2>{conversationName(selected)}</h2>
                   <p>
                     {projectName(selected)} · última mensagem do cliente:{" "}
@@ -179,7 +192,13 @@ export default async function WhatsAppPage({
 
               <div
                 className="card card-pad"
-                style={{ minHeight: "320px", maxHeight: "55vh", overflowY: "auto", display: "grid", gap: ".75rem" }}
+                style={{
+                  minHeight: "320px",
+                  maxHeight: "55vh",
+                  overflowY: "auto",
+                  display: "grid",
+                  gap: ".75rem"
+                }}
               >
                 {workspace.messages.map(message => {
                   const outbound = message.direction === "OUTBOUND";
@@ -189,8 +208,9 @@ export default async function WhatsAppPage({
                       key={message.id}
                       className="card card-pad"
                       style={{
-                        marginLeft: outbound ? "12%" : 0,
-                        marginRight: outbound ? 0 : "12%"
+                        marginLeft: outbound ? "min(12%,48px)" : 0,
+                        marginRight: outbound ? 0 : "min(12%,48px)",
+                        overflowWrap: "anywhere"
                       }}
                     >
                       <small>
@@ -274,7 +294,7 @@ export default async function WhatsAppPage({
               ) : (
                 <div className="validation warning" role="status">
                   Esta conta não possui capability outbound habilitada. O histórico permanece
-                  disponível, mas as ações de envio foram ocultadas.
+                  disponível para consulta, mas as ações de envio foram ocultadas.
                 </div>
               )}
             </>
