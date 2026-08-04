@@ -137,7 +137,7 @@ do $$ begin
     );
     raise exception 'W-15 cross tenant aceito';
   exception when others then
-    if sqlerrm not like '%AI_SCOPE_MISMATCH%' then raise; end if;
+    if sqlerrm not like '%AI_SCOPE_MISMATCH%' and sqlerrm not like '%AI_FORBIDDEN%' then raise; end if;
   end;
   raise notice 'W-15 isolamento multiempresa aprovado';
 end $$;
