@@ -1,6 +1,6 @@
 import "server-only";
 
-import { requireCapability } from "@/lib/authorization";
+import { hasCapability, requireCapability } from "@/lib/authorization";
 import {
   BAILEYS_PLANNED_CAPABILITY_MATRIX,
   WEB_CHAT_PLANNED_CAPABILITY_MATRIX,
@@ -43,7 +43,7 @@ function channelState(value: unknown, providerStatus: unknown): InboxChannelStat
 
 function capabilitiesFor(organizationId: string, type: ChannelProviderType) {
   if (type === "META_CLOUD") {
-    return resolveMetaCloudRuntimePolicy(organizationId).uiCapabilities;
+    return resolveMetaCloudRuntimePolicy(organizationId).ui;
   }
   if (type === "WHATSAPP_WEB_BAILEYS") {
     return deriveMessagingUiCapabilities(BAILEYS_PLANNED_CAPABILITY_MATRIX, false);
@@ -56,6 +56,7 @@ export async function loadMultiproviderInbox(input: {
   filters?: InboxFilters;
 }) {
   const context = await requireCapability("whatsapp", "read");
+  const canManage = await hasCapability("whatsapp", "manage", null, context);
   const [conversationResult, queueResult, presenceResult, noteResult] = await Promise.all([
     context.supabase
       .from("whatsapp_conversations")
@@ -137,7 +138,7 @@ export async function loadMultiproviderInbox(input: {
   return {
     organizationId: context.organizationId,
     currentUserId: context.userId,
-    canManage: context.access.manage,
+    canManage,
     unified,
     selectedThread,
     selectedOwnershipVersion: Number(selectedRow?.ownership_version ?? 0),
