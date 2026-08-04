@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-08-04T22:00:00.000Z",
+  "project": "Etapa 22 — WhatsApp e atendimento omnichannel",
+  "executionBranch": "feature/etapa-22-provider-whatsapp-web-baileys",
+  "pullRequest": 40,
+  "baseBranch": "feature/etapa-22-whatsapp-omnichannel",
+  "provider": {
+    "officialRuntime": "META_CLOUD",
+    "implementedRuntimeProviders": ["META_CLOUD"],
+    "studiedOptionalProvider": "WHATSAPP_WEB_BAILEYS",
+    "baileysPackage": "@whiskeysockets/baileys@7.0.0-rc13",
+    "baileysAdapterImplemented": true,
+    "baileysRuntimeRegistered": false,
+    "externalConnectionExecuted": false,
+    "realSessionCreated": false,
+    "qrOrPairingExecuted": false,
+    "realNumberUsed": false
+  },
+  "sprints": {
+    "W-00": "DOCUMENTED_COMPLETE",
+    "W-01": "DOCUMENTED_COMPLETE",
+    "W-02": "IMPLEMENTED_TESTED",
+    "W-03": "IMPLEMENTED_TESTED",
+    "W-04": "IMPLEMENTED_TESTED",
+    "W-05": "IMPLEMENTED_TESTED_SYNTHETIC",
+    "W-06": "IMPLEMENTED_TESTED_NO_NETWORK",
+    "W-07": "IMPLEMENTED_TESTED_SYNTHETIC",
+    "W-08": "IMPLEMENTED_TESTED_SYNTHETIC",
+    "W-09": "IMPLEMENTED_TESTED_SYNTHETIC",
+    "W-10": "IMPLEMENTED_TESTED_SYNTHETIC",
+    "W-11": "IMPLEMENTED_TESTED_SYNTHETIC",
+    "W-12": "IMPLEMENTED_TESTED_SYNTHETIC",
+    "W-13": "IMPLEMENTED_TESTED_SYNTHETIC",
+    "W-14": "IMPLEMENTED_TESTED_SYNTHETIC",
+    "W-15": "IMPLEMENTED_TESTED_DRAFT_ONLY",
+    "W-16": "IMPLEMENTED_TESTED_NO_AUTOMATIC_SEND",
+    "W-17": "IMPLEMENTED_TESTED_SECURITY_REVIEW",
+    "W-18": "IMPLEMENTED_TESTED_SYNTHETIC_OBSERVABILITY",
+    "W-19": "SYNTHETIC_COMPLETE_REAL_E2E_BLOCKED",
+    "W-20": "BLOCKED_NOT_EXECUTED",
+    "W-21": "HOLD_NOT_EXECUTED",
+    "W-22": "FINAL_TECHNICAL_RECONCILIATION"
+  },
+  "gates": {
+    "W-G19": "BLOCKED_REAL_NUMBER_AND_QR_NOT_EXECUTED",
+    "W-G20": "BLOCKED_REAL_HOMOLOGATION_PREREQUISITES_MISSING",
+    "W-G21": "HOLD_LEGAL_AND_REAL_PILOT_REVIEW_MISSING",
+    "production": "NOT_AUTHORIZED"
+  },
+  "reviews": {
+    "technical": "COMPLETED",
+    "security": "COMPLETED_SYNTHETIC_SCOPE",
+    "architectural": "COMPLETED",
+    "operational": "COMPLETED_SYNTHETIC_SCOPE",
+    "legal": "PENDING_EXTERNAL_OR_INTERNAL_COUNSEL_APPROVAL"
+  },
+  "completionCriteria": {
+    "W-C01_only_authorized_provider_connects": "NOT_PROVEN_NO_PROVIDER_CONNECTION_EXECUTED",
+    "W-C02_no_duplicate_messages": "PROVEN_SYNTHETIC_CONTRACTS",
+    "W-C03_single_writer": "PROVEN_SYNTHETIC",
+    "W-C04_credentials_safe": "PROVEN_SYNTHETIC",
+    "W-C05_restart_and_restore": "PROVEN_SYNTHETIC",
+    "W-C06_pn_lid_single_customer": "IMPLEMENTED_TESTED_SYNTHETIC",
+    "W-C07_media_safe": "IMPLEMENTED_TESTED_SYNTHETIC_AND_FILE_SECURITY_E2E",
+    "W-C08_ai_minimum_context_citations_handoff": "IMPLEMENTED_TESTED_DRAFT_ONLY",
+    "W-C09_ui_degraded_states": "IMPLEMENTED_TESTED",
+    "W-C10_tenant_isolation": "PROVEN_POSTGRES_TESTS",
+    "W-C11_metrics_alerts": "IMPLEMENTED_TESTED_SYNTHETIC",
+    "W-C12_no_secrets_in_logs": "SCANNER_AND_TESTS_GREEN",
+    "W-C13_canonical_sources": "IMPLEMENTED_TESTED",
+    "W-C14_rollback_disconnect": "DOCUMENTED_TESTED_SYNTHETIC",
+    "W-C15_controlled_pilot_go": "NOT_MET_HOLD_NOT_EXECUTED",
+    "W-C16_canonical_docs_reconciled": "IN_PROGRESS_W22"
+  },
+  "release": {
+    "pilotDecision": "HOLD",
+    "homologationDecision": "BLOCKED_NOT_EXECUTED",
+    "productionAuthorized": false,
+    "pullRequestMustRemainDraft": true,
+    "mergeAuthorized": false
+  },
+  "evidenceBaseline": {
+    "w21FunctionalHead": "1f8a39631baddd39b9f0f0fca7a9d864808fc949",
+    "w21IncrementalRun": 30945264909,
+    "w21CiRun": 30945264859,
+    "w21FileSecurityRun": 30945264848
+  }
+}
