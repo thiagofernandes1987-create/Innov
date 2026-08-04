@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 
 const files = [
+  "supabase/tests/messaging-identities/extensions.sql",
   "supabase/tests/messaging-multiprovider/fixture.sql",
   "supabase/tests/messaging-multiprovider/legacy-seed.sql",
   "supabase/migrations/20260804011500_stage22_multiprovider_storage.sql",
