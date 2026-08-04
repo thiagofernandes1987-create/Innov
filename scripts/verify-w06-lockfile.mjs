@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { createHash } from "node:crypto";
 
 const lockfilePath = "pnpm-lock.yaml";
-const expectedSha256 = "d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9";
+const expectedSha256 = "ce984fcb21008b5210e35c76287752374de2fd262efd8e4e382939b60a443fff";
 const failures = [];
 
 if (!fs.existsSync(lockfilePath)) {
