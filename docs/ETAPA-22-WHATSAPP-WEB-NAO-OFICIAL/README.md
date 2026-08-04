@@ -1,8 +1,8 @@
 # Provider WhatsApp Web não oficial — índice de governança
 
-**Status atual:** Sprint W-01 concluída documentalmente; implementação não iniciada  
+**Status atual:** Sprints W-01 e W-02 concluídas; engine e runtime não iniciados  
 **Produção:** bloqueada  
-**Próxima sprint:** W-02 — Modelo canônico de canal, identidade e mensagem
+**Próxima sprint:** W-03 — Contrato de engine e matriz de capacidades
 
 ---
 
@@ -13,8 +13,10 @@
 3. [`ADR-001-PROVIDER-WHATSAPP-WEB-NAO-OFICIAL.md`](./ADR-001-PROVIDER-WHATSAPP-WEB-NAO-OFICIAL.md) — decisão arquitetural e limites da autorização.
 4. [`MATRIZ-LICENCAS-E-REAPROVEITAMENTO.md`](./MATRIZ-LICENCAS-E-REAPROVEITAMENTO.md) — permissões, bloqueios e técnicas por projeto/arquivo.
 5. [`POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md`](./POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md) — número autorizado, aceite, opt-out, casos proibidos e remoção de sessão.
-6. [`EVIDENCIAS-W01.md`](./EVIDENCIAS-W01.md) — checklist e classificação das evidências da Sprint W-01.
-7. [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) — avisos e estado de dependências/adaptações externas.
+6. [`CONTRATOS-CANONICOS-V1.md`](./CONTRATOS-CANONICOS-V1.md) — modelo provider-neutral concluído na W-02.
+7. [`EVIDENCIAS-W01.md`](./EVIDENCIAS-W01.md) — evidências de governança.
+8. [`EVIDENCIAS-W02.md`](./EVIDENCIAS-W02.md) — evidências de código, testes e CI dos contratos canônicos.
+9. [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) — avisos e estado de dependências/adaptações externas.
 
 ---
 
@@ -23,8 +25,11 @@
 - o provider não oficial é opcional e revogável;
 - Meta Cloud API permanece o provider oficial e padrão;
 - providers compartilham domínio, mas não runtime;
+- `channelAccountId` interno e `providerAccountId` externo são campos distintos;
+- identidades PN, LID, grupos, newsletters e usuários web possuem namespaces próprios;
+- metadata específica do provider não governa o domínio;
 - Baileys ficará confinado a um adapter em gateway persistente separado;
-- nenhum tipo nativo do engine poderá vazar para o domínio;
+- o CI bloqueia imports e tipos Baileys fora dos adapters autorizados;
 - nenhum código de projeto sem licença clara será copiado;
 - nenhum mecanismo de evasão, spam ou rotação de contas será implementado;
 - nenhuma IA será acoplada diretamente ao Baileys;
@@ -38,12 +43,17 @@
 | Item | Estado |
 |---|---|
 | Análise de referências | concluída |
-| SPEC e inventário | concluídos |
+| SPEC e inventário | concluídos e atualizados |
 | ADR | concluída |
 | Matriz de licenças | concluída |
 | Política de risco/consentimento | concluída |
 | THIRD_PARTY_NOTICES preventivo | concluído |
-| Contratos canônicos | pendentes — W-02 |
+| Contratos canônicos v1 | concluídos — W-02 |
+| Compatibilidade Meta | concluída e validada |
+| Gate de imports Baileys | concluído e testado |
+| CI da W-02 | verde |
+| File Security E2E | verde |
+| Contratos de engine/capabilities | pendentes — W-03 |
 | Baileys instalado | não |
 | Gateway criado | não |
 | Número autorizado | não |
