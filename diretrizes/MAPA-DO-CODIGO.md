@@ -29,15 +29,15 @@ a ignorar.
 | | |
 |---|---|
 | Aplicativos no registro | 23 |
-| Rotas | 155 (139 páginas, 16 de API) |
-| Server actions | 185 em 31 arquivos |
-| Módulos de `lib/` | 85 |
+| Rotas | 156 (140 páginas, 16 de API) |
+| Server actions | 182 em 31 arquivos |
+| Módulos de `lib/` | 84 |
 | Funções do banco declaradas | 227 |
-| Funções do banco chamadas do código | 116 |
+| Funções do banco chamadas do código | 114 |
 | Suítes de teste | 42, com 473 casos |
 | Migrations | 157 |
 | Validadores de CI | 28 |
-| Módulos de `lib/` citados por algum teste | 41 de 85 |
+| Módulos de `lib/` citados por algum teste | 41 de 84 |
 
 ## 1. Aplicativos
 
@@ -141,6 +141,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/estoque` | página | — | `app/app/estoque/page.tsx` |
 | `/app/estoque/ativos` | página | estoque:read | `app/app/estoque/ativos/page.tsx` |
 | `/app/estoque/ativos/[id]` | página | estoque:read | `app/app/estoque/ativos/[id]/page.tsx` |
+| `/app/estoque/catalogo` | página | estoque:read | `app/app/estoque/catalogo/page.tsx` |
 | `/app/estoque/depositos` | página | estoque:read | `app/app/estoque/depositos/page.tsx` |
 | `/app/estoque/depositos/[id]` | página | estoque:read | `app/app/estoque/depositos/[id]/page.tsx` |
 | `/app/estoque/inventarios` | página | estoque:read | `app/app/estoque/inventarios/page.tsx` |
@@ -291,7 +292,6 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 |---|---|
 | `createAmendment` | aditivos:create |
 | `createContractFromProposal` | contratos:create |
-| `createProposalFromBudget` | propostas:create |
 
 ### `app/actions/create-budget.ts`
 
@@ -322,6 +322,8 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 
 | Função | Guarda |
 |---|---|
+| `alternarCategoriaDeEstoque` | estoque:update |
+| `alternarUnidadeDeEstoque` | estoque:update |
 | `createInventoryCategory` | estoque:create |
 | `createInventoryLot` | estoque:create |
 | `createInventoryMaintenance` | estoque:update |
@@ -439,13 +441,11 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `definirResponsavel` | sessão da organização |
 | `excluirEtapa` | sessão da organização |
 | `excluirFunil` | sessão da organização |
-| `instalarTrilha` | sessão da organização |
 | `moverCartao` | sessão da organização |
 | `registrarObservacao` | sessão da organização |
 | `registrarWhatsApp` | sessão da organização |
 | `renomearEtapa` | sessão da organização |
 | `renomearFunil` | sessão da organização |
-| `trilhaEhValida` | sessão da organização |
 
 ### `app/actions/procurement.ts`
 
@@ -475,9 +475,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `addDailyLogActivity` | sessão da organização |
 | `createBaseline` | sessão da organização |
 | `createDailyLog` | sessão da organização |
-| `createDependency` | sessão da organização |
 | `createMilestone` | sessão da organização |
-| `createProjectFromContract` | sessão da organização |
 | `createProjectResource` | sessão da organização |
 | `createTask` | sessão da organização |
 | `createTeam` | sessão da organização |
@@ -633,7 +631,6 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/planejamento/eap` | sim | `compararCodigos`, `diferencas`, `partes`, `proximoCodigo`, `renumerar` |
 | `@/lib/planejamento/modelos-de-eap` | sim | `MINIMO_DE_OCORRENCIAS`, `modeloPara`, `modelosDeEtapa` |
 | `@/lib/planejamento/modelos-servidor` | não | `modelosDeEap` |
-| `@/lib/planejamento/server` | não | `carregarCronograma`, `listaDoPlanejamento` |
 | `@/lib/procurement/comparison` | não | `compareProcurementQuotes`, `formatCurrency` |
 | `@/lib/projects/project-creation` | sim | `PROJECT_ENTRY_MODES`, `PROJECT_STATUSES_BY_MODE`, `classifyProjectCreationProviderError`, `validateContractProject`, `validateFlexibleProject` |
 | `@/lib/public-errors` | não | `mapPublicOperationError` |
@@ -717,9 +714,9 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `create_next_budget_version` | `supabase/migrations/20260729013000_budget_next_version.sql` | `app/actions/budget-versions.ts` |
 | `create_object_definition` | `supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql` | `app/actions/objetos.ts` |
 | `create_operational_event` | `supabase/migrations/20260728150000_operational_client_event_origin.sql` | — (só por SQL ou trigger) |
-| `create_project_from_contract` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | `app/actions/projects.ts` |
+| `create_project_from_contract` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | — (só por SQL ou trigger) |
 | `create_project_from_contract_v2` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | `app/actions/project-creation.ts` |
-| `create_proposal_from_budget_version` | `supabase/migrations/20260728162026_workflow_documental_descobrivel.sql` | `app/actions/commercial-documents.ts` |
+| `create_proposal_from_budget_version` | `supabase/migrations/20260728162026_workflow_documental_descobrivel.sql` | — (só por SQL ou trigger) |
 | `create_report_snapshot` | `supabase/migrations/20260728233000_qualify_pgcrypto_functions.sql` | `app/actions/reports.ts` |
 | `create_sac_ticket` | `supabase/migrations/20260721015350_stage18_sac_portal_release_guard.sql` | `app/actions/pipeline.ts`, `app/actions/relationship.ts` |
 | `create_sandbox_signature_envelope` | `supabase/migrations/20260719231500_stage9_workflows.sql` | — (só por SQL ou trigger) |
@@ -984,9 +981,9 @@ Declaradas em migration e chamadas por `.rpc()`.
 | Lacuna | Quantidade |
 |---|---|
 | RPC chamada sem declaração em migration | 3 |
-| Módulo de `lib/` nunca importado | 1 |
-| Server action nunca referenciada | 7 |
-| Módulo de `lib/` sem teste que o cite | 44 de 85 |
+| Módulo de `lib/` nunca importado | 0 |
+| Server action nunca referenciada | 0 |
+| Módulo de `lib/` sem teste que o cite | 43 de 84 |
 
 ### Módulos sem teste que os cite
 
@@ -1016,7 +1013,6 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/pipeline/server`
 - `@/lib/planejamento/curvas`
 - `@/lib/planejamento/modelos-servidor`
-- `@/lib/planejamento/server`
 - `@/lib/procurement/comparison`
 - `@/lib/public-errors`
 - `@/lib/quality/database`

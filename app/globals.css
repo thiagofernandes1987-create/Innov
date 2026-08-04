@@ -3907,3 +3907,8 @@ tbody tr:hover { background: var(--surface-muted); }
    antigo. O que muda é o peso — ele não é mais o que se preenche. */
 .data-table tr[data-arquivado="sim"] > td { opacity: 0.72; }
 .data-table tr[data-arquivado="sim"] > td:first-child strong { font-weight: 500; }
+
+/* Linha desativada continua na tabela: ela explica o item que já a escolheu.
+   O que muda é o peso — ela não é mais o que se oferece. */
+.data-table tr[data-inativo="sim"] > td { opacity: 0.72; }
+.data-table tr[data-inativo="sim"] > td:first-child strong { font-weight: 500; }

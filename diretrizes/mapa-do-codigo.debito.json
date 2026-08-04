@@ -6,18 +6,8 @@
     "set_profile_module_permission"
   ],
   "_rpc_responsavel": "S-22 — o repositório não reconstrói o banco. Replay em base limpa medido em 3 de agosto de 2026: 0 de 150 migrations. `has_module_permission` é chamada por 346 trechos de migration e não é criada por nenhuma; a única definição no repositório é um dublê de teste em supabase/tests/*/fixture.sql, que sempre concede.",
-  "libs": [
-    "@/lib/planejamento/server"
-  ],
-  "_libs_responsavel": "Módulo sem importador. Decidir entre ligar à tela de planejamento ou remover.",
-  "acoes": [
-    "app/actions/commercial-documents.ts#createProposalFromBudget",
-    "app/actions/inventory-extra.ts#createInventoryCategory",
-    "app/actions/inventory-extra.ts#createInventoryUnit",
-    "app/actions/pipeline.ts#instalarTrilha",
-    "app/actions/pipeline.ts#trilhaEhValida",
-    "app/actions/projects.ts#createDependency",
-    "app/actions/projects.ts#createProjectFromContract"
-  ],
-  "_acoes_responsavel": "Server actions que nenhuma tela importa. São superfície exposta sem uso: decidir entre ligar à tela que as justifica ou remover."
+  "libs": [],
+  "_libs_responsavel": "Vazio. `@/lib/planejamento/server` era uma segunda implementação da leitura que a página do cronograma já faz em linha, sem importador — removida na T-33.20.",
+  "acoes": [],
+  "_acoes_responsavel": "Vazio. As sete server actions sem uso foram decididas uma a uma na T-33.20: cinco removidas por terem equivalente ligado, duas ligadas à tela nova de categorias e unidades do estoque."
 }

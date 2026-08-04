@@ -76,7 +76,8 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
     { rotulo: "Depósitos", href: "/app/estoque/depositos" },
     { rotulo: "Inventários", href: "/app/estoque/inventarios" },
     { rotulo: "Reservas", href: "/app/estoque/reservas" },
-    { rotulo: "Ativos", href: "/app/estoque/ativos" }
+    { rotulo: "Ativos", href: "/app/estoque/ativos" },
+    { rotulo: "Categorias e unidades", href: "/app/estoque/catalogo" }
   ],
   financeiro: [
     { rotulo: "Lançamentos", href: "/app/financeiro/lancamentos" },
