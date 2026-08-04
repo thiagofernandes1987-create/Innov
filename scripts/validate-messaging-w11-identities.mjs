@@ -23,12 +23,16 @@ for (const token of [
 for (const token of [
   "channel_identity_alias_links", "channel_contact_merge_audit", "channel_identity_cache_versions",
   "observe_channel_contact_identity", "confirm_channel_identity_alias", "merge_channel_contacts",
-  "identity_version", "merged_into_contact_id", "superseded_by", "force row level security"
+  "identity_version", "merged_into_contact_id", "superseded_by", "force row level security",
+  "extensions.digest"
 ]) if (!migration.includes(token)) failures.push(`Controle SQL W-11 ausente: ${token}`);
 for (const forbidden of [
   "create table public.channel_contacts", "create table public.channel_customers",
-  "delete from public.whatsapp_contacts", "raw_payload"
+  "delete from public.whatsapp_contacts", "raw_payload text", "raw_payload jsonb"
 ]) if (migration.includes(forbidden)) failures.push(`Domínio/histórico proibido W-11: ${forbidden}`);
+if (!migration.includes("evidence ?| array['raw_payload'")) {
+  failures.push("Schema W-11 não bloqueia raw_payload em evidência.");
+}
 for (const token of [
   "identidade PN observada aprovada", "identidade LID separada aprovada",
   "alias PN LID confirmado aprovado", "conflito observado sem merge aprovado",
@@ -51,5 +55,6 @@ console.log(JSON.stringify({
   aliasesPreserved: true,
   cacheVersioned: true,
   crossTenantBlocked: true,
+  rawPayloadBlocked: true,
   parallelContactDomainCreated: false
 }, null, 2));
