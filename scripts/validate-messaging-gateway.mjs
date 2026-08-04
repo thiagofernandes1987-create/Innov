@@ -78,7 +78,7 @@ for (const token of ["read_only: true", "cap_drop:", "no-new-privileges:true", "
 for (const token of ["--network none", "--read-only", "--cap-drop ALL", "10001:10001", "gateway_shutdown_completed"])
   if (!smoke.includes(token)) failures.push(`Smoke test de container incompleto: ${token}`);
 for (const token of [
-  "d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9",
+  "ce984fcb21008b5210e35c76287752374de2fd262efd8e4e382939b60a443fff",
   "messaging-w06-lockfile-v1", "libsignal@6.0.0", "whatsapp-rust-bridge@0.5.4"
 ]) if (!lockGate.includes(token)) failures.push(`Gate de lockfile incompleto: ${token}`);
 for (const token of ["bloqueia comando sem HMAC", "rejeita replay", "limita o tamanho do corpo", "preserva correlação e causalidade"])
@@ -113,7 +113,7 @@ console.log(JSON.stringify({
   baileysRuntimeRegistered: false,
   externalSocketBlockedByDefault: true,
   lifecycleScriptsExecuted: false,
-  resolvedLockfileSha256: "d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9",
+  resolvedLockfileSha256: "ce984fcb21008b5210e35c76287752374de2fd262efd8e4e382939b60a443fff",
   databaseAccess: false,
   nonRootUid: 10001,
   internalNetwork: true,
