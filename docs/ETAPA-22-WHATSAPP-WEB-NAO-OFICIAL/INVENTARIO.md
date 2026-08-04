@@ -1,617 +1,208 @@
-# Inventário de execução — Provider WhatsApp Web não oficial
+# Inventário de execução — Etapa 22 WhatsApp multiprovider
 
-**Projeto pai:** Etapa 22 — WhatsApp e atendimento omnichannel  
-**Branch de execução:** `feature/etapa-22-provider-whatsapp-web-baileys`  
-**PR:** #40  
-**Status:** W-00 a W-08 concluídas; 9 de 23 sprints concluídas e 14 pendentes  
-**Provider estudado:** `@whiskeysockets/baileys@7.0.0-rc13`, somente por adapter próprio  
-**Runtime Baileys:** não registrado  
-**Produção:** bloqueada  
-**Última atualização:** 04 de agosto de 2026
+**Atualizado em:** 04 de agosto de 2026  
+**Branch:** `feature/etapa-22-provider-whatsapp-web-baileys`  
+**PR:** `#40`, draft, aberto e não mesclado  
+**Produção:** `NOT_AUTHORIZED`
 
-Documentos principais: [`SPEC.md`](./SPEC.md), [`README.md`](./README.md), [`ADAPTER-BAILEYS-W06.md`](./ADAPTER-BAILEYS-W06.md), [`SESSION-STORE-W07.md`](./SESSION-STORE-W07.md), [`RUNTIME-LIFECYCLE-W08.md`](./RUNTIME-LIFECYCLE-W08.md) e evidências W-01 a W-08.
+## 1. Regras de evidência
 
----
+- check exige código, teste, documento ou decisão verificável;
+- fixture sintética não prova integração externa;
+- dependência externa permanece aberta;
+- QR, pairing, número, sessão, tráfego, homologação e piloto reais não são inferidos;
+- PR não é fechado ou mesclado automaticamente;
+- Meta Cloud permanece preservado.
 
-## 1. Objetivo e fronteira
+## 2. Resumo das sprints
 
-```text
-engine de canal
-      ↓
-adapter anticorrupção
-      ↓
-contratos canônicos
-      ↓
-contas, contatos, conversas e mensagens existentes
-      ↓
-CRM, Cliente 360, obras, contratos, SAC e documentos
-```
-
-O domínio oficial da Etapa 22 permanece compartilhado. Meta Cloud API continua sendo o único runtime de canal registrado. O provider não oficial é opcional, revogável e isolado no gateway. A conclusão de código ou testes não autoriza automaticamente conexão, sessão real, número, deploy, piloto ou produção.
-
-## 2. Regras obrigatórias
-
-1. No máximo uma sprint em andamento.
-2. Check exige arquivo, migration, teste, log, métrica ou decisão verificável.
-3. Nenhum segredo, QR, cookie, token, número real ou material real de sessão no repositório.
-4. Tipos nativos do provider não atravessam o adapter.
-5. Escala horizontal exige single writer, lease e fencing token.
-6. Inbound deve ser validado, normalizado, deduplicado e persistido antes de workflow ou IA.
-7. Ordem obrigatória: política → consentimento → workflow → regra → fatos → IA → aprovação/handoff.
-8. Spam, evasão, spoofing e rotação de contas são proibidos.
-9. Kill switch é obrigatório antes de qualquer runtime real.
-10. Na dúvida, falhar fechado, preservar evidência e encaminhar para humano.
-11. Lifecycle scripts externos permanecem bloqueados sem revisão específica.
-12. Licença do pacote principal não substitui revisão da árvore transitiva.
-13. Uma execução isolada não prova homologação.
-
-## 3. Baseline da Etapa 22
-
-- [x] B-01 — Aplicativo `/app/whatsapp`
-- [x] B-02 — Caixa de entrada e histórico
-- [x] B-03 — Contas, contatos e conversas
-- [x] B-04 — Mensagens e status monotônicos
-- [x] B-05 — Vínculos com cliente, obra, contrato, oportunidade e SAC
-- [x] B-06 — `whatsapp_content_bindings` com fontes canônicas
-- [x] B-07 — Resolução de documentos versionados
-- [x] B-08 — Snapshot e SHA-256 da fonte usada
-- [x] B-09 — RLS, RPCs e histórico protegido
-- [x] B-10 — Meta Cloud API como implementação oficial inicial
-- [x] B-11 — Webhook oficial com HMAC e idempotência
-- [x] B-12 — Validador da Etapa 22 no CI
-
----
-
-# Marco M-0 — Governança e fronteiras
-
-## Sprint W-00 — Pesquisa e consolidação arquitetural
-
-**Estado:** concluída
-
-- [x] W-00.1 — Analisar `WhiskeySockets/Baileys`
-- [x] W-00.2 — Analisar `rmyndharis/OpenWA`
-- [x] W-00.3 — Analisar `tulir/whatsmeow`
-- [x] W-00.4 — Reanalisar `ArnasDon/wacrm`
-- [x] W-00.5 — Reanalisar `evolution-foundation/evolution-api`
-- [x] W-00.6 — Reanalisar `wwebjs/whatsapp-web.js`
-- [x] W-00.7 — Reanalisar `sebferreira/WhatsControl`
-- [x] W-00.8 — Analisar `wangrongding/wechat-bot`
-- [x] W-00.9 — Analisar `lyfe00011/whatsapp-bot`
-- [x] W-00.10 — Analisar `mruniquehacker/Knightbot-MD`
-- [x] W-00.11 — Analisar `sigalor/whatsapp-web-reveng`
-- [x] W-00.12 — Classificar biblioteca, driver, gateway, CRM, bot e pesquisa
-- [x] W-00.13 — Selecionar Baileys como primeiro engine estudado
-- [x] W-00.14 — Definir técnicas reaproveitáveis sem copiar produtos completos
-- [x] W-00.15 — Criar inventário e SPEC
-
-## Sprint W-01 — ADR, licença e modelo de risco
-
-**Estado:** concluída
-
-- [x] W-01.1 — ADR do provider opcional
-- [x] W-01.2 — Domínio compartilhado e runtimes separados
-- [x] W-01.3 — Matriz de licenças
-- [x] W-01.4 — `THIRD_PARTY_NOTICES.md`
-- [x] W-01.5 — Critérios de número autorizado
-- [x] W-01.6 — Termo interno de aceite de risco
-- [x] W-01.7 — Consentimento, opt-out e bloqueio
-- [x] W-01.8 — Casos proibidos
-- [x] W-01.9 — Processo de desligamento e remoção de sessão
-- [x] W-01.10 — Critérios de cancelamento do projeto
-
-**Gate W-G01:** concluído apenas no escopo documental.
-
----
-
-# Marco M-1 — Domínio canônico e persistência multiprovider
-
-## Sprint W-02 — Modelo canônico de canal, identidade e mensagem
-
-**Estado:** concluída
-
-- [x] W-02.1 — Definir `ChannelProviderType`
-- [x] W-02.1.1 — `META_CLOUD`
-- [x] W-02.1.2 — `WHATSAPP_WEB_BAILEYS`
-- [x] W-02.1.3 — `WEB_CHAT`
-- [x] W-02.1.4 — Providers futuros reservados
-- [x] W-02.2 — Definir `CanonicalIdentity`
-- [x] W-02.3 — Namespaces PHONE, PN, LID, GROUP, NEWSLETTER e WEB_USER
-- [x] W-02.4 — Definir `CanonicalMessage`
-- [x] W-02.5 — Definir `CanonicalMedia`
-- [x] W-02.6 — Definir `CanonicalReceipt`
-- [x] W-02.7 — Definir `CanonicalConversation`
-- [x] W-02.8 — Metadata específica separada do domínio
-- [x] W-02.9 — Versionamento dos contratos
-- [x] W-02.10 — Gate contra imports Baileys fora do adapter
-- [x] W-02.11 — Mapear estruturas existentes para o modelo neutro
-- [x] W-02.12 — Compatibilidade retroativa com Meta
-
-## Sprint W-03 — Contrato de engine e matriz de capacidades
-
-**Estado:** concluída
-
-- [x] W-03.1 — Criar `MessagingEngine`
-- [x] W-03.2 — Criar `SessionEngine`
-- [x] W-03.3 — Criar `EngineEventSource`
-- [x] W-03.4 — Criar `EngineCapabilityMatrix`
-- [x] W-03.5 — Capacidades de texto, mídia, reação, resposta, grupo, presença, histórico e edição
-- [x] W-03.6 — Criar `UnsupportedCapabilityError`
-- [x] W-03.7 — Encapsular Meta no contrato sem regressão
-- [x] W-03.8 — Criar `MockMessagingEngine`
-- [x] W-03.9 — Contract tests dos engines
-- [x] W-03.10 — Feature flags por provider e organização
-- [x] W-03.11 — Ocultar e bloquear ações não suportadas
-
-## Sprint W-04 — Evolução do banco sem domínio paralelo
-
-**Estado:** concluída
-
-- [x] W-04.1 — Inventariar tabelas `whatsapp_*`
-- [x] W-04.2 — Decidir evolução compatível e papel técnico de `channel_*`
-- [x] W-04.3 — Adicionar `provider_type` e `provider_account_id`
-- [x] W-04.4 — Criar identidades externas sem duplicar Cliente 360
-- [x] W-04.5 — Criar aliases e mapeamentos PN/LID
-- [x] W-04.6 — Criar comandos e idempotência
-- [x] W-04.7 — Criar outbox durável
-- [x] W-04.8 — Criar inbox de eventos sanitizados
-- [x] W-04.9 — Criar DLQ
-- [x] W-04.10 — Criar ledger de tentativas
-- [x] W-04.11 — Aplicar RLS forçada e revogar escrita direta
-- [x] W-04.12 — Criar testes negativos multiempresa
-- [x] W-04.13 — Criar rollback lógico sem perda histórica
-
-**Gate W-G04:** domínio operacional único preservado; 11 controles PostgreSQL verdes.
-
----
-
-# Marco M-2 — Runtime persistente do gateway
-
-## Sprint W-05 — Esqueleto do gateway
-
-**Estado:** concluída
-
-- [x] W-05.1 — Criar `apps/messaging-gateway`
-- [x] W-05.2 — Definir Node.js compatível
-- [x] W-05.3 — Configuração tipada e validação de environment
-- [x] W-05.4 — Health, readiness e metrics
-- [x] W-05.5 — API interna autenticada
-- [x] W-05.6 — Assinatura HMAC de comandos e eventos
-- [x] W-05.7 — Proteção contra replay
-- [x] W-05.8 — Correlation e causation IDs
-- [x] W-05.9 — Shutdown gracioso
-- [x] W-05.10 — Container não-root
-- [x] W-05.11 — Limites de CPU, memória e arquivo
-- [x] W-05.12 — Isolar rede e banco principal
-- [x] W-05.13 — Cliente fake sem WhatsApp
-
-## Sprint W-06 — Adapter Baileys
-
-**Estado:** concluída
-
-- [x] W-06.1 — Fixar versão exata; proibir `latest`
-- [x] W-06.2 — Criar `BaileysEngineAdapter`
-- [x] W-06.3 — Encapsular criação do socket
-- [x] W-06.4 — Encapsular eventos de conexão
-- [x] W-06.5 — Encapsular texto
-- [x] W-06.6 — Encapsular mídia
-- [x] W-06.7 — Encapsular receipts
-- [x] W-06.8 — Encapsular replies, reactions e quoted messages
-- [x] W-06.9 — Condicionar grupos à capability matrix
-- [x] W-06.10 — Normalizar erros
-- [x] W-06.11 — Mapear PN, LID, grupo e newsletter
-- [x] W-06.12 — Preservar metadata técnica sanitizada
-- [x] W-06.13 — Criar contract tests
-- [x] W-06.14 — Falhar se tipo Baileys escapar do adapter
-
-**Gate W-G06:** adapter e testes sem rede concluídos; runtime não registrado.
-
-## Sprint W-07 — Armazenamento criptográfico da sessão
-
-**Estado:** concluída no escopo sintético
-
-- [x] W-07.1 — Criar `SessionCredentialStore`
-- [x] W-07.2 — Modelar credenciais, keys e versões
-- [x] W-07.3 — Implementar transações
-- [x] W-07.4 — Implementar optimistic concurrency
-- [x] W-07.5 — Implementar envelope encryption
-- [x] W-07.6 — Separar DEK por sessão
-- [x] W-07.7 — Manter chave-mestra fora do banco
-- [x] W-07.8 — Impedir logs de material criptográfico
-- [x] W-07.9 — Criar rotação e recriptografia
-- [x] W-07.10 — Criar backup e restore testados
-- [x] W-07.11 — Criar exclusão criptográfica
-- [x] W-07.12 — Auditar acesso às credenciais
-- [x] W-07.13 — Testar corrupção, versão e concorrência
-- [x] W-07.14 — Proibir `useMultiFileAuthState` fora de testes descartáveis
-
-**Evidências:** store provider-neutral, migrations `20260804123000` e `20260804123500`, 8 controles PostgreSQL, 13 testes específicos, boundaries W-07, CI e File Security verdes.
-
-**Gate W-G07:** concluído somente com dados sintéticos. Nenhum socket, QR, pairing, número ou sessão real foi criado.
-
-## Sprint W-08 — Single writer, lease e lifecycle
-
-**Estado:** concluída no escopo sintético
-
-- [x] W-08.1 — Criar `session_runtime_leases`
-- [x] W-08.2 — Lease com expiração
-- [x] W-08.3 — Fencing token crescente
-- [x] W-08.4 — Impedir duas instâncias escritoras
-- [x] W-08.5 — State machine de conexão
-- [x] W-08.6 — QR e pairing efêmeros
-- [x] W-08.7 — Proibir persistência de QR
-- [x] W-08.8 — Reconnect com backoff e jitter
-- [x] W-08.9 — Classificar logout, restrição, transitório e ação humana
-- [x] W-08.10 — Takeover após lease expirado
-- [x] W-08.11 — Kill switch global e por sessão
-- [x] W-08.12 — Testar processo zumbi
-- [x] W-08.13 — Testar reinício durante atualização de credenciais
-- [x] W-08.14 — Testar restauração em nova instância
-
-**Evidências:**
-
-- `apps/messaging-gateway/src/runtime/**`;
-- migration `20260804134000_stage22_session_runtime_leases.sql`;
-- `compare_and_swap_channel_session_credentials_fenced`;
-- 12 controles PostgreSQL W-08 verdes;
-- testes específicos de lifecycle verdes;
-- `messaging-runtime-lifecycle-boundary-v1` verde;
-- `messaging-storage-boundary-v4` verde;
-- head funcional `d7bf69dd4db5e0e0f7be1a6f85a3a685675b8221`;
-- CI `30914446427` verde;
-- File Security E2E `30914450873` verde;
-- lint, typecheck, suíte global, Python, builds e container sem rede verdes;
-- `RUNTIME-LIFECYCLE-W08.md` e `EVIDENCIAS-W08.md`.
-
-**Gate W-G08:** concluído somente para single writer, lease, fencing, takeover e lifecycle sintético. O supervisor não está no bootstrap; nenhum socket, QR, pairing, número ou sessão real foi usado.
-
----
-
-# Marco M-3 — Pipeline de mensagens
-
-## Sprint W-09 — Ingress e normalização
-
-**Estado:** pendente — próxima sprint autorizada
-
-- [ ] W-09.1 — Criar envelope canônico
-- [ ] W-09.2 — Persistir antes do dispatch
-- [ ] W-09.3 — Criar idempotency key
-- [ ] W-09.4 — Normalizar wrappers, efêmeras e view-once conforme política
-- [ ] W-09.5 — Normalizar replies e quoted
-- [ ] W-09.6 — Normalizar receipts
-- [ ] W-09.7 — Normalizar contato e grupo
-- [ ] W-09.8 — Resolver organização e conta
-- [ ] W-09.9 — Criar estados do ingress
-- [ ] W-09.10 — Criar DLQ
-- [ ] W-09.11 — Criar replay idempotente
-- [ ] W-09.12 — Testar duplicado e fora de ordem
-- [ ] W-09.13 — Testar payload desconhecido
-- [ ] W-09.14 — Impedir IA antes de `PERSISTED`
-
-## Sprint W-10 — Outbox, comandos e entrega
-
-**Estado:** pendente
-
-- [ ] W-10.1 — Criar comando canônico
-- [ ] W-10.2 — Persistir antes do envio
-- [ ] W-10.3 — Separar mensagem e tentativa
-- [ ] W-10.4 — Criar worker de outbox
-- [ ] W-10.5 — Ordenar por conversa
-- [ ] W-10.6 — Criar idempotência
-- [ ] W-10.7 — Criar ledger de tentativas
-- [ ] W-10.8 — Classificar retryable e terminal
-- [ ] W-10.9 — Backoff limitado
-- [ ] W-10.10 — Circuit breaker
-- [ ] W-10.11 — Impedir regressão de status
-- [ ] W-10.12 — Reconciliar comando sem confirmação
-- [ ] W-10.13 — DLQ outbound
-- [ ] W-10.14 — Reprocessar com justificativa
-- [ ] W-10.15 — Limitar volume por organização e sessão
-- [ ] W-10.16 — Testar crash antes e depois do envio
-
-## Sprint W-11 — Identidades, contatos e deduplicação
-
-**Estado:** pendente
-
-- [ ] W-11.1 — Normalizar JIDs
-- [ ] W-11.2 — Persistir PN
-- [ ] W-11.3 — Persistir LID
-- [ ] W-11.4 — Persistir aliases e confiança
-- [ ] W-11.5 — Reconciliar LID e telefone sem duplicação
-- [ ] W-11.6 — Separar identidade observada de vínculo confirmado
-- [ ] W-11.7 — Merge transacional de duplicados
-- [ ] W-11.8 — Preservar histórico e aliases
-- [ ] W-11.9 — Cache com invalidação
-- [ ] W-11.10 — Testar mudança de identidade
-- [ ] W-11.11 — Testar conflito entre organizações
-
-## Sprint W-12 — Mídia segura
-
-**Estado:** pendente
-
-- [ ] W-12.1 — Criar `MediaReference`
-- [ ] W-12.2 — Streaming; evitar base64 persistente
-- [ ] W-12.3 — Limitar tipo e tamanho
-- [ ] W-12.4 — Quarentena privada
-- [ ] W-12.5 — Antivírus e classificação
-- [ ] W-12.6 — Validar MIME real
-- [ ] W-12.7 — Hash e deduplicação
-- [ ] W-12.8 — Thumbnail isolada
-- [ ] W-12.9 — Transcrição sob política
-- [ ] W-12.10 — OCR sob política
-- [ ] W-12.11 — Remover metadata sensível quando aplicável
-- [ ] W-12.12 — URL assinada
-- [ ] W-12.13 — Retry sem duplicar
-- [ ] W-12.14 — Testar malware, truncado, enorme e MIME falso
-
----
-
-# Marco M-4 — Produto, conteúdo e IA
-
-## Sprint W-13 — Inbox multiprovider e atendimento
-
-**Estado:** pendente
-
-- [ ] W-13.1 — Exibir provider e estado sem poluir UX
-- [ ] W-13.2 — Unificar conversas do mesmo contato
-- [ ] W-13.3 — Preservar origem da mensagem
-- [ ] W-13.4 — Filtrar por conta, fila, responsável, obra e estado
-- [ ] W-13.5 — Atribuição e transferência
-- [ ] W-13.6 — Notas internas
-- [ ] W-13.7 — Indicadores humano, automação e IA
-- [ ] W-13.8 — Presença do operador distinta da presença do canal
-- [ ] W-13.9 — Realtime pelo backend Innov
-- [ ] W-13.10 — Estados offline, reconnecting, degraded e action required
-- [ ] W-13.11 — Desabilitar ações incompatíveis
-- [ ] W-13.12 — Validar responsividade
-- [ ] W-13.13 — Testar agentes concorrentes
-
-## Sprint W-14 — Playbooks e fontes canônicas
-
-**Estado:** pendente
-
-- [ ] W-14.1 — Reaproveitar `whatsapp_content_bindings`
-- [ ] W-14.2 — Não duplicar mensagens padrão
-- [ ] W-14.3 — Criar `communication_playbooks` e versões
-- [ ] W-14.4 — Vincular fontes canônicas
-- [ ] W-14.5 — Definir schema de variáveis
-- [ ] W-14.6 — Validar variáveis
-- [ ] W-14.7 — Registrar snapshot, versão e SHA
-- [ ] W-14.8 — Classificar autonomia
-- [ ] W-14.9 — Bloquear reescrita contratual livre
-- [ ] W-14.10 — Aprovação humana para conteúdo sensível
-- [ ] W-14.11 — Testar reprodução histórica
-- [ ] W-14.12 — Testar atualização sem alterar histórico
-
-## Sprint W-15 — Ponte de IA
-
-**Estado:** pendente
-
-- [ ] W-15.1 — Criar `AiProvider`
-- [ ] W-15.2 — Criar `AiOrchestrator` independente do canal
-- [ ] W-15.3 — `ContextBuilder` com minimização
-- [ ] W-15.4 — Busca lexical
-- [ ] W-15.5 — Busca vetorial opcional
-- [ ] W-15.6 — Retrieval híbrido e fallback
-- [ ] W-15.7 — Filtros de tenancy, obra, versão e validade
-- [ ] W-15.8 — Precedência de workflow
-- [ ] W-15.9 — Limite atômico por conversa
-- [ ] W-15.10 — Limite por organização e custo
-- [ ] W-15.11 — Handoff persistente
-- [ ] W-15.12 — Desativar IA quando humano assumir
-- [ ] W-15.13 — Resumo de handoff
-- [ ] W-15.14 — Citações internas de fontes
-- [ ] W-15.15 — Validar números, datas, valores e compromissos
-- [ ] W-15.16 — Proteger contra prompt injection em documentos
-- [ ] W-15.17 — Auditar modelo, fontes, ferramentas e custo
-- [ ] W-15.18 — Iniciar em `draft_only`
-
-## Sprint W-16 — Plugins e automações governadas
-
-**Estado:** pendente
-
-- [ ] W-16.1 — Criar `MessagePlugin`
-- [ ] W-16.2 — Prioridade e short-circuit
-- [ ] W-16.3 — Plugin de consentimento
-- [ ] W-16.4 — Plugin anti-spam
-- [ ] W-16.5 — Plugin de qualificação
-- [ ] W-16.6 — Plugin de status de obra
-- [ ] W-16.7 — Plugin de documento
-- [ ] W-16.8 — Plugin de SAC
-- [ ] W-16.9 — Plugin de handoff
-- [ ] W-16.10 — IA como último recurso
-- [ ] W-16.11 — Permissões e flags
-- [ ] W-16.12 — Testar ordem e conflito
-
----
-
-# Marco M-5 — Segurança, observabilidade e qualidade
-
-## Sprint W-17 — Segurança e threat model
-
-**Estado:** pendente
-
-- [ ] W-17.1 — Criar STRIDE
-- [ ] W-17.2 — Mapear ativos
-- [ ] W-17.3 — Mapear trust boundaries
-- [ ] W-17.4 — Controle de replay
-- [ ] W-17.5 — Controle de command injection
-- [ ] W-17.6 — Controle de prompt injection
-- [ ] W-17.7 — Allowlist de ferramentas
-- [ ] W-17.8 — Aprovação para escritas críticas
-- [ ] W-17.9 — Redaction de logs
-- [ ] W-17.10 — Retenção e expurgo
-- [ ] W-17.11 — Auditoria de leitura sensível
-- [ ] W-17.12 — Teste cross-tenant
-- [ ] W-17.13 — Resposta a comprometimento de sessão
-- [ ] W-17.14 — Scanner de segredo
-- [ ] W-17.15 — SBOM e dependências
-
-## Sprint W-18 — Observabilidade e operação
-
-**Estado:** pendente
-
-- [ ] W-18.1 — Métricas de sessão
-- [ ] W-18.2 — Métricas ingress e egress
-- [ ] W-18.3 — Métricas retry e DLQ
-- [ ] W-18.4 — Métricas de mídia
-- [ ] W-18.5 — Métricas de IA e custo
-- [ ] W-18.6 — Logs estruturados
-- [ ] W-18.7 — Traces
-- [ ] W-18.8 — Dashboard
-- [ ] W-18.9 — Alerta de reconnect loop
-- [ ] W-18.10 — Alerta de DLQ
-- [ ] W-18.11 — Alerta de perda de lease
-- [ ] W-18.12 — Alerta de persistência de keys
-- [ ] W-18.13 — Runbook de desconexão
-- [ ] W-18.14 — Runbook de upgrade Baileys
-- [ ] W-18.15 — Runbook de rollback
-
-## Sprint W-19 — Testes funcionais, chaos e performance
-
-**Estado:** pendente
-
-- [ ] W-19.1 — Unit tests canônicos
-- [ ] W-19.2 — Contract tests
-- [ ] W-19.3 — Integration tests PostgreSQL
-- [ ] W-19.4 — E2E com número de homologação
-- [ ] W-19.5 — QR e pairing
-- [ ] W-19.6 — Restart durante mensagem
-- [ ] W-19.7 — Restart durante key update
-- [ ] W-19.8 — Perda de rede
-- [ ] W-19.9 — Evento duplicado
-- [ ] W-19.10 — Receipt fora de ordem
-- [ ] W-19.11 — Mídia corrompida
-- [ ] W-19.12 — Banco indisponível
-- [ ] W-19.13 — Processo zumbi
-- [ ] W-19.14 — Réplicas disputando sessão
-- [ ] W-19.15 — Upgrade e downgrade
-- [ ] W-19.16 — Restore em infraestrutura nova
-- [ ] W-19.17 — Benchmark memória por sessão
-- [ ] W-19.18 — Benchmark throughput
-- [ ] W-19.19 — Benchmark latência
-- [ ] W-19.20 — Registrar limites medidos
-
-**Gate W-G19:** nenhum número real antes da repetição dos testes P0.
-
----
-
-# Marco M-6 — Homologação e promoção controlada
-
-## Sprint W-20 — Homologação interna
-
-**Estado:** pendente
-
-- [ ] W-20.1 — Número dedicado e autorizado
-- [ ] W-20.2 — Organização de homologação
-- [ ] W-20.3 — Usuários autorizados
-- [ ] W-20.4 — Campanhas desabilitadas
-- [ ] W-20.5 — Auto-reply IA desabilitado
-- [ ] W-20.6 — Somente texto e mídia aprovada
-- [ ] W-20.7 — Roteiro diário de conexão, envio, recebimento e restart
-- [ ] W-20.8 — Validar métricas e alertas
-- [ ] W-20.9 — Validar expurgo e exclusão de sessão
-- [ ] W-20.10 — Validar handoff e multiagente
-- [ ] W-20.11 — Registrar incidentes e vacinas
-- [ ] W-20.12 — Relatório de homologação
-
-## Sprint W-21 — Piloto restrito
-
-**Estado:** pendente
-
-- [ ] W-21.1 — Definir escopo e usuários
-- [ ] W-21.2 — Definir SLOs e abort criteria
-- [ ] W-21.3 — Rollout por feature flag
-- [ ] W-21.4 — Rollback de um clique
-- [ ] W-21.5 — Monitorar falhas, reconnects, bloqueios e duplicações
-- [ ] W-21.6 — Comparar com provider oficial
-- [ ] W-21.7 — Medir custo operacional
-- [ ] W-21.8 — Validar suporte e runbooks
-- [ ] W-21.9 — Revisar riscos jurídicos, contratuais e de privacidade
-- [ ] W-21.10 — Decidir promover, restringir ou encerrar
-
-## Sprint W-22 — Encerramento da etapa
-
-**Estado:** pendente
-
-- [ ] W-22.1 — Atualizar `diretrizes/SPEC.md`
-- [ ] W-22.2 — Atualizar `diretrizes/INVENTARIO.md`
-- [ ] W-22.3 — Atualizar `diretrizes/MODULOS.md`
-- [ ] W-22.4 — Atualizar `diretrizes/ARQUITETURA.md`
-- [ ] W-22.5 — Atualizar `diretrizes/ROADMAP.md`
-- [ ] W-22.6 — Atualizar `diretrizes/RECUPERACAO.md`
-- [ ] W-22.7 — Atualizar `diretrizes/VACINAS.md`
-- [ ] W-22.8 — Atualizar `diretrizes/ESTADO-ATUAL.json`
-- [ ] W-22.9 — Registrar dependências e licenças
-- [ ] W-22.10 — Garantir CI e E2E verdes
-- [ ] W-22.11 — Registrar decisão final de produção
-- [ ] W-22.12 — Encerrar PR após revisão técnica e de segurança
-
----
-
-## 4. Critérios globais de conclusão
-
-- [x] Contratos provider-neutral
-- [x] Meta preservado sem regressão
-- [x] Contratos de engine e capability matrix
-- [x] Policy gates na UI e backend
-- [x] Mock engine sem provider real
-- [x] Storage multiprovider aditivo sem domínio paralelo
-- [x] RLS forçada e escrita técnica controlada
-- [x] Rollback lógico sem perda histórica
-- [x] Adapter Baileys confinado
-- [x] Runtime separado do Next.js
-- [x] Session store criptografado e transacional
-- [x] Single writer e fencing comprovados com fixtures sintéticas
-- [ ] Ingress operacional durável e idempotente
-- [ ] Worker de outbox e retry operacional comprovados
-- [ ] Reconciliação PN/LID completa
-- [ ] Mídia específica do canal protegida
-- [ ] Inbox multiprovider homologada
-- [x] Fontes canônicas preservadas
-- [ ] IA independente e inicialmente em rascunho
-- [ ] Handoff persistente
-- [ ] Threat model aprovado
-- [x] Bibliotecas W-07/W-08 sem logs de material sensível
-- [ ] Métricas, alertas e runbooks operacionais
-- [x] Restart, concorrência e restore de lifecycle sintético verdes
-- [ ] Piloto restrito concluído
-- [ ] Decisão explícita de produção
-- [ ] Documentação canônica final atualizada
-- [ ] CI e E2E finais verdes
-
-## 5. Dependências externas
-
-| Controle | Estado | Próxima ação |
+| Sprint | Estado técnico | Evidência/limite |
 |---|---|---|
-| Aceite operacional | não executado | antes de número real |
-| Revisão jurídica/SBOM | dependência externa | antes de piloto ou produção |
-| KMS/HSM de produção | não definido | antes de dados reais |
-| Número autorizado | não executado | somente W-20 |
-| Produção | bloqueada | decisão específica posterior |
+| W-00 | concluída | pesquisa, arquitetura e boundaries |
+| W-01 | concluída | governança, ADR, risco e licenças |
+| W-02 | concluída | contratos canônicos provider-neutral |
+| W-03 | concluída | engine contracts e capability matrix |
+| W-04 | concluída | storage multiprovider aditivo |
+| W-05 | concluída | gateway isolado e container endurecido |
+| W-06 | concluída | adapter Baileys confinado, sem rede |
+| W-07 | concluída | session credential store cifrado |
+| W-08 | concluída | lifecycle, lease, single writer e fencing sintéticos |
+| W-09 | concluída | ingress persist-before-dispatch |
+| W-10 | concluída | outbox, retry, DLQ e reconciliação |
+| W-11 | concluída | PN/LID e identidade canônica |
+| W-12 | concluída | mídia segura e quarentena |
+| W-13 | concluída | inbox multiprovider |
+| W-14 | concluída | playbooks e fontes canônicas |
+| W-15 | concluída | IA independente em `DRAFT_ONLY` e handoff |
+| W-16 | concluída | plugins governados e prioridade determinística |
+| W-17 | concluída | STRIDE, hardening, scanner e SBOM |
+| W-18 | concluída | métricas, alertas, traces, dashboard e runbooks |
+| W-19 | parcial controlada | escopo sintético aprovado; número/QR reais bloqueados |
+| W-20 | parcial controlada | controles técnicos aprovados; homologação real bloqueada |
+| W-21 | parcial controlada | controles de piloto aprovados; piloto real em `HOLD` |
+| W-22 | encerramento técnico | canônicos, licenças, decisão e CI; PR depende de revisão |
 
-## 6. Próxima ação autorizada
+## 3. Marcos concluídos
 
-A próxima e única sprint autorizada é **W-09 — Ingress e normalização**.
+### W-00 a W-04 — fundação
 
-É permitido:
+- [x] pesquisa e decisões arquiteturais;
+- [x] provider oficial preservado;
+- [x] contratos de domínio e engine;
+- [x] capability matrix;
+- [x] storage técnico sem domínio paralelo;
+- [x] RLS, idempotência e rollback lógico.
 
-- criar envelope canônico de ingress;
-- persistir evento sanitizado antes do dispatch;
-- criar idempotency key e estados do ingress;
-- normalizar wrappers, replies, quoted e receipts com fixtures;
-- resolver organização e conta sem domínio paralelo;
-- criar DLQ e replay idempotente;
-- testar duplicados, ordem invertida e payload desconhecido;
-- provar que nenhuma IA executa antes de `PERSISTED`.
+### W-05 a W-08 — gateway, adapter e sessão
 
-Ainda não está autorizado:
+- [x] gateway Node.js isolado;
+- [x] HMAC, replay guard, health, readiness e métricas;
+- [x] container non-root e read-only;
+- [x] Baileys `7.0.0-rc13` fixado sem range;
+- [x] tipos nativos confinados;
+- [x] nenhuma conexão externa no runtime ou testes;
+- [x] credenciais cifradas e versionadas;
+- [x] key updates transacionais;
+- [x] lease, single writer e fencing;
+- [x] restart e restore sintéticos.
 
-- abrir socket externo;
-- executar autenticação real;
-- produzir ou exibir QR/pairing real;
-- persistir dados reais de sessão;
-- usar número real;
-- registrar o supervisor ou Baileys no bootstrap;
-- conectar o gateway ao ambiente produtivo;
-- habilitar automação ou IA;
-- deploy, piloto ou produção.
+### W-09 a W-14 — pipeline e operação
+
+- [x] ingress persist-before-dispatch;
+- [x] envelopes sanitizados e idempotentes;
+- [x] outbox durável e ordenada por conversa;
+- [x] retry limitado, rate limit, circuit breaker, ledger e DLQ;
+- [x] PN/LID, conflitos e merge transacional;
+- [x] mídia em quarentena, antivírus, MIME real e SHA-256;
+- [x] inbox unificada com origem preservada;
+- [x] atribuição, notas e presença;
+- [x] playbooks versionados e snapshot histórico;
+- [x] conteúdo sensível exige aprovação humana.
+
+### W-15 a W-18 — IA, plugins, segurança e observabilidade
+
+- [x] IA provider/channel-independent;
+- [x] retrieval híbrido com tenancy e validade;
+- [x] orçamento, lock por conversa, citações e auditoria;
+- [x] handoff persistente e humano desabilita IA;
+- [x] pipeline de plugins com consentimento e anti-spam primeiro;
+- [x] IA como último recurso em `DRAFT_ONLY`;
+- [x] STRIDE, allowlist, aprovação crítica, retenção e incidentes;
+- [x] scanner de segredos e SBOM;
+- [x] métricas de baixa cardinalidade;
+- [x] logs sanitizados, traces, dashboard e alertas;
+- [x] runbooks de desconexão, upgrade e rollback.
+
+## 4. Sprint W-19 — testes funcionais, chaos e performance
+
+**Estado técnico:** concluído no escopo sintético; integração real bloqueada.
+
+- [x] W-19.1 — unit tests canônicos;
+- [x] W-19.2 — contract tests;
+- [x] W-19.3 — integration tests PostgreSQL local;
+- [ ] W-19.4 — E2E com número de homologação — `BLOCKED_NOT_EXECUTED`;
+- [ ] W-19.5 — QR e pairing reais — `BLOCKED_NOT_EXECUTED`;
+- [x] W-19.6 — restart durante mensagem sintética;
+- [x] W-19.7 — restart durante key update sintético;
+- [x] W-19.8 — perda de rede simulada;
+- [x] W-19.9 — evento duplicado;
+- [x] W-19.10 — receipt fora de ordem;
+- [x] W-19.11 — mídia corrompida;
+- [x] W-19.12 — banco indisponível;
+- [x] W-19.13 — processo zumbi;
+- [x] W-19.14 — réplicas disputando sessão;
+- [x] W-19.15 — upgrade e downgrade de contrato;
+- [x] W-19.16 — restore sintético em infraestrutura nova;
+- [x] W-19.17 — benchmark sintético de memória por sessão;
+- [x] W-19.18 — benchmark sintético de throughput;
+- [x] W-19.19 — benchmark sintético de latência;
+- [x] W-19.20 — limites sintéticos registrados.
+
+**Gate W-G19:** número real não liberado.
+
+## 5. Sprint W-20 — homologação interna
+
+**Estado técnico:** controles concluídos; homologação real bloqueada.
+
+- [ ] W-20.1 — número dedicado e autorizado — `BLOCKED_NOT_EXECUTED`;
+- [ ] W-20.2 — organização real de homologação — `BLOCKED_NOT_EXECUTED`;
+- [ ] W-20.3 — usuários reais autorizados — `BLOCKED_NOT_EXECUTED`;
+- [x] W-20.4 — campanhas desabilitadas;
+- [x] W-20.5 — auto-reply IA desabilitado;
+- [x] W-20.6 — política de texto e mídia aprovada;
+- [x] W-20.7 — roteiro diário fail-closed definido;
+- [x] W-20.8 — métricas e alertas validados sinteticamente;
+- [x] W-20.9 — expurgo e exclusão de sessão ensaiados;
+- [x] W-20.10 — handoff e multiagente ensaiados;
+- [x] W-20.11 — incidente sintético e vacinas registrados;
+- [x] W-20.12 — relatório de homologação técnica publicado.
+
+**Gate W-G20:** `BLOCKED_NOT_EXECUTED` para homologação real.
+
+## 6. Sprint W-21 — piloto restrito
+
+**Estado técnico:** controles concluídos; piloto real em `HOLD`.
+
+- [x] W-21.1 — limites de escopo e usuários definidos;
+- [x] W-21.2 — SLOs e abort criteria definidos;
+- [x] W-21.3 — rollout por feature flag;
+- [x] W-21.4 — rollback instantâneo;
+- [x] W-21.5 — monitoramento de falhas/reconnects/duplicações modelado;
+- [x] W-21.6 — comparação sintética com provider oficial;
+- [x] W-21.7 — custo operacional sintético;
+- [x] W-21.8 — suporte e runbooks revisados;
+- [ ] W-21.9 — revisão jurídica, contratual e privacidade — `PENDING_EXTERNAL_REVIEW`;
+- [x] W-21.10 — decisão registrada: `HOLD`;
+- [ ] piloto real — `NOT_EXECUTED`.
+
+**Gate W-G21:** não liberado.
+
+## 7. Sprint W-22 — encerramento da etapa
+
+**Estado técnico:** em fechamento; produção `NOT_AUTHORIZED`.
+
+- [x] W-22.1 — atualizar `diretrizes/SPEC.md`;
+- [x] W-22.2 — atualizar `diretrizes/INVENTARIO.md`;
+- [x] W-22.3 — atualizar `diretrizes/MODULOS.md`;
+- [x] W-22.4 — atualizar `diretrizes/ARQUITETURA.md`;
+- [x] W-22.5 — atualizar `diretrizes/ROADMAP.md`;
+- [x] W-22.6 — atualizar `diretrizes/RECUPERACAO.md`;
+- [x] W-22.7 — atualizar `diretrizes/VACINAS.md`;
+- [x] W-22.8 — atualizar `diretrizes/ESTADO-ATUAL.json`;
+- [ ] W-22.9 — registrar dependências e licenças — em reconciliação final;
+- [ ] W-22.10 — garantir CI e E2E finais verdes — aguardando head final;
+- [x] W-22.11 — registrar decisão final de produção: `HOLD / NOT_AUTHORIZED`;
+- [ ] W-22.12 — encerrar PR após revisão técnica e de segurança — `BLOCKED_PENDING_REVIEW`.
+
+O item W-22.12 não será convertido em check pela automação. O PR deve permanecer draft, aberto e não mesclado até revisão externa.
+
+## 8. Critérios globais
+
+- [x] contratos provider-neutral;
+- [x] Meta preservado sem regressão;
+- [x] engine e capability matrix;
+- [x] storage aditivo sem domínio paralelo;
+- [x] gateway e adapter confinados;
+- [x] session store, lease, single writer e fencing sintéticos;
+- [x] ingress, outbox, identidades e mídia;
+- [x] inbox, playbooks, IA, handoff e plugins;
+- [x] threat model, hardening e observabilidade;
+- [x] chaos/performance sintéticos;
+- [ ] homologação real;
+- [ ] piloto real;
+- [x] decisão explícita: `NOT_AUTHORIZED`;
+- [ ] revisão técnica e de segurança do PR;
+- [ ] produção.
+
+## 9. Dependências externas
+
+| Controle | Estado |
+|---|---|
+| revisão jurídica e privacidade | `PENDING_EXTERNAL_REVIEW` |
+| revisão da SBOM transitiva | `PENDING_EXTERNAL_REVIEW` |
+| KMS/HSM | `PENDING_EXTERNAL_DECISION` |
+| número autorizado | `BLOCKED_NOT_EXECUTED` |
+| homologação real | `BLOCKED_NOT_EXECUTED` |
+| piloto real | `HOLD / NOT_EXECUTED` |
+| revisão do PR | `BLOCKED_PENDING_REVIEW` |
+| produção | `NOT_AUTHORIZED` |
