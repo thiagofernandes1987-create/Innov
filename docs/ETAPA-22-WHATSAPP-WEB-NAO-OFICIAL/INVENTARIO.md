@@ -3,13 +3,13 @@
 **Projeto pai:** Etapa 22 — WhatsApp e atendimento omnichannel  
 **Branch de execução:** `feature/etapa-22-provider-whatsapp-web-baileys`  
 **PR:** #40  
-**Status:** W-00 a W-07 concluídas; 8 de 23 sprints concluídas e 15 pendentes  
+**Status:** W-00 a W-08 concluídas; 9 de 23 sprints concluídas e 14 pendentes  
 **Provider estudado:** `@whiskeysockets/baileys@7.0.0-rc13`, somente por adapter próprio  
 **Runtime Baileys:** não registrado  
 **Produção:** bloqueada  
 **Última atualização:** 04 de agosto de 2026
 
-Documentos principais: [`SPEC.md`](./SPEC.md), [`README.md`](./README.md), [`ADAPTER-BAILEYS-W06.md`](./ADAPTER-BAILEYS-W06.md), [`SESSION-STORE-W07.md`](./SESSION-STORE-W07.md) e evidências W-01 a W-07.
+Documentos principais: [`SPEC.md`](./SPEC.md), [`README.md`](./README.md), [`ADAPTER-BAILEYS-W06.md`](./ADAPTER-BAILEYS-W06.md), [`SESSION-STORE-W07.md`](./SESSION-STORE-W07.md), [`RUNTIME-LIFECYCLE-W08.md`](./RUNTIME-LIFECYCLE-W08.md) e evidências W-01 a W-08.
 
 ---
 
@@ -224,43 +224,45 @@ O domínio oficial da Etapa 22 permanece compartilhado. Meta Cloud API continua 
 - [x] W-07.13 — Testar corrupção, versão e concorrência
 - [x] W-07.14 — Proibir `useMultiFileAuthState` fora de testes descartáveis
 
-**Evidências:**
-
-- `apps/messaging-gateway/src/session-store/**`;
-- `apps/messaging-gateway/src/engines/baileys/stored-auth-state.ts`;
-- migrations `20260804123000` e `20260804123500`;
-- 8 controles PostgreSQL W-07 verdes;
-- 13 testes específicos verdes;
-- `messaging-session-store-boundary-v1` verde;
-- `messaging-engine-boundary-v5` verde;
-- `messaging-storage-boundary-v3` verde;
-- CI `30910897339` verde;
-- File Security E2E `30910899334` verde;
-- lint, typecheck, suíte global, Python, builds e container sem rede verdes;
-- `SESSION-STORE-W07.md` e `EVIDENCIAS-W07.md`.
+**Evidências:** store provider-neutral, migrations `20260804123000` e `20260804123500`, 8 controles PostgreSQL, 13 testes específicos, boundaries W-07, CI e File Security verdes.
 
 **Gate W-G07:** concluído somente com dados sintéticos. Nenhum socket, QR, pairing, número ou sessão real foi criado.
 
 ## Sprint W-08 — Single writer, lease e lifecycle
 
-**Estado:** pendente — próxima sprint autorizada
+**Estado:** concluída no escopo sintético
 
-- [ ] W-08.1 — Criar `session_runtime_leases`
-- [ ] W-08.2 — Lease com expiração
-- [ ] W-08.3 — Fencing token crescente
-- [ ] W-08.4 — Impedir duas instâncias escritoras
-- [ ] W-08.5 — State machine de conexão
-- [ ] W-08.6 — QR e pairing efêmeros
-- [ ] W-08.7 — Proibir persistência de QR
-- [ ] W-08.8 — Reconnect com backoff e jitter
-- [ ] W-08.9 — Classificar logout, restrição, transitório e ação humana
-- [ ] W-08.10 — Takeover após lease expirado
-- [ ] W-08.11 — Kill switch global e por sessão
-- [ ] W-08.12 — Testar processo zumbi
-- [ ] W-08.13 — Testar reinício durante atualização de credenciais
-- [ ] W-08.14 — Testar restauração em nova instância
+- [x] W-08.1 — Criar `session_runtime_leases`
+- [x] W-08.2 — Lease com expiração
+- [x] W-08.3 — Fencing token crescente
+- [x] W-08.4 — Impedir duas instâncias escritoras
+- [x] W-08.5 — State machine de conexão
+- [x] W-08.6 — QR e pairing efêmeros
+- [x] W-08.7 — Proibir persistência de QR
+- [x] W-08.8 — Reconnect com backoff e jitter
+- [x] W-08.9 — Classificar logout, restrição, transitório e ação humana
+- [x] W-08.10 — Takeover após lease expirado
+- [x] W-08.11 — Kill switch global e por sessão
+- [x] W-08.12 — Testar processo zumbi
+- [x] W-08.13 — Testar reinício durante atualização de credenciais
+- [x] W-08.14 — Testar restauração em nova instância
 
-**Gate W-G08:** escala horizontal somente após single writer e fencing aprovados.
+**Evidências:**
+
+- `apps/messaging-gateway/src/runtime/**`;
+- migration `20260804134000_stage22_session_runtime_leases.sql`;
+- `compare_and_swap_channel_session_credentials_fenced`;
+- 12 controles PostgreSQL W-08 verdes;
+- testes específicos de lifecycle verdes;
+- `messaging-runtime-lifecycle-boundary-v1` verde;
+- `messaging-storage-boundary-v4` verde;
+- head funcional `d7bf69dd4db5e0e0f7be1a6f85a3a685675b8221`;
+- CI `30914446427` verde;
+- File Security E2E `30914450873` verde;
+- lint, typecheck, suíte global, Python, builds e container sem rede verdes;
+- `RUNTIME-LIFECYCLE-W08.md` e `EVIDENCIAS-W08.md`.
+
+**Gate W-G08:** concluído somente para single writer, lease, fencing, takeover e lifecycle sintético. O supervisor não está no bootstrap; nenhum socket, QR, pairing, número ou sessão real foi usado.
 
 ---
 
@@ -268,7 +270,7 @@ O domínio oficial da Etapa 22 permanece compartilhado. Meta Cloud API continua 
 
 ## Sprint W-09 — Ingress e normalização
 
-**Estado:** pendente
+**Estado:** pendente — próxima sprint autorizada
 
 - [ ] W-09.1 — Criar envelope canônico
 - [ ] W-09.2 — Persistir antes do dispatch
@@ -559,7 +561,7 @@ O domínio oficial da Etapa 22 permanece compartilhado. Meta Cloud API continua 
 - [x] Adapter Baileys confinado
 - [x] Runtime separado do Next.js
 - [x] Session store criptografado e transacional
-- [ ] Single writer e fencing comprovados
+- [x] Single writer e fencing comprovados com fixtures sintéticas
 - [ ] Ingress operacional durável e idempotente
 - [ ] Worker de outbox e retry operacional comprovados
 - [ ] Reconciliação PN/LID completa
@@ -569,9 +571,9 @@ O domínio oficial da Etapa 22 permanece compartilhado. Meta Cloud API continua 
 - [ ] IA independente e inicialmente em rascunho
 - [ ] Handoff persistente
 - [ ] Threat model aprovado
-- [ ] Logs operacionais sem segredos
-- [ ] Métricas, alertas e runbooks
-- [ ] Restart, concorrência e restore de runtime verdes
+- [x] Bibliotecas W-07/W-08 sem logs de material sensível
+- [ ] Métricas, alertas e runbooks operacionais
+- [x] Restart, concorrência e restore de lifecycle sintético verdes
 - [ ] Piloto restrito concluído
 - [ ] Decisão explícita de produção
 - [ ] Documentação canônica final atualizada
@@ -589,21 +591,18 @@ O domínio oficial da Etapa 22 permanece compartilhado. Meta Cloud API continua 
 
 ## 6. Próxima ação autorizada
 
-A próxima e única sprint autorizada é **W-08 — Single writer, lease e lifecycle**.
+A próxima e única sprint autorizada é **W-09 — Ingress e normalização**.
 
 É permitido:
 
-- criar `session_runtime_leases`;
-- implementar lease com expiração e renovação;
-- implementar fencing token monotônico;
-- impedir dois escritores simultâneos;
-- modelar state machine de conexão;
-- representar QR e pairing somente como eventos efêmeros sintéticos;
-- aplicar backoff e jitter em doubles;
-- classificar logout, restrição, transitório e ação humana;
-- takeover somente após expiração comprovada;
-- implementar kill switch global e por sessão;
-- testar processo zumbi, restart durante atualização e restore sintético.
+- criar envelope canônico de ingress;
+- persistir evento sanitizado antes do dispatch;
+- criar idempotency key e estados do ingress;
+- normalizar wrappers, replies, quoted e receipts com fixtures;
+- resolver organização e conta sem domínio paralelo;
+- criar DLQ e replay idempotente;
+- testar duplicados, ordem invertida e payload desconhecido;
+- provar que nenhuma IA executa antes de `PERSISTED`.
 
 Ainda não está autorizado:
 
@@ -612,6 +611,7 @@ Ainda não está autorizado:
 - produzir ou exibir QR/pairing real;
 - persistir dados reais de sessão;
 - usar número real;
+- registrar o supervisor ou Baileys no bootstrap;
 - conectar o gateway ao ambiente produtivo;
 - habilitar automação ou IA;
 - deploy, piloto ou produção.
