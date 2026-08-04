@@ -40,7 +40,7 @@
 | W-19 | parcial controlada | escopo sintético aprovado; número/QR reais bloqueados |
 | W-20 | parcial controlada | controles técnicos aprovados; homologação real bloqueada |
 | W-21 | parcial controlada | controles de piloto aprovados; piloto real em `HOLD` |
-| W-22 | encerramento técnico | canônicos, licenças, decisão e CI; PR depende de revisão |
+| W-22 | concluída tecnicamente | canônicos, licenças, decisão e CI verdes; PR depende de revisão |
 
 ## 3. Marcos concluídos
 
@@ -159,7 +159,7 @@
 
 ## 7. Sprint W-22 — encerramento da etapa
 
-**Estado técnico:** em fechamento; produção `NOT_AUTHORIZED`.
+**Estado técnico:** concluído; produção `NOT_AUTHORIZED`.
 
 - [x] W-22.1 — atualizar `diretrizes/SPEC.md`;
 - [x] W-22.2 — atualizar `diretrizes/INVENTARIO.md`;
@@ -169,8 +169,8 @@
 - [x] W-22.6 — atualizar `diretrizes/RECUPERACAO.md`;
 - [x] W-22.7 — atualizar `diretrizes/VACINAS.md`;
 - [x] W-22.8 — atualizar `diretrizes/ESTADO-ATUAL.json`;
-- [ ] W-22.9 — registrar dependências e licenças — em reconciliação final;
-- [ ] W-22.10 — garantir CI e E2E finais verdes — aguardando head final;
+- [x] W-22.9 — registrar dependências e licenças;
+- [x] W-22.10 — garantir CI e E2E finais verdes no head funcional `ad7bdcd4097d70190848c180eedc22b1feb35204`;
 - [x] W-22.11 — registrar decisão final de produção: `HOLD / NOT_AUTHORIZED`;
 - [ ] W-22.12 — encerrar PR após revisão técnica e de segurança — `BLOCKED_PENDING_REVIEW`.
 
