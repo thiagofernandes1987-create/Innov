@@ -1,0 +1,9 @@
+IMAGE_REFERENCE_RESULT: BLOCKED_EXTERNAL
+05-infra/kubernetes/execution-evidence-job.yaml:24:ghcr.io/innovar/execution-evidence:sha256-required
+05-infra/docker/docker-compose.yml:3:postgres:16-alpine
+05-infra/docker/docker-compose.yml:23:redis:7-alpine
+05-infra/docker/docker-compose.yml:59:innovar/event-publisher:BLOCKED_UNTIL_DIGEST_AND_LOCK
+05-infra/docker/docker-compose.event-transport.yml:3:docker.redpanda.com/redpandadata/redpanda:v24.2.18
+05-infra/docker/docker-compose.event-transport.yml:38:innovar/event-publisher:BLOCKED_UNTIL_DIGEST_AND_LOCK
+.github/workflows/executable-spec-integration.yaml:34:postgres:16.4
+.github/workflows/executable-spec-integration.yaml:59:ghcr.io/yannh/kubeconform:v0.7.0

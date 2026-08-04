@@ -1,0 +1,584 @@
+{
+  "features": 11,
+  "scenarios": 38,
+  "unique_scenario_ids": 38,
+  "registered": 38,
+  "executed_pass": 14,
+  "blocked_external": 2,
+  "not_run": 22,
+  "method": "explicit scenario registry; no lexical hints",
+  "items": [
+    {
+      "feature": "04-bdd/features/cache.feature",
+      "line": 4,
+      "name": "Metadata invalidation removes stale entries",
+      "scenario_ids": [
+        "SCN-BDD-CACHE-001"
+      ],
+      "requirements": [
+        "REQ-CACHE-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/cache.feature"
+    },
+    {
+      "feature": "04-bdd/features/cache.feature",
+      "line": 10,
+      "name": "Redis unavailable does not fabricate a successful invalidation",
+      "scenario_ids": [
+        "SCN-BDD-CACHE-002"
+      ],
+      "requirements": [
+        "REQ-CACHE-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/cache.feature"
+    },
+    {
+      "feature": "04-bdd/features/concurrency.feature",
+      "line": 4,
+      "name": "Only one optimistic update wins",
+      "scenario_ids": [
+        "SCN-BDD-CONC-001"
+      ],
+      "requirements": [
+        "REQ-CONC-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/concurrency.feature"
+    },
+    {
+      "feature": "04-bdd/features/concurrency.feature",
+      "line": 10,
+      "name": "Quota reservation is atomic",
+      "scenario_ids": [
+        "SCN-BDD-CONC-002"
+      ],
+      "requirements": [
+        "REQ-QUOTA-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/concurrency.feature"
+    },
+    {
+      "feature": "04-bdd/features/event-transport-executable.feature",
+      "line": 3,
+      "name": "rollback do agregado também remove evento e outbox",
+      "scenario_ids": [
+        "SCN-BDD-EVT-003"
+      ],
+      "requirements": [
+        "REQ-EVT-001"
+      ],
+      "status": "BLOCKED_EXTERNAL",
+      "execution_level": "NOT_EXECUTED",
+      "binding": null,
+      "evidence_path": "audit/evidence-records/postgres-runtime.json"
+    },
+    {
+      "feature": "04-bdd/features/event-transport-executable.feature",
+      "line": 9,
+      "name": "dois publishers não reivindicam a mesma mensagem",
+      "scenario_ids": [
+        "SCN-BDD-EVT-004"
+      ],
+      "requirements": [
+        "REQ-EVT-001"
+      ],
+      "status": "BLOCKED_EXTERNAL",
+      "execution_level": "NOT_EXECUTED",
+      "binding": null,
+      "evidence_path": "audit/evidence-records/postgres-runtime.json"
+    },
+    {
+      "feature": "04-bdd/features/event-transport-executable.feature",
+      "line": 15,
+      "name": "replay de DLQ exige escopo administrativo, motivo e idempotência",
+      "scenario_ids": [
+        "SCN-BDD-EVT-005"
+      ],
+      "requirements": [
+        "REQ-DLQ-001"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_event_transport_steps.Steps.test_given_open_dlq_when_replay_then_exactly_one_effect",
+      "evidence_path": "bdd_steps/test_event_transport_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/event-transport-executable.feature",
+      "line": 21,
+      "name": "consumidor duplicado não reaplica efeito",
+      "scenario_ids": [
+        "SCN-BDD-EVT-006"
+      ],
+      "requirements": [
+        "REQ-EVT-002"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_event_transport_steps.Steps.test_given_duplicate_delivery_when_consumed_then_one_effect",
+      "evidence_path": "bdd_steps/test_event_transport_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/events.feature",
+      "line": 4,
+      "name": "Aggregate and outbox are atomic",
+      "scenario_ids": [
+        "SCN-BDD-EVT-001"
+      ],
+      "requirements": [
+        "REQ-EVT-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/events.feature"
+    },
+    {
+      "feature": "04-bdd/features/events.feature",
+      "line": 10,
+      "name": "Duplicate consumer delivery applies one effect",
+      "scenario_ids": [
+        "SCN-BDD-EVT-002"
+      ],
+      "requirements": [
+        "REQ-EVT-002"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/events.feature"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 5,
+      "name": "Record a passing gate with artifact checksum",
+      "scenario_ids": [
+        "SCN-BDD-EVID-001"
+      ],
+      "requirements": [
+        "REQ-NFR-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/execution-evidence.feature"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 10,
+      "name": "Reject an invalid checksum",
+      "scenario_ids": [
+        "SCN-BDD-EVID-002"
+      ],
+      "requirements": [
+        "REQ-NFR-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/execution-evidence.feature"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 15,
+      "name": "Reject mutation of recorded evidence",
+      "scenario_ids": [
+        "SCN-BDD-EVID-003"
+      ],
+      "requirements": [
+        "REQ-NFR-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/execution-evidence.feature"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 20,
+      "name": "Reject deletion of recorded evidence",
+      "scenario_ids": [
+        "SCN-BDD-EVID-004"
+      ],
+      "requirements": [
+        "REQ-NFR-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/execution-evidence.feature"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 25,
+      "name": "Hide evidence from another tenant",
+      "scenario_ids": [
+        "SCN-BDD-EVID-005"
+      ],
+      "requirements": [
+        "REQ-RLS-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/execution-evidence.feature"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 31,
+      "name": "Accept a complete development configuration",
+      "scenario_ids": [
+        "SCN-BDD-EVID-006"
+      ],
+      "requirements": [
+        "REQ-NFR-001"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_canonical_environment_validation_passes",
+      "evidence_path": "bdd_steps/test_execution_evidence_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 36,
+      "name": "Reject a pool with maximum below minimum",
+      "scenario_ids": [
+        "SCN-BDD-EVID-007"
+      ],
+      "requirements": [
+        "REQ-NFR-001"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_invalid_pool_configuration_fails_closed",
+      "evidence_path": "bdd_steps/test_execution_evidence_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 41,
+      "name": "Reject retry maximum below retry base",
+      "scenario_ids": [
+        "SCN-BDD-EVID-008"
+      ],
+      "requirements": [
+        "REQ-NFR-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/execution-evidence.feature"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 47,
+      "name": "PostgreSQL unavailable is blocked",
+      "scenario_ids": [
+        "SCN-BDD-EVID-009"
+      ],
+      "requirements": [
+        "REQ-NFR-001"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_postgres_gate_without_database_is_blocked",
+      "evidence_path": "bdd_steps/test_execution_evidence_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 52,
+      "name": "Kubernetes unavailable is blocked",
+      "scenario_ids": [
+        "SCN-BDD-EVID-010"
+      ],
+      "requirements": [
+        "REQ-NFR-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/execution-evidence.feature"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 57,
+      "name": "XState package unavailable is blocked",
+      "scenario_ids": [
+        "SCN-BDD-EVID-011"
+      ],
+      "requirements": [
+        "REQ-STATE-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/execution-evidence.feature"
+    },
+    {
+      "feature": "04-bdd/features/execution-evidence.feature",
+      "line": 62,
+      "name": "SDK generation is deterministic",
+      "scenario_ids": [
+        "SCN-BDD-EVID-012"
+      ],
+      "requirements": [
+        "REQ-NFR-001"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_sdk_generation_is_byte_deterministic",
+      "evidence_path": "bdd_steps/test_execution_evidence_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/idempotency.feature",
+      "line": 4,
+      "name": "Same key and payload replays the original response",
+      "scenario_ids": [
+        "SCN-BDD-IDEMP-001"
+      ],
+      "requirements": [
+        "REQ-IDEMP-002"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_same_key_and_payload_replays_original_response",
+      "evidence_path": "bdd_steps/test_remediation_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/idempotency.feature",
+      "line": 10,
+      "name": "Same key with a different payload is rejected",
+      "scenario_ids": [
+        "SCN-BDD-IDEMP-002"
+      ],
+      "requirements": [
+        "REQ-IDEMP-003"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_same_key_with_different_payload_is_rejected",
+      "evidence_path": "bdd_steps/test_remediation_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/idempotency.feature",
+      "line": 16,
+      "name": "Concurrent command with the same key reports operation in progress",
+      "scenario_ids": [
+        "SCN-BDD-IDEMP-003"
+      ],
+      "requirements": [
+        "REQ-IDEMP-001",
+        "REQ-IDEMP-002"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_concurrent_key_reports_in_progress",
+      "evidence_path": "bdd_steps/test_remediation_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/metadata.feature",
+      "line": 4,
+      "name": "Published object versions are immutable",
+      "scenario_ids": [
+        "SCN-BDD-META-001"
+      ],
+      "requirements": [
+        "REQ-META-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/metadata.feature"
+    },
+    {
+      "feature": "04-bdd/features/metadata.feature",
+      "line": 10,
+      "name": "Object creation beyond quota is rejected",
+      "scenario_ids": [
+        "SCN-BDD-META-002"
+      ],
+      "requirements": [
+        "REQ-QUOTA-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/metadata.feature"
+    },
+    {
+      "feature": "04-bdd/features/metadata.feature",
+      "line": 16,
+      "name": "Invalid object key is rejected",
+      "scenario_ids": [
+        "SCN-BDD-META-003"
+      ],
+      "requirements": [
+        "REQ-META-002"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/metadata.feature"
+    },
+    {
+      "feature": "04-bdd/features/object-lifecycle.feature",
+      "line": 3,
+      "name": "Publish an object under the expected version",
+      "scenario_ids": [
+        "SCN-BDD-LIFE-001"
+      ],
+      "requirements": [
+        "REQ-META-003"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_publish_under_expected_version",
+      "evidence_path": "bdd_steps/test_remediation_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/object-lifecycle.feature",
+      "line": 9,
+      "name": "Reject a stale transition",
+      "scenario_ids": [
+        "SCN-BDD-LIFE-002"
+      ],
+      "requirements": [
+        "REQ-CONC-001",
+        "REQ-META-003"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_reject_stale_transition",
+      "evidence_path": "bdd_steps/test_remediation_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/object-lifecycle.feature",
+      "line": 15,
+      "name": "Reject mutation of a published version",
+      "scenario_ids": [
+        "SCN-BDD-LIFE-003"
+      ],
+      "requirements": [
+        "REQ-META-001"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_reject_published_mutation",
+      "evidence_path": "bdd_steps/test_remediation_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/sla.feature",
+      "line": 4,
+      "name": "Paused time is excluded",
+      "scenario_ids": [
+        "SCN-BDD-SLA-001"
+      ],
+      "requirements": [
+        "REQ-SLA-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/sla.feature"
+    },
+    {
+      "feature": "04-bdd/features/sla.feature",
+      "line": 10,
+      "name": "Holidays are excluded",
+      "scenario_ids": [
+        "SCN-BDD-SLA-002"
+      ],
+      "requirements": [
+        "REQ-SLA-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/sla.feature"
+    },
+    {
+      "feature": "04-bdd/features/tenancy.feature",
+      "line": 4,
+      "name": "Cross-tenant read is denied",
+      "scenario_ids": [
+        "SCN-BDD-TEN-001"
+      ],
+      "requirements": [
+        "REQ-RLS-001"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_cross_tenant_read_denied",
+      "evidence_path": "bdd_steps/test_remediation_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/tenancy.feature",
+      "line": 10,
+      "name": "Organization context is derived server-side",
+      "scenario_ids": [
+        "SCN-BDD-TEN-002"
+      ],
+      "requirements": [
+        "REQ-TEN-001"
+      ],
+      "status": "PASS",
+      "execution_level": "UNIT_EXECUTED",
+      "binding": "bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_organization_context_is_signed_server_side",
+      "evidence_path": "bdd_steps/test_remediation_steps.py"
+    },
+    {
+      "feature": "04-bdd/features/workflow.feature",
+      "line": 4,
+      "name": "Complete draft can be submitted",
+      "scenario_ids": [
+        "SCN-BDD-WF-001"
+      ],
+      "requirements": [
+        "REQ-WF-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/workflow.feature"
+    },
+    {
+      "feature": "04-bdd/features/workflow.feature",
+      "line": 10,
+      "name": "Rejection without a reason is denied",
+      "scenario_ids": [
+        "SCN-BDD-WF-002"
+      ],
+      "requirements": [
+        "REQ-WF-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/workflow.feature"
+    },
+    {
+      "feature": "04-bdd/features/workflow.feature",
+      "line": 16,
+      "name": "Approval over limit requires approval path",
+      "scenario_ids": [
+        "SCN-BDD-WF-003"
+      ],
+      "requirements": [
+        "REQ-APP-001"
+      ],
+      "status": "NOT_RUN",
+      "execution_level": "DOCUMENTED",
+      "binding": null,
+      "evidence_path": "04-bdd/features/workflow.feature"
+    }
+  ]
+}

@@ -1,0 +1,1076 @@
+openapi: 3.1.0
+info:
+  title: Innovar Platform Core API
+  version: 1.0.0
+servers:
+- url: https://api.innovar.app
+security:
+- oauth2:
+  - objects.read
+tags:
+- name: Objects
+- name: Records
+- name: WorkInbox
+- name: ObjectLifecycle
+- name: EventAdministration
+- name: ExecutionEvidence
+paths:
+  /v1/objects:
+    post:
+      tags:
+      - Objects
+      operationId: createObjectDefinition
+      security:
+      - oauth2:
+        - objects.write
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - $ref: '#/components/parameters/Timezone'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateObjectRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectDefinition'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/QuotaExceeded'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    get:
+      tags:
+      - Objects
+      operationId: listObjectDefinitions
+      parameters:
+      - $ref: '#/components/parameters/PageSize'
+      - $ref: '#/components/parameters/PageAfter'
+      responses:
+        '200':
+          description: Page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectDefinitionPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /v1/objects/{objectKey}/records:
+    parameters:
+    - name: objectKey
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: ^[a-z][a-z0-9_]{2,119}$
+    post:
+      tags:
+      - Records
+      operationId: createRecord
+      security:
+      - oauth2:
+        - records.write
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRecordRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Record'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    get:
+      tags:
+      - Records
+      operationId: listRecords
+      parameters:
+      - name: filter
+        in: query
+        schema:
+          type: string
+          maxLength: 4000
+        description: JSON-encoded array of safe filter expressions.
+      - $ref: '#/components/parameters/PageSize'
+      - $ref: '#/components/parameters/PageAfter'
+      responses:
+        '200':
+          description: Page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+      security:
+      - oauth2:
+        - records.read
+  /v1/objects/{objectKey}/records/{recordId}:
+    parameters:
+    - name: objectKey
+      in: path
+      required: true
+      schema:
+        type: string
+    - name: recordId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    patch:
+      tags:
+      - Records
+      operationId: updateRecord
+      security:
+      - oauth2:
+        - records.write
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - name: If-Match
+        in: header
+        required: true
+        schema:
+          type: string
+          pattern: ^"[1-9][0-9]*"$
+        description: Strong entity tag containing the expected aggregate version.
+      requestBody:
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/UpdateRecordRequest'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Record'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+    get:
+      tags:
+      - Records
+      operationId: getRecord
+      summary: Read one record by identifier within the authenticated organization.
+      security:
+      - oauth2:
+        - records.read
+      parameters:
+      - name: If-None-Match
+        in: header
+        required: false
+        schema:
+          type: string
+          pattern: ^"[1-9][0-9]*"$
+        description: Optional strong ETag for conditional retrieval.
+      responses:
+        '200':
+          description: Record found.
+          headers:
+            ETag:
+              description: Strong ETag containing the aggregate version.
+              schema:
+                type: string
+                pattern: ^"[1-9][0-9]*"$
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Record'
+        '304':
+          description: The representation has not changed since If-None-Match.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /v1/work-inbox:
+    get:
+      tags:
+      - WorkInbox
+      operationId: getWorkInbox
+      security:
+      - oauth2:
+        - work.read
+      parameters:
+      - name: kind
+        in: query
+        schema:
+          type: string
+          enum:
+          - TASK
+          - ACTIVITY
+          - APPROVAL
+          - APPOINTMENT
+          - ALERT
+      - $ref: '#/components/parameters/PageSize'
+      - $ref: '#/components/parameters/PageAfter'
+      responses:
+        '200':
+          description: Page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkItemPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /v1/objects/{objectKey}/transitions:
+    parameters:
+    - name: objectKey
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: ^[a-z][a-z0-9_]{2,119}$
+    post:
+      tags:
+      - ObjectLifecycle
+      operationId: transitionObjectDefinition
+      security:
+      - oauth2:
+        - objects.write
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - name: If-Match
+        in: header
+        required: true
+        schema:
+          type: string
+          pattern: ^"[1-9][0-9]*"$
+        description: Strong entity tag containing the expected object-definition version.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ./schemas/transition-request.schema.json
+      responses:
+        '200':
+          description: Transition applied
+          headers:
+            ETag:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectDefinition'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+  /v1/admin/events/dlq:
+    get:
+      tags:
+      - EventAdministration
+      operationId: listDeadLetters
+      security:
+      - trustedProxyHmac: []
+      parameters:
+      - name: consumer
+        in: query
+        schema:
+          type: string
+          maxLength: 120
+      - $ref: '#/components/parameters/PageSize'
+      - $ref: '#/components/parameters/PageAfter'
+      - &id001
+        $ref: '#/components/parameters/OrganizationContext'
+      - &id002
+        $ref: '#/components/parameters/ActorContext'
+      - &id003
+        $ref: '#/components/parameters/ScopeContext'
+      - &id004
+        $ref: '#/components/parameters/ContextTimestamp'
+      - &id005
+        $ref: '#/components/parameters/ContextNonce'
+      - &id006
+        $ref: '#/components/parameters/ContextAudience'
+      - &id007
+        $ref: '#/components/parameters/ContextVersion'
+      responses:
+        '200':
+          description: Dead-letter page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeadLetterPage'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/admin/events/dlq/{deadLetterId}/replay:
+    post:
+      tags:
+      - EventAdministration
+      operationId: replayDeadLetter
+      security:
+      - trustedProxyHmac: []
+      parameters:
+      - name: deadLetterId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - *id001
+      - *id002
+      - *id003
+      - *id004
+      - *id005
+      - *id006
+      - *id007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DlqReplayRequest'
+      responses:
+        '202':
+          description: Replay accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeadLetterReplay'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '200':
+          description: Idempotent replay response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeadLetterReplay'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+  /v1/admin/events/dlq/{deadLetterId}/resolution:
+    post:
+      tags:
+      - EventAdministration
+      operationId: resolveDeadLetter
+      security:
+      - trustedProxyHmac: []
+      parameters:
+      - name: deadLetterId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - $ref: '#/components/parameters/IdempotencyKey'
+      - *id001
+      - *id002
+      - *id003
+      - *id004
+      - *id005
+      - *id006
+      - *id007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DlqResolutionRequest'
+      responses:
+        '200':
+          description: DLQ item resolved or idempotently replayed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeadLetter'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '428':
+          $ref: '#/components/responses/PreconditionRequired'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+  /v1/admin/execution-evidence:
+    get:
+      tags:
+      - ExecutionEvidence
+      operationId: listExecutionEvidence
+      security:
+      - oauth2:
+        - evidence.read
+      parameters:
+      - name: campaignId
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Evidence page
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionEvidenceList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+      - ExecutionEvidence
+      operationId: recordExecutionEvidence
+      security:
+      - oauth2:
+        - evidence.write
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecutionEvidenceInput'
+      responses:
+        '201':
+          description: Evidence recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionEvidence'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.innovar.app/oauth/authorize
+          tokenUrl: https://auth.innovar.app/oauth/token
+          scopes:
+            objects.read: Read object definitions
+            objects.write: Manage object definitions
+            records.read: Read records
+            records.write: Write records
+            work.read: Read work inbox
+            events.admin: Inspect and operate DLQ and replay
+            evidence.read: Read execution evidence
+            evidence.write: Append execution evidence
+    trustedProxyHmac:
+      type: apiKey
+      in: header
+      name: X-Context-Signature
+      description: HMAC-SHA256 v2 assertion from the trusted identity proxy. The signature binds organization, actor, scopes,
+        timestamp, nonce, audience, HTTP method, normalized path/query, body SHA-256 and idempotency key.
+  parameters:
+    IdempotencyKey:
+      name: X-Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Timezone:
+      name: X-Timezone
+      in: header
+      required: false
+      schema:
+        type: string
+        default: America/Sao_Paulo
+    PageSize:
+      name: page[size]
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    PageAfter:
+      name: page[after]
+      in: query
+      schema:
+        type: string
+        maxLength: 1000
+    OrganizationContext:
+      name: X-Organization-Id
+      in: header
+      required: true
+      description: Organization UUID or stable tenant identifier asserted by the trusted proxy.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 512
+    ActorContext:
+      name: X-Actor-Id
+      in: header
+      required: true
+      description: Authenticated actor identifier asserted by the trusted proxy.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 512
+    ScopeContext:
+      name: X-OAuth-Scopes
+      in: header
+      required: true
+      description: Space-delimited scopes derived from the upstream OAuth2/JWT identity.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 512
+    ContextTimestamp:
+      name: X-Context-Timestamp
+      in: header
+      required: true
+      description: Unix timestamp covered by the HMAC assertion.
+      schema:
+        type: string
+        pattern: ^[0-9]{10,13}$
+    ContextNonce:
+      name: X-Context-Nonce
+      in: header
+      required: true
+      description: Single-use UUID nonce covered by the HMAC assertion.
+      schema:
+        type: string
+        format: uuid
+    ContextAudience:
+      name: X-Context-Audience
+      in: header
+      required: true
+      description: Expected service audience; canonical value innovar-event-admin.
+      schema:
+        type: string
+        const: innovar-event-admin
+    ContextVersion:
+      name: X-Context-Version
+      in: header
+      required: true
+      description: Signature contract version; canonical value v2.
+      schema:
+        type: string
+        const: v2
+  schemas:
+    CreateObjectRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - namespace
+      - object_key
+      - singular_name
+      - plural_name
+      - retention_class
+      properties:
+        namespace:
+          type: string
+          pattern: ^[a-z][a-z0-9_.-]{1,79}$
+        object_key:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{2,119}$
+        singular_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        plural_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+        storage_strategy:
+          type: string
+          enum:
+          - JSONB_HYBRID
+          default: JSONB_HYBRID
+          description: Only executable storage strategy in this release. PROVISIONED_TABLE remains deferred by ADR.
+        retention_class:
+          type: string
+          enum:
+          - OPERATIONAL
+          - FINANCIAL
+          - LEGAL
+          - AUDIT
+          - MARKETING
+          - TEMPORARY
+          - SENSITIVE
+        api_exposure:
+          type: boolean
+          default: false
+        search_exposure:
+          type: boolean
+          default: false
+    ObjectDefinition:
+      allOf:
+      - $ref: '#/components/schemas/CreateObjectRequest'
+      - type: object
+        required:
+        - id
+        - version
+        - lifecycle_state
+        - created_at
+        properties:
+          id:
+            type: string
+            format: uuid
+          version:
+            type: integer
+            minimum: 1
+          lifecycle_state:
+            type: string
+            enum:
+            - DRAFT
+            - IN_REVIEW
+            - PUBLISHED
+            - DEPRECATED
+            - ARCHIVED
+          created_at:
+            type: string
+            format: date-time
+    CreateRecordRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - values
+      properties:
+        values:
+          type: object
+    UpdateRecordRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - values
+      properties:
+        values:
+          type: object
+    Record:
+      type: object
+      required:
+      - id
+      - object_key
+      - object_version
+      - values
+      - version
+      - created_at
+      - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        object_key:
+          type: string
+        object_version:
+          type: integer
+        values:
+          type: object
+        version:
+          type: integer
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    WorkItem:
+      type: object
+      required:
+      - id
+      - source_resource_id
+      - source_kind
+      - source_state_version
+      - title
+      - priority
+      properties:
+        id:
+          type: string
+          format: uuid
+        source_resource_id:
+          type: string
+          format: uuid
+        source_kind:
+          type: string
+          enum:
+          - TASK
+          - ACTIVITY
+          - APPROVAL
+          - APPOINTMENT
+          - ALERT
+        source_state_version:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+          maxLength: 240
+        due_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        priority:
+          type: integer
+          minimum: 1
+          maximum: 5
+    ObjectDefinitionPage:
+      type: object
+      required:
+      - data
+      - page
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ObjectDefinition'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    RecordPage:
+      type: object
+      required:
+      - data
+      - page
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Record'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    WorkItemPage:
+      type: object
+      required:
+      - data
+      - page
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkItem'
+        page:
+          $ref: '#/components/schemas/PageMeta'
+    PageMeta:
+      type: object
+      required:
+      - has_more
+      properties:
+        next:
+          type:
+          - string
+          - 'null'
+        has_more:
+          type: boolean
+    Problem:
+      type: object
+      additionalProperties: false
+      required:
+      - type
+      - title
+      - status
+      - code
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+          enum:
+          - 401
+          - 403
+          - 404
+          - 409
+          - 422
+          - 428
+          - 429
+          - 500
+          - 503
+          - 413
+        code:
+          type: string
+          enum:
+          - VALIDATION_FAILED
+          - UNAUTHENTICATED
+          - FORBIDDEN
+          - NOT_FOUND
+          - VERSION_CONFLICT
+          - IDEMPOTENCY_KEY_REUSED
+          - OPERATION_IN_PROGRESS
+          - QUOTA_EXCEEDED
+          - RATE_LIMITED
+          - DEPENDENCY_CONFLICT
+          - INVALID_TRANSITION
+          - INTERNAL_ERROR
+          - SERVICE_UNAVAILABLE
+          - PUBLISHED_VERSION_IMMUTABLE
+          - PRECONDITION_REQUIRED
+          - PAYLOAD_TOO_LARGE
+        detail:
+          type: string
+        request_id:
+          type: string
+    DeadLetter:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - event_id
+      - consumer_name
+      - event_type
+      - attempts
+      - failed_at
+      - status
+      properties:
+        id:
+          type: string
+          format: uuid
+        event_id:
+          type: string
+          format: uuid
+        consumer_name:
+          type: string
+        event_type:
+          type: string
+        attempts:
+          type: integer
+          minimum: 1
+        failed_at:
+          type: string
+          format: date-time
+        last_error:
+          type: string
+        resolved_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        status:
+          type: string
+          enum:
+          - OPEN
+          - RESOLVED
+    ExecutionEvidence:
+      type: object
+      additionalProperties: false
+      required:
+      - campaignId
+      - gateKey
+      - status
+      - observedAt
+      properties:
+        campaignId:
+          type: string
+        gateKey:
+          type: string
+        status:
+          enum:
+          - PASS
+          - FAIL
+          - BLOCKED
+        observedAt:
+          type: string
+          format: date-time
+        artifactSha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+    DeadLetterPage:
+      type: object
+      additionalProperties: false
+      required:
+      - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeadLetter'
+    DeadLetterReplay:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - dead_letter_id
+      - status
+      - dry_run
+      - created_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        dead_letter_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum:
+          - ACCEPTED
+        dry_run:
+          type: boolean
+        provider_message_id:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type: string
+          format: date-time
+    ExecutionEvidenceList:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExecutionEvidence'
+    TransitionRequest:
+      $ref: ./schemas/transition-request.schema.json
+    DlqReplayRequest:
+      $ref: ./schemas/dlq-replay-request.schema.json
+    DlqResolutionRequest:
+      $ref: ./schemas/dlq-resolution-request.schema.json
+    ExecutionEvidenceInput:
+      $ref: ./schemas/execution-evidence.schema.json
+  responses:
+    Conflict:
+      description: Conflict
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ValidationError:
+      description: Validation failed
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    QuotaExceeded:
+      description: Quota exceeded
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Unauthorized:
+      description: Authentication required or token invalid.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    Forbidden:
+      description: Authenticated principal lacks required capability or scope.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    PreconditionFailed:
+      description: The supplied strong ETag does not match the current version.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    PreconditionRequired:
+      description: If-Match is required for this mutation.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    NotFound:
+      description: The requested resource does not exist in the authenticated organization.
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    ServiceUnavailable:
+      description: A required dependency is unavailable.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    PayloadTooLarge:
+      description: Request body exceeds the configured limit
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'
+    InternalError:
+      description: Internal server error
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Problem'

@@ -1,10 +1,13 @@
 "use server";
 
 import{randomUUID}from"node:crypto";
+import { lerMoeda } from "@/lib/validacao/moeda";
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireClientContext}from"@/lib/auth";
 import{requireCapability}from"@/lib/authorization";
+import { listaDoEscopo, pertenceALista } from "@/lib/listas/servidor";
+import { ESCOPOS } from "@/lib/sugestoes/servidor";
 import{
  FILE_SECURITY_SAC_MIME_TYPES,
  fileSecurityMessage,
@@ -12,16 +15,26 @@ import{
 }from"@/lib/file-security/domain";
 import{secureUpload}from"@/lib/file-security/server";
 import{createSupabaseAdminClient}from"@/lib/supabase/admin";
+import{checarCamposBR}from"@/lib/validacao/formulario";
 
 function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
-function numberOrNull(value:unknown){if(value===null||value===undefined||String(value).trim()==="")return null;const parsed=Number(value);return Number.isFinite(parsed)?parsed:null;}
+// Lê valor monetário tolerando o que gente digita e o que planilha cola:
+// "1.500,25", "1500.25" e "R$ 1.500,00" chegam ao mesmo número. `Number()` cru
+// lia "1.500" como 1,5 — erro de três ordens de grandeza num campo de dinheiro.
+function numberOrNull(value:unknown){return lerMoeda(value as string|number|null|undefined);}
 function boolean(data:FormData,key:string){return data.get(key)!==null;}
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}
 function resultRow<T extends Record<string,unknown>>(value:T|T[]|null){return Array.isArray(value)?value[0]??null:value;}
 
 export async function createCrmLead(data:FormData){
  const context=await requireCapability("crm","create");const path="/app/crm/leads/novo";
+ const invalido=checarCamposBR(data,[
+  {campo:"email",tipo:"email",rotulo:"E-mail"},
+  {campo:"phone",tipo:"telefone",rotulo:"Telefone/WhatsApp"},
+  {campo:"taxId",tipo:"documento",rotulo:"CPF/CNPJ"}
+ ]);
+ if(invalido)fail(path,invalido);
  const{data:lead,error}=await context.supabase.rpc("create_crm_lead",{
   p_organization_id:context.organizationId,p_full_name:text(data,"fullName"),p_company_name:optional(data,"companyName"),
   p_email:optional(data,"email"),p_phone:optional(data,"phone"),p_tax_id:optional(data,"taxId"),p_source:optional(data,"source"),
@@ -55,14 +68,43 @@ export async function createCrmOpportunity(data:FormData){
  if(error)fail(path,error.message);const row=resultRow(opportunity as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/app/crm/oportunidades/${row?.id??""}`);
 }
 
+// Motivo e observação são dois campos, não um. Motivo é **escolhido** de uma
+// lista curada, porque alimenta contagem — "quantos perdemos por preço neste
+// trimestre" — e contagem sobre texto que cada pessoa escreve do seu jeito não
+// fecha. Observação é prosa daquele negócio, livre, e não entra em contagem
+// nenhuma.
 export async function moveCrmOpportunityStage(data:FormData){
  const id=text(data,"opportunityId");const context=await requireCapability("crm","update");
- const{error}=await context.supabase.rpc("move_crm_opportunity_stage",{p_opportunity_id:id,p_to_stage:text(data,"stage"),p_reason:optional(data,"reason")});
- if(error)fail(`/app/crm/oportunidades/${id}`,error.message);revalidatePath(`/app/crm/oportunidades/${id}`);revalidatePath("/app/crm");
+ const path=`/app/crm/oportunidades/${id}`;
+ const estagio=text(data,"stage");
+ const motivo=optional(data,"reason");
+
+ // Conferência no servidor, e não só no `required` do rádio. O que chega aqui
+ // é um POST, e um POST montado à mão gravaria qualquer texto em `lost_reason`
+ // — que é justamente a coluna que precisa ser contável. Guarda de tela protege
+ // a tela; esta protege o dado.
+ if(estagio==="LOST"){
+  const lista=await listaDoEscopo(context.supabase,context.organizationId,ESCOPOS.motivoDePerda);
+  if(lista.length===0)fail(path,"Nenhum motivo de perda cadastrado. Cadastre em Administração → Motivos de perda.");
+  if(!motivo||!pertenceALista(lista,motivo))fail(path,"Escolha um dos motivos de perda cadastrados.");
+ }
+
+ const{error}=await context.supabase.rpc("move_crm_opportunity_stage",{
+  p_opportunity_id:id,p_to_stage:estagio,p_reason:motivo,p_note:optional(data,"note")
+ });
+ if(error)fail(path,error.message);
+ revalidatePath(path);revalidatePath("/app/crm");
 }
 
 export async function createRelationshipClient(data:FormData){
  const context=await requireCapability("clientes","create");const path="/app/clientes/novo";
+ const invalido=checarCamposBR(data,[
+  {campo:"email",tipo:"email",rotulo:"E-mail"},
+  {campo:"phone",tipo:"telefone",rotulo:"Telefone"},
+  {campo:"taxId",tipo:"documento",rotulo:"CPF/CNPJ",campoTipoPessoa:"type"},
+  {campo:"postalCode",tipo:"cep",rotulo:"CEP"}
+ ]);
+ if(invalido)fail(path,invalido);
  const{data:client,error}=await context.supabase.from("clients").insert({
   organization_id:context.organizationId,type:text(data,"type")||"PERSON",legal_name:text(data,"legalName"),trade_name:optional(data,"tradeName"),
   tax_id:optional(data,"taxId"),email:optional(data,"email"),phone:optional(data,"phone"),status:"ACTIVE",address_line:optional(data,"addressLine"),
@@ -75,6 +117,13 @@ export async function createRelationshipClient(data:FormData){
 
 export async function updateRelationshipClient(data:FormData){
  const id=text(data,"clientId");const context=await requireCapability("clientes","update");const path=`/app/clientes/${id}`;
+ const invalido=checarCamposBR(data,[
+  {campo:"email",tipo:"email",rotulo:"E-mail"},
+  {campo:"phone",tipo:"telefone",rotulo:"Telefone"},
+  {campo:"taxId",tipo:"documento",rotulo:"CPF/CNPJ",campoTipoPessoa:"type"},
+  {campo:"postalCode",tipo:"cep",rotulo:"CEP"}
+ ]);
+ if(invalido)fail(path,invalido);
  const{error}=await context.supabase.from("clients").update({
   type:text(data,"type"),legal_name:text(data,"legalName"),trade_name:optional(data,"tradeName"),tax_id:optional(data,"taxId"),email:optional(data,"email"),phone:optional(data,"phone"),
   address_line:optional(data,"addressLine"),city:optional(data,"city"),state:optional(data,"state"),postal_code:optional(data,"postalCode"),notes:optional(data,"notes"),source:optional(data,"source"),

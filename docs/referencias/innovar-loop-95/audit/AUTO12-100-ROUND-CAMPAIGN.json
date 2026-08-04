@@ -1,0 +1,910 @@
+{
+  "generated_at_utc": "2026-07-22T23:15:31Z",
+  "rounds": [
+    {
+      "round": 1,
+      "domain": "postgres",
+      "name": "migration 0001",
+      "status": "PASS",
+      "detail": "0001_core.sql",
+      "evidence": "01-db/migrations/0001_core.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 2,
+      "domain": "postgres",
+      "name": "migration 0002",
+      "status": "PASS",
+      "detail": "0002_functions.sql",
+      "evidence": "01-db/migrations/0002_functions.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 3,
+      "domain": "postgres",
+      "name": "migration 0003",
+      "status": "PASS",
+      "detail": "0003_runtime_hardening.sql",
+      "evidence": "01-db/migrations/0003_runtime_hardening.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 4,
+      "domain": "postgres",
+      "name": "migration 0004",
+      "status": "PASS",
+      "detail": "0004_evidence_hardening.sql",
+      "evidence": "01-db/migrations/0004_evidence_hardening.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 5,
+      "domain": "postgres",
+      "name": "migration 0005",
+      "status": "PASS",
+      "detail": "0005_security_contract_hardening.sql",
+      "evidence": "01-db/migrations/0005_security_contract_hardening.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 6,
+      "domain": "postgres",
+      "name": "migration 0006",
+      "status": "PASS",
+      "detail": "0006_tenancy_and_function_signature_hardening.sql",
+      "evidence": "01-db/migrations/0006_tenancy_and_function_signature_hardening.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 7,
+      "domain": "postgres",
+      "name": "migration 0007",
+      "status": "PASS",
+      "detail": "0007_event_transport_execution.sql",
+      "evidence": "01-db/migrations/0007_event_transport_execution.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 8,
+      "domain": "postgres",
+      "name": "migration 0008",
+      "status": "PASS",
+      "detail": "0008_event_transport_security_and_retry_hardening.sql",
+      "evidence": "01-db/migrations/0008_event_transport_security_and_retry_hardening.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 9,
+      "domain": "postgres",
+      "name": "migration 0009",
+      "status": "PASS",
+      "detail": "0009_dlq_admin_runtime.sql",
+      "evidence": "01-db/migrations/0009_dlq_admin_runtime.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 10,
+      "domain": "postgres",
+      "name": "migration 0010",
+      "status": "PASS",
+      "detail": "0010_execution_evidence_ledger.sql",
+      "evidence": "01-db/migrations/0010_execution_evidence_ledger.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 11,
+      "domain": "postgres",
+      "name": "migration 0011",
+      "status": "PASS",
+      "detail": "0011_event_transport_operational_triggers.sql",
+      "evidence": "01-db/migrations/0011_event_transport_operational_triggers.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 12,
+      "domain": "postgres",
+      "name": "migration 0012",
+      "status": "PASS",
+      "detail": "0012_runtime_configuration_audit.sql",
+      "evidence": "01-db/migrations/0012_runtime_configuration_audit.sql",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 13,
+      "domain": "postgres",
+      "name": "sequence 0001-0012",
+      "status": "PASS",
+      "detail": "static contract satisfied",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 14,
+      "domain": "postgres",
+      "name": "gen_random_uuid referenced",
+      "status": "PASS",
+      "detail": "static contract satisfied",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 15,
+      "domain": "postgres",
+      "name": "RLS enabled",
+      "status": "PASS",
+      "detail": "static contract satisfied",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 16,
+      "domain": "postgres",
+      "name": "RLS forced",
+      "status": "PASS",
+      "detail": "static contract satisfied",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 17,
+      "domain": "postgres",
+      "name": "tenant setting",
+      "status": "PASS",
+      "detail": "static contract satisfied",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 18,
+      "domain": "postgres",
+      "name": "NOBYPASSRLS fixture",
+      "status": "PASS",
+      "detail": "static contract satisfied",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 19,
+      "domain": "postgres",
+      "name": "SKIP LOCKED",
+      "status": "PASS",
+      "detail": "static contract satisfied",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 20,
+      "domain": "postgres",
+      "name": "outbox trigger",
+      "status": "PASS",
+      "detail": "static contract satisfied",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 21,
+      "domain": "postgres",
+      "name": "audit immutability",
+      "status": "PASS",
+      "detail": "static contract satisfied",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 22,
+      "domain": "postgres",
+      "name": "adapter local tenant",
+      "status": "PASS",
+      "detail": "static contract satisfied",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:58Z"
+    },
+    {
+      "round": 23,
+      "domain": "postgres",
+      "name": "real PostgreSQL execution",
+      "status": "BLOCKED",
+      "detail": "POSTGRES_EVENT_TRANSPORT: BLOCKED - TEST_DATABASE_URL not set",
+      "evidence": "audit/AUTO12-POSTGRES-RUNTIME.txt",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 24,
+      "domain": "postgres",
+      "name": "adapter transaction",
+      "status": "PASS",
+      "detail": "token=with self.connect",
+      "evidence": "event_admin/postgres_store.py",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 25,
+      "domain": "postgres",
+      "name": "adapter tenant isolation",
+      "status": "PASS",
+      "detail": "token=organization_id",
+      "evidence": "event_admin/postgres_store.py",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 26,
+      "domain": "postgres",
+      "name": "adapter replay",
+      "status": "PASS",
+      "detail": "token=replay",
+      "evidence": "event_admin/postgres_store.py",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 27,
+      "domain": "postgres",
+      "name": "RLS policies",
+      "status": "PASS",
+      "detail": "token=CREATE POLICY",
+      "evidence": "01-db/rls/0001_rls.sql",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 28,
+      "domain": "postgres",
+      "name": "role bypass defense",
+      "status": "PASS",
+      "detail": "token=NOBYPASSRLS",
+      "evidence": "scripts/test_postgres_event_transport.py",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 29,
+      "domain": "postgres",
+      "name": "two tenant test",
+      "status": "PASS",
+      "detail": "token=tenant_a",
+      "evidence": "scripts/test_postgres_event_transport.py",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 30,
+      "domain": "postgres",
+      "name": "concurrent claim",
+      "status": "PASS",
+      "detail": "token=concurrent",
+      "evidence": "scripts/test_postgres_event_transport.py",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 31,
+      "domain": "redpanda",
+      "name": "async event contract",
+      "status": "PASS",
+      "detail": "verified",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 32,
+      "domain": "redpanda",
+      "name": "broker env",
+      "status": "PASS",
+      "detail": "verified",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 33,
+      "domain": "redpanda",
+      "name": "rpk health runbook",
+      "status": "PASS",
+      "detail": "verified",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 34,
+      "domain": "redpanda",
+      "name": "produce capability",
+      "status": "PASS",
+      "detail": "verified",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 35,
+      "domain": "redpanda",
+      "name": "consume capability",
+      "status": "PASS",
+      "detail": "verified",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 36,
+      "domain": "redpanda",
+      "name": "DLQ contract",
+      "status": "PASS",
+      "detail": "verified",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 37,
+      "domain": "redpanda",
+      "name": "retry contract",
+      "status": "PASS",
+      "detail": "verified",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 38,
+      "domain": "redpanda",
+      "name": "correlation id",
+      "status": "PASS",
+      "detail": "verified",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 39,
+      "domain": "redpanda",
+      "name": "idempotency",
+      "status": "PASS",
+      "detail": "verified",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 40,
+      "domain": "redpanda",
+      "name": "rpk available",
+      "status": "BLOCKED",
+      "detail": "unavailable/missing",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 41,
+      "domain": "iac",
+      "name": "helm static",
+      "status": "PASS",
+      "detail": "HELM_STATIC_VALIDATION: PASS",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 42,
+      "domain": "iac",
+      "name": "helm binary",
+      "status": "BLOCKED",
+      "detail": "helm unavailable",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 43,
+      "domain": "iac",
+      "name": "kubeconform binary",
+      "status": "BLOCKED",
+      "detail": "kubeconform unavailable",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 44,
+      "domain": "iac",
+      "name": "kubectl binary",
+      "status": "BLOCKED",
+      "detail": "kubectl unavailable",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 45,
+      "domain": "iac",
+      "name": "network targets",
+      "status": "BLOCKED",
+      "detail": "NETWORKPOLICY_TARGETS: BLOCKED - kubectl missing",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 46,
+      "domain": "iac",
+      "name": "manifests present",
+      "status": "PASS",
+      "detail": "static",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 47,
+      "domain": "iac",
+      "name": "deployment present",
+      "status": "PASS",
+      "detail": "static",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 48,
+      "domain": "iac",
+      "name": "service present",
+      "status": "PASS",
+      "detail": "static",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 49,
+      "domain": "iac",
+      "name": "networkpolicy present",
+      "status": "PASS",
+      "detail": "static",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 50,
+      "domain": "iac",
+      "name": "probes",
+      "status": "PASS",
+      "detail": "static",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 51,
+      "domain": "iac",
+      "name": "resources",
+      "status": "PASS",
+      "detail": "static",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 52,
+      "domain": "iac",
+      "name": "securityContext",
+      "status": "PASS",
+      "detail": "static",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 53,
+      "domain": "iac",
+      "name": "PDB",
+      "status": "PASS",
+      "detail": "static",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 54,
+      "domain": "iac",
+      "name": "HPA",
+      "status": "PASS",
+      "detail": "static",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 55,
+      "domain": "iac",
+      "name": "labels explicit",
+      "status": "PASS",
+      "detail": "static",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 56,
+      "domain": "xstate",
+      "name": "machine source",
+      "status": "PASS",
+      "detail": "checked",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 57,
+      "domain": "xstate",
+      "name": "package pins xstate",
+      "status": "PASS",
+      "detail": "checked",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 58,
+      "domain": "xstate",
+      "name": "test harness",
+      "status": "PASS",
+      "detail": "checked",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 59,
+      "domain": "xstate",
+      "name": "createActor",
+      "status": "PASS",
+      "detail": "checked",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 60,
+      "domain": "xstate",
+      "name": "official runtime installed",
+      "status": "BLOCKED",
+      "detail": "checked",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 61,
+      "domain": "xstate",
+      "name": "npm dependency resolution",
+      "status": "BLOCKED",
+      "detail": "node_modules/xstate unavailable; network installation not treated as evidence",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 62,
+      "domain": "xstate",
+      "name": "pending state",
+      "status": "PASS",
+      "detail": "pending",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 63,
+      "domain": "xstate",
+      "name": "leased state",
+      "status": "PASS",
+      "detail": "leased",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 64,
+      "domain": "xstate",
+      "name": "retry state",
+      "status": "PASS",
+      "detail": "retryWaiting",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 65,
+      "domain": "xstate",
+      "name": "dead letter state",
+      "status": "PASS",
+      "detail": "deadLetter",
+      "evidence": "",
+      "utc": "2026-07-22T23:14:59Z"
+    },
+    {
+      "round": 66,
+      "domain": "bdd",
+      "name": "global inventory",
+      "status": "PASS",
+      "detail": "{\"features\": 11, \"scenarios\": 152, \"binding_hints\": 29, \"unmapped_or_descriptive\": 123, \"method\": \"conservative lexical hint; not proof of executable binding\"}",
+      "evidence": "audit/AUTO12-GHERKIN.json",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 67,
+      "domain": "bdd",
+      "name": "object-lifecycle.feature",
+      "status": "PASS",
+      "detail": "3 scenarios",
+      "evidence": "04-bdd/features/object-lifecycle.feature",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 68,
+      "domain": "bdd",
+      "name": "events.feature",
+      "status": "PASS",
+      "detail": "14 scenarios",
+      "evidence": "04-bdd/features/events.feature",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 69,
+      "domain": "bdd",
+      "name": "event-transport-executable.feature",
+      "status": "PASS",
+      "detail": "4 scenarios",
+      "evidence": "04-bdd/features/event-transport-executable.feature",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 70,
+      "domain": "bdd",
+      "name": "execution-evidence.feature",
+      "status": "PASS",
+      "detail": "12 scenarios",
+      "evidence": "04-bdd/features/execution-evidence.feature",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 71,
+      "domain": "bdd",
+      "name": "metadata.feature",
+      "status": "PASS",
+      "detail": "21 scenarios",
+      "evidence": "04-bdd/features/metadata.feature",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 72,
+      "domain": "bdd",
+      "name": "concurrency.feature",
+      "status": "PASS",
+      "detail": "14 scenarios",
+      "evidence": "04-bdd/features/concurrency.feature",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 73,
+      "domain": "bdd",
+      "name": "tenancy.feature",
+      "status": "PASS",
+      "detail": "14 scenarios",
+      "evidence": "04-bdd/features/tenancy.feature",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 74,
+      "domain": "bdd",
+      "name": "cache.feature",
+      "status": "PASS",
+      "detail": "14 scenarios",
+      "evidence": "04-bdd/features/cache.feature",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 75,
+      "domain": "bdd",
+      "name": "sla.feature",
+      "status": "PASS",
+      "detail": "14 scenarios",
+      "evidence": "04-bdd/features/sla.feature",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 76,
+      "domain": "bdd",
+      "name": "idempotency.feature",
+      "status": "PASS",
+      "detail": "21 scenarios",
+      "evidence": "04-bdd/features/idempotency.feature",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 77,
+      "domain": "bdd",
+      "name": "workflow.feature",
+      "status": "PASS",
+      "detail": "21 scenarios",
+      "evidence": "04-bdd/features/workflow.feature",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 78,
+      "domain": "bdd",
+      "name": "binding registry",
+      "status": "PASS",
+      "detail": "created/verified",
+      "evidence": "04-bdd/BINDING-REGISTRY.yaml",
+      "utc": "2026-07-22T23:15:00Z"
+    },
+    {
+      "round": 79,
+      "domain": "bdd",
+      "name": "BDD local",
+      "status": "PASS",
+      "detail": "SDK_GENERATION: PASS 12\nSDK_GENERATION: PASS 12\ntest_canonical_environment_validation_passes (bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_canonical_environment_validation_passes) ... ok\ntest_invalid_pool_configuration_fails_closed (bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_invalid_pool_configuration_fails_closed) ... ok\ntest_postgres_gate_without_database_is_blocked (bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_postgres_gate_without_database_is_blocked) ... ok\ntest_sdk_generation_is_byte_deterministic (bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_sdk_generation_is_byte_deterministic) ... ok\n\n----------------------------------------------------------------------\nRan 4 tests in 3.656s\n\nOK",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:04Z"
+    },
+    {
+      "round": 80,
+      "domain": "bdd",
+      "name": "full tests",
+      "status": "PASS",
+      "detail": ".. ok\ntest_publisher_executes_against_http_broker_contract (test_event_transport_focus.Tests.test_publisher_executes_against_http_broker_contract) ... ok\ntest_sql_has_atomic_append_and_complete_inbox_lifecycle (test_event_transport_focus.Tests.test_sql_has_atomic_append_and_complete_inbox_lifecycle) ... ok\ntest_ci_executes_xstate_and_sdk_drift (test_evidence_campaign.EvidenceCampaignTests.test_ci_executes_xstate_and_sdk_drift) ... ok\ntest_event_transport_xstate_machine_exists (test_evidence_campaign.EvidenceCampaignTests.test_event_transport_xstate_machine_exists) ... ok\ntest_sdk_drift_gate_is_fail_closed (test_evidence_campaign.EvidenceCampaignTests.test_sdk_drift_gate_is_fail_closed) ... ok\n\n----------------------------------------------------------------------\nRan 70 tests in 7.841s\n\nOK",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:13Z"
+    },
+    {
+      "round": 81,
+      "domain": "contracts",
+      "name": "SDK generate",
+      "status": "PASS",
+      "detail": "SDK_GENERATION: PASS 12",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:14Z"
+    },
+    {
+      "round": 82,
+      "domain": "contracts",
+      "name": "SDK drift",
+      "status": "PASS",
+      "detail": "SDK_DRIFT_GATE: PASS generated dist matches committed dist",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:15Z"
+    },
+    {
+      "round": 83,
+      "domain": "contracts",
+      "name": "event compatibility",
+      "status": "PASS",
+      "detail": "EVENT_COMPATIBILITY: PASS",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:15Z"
+    },
+    {
+      "round": 84,
+      "domain": "contracts",
+      "name": "traceability",
+      "status": "PASS",
+      "detail": "TRACEABILITY_FACETS_CHECKED 36\nTRACEABILITY_MATRIX_RESULT: PASS",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:16Z"
+    },
+    {
+      "round": 85,
+      "domain": "contracts",
+      "name": "requirements",
+      "status": "PASS",
+      "detail": "REQUIREMENTS_CANONICAL 19\nREQUIREMENTS_MAPPED 19\nREQUIREMENT_TRACEABILITY_RESULT: PASS",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:16Z"
+    },
+    {
+      "round": 86,
+      "domain": "contracts",
+      "name": "env contract",
+      "status": "PASS",
+      "detail": "ENV_KEYS_VALIDATED 22\nENV_CONTRACT_RESULT: PASS",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:17Z"
+    },
+    {
+      "round": 87,
+      "domain": "contracts",
+      "name": "all validation",
+      "status": "PASS",
+      "detail": "vidence_campaign.EvidenceCampaignTests.test_sdk_drift_gate_is_fail_closed) ... ok\n\n----------------------------------------------------------------------\nRan 70 tests in 7.909s\n\nOK\n\n{\"features\": 11, \"scenarios\": 152, \"binding_hints\": 29, \"unmapped_or_descriptive\": 123, \"method\": \"conservative lexical hint; not proof of executable binding\"}\n\nGHERKIN_FEATURE_FILES 11\nGHERKIN_SCENARIOS_TOTAL 152\nGHERKIN_BINDING_HINTS 29\nGHERKIN_BOUND_EXECUTED_PASS 2\nGHERKIN_BOUND_BLOCKED_EXTERNAL 2\nGHERKIN_UNMAPPED_OR_DESCRIPTIVE 123\nGHERKIN_BOUND_FAILED 0\nVALIDATION_RESULT: PARTIAL\nBDD_GLOBAL_COVERAGE_INCOMPLETE",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 88,
+      "domain": "contracts",
+      "name": "OpenAPI/AsyncAPI source",
+      "status": "PASS",
+      "detail": "canonical files present",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 89,
+      "domain": "gameday",
+      "name": "RTO metric",
+      "status": "PASS",
+      "detail": "rto_ms",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 90,
+      "domain": "gameday",
+      "name": "P50 metric",
+      "status": "PASS",
+      "detail": "p50",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 91,
+      "domain": "gameday",
+      "name": "P95 metric",
+      "status": "PASS",
+      "detail": "p95",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 92,
+      "domain": "gameday",
+      "name": "loss metric",
+      "status": "PASS",
+      "detail": "loss",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 93,
+      "domain": "gameday",
+      "name": "duplicate metric",
+      "status": "PASS",
+      "detail": "duplicate",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 94,
+      "domain": "gameday",
+      "name": "backlog recovery",
+      "status": "PASS",
+      "detail": "backlog",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 95,
+      "domain": "gameday",
+      "name": "checksum",
+      "status": "PASS",
+      "detail": "SHA256",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 96,
+      "domain": "gameday",
+      "name": "blocked semantics",
+      "status": "PASS",
+      "detail": "exit 77",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 97,
+      "domain": "gameday",
+      "name": "distributed execution",
+      "status": "BLOCKED",
+      "detail": "GAMEDAY: BLOCKED KUBECONFIG required",
+      "evidence": "audit/AUTO12-GAMEDAY-RUNTIME.txt",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 98,
+      "domain": "load",
+      "name": "load execution",
+      "status": "BLOCKED",
+      "detail": "EVENT_ADMIN_URL unavailable",
+      "evidence": "audit/AUTO12-LOAD-RUNTIME.txt",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 99,
+      "domain": "audit",
+      "name": "independent gap audit",
+      "status": "PASS",
+      "detail": "all non-PASS statuses retained explicitly",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    },
+    {
+      "round": 100,
+      "domain": "campaign",
+      "name": "final classification",
+      "status": "PASS",
+      "detail": "PASS=89 BLOCKED=10 FAIL=0",
+      "evidence": "",
+      "utc": "2026-07-22T23:15:31Z"
+    }
+  ],
+  "counts": {
+    "PASS": 90,
+    "BLOCKED": 10,
+    "FAIL": 0
+  }
+}

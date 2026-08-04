@@ -1,0 +1,17 @@
+version: 1
+policy_id: INNOVAR-SUPPLY-CHAIN-v1
+github_actions:
+  require_commit_sha: true
+  require_explicit_permissions: true
+  forbid_pull_request_target: true
+dependencies:
+  require_lockfile_for_node_projects: true
+  require_npm_ci_after_lockfile_generation: true
+containers:
+  require_digest_before_protected_release: true
+  current_status: BLOCKED_EXTERNAL
+release:
+  require_sbom: true
+  require_signature: true
+  require_provenance: true
+  current_status: BLOCKED_EXTERNAL

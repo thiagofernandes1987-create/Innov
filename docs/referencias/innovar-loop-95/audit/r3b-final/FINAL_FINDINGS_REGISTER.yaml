@@ -1,0 +1,520 @@
+schema_version: UTA-R3B-findings-register-v1
+generated_from_freeze: db24c7f4498384970eafe9f24319728de3f2e77b20b0fef16bfd6ab3efd97db5
+findings:
+- final_finding_id: FFND-R3B-0001
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-001
+    title: Idempotência global permite colisão e exposição cross-tenant no runtime administrativo
+  - source_round: R3A
+    finding_id: PFND-0004
+    title: Idempotência de resolução DLQ pode colidir entre recursos distintos
+  title: Escopo de idempotência de DLQ continua sem identidade do recurso
+  severity: HIGH
+  priority: P0
+  category: SECURITY_AND_DATA_INTEGRITY
+  reconciliation_status: PARTIALLY_RESOLVED
+  current_condition: O isolamento por organização e operação removeu o vazamento cross-tenant, mas a mesma chave em dois dead_letter_id
+    retorna a resposta do primeiro recurso e não resolve o segundo.
+  final_outcome: PARTIAL
+  validation_ids:
+  - FVAL-R3B-0031
+  - FVAL-R3B-0008
+  residual_risk: Colisão lógica e resposta associada ao recurso errado dentro do mesmo tenant.
+  required_action: Incluir dead_letter_id e hash semântico do payload no escopo de idempotência em SQLite e PostgreSQL; criar
+    testes negativos por recurso.
+- final_finding_id: FFND-R3B-0002
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-002
+    title: Contexto de autenticação do runtime administrativo é falsificável por headers
+  - source_round: R3A
+    finding_id: PFND-0002
+    title: Assinatura de contexto administrativo não é vinculada à requisição
+  title: Contexto HMAC reduz falsificação direta, mas permanece reutilizável entre requisições
+  severity: HIGH
+  priority: P0
+  category: SECURITY
+  reconciliation_status: PARTIALLY_RESOLVED
+  current_condition: Headers sem assinatura são rejeitados, porém o HMAC cobre apenas organização, ator, scopes e timestamp.
+  final_outcome: PARTIAL
+  validation_ids:
+  - FVAL-R3B-0030
+  - FVAL-R3B-0008
+  residual_risk: Replay de contexto capturado dentro da janela de 300 segundos em método, rota ou corpo distintos.
+  required_action: Assinar versão canônica de method, normalized path/query, body hash, idempotency key, timestamp e nonce;
+    manter cache anti-replay e vínculo de audiência.
+- final_finding_id: FFND-R3B-0003
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-003
+    title: Runtime administrativo diverge do OpenAPI em idempotência, códigos e respostas
+  - source_round: R3A
+    finding_id: PFND-0003
+    title: Contrato OAuth2 e autenticação do runtime administrativo divergem
+  title: Contrato OAuth2 e runtime administrativo permanecem semanticamente divergentes
+  severity: HIGH
+  priority: P0
+  category: CONTRACTS_AND_SECURITY
+  reconciliation_status: PARTIALLY_RESOLVED
+  current_condition: Códigos e respostas locais foram alinhados, mas o OpenAPI publica OAuth2 enquanto o serviço só aceita
+    contexto HMAC de proxy.
+  final_outcome: PARTIAL
+  validation_ids:
+  - FVAL-R3B-0034
+  - FVAL-R3B-0013
+  - FVAL-R3B-0008
+  residual_risk: Clientes e implantações diretas podem assumir autenticação inexistente ou contornar a fronteira de confiança
+    esperada.
+  required_action: 'Escolher uma arquitetura canônica: validar JWT/OAuth2 no serviço ou modelar formalmente o trusted proxy
+    e seus headers assinados no contrato e testes.'
+- final_finding_id: FFND-R3B-0004
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-004
+    title: SDK apresenta drift semântico apesar do gate de cobertura por operationId
+  title: Drift semântico do SDK
+  severity: HIGH
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A correção está presente e a validação local correspondente foi reproduzida.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0012
+  - FVAL-R3B-0011
+  - FVAL-R3B-0013
+  residual_risk: Nenhum risco residual identificado no nível local executado.
+  required_action: Manter gate anti-regressão no CI.
+- final_finding_id: FFND-R3B-0005
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-005
+    title: Pipeline denominado geração de SDK produz apenas inventário de operações
+  title: Pipeline de geração do SDK
+  severity: MEDIUM
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A correção está presente e a validação local correspondente foi reproduzida.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0012
+  - FVAL-R3B-0011
+  residual_risk: Nenhum risco residual identificado no nível local executado.
+  required_action: Manter gate anti-regressão no CI.
+- final_finding_id: FFND-R3B-0006
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-006
+    title: Backoff do publisher não cresce com tentativas
+  title: Backoff do publisher
+  severity: HIGH
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A correção está presente e a validação local correspondente foi reproduzida.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0008
+  - FVAL-R3B-0009
+  residual_risk: Nenhum risco residual identificado no nível local executado.
+  required_action: Manter gate anti-regressão no CI.
+- final_finding_id: FFND-R3B-0007
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-007
+    title: Harness Docker Compose não é autocontido nem reproduzível
+  title: Harness Docker Compose permanece apenas parcialmente reproduzível
+  severity: HIGH
+  priority: P1
+  category: SUPPLY_CHAIN
+  reconciliation_status: PARTIALLY_RESOLVED
+  current_condition: Dockerfile/build local foi adicionado e defaults foram endurecidos, porém imagens e dependências não
+    estão fixadas de forma verificável.
+  final_outcome: PARTIAL
+  validation_ids:
+  - FVAL-R3B-0028
+  - FVAL-R3B-0029
+  - FVAL-R3B-0007
+  residual_risk: Build pode variar ou permanecer inexequível em ambiente limpo.
+  required_action: Gerar lockfiles confiáveis, fixar imagens por digest e executar build/compose em runner limpo.
+- final_finding_id: FFND-R3B-0008
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-008
+    title: Lockfiles verificados estão ausentes
+  - source_round: R3A
+    finding_id: PFND-0007
+    title: Dependências não possuem lockfiles verificados
+  title: Lockfiles verificados ausentes
+  severity: HIGH
+  priority: P0
+  category: SUPPLY_CHAIN
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  current_condition: Os arquivos package-lock e requirements lock com hashes não existem no material.
+  final_outcome: BLOCKED_EXTERNAL
+  validation_ids:
+  - FVAL-R3B-0028
+  residual_risk: Resolução transitiva não determinística e impossibilidade de reproduzir dependências oficiais.
+  required_action: Resolver dependências em registries confiáveis, revisar e congelar lockfiles; repetir npm ci e pip --require-hashes.
+- final_finding_id: FFND-R3B-0009
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-009
+    title: Imagens OCI não estão fixadas por digest
+  - source_round: R3A
+    finding_id: PFND-0008
+    title: Imagens OCI usam tags mutáveis ou placeholders
+  title: Imagens OCI não fixadas por digest
+  severity: HIGH
+  priority: P0
+  category: SUPPLY_CHAIN
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  current_condition: Tags mutáveis e placeholders continuam presentes em Compose, Kubernetes e workflow.
+  final_outcome: BLOCKED_EXTERNAL
+  validation_ids:
+  - FVAL-R3B-0029
+  residual_risk: Supply chain não reprodutível e risco de alteração upstream.
+  required_action: Resolver digests oficiais, atualizar referências, gerar SBOM, assinatura e provenance.
+- final_finding_id: FFND-R3B-0010
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-010
+    title: Isolamento RLS e migration 0013 não foram provados em PostgreSQL real
+  - source_round: R3A
+    finding_id: PFND-0006
+    title: RLS, migrations e concorrência PostgreSQL não foram executadas
+  title: RLS, migrations e concorrência PostgreSQL sem execução real
+  severity: CRITICAL
+  priority: P0
+  category: DATABASE_SECURITY
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  current_condition: Migrations 0013/0014 estão presentes, mas nenhuma execução PostgreSQL real foi fornecida.
+  final_outcome: BLOCKED_EXTERNAL
+  validation_ids:
+  - FVAL-R3B-0023
+  - FVAL-R3B-0027
+  residual_risk: Isolamento de tenant, locks, assinatura de funções e idempotência SQL permanecem não comprovados.
+  required_action: Executar banco efêmero/real com roles NOBYPASSRLS, matriz cross-tenant, pool reuse e concorrência.
+- final_finding_id: FFND-R3B-0011
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-011
+    title: Transporte Redpanda/Kafka permanece sem prova integrada
+  - source_round: R3A
+    finding_id: PFND-0009
+    title: Transporte Redpanda real permanece sem prova
+  title: Transporte Redpanda/Kafka sem prova integrada
+  severity: HIGH
+  priority: P1
+  category: EVENTING
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  current_condition: Broker e rpk não estão disponíveis.
+  final_outcome: BLOCKED_EXTERNAL
+  validation_ids:
+  - FVAL-R3B-0024
+  - FVAL-R3B-0027
+  residual_risk: Retry, deduplicação, ordering, replay e DLQ não estão provados no transporte real.
+  required_action: Executar producer/consumer, falhas, replay e dedupe em Redpanda versionado.
+- final_finding_id: FFND-R3B-0012
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-012
+    title: Helm/Kubernetes/NetworkPolicy permanecem sem prova oficial
+  - source_round: R3A
+    finding_id: PFND-0011
+    title: Kubernetes e NetworkPolicies não foram exercitados em cluster
+  title: Helm, Kubernetes e NetworkPolicy sem prova em cluster
+  severity: HIGH
+  priority: P1
+  category: INFRASTRUCTURE
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  current_condition: Validação Helm estática passa; kubectl/cluster não estão disponíveis.
+  final_outcome: BLOCKED_EXTERNAL
+  validation_ids:
+  - FVAL-R3B-0026
+  - FVAL-R3B-0027
+  residual_risk: Seletores, policies, probes e tráfego real podem divergir da análise estática.
+  required_action: Renderizar com Helm oficial/kubeconform e executar testes de tráfego permitido/negado no cluster.
+- final_finding_id: FFND-R3B-0013
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-013
+    title: Statecharts não foram executados no runtime oficial XState
+  - source_round: R3A
+    finding_id: PFND-0010
+    title: Statecharts não foram executados no runtime oficial XState
+  title: Statecharts sem execução no runtime oficial XState
+  severity: HIGH
+  priority: P1
+  category: STATE_MACHINES
+  reconciliation_status: BLOCKED_EXTERNAL_CONFIRMED
+  current_condition: Registro estático cobre cinco máquinas, mas o lockfile verificado do runtime XState está ausente.
+  final_outcome: BLOCKED_EXTERNAL
+  validation_ids:
+  - FVAL-R3B-0025
+  - FVAL-R3B-0019
+  residual_risk: Semântica real de guards, snapshots e migrações não foi confirmada pelo runtime oficial.
+  required_action: Resolver lockfile confiável e executar testes oficiais de máquinas e migração de snapshots.
+- final_finding_id: FFND-R3B-0014
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-014
+    title: 'Cobertura BDD executada é minoritária: 6 de 38 cenários'
+  title: Cobertura BDD executada permanece parcial
+  severity: HIGH
+  priority: P1
+  category: TEST_COVERAGE
+  reconciliation_status: PARTIALLY_RESOLVED
+  current_condition: O registro possui 38 comportamentos únicos; a camada BDD unitária reproduzida tem 16 testes, mas cenários
+    dependentes de infraestrutura continuam sem execução integral.
+  final_outcome: PARTIAL
+  validation_ids:
+  - FVAL-R3B-0010
+  - FVAL-R3B-0018
+  - FVAL-R3B-0023
+  - FVAL-R3B-0024
+  - FVAL-R3B-0026
+  residual_risk: Requisitos de integração e E2E permanecem sem evidência de ambiente.
+  required_action: Vincular e executar os cenários restantes nos ambientes PostgreSQL, broker e cluster.
+- final_finding_id: FFND-R3B-0015
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-015
+    title: Claim local_integration PARTIAL não possui registro explícito de execução local integrada
+  title: Claim de integração local sem evidência
+  severity: MEDIUM
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0017
+  - FVAL-R3B-0016
+  residual_risk: Nenhum risco residual além do limite do método de validação utilizado.
+  required_action: Manter testes e validadores como gates obrigatórios.
+- final_finding_id: FFND-R3B-0016
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-016
+    title: Política de ciclo de vida de artefatos é declarativa e não aplicada
+  title: Aplicação da política de ciclo de vida
+  severity: MEDIUM
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0005
+  - FVAL-R3B-0006
+  residual_risk: Nenhum risco residual além do limite do método de validação utilizado.
+  required_action: Manter testes e validadores como gates obrigatórios.
+- final_finding_id: FFND-R3B-0017
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-017
+    title: Gate de compatibilidade de eventos pode aprovar mudanças quebradoras aninhadas
+  title: Compatibilidade de eventos aninhada
+  severity: HIGH
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0015
+  residual_risk: Nenhum risco residual além do limite do método de validação utilizado.
+  required_action: Manter testes e validadores como gates obrigatórios.
+- final_finding_id: FFND-R3B-0018
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-018
+    title: SCI por capability é validado aritmeticamente, não quanto à força da evidência
+  title: Força de evidência nas métricas SCI
+  severity: MEDIUM
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0017
+  residual_risk: Nenhum risco residual além do limite do método de validação utilizado.
+  required_action: Manter testes e validadores como gates obrigatórios.
+- final_finding_id: FFND-R3B-0019
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-019
+    title: Defaults de desenvolvimento expõem serviços e credenciais fracas
+  title: Defaults de desenvolvimento inseguros
+  severity: MEDIUM
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0007
+  - FVAL-R3B-0008
+  residual_risk: Nenhum risco residual além do limite do método de validação utilizado.
+  required_action: Manter testes e validadores como gates obrigatórios.
+- final_finding_id: FFND-R3B-0020
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-020
+    title: Campanha de 100 controles mede presença e tokens como PASS, não maturidade
+  title: Campanha de 100 controles com falso PASS
+  severity: MEDIUM
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0017
+  residual_risk: Nenhum risco residual além do limite do método de validação utilizado.
+  required_action: Manter testes e validadores como gates obrigatórios.
+- final_finding_id: FFND-R3B-0021
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-021
+    title: Runtime em memória não inclui operation_scope na idempotência
+  title: operation_scope na idempotência em memória
+  severity: HIGH
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0008
+  residual_risk: Nenhum risco residual além do limite do método de validação utilizado.
+  required_action: Manter testes e validadores como gates obrigatórios.
+- final_finding_id: FFND-R3B-0022
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-022
+    title: Runtime HTTP não limita body e devolve detalhes brutos de exceção
+  title: Limite de body e sanitização de exceções HTTP
+  severity: MEDIUM
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0008
+  residual_risk: Nenhum risco residual além do limite do método de validação utilizado.
+  required_action: Manter testes e validadores como gates obrigatórios.
+- final_finding_id: FFND-R3B-0023
+  source_findings:
+  - source_round: R1
+    finding_id: FND-R1-023
+    title: Baseline e schemas atuais reutilizam os mesmos $id JSON Schema
+  title: Colisão de $id entre baseline e schemas atuais
+  severity: MEDIUM
+  priority: P2
+  category: ENGINEERING
+  reconciliation_status: RESOLVED_CONFIRMED
+  current_condition: A condição original não foi reproduzida no material atualizado e os gates associados passam.
+  final_outcome: CLOSED
+  validation_ids:
+  - FVAL-R3B-0015
+  residual_risk: Nenhum risco residual além do limite do método de validação utilizado.
+  required_action: Manter testes e validadores como gates obrigatórios.
+- final_finding_id: FFND-R3B-0024
+  source_findings:
+  - source_round: R3A
+    finding_id: PFND-0001
+    title: Material cego tecnicamente incompleto para os validadores que transporta
+  title: Incompletude do pacote cego R3A
+  severity: HIGH
+  priority: P2
+  category: AUDIT_PROCESS
+  reconciliation_status: SUPERSEDED_CONFIRMED
+  current_condition: O achado é válido para o material sanitizado R3A, mas não para o material atualizado integral usado pela
+    R3B, que contém os artefatos requeridos.
+  final_outcome: SUPERSEDED
+  validation_ids:
+  - FVAL-R3B-0003
+  - FVAL-R3B-0005
+  - FVAL-R3B-0006
+  residual_risk: Nenhum risco do produto; permanece como limitação histórica do desenho da auditoria cega.
+  required_action: Preservar o handoff PARTIAL e, em futuras R3A, transportar versões semanticamente sanitizadas dos manifests
+    e matrizes atuais.
+- final_finding_id: FFND-R3B-0025
+  source_findings:
+  - source_round: R3A
+    finding_id: PFND-0005
+    title: Orquestrador de validação omite gates críticos de integração
+  title: Orquestrador validate_all omite gates críticos e não representa o estado final
+  severity: HIGH
+  priority: P0
+  category: GOVERNANCE_AND_CI
+  reconciliation_status: NEW_FINDING
+  current_condition: validate_all retorna sucesso parcial e não chama PostgreSQL, Redpanda, XState, Kubernetes, remediation
+    register, release manifest nem SHA manifest.
+  final_outcome: OPEN
+  validation_ids:
+  - FVAL-R3B-0022
+  - FVAL-R3B-0021
+  - FVAL-R3B-0023
+  - FVAL-R3B-0024
+  - FVAL-R3B-0025
+  - FVAL-R3B-0026
+  residual_risk: Um pipeline pode aceitar o pacote apesar de falha local registrada ou ausência de integração crítica.
+  required_action: Transformar validate_round2/final validator em gate canônico único, incluir todos os controles e retornar
+    código não zero quando houver FAIL local.
+- final_finding_id: FFND-R3B-0026
+  source_findings:
+  - source_round: R3A
+    finding_id: PFND-0012
+    title: Estado global compartilhado entre instâncias do servidor administrativo
+  title: Estado do AdminHandler é global entre instâncias
+  severity: MEDIUM
+  priority: P1
+  category: RUNTIME_ISOLATION
+  reconciliation_status: NEW_FINDING
+  current_condition: Store, publisher, secret e body limit são atributos de classe; a segunda chamada serve sobrescreve o
+    estado usado pela primeira instância.
+  final_outcome: OPEN
+  validation_ids:
+  - FVAL-R3B-0032
+  residual_risk: Interferência entre servidores/testes e possível uso de tenant store ou segredo incorreto em implantação
+    multi-instância no mesmo processo.
+  required_action: Criar handler factory/subclasse por servidor ou injetar dependências na instância/request handler.
+- final_finding_id: FFND-R3B-0027
+  source_findings:
+  - source_round: R3A
+    finding_id: PFND-0013
+    title: Tópico do REST Proxy é interpolado sem validação local
+  title: Tópico do REST Proxy é interpolado sem validação ou encoding
+  severity: MEDIUM
+  priority: P1
+  category: INPUT_VALIDATION
+  reconciliation_status: NEW_FINDING
+  current_condition: O tópico é concatenado diretamente à URL. Prova direcionada construiu /topics/../admin?x=1.
+  final_outcome: OPEN
+  validation_ids:
+  - FVAL-R3B-0033
+  residual_risk: Alteração de rota/query no REST Proxy se o tópico armazenado não for confiável; incompatibilidade com nomes
+    fora do conjunto esperado.
+  required_action: Aplicar allowlist de tópico e percent-encoding de segmento; rejeitar slash, dot segments, query e fragment.
+- final_finding_id: FFND-R3B-0028
+  source_findings: []
+  title: Registro de remediação aponta para artefato SDK removido
+  severity: MEDIUM
+  priority: P0
+  category: TRACEABILITY
+  reconciliation_status: NEW_FINDING
+  current_condition: Duas entradas ainda referenciam 06-sdk/generated/openapi-operations.json, removido e substituído por
+    openapi-operation-inventory.json.
+  final_outcome: OPEN
+  validation_ids:
+  - FVAL-R3B-0021
+  residual_risk: O gate de remediação falha e a rastreabilidade documental não corresponde ao pacote.
+  required_action: Atualizar as duas referências, revisar evidências históricas e tornar validate_remediation_register obrigatório
+    no orquestrador canônico.

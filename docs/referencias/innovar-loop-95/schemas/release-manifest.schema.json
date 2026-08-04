@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://innovar.local/schemas/release-manifest.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "release_id",
+    "source_release",
+    "remediation_round",
+    "status",
+    "effective_at",
+    "package_root",
+    "canonical_blueprint",
+    "canonical_status",
+    "canonical_requirements",
+    "canonical_finding_source",
+    "current_validation",
+    "current_remediation_report",
+    "hash_manifest",
+    "claims",
+    "external_proof_required"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "release_id": {
+      "type": "string",
+      "pattern": "^INNOVAR-[A-Z0-9-]+$"
+    },
+    "source_release": {
+      "type": "string"
+    },
+    "remediation_round": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "status": {
+      "enum": [
+        "CANONICAL",
+        "DRAFT",
+        "SUPERSEDED"
+      ]
+    },
+    "effective_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "package_root": {
+      "type": "string"
+    },
+    "canonical_blueprint": {
+      "type": "string"
+    },
+    "canonical_status": {
+      "type": "string"
+    },
+    "canonical_requirements": {
+      "type": "string"
+    },
+    "canonical_finding_source": {
+      "type": "string"
+    },
+    "current_validation": {
+      "type": "string"
+    },
+    "current_remediation_report": {
+      "type": "string"
+    },
+    "hash_manifest": {
+      "type": "string"
+    },
+    "claims": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "static_validation",
+        "unit_execution",
+        "local_integration",
+        "external_integration",
+        "operational_proof"
+      ],
+      "properties": {
+        "static_validation": {
+          "enum": [
+            "PENDING",
+            "PASS",
+            "PARTIAL",
+            "FAIL",
+            "BLOCKED_EXTERNAL",
+            "NOT_CLAIMED"
+          ]
+        },
+        "unit_execution": {
+          "enum": [
+            "PENDING",
+            "PASS",
+            "PARTIAL",
+            "FAIL",
+            "BLOCKED_EXTERNAL",
+            "NOT_CLAIMED"
+          ]
+        },
+        "local_integration": {
+          "enum": [
+            "PENDING",
+            "PASS",
+            "PARTIAL",
+            "FAIL",
+            "BLOCKED_EXTERNAL",
+            "NOT_CLAIMED"
+          ]
+        },
+        "external_integration": {
+          "enum": [
+            "PENDING",
+            "PASS",
+            "PARTIAL",
+            "FAIL",
+            "BLOCKED_EXTERNAL",
+            "NOT_CLAIMED"
+          ]
+        },
+        "operational_proof": {
+          "enum": [
+            "PENDING",
+            "PASS",
+            "PARTIAL",
+            "FAIL",
+            "BLOCKED_EXTERNAL",
+            "NOT_CLAIMED"
+          ]
+        }
+      }
+    },
+    "external_proof_required": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    }
+  }
+}

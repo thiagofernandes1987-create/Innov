@@ -1,0 +1,148 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Timesheets"
+      - generic: Timesheets
+    - menu:
+      - button "Timesheets":
+        - generic: Timesheets
+      - button "To Validate":
+        - generic: To Validate
+      - button "Reporting":
+        - generic: Reporting
+      - menuitem "Configuration"
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- button "Add a Line"
+- generic: My Timesheets
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - searchbox "Search..." [active]
+  - button ""
+- navigation:
+  - button "Grid View":
+    - generic: 
+  - button "List View":
+    - generic: 
+  - button "Calendar View":
+    - generic: 
+  - button "Kanban View":
+    - generic: 
+  - button "Pivot View":
+    - generic: 
+  - button "Graph View":
+    - generic: 
+- main:
+  - generic "Hours worked in July":
+    - generic: "0"
+    - text: Hours
+    - generic: worked
+  - generic "Hours billable in July Click to filter":
+    - generic: "0"
+    - text: Hours
+    - generic: billable
+  - button "Today"
+  - button "Previous":
+    - img "Previous": 
+  - button "Week "
+  - button "Next":
+    - img "Next": 
+  - generic: Sun, Jul 26
+  - generic: Mon, Jul 27
+  - generic: Tue, Jul 28
+  - generic: Wed, Jul 29
+  - generic: Thu, Jul 30
+  - generic: Fri, Jul 31
+  - generic: Sat, Aug 1
+  - generic: Time Spent
+  - link "Teste":
+    - /url: /odoo/project.project/1
+  - generic: "|"
+  - link "Executivo":
+    - /url: /odoo/project.task/2
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - link "Teste":
+    - /url: /odoo/project.project/1
+  - generic: "|"
+  - link "fgdgd":
+    - /url: /odoo/project.task/6
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - link "Internal":
+    - /url: /odoo/project.project/2
+  - generic: "|"
+  - link "Time Off":
+    - /url: /odoo/project.task/5
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - link "Internal":
+    - /url: /odoo/project.project/2
+  - generic: "|"
+  - link "Meeting":
+    - /url: /odoo/project.task/4
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - link "Internal":
+    - /url: /odoo/project.project/2
+  - generic: "|"
+  - link "Training":
+    - /url: /odoo/project.task/3
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 0h
+  - generic: 
+  - text: Add a line
+  - generic: 0h
+- paragraph: Press esc to exit full screen

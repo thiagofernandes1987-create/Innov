@@ -1,0 +1,21 @@
+slos:
+  core_api:
+    availability_target: 99.9
+    latency_p95_ms: 500
+    error_rate_target_percent: 1.0
+    measurement_window_days: 30
+  command_processing:
+    latency_p95_ms: 800
+    duplicate_effect_target: 0
+  event_delivery:
+    outbox_lag_p95_seconds: 30
+    terminal_dlq_rate_target_percent: 0.1
+  tenant_isolation:
+    cross_tenant_read_target: 0
+    cross_tenant_write_target: 0
+  recovery:
+    rpo_minutes: 15
+    rto_minutes: 120
+notes:
+  - Targets are architecture acceptance targets, not measured production results.
+  - Production readiness requires telemetry evidence for the declared window.

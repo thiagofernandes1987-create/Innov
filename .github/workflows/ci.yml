@@ -29,10 +29,26 @@ jobs:
         run: |
           set -o pipefail
           node scripts/validate-documentation.mjs 2>&1 | tee documentation-validation.txt
+      - name: Validate auditable persona contracts
+        run: |
+          set -o pipefail
+          node scripts/validate-personas-audit.mjs 2>&1 | tee personas-audit-validation.txt
       - name: Validate engineering vaccines
         run: |
           set -o pipefail
           node scripts/validate-vaccines.mjs 2>&1 | tee vaccines-validation.txt
+      - name: Validate extension function qualification
+        run: |
+          set -o pipefail
+          node scripts/validate-extension-functions.mjs 2>&1 | tee extension-functions-validation.txt
+      - name: Validate operational QA guards
+        run: |
+          set -o pipefail
+          node scripts/validate-operational-qa-guards.mjs 2>&1 | tee operational-qa-validation.txt
+      - name: Validate flexible commercial workflows
+        run: |
+          set -o pipefail
+          node scripts/validate-flexible-commercial-workflows.mjs 2>&1 | tee flexible-workflows-validation.txt
       - name: Validate Supabase migration ledger
         run: |
           set -o pipefail
@@ -60,7 +76,11 @@ jobs:
           name: structural-validation
           path: |
             documentation-validation.txt
+            personas-audit-validation.txt
             vaccines-validation.txt
+            extension-functions-validation.txt
+            operational-qa-validation.txt
+            flexible-workflows-validation.txt
             migrations-validation.txt
             stage17-validation.txt
             stage18-validation.txt
@@ -77,13 +97,15 @@ jobs:
             supabase/migrations/20260720*.sql
             supabase/migrations/20260721*.sql
             supabase/migrations/20260722*.sql
+            supabase/migrations/20260728*.sql
+            supabase/migrations/20260729*.sql
           if-no-files-found: warn
           retention-days: 7
 
   quality:
     needs: preflight
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
@@ -109,6 +131,26 @@ jobs:
         run: pnpm install --no-frozen-lockfile --reporter=append-only
       - name: Validate engineering vaccines
         run: pnpm validate:vaccines
+      - name: Validate canonical documentation
+        run: pnpm validate:docs
+      - name: Validate server actions exports (VACINA-047)
+        run: pnpm validate:server-actions
+      - name: Validate PostgREST embeds (VACINA-052)
+        run: pnpm validate:postgrest-embeds
+      - name: Validate module keys against app_modules (VACINA-053)
+        run: pnpm validate:module-keys
+      - name: Validate code map against the code
+        run: pnpm validate:code-map
+      - name: Validate migrations against the applied ledger (VACINA-057)
+        run: pnpm validate:migrations-applied
+      - name: Validate auditable persona contracts
+        run: pnpm validate:personas-audit
+      - name: Validate extension function qualification
+        run: pnpm validate:extension-functions
+      - name: Validate operational QA guards
+        run: pnpm validate:operational-qa
+      - name: Validate flexible commercial workflows
+        run: pnpm validate:flexible-workflows
       - name: Validate Stage 9 structure
         run: pnpm validate:stage9
       - name: Validate Stage 12 structure
@@ -133,6 +175,24 @@ jobs:
         run: pnpm validate:stage19
       - name: Validate Stage 20 production readiness
         run: pnpm validate:stage20
+      - name: Validate execution inventory
+        run: pnpm validate:inventory
+      - name: Validate Object Runtime invariants
+        run: pnpm validate:object-runtime
+      - name: Validate pipeline invariants
+        run: pnpm validate:pipeline
+      - name: Validate module menu destinations
+        run: pnpm validate:menus
+      - name: Schedule dependency database tests
+        run: pnpm test:db:planejamento
+      - name: Pipeline database tests
+        run: pnpm test:db:pipeline
+      - name: Operational event and notification database tests
+        run: pnpm test:db:operations
+      - name: Budget composition and approval database tests
+        run: pnpm test:db:budgets
+      - name: Commercial documents database tests
+        run: pnpm test:db:commercial-documents
       - name: Lint
         run: |
           set -o pipefail

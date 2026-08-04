@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.innovar.app/commands/publish-object.command.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "object_definition_id",
+    "expected_version",
+    "schema_hash"
+  ],
+  "properties": {
+    "object_definition_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "expected_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "schema_hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

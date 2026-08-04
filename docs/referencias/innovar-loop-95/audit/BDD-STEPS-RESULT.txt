@@ -1,0 +1,8 @@
+test_given_open_dlq_when_replay_then_exactly_one_effect (test_event_transport_steps.Steps.test_given_open_dlq_when_replay_then_exactly_one_effect) ... ok
+test_given_replayed_item_when_resolved_then_closed (test_event_transport_steps.Steps.test_given_replayed_item_when_resolved_then_closed) ... ok
+test_given_tenant_a_dlq_when_tenant_b_lists_then_hidden (test_event_transport_steps.Steps.test_given_tenant_a_dlq_when_tenant_b_lists_then_hidden) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 1.520s
+
+OK

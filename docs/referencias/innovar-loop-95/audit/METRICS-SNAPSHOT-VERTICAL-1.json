@@ -1,0 +1,21 @@
+{
+  "snapshot_version": "vertical-1",
+  "date": "2026-07-22",
+  "capability": "object_definitions",
+  "sci_percent": 77.2,
+  "portfolio_sci": "NOT_CALCULATED",
+  "eei_legacy_percent": 59.3,
+  "validator_exit_code": 0,
+  "tests_total": 25,
+  "test_failures": 0,
+  "typescript_compile_exit_code": 0,
+  "gherkin_scenarios_descriptive_only": 136,
+  "capabilities_itemized_for_sci": 1,
+  "regression_detected": false,
+  "limitations": [
+    "No PostgreSQL execution",
+    "No BDD step definitions",
+    "No integrated HTTP runtime",
+    "No broker or Kubernetes execution"
+  ]
+}

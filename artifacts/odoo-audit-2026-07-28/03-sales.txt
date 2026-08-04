@@ -1,0 +1,129 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Sales"
+      - generic: Sales
+    - menu:
+      - button "Orders":
+        - generic: Orders
+      - button "To Invoice":
+        - generic: To Invoice
+      - button "Products":
+        - generic: Products
+      - button "Reporting":
+        - generic: Reporting
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- button "New"
+- generic: Quotations
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - listitem "search":
+      - button " ":
+        - generic: 
+        - generic: 
+      - generic "My Quotations"
+      - button "Remove": 
+    - searchbox "Search..." [active]
+  - button ""
+- search:
+  - navigation "Pager":
+    - generic: 1-1
+    - text: / 1
+    - button "Previous" [disabled]:
+      - generic: 
+    - button "Next" [disabled]:
+      - generic: 
+- navigation:
+  - button "List View":
+    - generic: 
+  - button "Kanban View":
+    - generic: 
+  - button "Map View":
+    - generic: 
+  - button "Calendar View":
+    - generic: 
+  - button "Pivot View":
+    - generic: 
+  - button "Graph View":
+    - generic: 
+  - button "Activity View":
+    - generic: 
+- main:
+  - table:
+    - rowgroup:
+      - row "Number  Creation Date  Customer  Salesperson  Activities Total  Status  ":
+        - columnheader:
+          - checkbox
+        - columnheader "Number ":
+          - generic: Number
+          - generic: 
+        - columnheader "Creation Date ":
+          - generic: Creation Date
+          - generic: 
+        - columnheader "Customer ":
+          - generic: Customer
+          - generic: 
+        - columnheader "Salesperson ":
+          - generic: Salesperson
+          - generic: 
+        - columnheader "Activities":
+          - generic: Activities
+          - text: 
+        - columnheader "Total ":
+          - generic: Total
+          - generic: 
+        - columnheader "Status ":
+          - generic: Status
+          - generic: 
+        - columnheader "":
+          - button "":
+            - generic: 
+    - rowgroup:
+      - row "S00001 Jul 26, 8:50 PM Innovar Innovar Construções e Reformas, Thiago Fernandes da silva Show activities R$ 0.00 Quotation":
+        - cell:
+          - checkbox
+        - cell "S00001"
+        - cell "Jul 26, 8:50 PM"
+        - cell "Innovar"
+        - cell "Innovar Construções e Reformas, Thiago Fernandes da silva":
+          - generic: Innovar Construções e Reformas, Thiago Fernandes da silva
+        - cell "Show activities":
+          - button "Show activities":
+            - img: 
+        - cell "R$ 0.00":
+          - generic: R$ 0.00
+        - cell "Quotation":
+          - generic: Quotation
+        - cell
+    - rowgroup:
+      - row "R$ 0.00":
+        - cell
+        - cell "R$ 0.00":
+          - generic: R$ 0.00
+        - cell
+- paragraph: Press esc to exit full screen

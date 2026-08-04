@@ -107,8 +107,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: updateError.message }, { status: 500 });
   }
 
+  // A guarda de monotonicidade decide **se** o evento vale: webhook atrasado ou
+  // fora de ordem não regride o envelope. O que muda de estado — signatário e
+  // negócio — fica todo dentro dela.
   if (applyStatus && payload.signerEmail) {
-    await admin
+    const { error: signerError } = await admin
       .from("signature_signers")
       .update({
         status: nextStatus === "COMPLETED" ? "COMPLETED" : nextStatus,
@@ -117,41 +120,30 @@ export async function POST(request: Request) {
       })
       .eq("envelope_id", envelope.id)
       .eq("email", payload.signerEmail);
-  }
 
-  if (applyStatus && nextStatus === "COMPLETED" && envelope.contract_version_id) {
-    const { data: version } = await admin
-      .from("contract_versions")
-      .select("contract_id")
-      .eq("id", envelope.contract_version_id)
-      .maybeSingle();
-    if (version) {
-      await admin.from("contract_versions").update({ status: "SIGNED" }).eq("id", envelope.contract_version_id);
-      await admin.from("contracts").update({ status: "SIGNED" }).eq("id", version.contract_id);
+    if (signerError) {
+      return NextResponse.json({ error: signerError.message }, { status: 500 });
     }
   }
 
-  if (applyStatus && nextStatus === "COMPLETED" && envelope.amendment_version_id) {
-    const { data: version } = await admin
-      .from("amendment_versions")
-      .select("amendment_id")
-      .eq("id", envelope.amendment_version_id)
-      .maybeSingle();
-    if (version) {
-      const { data: amendment } = await admin
-        .from("amendments")
-        .select("contract_id, value_delta")
-        .eq("id", version.amendment_id)
-        .maybeSingle();
-      await admin.from("amendment_versions").update({ status: "SIGNED" }).eq("id", envelope.amendment_version_id);
-      await admin.from("amendments").update({ status: "SIGNED" }).eq("id", version.amendment_id);
-      if (amendment) {
-        await admin.rpc("apply_signed_amendment", { p_amendment_id: version.amendment_id });
-      }
+  if (applyStatus && nextStatus === "COMPLETED") {
+    // Contrato, versão, aditivo e o reflexo financeiro do aditivo mudam juntos
+    // ou não mudam: a RPC faz os quatro numa transação só. Antes eram quatro
+    // updates soltos, e uma falha no meio deixava contrato assinado com aditivo
+    // pendente.
+    const { error: completionError } = await admin.rpc("complete_signature_business_state", {
+      p_envelope_id: envelope.id
+    });
+
+    if (completionError) {
+      return NextResponse.json(
+        { error: "A assinatura foi recebida, mas o estado do contrato não pôde ser concluído." },
+        { status: 500 }
+      );
     }
   }
 
-  await admin.from("audit_events").insert({
+  const { error: auditError } = await admin.from("audit_events").insert({
     organization_id: envelope.organization_id,
     event_type: "signature.webhook.processed",
     resource_type: "SIGNATURE_ENVELOPE",
@@ -166,6 +158,10 @@ export async function POST(request: Request) {
       payload_hash: payloadHash
     }
   });
+
+  if (auditError) {
+    return NextResponse.json({ error: auditError.message }, { status: 500 });
+  }
 
   return NextResponse.json({
     data: { idempotent: false, applied: applyStatus, status: applyStatus ? nextStatus : envelope.status }

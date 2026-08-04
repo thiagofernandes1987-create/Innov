@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "scope": "LOCAL_HTTP_CONTROLLED_BROKER_NOT_REDPANDA",
+  "rto_observed_ms": 2.944,
+  "total_duration_ms": 15.493,
+  "messages_published": 1,
+  "messages_consumed": 1,
+  "duplicate_effects": 0,
+  "lost_messages": 0,
+  "failure_injection": [
+    "broker_unavailable_observed"
+  ],
+  "postgres_executed": false,
+  "redpanda_executed": false,
+  "helm_executed": false
+}

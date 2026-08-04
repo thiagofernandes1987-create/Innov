@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: innovar-execution-evidence
+  labels:
+    app.kubernetes.io/name: innovar
+    app.kubernetes.io/component: evidence
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 86400
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: innovar
+        app.kubernetes.io/component: evidence
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+      - name: evidence
+        image: ghcr.io/innovar/execution-evidence:sha256-required
+        args: ["python3", "scripts/validate_all.py"]
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities: {drop: ["ALL"]}
+        resources:
+          requests: {cpu: 100m, memory: 128Mi}
+          limits: {cpu: 500m, memory: 512Mi}
+        volumeMounts:
+        - {name: evidence, mountPath: /evidence}
+        - {name: tmp, mountPath: /tmp}
+      volumes:
+      - {name: evidence, emptyDir: {}}
+      - {name: tmp, emptyDir: {}}

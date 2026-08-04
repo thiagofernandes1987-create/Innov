@@ -1,0 +1,586 @@
+{
+  "schemaVersion": 1,
+  "updatedAt": "2026-08-02T21:00:00Z",
+  "reference": {
+    "visualSpec": "docs/REFERENCIA-VISUAL-CANONICA-2026.md",
+    "captureProtocol": "docs/QA-VISUAL-POR-CAPTURAS.md",
+    "campaignIssue": 32
+  },
+  "allowedStatuses": [
+    "pendente",
+    "em_correcao",
+    "aguardando_preview",
+    "em_validacao_persona",
+    "reprovado",
+    "aprovado"
+  ],
+  "requiredViewports": [
+    "1920x1080",
+    "1366x768",
+    "390x844"
+  ],
+  "requiredThemes": [
+    "claro",
+    "escuro"
+  ],
+  "modules": [
+    {
+      "key": "dashboard",
+      "name": "Início / Aplicativos",
+      "route": "/app",
+      "persona": "SUPER_ADMIN",
+      "status": "em_correcao",
+      "iterations": 0,
+      "referenceSurface": "launcher",
+      "acceptance": [
+        "grade de aplicativos conforme referência",
+        "micro-resumos operacionais reais",
+        "busca global utilizável",
+        "categorias e personalização funcionais",
+        "sem sobreposição ou overflow"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-027",
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "crm",
+      "name": "CRM e Vendas",
+      "route": "/app/crm",
+      "persona": "VENDEDOR",
+      "status": "aprovado",
+      "iterations": 3,
+      "referenceSurface": "internal-crm",
+      "acceptance": [
+        "lead, oportunidade e pipeline funcionais",
+        "menus Vendas, Pipeline, Relatórios e Configuração",
+        "busca com filtros do domínio",
+        "Kanban e painel de atividades conforme referência",
+        "nenhum UUID ou erro técnico exposto"
+      ],
+      "resolvedProblems": [
+        "Contraste do tema claro: 78 reprovações WCAG AA na casca, por cor amostrada da referência escura gravada como hex fixo (VACINA-043)",
+        "Sobreposição na barra superior: 614px de conteúdo em faixa de 440px, com nome do módulo e menu por cima da busca",
+        "Transbordo horizontal de 982px em 390px, por grade de faixa única sem minmax(0,1fr) (VACINA-044)",
+        "Valor do KPI invisível no escuro: --navy sobre a superfície escura dava 1,03:1",
+        "25 alvos de toque abaixo de 44px; cartão do kanban só clicável no título",
+        "Tela inicial do módulo abria página de índice em vez do funil, contrariando crm-001 a crm-020 do atlas",
+        "Busca da barra desligada em /app/crm por lista de rota escrita à mão"
+      ],
+      "approvedCaptures": [
+        "crm-390x844-claro.png",
+        "crm-390x844-escuro.png",
+        "crm-1366x768-claro.png",
+        "crm-1366x768-escuro.png",
+        "crm-1920x1080-claro.png",
+        "crm-1920x1080-escuro.png"
+      ],
+      "runtimeLogsReviewed": true,
+      "browserConsoleReviewed": true,
+      "vaccines": [
+        "VACINA-042",
+        "VACINA-043",
+        "VACINA-044"
+      ],
+      "evidence": {
+        "referenciaAtlas": "docs/referencias/atlas-odoo/crm-001.jpg a crm-027.jpg",
+        "contraste": {
+          "claro": 1,
+          "escuro": 0,
+          "observacao": "a única reprovação restante é a marca IN, 2,87:1, com o texto INNOVAR ao lado"
+        },
+        "alvosAbaixoDe44px": {
+          "390": 1,
+          "1366": 0,
+          "1920": 0
+        },
+        "transbordoHorizontal": "nenhum nos três breakpoints",
+        "consoleDoNavegador": "nenhum erro ou aviso",
+        "funcionalVerificado": [
+          "funil abre como tela inicial do módulo",
+          "busca com faceta filtra 3 cartões para 1",
+          "clique na base do cartão navega para o detalhe",
+          "seguidores múltiplos: bloco com contagem e ação de deixar de seguir"
+        ]
+      }
+    },
+    {
+      "key": "clientes",
+      "name": "Clientes",
+      "route": "/app/clientes",
+      "persona": "VENDEDOR",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "cadastro e edição funcionais",
+        "visão 360 legível",
+        "busca por nome, contato, telefone, e-mail, cidade e bairro",
+        "atividades e contatos utilizáveis",
+        "formatação e contraste corretos"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "obras",
+      "name": "Obras",
+      "route": "/app/obras",
+      "persona": "GESTOR_DE_OBRAS",
+      "status": "em_correcao",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "cadastro direto de obra e projeto",
+        "navegação contextual legível",
+        "visão geral, EAP, cronograma, tarefas, diário, documentos e equipes",
+        "sem estados 200 com falha funcional",
+        "sem abas brancas no tema escuro"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-040",
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "planejamento",
+      "name": "Planejamento",
+      "route": "/app/planejamento",
+      "persona": "PLANEJADOR",
+      "status": "em_correcao",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "criar projeto sem proposta ou orçamento",
+        "implantar obra em andamento",
+        "EAP, Gantt, marcos, tarefas e calendários funcionais",
+        "equipes e recursos consultáveis e alocáveis",
+        "sem PGRST200"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-028",
+        "VACINA-040",
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "tarefas",
+      "name": "Tarefas",
+      "route": "/app/tarefas",
+      "persona": "PLANEJADOR",
+      "status": "em_correcao",
+      "iterations": 0,
+      "referenceSurface": "internal-kanban",
+      "acceptance": [
+        "Kanban, lista e calendário funcionais",
+        "responsáveis e prioridades carregados",
+        "contraste correto em todas as colunas",
+        "sem overflow global",
+        "sem PGRST200"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "diario",
+      "name": "Diário de Obras",
+      "route": "/app/diario",
+      "persona": "GESTOR_DE_OBRAS",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "registro diário funcional",
+        "ocorrências, evidências e responsáveis",
+        "filtros por obra, data, equipe e situação",
+        "captura e anexos funcionais",
+        "timeline legível"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "equipes",
+      "name": "Equipes",
+      "route": "/app/equipes",
+      "persona": "GESTOR_DE_OBRAS",
+      "status": "em_correcao",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "cadastro de equipe, pessoa, recurso e equipamento",
+        "alocação e disponibilidade",
+        "ação primária visível",
+        "histograma e conflitos",
+        "sem PGRST200"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-028",
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "orcamentos",
+      "name": "Orçamentos",
+      "route": "/app/orcamentos",
+      "persona": "ORCAMENTISTA",
+      "status": "em_correcao",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "composição e formação de preço funcionais",
+        "resumo financeiro não cobre conteúdo",
+        "moeda e percentuais em pt-BR",
+        "ROI e payback protegidos contra denominador zero",
+        "desconto e alçada funcionais"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-037",
+        "VACINA-041",
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "propostas",
+      "name": "Propostas",
+      "route": "/app/propostas",
+      "persona": "VENDEDOR",
+      "status": "em_correcao",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "proposta por valor fixo",
+        "proposta baseada em orçamento calculado",
+        "upload de PDF sem exceder Server Action",
+        "desconto e aprovação",
+        "envio e continuidade para contrato/projeto"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-040",
+        "VACINA-041",
+        "VACINA-042",
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "contratos",
+      "name": "Contratos",
+      "route": "/app/contratos",
+      "persona": "JURIDICO",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "criação, versão e vigência",
+        "vínculos com proposta e projeto",
+        "documentos e assinatura",
+        "menus e busca funcionais",
+        "valores formatados"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "aditivos",
+      "name": "Aditivos",
+      "route": "/app/aditivos",
+      "persona": "JURIDICO",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "alteração de valor, prazo e escopo",
+        "encadeamento com contrato",
+        "aprovações e versões",
+        "sem corte de menu",
+        "valores e datas formatados"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-030",
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "assinaturas",
+      "name": "Assinaturas",
+      "route": "/app/assinaturas",
+      "persona": "JURIDICO",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "envelope, signatários e evidências",
+        "contraste de avisos",
+        "fluxo de assinatura funcional",
+        "estados claros",
+        "sem mensagem do provedor exposta"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-031",
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "documentos",
+      "name": "Documentos",
+      "route": "/app/documentos",
+      "persona": "GESTOR_DE_OBRAS",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "upload, versão, busca e download",
+        "permissões e visibilidade",
+        "filtros por tipo, obra, cliente e data",
+        "armazenamento e recentes no launcher",
+        "sem overflow"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "qualidade",
+      "name": "Qualidade",
+      "route": "/app/qualidade",
+      "persona": "QUALIDADE",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "inspeções, formulários e não conformidades",
+        "indicadores e relatórios",
+        "busca e filtros",
+        "estados e contrastes",
+        "ações de correção funcionais"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "compras",
+      "name": "Compras e Suprimentos",
+      "route": "/app/compras",
+      "persona": "COMPRADOR",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "solicitação, cotação, aprovação, pedido e recebimento",
+        "fornecedores e calendário de entregas",
+        "tabelas e filtros",
+        "valores formatados",
+        "menus internos completos"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "estoque",
+      "name": "Estoque",
+      "route": "/app/estoque",
+      "persona": "ALMOXARIFE",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "entradas, saídas, transferências e inventários",
+        "saldo e rastreabilidade",
+        "busca e filtros",
+        "sem valores crus",
+        "fluxos concorrentes protegidos"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-036",
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "financeiro",
+      "name": "Financeiro Operacional",
+      "route": "/app/financeiro",
+      "persona": "FINANCEIRO",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "contas, parcelas, medições e liquidações",
+        "fluxo de caixa e calendário",
+        "valores pt-BR",
+        "filtros e relatórios",
+        "permissões de dados sensíveis"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "sac",
+      "name": "Pós-venda e SAC",
+      "route": "/app/ocorrencias",
+      "persona": "ATENDIMENTO",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "abertura, classificação, SLA e mensagens",
+        "anexos e visibilidade do cliente",
+        "busca e filtros",
+        "painel de atividades",
+        "portal do cliente coerente"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "relatorios",
+      "name": "Relatórios e Indicadores",
+      "route": "/app/relatorios",
+      "persona": "DIRETORIA",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "painéis executivos e filtros",
+        "dados rastreáveis e exportação",
+        "gráficos legíveis",
+        "comparações e períodos",
+        "nenhum relatório fictício"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "auditoria",
+      "name": "Auditoria",
+      "route": "/app/auditoria",
+      "persona": "AUDITOR",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "eventos consultáveis",
+        "filtros e exportação",
+        "dados imutáveis e rastreáveis",
+        "contraste e tabela responsiva",
+        "sem exposição indevida"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-043"
+      ]
+    },
+    {
+      "key": "administracao",
+      "name": "Administração",
+      "route": "/app/administracao",
+      "persona": "SUPER_ADMIN",
+      "status": "pendente",
+      "iterations": 0,
+      "referenceSurface": "internal",
+      "acceptance": [
+        "aplicativos, perfis, usuários e permissões",
+        "menus e configurações",
+        "ações de risco confirmadas",
+        "busca e filtros",
+        "sem inconsistência persona-papel"
+      ],
+      "resolvedProblems": [],
+      "approvedCaptures": [],
+      "runtimeLogsReviewed": false,
+      "browserConsoleReviewed": false,
+      "vaccines": [
+        "VACINA-022",
+        "VACINA-043"
+      ]
+    }
+  ]
+}

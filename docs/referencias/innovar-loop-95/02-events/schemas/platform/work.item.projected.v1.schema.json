@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.innovar.app/events/work.item.projected.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "work_item_id",
+    "source_resource_id",
+    "source_kind",
+    "source_state_version",
+    "title"
+  ],
+  "properties": {
+    "work_item_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "source_resource_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "source_kind": {
+      "type": "string",
+      "enum": [
+        "TASK",
+        "ACTIVITY",
+        "APPROVAL",
+        "APPOINTMENT",
+        "ALERT"
+      ]
+    },
+    "source_state_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 240
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "generated_at": "2026-07-22T13:48:59.195041+00:00",
+  "canonical_blueprint": "INNOVAR_PLATFORM_BLUEPRINT_EXECUTAVEL.md",
+  "canonical_source_count": 1,
+  "artifact_count": 133,
+  "artifact_counts_by_area": {
+    "00-decisions": 10,
+    "01-api": 2,
+    "01-db": 8,
+    "02-commands": 4,
+    "02-events": 9,
+    "03-statecharts": 6,
+    "04-bdd": 10,
+    "05-config": 3,
+    "05-infra": 13,
+    "06-adapters": 3,
+    "06-sdk": 8,
+    "07-adrs": 10,
+    "audit": 33,
+    "tests": 4,
+    "traceability": 2,
+    "reference_runtime": 2
+  },
+  "gherkin_feature_files": 9,
+  "gherkin_scenarios_descriptive": 136,
+  "automated_test_files": 2,
+  "current_coverage_values_found": [
+    "59,3"
+  ],
+  "conflicting_current_coverage_values": 0,
+  "sci_status": "NOT_CALCULATED",
+  "eei_legacy_percent": 59.3,
+  "canonical_blueprint_sha256": "f1ddd3c62e3acbbd44b677257c82cc5c2acf1079a79323700db6e3ce851dc379"
+}

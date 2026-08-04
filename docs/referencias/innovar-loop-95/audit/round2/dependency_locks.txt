@@ -1,0 +1,2 @@
+DEPENDENCY_LOCK_RESULT: BLOCKED_EXTERNAL
+MISSING_VERIFIED_LOCKFILES 06-sdk/typescript/package-lock.json,tools/xstate-runtime/package-lock.json,requirements-ci.lock

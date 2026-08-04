@@ -11,7 +11,7 @@ export default async function QualityResponseDetail({params}:{params:Promise<{id
   const{data:response,error}=await context.supabase.from("quality_form_responses").select("*").eq("id",id).eq("organization_id",context.organizationId).single();if(error||!response)notFound();
   const[{data:assignment},{data:version},{data:answers}]=await Promise.all([
     context.supabase.from("quality_form_assignments").select("title,instructions").eq("id",response.assignment_id).single(),
-    context.supabase.from("quality_form_versions").select("schema_json,version_number,quality_form_templates(title,kind)").eq("id",response.template_version_id).single(),
+    context.supabase.from("quality_form_versions").select("schema_json,version_number,quality_form_templates!quality_form_versions_template_id_fkey(title,kind)").eq("id",response.template_version_id).single(),
     context.supabase.from("quality_form_answers").select("*").eq("response_id",id).order("created_at")
   ]);if(!version)notFound();
   const schema=parseQualityFormSchema(version.schema_json);const byKey=new Map((answers??[]).map(answer=>[answer.field_key,answer]));const template=relationFrom<QualityTemplateSummary>(version,"quality_form_templates");

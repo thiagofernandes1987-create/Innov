@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
 import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 
 const managementRoles = [
   "SUPER_ADMIN",
@@ -46,33 +47,6 @@ function bool(formData: FormData, name: string) {
 
 function fail(path: string, message: string): never {
   redirect(`${path}${path.includes("?") ? "&" : "?"}error=${encodeURIComponent(message)}`);
-}
-
-export async function createProjectFromContract(formData: FormData) {
-  const { supabase } = await requireOrganizationContext(managementRoles);
-  const contractId = text(formData, "contractId");
-  const code = text(formData, "code");
-  const name = text(formData, "name");
-  const plannedStart = text(formData, "plannedStart");
-  const plannedEnd = text(formData, "plannedEnd");
-
-  if (!contractId || !code || !name || !plannedStart || !plannedEnd) {
-    fail("/app/obras/novo", "Preencha contrato, código, nome e período planejado.");
-  }
-
-  const { data, error } = await supabase.rpc("create_project_from_contract", {
-    p_contract_id: contractId,
-    p_code: code,
-    p_name: name,
-    p_planned_start: plannedStart,
-    p_planned_end: plannedEnd,
-    p_address_line: optionalText(formData, "addressLine"),
-    p_city: optionalText(formData, "city"),
-    p_state: optionalText(formData, "state")
-  });
-
-  if (error || !data) fail("/app/obras/novo", error?.message ?? "Não foi possível criar a obra.");
-  redirect(`/app/obras/${data}`);
 }
 
 export async function releaseProjectToClient(formData: FormData) {
@@ -156,22 +130,6 @@ export async function moveTask(formData: FormData) {
   revalidatePath(`/app/obras/${projectId}/tarefas`);
   revalidatePath(`/app/obras/${projectId}/cronograma`);
   revalidatePath("/cliente/obras");
-}
-
-export async function createDependency(formData: FormData) {
-  const projectId = text(formData, "projectId");
-  const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
-  const { error } = await supabase.from("task_dependencies").insert({
-    organization_id: organizationId,
-    project_id: projectId,
-    predecessor_task_id: text(formData, "predecessorTaskId"),
-    successor_task_id: text(formData, "successorTaskId"),
-    dependency_type: text(formData, "dependencyType") || "FS",
-    lag_days: optionalNumber(formData, "lagDays") ?? 0,
-    created_by: userId
-  });
-  if (error) fail(`/app/obras/${projectId}/cronograma`, error.message);
-  revalidatePath(`/app/obras/${projectId}/cronograma`);
 }
 
 export async function createMilestone(formData: FormData) {
@@ -383,9 +341,12 @@ export async function decideDailyLog(formData: FormData) {
 
 export async function uploadProjectDocument(formData: FormData) {
   const projectId = text(formData, "projectId");
+  const globalUpload = text(formData, "returnPath") === "/app/documentos";
+  const errorPath = globalUpload ? "/app/documentos/novo" : `/app/obras/${projectId}/documentos`;
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) fail(`/app/obras/${projectId}/documentos`, "Selecione um arquivo.");
-  if (file.size > 50 * 1024 * 1024) fail(`/app/obras/${projectId}/documentos`, "O arquivo excede 50 MB.");
+  if (!projectId) fail(errorPath, "Selecione a obra do documento.");
+  if (!(file instanceof File) || file.size === 0) fail(errorPath, "Selecione um arquivo.");
+  if (file.size > 50 * 1024 * 1024) fail(errorPath, "O arquivo excede 50 MB.");
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
   const code = text(formData, "code").toUpperCase();
@@ -412,8 +373,11 @@ export async function uploadProjectDocument(formData: FormData) {
       category: text(formData, "category"),
       created_by: userId
     }).select("id").single();
-    if (error || !data) fail(`/app/obras/${projectId}/documentos`, error?.message ?? "Falha ao criar documento.");
+    if (error || !data) fail(errorPath, error?.message ?? "Falha ao criar documento.");
     documentId = data.id;
+    // Só depois de o documento existir: disciplina digitada e abandonada não
+    // vira vocabulário da empresa.
+    await registrarValorUsado(supabase, organizationId, ESCOPOS.disciplina, text(formData, "discipline"));
   }
 
   const { count } = await supabase
@@ -437,7 +401,9 @@ export async function uploadProjectDocument(formData: FormData) {
       policy: { allowedMimeTypes: null, maxBytes: 50 * 1024 * 1024, requireContentSignature: false }
     });
   } catch (error) {
-    fail(`/app/obras/${projectId}/documentos`, fileSecurityMessage(error, { maxBytesLabel: "50 MB" }));
+    // `errorPath` porque o envio passou a existir também fora da obra; a
+    // varredura antimalware da auditoria continua valendo nos dois caminhos.
+    fail(errorPath, fileSecurityMessage(error, { maxBytesLabel: "50 MB" }));
   }
 
   const { error } = await supabase.from("project_document_versions").insert({
@@ -455,9 +421,11 @@ export async function uploadProjectDocument(formData: FormData) {
   });
   if (error) {
     await supabase.storage.from("project-documents").remove([storagePath]);
-    fail(`/app/obras/${projectId}/documentos`, error.message);
+    fail(errorPath, error.message);
   }
   revalidatePath(`/app/obras/${projectId}/documentos`);
+  revalidatePath("/app/documentos");
+  if (globalUpload) redirect("/app/documentos");
 }
 
 export async function releaseProjectDocument(formData: FormData) {

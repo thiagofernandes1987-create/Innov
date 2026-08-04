@@ -1,9 +1,17 @@
 import { defineConfig } from "vitest/config";
+import { fileURLToPath } from "node:url";
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL(".", import.meta.url)),
+      "server-only": fileURLToPath(new URL("./tests/apoio/server-only.ts", import.meta.url))
+    }
+  },
   test: {
     environment: "node",
-    include: ["**/*.test.ts"],
+    include: ["**/*.test.{ts,tsx}"],
+    exclude: ["node_modules/**", "docs/referencias/**"],
     coverage: {
       reporter: ["text", "json-summary"]
     }

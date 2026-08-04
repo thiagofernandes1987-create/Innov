@@ -1,0 +1,43 @@
+version: 2
+policy: every-machine-source-must-be-registered
+machines:
+  approval:
+    source: 03-statecharts/xstate/approval.machine.ts
+    runtime_id: approval.v1
+    current_version: 1
+    migrations: []
+    persistence: NOT_PROVEN
+    unknown_version_policy: stop_and_alert
+    snapshot_schema: approval.snapshot.v1
+  event-transport:
+    source: 03-statecharts/xstate/event-transport.machine.ts
+    runtime_id: eventTransport.v1
+    current_version: 1
+    migrations: []
+    persistence: SPECIFIED
+    unknown_version_policy: stop_and_alert
+    snapshot_schema: event-transport.snapshot.v1
+  metadata.object-definition:
+    source: 03-statecharts/xstate/object-definition.machine.ts
+    runtime_id: object-definition.v1
+    current_version: 1
+    migrations: []
+    persistence: SPECIFIED
+    unknown_version_policy: stop_and_alert
+    snapshot_schema: object-definition.snapshot.v1
+  sla:
+    source: 03-statecharts/xstate/sla.machine.ts
+    runtime_id: sla.v1
+    current_version: 1
+    migrations: []
+    persistence: NOT_PROVEN
+    unknown_version_policy: stop_and_alert
+    snapshot_schema: sla.snapshot.v1
+  generic-workflow:
+    source: 03-statecharts/xstate/workflow.machine.ts
+    runtime_id: genericWorkflow.v1
+    current_version: 1
+    migrations: []
+    persistence: NOT_PROVEN
+    unknown_version_policy: stop_and_alert
+    snapshot_schema: workflow.snapshot.v1

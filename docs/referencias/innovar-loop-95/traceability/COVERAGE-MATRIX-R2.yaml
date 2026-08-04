@@ -1,0 +1,75 @@
+release_id: INNOVAR-AUTO12-R2
+measurement_model: evidence-state-only
+portfolio_score:
+  status: NOT_CALCULATED
+  value_percent: null
+  reason: No complete capability-by-facet inventory with versioned weights and evidence exists for the full platform. A percentage
+    would be subjective.
+target_95:
+  status: NOT_EVALUABLE
+  reason: A target percentage cannot be evaluated while the portfolio score is NOT_CALCULATED.
+dimensions:
+- dimension: product_vision
+  state: STATICALLY_VALIDATED
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: logical_architecture
+  state: STATICALLY_VALIDATED
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: capability_decomposition
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: physical_architecture
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: executable_data_model
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: api_contracts
+  state: STATICALLY_VALIDATED
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: event_contracts
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: executable_statecharts
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: formal_validation
+  state: STATICALLY_VALIDATED
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: concurrency
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: idempotency
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: cache_invalidation
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: infrastructure_as_code
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: executable_acceptance_tests
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: implementable_sdk
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.
+- dimension: operational_runbooks
+  state: PARTIAL
+  evidence: audit/round2/ROUND2-VALIDATION-SUMMARY.json
+  remaining_gap: See remediation/REMEDIATION-REGISTER.yaml and remediation/EXTERNAL-DEPENDENCIES.md.

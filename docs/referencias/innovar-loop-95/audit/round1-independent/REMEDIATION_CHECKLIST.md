@@ -1,0 +1,130 @@
+# INNOVAR EXECUTABLE SPEC AUTO12
+## Checklist de Remediação — Base da Rodada 2
+
+Legenda: `☐ OPEN` · `☑ CORRIGIDO` · `◐ PARCIAL/EXTERNO` · `☒ NÃO APLICÁVEL`
+
+## P0
+- ☐ **AUD-CAN-001 — STATUS.md canônico permanece no ciclo AUTO6**
+  - Classe: `LOCAL`
+  - Validação: Validador deve falhar quando STATUS, manifesto, nome do pacote e auditoria corrente divergirem.
+- ☐ **AUD-INT-001 — SHA256SUMS.txt não representa o pacote entregue**
+  - Classe: `LOCAL`
+  - Validação: sha256sum -c SHA256SUMS.txt deve retornar 0 e a contagem deve cobrir todos os arquivos, exceto o próprio manifesto.
+- ☐ **AUD-EVD-002 — Campanha de 100 rodadas mistura presença estática com execução**
+  - Classe: `LOCAL`
+  - Validação: Nenhum PASS deve existir sem evidence_path válido e execution_level explícito; token presence não pode receber status de runtime.
+- ☐ **AUD-BDD-002 — Tags de requisitos BDD não correspondem ao catálogo canônico**
+  - Classe: `LOCAL`
+  - Validação: Todo @REQ-* deve existir no catálogo e todo requisito aplicável deve apontar para pelo menos um cenário não duplicado.
+- ☐ **AUD-SQL-001 — Dois modelos de contexto tenant coexistem nas RLS**
+  - Classe: `LOCAL_PARTIAL`
+  - Validação: Executar migrations em PostgreSQL e provar leitura/escrita A, negação B e fail-closed sem contexto.
+  - Dependência externa: PostgreSQL real necessário para prova final.
+- ☐ **AUD-SQL-002 — PostgreSQL, concorrência e RLS permanecem não executados**
+  - Classe: `EXTERNAL`
+  - Validação: Execução deve gerar logs, versões, hashes e resultados em PostgreSQL 16.x.
+  - Dependência externa: Requer PostgreSQL acessível e credenciais de teste.
+
+## P1
+- ☐ **AUD-CAN-002 — Narrativa do README não identifica inequivocamente o ciclo AUTO12**
+  - Classe: `LOCAL`
+  - Validação: Uma única fonte CANONICAL por domínio; documentos históricos não podem ser referenciados como CURRENT.
+- ☐ **AUD-EVD-001 — Arquivos de evidência vazios coexistem com referências formais**
+  - Classe: `LOCAL`
+  - Validação: Gate deve rejeitar evidence_path inexistente, vazio ou sem status/command/tool_versions/hash.
+- ☐ **AUD-TST-001 — pytest não consegue coletar a suíte completa**
+  - Classe: `LOCAL`
+  - Validação: pytest -q deve concluir com resultado explícito, sem INTERNALERROR.
+- ☐ **AUD-BDD-001 — Cenários BDD são massivamente duplicados**
+  - Classe: `LOCAL`
+  - Validação: Gate de duplicidade semântica deve impedir cenários com passos idênticos e IDs diferentes sem justificativa.
+- ☐ **AUD-BDD-003 — Binding registry não contém mapeamento por cenário**
+  - Classe: `LOCAL`
+  - Validação: Validador deve falhar para cenário sem registro ou para evidence_path inválido.
+- ☐ **AUD-API-002 — Catálogo de erros não está fechado no contrato OpenAPI**
+  - Classe: `LOCAL`
+  - Validação: Todo código usado deve existir uma vez, com status idêntico em todas as superfícies.
+- ☐ **AUD-EVT-001 — AsyncAPI 3 possui cobertura operacional incompleta**
+  - Classe: `LOCAL_PARTIAL`
+  - Validação: Validação AsyncAPI 3 + gate que exige ao menos uma operação por canal aplicável.
+- ☐ **AUD-EVT-002 — Broker Redpanda não foi executado**
+  - Classe: `EXTERNAL`
+  - Validação: Evidence deve incluir broker version, topic config, offsets, payload hashes e resultados.
+  - Dependência externa: Requer Redpanda/Kafka runtime e engine de containers ou cluster.
+- ☐ **AUD-STATE-001 — Registry de migração cobre apenas 2 das 5 máquinas**
+  - Classe: `LOCAL`
+  - Validação: Gate deve comparar arquivos *.machine.ts com registry e rejeitar omissões.
+- ☐ **AUD-SDK-001 — SDK não possui lockfile e usa instalação não determinística no CI**
+  - Classe: `LOCAL_PARTIAL`
+  - Validação: npm ci, tsc --noEmit e testes devem passar sem alterar lockfile.
+  - Dependência externa: Geração inicial do lockfile requer resolução confiável de pacotes.
+- ☐ **AUD-CI-001 — Workflow não aplica hardening mínimo de supply chain**
+  - Classe: `LOCAL_PARTIAL`
+  - Validação: Validador estático + execução real em GitHub Actions.
+  - Dependência externa: SHAs atuais, OIDC e branch protection exigem GitHub/repositórios oficiais.
+- ☐ **AUD-SUP-001 — Imagens de container não estão fixadas por digest**
+  - Classe: `LOCAL_PARTIAL`
+  - Validação: Gate deve rejeitar imagens sem @sha256 e verificar assinatura/provenance.
+  - Dependência externa: Digests/assinaturas exigem registry OCI e OIDC/chaves.
+- ☐ **AUD-INF-001 — Helm foi validado apenas por validador estático próprio**
+  - Classe: `EXTERNAL`
+  - Validação: Salvar rendered.yaml, versões das ferramentas, eventos do cluster e smoke tests.
+  - Dependência externa: Requer Helm, kubeconform e Kubernetes.
+- ☐ **AUD-OBS-001 — SLOs são metas declaradas, não medições operacionais**
+  - Classe: `EXTERNAL`
+  - Validação: Relatórios devem conter janela, população, percentis, erros e fonte de métricas.
+  - Dependência externa: Requer serviços implantados e backend de observabilidade.
+- ☐ **AUD-MET-001 — Matriz de métricas contém contradição de escopo**
+  - Classe: `LOCAL`
+  - Validação: Validador deve contar capabilities elegíveis e confrontar a justificativa.
+- ☐ **AUD-DOC-001 — Consolidado interpreta AsyncAPI 3 como publish/subscribe de canal**
+  - Classe: `LOCAL`
+  - Validação: Tabela deve mostrar action send/receive e operationId por channel.
+- ☐ **AUD-LOCK-001 — Lockfile raiz é vazio e não protege dependências**
+  - Classe: `LOCAL_PARTIAL`
+  - Validação: Instalações clean devem ser byte-reprodutíveis e não modificar locks.
+  - Dependência externa: Resolução inicial depende dos registries confiáveis.
+- ☐ **AUD-RUN-001 — Evidências de execução externa permanecem BLOCKED e precisam de runbook único**
+  - Classe: `EXTERNAL`
+  - Validação: Cada gate externo deve gerar registro assinado/hasheado com PASS/FAIL/BLOCKED.
+  - Dependência externa: Requer ambientes externos correspondentes.
+
+## P2
+- ☐ **AUD-HYG-001 — Artefatos de cache/temporários foram incluídos no ZIP**
+  - Classe: `LOCAL`
+  - Validação: Inventário final deve conter zero .pyc, zero __pycache__ e zero .tmp.
+- ☐ **AUD-TST-002 — Validador rotula JSON comum como JSON_SCHEMA_OK**
+  - Classe: `LOCAL`
+  - Validação: Relatório deve distinguir parse, meta-schema e instance validation.
+- ☐ **AUD-API-001 — Operação de leitura individual de record não existe**
+  - Classe: `LOCAL_PARTIAL`
+  - Validação: Lint OpenAPI + contract test + teste contra API implantada.
+  - Dependência externa: Semântica final e prova de runtime dependem do serviço.
+- ☐ **AUD-API-003 — Respostas 401/403 são inconsistentes entre operações protegidas**
+  - Classe: `LOCAL`
+  - Validação: Validador deve exigir 401/403 em toda operação com OAuth2, salvo exceção justificada.
+- ☐ **AUD-STATE-002 — Execução oficial XState não foi reproduzida nesta auditoria**
+  - Classe: `EXTERNAL`
+  - Validação: npm ci && npm test com log e hash do lockfile.
+  - Dependência externa: Requer acesso ao registry npm ou cache confiável.
+- ☐ **AUD-SDK-002 — SDK compila e drift gate passa, mas cobertura herda lacunas do OpenAPI**
+  - Classe: `LOCAL_PARTIAL`
+  - Validação: Cobertura SDK deve ser 1:1 com operationId e exemplos de sucesso/erro.
+- ☐ **AUD-INF-002 — Não existe Terraform/OpenTofu**
+  - Classe: `LOCAL_PARTIAL`
+  - Validação: tofu fmt/validate/plan e policy checks; apply somente em ambiente autorizado.
+  - Dependência externa: Provider, credenciais, backend e decisões de cloud são externos.
+- ☐ **AUD-SEC-001 — Threat model formal não está presente**
+  - Classe: `LOCAL`
+  - Validação: Checklist STRIDE/abuse cases deve apontar controles, owners e evidências.
+- ☐ **AUD-DATA-001 — Governança de dados pessoais não está formalizada como inventário executável**
+  - Classe: `LOCAL_PARTIAL`
+  - Validação: Gate documental e testes de retenção; aprovação jurídica/organizacional externa.
+  - Dependência externa: Base legal, responsáveis e processo operacional dependem da organização.
+- ☐ **AUD-MET-002 — Matriz contém chave YAML textual acidental**
+  - Classe: `LOCAL`
+  - Validação: Validação de schema deve falhar para qualquer campo não previsto.
+- ☐ **AUD-DOC-002 — Consolidado não é inventário completo para auditoria**
+  - Classe: `LOCAL`
+  - Validação: Manifesto de auditoria deve cobrir 355/355 com hash e classificação.
+

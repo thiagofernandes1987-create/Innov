@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: innovar
+      POSTGRES_USER: innovar
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set for the
+        development profile}
+    ports:
+    - 127.0.0.1:5432:5432
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -U innovar -d innovar
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    volumes:
+    - pgdata:/var/lib/postgresql/data
+    profiles:
+    - development
+  redis:
+    image: redis:7-alpine
+    command:
+    - redis-server
+    - --appendonly
+    - 'yes'
+    ports:
+    - 127.0.0.1:6379:6379
+    healthcheck:
+      test:
+      - CMD
+      - redis-cli
+      - ping
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    profiles:
+    - development
+  api:
+    env_file: ../../05-config/.env.example
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+    - 127.0.0.1:3000:3000
+    build:
+      context: ../..
+      dockerfile: 05-infra/docker/Dockerfile.event-admin
+    environment:
+      TRUSTED_PROXY_CONTEXT_SECRET: ${TRUSTED_PROXY_CONTEXT_SECRET:?TRUSTED_PROXY_CONTEXT_SECRET
+        must be set}
+      PORT: '3000'
+    profiles:
+    - development
+  worker:
+    image: innovar/event-publisher:BLOCKED_UNTIL_DIGEST_AND_LOCK
+    command:
+    - python
+    - -m
+    - event_publisher
+    env_file: ../../05-config/.env.example
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    profiles:
+    - external-worker
+volumes:
+  pgdata: null

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: innovar-platform
+description: Innovar Platform core API and workers
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

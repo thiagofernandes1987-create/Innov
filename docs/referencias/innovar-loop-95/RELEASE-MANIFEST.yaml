@@ -1,0 +1,29 @@
+schema_version: 1
+release_id: INNOVAR-AUTO12-R3B-FOLLOWUP
+source_release: INNOVAR-AUTO12-R2-UTA-R2
+remediation_round: 3
+status: DRAFT
+effective_at: '2026-07-23T10:45:00Z'
+package_root: innovar_loop_95
+canonical_blueprint: INNOVAR_PLATFORM_BLUEPRINT_EXECUTAVEL.md
+canonical_status: STATUS.md
+canonical_requirements: 00-decisions/requirements.yaml
+canonical_finding_source: audit/r3b-final/FINAL_FINDING_LEDGER_R3B.yaml
+current_validation: audit/post-r3b/VALIDATION-SUMMARY.json
+current_remediation_report: remediation/r3b-followup/POST-R3B-REMEDIATION-REPORT.md
+hash_manifest: SHA256SUMS.txt
+claims:
+  static_validation: PASS
+  unit_execution: PASS
+  local_integration: PARTIAL
+  external_integration: BLOCKED_EXTERNAL
+  operational_proof: NOT_CLAIMED
+external_proof_required:
+- Trusted Python and npm registries for verified lockfiles
+- OCI registries for immutable image digests, SBOM, signature and provenance
+- PostgreSQL 16 execution of migrations 0001-0015 with two NOBYPASSRLS roles and pool-isolation tests
+- Redpanda/Kafka broker with replay, deduplication and REST Proxy validation
+- Official XState runtime after verified lock resolution
+- Helm, kubeconform, kubectl and a Kubernetes test cluster
+- GitHub protected workflow, environments and OIDC
+- Operational telemetry, load, RTO/RPO, backup/restore and game-day evidence

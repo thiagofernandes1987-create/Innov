@@ -1,0 +1,132 @@
+[
+ {
+  "arquivo": "01-mensagens-notifica-es-studio-e-usu-rio-campo-de-escolha-de-tema-deveri.png",
+  "comentario": "Mensagens, Notificações, studio e usuário, campo de escolha de tema deveria ficar aqui",
+  "modulo": "administracao"
+ },
+ {
+  "arquivo": "02-tela-login-usu-rio.png",
+  "comentario": "tela login usuário",
+  "modulo": "autenticacao"
+ },
+ {
+  "arquivo": "03-tela-login.png",
+  "comentario": "tela login",
+  "modulo": "autenticacao"
+ },
+ {
+  "arquivo": "04-card-cliente.png",
+  "comentario": "card cliente",
+  "modulo": "clientes"
+ },
+ {
+  "arquivo": "05-nosso-pipe-line-cliente.png",
+  "comentario": "nosso pipe line cliente",
+  "modulo": "clientes"
+ },
+ {
+  "arquivo": "06-adicionar-etapas-ao-pipeline.png",
+  "comentario": "adicionar etapas ao pipeline",
+  "modulo": "crm"
+ },
+ {
+  "arquivo": "07-busca-com-filtro-crm.png",
+  "comentario": "busca com filtro crm",
+  "modulo": "crm"
+ },
+ {
+  "arquivo": "08-cards-crm.png",
+  "comentario": "cards crm",
+  "modulo": "crm"
+ },
+ {
+  "arquivo": "09-criar-e-editar-etapas-pipeline-depois-voce-movimenta-segurando-e-arras.png",
+  "comentario": "Criar e editar etapas pipeline, depois voce movimenta segurando e arrastando o mouse",
+  "modulo": "crm"
+ },
+ {
+  "arquivo": "10-crm-tela-inicial.png",
+  "comentario": "crm tela inicial",
+  "modulo": "crm"
+ },
+ {
+  "arquivo": "11-menu-crm.png",
+  "comentario": "menu crm",
+  "modulo": "crm"
+ },
+ {
+  "arquivo": "12-pop-pup-filtro-crm.png",
+  "comentario": "pop pup filtro crm",
+  "modulo": "crm"
+ },
+ {
+  "arquivo": "13-repare-como-tudo-padronizado-todos-as-vizualiza-es-tipo-kanban-listas-.png",
+  "comentario": "repare como tudo é padronizado, todos as vizualizações tipo kanban, listas, onde tem pipeline segue o mesmo padrão, o que você faz para um se aplica a quase todos",
+  "modulo": "crm"
+ },
+ {
+  "arquivo": "14-repare-que-sempre-tem-os-mesmos-conte-dos-padr-o-menus-notifica-o-icon.png",
+  "comentario": "repare que sempre tem os mesmos conteúdos padrão, menus, notificação, icones de tipo de visualização, onde acrescenta arquivos, adicionar mais etapas ao pipeline, tipos de cards, todos seguem um padrão de layout em todos os módulos",
+  "modulo": "crm"
+ },
+ {
+  "arquivo": "15-nossa-tela-app.png",
+  "comentario": "nossa tela app",
+  "modulo": "dashboard"
+ },
+ {
+  "arquivo": "16-padr-o-em-todos-cards-mensagens-atividades-notas-whathapp-e-a-o.png",
+  "comentario": "Padrão em todos cards, mensagens, atividades, notas, whathapp e ação",
+  "modulo": "dashboard"
+ },
+ {
+  "arquivo": "17-tela-inial-dos-aplicativos-olha-como-colorida-e-moderna.png",
+  "comentario": "tela inial dos aplicativos, olha como é colorida e moderna",
+  "modulo": "nao-classificado"
+ },
+ {
+  "arquivo": "18-nosso-planejamentp.png",
+  "comentario": "nosso planejamentp",
+  "modulo": "planejamento"
+ },
+ {
+  "arquivo": "19-tela-planejamento-odoo.png",
+  "comentario": "tela planejamento odoo",
+  "modulo": "planejamento"
+ },
+ {
+  "arquivo": "20-kambam-lista-calend-rio-tabela-din-mica-gr-fico-localiza-o-tarefas.png",
+  "comentario": "kambam, lista, calendário, tabela dinâmica, gráfico, localização, tarefas",
+  "modulo": "tarefas"
+ },
+ {
+  "arquivo": "21-adicionar-novos-cards-as-etapas-e-configura-o-aparece-ao-passar-o-mous.png",
+  "comentario": "adicionar novos cards as etapas e configuração aparece ao passar o mouse por cima",
+  "modulo": "transversal"
+ },
+ {
+  "arquivo": "22-busca-com-filtro.png",
+  "comentario": "busca com filtro",
+  "modulo": "transversal"
+ },
+ {
+  "arquivo": "23-menu-padr-o.png",
+  "comentario": "menu padrão",
+  "modulo": "transversal"
+ },
+ {
+  "arquivo": "24-padr-o-de-cria-o-de-novos-inputs-publicar-etc.png",
+  "comentario": "Padrão de criação de novos inputs, publicar, etc",
+  "modulo": "transversal"
+ },
+ {
+  "arquivo": "25-repare-os-padr-es-do-card-como-eles-reaproveiram-quase-tudo-do-layout-.png",
+  "comentario": "repare os padrões do card, como eles reaproveiram quase tudo do layout e acrescentam alguns objetos, porem tudo é parecido e semelhante, só mudam algumas coisas conforme a tarefa da pessoa que realiza a atividade e precisa de campos específicos",
+  "modulo": "transversal"
+ },
+ {
+  "arquivo": "26-tela-inicial-projeto-um-card-por-projeto-o-restante-segue-o-mesmo-padr.png",
+  "comentario": "tela inicial projeto, um card por projeto, o restante segue o mesmo padrão",
+  "modulo": "transversal"
+ }
+]

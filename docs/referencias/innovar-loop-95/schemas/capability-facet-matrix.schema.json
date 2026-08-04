@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://innovar.local/schemas/capability-facet-matrix.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "scoring_model",
+    "capabilities",
+    "portfolio_sci",
+    "scoring_scale",
+    "execution_evidence_campaign_2026_07_22",
+    "auto9_evidence_integrity_rebuild_2026_07_22",
+    "auto10_traceability_integrity_2026_07_22",
+    "score_cap_policy"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer"
+    },
+    "scoring_model": {
+      "type": "string"
+    },
+    "scoring_scale": {
+      "type": "string"
+    },
+    "capabilities": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/capability"
+      }
+    },
+    "portfolio_sci": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "eligible_capability_count",
+        "reason"
+      ],
+      "properties": {
+        "status": {
+          "const": "NOT_CALCULATED"
+        },
+        "eligible_capability_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 20
+        }
+      }
+    },
+    "execution_evidence_campaign_2026_07_22": {
+      "type": "object"
+    },
+    "auto9_evidence_integrity_rebuild_2026_07_22": {
+      "type": "object"
+    },
+    "auto10_traceability_integrity_2026_07_22": {
+      "type": "object"
+    },
+    "score_cap_policy": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 100
+      }
+    }
+  },
+  "$defs": {
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "facets",
+        "sci_percent"
+      ],
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "facets": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/facet"
+          }
+        },
+        "sci_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "calculation": {
+          "type": "string"
+        },
+        "open_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "facet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "score",
+        "evidence",
+        "execution_level",
+        "evidence_strength",
+        "status",
+        "gap"
+      ],
+      "properties": {
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "evidence": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1
+            }
+          ]
+        },
+        "gap": {
+          "type": "string"
+        },
+        "execution_level": {
+          "enum": [
+            "DOCUMENTED",
+            "STATICALLY_VALIDATED",
+            "UNIT_EXECUTED",
+            "LOCAL_INTEGRATION_EXECUTED",
+            "EXTERNAL_INTEGRATION_EXECUTED",
+            "OPERATIONALLY_PROVEN"
+          ]
+        },
+        "evidence_strength": {
+          "enum": [
+            "PRIMARY",
+            "CORROBORATED",
+            "SECONDARY",
+            "DERIVED",
+            "DECLARATIVE_ONLY",
+            "INSUFFICIENT"
+          ]
+        },
+        "status": {
+          "enum": [
+            "PASS",
+            "PARTIAL",
+            "BLOCKED_EXTERNAL"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,416 @@
+schema_version: UTA-R1-finding-v1
+ledger_status: FROZEN
+audit_id: UTA-R1-INNOVAR-AUTO12-R2
+generated_at: '2026-07-23T04:21:40Z'
+finding_count: 23
+counts_by_severity:
+  CRITICAL: 2
+  HIGH: 13
+  MEDIUM: 8
+findings:
+- finding_id: FND-R1-001
+  title: Idempotência global permite colisão e exposição cross-tenant no runtime administrativo
+  severity: CRITICAL
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P0_IMMEDIATE
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - SECURITY
+  - PRIVACY
+  - DATA_INTEGRITY
+  category: SECURITY
+  evidence_ids:
+  - EVD-R1-012
+  recommendation: Escopar a chave por organization_id e operação; negar retorno de replay pertencente a outro tenant; criar teste negativo cross-tenant.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-002
+  title: Contexto de autenticação do runtime administrativo é falsificável por headers
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P0_IMMEDIATE
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - SECURITY
+  - PRIVACY
+  category: SECURITY
+  evidence_ids:
+  - EVD-R1-013
+  recommendation: Substituir headers de identidade/escopo por contexto autenticado verificado; reservar headers apenas para proxy confiável com assinatura/mTLS.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-003
+  title: Runtime administrativo diverge do OpenAPI em idempotência, códigos e respostas
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P1_HIGH
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - INTEROPERABILITY
+  - RELIABILITY
+  - MAINTAINABILITY
+  category: CONTRACTS
+  evidence_ids:
+  - EVD-R1-014
+  recommendation: Definir uma única semântica canônica e alinhar OpenAPI, runtime, catálogo de erros e testes, incluindo 403, 404, 200/202 e idempotência
+    da resolução.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-004
+  title: SDK apresenta drift semântico apesar do gate de cobertura por operationId
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P0_IMMEDIATE
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - INTEROPERABILITY
+  - FUNCTIONAL
+  - MAINTAINABILITY
+  category: SDK
+  evidence_ids:
+  - EVD-R1-015
+  recommendation: Gerar ou validar tipos, parâmetros, headers e response bodies a partir do OpenAPI; adicionar contract snapshots e testes de serialização/response
+    shape.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-005
+  title: Pipeline denominado geração de SDK produz apenas inventário de operações
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P1_HIGH
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - GOVERNANCE
+  - MAINTAINABILITY
+  category: SDK
+  evidence_ids:
+  - EVD-R1-016
+  recommendation: Renomear o artefato para operation inventory ou implementar geração real; não usar o gate atual como prova de compatibilidade do cliente.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-006
+  title: Backoff do publisher não cresce com tentativas
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P0_IMMEDIATE
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - RELIABILITY
+  - AVAILABILITY
+  - PERFORMANCE
+  category: EVENT_RUNTIME
+  evidence_ids:
+  - EVD-R1-017
+  recommendation: Adicionar attempts ao modelo retornado pelo store, validar incremento e criar teste de progressão/cap do retry.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-007
+  title: Harness Docker Compose não é autocontido nem reproduzível
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P1_HIGH
+  executability: PARTIALLY_EXECUTABLE
+  impact_categories:
+  - DELIVERY
+  - RELIABILITY
+  - MAINTAINABILITY
+  category: INFRASTRUCTURE
+  evidence_ids:
+  - EVD-R1-018
+  recommendation: Adicionar Dockerfiles/Containerfiles, build contexts e digests, ou documentar explicitamente registry e processo de build verificado.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-008
+  title: Lockfiles verificados estão ausentes
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: EXTERNAL_DEPENDENCY
+  status: BLOCKED_EXTERNAL
+  priority: P0_IMMEDIATE
+  executability: BLOCKED_EXTERNAL
+  impact_categories:
+  - SECURITY
+  - DELIVERY
+  - MAINTAINABILITY
+  category: SUPPLY_CHAIN
+  evidence_ids:
+  - EVD-R1-019
+  recommendation: Gerar e revisar requirements-ci.lock com hashes e package-lock.json para SDK/XState em registry confiável.
+  required_external_environment: Registry npm/Python ou cache corporativo confiável
+  residual_risk: null
+- finding_id: FND-R1-009
+  title: Imagens OCI não estão fixadas por digest
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: EXTERNAL_DEPENDENCY
+  status: BLOCKED_EXTERNAL
+  priority: P0_IMMEDIATE
+  executability: BLOCKED_EXTERNAL
+  impact_categories:
+  - SECURITY
+  - DELIVERY
+  category: SUPPLY_CHAIN
+  evidence_ids:
+  - EVD-R1-020
+  recommendation: Resolver digests em registry confiável, atualizar Compose/workflow/Helm e verificar assinatura/provenance.
+  required_external_environment: Registry OCI confiável e imagens publicadas
+  residual_risk: null
+- finding_id: FND-R1-010
+  title: Isolamento RLS e migration 0013 não foram provados em PostgreSQL real
+  severity: CRITICAL
+  confidence: CONFIRMED
+  statement_type: EXTERNAL_DEPENDENCY
+  status: BLOCKED_EXTERNAL
+  priority: P0_IMMEDIATE
+  executability: BLOCKED_EXTERNAL
+  impact_categories:
+  - SECURITY
+  - PRIVACY
+  - DATA_INTEGRITY
+  category: DATABASE_SECURITY
+  evidence_ids:
+  - EVD-R1-021
+  recommendation: Executar migrations 0001-0013, roles NOBYPASSRLS, testes A/B, pool leakage, concorrência e schema dump sanitizado.
+  required_external_environment: PostgreSQL 16 descartável com duas roles de aplicação NOBYPASSRLS
+  residual_risk: null
+- finding_id: FND-R1-011
+  title: Transporte Redpanda/Kafka permanece sem prova integrada
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: EXTERNAL_DEPENDENCY
+  status: BLOCKED_EXTERNAL
+  priority: P1_HIGH
+  executability: BLOCKED_EXTERNAL
+  impact_categories:
+  - RELIABILITY
+  - DATA_INTEGRITY
+  - INTEROPERABILITY
+  category: EVENT_RUNTIME
+  evidence_ids:
+  - EVD-R1-022
+  recommendation: Executar produção/consumo dos sete eventos, duplicidade, ordering, retry, DLQ e replay com offsets registrados.
+  required_external_environment: Redpanda/Kafka autorizado, tópicos e credenciais
+  residual_risk: null
+- finding_id: FND-R1-012
+  title: Helm/Kubernetes/NetworkPolicy permanecem sem prova oficial
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: EXTERNAL_DEPENDENCY
+  status: BLOCKED_EXTERNAL
+  priority: P1_HIGH
+  executability: BLOCKED_EXTERNAL
+  impact_categories:
+  - AVAILABILITY
+  - SECURITY
+  - DELIVERY
+  category: INFRASTRUCTURE
+  evidence_ids:
+  - EVD-R1-023
+  recommendation: Executar helm lint/template, kubeconform strict, instalação, probes, selectors e testes de tráfego permitido/negado.
+  required_external_environment: Helm, kubeconform, kubectl e cluster efêmero
+  residual_risk: null
+- finding_id: FND-R1-013
+  title: Statecharts não foram executados no runtime oficial XState
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: EXTERNAL_DEPENDENCY
+  status: BLOCKED_EXTERNAL
+  priority: P1_HIGH
+  executability: BLOCKED_EXTERNAL
+  impact_categories:
+  - FUNCTIONAL
+  - RELIABILITY
+  category: STATECHARTS
+  evidence_ids:
+  - EVD-R1-024
+  recommendation: Resolver lockfile, executar máquinas oficiais, invariantes, snapshots e migrações de estado.
+  required_external_environment: Registry npm confiável e dependências XState verificadas
+  residual_risk: null
+- finding_id: FND-R1-014
+  title: 'Cobertura BDD executada é minoritária: 6 de 38 cenários'
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P1_HIGH
+  executability: PARTIALLY_EXECUTABLE
+  impact_categories:
+  - FUNCTIONAL
+  - RELIABILITY
+  - GOVERNANCE
+  category: BDD
+  evidence_ids:
+  - EVD-R1-025
+  recommendation: Criar bindings para os 30 NOT_RUN, separar testes unitários de integração e executar os cenários externos no ambiente correspondente.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-015
+  title: Claim local_integration PARTIAL não possui registro explícito de execução local integrada
+  severity: MEDIUM
+  confidence: HIGH
+  statement_type: TECHNICAL_INFERENCE
+  status: OPEN
+  priority: P1_HIGH
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - GOVERNANCE
+  - COMPLIANCE
+  category: EVIDENCE_GOVERNANCE
+  evidence_ids:
+  - EVD-R1-026
+  recommendation: Rebaixar o claim para o nível comprovado ou anexar registro de integração local com componentes, comando, ambiente e resultado.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-016
+  title: Política de ciclo de vida de artefatos é declarativa e não aplicada
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P2_PLANNED
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - GOVERNANCE
+  - MAINTAINABILITY
+  category: GOVERNANCE
+  evidence_ids:
+  - EVD-R1-027
+  recommendation: Criar manifesto de metadados por artefato e validador que imponha artifact_id, release_id, status, effective_at e sha256.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-017
+  title: Gate de compatibilidade de eventos pode aprovar mudanças quebradoras aninhadas
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P0_IMMEDIATE
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - INTEROPERABILITY
+  - RELIABILITY
+  category: EVENT_CONTRACTS
+  evidence_ids:
+  - EVD-R1-028
+  recommendation: Implementar diff recursivo JSON Schema, allOf/$ref resolution, required nested, additionalProperties, enum e constraints; adicionar fixtures
+    negativas.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-018
+  title: SCI por capability é validado aritmeticamente, não quanto à força da evidência
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P1_HIGH
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - GOVERNANCE
+  - COMPLIANCE
+  category: METRICS
+  evidence_ids:
+  - EVD-R1-029
+  recommendation: Versionar critérios objetivos por nível, vincular scores a execução/evidência, remover gaps stale e impedir 100 quando existir gap incompatível.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-019
+  title: Defaults de desenvolvimento expõem serviços e credenciais fracas
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P1_HIGH
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - SECURITY
+  - PRIVACY
+  category: INFRASTRUCTURE_SECURITY
+  evidence_ids:
+  - EVD-R1-030
+  recommendation: Bindar portas a 127.0.0.1, usar secrets/variáveis obrigatórias e adicionar aviso/profile exclusivamente de desenvolvimento.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-020
+  title: Campanha de 100 controles mede presença e tokens como PASS, não maturidade
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P2_PLANNED
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - GOVERNANCE
+  - COMPLIANCE
+  category: AUDIT_METHOD
+  evidence_ids:
+  - EVD-R1-031
+  recommendation: Separar controles de inventário, estrutura, comportamento e runtime; não usar número de rodadas como indicador de cobertura ou qualidade.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-021
+  title: Runtime em memória não inclui operation_scope na idempotência
+  severity: HIGH
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P1_HIGH
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - FUNCTIONAL
+  - RELIABILITY
+  - INTEROPERABILITY
+  category: REFERENCE_RUNTIME
+  evidence_ids:
+  - EVD-R1-032
+  recommendation: Alinhar scope a (organization, operation_scope, idempotency_key) e criar teste de mesma chave em operações distintas.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-022
+  title: Runtime HTTP não limita body e devolve detalhes brutos de exceção
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P1_HIGH
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - SECURITY
+  - AVAILABILITY
+  - PRIVACY
+  category: APPLICATION_SECURITY
+  evidence_ids:
+  - EVD-R1-033
+  recommendation: Impor limite de Content-Length, validar JSON e mapear erros sanitizados por catálogo, preservando detalhes somente em logs seguros.
+  required_external_environment: null
+  residual_risk: null
+- finding_id: FND-R1-023
+  title: Baseline e schemas atuais reutilizam os mesmos $id JSON Schema
+  severity: MEDIUM
+  confidence: CONFIRMED
+  statement_type: OBSERVED_FACT
+  status: OPEN
+  priority: P2_PLANNED
+  executability: EXECUTABLE_HERE
+  impact_categories:
+  - INTEROPERABILITY
+  - MAINTAINABILITY
+  category: SCHEMA_GOVERNANCE
+  evidence_ids:
+  - EVD-R1-034
+  recommendation: Usar URIs distintas para snapshots baseline ou carregar registries isolados; adicionar teste de colisão de $id.
+  required_external_environment: null
+  residual_risk: null

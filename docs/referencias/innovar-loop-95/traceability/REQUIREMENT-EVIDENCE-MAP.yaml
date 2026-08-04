@@ -1,0 +1,79 @@
+version: 1
+source: 00-decisions/requirements.yaml
+requirements:
+  REQ-TEN-001:
+    status: PARTIAL
+    evidence: [01-db/migrations/0001_core.sql, 01-db/rls/0001_rls.sql]
+    gap: PostgreSQL runtime proof remains blocked.
+  REQ-RLS-001:
+    status: PARTIAL
+    evidence: [01-db/rls/0001_rls.sql, scripts/test_postgres_event_transport.py]
+    gap: Two NOBYPASSRLS roles were not executed against a real database.
+  REQ-IDEMP-001:
+    status: SPECIFIED
+    evidence: [01-api/openapi.yaml]
+    gap: Deployed API behavior is not proven.
+  REQ-IDEMP-002:
+    status: PARTIAL
+    evidence: [01-db/migrations/0001_core.sql, 02-events/RETRY-IDEMPOTENCY.md]
+    gap: Integrated replay behavior is not proven.
+  REQ-IDEMP-003:
+    status: PARTIAL
+    evidence: [01-api/openapi.yaml, 02-events/RETRY-IDEMPOTENCY.md]
+    gap: Conflict behavior is not proven against a deployed API.
+  REQ-CONC-001:
+    status: PARTIAL
+    evidence: [01-db/migrations/0001_core.sql, 06-sdk/typescript/src/lifecycle.ts]
+    gap: Concurrent PostgreSQL execution remains blocked.
+  REQ-EVT-001:
+    status: PARTIAL
+    evidence: [01-db/migrations/0007_event_transport_execution.sql]
+    gap: Atomicity is statically specified but not executed in PostgreSQL.
+  REQ-EVT-002:
+    status: PARTIAL
+    evidence: [01-db/migrations/0007_event_transport_execution.sql, 04-bdd/features/event-transport-executable.feature]
+    gap: Real broker consumer deduplication remains unproven.
+  REQ-META-001:
+    status: PARTIAL
+    evidence: [01-db/migrations/0004_evidence_hardening.sql, tests/test_contracts.py]
+    gap: Trigger behavior is not executed in PostgreSQL.
+  REQ-META-002:
+    status: SPECIFIED
+    evidence: [01-api/openapi.yaml, capabilities/object-definitions/SPEC.md]
+    gap: Runtime enforcement is incomplete.
+  REQ-QUOTA-001:
+    status: SPECIFIED
+    evidence: [00-decisions/INVARIANTS.yaml]
+    gap: Transactional quota enforcement has no runtime implementation evidence.
+  REQ-CACHE-001:
+    status: SPECIFIED
+    evidence: [05-config/CACHE-POLICY.md, 02-events/asyncapi.yaml]
+    gap: Cache invalidation integration is not executed.
+  REQ-WF-001:
+    status: PARTIAL
+    evidence: [03-statecharts/xstate/object-definition.machine.ts, tests/test_contracts.py]
+    gap: Official XState runtime execution remains blocked.
+  REQ-APP-001:
+    status: SPECIFIED
+    evidence: [00-decisions/INVARIANTS.yaml]
+    gap: Approval execution runtime is outside the currently proven capabilities.
+  REQ-SLA-001:
+    status: SPECIFIED
+    evidence: [00-decisions/INVARIANTS.yaml, 05-config/.env.example]
+    gap: Business-calendar implementation is not executable in this package.
+  REQ-META-003:
+    status: PARTIAL
+    evidence: [01-db/migrations/0004_evidence_hardening.sql, 06-sdk/typescript/src/lifecycle.ts]
+    gap: Persistence and event emission are not integrated against PostgreSQL.
+  REQ-STATE-001:
+    status: PARTIAL
+    evidence: [03-statecharts/STATE-MIGRATION-REGISTRY.yaml, 07-adrs/ADR-008-statecharts.md]
+    gap: Runtime stop-and-alert behavior is not executed with official XState.
+  REQ-DLQ-001:
+    status: PARTIAL
+    evidence: [01-db/migrations/0007_event_transport_execution.sql, 01-api/openapi.yaml, 09-runbooks/event-transport-game-day.md]
+    gap: Distributed retention and replay are not proven.
+  REQ-NFR-001:
+    status: PARTIAL
+    evidence: [00-decisions/NFR-SLO-CATALOG.yaml, audit/EVIDENCE-RUBRIC.md, 09-runbooks/integration-evidence-gate.md]
+    gap: Production SLO measurements remain unavailable.

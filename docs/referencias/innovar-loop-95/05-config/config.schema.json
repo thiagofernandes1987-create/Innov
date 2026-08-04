@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "REDIS_URL",
+    "DEFAULT_LOCALE",
+    "DEFAULT_TIMEZONE",
+    "DEFAULT_CURRENCY",
+    "WORKER_MAX_CONCURRENCY"
+  ],
+  "properties": {
+    "NODE_ENV": {
+      "enum": [
+        "development",
+        "test",
+        "production"
+      ]
+    },
+    "DATABASE_URL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "REDIS_URL": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DEFAULT_LOCALE": {
+      "enum": [
+        "pt-BR",
+        "en-US"
+      ]
+    },
+    "DEFAULT_TIMEZONE": {
+      "type": "string",
+      "default": "America/Sao_Paulo"
+    },
+    "DEFAULT_CURRENCY": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}$"
+    },
+    "STORAGE_STRATEGY": {
+      "enum": [
+        "JSONB_HYBRID",
+        "PROVISIONED_TABLE"
+      ]
+    },
+    "FEATURE_METADATA_OBJECTS": {
+      "type": "boolean"
+    },
+    "FEATURE_SOLUTION_PACKAGING": {
+      "type": "boolean"
+    },
+    "WORKER_MAX_CONCURRENCY": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "WORKER_MAX_ATTEMPTS": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 20
+    },
+    "IDEMPOTENCY_TTL_SECONDS": {
+      "type": "integer",
+      "minimum": 3600
+    },
+    "METADATA_CACHE_TTL_SECONDS": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3600
+    },
+    "OBJECT_DEFINITION_MAX_FIELDS": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5000,
+      "default": 250
+    },
+    "OBJECT_SCHEMA_MAX_BYTES": {
+      "type": "integer",
+      "minimum": 1024,
+      "maximum": 16777216,
+      "default": 1048576
+    },
+    "OBJECT_PUBLISH_REQUIRE_REVIEW": {
+      "type": "boolean",
+      "default": true
+    },
+    "OBJECT_BREAKING_CHANGE_POLICY": {
+      "type": "string",
+      "enum": [
+        "DENY",
+        "REQUIRE_APPROVAL"
+      ],
+      "default": "DENY"
+    }
+  }
+}

@@ -1,0 +1,749 @@
+.planner {
+  --left-pane: 660px;
+  --row-height: 42px;
+  --header-height: 62px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.toolbar {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-muted);
+}
+
+.toolbarGroup,
+.toolbarActions,
+.zoomGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.toolbarTitle {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-right: 8px;
+}
+
+.toolbarTitle strong {
+  font-size: 0.93rem;
+}
+
+.toolbarTitle small {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.toolButton,
+.zoomButton,
+.primaryButton,
+.iconButton {
+  /* 44px é o mínimo do protocolo, e a barra do planejador estava em 34.
+     Quatro botões de 34px lado a lado somam menos área de acerto que um
+     único alvo conforme — e a barra é usada em campo, com luva. */
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 620;
+  cursor: pointer;
+}
+
+.toolButton,
+.primaryButton {
+  padding: 0 11px;
+}
+
+.primaryButton {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: white;
+}
+
+.iconButton,
+.zoomButton {
+  width: 44px;
+  padding: 0;
+}
+
+.toolButton.active,
+.zoomButton.active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+}
+
+.toolButton:hover,
+.zoomButton:hover,
+.iconButton:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-strong);
+}
+
+.viewport {
+  max-height: calc(100vh - 285px);
+  min-height: 470px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: var(--left-pane) minmax(0, 1fr);
+  position: relative;
+}
+
+.leftPane {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  min-width: 0;
+  border-right: 1px solid var(--border-strong);
+  background: var(--surface);
+  box-shadow: 8px 0 16px rgba(8, 24, 43, 0.04);
+}
+
+.leftHeader,
+.leftRow {
+  display: grid;
+  grid-template-columns: 74px minmax(220px, 1fr) 76px 92px 92px 96px;
+  align-items: stretch;
+}
+
+.leftHeader {
+  position: sticky;
+  top: 0;
+  z-index: 7;
+  height: var(--header-height);
+  background: var(--surface-muted);
+  border-bottom: 1px solid var(--border-strong);
+}
+
+.headerCell {
+  display: flex;
+  align-items: flex-end;
+  padding: 0 8px 9px;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.69rem;
+  font-weight: 720;
+  text-transform: uppercase;
+  letter-spacing: 0.035em;
+}
+
+.headerCell:last-child {
+  border-right: 0;
+}
+
+.leftRow {
+  height: var(--row-height);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.leftRow:hover {
+  background: var(--surface-muted);
+}
+
+.leftRow.summary {
+  background: color-mix(in srgb, var(--brand-soft) 52%, var(--surface));
+  font-weight: 680;
+}
+
+.leftRow.selected {
+  box-shadow: inset 3px 0 0 var(--brand);
+  background: var(--brand-soft);
+}
+
+.cell {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border-right: 1px solid var(--border);
+  font-size: 0.76rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.cell:last-child {
+  border-right: 0;
+}
+
+.codeCell {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.nameButton,
+.summaryName {
+  min-width: 0;
+  flex: 1 1 auto;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nameButton:hover {
+  color: var(--brand-strong);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.treeIndent {
+  flex: 0 0 auto;
+  width: calc(var(--depth) * 18px);
+}
+
+.collapseButton {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.collapseButton:hover {
+  background: var(--surface-strong);
+  color: var(--text);
+}
+
+.taskDot,
+.summaryDot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--brand);
+}
+
+.summaryDot {
+  border-radius: 1px;
+  background: var(--text);
+}
+
+.mutedCell {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.timelinePane {
+  min-width: 0;
+  background: var(--surface);
+}
+
+.timelineScroller {
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.timelineCanvas {
+  position: relative;
+  min-height: calc(var(--header-height) + var(--rows) * var(--row-height));
+}
+
+.timelineHeader {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  height: var(--header-height);
+  border-bottom: 1px solid var(--border-strong);
+  background: var(--surface-muted);
+}
+
+.months,
+.days {
+  display: flex;
+}
+
+.months {
+  height: 30px;
+  border-bottom: 1px solid var(--border);
+}
+
+.monthCell {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--border-strong);
+  color: var(--text);
+  font-size: 0.71rem;
+  font-weight: 720;
+  text-transform: capitalize;
+}
+
+.days {
+  height: 32px;
+}
+
+.dayCell {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.64rem;
+  line-height: 1.05;
+}
+
+.dayCell.weekend {
+  background: var(--surface-strong);
+}
+
+.dayCell.today {
+  color: var(--danger);
+  font-weight: 800;
+}
+
+.timelineRows {
+  position: relative;
+}
+
+.timelineRow {
+  position: relative;
+  height: var(--row-height);
+  border-bottom: 1px solid var(--border);
+  background-image: linear-gradient(to right, var(--border) 1px, transparent 1px);
+  background-size: var(--day-width) 100%;
+}
+
+.timelineRow.summary {
+  background-color: color-mix(in srgb, var(--brand-soft) 38%, var(--surface));
+}
+
+.timelineRow.weekGrid {
+  background-image: linear-gradient(to right, var(--border) 1px, transparent 1px);
+}
+
+.weekendShade {
+  position: absolute;
+  top: var(--header-height);
+  bottom: 0;
+  background: color-mix(in srgb, var(--surface-strong) 64%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.todayLine {
+  position: absolute;
+  top: var(--header-height);
+  bottom: 0;
+  width: 2px;
+  background: var(--danger);
+  opacity: 0.72;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.taskBar,
+.summaryBar {
+  position: absolute;
+  z-index: 2;
+  top: 9px;
+  height: 24px;
+  min-width: 4px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--brand);
+  color: white;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+
+.taskBar.critical {
+  background: var(--danger);
+}
+
+.taskBar.delayed {
+  outline: 2px solid var(--danger);
+  outline-offset: 1px;
+}
+
+.taskBar.derived {
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.16) 0 5px, transparent 5px 10px);
+}
+
+.progressFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.barLabel {
+  position: relative;
+  display: block;
+  padding: 4px 7px 0;
+  font-size: 0.67rem;
+  font-weight: 740;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summaryBar {
+  top: 13px;
+  height: 14px;
+  border-radius: 0;
+  background: var(--text);
+  cursor: default;
+  overflow: visible;
+}
+
+.summaryBar::before,
+.summaryBar::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  width: 2px;
+  height: 7px;
+  background: var(--text);
+}
+
+.summaryBar::before { left: 0; }
+.summaryBar::after { right: 0; }
+
+.dependencySvg {
+  position: absolute;
+  left: 0;
+  top: var(--header-height);
+  z-index: 4;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.dependencyPath {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.25;
+  opacity: 0.68;
+}
+
+.dependencyPath.critical {
+  stroke: var(--danger);
+  stroke-width: 1.7;
+  opacity: 0.92;
+}
+
+.emptyState {
+  min-height: 430px;
+  display: grid;
+  place-items: center;
+  padding: 40px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.emptyState strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 0.71rem;
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legendSwatch {
+  width: 18px;
+  height: 8px;
+  border-radius: 3px;
+  background: var(--brand);
+}
+
+.legendSwatch.critical { background: var(--danger); }
+.legendSwatch.summary { height: 3px; border-radius: 0; background: var(--text); }
+
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(2, 12, 24, 0.62);
+  backdrop-filter: blur(3px);
+}
+
+.modal {
+  width: min(780px, 100%);
+  max-height: min(820px, calc(100vh - 48px));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+}
+
+.modal.small {
+  width: min(620px, 100%);
+}
+
+.modalHeader {
+  min-height: 62px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-muted);
+}
+
+.modalHeaderTitle {
+  min-width: 0;
+}
+
+.modalHeaderTitle strong {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.modalHeaderTitle small {
+  color: var(--muted);
+}
+
+.modalBody {
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 680;
+  cursor: pointer;
+}
+
+.tab.active {
+  border-bottom-color: var(--brand);
+  color: var(--brand-strong);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.formGrid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.field,
+.fullField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+}
+
+.fullField {
+  grid-column: 1 / -1;
+}
+
+.field input,
+.field select,
+.field textarea,
+.fullField input,
+.fullField select,
+.fullField textarea {
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.84rem;
+}
+
+.field textarea,
+.fullField textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.secondaryButton,
+.dangerButton {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.dangerButton {
+  color: var(--danger);
+}
+
+.relationColumns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.relationPanel {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.relationPanel h3 {
+  margin: 0;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-muted);
+  font-size: 0.83rem;
+}
+
+.relationList {
+  display: flex;
+  flex-direction: column;
+}
+
+.relationRow {
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.76rem;
+}
+
+.relationRow:last-child {
+  border-bottom: 0;
+}
+
+.relationRow span:first-child {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.relationType {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--surface-strong);
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 760;
+}
+
+.relationEmpty {
+  padding: 14px 10px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.addRelation {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface-muted);
+}
+
+@media (max-width: 1180px) {
+  .planner { --left-pane: 560px; }
+  .leftHeader,
+  .leftRow { grid-template-columns: 64px minmax(190px, 1fr) 68px 84px 84px 84px; }
+}
+
+@media (max-width: 860px) {
+  .planner { --left-pane: min(78vw, 520px); }
+  .toolbar { align-items: flex-start; }
+  .toolbarTitle { flex-basis: 100%; }
+  .viewport { min-height: 420px; }
+  .formGrid,
+  .formGrid.three,
+  .relationColumns { grid-template-columns: 1fr; }
+}
+
+/* Dica sob o campo de código: explica que vazio numera sozinho. O campo
+   continua aceitando valor manual para quem espelha uma EAP contratual. */
+.dica {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}

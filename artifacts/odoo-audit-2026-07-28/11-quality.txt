@@ -1,0 +1,60 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Quality"
+      - generic: Quality
+    - menu:
+      - menuitem "Overview"
+      - button "Quality Control":
+        - generic: Quality Control
+      - button "Products":
+        - generic: Products
+      - button "Reporting":
+        - generic: Reporting
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- generic: Quality Overview
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - searchbox "Search..." [active]
+  - button ""
+- search:
+  - navigation "Pager":
+    - generic: 1-1
+    - text: / 1
+    - button "Previous" [disabled]:
+      - generic: 
+    - button "Next" [disabled]:
+      - generic: 
+- main:
+  - link "Main Quality Team 0 Quality Alerts 0 Checks In Progress":
+    - generic: Main Quality Team
+    - button "0 Quality Alerts":
+      - generic: 0 Quality Alerts
+    - link "0 Checks In Progress":
+      - /url: "#"
+- paragraph: Press esc to exit full screen

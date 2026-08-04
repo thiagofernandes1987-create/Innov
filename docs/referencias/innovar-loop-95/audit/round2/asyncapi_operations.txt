@@ -1,0 +1,1 @@
+ASYNCAPI_OPERATIONS_RESULT: PASS channels=7 operations=14

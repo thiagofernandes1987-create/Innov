@@ -33,6 +33,7 @@ export const MODULE_REGISTRY: readonly ModuleManifest[] = [
   { key:"aditivos", name:"Aditivos", description:"Alterações de valor, escopo e prazo.", icon:"＋", category:"Jurídico", routePrefix:"/app/aditivos", sortOrder:110, dependencies:["contratos"] },
   { key:"assinaturas", name:"Assinaturas", description:"Envelopes, signatários e evidências.", icon:"✎", category:"Jurídico", routePrefix:"/app/assinaturas", sortOrder:120, dependencies:["documentos"] },
   { key:"documentos", name:"Documentos", description:"Arquivos privados, versões e liberações.", icon:"□", category:"Operacional", routePrefix:"/app/documentos", sortOrder:130 },
+  { key:"modelos", name:"Modelos e Documentações", description:"Biblioteca única de modelos: propostas, contratos, termos, mensagens e e-mails. Todo aplicativo lê daqui.", icon:"▤", category:"Operacional", routePrefix:"/app/modelos", sortOrder:135 },
   { key:"qualidade", name:"Qualidade", description:"PO, FVS, FVM e não conformidades.", icon:"◇", category:"Qualidade", routePrefix:"/app/qualidade", sortOrder:140, dependencies:["obras"] },
   { key:"compras", name:"Compras e Suprimentos", description:"Solicitações, cotações, aprovações, pedidos e recebimentos.", icon:"◉", category:"Suprimentos", routePrefix:"/app/compras", sortOrder:150, dependencies:["obras","qualidade"] },
   { key:"estoque", name:"Estoque", description:"Entradas, saídas e inventários.", icon:"▣", category:"Suprimentos", routePrefix:"/app/estoque", sortOrder:160, dependencies:["compras"] },

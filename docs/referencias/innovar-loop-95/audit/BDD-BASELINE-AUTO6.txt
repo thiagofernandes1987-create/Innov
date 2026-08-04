@@ -1,0 +1,33 @@
+{
+  "feature": "04-bdd/features/event-transport-executable.feature",
+  "scenario_count": 4,
+  "passed": 2,
+  "blocked": 2,
+  "unbound": 0,
+  "failed": 0,
+  "results": [
+    {
+      "scenario": "rollback do agregado também remove evento e outbox",
+      "status": "BLOCKED",
+      "reason": "requires PostgreSQL via TEST_DATABASE_URL"
+    },
+    {
+      "scenario": "dois publishers não reivindicam a mesma mensagem",
+      "status": "BLOCKED",
+      "reason": "requires PostgreSQL concurrency via TEST_DATABASE_URL"
+    },
+    {
+      "scenario": "replay de DLQ exige escopo administrativo, motivo e idempotência",
+      "status": "PASS",
+      "binding": "test_given_open_dlq_when_replay_then_exactly_one_effect",
+      "evidence": "test_given_open_dlq_when_replay_then_exactly_one_effect (bdd_steps.test_event_transport_steps.Steps.test_given_open_dlq_when_replay_then_exactly_one_effect) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.532s\n\nOK\n"
+    },
+    {
+      "scenario": "consumidor duplicado não reaplica efeito",
+      "status": "PASS",
+      "binding": "test_given_duplicate_delivery_when_consumed_then_one_effect",
+      "evidence": "test_given_duplicate_delivery_when_consumed_then_one_effect (bdd_steps.test_event_transport_steps.Steps.test_given_duplicate_delivery_when_consumed_then_one_effect) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.508s\n\nOK\n"
+    }
+  ],
+  "generated_at_epoch": 1784743322.1529708
+}

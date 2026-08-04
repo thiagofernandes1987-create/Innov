@@ -1,0 +1,146 @@
+- banner:
+  - navigation:
+    - link "Home menu":
+      - /url: /odoo
+      - img "Sign"
+      - generic: Sign
+    - menu:
+      - button "Documents":
+        - generic: Documents
+      - menuitem "Templates"
+      - button "Reports":
+        - generic: Reports
+      - button "Configuration":
+        - generic: Configuration
+    - menu:
+      - button "":
+        - generic: 
+      - button "AI":
+        - img "AI"
+      - button "Messages 3":
+        - img "Messages": 
+        - generic: "3"
+      - button "Activities 1":
+        - img "Activities": 
+        - generic: "1"
+      - button "Toggle Studio":
+        - img: 
+      - button "Innovar" [disabled]:
+        - text: 
+        - generic: Innovar
+      - text: 
+      - button:
+        - text: 
+- button "Upload PDF"
+- generic: Documents
+- button "Actions menu":
+  - generic: 
+- search:
+  - search:
+    - button "Search...":
+      - img: 
+    - listitem "search":
+      - button " ":
+        - generic: 
+        - generic: 
+      - generic "My Documents"
+      - emphasis: or
+      - generic "My Requests"
+      - button "Remove": 
+    - searchbox "Search..." [active]
+  - button ""
+- search:
+  - navigation "Pager":
+    - generic: 1-2
+    - text: / 2
+    - button "Previous" [disabled]:
+      - generic: 
+    - button "Next" [disabled]:
+      - generic: 
+- navigation:
+  - button "List View":
+    - generic: 
+  - button "Kanban View":
+    - generic: 
+  - button "Pivot View":
+    - generic: 
+  - button "Graph View":
+    - generic: 
+  - button "Activity View":
+    - generic: 
+- main:
+  - table:
+    - rowgroup:
+      - row "Date  Name  Sent by  Signers Status  Valid Until  ":
+        - columnheader:
+          - checkbox
+        - columnheader "Date ":
+          - generic: Date
+          - generic: 
+        - columnheader "Name ":
+          - generic: Name
+          - generic: 
+        - columnheader "Sent by ":
+          - generic: Sent by
+          - generic: 
+        - columnheader "Signers":
+          - generic: Signers
+          - text: 
+        - columnheader "Status ":
+          - generic: Status
+          - generic: 
+        - columnheader "Valid Until ":
+          - generic: Valid Until
+          - generic: 
+        - columnheader
+        - columnheader
+        - columnheader "":
+          - button "":
+            - generic: 
+    - rowgroup:
+      - row "Jul 26, 8:23 AM Validação Matemática do Framework APEX.pdf Innovar Construções e Reformas, Thiago Fernandes da silva Innovar Construções e Reformas, Thiago Fernandes da silva To Sign Sep 24  Resend  Sign":
+        - cell:
+          - checkbox
+        - cell "Jul 26, 8:23 AM"
+        - cell "Validação Matemática do Framework APEX.pdf"
+        - cell "Innovar Construções e Reformas, Thiago Fernandes da silva":
+          - generic: Innovar Construções e Reformas, Thiago Fernandes da silva
+        - cell "Innovar Construções e Reformas, Thiago Fernandes da silva":
+          - generic "Innovar Construções e Reformas, Thiago Fernandes da silva":
+            - generic: Innovar Construções e Reformas, Thiago Fernandes da silva
+        - cell "To Sign":
+          - generic: To Sign
+        - cell "Sep 24"
+        - cell
+        - cell " Resend  Sign":
+          - button " Resend":
+            - generic: 
+            - text: Resend
+          - button " Sign":
+            - generic: 
+            - text: Sign
+        - cell
+      - row "Jul 26, 8:20 AM Validação Matemática do Framework APEX.pdf Innovar Construções e Reformas, Thiago Fernandes da silva Innovar Construções e Reformas, Thiago Fernandes da silva Signed Sep 24  Download":
+        - cell:
+          - checkbox
+        - cell "Jul 26, 8:20 AM"
+        - cell "Validação Matemática do Framework APEX.pdf"
+        - cell "Innovar Construções e Reformas, Thiago Fernandes da silva":
+          - generic: Innovar Construções e Reformas, Thiago Fernandes da silva
+        - cell "Innovar Construções e Reformas, Thiago Fernandes da silva":
+          - generic "Innovar Construções e Reformas, Thiago Fernandes da silva":
+            - generic: Innovar Construções e Reformas, Thiago Fernandes da silva
+        - cell "Signed":
+          - generic: Signed
+        - cell "Sep 24"
+        - cell
+        - cell " Download":
+          - button " Download":
+            - generic: 
+            - text: Download
+        - cell
+    - rowgroup:
+      - row:
+        - cell
+        - cell
+- paragraph: Press esc to exit full screen

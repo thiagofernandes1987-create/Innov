@@ -1,0 +1,103 @@
+{
+  "schema_version": "UTA-R3B-final-package-v1",
+  "package_id": "INNOVAR-UTA-R3B-RECONCILIATION-FINAL-2026-07-23",
+  "status": "FROZEN_WITH_OPEN_ITEMS",
+  "created_at": "2026-07-23T10:30:00Z",
+  "freeze_manifest_sha256": "db24c7f4498384970eafe9f24319728de3f2e77b20b0fef16bfd6ab3efd97db5",
+  "file_count_excluding_manifest_and_sha": 17,
+  "files": [
+    {
+      "path": "AUDIT_CHECKLIST_MASTER_R3.md",
+      "sha256": "ea84258c430d4c2542119f49b092a7ba389e00933dba88d77b316dd4e1bedcc2",
+      "bytes": 543
+    },
+    {
+      "path": "CONSOLIDATED_TECHNICAL_DOCUMENTATION.md",
+      "sha256": "66aa738b17c8ce04dea239fee9ad2479c78008924def4d6b461c1096b8759249",
+      "bytes": 1537
+    },
+    {
+      "path": "EXTERNAL_PENDING_PLAN.md",
+      "sha256": "d7b3b903e93cc66a54bb24143826cf2d6eed7202674d47629c7d656afc8f55c5",
+      "bytes": 1081
+    },
+    {
+      "path": "FINAL_ARTIFACT_INDEX_R3B.yaml",
+      "sha256": "33605ad60509a7af733e0307b208c9d73e74814e10b3d5df69ed2fcd7e870efa",
+      "bytes": 165247
+    },
+    {
+      "path": "FINAL_AUDIT_DOSSIER.md",
+      "sha256": "53b48e87a04f095baf4d8de762403831cfaea18b559639202b5987ac8b787968",
+      "bytes": 18426
+    },
+    {
+      "path": "FINAL_AUDIT_MASTER.md",
+      "sha256": "903a3f2c0f58007dc740cc9edabfa05cdd68c0709b2f10b18b6ff25f06bd65ae",
+      "bytes": 6177
+    },
+    {
+      "path": "FINAL_CHECKLIST.md",
+      "sha256": "567fb24c9852036cff016024637e52793e5f8499a9262e0b69a0793c34b49a88",
+      "bytes": 3606
+    },
+    {
+      "path": "FINAL_FINDINGS_REGISTER.yaml",
+      "sha256": "42a7a07d1389e8e7f1c67826f4f6a6cabbb0bfd2f6e74f0cf70d4661b2e22469",
+      "bytes": 22412
+    },
+    {
+      "path": "FINAL_FINDING_LEDGER_R3B.yaml",
+      "sha256": "0a61e94c54b66888fe5c122c81db972857114030e8dc22ddd8ce40d0e2b77ad8",
+      "bytes": 22579
+    },
+    {
+      "path": "FINAL_FREEZE_MANIFEST.json",
+      "sha256": "db24c7f4498384970eafe9f24319728de3f2e77b20b0fef16bfd6ab3efd97db5",
+      "bytes": 2016
+    },
+    {
+      "path": "FINAL_INVENTORY_MASTER.md",
+      "sha256": "91eef87123cfa7e9e893091f3a0435f9b0d1502dc9f42353dd844300c6e16bc1",
+      "bytes": 717
+    },
+    {
+      "path": "FINAL_OUTCOME_LEDGER_R3B.yaml",
+      "sha256": "141e7893a46e7a05d59d0e683c25e5c014d724f78e86b28deb1c2c907b630df1",
+      "bytes": 11013
+    },
+    {
+      "path": "FINAL_TRACEABILITY_MATRIX.md",
+      "sha256": "c2b77f693e4ea531ca6029406a2446bdbaa3538cf291a5a74dfa5cf15dab2b8e",
+      "bytes": 3053
+    },
+    {
+      "path": "FINAL_VALIDATION_LEDGER_R3B.yaml",
+      "sha256": "b1c8bcffb2b78751302c7db2b6a43f75218cc61d9dab1fc94842a74c912e3e17",
+      "bytes": 14059
+    },
+    {
+      "path": "NEW_CYCLE_REQUESTS.yaml",
+      "sha256": "ea78096736caeb9711cf33e4b008176edd584a1af4514ff703f6f3ea6092bf21",
+      "bytes": 2262
+    },
+    {
+      "path": "RECONCILIATION_LEDGER_R3B.yaml",
+      "sha256": "9c57fa35be6abe2eb2fea621ab2540b536e26d570736248e51fecc50cd80b824",
+      "bytes": 10896
+    },
+    {
+      "path": "SPRINTS_AND_MILESTONES_R3.md",
+      "sha256": "3076e6bff87d2e56cc296c0438b3bfcaf520f72d52165a0102492431abe4f2ab",
+      "bytes": 605
+    }
+  ],
+  "outcome_counts": {
+    "PARTIAL": 5,
+    "CLOSED": 12,
+    "BLOCKED_EXTERNAL": 6,
+    "SUPERSEDED": 1,
+    "OPEN": 4
+  },
+  "completion_authorized": false
+}

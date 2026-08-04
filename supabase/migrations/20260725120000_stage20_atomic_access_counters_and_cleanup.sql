@@ -1,8 +1,19 @@
--- Auditoria APEX V5.2.5 — FND-0008 e FND-0010.
--- 1. Contadores de acesso deixam de ser incrementados por leitura-modificação-escrita
---    da aplicação e passam a ser somados dentro do banco, sem perda sob concorrência.
--- 2. Remove a função de diagnóstico global que ficou sem referência depois do
---    hardening R3B da observabilidade.
+-- Auditoria APEX V5.2.5 — FND-0008.
+-- Contadores de acesso deixam de ser incrementados por leitura-modificação-escrita
+-- da aplicação e passam a ser somados dentro do banco, sem perda sob concorrência.
+--
+-- A remoção da função de diagnóstico global (FND-0010) **saiu daqui**. Ela
+-- pressupunha que o hardening R3B já estivesse aplicado, porque é ele que tira a
+-- função de dentro de `observability_diagnostics_select`. Medido no banco em 4 de
+-- agosto de 2026: a policy viva ainda a chama —
+--
+--   (organization_id is null and stage19_can_read_global_diagnostics())
+--
+-- — porque `r3b_observability_security_hardening` está no débito congelado de
+-- `diretrizes/migrations-aplicadas.json`, sob a S-22. A função não é órfã: é
+-- load-bearing. Dropá-la agora abriria o diagnóstico global ou derrubaria a
+-- policy, dependendo de o `drop` passar. Fica registrado na T-22.x do inventário,
+-- junto do pré-requisito.
 
 begin;
 
@@ -43,19 +54,8 @@ $$;
 revoke all on function public.register_procurement_invitation_access(uuid) from public, anon, authenticated;
 grant execute on function public.register_procurement_invitation_access(uuid) to service_role;
 
--- A policy observability_diagnostics_select deixou de consumir esta função no
--- hardening R3B e nenhuma outra policy ou função a referencia.
-drop function if exists public.stage19_can_read_global_diagnostics();
-
 do $$
 begin
-  if exists (
-    select 1 from pg_proc p
-    join pg_namespace n on n.oid = p.pronamespace
-    where n.nspname = 'public' and p.proname = 'stage19_can_read_global_diagnostics'
-  ) then
-    raise exception 'Função de diagnóstico global ainda existe após a remoção.';
-  end if;
   if not exists (
     select 1 from pg_proc p
     join pg_namespace n on n.oid = p.pronamespace

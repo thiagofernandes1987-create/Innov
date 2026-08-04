@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.innovar.app/events/envelope.v1.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "event_version",
+    "organization_id",
+    "aggregate_type",
+    "aggregate_id",
+    "aggregate_version",
+    "actor_type",
+    "occurred_at",
+    "recorded_at",
+    "correlation_id",
+    "request_id",
+    "producer",
+    "payload",
+    "metadata",
+    "pii_classification",
+    "retention_class"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]+\\.v[1-9][0-9]*$"
+    },
+    "event_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "organization_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregate_type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "aggregate_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "aggregate_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "actor_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "actor_type": {
+      "type": "string",
+      "enum": [
+        "USER",
+        "SERVICE_ACCOUNT",
+        "SYSTEM",
+        "EXTERNAL"
+      ]
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlation_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "causation_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "request_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "idempotency_key": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "producer": {
+      "type": "string",
+      "maxLength": 120
+    },
+    "payload": {
+      "type": "object"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "pii_classification": {
+      "type": "string",
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "SENSITIVE"
+      ]
+    },
+    "retention_class": {
+      "type": "string",
+      "enum": [
+        "OPERATIONAL",
+        "FINANCIAL",
+        "LEGAL",
+        "AUDIT",
+        "MARKETING",
+        "TEMPORARY",
+        "SENSITIVE"
+      ]
+    }
+  }
+}

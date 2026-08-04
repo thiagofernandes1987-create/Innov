@@ -1,0 +1,30 @@
+snapshot_version: metrics-v2-r2
+date: '2026-07-22'
+release_id: INNOVAR-AUTO12-R2
+canonical_blueprint: INNOVAR_PLATFORM_BLUEPRINT_EXECUTAVEL.md
+measurement_status:
+  SCI:
+    status: NOT_CALCULATED
+    value_percent: null
+    reason: Full platform capability-by-facet inventory is incomplete; no global percentage is defensible.
+  EEI:
+    status: NOT_CALCULATED
+    value_percent: null
+    reason: Execution states are reported per gate; no blended portfolio percentage is published.
+historical_baselines:
+- indicator: EEI_LEGACY
+  value_percent: 59.3
+  status: SUPERSEDED_HISTORICAL
+  source: audit/history/TRACEABILITY-MATRIX-LEGACY-59_3.md
+  must_not_be_used_as_current: true
+anti_regression_baseline:
+  canonical_source_count: 1
+  conflicting_current_coverage_values_target: 0
+  test_failures_target: 0
+  validator_exit_code_target: 0
+  typescript_compile_exit_code_target: 0
+next_required_measurement_work:
+- complete capability inventory
+- evaluate each applicable facet with evidence
+- version weights and formula
+- calculate only after independent validation

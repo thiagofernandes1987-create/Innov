@@ -1,0 +1,2 @@
+SDK_DRIFT_GATE: PASS generated dist matches committed dist
+SDK_RC=0

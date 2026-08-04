@@ -4,23 +4,31 @@ const errors=[];
 const requiredCanonical=[
  "diretrizes/README.md","diretrizes/SPEC.md","diretrizes/ESTADO-ATUAL.json","diretrizes/INVENTARIO.md",
  "diretrizes/MODULOS.md","diretrizes/ARQUITETURA.md","diretrizes/ROADMAP.md","diretrizes/RECUPERACAO.md",
- "diretrizes/VACINAS.md","diretrizes/UI-UX-PRO-MAX.md","diretrizes/PADRAO-DOCUMENTACAO.md","diretrizes/HISTORICO-ETAPAS.md"
+ "diretrizes/VACINAS.md","diretrizes/UI-UX-PRO-MAX.md","diretrizes/PADRAO-DOCUMENTACAO.md","diretrizes/HISTORICO-ETAPAS.md",
+ "diretrizes/METODO-DE-TRABALHO.md","diretrizes/OBJECT-RUNTIME.md",
+ "diretrizes/LEIA-PRIMEIRO.md","diretrizes/INVENTARIO-DE-EXECUCAO.md","diretrizes/PADRAO-DE-INTERFACE.md",
+ "diretrizes/PERSONAS-E-ROTINAS.md","diretrizes/SERVICO-DE-CAMPO.md","diretrizes/KPIS.md",
+ "diretrizes/FLUXOS-E-RISCOS.md","diretrizes/ACOMPANHAMENTO-A-DISTANCIA.md",
+ "diretrizes/QUALIDADE-CAUSA-RAIZ.md","diretrizes/REUSO-DE-INFORMACAO.md",
+ "diretrizes/MAPA-DO-CODIGO.md"
 ];
-const requiredVaccines=[
- "diretrizes/vacinas/VACINA-001-RELACOES-SUPABASE.md",
- "diretrizes/vacinas/VACINA-002-VALIDADORES-SEMANTICOS.md",
- "diretrizes/vacinas/VACINA-003-LEDGER-MIGRATIONS-SUPABASE.md",
- "diretrizes/vacinas/VACINA-004-PRIVILEGIOS-RPCS.md",
- "diretrizes/vacinas/VACINA-005-WORKFLOW-PROTEGIDO.md",
- "diretrizes/vacinas/VACINA-006-RUNTIME-GITHUB-ACTIONS.md",
- "diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md",
- "diretrizes/vacinas/VACINA-008-INSTALACAO-HOMOLOGACAO.md",
- "diretrizes/vacinas/VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md",
- "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md",
- "diretrizes/vacinas/VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md",
- "diretrizes/vacinas/VACINA-012-ESTADO-POS-MERGE.md",
- "diretrizes/vacinas/VACINA-013-FIXTURES-RESPEITAM-FRONTEIRAS-SENSIVEIS.md"
-];
+// Vacinas por descoberta, não por lista fixa — VACINA-014. A lista escrita à
+// mão que existia aqui passou verde com duas vacinas novas fora do catálogo:
+// quem escreve a vacina não tem motivo para abrir o validador. O que importa é
+// que todo arquivo tenha verbete e todo verbete tenha arquivo, nos dois
+// sentidos.
+const vaccineDir="diretrizes/vacinas";
+const requiredVaccines=(fs.existsSync(vaccineDir)?fs.readdirSync(vaccineDir):[])
+ .filter(name=>/^VACINA-\d{3}-.+\.md$/.test(name))
+ .sort()
+ .map(name=>`${vaccineDir}/${name}`);
+if(requiredVaccines.length===0)errors.push("Nenhuma vacina encontrada em diretrizes/vacinas.");
+// Numeração sem buraco: VACINA-014 seguida de VACINA-016 esconde uma vacina
+// que alguém apagou ou nunca commitou.
+requiredVaccines.forEach((file,indice)=>{
+ const esperado=`VACINA-${String(indice+1).padStart(3,"0")}`;
+ if(!file.includes(esperado))errors.push(`Numeração de vacinas com buraco: esperado ${esperado}, veio ${file}`);
+});
 const requiredHistorical=[
  "docs/ETAPA-09-FINANCEIRO-CONTRATOS.md","docs/ETAPA-09-TEST-PLAN.md","docs/ETAPA-10-HOMOLOGACAO-SUPABASE.md",
  "docs/ETAPA-11-HOMOLOGACAO-AUTENTICADA.md","docs/ETAPA-12-GESTAO-DE-OBRAS.md","docs/RELATORIO-HOMOLOGACAO-ETAPA-12.md",
@@ -35,6 +43,15 @@ const requiredHistorical=[
  "docs/DECISAO-ARQUITETURAL-MODULOS-PLUG-AND-PLAY.md"
 ];
 
+// Scanner de segredos — origem: diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md.
+// A vacina proíbe o modelo textual anterior, que casava a palavra e não a
+// atribuição, e reprovava documento que só citava o nome da variável. O que vale
+// é o VALOR atribuído: placeholder passa, segredo de verdade reprova.
+//
+// A citação do arquivo da vacina acima não é enfeite: `validate-vaccines.mjs`
+// procura por ela para provar que esta prevenção continua ligada a quem a pediu.
+// Ela sumiu quando este validador passou a descobrir as vacinas por varredura em
+// vez de lista fixa, e o portão de vacinas ficou vermelho até esta linha voltar.
 function isSafeSecretPlaceholder(rawValue){
  const withoutContinuation=String(rawValue??"").replace(/[ \t]*\\[ \t]*$/,"" ).trim();
  const value=withoutContinuation.replace(/^("|'|`)|("|'|`)$/g,"").trim();
@@ -120,8 +137,17 @@ if(errors.length===0){
  }
  for(const token of["diretrizes/SPEC.md","diretrizes/INVENTARIO.md","diretrizes/RECUPERACAO.md","pnpm validate:docs"])
   if(!readme.includes(token))errors.push(`README sem referência obrigatória: ${token}`);
- for(let id=1;id<=13;id++)if(!vaccinesIndex.includes(`VACINA-${String(id).padStart(3,"0")}`))
-  errors.push(`Catálogo de vacinas incompleto: VACINA-${String(id).padStart(3,"0")}`);
+ // Nos dois sentidos: arquivo sem verbete no catálogo e verbete no catálogo
+ // sem arquivo. Só o primeiro sentido deixaria passar vacina citada e ausente.
+ for(const file of requiredVaccines){
+  const id=file.match(/VACINA-\d{3}/)[0];
+  if(!vaccinesIndex.includes(id))errors.push(`Catálogo de vacinas incompleto: ${id} tem arquivo e não tem verbete.`);
+  if(!vaccinesIndex.includes(file.replace(`${vaccineDir}/`,"")))
+   errors.push(`Catálogo de vacinas sem o arquivo de ${id} na árvore da seção 4.`);
+ }
+ for(const id of new Set(vaccinesIndex.match(/VACINA-\d{3}/g)??[]))
+  if(!requiredVaccines.some(file=>file.includes(id)))
+   errors.push(`Catálogo cita ${id}, que não existe em ${vaccineDir}.`);
  if(!vaccinesIndex.includes("Definition of Done de erro"))errors.push("Catálogo de vacinas sem Definition of Done de erro.");
  for(const token of["Arquitetura em operação","WCAG 2.2 nível AA","Estados obrigatórios","Padrões proibidos","Pipeline obrigatório de UI/UX","Checklist de entrega"])
   if(!uiUx.includes(token))errors.push(`UI/UX Pro Max incompleta: ${token}`);

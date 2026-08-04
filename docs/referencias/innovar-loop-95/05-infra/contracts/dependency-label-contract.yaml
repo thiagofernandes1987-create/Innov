@@ -1,0 +1,24 @@
+version: 1
+purpose: Contract used by Innovar NetworkPolicies to select runtime dependencies.
+dependencies:
+  postgresql:
+    namespace: innovar-data
+    pod_labels:
+      app.kubernetes.io/name: postgresql
+    ports: [5432]
+  redpanda:
+    namespace: innovar-events
+    pod_labels:
+      app.kubernetes.io/name: redpanda
+    ports: [8082, 9092]
+  dns:
+    namespace: kube-system
+    pod_labels:
+      k8s-app: kube-dns
+    ports: [53]
+validation:
+  fail_closed: true
+  required_before_install:
+    - kubectl get namespace with expected kubernetes.io/metadata.name label
+    - kubectl get pods in dependency namespace matching every configured pod label
+    - kubectl auth can-i create networkpolicies.networking.k8s.io

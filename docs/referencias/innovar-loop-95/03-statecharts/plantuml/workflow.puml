@@ -1,0 +1,15 @@
+@startuml
+[*] --> DRAFT
+DRAFT --> SUBMITTED : SUBMIT\n[versionMatches && hasRequiredFields]
+SUBMITTED --> UNDER_REVIEW : [amount <= approvalLimit]
+SUBMITTED --> WAITING_APPROVAL : [amount > approvalLimit]
+UNDER_REVIEW --> APPROVED : APPROVE [versionMatches]
+UNDER_REVIEW --> REJECTED : REJECT [hasReason]
+UNDER_REVIEW --> DRAFT : RETURN [hasReason]
+WAITING_APPROVAL --> APPROVED : APPROVE [versionMatches]
+WAITING_APPROVAL --> REJECTED : REJECT [hasReason]
+DRAFT --> CANCELED : CANCEL [hasReason]
+APPROVED --> [*]
+REJECTED --> [*]
+CANCELED --> [*]
+@enduml

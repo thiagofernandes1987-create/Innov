@@ -1,0 +1,9 @@
+version: 1
+status: POLICY_DRAFT_REQUIRES_LEGAL_APPROVAL
+rules:
+  business_records: capability-specific and purpose-limited
+  execution_evidence: immutable for approved audit period
+  dead_letters: bounded retention with reviewed replay/resolution
+  logs: shortest operationally sufficient period
+  backups: deletion propagates according to documented restore cycle
+legal_hold: suspends deletion only with recorded authority and scope

@@ -1,0 +1,122 @@
+# Checklist de Remediação — Rodada 2
+
+**Total:** 35 achados.
+
+Legenda: `[x]` ação local executada; `[ ]` prova/decisão ainda pendente; `RESOLVED_LOCAL` não equivale a prova operacional.
+
+- [x] **AUD-CAN-001** — `RESOLVED_LOCAL` — STATUS.md canônico permanece no ciclo AUTO6
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_canonical_status.py`.
+- [x] **AUD-CAN-002** — `RESOLVED_LOCAL` — Narrativa do README não identifica inequivocamente o ciclo AUTO12
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_canonical_status.py`.
+- [x] **AUD-INT-001** — `RESOLVED_LOCAL` — SHA256SUMS.txt não representa o pacote entregue
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/verify_sha256_manifest.py`.
+- [x] **AUD-HYG-001** — `RESOLVED_LOCAL` — Artefatos de cache/temporários foram incluídos no ZIP
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_package_hygiene.py`.
+- [x] **AUD-EVD-001** — `RESOLVED_LOCAL` — Arquivos de evidência vazios coexistem com referências formais
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_evidence_records.py`.
+- [x] **AUD-EVD-002** — `RESOLVED_LOCAL` — Campanha de 100 rodadas mistura presença estática com execução
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/run_100_round_evidence_campaign.py`.
+- [x] **AUD-TST-001** — `RESOLVED_LOCAL` — pytest não consegue coletar a suíte completa
+  - Implementação/preparação local: concluída.
+  - Validação: `python -m pytest -q -p no:cacheprovider`.
+- [x] **AUD-TST-002** — `RESOLVED_LOCAL` — Validador rotula JSON comum como JSON_SCHEMA_OK
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_all.py`.
+- [x] **AUD-BDD-001** — `RESOLVED_LOCAL` — Cenários BDD são massivamente duplicados
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_bdd_registry.py`.
+- [x] **AUD-BDD-002** — `RESOLVED_LOCAL` — Tags de requisitos BDD não correspondem ao catálogo canônico
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_bdd_registry.py`.
+- [x] **AUD-BDD-003** — `RESOLVED_LOCAL` — Binding registry não contém mapeamento por cenário
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_bdd_registry.py`.
+- [ ] **AUD-SQL-001** — `PARTIAL_EXTERNAL_DEPENDENCY` — Dois modelos de contexto tenant coexistem nas RLS
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_tenant_convention.py`.
+  - [ ] Encerramento externo: Static repair is complete; migration execution and two-role RLS proof require PostgreSQL 16.
+- [ ] **AUD-SQL-002** — `BLOCKED_EXTERNAL` — PostgreSQL, concorrência e RLS permanecem não executados
+  - Implementação/preparação local: concluída.
+  - Validação: `TEST_DATABASE_URL=... python scripts/test_postgres_event_transport.py`.
+  - [ ] Encerramento externo: Requires disposable PostgreSQL 16 and authorized bootstrap privileges.
+- [x] **AUD-API-001** — `RESOLVED_LOCAL` — Operação de leitura individual de record não existe
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_openapi_contract.py`.
+- [x] **AUD-API-002** — `RESOLVED_LOCAL` — Catálogo de erros não está fechado no contrato OpenAPI
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_error_catalog.py`.
+- [x] **AUD-API-003** — `RESOLVED_LOCAL` — Respostas 401/403 são inconsistentes entre operações protegidas
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_openapi_contract.py`.
+- [x] **AUD-EVT-001** — `RESOLVED_LOCAL` — AsyncAPI 3 possui cobertura operacional incompleta
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_asyncapi_operations.py`.
+- [ ] **AUD-EVT-002** — `BLOCKED_EXTERNAL` — Broker Redpanda não foi executado
+  - Implementação/preparação local: concluída.
+  - Validação: `REDPANDA_BROKERS=... python scripts/test_redpanda_runtime.py`.
+  - [ ] Encerramento externo: Requires approved broker, credentials and rpk/client tooling.
+- [x] **AUD-STATE-001** — `RESOLVED_LOCAL` — Registry de migração cobre apenas 2 das 5 máquinas
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_statechart_registry.py`.
+- [ ] **AUD-STATE-002** — `BLOCKED_EXTERNAL` — Execução oficial XState não foi reproduzida nesta auditoria
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/test_xstate_official_runtime.py`.
+  - [ ] Encerramento externo: Requires verified npm lockfile and trusted package resolution.
+- [ ] **AUD-SDK-001** — `PARTIAL_EXTERNAL_DEPENDENCY` — SDK não possui lockfile e usa instalação não determinística no CI
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_dependency_locks.py`.
+  - [ ] Encerramento externo: Exact direct versions are set; a verified package-lock and npm ci remain external.
+- [x] **AUD-SDK-002** — `RESOLVED_LOCAL` — SDK compila e drift gate passa, mas cobertura herda lacunas do OpenAPI
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_sdk_operation_coverage.py && tsc -p 06-sdk/typescript/tsconfig.json --noEmit`.
+- [ ] **AUD-CI-001** — `PARTIAL_EXTERNAL_DEPENDENCY` — Workflow não aplica hardening mínimo de supply chain
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_workflow_security.py`.
+  - [ ] Encerramento externo: Workflow execution, rulesets, branch protection, OIDC and environment protection require GitHub.
+- [ ] **AUD-SUP-001** — `BLOCKED_EXTERNAL` — Imagens de container não estão fixadas por digest
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_image_references.py`.
+  - [ ] Encerramento externo: Requires OCI registry digests, SBOM, signature and provenance.
+- [ ] **AUD-INF-001** — `BLOCKED_EXTERNAL` — Helm foi validado apenas por validador estático próprio
+  - Implementação/preparação local: concluída.
+  - Validação: `helm lint 05-infra/helm && helm template ... && kubeconform -strict ...`.
+  - [ ] Encerramento externo: Helm/kubeconform/Kubernetes are not installed in this environment.
+- [ ] **AUD-INF-002** — `DEFERRED_DECISION_REQUIRED` — Não existe Terraform/OpenTofu
+  - Implementação/preparação local: limitada ao ADR de decisão.
+  - Validação: `Architecture decision followed by tofu fmt/validate/plan`.
+  - [ ] Encerramento externo: Provider, topology, IAM, backend and cost decisions are not supplied.
+- [ ] **AUD-OBS-001** — `BLOCKED_EXTERNAL` — SLOs são metas declaradas, não medições operacionais
+  - Implementação/preparação local: concluída.
+  - Validação: `Execute load/game-day against deployed services and telemetry`.
+  - [ ] Encerramento externo: Requires representative deployment, load source and metrics backend.
+- [x] **AUD-SEC-001** — `RESOLVED_LOCAL` — Threat model formal não está presente
+  - Implementação/preparação local: concluída.
+  - Validação: `Document review against requirements and remediation register`.
+- [x] **AUD-DATA-001** — `RESOLVED_LOCAL` — Governança de dados pessoais não está formalizada como inventário executável
+  - Implementação/preparação local: concluída.
+  - Validação: `Document/schema review`.
+- [x] **AUD-MET-001** — `RESOLVED_LOCAL` — Matriz de métricas contém contradição de escopo
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_metrics_matrix.py`.
+- [x] **AUD-MET-002** — `RESOLVED_LOCAL` — Matriz contém chave YAML textual acidental
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_metrics_matrix.py`.
+- [x] **AUD-DOC-001** — `RESOLVED_LOCAL` — Consolidado interpreta AsyncAPI 3 como publish/subscribe de canal
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_asyncapi_operations.py`.
+- [x] **AUD-DOC-002** — `RESOLVED_LOCAL` — Consolidado não é inventário completo para auditoria
+  - Implementação/preparação local: concluída.
+  - Validação: `Verify inventory count and SHA-256 manifest`.
+- [ ] **AUD-LOCK-001** — `PARTIAL_EXTERNAL_DEPENDENCY` — Lockfile raiz é vazio e não protege dependências
+  - Implementação/preparação local: concluída.
+  - Validação: `python scripts/validate_dependency_locks.py`.
+  - [ ] Encerramento externo: Root empty lockfile removed; verified npm locks and Python hash lock require trusted registries/cache.
+- [x] **AUD-RUN-001** — `RESOLVED_LOCAL` — Evidências de execução externa permanecem BLOCKED e precisam de runbook único
+  - Implementação/preparação local: concluída.
+  - Validação: `Review external gate table and evidence schema`.

@@ -1,0 +1,429 @@
+version: 2
+policy: explicit-scenario-registry
+scenario_count: 38
+statuses:
+- PASS
+- FAIL
+- BLOCKED_EXTERNAL
+- NOT_RUN
+items:
+- scenario_id: SCN-BDD-CACHE-001
+  requirements:
+  - REQ-CACHE-001
+  feature: 04-bdd/features/cache.feature
+  line: 4
+  name: Metadata invalidation removes stale entries
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/cache.feature
+- scenario_id: SCN-BDD-CACHE-002
+  requirements:
+  - REQ-CACHE-001
+  feature: 04-bdd/features/cache.feature
+  line: 10
+  name: Redis unavailable does not fabricate a successful invalidation
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/cache.feature
+- scenario_id: SCN-BDD-CONC-001
+  requirements:
+  - REQ-CONC-001
+  feature: 04-bdd/features/concurrency.feature
+  line: 4
+  name: Only one optimistic update wins
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/concurrency.feature
+- scenario_id: SCN-BDD-CONC-002
+  requirements:
+  - REQ-QUOTA-001
+  feature: 04-bdd/features/concurrency.feature
+  line: 10
+  name: Quota reservation is atomic
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/concurrency.feature
+- scenario_id: SCN-BDD-EVT-003
+  requirements:
+  - REQ-EVT-001
+  feature: 04-bdd/features/event-transport-executable.feature
+  line: 3
+  name: rollback do agregado também remove evento e outbox
+  binding: null
+  execution_level: NOT_EXECUTED
+  required_execution_level: EXTERNAL_INTEGRATION_EXECUTED
+  status: BLOCKED_EXTERNAL
+  evidence_path: audit/evidence-records/postgres-runtime.json
+- scenario_id: SCN-BDD-EVT-004
+  requirements:
+  - REQ-EVT-001
+  feature: 04-bdd/features/event-transport-executable.feature
+  line: 9
+  name: dois publishers não reivindicam a mesma mensagem
+  binding: null
+  execution_level: NOT_EXECUTED
+  required_execution_level: EXTERNAL_INTEGRATION_EXECUTED
+  status: BLOCKED_EXTERNAL
+  evidence_path: audit/evidence-records/postgres-runtime.json
+- scenario_id: SCN-BDD-EVT-005
+  requirements:
+  - REQ-DLQ-001
+  feature: 04-bdd/features/event-transport-executable.feature
+  line: 15
+  name: replay de DLQ exige escopo administrativo, motivo e idempotência
+  binding: bdd_steps.test_event_transport_steps.Steps.test_given_open_dlq_when_replay_then_exactly_one_effect
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_event_transport_steps.py
+- scenario_id: SCN-BDD-EVT-006
+  requirements:
+  - REQ-EVT-002
+  feature: 04-bdd/features/event-transport-executable.feature
+  line: 21
+  name: consumidor duplicado não reaplica efeito
+  binding: bdd_steps.test_event_transport_steps.Steps.test_given_duplicate_delivery_when_consumed_then_one_effect
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_event_transport_steps.py
+- scenario_id: SCN-BDD-EVT-001
+  requirements:
+  - REQ-EVT-001
+  feature: 04-bdd/features/events.feature
+  line: 4
+  name: Aggregate and outbox are atomic
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/events.feature
+- scenario_id: SCN-BDD-EVT-002
+  requirements:
+  - REQ-EVT-002
+  feature: 04-bdd/features/events.feature
+  line: 10
+  name: Duplicate consumer delivery applies one effect
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/events.feature
+- scenario_id: SCN-BDD-EVID-001
+  requirements:
+  - REQ-NFR-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 5
+  name: Record a passing gate with artifact checksum
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/execution-evidence.feature
+- scenario_id: SCN-BDD-EVID-002
+  requirements:
+  - REQ-NFR-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 10
+  name: Reject an invalid checksum
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/execution-evidence.feature
+- scenario_id: SCN-BDD-EVID-003
+  requirements:
+  - REQ-NFR-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 15
+  name: Reject mutation of recorded evidence
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/execution-evidence.feature
+- scenario_id: SCN-BDD-EVID-004
+  requirements:
+  - REQ-NFR-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 20
+  name: Reject deletion of recorded evidence
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/execution-evidence.feature
+- scenario_id: SCN-BDD-EVID-005
+  requirements:
+  - REQ-RLS-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 25
+  name: Hide evidence from another tenant
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/execution-evidence.feature
+- scenario_id: SCN-BDD-EVID-006
+  requirements:
+  - REQ-NFR-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 31
+  name: Accept a complete development configuration
+  binding: bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_canonical_environment_validation_passes
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_execution_evidence_steps.py
+- scenario_id: SCN-BDD-EVID-007
+  requirements:
+  - REQ-NFR-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 36
+  name: Reject a pool with maximum below minimum
+  binding: bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_invalid_pool_configuration_fails_closed
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_execution_evidence_steps.py
+- scenario_id: SCN-BDD-EVID-008
+  requirements:
+  - REQ-NFR-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 41
+  name: Reject retry maximum below retry base
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/execution-evidence.feature
+- scenario_id: SCN-BDD-EVID-009
+  requirements:
+  - REQ-NFR-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 47
+  name: PostgreSQL unavailable is blocked
+  binding: bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_postgres_gate_without_database_is_blocked
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_execution_evidence_steps.py
+- scenario_id: SCN-BDD-EVID-010
+  requirements:
+  - REQ-NFR-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 52
+  name: Kubernetes unavailable is blocked
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/execution-evidence.feature
+- scenario_id: SCN-BDD-EVID-011
+  requirements:
+  - REQ-STATE-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 57
+  name: XState package unavailable is blocked
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/execution-evidence.feature
+- scenario_id: SCN-BDD-EVID-012
+  requirements:
+  - REQ-NFR-001
+  feature: 04-bdd/features/execution-evidence.feature
+  line: 62
+  name: SDK generation is deterministic
+  binding: bdd_steps.test_execution_evidence_steps.ExecutionEvidenceSteps.test_sdk_generation_is_byte_deterministic
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_execution_evidence_steps.py
+- scenario_id: SCN-BDD-IDEMP-001
+  requirements:
+  - REQ-IDEMP-002
+  feature: 04-bdd/features/idempotency.feature
+  line: 4
+  name: Same key and payload replays the original response
+  binding: bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_same_key_and_payload_replays_original_response
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_remediation_steps.py
+- scenario_id: SCN-BDD-IDEMP-002
+  requirements:
+  - REQ-IDEMP-003
+  feature: 04-bdd/features/idempotency.feature
+  line: 10
+  name: Same key with a different payload is rejected
+  binding: bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_same_key_with_different_payload_is_rejected
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_remediation_steps.py
+- scenario_id: SCN-BDD-IDEMP-003
+  requirements:
+  - REQ-IDEMP-001
+  - REQ-IDEMP-002
+  feature: 04-bdd/features/idempotency.feature
+  line: 16
+  name: Concurrent command with the same key reports operation in progress
+  binding: bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_concurrent_key_reports_in_progress
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_remediation_steps.py
+- scenario_id: SCN-BDD-META-001
+  requirements:
+  - REQ-META-001
+  feature: 04-bdd/features/metadata.feature
+  line: 4
+  name: Published object versions are immutable
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/metadata.feature
+- scenario_id: SCN-BDD-META-002
+  requirements:
+  - REQ-QUOTA-001
+  feature: 04-bdd/features/metadata.feature
+  line: 10
+  name: Object creation beyond quota is rejected
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/metadata.feature
+- scenario_id: SCN-BDD-META-003
+  requirements:
+  - REQ-META-002
+  feature: 04-bdd/features/metadata.feature
+  line: 16
+  name: Invalid object key is rejected
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/metadata.feature
+- scenario_id: SCN-BDD-LIFE-001
+  requirements:
+  - REQ-META-003
+  feature: 04-bdd/features/object-lifecycle.feature
+  line: 3
+  name: Publish an object under the expected version
+  binding: bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_publish_under_expected_version
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_remediation_steps.py
+- scenario_id: SCN-BDD-LIFE-002
+  requirements:
+  - REQ-CONC-001
+  - REQ-META-003
+  feature: 04-bdd/features/object-lifecycle.feature
+  line: 9
+  name: Reject a stale transition
+  binding: bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_reject_stale_transition
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_remediation_steps.py
+- scenario_id: SCN-BDD-LIFE-003
+  requirements:
+  - REQ-META-001
+  feature: 04-bdd/features/object-lifecycle.feature
+  line: 15
+  name: Reject mutation of a published version
+  binding: bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_reject_published_mutation
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_remediation_steps.py
+- scenario_id: SCN-BDD-SLA-001
+  requirements:
+  - REQ-SLA-001
+  feature: 04-bdd/features/sla.feature
+  line: 4
+  name: Paused time is excluded
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/sla.feature
+- scenario_id: SCN-BDD-SLA-002
+  requirements:
+  - REQ-SLA-001
+  feature: 04-bdd/features/sla.feature
+  line: 10
+  name: Holidays are excluded
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/sla.feature
+- scenario_id: SCN-BDD-TEN-001
+  requirements:
+  - REQ-RLS-001
+  feature: 04-bdd/features/tenancy.feature
+  line: 4
+  name: Cross-tenant read is denied
+  binding: bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_cross_tenant_read_denied
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_remediation_steps.py
+- scenario_id: SCN-BDD-TEN-002
+  requirements:
+  - REQ-TEN-001
+  feature: 04-bdd/features/tenancy.feature
+  line: 10
+  name: Organization context is derived server-side
+  binding: bdd_steps.test_remediation_steps.RemediationBehaviorSteps.test_organization_context_is_signed_server_side
+  execution_level: UNIT_EXECUTED
+  required_execution_level: null
+  status: PASS
+  evidence_path: bdd_steps/test_remediation_steps.py
+- scenario_id: SCN-BDD-WF-001
+  requirements:
+  - REQ-WF-001
+  feature: 04-bdd/features/workflow.feature
+  line: 4
+  name: Complete draft can be submitted
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/workflow.feature
+- scenario_id: SCN-BDD-WF-002
+  requirements:
+  - REQ-WF-001
+  feature: 04-bdd/features/workflow.feature
+  line: 10
+  name: Rejection without a reason is denied
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/workflow.feature
+- scenario_id: SCN-BDD-WF-003
+  requirements:
+  - REQ-APP-001
+  feature: 04-bdd/features/workflow.feature
+  line: 16
+  name: Approval over limit requires approval path
+  binding: null
+  execution_level: DOCUMENTED
+  required_execution_level: null
+  status: NOT_RUN
+  evidence_path: 04-bdd/features/workflow.feature

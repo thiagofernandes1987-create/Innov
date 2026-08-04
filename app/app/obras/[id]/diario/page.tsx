@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createDailyLog } from "@/app/actions/projects";
 import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
+import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
 import { dailyLogStatusLabels, formatDate, statusBadge } from "@/lib/stage12";
 
 export default async function DailyLogsPage({
@@ -15,11 +16,29 @@ export default async function DailyLogsPage({
   const { id } = await params;
   const { error: pageError } = await searchParams;
   const { supabase, organizationId } = await requireOrganizationContext();
-  const [{ data: project }, { data: logs, error }] = await Promise.all([
+  const [projectResult, logsResult] = await Promise.all([
     supabase.from("projects").select("id,code,name").eq("id", id).eq("organization_id", organizationId).maybeSingle(),
     supabase.from("daily_logs").select("id,log_date,shift,status,weather,summary,occurrences,client_visible,created_at,daily_log_media(count)").eq("project_id", id).order("log_date", { ascending: false })
   ]);
+
+  reportDataAccessError("project-daily-log.project", projectResult.error);
+  reportDataAccessError("project-daily-log.collection", logsResult.error);
+
+  if (projectResult.error) {
+    return (
+      <main className="content">
+        <ProjectNav projectId={id} />
+        <h1>Diário de obra</h1>
+        <div className="validation blocking" role="alert">{DATA_LOAD_ERROR_MESSAGE}</div>
+      </main>
+    );
+  }
+
+  const project = projectResult.data;
   if (!project) notFound();
+
+  const logs = logsResult.data ?? [];
+  const logsLoadFailed = Boolean(logsResult.error);
 
   return (
     <main className="content">
@@ -32,31 +51,33 @@ export default async function DailyLogsPage({
         </div>
       </div>
 
-      {pageError ? <div className="validation blocking">{pageError}</div> : null}
-      {error ? <div className="validation blocking">{error.message}</div> : null}
+      {pageError ? <div className="validation blocking" role="alert">{pageError}</div> : null}
+      {logsLoadFailed ? <div className="validation blocking" role="alert">{DATA_LOAD_ERROR_MESSAGE}</div> : null}
 
       <div className="split-layout">
         <section className="card table-wrap">
-          <table>
-            <thead><tr><th>Data</th><th>Turno</th><th>Status</th><th>Clima</th><th>Resumo</th><th>Mídias</th><th>Portal</th></tr></thead>
-            <tbody>
-              {(logs ?? []).map((log) => {
-                const mediaCount = Array.isArray(log.daily_log_media) ? Number(log.daily_log_media[0]?.count ?? 0) : 0;
-                return (
-                  <tr key={log.id}>
-                    <td><Link href={`/app/obras/${id}/diario/${log.id}`}><strong>{formatDate(log.log_date)}</strong></Link></td>
-                    <td>{log.shift}</td>
-                    <td><span className={statusBadge(log.status)}>{dailyLogStatusLabels[log.status] ?? log.status}</span></td>
-                    <td>{log.weather || "—"}</td>
-                    <td style={{ maxWidth: 320, whiteSpace: "normal" }}>{log.summary || "—"}</td>
-                    <td>{mediaCount}</td>
-                    <td>{log.client_visible ? <span className="badge badge-success">Liberado</span> : <span className="badge">Interno</span>}</td>
-                  </tr>
-                );
-              })}
-              {!logs?.length ? <tr><td colSpan={7}>Nenhum diário registrado.</td></tr> : null}
-            </tbody>
-          </table>
+          {!logsLoadFailed ? (
+            <table>
+              <thead><tr><th>Data</th><th>Turno</th><th>Status</th><th>Clima</th><th>Resumo</th><th>Mídias</th><th>Portal</th></tr></thead>
+              <tbody>
+                {logs.map((log) => {
+                  const mediaCount = Array.isArray(log.daily_log_media) ? Number(log.daily_log_media[0]?.count ?? 0) : 0;
+                  return (
+                    <tr key={log.id}>
+                      <td><Link href={`/app/obras/${id}/diario/${log.id}`}><strong>{formatDate(log.log_date)}</strong></Link></td>
+                      <td>{log.shift}</td>
+                      <td><span className={statusBadge(log.status)}>{dailyLogStatusLabels[log.status] ?? log.status}</span></td>
+                      <td>{log.weather || "—"}</td>
+                      <td style={{ maxWidth: 320, whiteSpace: "normal" }}>{log.summary || "—"}</td>
+                      <td>{mediaCount}</td>
+                      <td>{log.client_visible ? <span className="badge badge-success">Liberado</span> : <span className="badge">Interno</span>}</td>
+                    </tr>
+                  );
+                })}
+                {!logs.length ? <tr><td colSpan={7}>Nenhum diário registrado.</td></tr> : null}
+              </tbody>
+            </table>
+          ) : <div className="card-pad"><strong>Registros temporariamente indisponíveis.</strong><p className="muted">Não conclua que não houve produção ou ocorrência até a coleção ser recarregada.</p></div>}
         </section>
 
         <aside className="card form-card">

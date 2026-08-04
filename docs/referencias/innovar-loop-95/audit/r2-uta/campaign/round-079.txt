@@ -1,0 +1,23 @@
+test_given_duplicate_delivery_when_consumed_then_one_effect (test_event_transport_steps.Steps.test_given_duplicate_delivery_when_consumed_then_one_effect) ... ok
+test_given_open_dlq_when_replay_then_exactly_one_effect (test_event_transport_steps.Steps.test_given_open_dlq_when_replay_then_exactly_one_effect) ... ok
+test_given_replayed_item_when_resolved_then_closed (test_event_transport_steps.Steps.test_given_replayed_item_when_resolved_then_closed) ... ok
+test_given_tenant_a_dlq_when_tenant_b_lists_then_hidden (test_event_transport_steps.Steps.test_given_tenant_a_dlq_when_tenant_b_lists_then_hidden) ... ok
+test_canonical_environment_validation_passes (test_execution_evidence_steps.ExecutionEvidenceSteps.test_canonical_environment_validation_passes) ... ok
+test_invalid_pool_configuration_fails_closed (test_execution_evidence_steps.ExecutionEvidenceSteps.test_invalid_pool_configuration_fails_closed) ... ok
+test_postgres_gate_without_database_is_blocked (test_execution_evidence_steps.ExecutionEvidenceSteps.test_postgres_gate_without_database_is_blocked) ... ok
+test_sdk_generation_is_byte_deterministic (test_execution_evidence_steps.ExecutionEvidenceSteps.test_sdk_generation_is_byte_deterministic) ... SDK_GENERATION: PASS types=20 operations=13
+SDK_GENERATION: PASS types=20 operations=13
+ok
+test_concurrent_key_reports_in_progress (test_remediation_steps.RemediationBehaviorSteps.test_concurrent_key_reports_in_progress) ... ok
+test_cross_tenant_read_denied (test_remediation_steps.RemediationBehaviorSteps.test_cross_tenant_read_denied) ... ok
+test_organization_context_is_signed_server_side (test_remediation_steps.RemediationBehaviorSteps.test_organization_context_is_signed_server_side) ... ok
+test_publish_under_expected_version (test_remediation_steps.RemediationBehaviorSteps.test_publish_under_expected_version) ... ok
+test_reject_published_mutation (test_remediation_steps.RemediationBehaviorSteps.test_reject_published_mutation) ... ok
+test_reject_stale_transition (test_remediation_steps.RemediationBehaviorSteps.test_reject_stale_transition) ... ok
+test_same_key_and_payload_replays_original_response (test_remediation_steps.RemediationBehaviorSteps.test_same_key_and_payload_replays_original_response) ... ok
+test_same_key_with_different_payload_is_rejected (test_remediation_steps.RemediationBehaviorSteps.test_same_key_with_different_payload_is_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 6.460s
+
+OK

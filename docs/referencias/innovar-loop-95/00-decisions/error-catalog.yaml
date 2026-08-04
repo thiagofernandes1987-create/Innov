@@ -1,0 +1,49 @@
+errors:
+  VALIDATION_FAILED:
+    status: 422
+    retryable: false
+  UNAUTHENTICATED:
+    status: 401
+    retryable: false
+  FORBIDDEN:
+    status: 403
+    retryable: false
+  NOT_FOUND:
+    status: 404
+    retryable: false
+  VERSION_CONFLICT:
+    status: 409
+    retryable: true
+  IDEMPOTENCY_KEY_REUSED:
+    status: 409
+    retryable: false
+  OPERATION_IN_PROGRESS:
+    status: 409
+    retryable: true
+  QUOTA_EXCEEDED:
+    status: 429
+    retryable: true
+  RATE_LIMITED:
+    status: 429
+    retryable: true
+  DEPENDENCY_CONFLICT:
+    status: 409
+    retryable: false
+  INVALID_TRANSITION:
+    status: 409
+    retryable: false
+  INTERNAL_ERROR:
+    status: 500
+    retryable: true
+  SERVICE_UNAVAILABLE:
+    status: 503
+    retryable: true
+  PUBLISHED_VERSION_IMMUTABLE:
+    status: 409
+    retryable: false
+  PRECONDITION_REQUIRED:
+    status: 428
+    retryable: false
+  PAYLOAD_TOO_LARGE:
+    status: 413
+    retryable: false

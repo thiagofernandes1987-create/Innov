@@ -1,0 +1,50 @@
+{{- if .Values.eventPublisher.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-event-publisher
+spec:
+  replicas: {{ .Values.eventPublisher.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Release.Name }}-event-publisher
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}-event-publisher
+        app.kubernetes.io/component: event-publisher
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: {{ .Values.eventPublisher.terminationGracePeriodSeconds }}
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: publisher
+          image: "{{ .Values.eventPublisher.image.repository }}:{{ .Values.eventPublisher.image.tag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources: {{- toYaml .Values.eventPublisher.resources | nindent 12 }}
+          envFrom:
+            - secretRef: {name: {{ .Release.Name }}-secrets}
+            - configMapRef: {name: {{ .Release.Name }}-config}
+          env:
+            - {name: EVENT_BROKER_URL, value: "{{ .Values.eventPublisher.brokerUrl }}"}
+            - {name: EVENT_PUBLISHER_BATCH_SIZE, value: "{{ .Values.eventPublisher.batchSize }}"}
+            - {name: EVENT_PUBLISHER_LEASE_SECONDS, value: "{{ .Values.eventPublisher.leaseSeconds }}"}
+          readinessProbe:
+            exec:
+              command: ["python", "-c", "import os; assert os.environ.get('EVENT_BROKER_URL')"]
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["python", "-c", "import os; assert os.environ.get('EVENT_BROKER_URL')"]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+{{- end }}

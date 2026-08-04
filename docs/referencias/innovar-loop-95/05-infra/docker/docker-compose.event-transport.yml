@@ -1,0 +1,48 @@
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.2.18
+    command:
+    - redpanda
+    - start
+    - --overprovisioned
+    - --smp
+    - '1'
+    - --memory
+    - 1G
+    - --reserve-memory
+    - 0M
+    - --node-id
+    - '0'
+    - --check=false
+    - --kafka-addr
+    - PLAINTEXT://0.0.0.0:9092
+    - --advertise-kafka-addr
+    - PLAINTEXT://redpanda:9092
+    - --pandaproxy-addr
+    - 0.0.0.0:8082
+    - --advertise-pandaproxy-addr
+    - redpanda:8082
+    ports:
+    - 127.0.0.1:9092:9092
+    - 127.0.0.1:8082:8082
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - rpk cluster health --exit-when-healthy
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    profiles:
+    - integration
+  event-publisher:
+    image: innovar/event-publisher:BLOCKED_UNTIL_DIGEST_AND_LOCK
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      BROKER_REST_URL: http://redpanda:8082
+      EVENT_PUBLISHER_BATCH_SIZE: 100
+      EVENT_PUBLISHER_LEASE_SECONDS: 60
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    profiles:
+    - external-worker

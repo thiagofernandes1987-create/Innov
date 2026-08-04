@@ -1,0 +1,196 @@
+schema_version: 2
+protocol: UTA-R2
+source_finding_ledger_sha256: 56abe3e6108dce5a6cbd03f6cb65050b72b7c54ff26ced2214e76466f51e735d
+counts:
+  REMEDIATED: 14
+  PARTIAL: 3
+  BLOCKED_EXTERNAL: 6
+remediations:
+- finding_id: FND-R1-001
+  title: Idempotência global permite colisão e exposição cross-tenant no runtime administrativo
+  severity: CRITICAL
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: LOCALLY_EXECUTED
+  summary: Tenant- and operation-scoped replay/resolution idempotency; negative cross-tenant tests pass.
+  residual_risk: null
+- finding_id: FND-R1-002
+  title: Contexto de autenticação do runtime administrativo é falsificável por headers
+  severity: HIGH
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: LOCALLY_EXECUTED
+  summary: Unsigned identity headers are rejected; trusted proxy context requires timestamped HMAC signature.
+  residual_risk: Operational deployment must protect the HMAC secret and terminate authentication at a trusted proxy.
+- finding_id: FND-R1-003
+  title: Runtime administrativo diverge do OpenAPI em idempotência, códigos e respostas
+  severity: HIGH
+  r1_status: OPEN
+  r2_result: PARTIAL
+  execution_level_reached: LOCALLY_EXECUTED
+  summary: SQLite reference runtime, OpenAPI, SDK and error catalog were aligned; PostgreSQL function 0014 was added statically.
+  residual_risk: PostgreSQL adapter behavior remains unexecuted in a real database.
+- finding_id: FND-R1-004
+  title: SDK apresenta drift semântico apesar do gate de cobertura por operationId
+  severity: HIGH
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: STATICALLY_VALIDATED
+  summary: SDK gate now checks source hash, response types and required idempotency options; TypeScript compiles and drift
+    gate passes.
+  residual_risk: null
+- finding_id: FND-R1-005
+  title: Pipeline denominado geração de SDK produz apenas inventário de operações
+  severity: MEDIUM
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: STATICALLY_VALIDATED
+  summary: Generator now emits generated-contract.ts and operation inventory tied to the OpenAPI digest.
+  residual_risk: null
+- finding_id: FND-R1-006
+  title: Backoff do publisher não cresce com tentativas
+  severity: HIGH
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: LOCALLY_EXECUTED
+  summary: OutboxMessage carries attempts and retry delay grows with a cap; directed unit test passes.
+  residual_risk: null
+- finding_id: FND-R1-007
+  title: Harness Docker Compose não é autocontido nem reproduzível
+  severity: HIGH
+  r1_status: OPEN
+  r2_result: PARTIAL
+  execution_level_reached: STATICALLY_VALIDATED
+  summary: Event-admin has a local Dockerfile/build context and loopback-only development defaults.
+  residual_risk: Event-publisher image remains blocked until verified dependencies and OCI digest exist; Docker was unavailable
+    for build execution.
+- finding_id: FND-R1-008
+  title: Lockfiles verificados estão ausentes
+  severity: HIGH
+  r1_status: BLOCKED_EXTERNAL
+  r2_result: BLOCKED_EXTERNAL
+  execution_level_reached: BLOCKED_EXTERNAL
+  summary: One controlled offline attempt per ecosystem confirmed absence of a complete trusted cache.
+  residual_risk: Generate reviewed npm and Python hash lockfiles using trusted registries.
+- finding_id: FND-R1-009
+  title: Imagens OCI não estão fixadas por digest
+  severity: HIGH
+  r1_status: BLOCKED_EXTERNAL
+  r2_result: BLOCKED_EXTERNAL
+  execution_level_reached: BLOCKED_EXTERNAL
+  summary: Image reference gate preserved all mutable/placeholder references as blocked.
+  residual_risk: Resolve immutable digests, SBOM, signatures and provenance in trusted registries.
+- finding_id: FND-R1-010
+  title: Isolamento RLS e migration 0013 não foram provados em PostgreSQL real
+  severity: CRITICAL
+  r1_status: BLOCKED_EXTERNAL
+  r2_result: BLOCKED_EXTERNAL
+  execution_level_reached: BLOCKED_EXTERNAL
+  summary: SQL repair artifacts exist, including migration 0014, but no PostgreSQL execution occurred.
+  residual_risk: Run migrations with two NOBYPASSRLS roles, pool reuse, tenant A/B and concurrency tests.
+- finding_id: FND-R1-011
+  title: Transporte Redpanda/Kafka permanece sem prova integrada
+  severity: HIGH
+  r1_status: BLOCKED_EXTERNAL
+  r2_result: BLOCKED_EXTERNAL
+  execution_level_reached: BLOCKED_EXTERNAL
+  summary: Broker gate returned the reserved external-block code.
+  residual_risk: Execute real Redpanda/Kafka produce, consume, duplicate, ordering, retry, DLQ and replay tests.
+- finding_id: FND-R1-012
+  title: Helm/Kubernetes/NetworkPolicy permanecem sem prova oficial
+  severity: HIGH
+  r1_status: BLOCKED_EXTERNAL
+  r2_result: BLOCKED_EXTERNAL
+  execution_level_reached: BLOCKED_EXTERNAL
+  summary: Static Helm checks pass; official tools and cluster are absent.
+  residual_risk: Run helm lint/template, kubeconform strict, install and NetworkPolicy traffic tests.
+- finding_id: FND-R1-013
+  title: Statecharts não foram executados no runtime oficial XState
+  severity: HIGH
+  r1_status: BLOCKED_EXTERNAL
+  r2_result: BLOCKED_EXTERNAL
+  execution_level_reached: BLOCKED_EXTERNAL
+  summary: Official XState gate is blocked by missing verified lockfile.
+  residual_risk: Resolve the XState graph from a trusted registry and execute machines/snapshot migrations.
+- finding_id: FND-R1-014
+  title: 'Cobertura BDD executada é minoritária: 6 de 38 cenários'
+  severity: HIGH
+  r1_status: OPEN
+  r2_result: PARTIAL
+  execution_level_reached: LOCALLY_EXECUTED
+  summary: Executed BDD scenarios increased from 6 to 14 of 38.
+  residual_risk: 22 scenarios remain NOT_RUN and 2 remain BLOCKED_EXTERNAL.
+- finding_id: FND-R1-015
+  title: Claim local_integration PARTIAL não possui registro explícito de execução local integrada
+  severity: MEDIUM
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: STATICALLY_VALIDATED
+  summary: Unsupported local integration claim was retracted to NOT_CLAIMED.
+  residual_risk: null
+- finding_id: FND-R1-016
+  title: Política de ciclo de vida de artefatos é declarativa e não aplicada
+  severity: MEDIUM
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: STATICALLY_VALIDATED
+  summary: Artifact metadata and lifecycle coverage gate now enforce identity, release, status, date and SHA-256.
+  residual_risk: null
+- finding_id: FND-R1-017
+  title: Gate de compatibilidade de eventos pode aprovar mudanças quebradoras aninhadas
+  severity: HIGH
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: LOCALLY_EXECUTED
+  summary: Recursive compatibility checker covers nested required/properties, allOf/$ref, enums, constraints and additionalProperties;
+    negative fixture test passes.
+  residual_risk: null
+- finding_id: FND-R1-018
+  title: SCI por capability é validado aritmeticamente, não quanto à força da evidência
+  severity: MEDIUM
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: STATICALLY_VALIDATED
+  summary: Capability scores are capped by evidence strength and global SCI/EEI remain NOT_CALCULATED.
+  residual_risk: null
+- finding_id: FND-R1-019
+  title: Defaults de desenvolvimento expõem serviços e credenciais fracas
+  severity: MEDIUM
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: STATICALLY_VALIDATED
+  summary: Development services bind to 127.0.0.1 and require explicit secrets/profile.
+  residual_risk: null
+- finding_id: FND-R1-020
+  title: Campanha de 100 controles mede presença e tokens como PASS, não maturidade
+  severity: MEDIUM
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: LOCALLY_EXECUTED
+  summary: 'Campaign classifies inventory/string checks as OBSERVED; final run: 24 PASS, 66 OBSERVED, 10 BLOCKED_EXTERNAL,
+    0 FAIL.'
+  residual_risk: null
+- finding_id: FND-R1-021
+  title: Runtime em memória não inclui operation_scope na idempotência
+  severity: HIGH
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: LOCALLY_EXECUTED
+  summary: In-memory idempotency scope is now (organization, operation_scope, key), with unit tests.
+  residual_risk: null
+- finding_id: FND-R1-022
+  title: Runtime HTTP não limita body e devolve detalhes brutos de exceção
+  severity: MEDIUM
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: LOCALLY_EXECUTED
+  summary: HTTP body limit, JSON validation and sanitized error mapping are implemented and tested.
+  residual_risk: null
+- finding_id: FND-R1-023
+  title: Baseline e schemas atuais reutilizam os mesmos $id JSON Schema
+  severity: MEDIUM
+  r1_status: OPEN
+  r2_result: REMEDIATED
+  execution_level_reached: LOCALLY_EXECUTED
+  summary: Baseline $id values are unique and collision test passes.
+  residual_risk: null

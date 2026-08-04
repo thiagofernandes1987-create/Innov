@@ -1,0 +1,119 @@
+{
+  "audit_id": "INNOVAR-AUTO12-R1",
+  "source_zip": "INNOVAR_EXECUTABLE_SPEC_AUTO12_100_RODADAS_2026-07-22.zip",
+  "source_zip_sha256": "a38dfbac3ff539c1adc1aa4b1a692f4fc2661b5b0ffa0056faaefe73d03b0fb7",
+  "consolidated_input_sha256": "0f620526501656d339ab8ad86258198d39a78156427fd53d73dc211cccf659c0",
+  "generated_at": "2026-07-22T21:00:00-03:00",
+  "files": [
+    {
+      "path": "AUDIT_MASTER.md",
+      "bytes": 32415,
+      "sha256": "5199406767d2764b5f414f4458cb96260e69d9250e758844354b48799f109079"
+    },
+    {
+      "path": "AUDIT_SUMMARY.md",
+      "bytes": 1545,
+      "sha256": "d1cde0665417f430e2e269bfe7da95ddbbfbe9337e89916304448512fb3542f4"
+    },
+    {
+      "path": "EXECUTION_BOUNDARIES.md",
+      "bytes": 2694,
+      "sha256": "1e0caca6f07739c8dd6b608864ab766ecd2b9149495ec6f15899ba41238a6465"
+    },
+    {
+      "path": "FINDINGS_REGISTER.yaml",
+      "bytes": 27281,
+      "sha256": "b588bbcd0fd8a6d8dc86e11dab518d650cbf5503c3aa50af1d4104007d43f150"
+    },
+    {
+      "path": "INVENTORY_MASTER.md",
+      "bytes": 50639,
+      "sha256": "abd5ce664dbe85cbfbdc7c3752f14d5ba61307899f66192c9216db0ec3a74d3a"
+    },
+    {
+      "path": "REMEDIATION_CHECKLIST.md",
+      "bytes": 8548,
+      "sha256": "f809028c6104148f2f35b803389df97fb977144a1b85c7c88f45a3148773220f"
+    },
+    {
+      "path": "ROUND1_VALIDATION.json",
+      "bytes": 377,
+      "sha256": "a140fb34e989b9ce4347495412779c532c1f6f27acda38a70d53ba661377df45"
+    },
+    {
+      "path": "TRACEABILITY_MATRIX_AUDIT.md",
+      "bytes": 6519,
+      "sha256": "2f9f5189b04ab29f4195481f46bc930909295b75291d6fbbad14c092d44d1a88"
+    },
+    {
+      "path": "evidence/STATIC_SCAN.json",
+      "bytes": 139269,
+      "sha256": "90e15184860092b0b61b0d78f617047c33cc664588745e29e4d39c39595bc30d"
+    },
+    {
+      "path": "evidence/bdd_event_transport.txt",
+      "bytes": 1538,
+      "sha256": "c34079c4123f05a7c33b4155d186e5218fb891160c792c464871ab5e5cff6a4e"
+    },
+    {
+      "path": "evidence/env_contract.txt",
+      "bytes": 48,
+      "sha256": "b56555268148cf92b1eef8e5ba4878a2b41cd16dee322b478a26c9bdd4715aa9"
+    },
+    {
+      "path": "evidence/event_compatibility.txt",
+      "bytes": 27,
+      "sha256": "5b13346872586b537058933cd1463b53df7ce2137fa4fa7adbecd93e3b752cb1"
+    },
+    {
+      "path": "evidence/gherkin_coverage.txt",
+      "bytes": 160,
+      "sha256": "509c981f2fbe58508ca4b7972bcadb9b6b369bcef333b9d5845b20cbf864bb1c"
+    },
+    {
+      "path": "evidence/helm_static.txt",
+      "bytes": 29,
+      "sha256": "dd1036d87926e16f0dfd2bc7e3dbcd61d5513959dbaf4cbe321c451ecd59ca0b"
+    },
+    {
+      "path": "evidence/pytest.txt",
+      "bytes": 8886,
+      "sha256": "6ca339f7da26228e62792fdb4b328384d0fdb59a5631d2d66c933806bda3fa19"
+    },
+    {
+      "path": "evidence/requirement_traceability.txt",
+      "bytes": 87,
+      "sha256": "7651f769e249723bba868d2dbb7d639703f634efd5d13b8607ee577f95bea346"
+    },
+    {
+      "path": "evidence/sdk_drift.txt",
+      "bytes": 59,
+      "sha256": "ed4e78d6c7074c0e4b3c717ba9a0676997b452ad82602d4aae7f8135d8ea92f7"
+    },
+    {
+      "path": "evidence/sdk_tsc_global.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "evidence/traceability_matrix.txt",
+      "bytes": 64,
+      "sha256": "f7eeeea702cae9b5dc8ef3c74b5bb353335f30a7332a7f980c25791f276b9e19"
+    },
+    {
+      "path": "evidence/unittest_bdd_steps.txt",
+      "bytes": 1366,
+      "sha256": "a24079e37dfa0f96b4ff6ea3959b7227e7e5f1f8908a9b2028bfe80102f36774"
+    },
+    {
+      "path": "evidence/unittest_tests.txt",
+      "bytes": 9973,
+      "sha256": "eb9aeaad348b33b50d32e7250fc37f2aa4d6f696536b7d830da1a969169b9eb1"
+    },
+    {
+      "path": "evidence/validate_all.txt",
+      "bytes": 14708,
+      "sha256": "adb179e29db7a51738616d30f22385d9375afbcc301717033c8ed2714bc40ffa"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+name: Object Runtime Database Tests
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "supabase/migrations/*object_runtime*.sql"
+      - "supabase/tests/object-runtime/**"
+      - "scripts/run-object-runtime-db-tests.mjs"
+      - "scripts/validate-object-runtime.mjs"
+      - "lib/object-runtime/**"
+      - ".github/workflows/object-runtime-db.yml"
+  pull_request:
+    paths:
+      - "supabase/migrations/*object_runtime*.sql"
+      - "supabase/tests/object-runtime/**"
+      - "scripts/run-object-runtime-db-tests.mjs"
+      - "scripts/validate-object-runtime.mjs"
+      - "lib/object-runtime/**"
+      - ".github/workflows/object-runtime-db.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: object-runtime-db-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  catalog-behaviour:
+    name: Catalog behaviour against PostgreSQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: object_runtime_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/object_runtime_test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install --yes postgresql-client
+
+      # O script exige confirmação explícita dos testes executados: se o banco
+      # não estiver acessível ele diz que não rodou, em vez de passar calado.
+      - name: Run Object Runtime database tests
+        run: node scripts/run-object-runtime-db-tests.mjs
+
+      - name: Validate Object Runtime invariants
+        run: node scripts/validate-object-runtime.mjs

@@ -1,0 +1,189 @@
+asyncapi: 3.0.0
+info:
+  title: Innovar Platform Events
+  version: 1.0.0
+defaultContentType: application/json
+channels:
+  metadataObjectCreated:
+    address: metadata.object.created.v1
+    messages:
+      event:
+        $ref: '#/components/messages/MetadataObjectCreated'
+    bindings:
+      kafka: {}
+  metadataObjectPublished:
+    address: metadata.object.published.v1
+    messages:
+      event:
+        $ref: '#/components/messages/MetadataObjectPublished'
+    bindings:
+      kafka: {}
+  metadataRecordCreated:
+    address: metadata.record.created.v1
+    messages:
+      event:
+        $ref: '#/components/messages/MetadataRecordCreated'
+    bindings:
+      kafka: {}
+  quotaExceeded:
+    address: platform.quota.exceeded.v1
+    messages:
+      event:
+        $ref: '#/components/messages/QuotaExceeded'
+    bindings:
+      kafka: {}
+  workItemProjected:
+    address: work.item.projected.v1
+    messages:
+      event:
+        $ref: '#/components/messages/WorkItemProjected'
+    bindings:
+      kafka: {}
+  metadataObjectTransitioned:
+    address: metadata.object.transitioned.v1
+    messages:
+      event:
+        $ref: '#/components/messages/MetadataObjectTransitioned'
+    bindings:
+      kafka: {}
+  executionEvidenceRecorded:
+    address: execution.evidence.recorded.v1
+    messages:
+      event:
+        $ref: '#/components/messages/ExecutionEvidenceRecorded'
+    bindings:
+      kafka: {}
+operations:
+  publishMetadataObjectCreated:
+    action: send
+    channel:
+      $ref: '#/channels/metadataObjectCreated'
+    messages:
+    - $ref: '#/channels/metadataObjectCreated/messages/event'
+  consumeMetadataObjectCreated:
+    action: receive
+    channel:
+      $ref: '#/channels/metadataObjectCreated'
+    messages:
+    - $ref: '#/channels/metadataObjectCreated/messages/event'
+  publishMetadataObjectTransitioned:
+    action: send
+    channel:
+      $ref: '#/channels/metadataObjectTransitioned'
+    messages:
+    - $ref: '#/channels/metadataObjectTransitioned/messages/event'
+  consumeMetadataObjectTransitioned:
+    action: receive
+    channel:
+      $ref: '#/channels/metadataObjectTransitioned'
+    messages:
+    - $ref: '#/channels/metadataObjectTransitioned/messages/event'
+  publishExecutionEvidenceRecorded:
+    action: send
+    channel:
+      $ref: '#/channels/executionEvidenceRecorded'
+    messages:
+    - $ref: '#/channels/executionEvidenceRecorded/messages/event'
+  consumeExecutionEvidenceRecorded:
+    action: receive
+    channel:
+      $ref: '#/channels/executionEvidenceRecorded'
+    messages:
+    - $ref: '#/channels/executionEvidenceRecorded/messages/event'
+  publishMetadataObjectPublished:
+    action: send
+    channel:
+      $ref: '#/channels/metadataObjectPublished'
+    summary: Publish metadataObjectPublished.
+    messages:
+    - $ref: '#/channels/metadataObjectPublished/messages/event'
+  consumeMetadataObjectPublished:
+    action: receive
+    channel:
+      $ref: '#/channels/metadataObjectPublished'
+    summary: Consume metadataObjectPublished.
+    messages:
+    - $ref: '#/channels/metadataObjectPublished/messages/event'
+  publishMetadataRecordCreated:
+    action: send
+    channel:
+      $ref: '#/channels/metadataRecordCreated'
+    summary: Publish metadataRecordCreated.
+    messages:
+    - $ref: '#/channels/metadataRecordCreated/messages/event'
+  consumeMetadataRecordCreated:
+    action: receive
+    channel:
+      $ref: '#/channels/metadataRecordCreated'
+    summary: Consume metadataRecordCreated.
+    messages:
+    - $ref: '#/channels/metadataRecordCreated/messages/event'
+  publishQuotaExceeded:
+    action: send
+    channel:
+      $ref: '#/channels/quotaExceeded'
+    summary: Publish quotaExceeded.
+    messages:
+    - $ref: '#/channels/quotaExceeded/messages/event'
+  consumeQuotaExceeded:
+    action: receive
+    channel:
+      $ref: '#/channels/quotaExceeded'
+    summary: Consume quotaExceeded.
+    messages:
+    - $ref: '#/channels/quotaExceeded/messages/event'
+  publishWorkItemProjected:
+    action: send
+    channel:
+      $ref: '#/channels/workItemProjected'
+    summary: Publish workItemProjected.
+    messages:
+    - $ref: '#/channels/workItemProjected/messages/event'
+  consumeWorkItemProjected:
+    action: receive
+    channel:
+      $ref: '#/channels/workItemProjected'
+    summary: Consume workItemProjected.
+    messages:
+    - $ref: '#/channels/workItemProjected/messages/event'
+components:
+  messages:
+    MetadataObjectCreated:
+      name: metadata.object.created.v1
+      payload:
+        $ref: ./schemas/metadata/metadata.object.created.v1.schema.json
+    MetadataObjectPublished:
+      name: metadata.object.published.v1
+      payload:
+        $ref: ./schemas/metadata/metadata.object.published.v1.schema.json
+    MetadataRecordCreated:
+      name: metadata.record.created.v1
+      payload:
+        $ref: ./schemas/metadata/metadata.record.created.v1.schema.json
+    QuotaExceeded:
+      name: platform.quota.exceeded.v1
+      payload:
+        $ref: ./schemas/platform/platform.quota.exceeded.v1.schema.json
+    WorkItemProjected:
+      name: work.item.projected.v1
+      payload:
+        $ref: ./schemas/platform/work.item.projected.v1.schema.json
+    MetadataObjectTransitioned:
+      name: metadata.object.transitioned.v1
+      payload:
+        $ref: ./schemas/metadata/metadata.object.transitioned.v1.schema.json
+    ExecutionEvidenceRecorded:
+      name: execution.evidence.recorded.v1
+      payload:
+        $ref: ./schemas/platform/execution.evidence.recorded.v1.schema.json
+servers:
+  redpanda:
+    host: '{brokerHost}:{brokerPort}'
+    protocol: kafka
+    description: Redpanda/Kafka endpoint supplied by the deployment environment.
+    variables:
+      brokerHost:
+        default: redpanda
+        description: DNS name only; not proof of deployment.
+      brokerPort:
+        default: '9092'

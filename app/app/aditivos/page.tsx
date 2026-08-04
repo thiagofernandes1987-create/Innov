@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
 import { singleRelation } from "@/lib/supabase/relations";
@@ -12,7 +14,8 @@ export default async function AmendmentsPage() {
 
   return (
     <main className="content">
-      <div className="page-head"><div><span className="badge">ALTERAÇÕES CONTRATUAIS</span><h1>Aditivos</h1><p className="muted">Impactos de escopo, valor e prazo preservando o contrato original.</p></div></div>
+      <BarraDeTrabalho title="Aditivos" primaryAction={<Link className="button button-primary" href="/app/aditivos/novo">Novo aditivo</Link>} />
+      <p className="workspace-intro">Impactos de escopo, valor e prazo registrados antes da execução, preservando o contrato original.</p>
       {error ? <div className="validation blocking">{error.message}</div> : null}
       <section className="card table-wrap">
         <table>

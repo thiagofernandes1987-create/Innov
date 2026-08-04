@@ -1,0 +1,5 @@
+command: npx tsc --noEmit -p tsconfig.json
+exit_code: 0
+stdout:
+
+stderr:

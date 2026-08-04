@@ -2,34 +2,32 @@ import fs from"node:fs";
 
 const errors=[];
 const read=file=>fs.readFileSync(file,"utf8");
-const vaccines=[
- "diretrizes/vacinas/VACINA-001-RELACOES-SUPABASE.md",
- "diretrizes/vacinas/VACINA-002-VALIDADORES-SEMANTICOS.md",
- "diretrizes/vacinas/VACINA-003-LEDGER-MIGRATIONS-SUPABASE.md",
- "diretrizes/vacinas/VACINA-004-PRIVILEGIOS-RPCS.md",
- "diretrizes/vacinas/VACINA-005-WORKFLOW-PROTEGIDO.md",
- "diretrizes/vacinas/VACINA-006-RUNTIME-GITHUB-ACTIONS.md",
- "diretrizes/vacinas/VACINA-007-SCANNER-DE-SEGREDOS.md",
- "diretrizes/vacinas/VACINA-008-INSTALACAO-HOMOLOGACAO.md",
- "diretrizes/vacinas/VACINA-009-PREREQUISITOS-E-RELATORIO-E2E.md",
- "diretrizes/vacinas/VACINA-010-JSON-DE-RELATORIOS.md",
- "diretrizes/vacinas/VACINA-011-IDENTIFICADORES-RESERVADOS-NODE-NEXT.md",
- "diretrizes/vacinas/VACINA-012-ESTADO-POS-MERGE.md",
- "diretrizes/vacinas/VACINA-013-FIXTURES-RESPEITAM-FRONTEIRAS-SENSIVEIS.md"
-];
+const vaccinesDirectory="diretrizes/vacinas";
+// Descoberta por padrão e ordem lexical: VACINA-014-LISTA-FIXA-DE-MIGRATIONS-EM-TESTE.md.
+// A procedência fica junto do código, conforme VACINA-016-VALIDADOR-QUE-CITA-OUTRO-VALIDADOR.md.
+const vaccines=fs.readdirSync(vaccinesDirectory)
+ .filter(file=>/^VACINA-\d{3}-.*\.md$/.test(file))
+ .sort()
+ .map(file=>`${vaccinesDirectory}/${file}`);
 const required=["diretrizes/VACINAS.md",...vaccines];
 
 for(const file of required){
  if(!fs.existsSync(file)){errors.push(`Vacina ausente: ${file}`);continue;}
  const content=read(file);
- for(const section of["Causa raiz","Vacina","Teste preventivo","Critério de encerramento"]){
-  if(file!=="diretrizes/VACINAS.md"&&!content.includes(section))errors.push(`${file} sem seção ${section}.`);
+ if(file!=="diretrizes/VACINAS.md"){
+  const legacy=content.includes("Causa raiz")&&content.includes("Vacina")&&/Teste (?:preventivo|negativo)/.test(content);
+  const current=["Qual foi o problema","Como ocorreu","Por que aconteceu","Como foi detectado","Qual foi a solução"]
+   .every(section=>content.includes(section));
+  if(!legacy&&!current)errors.push(`${file} não segue nem a estrutura legada nem as cinco perguntas do protocolo atual.`);
  }
 }
 
 if(fs.existsSync("diretrizes/VACINAS.md")){
  const index=read("diretrizes/VACINAS.md");
- for(let id=1;id<=13;id++)if(!index.includes(`VACINA-${String(id).padStart(3,"0")}`))errors.push(`Catálogo sem VACINA-${String(id).padStart(3,"0")}.`);
+ for(const file of vaccines){
+  const id=/VACINA-\d{3}/.exec(file)?.[0];
+  if(id&&!index.includes(id))errors.push(`Catálogo sem ${id}.`);
+ }
 }
 
 // VACINA-001 — relações Supabase variáveis.
@@ -207,6 +205,35 @@ else{
  const guard=read(sensitiveGuard);
  for(const token of["enforce_inventory_sensitive_write","reference_unit_cost","Permissão sensível necessária para definir custo de referência","revoke all on function"])
   if(!guard.includes(token))errors.push(`Guard sensível incompleto: ${token}`);
+}
+
+// VACINA-060 — leitor que não entende o arquivo responde zero.
+const leitorSinapi="lib/sinapi/relatorio-oficial.ts";
+if(!fs.existsSync(leitorSinapi))errors.push(`Leitor do relatório oficial ausente: ${leitorSinapi}`);
+else{
+ const leitor=read(leitorSinapi);
+ // As três recusas do formato: código vindo do MATCH, preço vazio devolvendo
+ // null, e a contagem de colunas de custo conferida contra as 27 UFs.
+ if(!/MATCH\\\(/.test(leitor))errors.push("Leitor SINAPI não lê mais o código da composição do argumento do MATCH.");
+ if(!leitor.includes('if (cru === "" || cru === "-") return null;'))errors.push("Leitor SINAPI voltou a tratar preço vazio como número.");
+ if(!leitor.includes("colunasDeCusto.length !== UFS.length"))errors.push("Leitor SINAPI deixou de conferir as 27 colunas de custo antes do mapeamento posicional de UF.");
+}
+const montadorSinapi="lib/sinapi/official-reference-parser.ts";
+if(!fs.existsSync(montadorSinapi))errors.push(`Montador do pacote SINAPI ausente: ${montadorSinapi}`);
+else{
+ const montador=read(montadorSinapi);
+ if(!montador.includes("custoPorComposicao.get(filho.codigo)"))errors.push("Montador SINAPI voltou a gravar zero no custo da sub-composição.");
+}
+if(fs.existsSync("lib/sinapi/automatic-update-v2.ts"))errors.push("`automatic-update-v2.ts` voltou: o leitor do SINAPI tem um caminho só.");
+const conferenciaAoVivo="tests/sinapi-layout-publicado.test.ts";
+if(!fs.existsSync(conferenciaAoVivo))errors.push(`Conferência do layout publicado ausente: ${conferenciaAoVivo}`);
+if(fs.existsSync("package.json")){
+ const pacote=JSON.parse(read("package.json"));
+ if(!pacote.scripts?.["sinapi:layout"])errors.push("`pnpm sinapi:layout` ausente: o layout publicado deixou de ser conferível.");
+ const prebuild=pacote.scripts?.prebuild??"";
+ if(prebuild.includes("sinapi-xlsx-parser"))errors.push("O `prebuild` voltou a conferir o leitor antigo em vez do leitor em uso.");
+ if(!prebuild.includes("sinapi-relatorio-oficial")||!prebuild.includes("sinapi-official-reference-parser"))
+  errors.push("O `prebuild` não confere o leitor SINAPI em uso.");
 }
 
 if(errors.length){

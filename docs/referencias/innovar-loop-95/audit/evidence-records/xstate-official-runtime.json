@@ -1,0 +1,20 @@
+{
+  "evidence_id": "xstate-official-runtime",
+  "status": "BLOCKED_EXTERNAL",
+  "execution_level": "NOT_EXECUTED",
+  "generated_at": "2026-07-23T00:00:00Z",
+  "command": "npm ci && npm test",
+  "environment": {
+    "execution_context": "chat-container",
+    "network": "restricted"
+  },
+  "result_summary": "npm package resolution unavailable; no verified lockfile",
+  "source_artifacts": [
+    "tools/xstate-runtime/package.json",
+    "tools/xstate-runtime/test-machines.ts"
+  ],
+  "artifact_sha256": null,
+  "blocked_reason": "npm package resolution unavailable; no verified lockfile",
+  "tool_versions": {},
+  "required_execution_level": "COMPONENT_EXECUTED"
+}

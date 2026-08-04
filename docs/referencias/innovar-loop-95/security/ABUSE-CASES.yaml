@@ -1,0 +1,18 @@
+version: 1
+cases:
+  - id: ABUSE-TENANT-001
+    attempt: tenant A reads or writes tenant B data
+    required_control: PostgreSQL RLS with two NOBYPASSRLS roles
+    status: BLOCKED_EXTERNAL
+  - id: ABUSE-EVENT-001
+    attempt: duplicate or forged event is processed twice
+    required_control: inbox deduplication and broker integration test
+    status: BLOCKED_EXTERNAL
+  - id: ABUSE-DLQ-001
+    attempt: unauthorized replay or resolution
+    required_control: events.admin scope and tenant-isolated storage
+    status: PARTIAL
+  - id: ABUSE-SUPPLY-001
+    attempt: mutable action or container is substituted
+    required_control: action SHA pins, OCI digests, signature and provenance
+    status: PARTIAL

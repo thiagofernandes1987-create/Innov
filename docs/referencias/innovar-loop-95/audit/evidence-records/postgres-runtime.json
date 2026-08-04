@@ -1,0 +1,20 @@
+{
+  "evidence_id": "postgres-runtime",
+  "status": "BLOCKED_EXTERNAL",
+  "execution_level": "NOT_EXECUTED",
+  "generated_at": "2026-07-23T00:00:00Z",
+  "command": "python scripts/test_postgres_event_transport.py",
+  "environment": {
+    "execution_context": "chat-container",
+    "network": "restricted"
+  },
+  "result_summary": "TEST_DATABASE_URL/PostgreSQL unavailable in this environment",
+  "source_artifacts": [
+    "scripts/test_postgres_event_transport.py",
+    "01-db/migrations/0010_execution_evidence_ledger.sql"
+  ],
+  "artifact_sha256": null,
+  "blocked_reason": "TEST_DATABASE_URL/PostgreSQL unavailable in this environment",
+  "tool_versions": {},
+  "required_execution_level": "EXTERNAL_INTEGRATION_EXECUTED"
+}

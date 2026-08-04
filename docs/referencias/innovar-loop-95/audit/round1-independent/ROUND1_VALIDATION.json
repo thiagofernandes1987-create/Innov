@@ -1,0 +1,17 @@
+{
+  "status": "PASS",
+  "source_file_count": 355,
+  "finding_count": 35,
+  "critical": 6,
+  "high": 18,
+  "medium": 11,
+  "checks": {
+    "source_inventory_355": true,
+    "all_findings_in_master": true,
+    "all_findings_in_checklist": true,
+    "all_findings_in_traceability": true,
+    "findings_yaml_parse": true,
+    "output_manifest_verified": true
+  },
+  "errors": []
+}
