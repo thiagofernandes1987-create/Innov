@@ -2,13 +2,15 @@ import fs from "node:fs";
 
 const root = "apps/messaging-gateway";
 const smokeFile = "scripts/run-messaging-gateway-container-smoke.sh";
+const lockGateFile = "scripts/verify-w06-lockfile.mjs";
 const requiredFiles = [
   `${root}/package.json`, `${root}/tsconfig.json`, `${root}/README.md`, `${root}/Dockerfile`,
   `${root}/compose.yaml`, `${root}/src/config.ts`, `${root}/src/contracts.ts`,
   `${root}/src/security.ts`, `${root}/src/replay-guard.ts`, `${root}/src/metrics.ts`,
   `${root}/src/fake-client.ts`, `${root}/src/server.ts`, `${root}/src/index.ts`,
   `${root}/src/engines/baileys/adapter.ts`, `${root}/src/engines/baileys/official-factory.ts`,
-  "tests/messaging-gateway.test.ts", "tests/messaging-baileys-adapter.test.ts", smokeFile
+  "tests/messaging-gateway.test.ts", "tests/messaging-baileys-adapter.test.ts",
+  smokeFile, lockGateFile
 ];
 const failures = [];
 for (const file of requiredFiles) if (!fs.existsSync(file)) failures.push(`Arquivo ausente: ${file}`);
@@ -33,6 +35,7 @@ const compose = read(`${root}/compose.yaml`);
 const tests = read("tests/messaging-gateway.test.ts");
 const baileysTests = read("tests/messaging-baileys-adapter.test.ts");
 const smoke = read(smokeFile);
+const lockGate = read(lockGateFile);
 const ci = read(".github/workflows/ci.yml");
 const workspace = read("pnpm-workspace.yaml");
 
@@ -68,24 +71,31 @@ for (const token of ["createOfficialBaileysSocketFactory", "EXTERNAL_SOCKET_BLOC
 if (gatewayIndex.includes("engines/baileys") || gatewayIndex.includes("BaileysEngineAdapter")) {
   failures.push("Gateway base registrou Baileys no runtime antes de W-07/W-08.");
 }
-for (const token of ["USER 10001:10001", "STOPSIGNAL SIGTERM"])
-  if (!dockerfile.includes(token)) failures.push(`Container sem hardening: ${token}`);
+for (const token of ["USER 10001:10001", "STOPSIGNAL SIGTERM", "verify-w06-lockfile.mjs"])
+  if (!dockerfile.includes(token)) failures.push(`Container sem hardening/reprodutibilidade: ${token}`);
 for (const token of ["read_only: true", "cap_drop:", "no-new-privileges:true", "pids_limit: 128", "mem_limit: 256m", "cpus: 0.50", "internal: true"])
   if (!compose.includes(token)) failures.push(`Limite/isolamento ausente: ${token}`);
 for (const token of ["--network none", "--read-only", "--cap-drop ALL", "10001:10001", "gateway_shutdown_completed"])
   if (!smoke.includes(token)) failures.push(`Smoke test de container incompleto: ${token}`);
+for (const token of [
+  "d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9",
+  "messaging-w06-lockfile-v1", "libsignal@6.0.0", "whatsapp-rust-bridge@0.5.4"
+]) if (!lockGate.includes(token)) failures.push(`Gate de lockfile incompleto: ${token}`);
 for (const token of ["bloqueia comando sem HMAC", "rejeita replay", "limita o tamanho do corpo", "preserva correlação e causalidade"])
   if (!tests.includes(token)) failures.push(`Teste W-05 ausente: ${token}`);
 for (const token of ["fábrica oficial bloqueada", "normaliza mensagem inbound", "normaliza receipts"])
   if (!baileysTests.includes(token)) failures.push(`Teste W-06 ausente: ${token}`);
 for (const script of [
-  "validate:messaging-gateway", "test:messaging-gateway", "test:messaging-baileys",
-  "test:container:messaging-gateway", "build:messaging-gateway"
+  "validate:messaging-gateway", "validate:messaging-lockfile", "test:messaging-gateway",
+  "test:messaging-baileys", "test:container:messaging-gateway", "build:messaging-gateway"
 ]) if (!rootPackage.scripts?.[script]) failures.push(`Script raiz ausente: ${script}`);
 for (const token of [
-  "Validate messaging gateway skeleton", "Messaging gateway unit tests",
-  "Baileys adapter contract tests", "Messaging gateway container smoke test", "Build messaging gateway"
+  "Validate messaging gateway skeleton", "Verify resolved W-06 lockfile",
+  "Messaging gateway unit tests", "Baileys adapter contract tests",
+  "Messaging gateway container smoke test", "Build messaging gateway"
 ]) if (!ci.includes(token)) failures.push(`CI sem gate explícito: ${token}`);
+if (!ci.includes("--ignore-scripts")) failures.push("CI permite lifecycle scripts de dependências.");
+if (!dockerfile.includes("--ignore-scripts")) failures.push("Docker permite lifecycle scripts de dependências.");
 if (!workspace.includes("apps/messaging-gateway")) failures.push("Gateway ausente do workspace pnpm.");
 
 if (failures.length) {
@@ -94,7 +104,7 @@ if (failures.length) {
 }
 console.log(JSON.stringify({
   ok: true,
-  contract: "messaging-gateway-boundary-v3",
+  contract: "messaging-gateway-boundary-v4",
   node: packageJson.engines.node,
   endpoints: 4,
   ownDependencies: 1,
@@ -102,6 +112,8 @@ console.log(JSON.stringify({
   baileysConfined: true,
   baileysRuntimeRegistered: false,
   externalSocketBlockedByDefault: true,
+  lifecycleScriptsExecuted: false,
+  resolvedLockfileSha256: "d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9",
   databaseAccess: false,
   nonRootUid: 10001,
   internalNetwork: true,
