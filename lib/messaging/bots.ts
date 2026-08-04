@@ -1,3 +1,5 @@
+import { BOT_TEST_IMPLEMENTED_TOOLS } from "./canonical-retrieval";
+
 export const BOT_ALLOWED_TOOLS = [
   "SEARCH_CANONICAL",
   "READ_PROJECT_STATUS",
@@ -88,11 +90,17 @@ export function deriveBotReadiness(input: {
   if (input.dailyBudgetMicros <= 0) blockers.push("Orçamento diário de IA não configurado");
   if (!input.consentPluginEnabled) blockers.push("Plugin obrigatório de consentimento desabilitado");
   if (!input.aiPluginEnabled) blockers.push("Plugin AI_FALLBACK desabilitado");
+  const implementedTools = new Set<string>(BOT_TEST_IMPLEMENTED_TOOLS);
+  const unavailableTools = input.profile.allowedTools.filter(tool => !implementedTools.has(tool));
+  if (unavailableTools.length) {
+    blockers.push(`Ferramentas ainda não implementadas no teste: ${unavailableTools.join(", ")}`);
+  }
   return {
     readyForDraftTest: blockers.length === 0,
     blockers,
     autonomyMode: "DRAFT_ONLY" as const,
     sendAllowed: false,
-    humanReviewRequired: true
+    humanReviewRequired: true,
+    implementedTools: [...BOT_TEST_IMPLEMENTED_TOOLS]
   };
 }
