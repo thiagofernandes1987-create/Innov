@@ -10,10 +10,24 @@ import {
 export type IngressNormalizationContext = {
   receivedAt: string;
   resolveProviderAccountId?: (channelAccountId: string) => string | null;
+  resolveOrganizationId?: (channelAccountId: string) => string | null;
 };
 
 function hash(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
+}
+
+function eventChannelAccountId(event: BaileysEngineEvent): string {
+  switch (event.kind) {
+    case "MESSAGE_RECEIVED":
+      return event.channelAccountId;
+    case "RECEIPT_RECEIVED":
+      return event.receipt.channelAccountId;
+    case "SESSION_STATE_CHANGED":
+      return event.snapshot.channelAccountId;
+    case "ENGINE_ERROR":
+      return event.channelAccountId ?? "UNRESOLVED";
+  }
 }
 
 function identity(input: {
@@ -34,6 +48,7 @@ function normalizeContent(event: Extract<BaileysEngineEvent, { kind: "MESSAGE_RE
     messageType: event.messageType,
     text: event.content.text ?? null,
     caption: event.content.caption ?? null,
+    replyToProviderMessageId: null,
     reaction: event.content.reaction ?? null,
     media: event.content.media?.map(item => ({
       mediaType: item.mediaType,
@@ -55,9 +70,8 @@ export function normalizeBaileysEngineEvent(
   event: BaileysEngineEvent,
   context: IngressNormalizationContext
 ): CanonicalIngressEnvelope {
-  const providerAccountId = context.resolveProviderAccountId?.(
-    "channelAccountId" in event ? event.channelAccountId ?? "" : event.snapshot.channelAccountId
-  ) ?? null;
+  const channelAccountId = eventChannelAccountId(event);
+  const providerAccountId = context.resolveProviderAccountId?.(channelAccountId) ?? null;
 
   if (event.kind === "MESSAGE_RECEIVED") {
     const idempotencyKey = hash({
@@ -126,20 +140,21 @@ export function normalizeBaileysEngineEvent(
     };
   }
 
+  const organizationId = context.resolveOrganizationId?.(channelAccountId) ?? "UNRESOLVED";
   if (event.kind === "SESSION_STATE_CHANGED") {
     return {
       schemaVersion: INGRESS_SCHEMA_VERSION,
       eventId: event.eventId,
       idempotencyKey: hash({ eventId: event.eventId, state: event.snapshot.state }),
-      organizationId: "SYSTEM",
-      channelAccountId: event.snapshot.channelAccountId,
+      organizationId,
+      channelAccountId,
       providerType: event.snapshot.providerType,
       providerAccountId,
       providerEventId: event.eventId,
       eventKind: "SESSION",
       occurredAt: event.occurredAt,
       receivedAt: context.receivedAt,
-      sequenceKey: event.snapshot.channelAccountId,
+      sequenceKey: channelAccountId,
       recipients: [],
       sanitizedMetadata: {
         state: event.snapshot.state,
@@ -154,15 +169,15 @@ export function normalizeBaileysEngineEvent(
     schemaVersion: INGRESS_SCHEMA_VERSION,
     eventId: event.eventId,
     idempotencyKey: hash({ eventId: event.eventId, code: event.code }),
-    organizationId: "SYSTEM",
-    channelAccountId: event.channelAccountId ?? "UNRESOLVED",
+    organizationId,
+    channelAccountId,
     providerType: event.providerType,
     providerAccountId,
     providerEventId: event.eventId,
     eventKind: "UNKNOWN",
     occurredAt: event.occurredAt,
     receivedAt: context.receivedAt,
-    sequenceKey: event.channelAccountId ?? "UNRESOLVED",
+    sequenceKey: channelAccountId,
     recipients: [],
     sanitizedMetadata: {
       code: event.code,
