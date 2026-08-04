@@ -5,7 +5,8 @@
 **PR:** #40  
 **Estado:** concluída no escopo de adapter sem conexão externa  
 **Data:** 04 de agosto de 2026  
-**Head funcional validado:** `9e94603cbd9e50dc44e5f848a2aa5e195a8d9a43`
+**Head funcional validado:** `9e94603cbd9e50dc44e5f848a2aa5e195a8d9a43`  
+**Head documental e de supply chain validado:** `dee0b89a3c8c51d1d91bb559c70cb3c85b5a7880`
 
 ---
 
@@ -136,28 +137,29 @@ O CI regenerou o lockfile sem lifecycle scripts.
 | Evidência | Valor |
 |---|---|
 | artefato | `pnpm-lock-w06` |
-| artifact ID | `8890309340` |
+| artifact ID inicial | `8890309340` |
 | SHA-256 do lockfile | `d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9` |
-| SHA-256 do ZIP | `4261c27746f362710344c066cf919fd9b15bd6932b894052782ad3c4e065baed` |
+| SHA-256 do ZIP inicial | `4261c27746f362710344c066cf919fd9b15bd6932b894052782ad3c4e065baed` |
 | lifecycle scripts | não executados |
 
-O gate falha se o hash, importer, versão, `libsignal@6.0.0` ou `whatsapp-rust-bridge@0.5.4` divergirem.
+O gate falha se o hash, importer, versão, `libsignal@6.0.0` ou `whatsapp-rust-bridge@0.5.4` divergirem. O head final executou esse gate no CI e no build Docker.
 
-## 7. Validação do head funcional
+## 7. Validação final
 
 ### Runs
 
-- CI: `30904107383`;
-- Stage 20 File Security E2E: `30904107397`.
+- CI final: `30905200397`;
+- Stage 20 File Security E2E final: `30905200325`.
 
 ### Resultados
 
 | Validação | Resultado |
 |---|---|
 | preflight e documentação | `PASS` |
+| lockfile SHA-256 | `PASS` |
 | engine boundary v4 | `PASS` |
-| gateway boundary | `PASS` |
-| storage multiprovider | `PASS` |
+| gateway boundary v4 | `PASS` |
+| storage boundary v2 | `PASS` |
 | testes do adapter — 25 | `PASS` |
 | testes do gateway — 9 | `PASS` |
 | suíte Vitest global — 312 | `PASS` |
@@ -168,6 +170,7 @@ O gate falha se o hash, importer, versão, `libsignal@6.0.0` ou `whatsapp-rust-b
 | smoke test Docker sem rede | `PASS` |
 | build Next.js | `PASS` |
 | quarentena limpa/EICAR | `PASS` |
+| Vercel | bloqueado por cota `build-rate-limit`, não por erro de compilação |
 
 ## 8. Licença e bloqueio jurídico
 
@@ -197,4 +200,4 @@ A conclusão técnica da W-06 não substitui:
 
 ## 10. Resultado
 
-A W-06 prova o adapter e sua fronteira, não uma integração operacional. A próxima sprint autorizável é W-07 — armazenamento criptográfico da sessão — ainda com testes/doubles e sem conexão, QR, pairing, número real ou deploy.
+A W-06 prova o adapter e sua fronteira, não uma integração operacional. A próxima sprint autorizada é W-07 — armazenamento criptográfico da sessão — ainda com testes/doubles e sem conexão, QR, pairing, número real ou deploy.
