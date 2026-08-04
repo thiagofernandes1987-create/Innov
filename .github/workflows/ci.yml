@@ -138,6 +138,10 @@ jobs:
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       SIGNATURE_PROVIDER: sandbox
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -150,6 +154,11 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
+      - name: Start PostgreSQL test service
+        run: |
+          sudo systemctl start postgresql
+          sudo -u postgres psql -v ON_ERROR_STOP=1 -c "alter user postgres password 'postgres';"
+          pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER"
       - name: Enable pnpm
         run: |
           corepack enable
