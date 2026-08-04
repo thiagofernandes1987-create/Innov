@@ -26,7 +26,7 @@ export type IngressPipelineOptions = {
 function validate(envelope: CanonicalIngressEnvelope): void {
   if (
     !envelope.idempotencyKey ||
-    envelope.idempotencyKey.length !== 64 ||
+    !/^[0-9a-f]{64}$/.test(envelope.idempotencyKey) ||
     !envelope.organizationId ||
     !envelope.channelAccountId ||
     !envelope.sequenceKey ||
@@ -34,6 +34,16 @@ function validate(envelope: CanonicalIngressEnvelope): void {
     Number.isNaN(Date.parse(envelope.receivedAt))
   ) {
     throw new IngressPipelineError("INVALID_EVENT", "Envelope ingress inválido.");
+  }
+  if (
+    envelope.organizationId === "UNRESOLVED" ||
+    envelope.channelAccountId === "UNRESOLVED"
+  ) {
+    throw new IngressPipelineError(
+      "TENANT_UNRESOLVED",
+      "Organização ou conta do evento não foi resolvida.",
+      false
+    );
   }
 }
 
