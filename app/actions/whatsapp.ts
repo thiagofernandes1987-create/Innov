@@ -138,6 +138,32 @@ function recordFailure(operation: string, error: unknown) {
   return correlationId;
 }
 
+async function completeDispatchWithRetry(input: {
+  messageId: string;
+  dispatchToken: string;
+  providerMessageId: string | null;
+  status: "SENT" | "FAILED";
+  errorCode: string | null;
+  errorMessage: string | null;
+}) {
+  const admin = createSupabaseAdminClient();
+  let lastError: unknown = null;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    const { error } = await admin.rpc("complete_whatsapp_outbound_dispatch", {
+      p_message_id: input.messageId,
+      p_dispatch_token: input.dispatchToken,
+      p_provider_message_id: input.providerMessageId,
+      p_status: input.status,
+      p_error_code: input.errorCode,
+      p_error_message: input.errorMessage
+    });
+    if (!error) return;
+    lastError = error;
+    if (attempt < 3) await new Promise(resolve => setTimeout(resolve, attempt * 150));
+  }
+  throw lastError ?? new Error("DISPATCH_COMPLETION_FAILED");
+}
+
 export async function saveWhatsAppAccount(data: FormData) {
   const context = await requireCapability("whatsapp", "manage");
   const path = "/app/whatsapp";
@@ -325,6 +351,8 @@ export async function sendWhatsAppMessage(data: FormData) {
   const context = await requireCapability("whatsapp", "update", requestedProjectId);
 
   let queuedMessageId: string | null = null;
+  let dispatchToken: string | null = null;
+  let providerAccepted = false;
 
   try {
     const { data: conversation, error: conversationError } = await context.supabase
@@ -449,9 +477,32 @@ export async function sendWhatsAppMessage(data: FormData) {
     );
     queuedMessageId = String(queuedRow?.id ?? "");
     if (!queuedMessageId) throw new Error("queued_message_missing");
-    if (String(queuedRow?.status ?? "") === "SENT" || queuedRow?.provider_message_id) {
+    const queuedStatus = String(queuedRow?.status ?? "");
+    if (queuedStatus === "SENT" || queuedRow?.provider_message_id) {
       revalidatePath(path);
       redirect(`${path}&success=${encodeURIComponent("Mensagem já processada anteriormente.")}`);
+    }
+    if (queuedStatus === "FAILED") {
+      throw new WhatsAppDomainError(
+        "INVALID_SOURCE",
+        "Uma tentativa anterior com esta chave falhou. Atualize a conversa antes de tentar novamente."
+      );
+    }
+
+    dispatchToken = randomUUID();
+    const { data: dispatchClaimed, error: dispatchError } = await context.supabase.rpc(
+      "claim_whatsapp_outbound_dispatch",
+      {
+        p_message_id: queuedMessageId,
+        p_dispatch_token: dispatchToken,
+        p_stale_after_seconds: 900
+      }
+    );
+    if (dispatchError) throw dispatchError;
+    if (!dispatchClaimed) {
+      dispatchToken = null;
+      revalidatePath(path);
+      redirect(`${path}&success=${encodeURIComponent("A mensagem já está em processamento.")}`);
     }
 
     let content: EngineSendCommand["content"];
@@ -496,22 +547,21 @@ export async function sendWhatsAppMessage(data: FormData) {
 
     const engine = createMetaCloudMessagingEngine();
     const sendResult = await engine.send({ ...commandBase, content });
+    providerAccepted = true;
     const providerMessageId = sendResult.providerMessageId;
 
-    const admin = createSupabaseAdminClient();
-    const { error: completionError } = await admin.rpc(
-      "complete_whatsapp_outbound_message",
-      {
-        p_message_id: queuedMessageId,
-        p_provider_message_id: providerMessageId,
-        p_status: "SENT",
-        p_error_code: null,
-        p_error_message: null
-      }
-    );
-    if (completionError) throw completionError;
+    await completeDispatchWithRetry({
+      messageId: queuedMessageId,
+      dispatchToken,
+      providerMessageId,
+      status: "SENT",
+      errorCode: null,
+      errorMessage: null
+    });
+    dispatchToken = null;
 
-    await admin.from("audit_events").insert({
+    const admin = createSupabaseAdminClient();
+    const { error: auditError } = await admin.from("audit_events").insert({
       organization_id: context.organizationId,
       project_id: conversation.project_id,
       actor_user_id: context.userId,
@@ -529,6 +579,7 @@ export async function sendWhatsAppMessage(data: FormData) {
         engine_schema: sendResult.providerMetadata.schemaVersion
       }
     });
+    if (auditError) recordFailure("audit_sent_message", auditError);
 
     revalidatePath(path);
     redirect(`${path}&success=${encodeURIComponent("Mensagem enviada.")}`);
@@ -543,15 +594,26 @@ export async function sendWhatsAppMessage(data: FormData) {
     }
 
     const correlationId = recordFailure("send_message", error);
-    if (queuedMessageId) {
-      const admin = createSupabaseAdminClient();
-      await admin.rpc("complete_whatsapp_outbound_message", {
-        p_message_id: queuedMessageId,
-        p_provider_message_id: null,
-        p_status: "FAILED",
-        p_error_code: errorCode(error, "SEND_FAILED"),
-        p_error_message: `Falha de envio. Referência: ${correlationId}`
-      });
+    if (queuedMessageId && dispatchToken && !providerAccepted) {
+      try {
+        await completeDispatchWithRetry({
+          messageId: queuedMessageId,
+          dispatchToken,
+          providerMessageId: null,
+          status: "FAILED",
+          errorCode: errorCode(error, "SEND_FAILED"),
+          errorMessage: `Falha de envio. Referência: ${correlationId}`
+        });
+        dispatchToken = null;
+      } catch (completionError) {
+        recordFailure("complete_failed_dispatch", completionError);
+      }
+    }
+    if (providerAccepted) {
+      fail(
+        path,
+        `O provider aceitou a mensagem, mas a confirmação interna ficou pendente. Não reenvie. Referência: ${correlationId}`
+      );
     }
     fail(path, safeActionMessage(error));
   }
