@@ -327,11 +327,11 @@ describe("BaileysEngineAdapter outbound", () => {
 
 describe("BaileysEngineAdapter inbound and lifecycle", () => {
   it("traduz connection.update sem expor o QR", async () => {
-    const { adapter, ev } = fakeSocket();
+    const { socket, ev } = fakeSocket();
     const engine = new BaileysEngineAdapter({
       organizationId,
       channelAccountId,
-      socketFactory: async () => adapter,
+      socketFactory: async () => socket,
       now: () => fixedNow,
       createEventId: () => "event-fixed"
     });
