@@ -151,6 +151,8 @@ jobs:
           corepack prepare pnpm@11.15.0 --activate
       - name: Install dependencies without lifecycle scripts
         run: pnpm install --no-frozen-lockfile --ignore-scripts --reporter=append-only
+      - name: Verify resolved W-06 lockfile
+        run: pnpm validate:messaging-lockfile
       - name: Upload resolved W-06 lockfile
         if: always()
         uses: actions/upload-artifact@v7
