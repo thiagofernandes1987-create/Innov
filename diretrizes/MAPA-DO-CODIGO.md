@@ -35,7 +35,7 @@ a ignorar.
 | Funções do banco declaradas | 229 |
 | Funções do banco chamadas do código | 116 |
 | Suítes de teste | 54, com 614 casos |
-| Migrations | 161 |
+| Migrations | 162 |
 | Validadores de CI | 28 |
 | Módulos de `lib/` citados por algum teste | 52 de 92 |
 
@@ -768,7 +768,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `get_report_dashboard` | `supabase/migrations/20260720143100_stage16_reports_security.sql` | `app/api/relatorios/exportar/route.ts`, `app/app/relatorios/page.tsx`, `lib/reports/server.ts` |
 | `get_sac_dashboard` | `supabase/migrations/20260721013941_stage18_relationship_queries.sql` | `lib/relationship/server.ts` |
 | `get_sac_ticket_detail` | `supabase/migrations/20260722104500_stage20_sac_attachment_security.sql` | `lib/relationship/server.ts` |
-| `guard_official_cost_reference` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | — (só por SQL ou trigger) |
+| `guard_official_cost_reference` | `supabase/migrations/20260804060000_referencia_oficial_nao_muda_de_dono.sql` | — (só por SQL ou trigger) |
 | `has_org_role` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |
 | `import_procurement_receipt_to_inventory` | `supabase/migrations/20260729001500_inventory_receipt_line_order.sql` | `app/actions/inventory.ts` |
 | `import_sinapi_compositions_chunk` | `supabase/migrations/20260804040000_composicao_registra_custo_ausente.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |

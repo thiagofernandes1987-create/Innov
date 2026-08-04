@@ -278,6 +278,22 @@ if(fs.existsSync("package.json")){
   errors.push("O `prebuild` não confere o leitor SINAPI em uso.");
 }
 
+// VACINA-061 — guarda que lê o valor novo do campo que decide a guarda.
+const guardaOficial="supabase/migrations/20260804060000_referencia_oficial_nao_muda_de_dono.sql";
+if(!fs.existsSync(guardaOficial))errors.push(`Migration da guarda de referência oficial ausente: ${guardaOficial}`);
+else{
+ const guarda=read(guardaOficial);
+ const sql=guarda.split("\n").filter(linha=>!linha.trimStart().startsWith("--")).join("\n");
+ // A regra é sobre o que a linha **é**: recusa quando era oficial ou quando
+ // passaria a ser. Só uma das duas deixa metade do buraco aberto.
+ for(const token of["v_antiga","v_nova","SINDUSCON_SP_CUB","trg_guard_official_reference_snapshots"])
+  if(!sql.includes(token))errors.push(`Guarda de referência oficial sem ${token}.`);
+ if(!/coalesce\(v_antiga[\s\S]{0,120}coalesce\(v_nova/.test(sql))
+  errors.push("A guarda de referência oficial voltou a conferir um sentido só.");
+ if(!/revoke insert, update, delete on public\.cost_reference_snapshots/.test(sql))
+  errors.push("O privilégio de escrita do instantâneo de custo voltou a ser concedido.");
+}
+
 if(errors.length){
  console.error(`Vacinas inválidas (${errors.length} falha(s)):`);
  for(const error of errors)console.error(`- ${error}`);
