@@ -199,6 +199,18 @@ export function assertEngineCommand(
   return command;
 }
 
+function eventProviderType(event: EngineEvent): ChannelProviderType {
+  switch (event.kind) {
+    case "SESSION_STATE_CHANGED":
+      return event.snapshot.providerType;
+    case "RECEIPT_RECEIVED":
+      return event.receipt.providerType;
+    case "MESSAGE_RECEIVED":
+    case "ENGINE_ERROR":
+      return event.providerType;
+  }
+}
+
 export class InMemoryEngineEventSource implements EngineEventSource {
   private readonly listeners = new Set<EngineEventListener>();
 
@@ -210,7 +222,7 @@ export class InMemoryEngineEventSource implements EngineEventSource {
   }
 
   async emit(event: EngineEvent) {
-    if (event.kind !== "RECEIPT_RECEIVED" && event.providerType !== this.providerType) {
+    if (eventProviderType(event) !== this.providerType) {
       throw new MessagingEngineError(
         "PROVIDER_MISMATCH",
         "Evento publicado em source de outro provider."
