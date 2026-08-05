@@ -24,7 +24,8 @@ try {
     "supabase/migrations/20260804200000_stage22_ai_bridge.sql",
     "supabase/migrations/20260804210000_stage22_message_plugins.sql",
     "supabase/migrations/20260805003000_stage22_governed_bot_profiles.sql",
-    "supabase/tests/messaging-bots/bots.test.sql"
+    "supabase/tests/messaging-bots/bots.test.sql",
+    "supabase/tests/messaging-bots/edit.test.sql"
   ]) psql(["-d", database, "-v", "ON_ERROR_STOP=1", "-f", file]);
 } finally {
   psql(["-d", "postgres", "-v", "ON_ERROR_STOP=1", "-c", `drop database if exists ${database} with (force)`]);
