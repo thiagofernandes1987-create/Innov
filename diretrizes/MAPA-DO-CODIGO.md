@@ -29,15 +29,15 @@ a ignorar.
 | | |
 |---|---|
 | Aplicativos no registro | 23 |
-| Rotas | 159 (141 páginas, 18 de API) |
-| Server actions | 182 em 31 arquivos |
-| Módulos de `lib/` | 93 |
+| Rotas | 160 (142 páginas, 18 de API) |
+| Server actions | 183 em 32 arquivos |
+| Módulos de `lib/` | 94 |
 | Funções do banco declaradas | 233 |
-| Funções do banco chamadas do código | 116 |
-| Suítes de teste | 55, com 623 casos |
+| Funções do banco chamadas do código | 117 |
+| Suítes de teste | 56, com 634 casos |
 | Migrations | 164 |
 | Validadores de CI | 28 |
-| Módulos de `lib/` citados por algum teste | 53 de 93 |
+| Módulos de `lib/` citados por algum teste | 54 de 94 |
 
 ## 1. Aplicativos
 
@@ -183,6 +183,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/ocorrencias/novo` | página | sac:create | `app/app/ocorrencias/novo/page.tsx` |
 | `/app/orcamentos` | página | sessão da organização | `app/app/orcamentos/page.tsx` |
 | `/app/orcamentos/[id]` | página | sessão da organização | `app/app/orcamentos/[id]/page.tsx` |
+| `/app/orcamentos/cub/importar` | página | sessão da organização | `app/app/orcamentos/cub/importar/page.tsx` |
 | `/app/orcamentos/novo` | página | papéis: SUPER_ADMIN, DIRECAO, ADMINISTRADOR, COMERCIAL, ORCAMENTISTA | `app/app/orcamentos/novo/page.tsx` |
 | `/app/orcamentos/sinapi` | página | papéis: SUPER_ADMIN, DIRECAO, ADMINISTRADOR, ORCAMENTISTA, FINANCEIRO | `app/app/orcamentos/sinapi/page.tsx` |
 | `/app/orcamentos/sinapi/composicao/[id]` | página | papéis: SUPER_ADMIN, DIRECAO, ADMINISTRADOR, ORCAMENTISTA, FINANCEIRO | `app/app/orcamentos/sinapi/composicao/[id]/page.tsx` |
@@ -301,6 +302,12 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | Função | Guarda |
 |---|---|
 | `createBudget` | papéis: SUPER_ADMIN, DIRECAO, ADMINISTRADOR, COMERCIAL, ORCAMENTISTA |
+
+### `app/actions/cub.ts`
+
+| Função | Guarda |
+|---|---|
+| `registrarCubManual` | sessão da organização |
 
 ### `app/actions/documentos.ts`
 
@@ -623,6 +630,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/operations/notifications` | sim | `agruparNotificacoesOperacionais`, `descreverNotificacaoOperacional`, `planejarNotificacoesOperacionais` |
 | `@/lib/operations/routines` | sim | `ROTINAS_OPERACIONAIS`, `executarCenariosDasPersonas` |
 | `@/lib/orcamentos/composicao` | sim | `TOLERANCIA_DA_CONTA`, `motivoDoItem`, `reconciliacaoDaComposicao`, `situacaoDaPlanilhaEmPortugues` |
+| `@/lib/orcamentos/cub-manual` | sim | `lerDeclaracaoDeCub` |
 | `@/lib/orcamentos/cub-por-uf` | sim | `UFS_DO_BRASIL`, `UF_PADRAO`, `referenciasDaUf`, `ufDaReferencia` |
 | `@/lib/orcamentos/cub` | sim | `linhasDoCub` |
 | `@/lib/orcamentos/naturezas` | sim | `custoDoItem`, `rotuloDaNatureza`, `totaisPorNatureza` |
@@ -859,7 +867,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `register_procurement_invitation_access` | `supabase/migrations/20260725120000_stage20_atomic_access_counters_and_cleanup.sql` | `app/actions/procurement.ts` |
 | `register_quality_public_link_access` | `supabase/migrations/20260725120000_stage20_atomic_access_counters_and_cleanup.sql` | `app/actions/quality.ts` |
 | `register_sac_ticket_attachment` | `supabase/migrations/20260722104500_stage20_sac_attachment_security.sql` | `app/actions/relationship.ts` |
-| `registrar_cub_manual` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
+| `registrar_cub_manual` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | `app/actions/cub.ts` |
 | `registrar_valor_usado` | `supabase/migrations/20260803200000_catalogo_de_valores_usados.sql` | `lib/sugestoes/servidor.ts` |
 | `release_inventory_reservation` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | `app/actions/inventory.ts` |
 | `release_project_document_version` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | `app/actions/projects.ts` |
@@ -946,6 +954,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/operational-notifications.test.ts` | 5 | notificações operacionais por exceção |
 | `tests/operational-routines.test.ts` | 3 | runner das rotinas profissionais |
 | `tests/orcamento-composicao.test.ts` | 11 | por que o custo de um item falta; a soma dos itens fecha com o custo publicado? |
+| `tests/orcamento-cub-manual.test.ts` | 11 | a declaração que sai do formulário |
 | `tests/orcamento-cub-por-uf.test.ts` | 9 | qual UF a tela oferece; o que a tela mostra para a UF escolhida |
 | `tests/orcamento-cub.test.ts` | 14 | as tipologias semeadas da série histórica decompõem; o CUB entra decomposto quando a publicação traz a decomposição; sem decomposição publicada, nada é inventado; decomposição que não fecha não é usada |
 | `tests/orcamento-naturezas.test.ts` | 12 | o custo de um item é o mesmo que o banco calcula; totais por natureza; rótulo em português |
@@ -1014,7 +1023,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 40 de 93 |
+| Módulo de `lib/` sem teste que o cite | 40 de 94 |
 
 ### Módulos sem teste que os cite
 

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   addCubReferenceItem,
@@ -54,7 +55,18 @@ type CostReferenceSnapshot = {
   labor_cost: number | string | null;
   administrative_cost: number | string | null;
   source_url: string;
+  raw_payload: Record<string, unknown> | null;
 };
+
+/**
+ * Uma declaração manual não pode chegar com a mesma cara de uma leitura
+ * conferida (T-37.13b). O servidor baixou e conferiu o arquivo do SindusCon-SP;
+ * no CUB de outro estado, alguém digitou o número de um PDF. As duas entram no
+ * mesmo catálogo oficial, e quem escolhe merece saber qual é qual.
+ */
+function declaradaAMao(snapshot: CostReferenceSnapshot) {
+  return (snapshot.raw_payload as { retrievalMode?: string } | null)?.retrievalMode === "declaracao-manual";
+}
 
 const categoryLabels: Record<string, string> = {
   MATERIAL: "Material",
@@ -137,7 +149,7 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
       .order("created_at"),
     supabase
       .from("cost_reference_snapshots")
-      .select("id, source_name, region, reference_code, base_date, publication_date, tax_relief, unit, total_cost, materials_cost, labor_cost, administrative_cost, source_url")
+      .select("id, source_name, region, reference_code, base_date, publication_date, tax_relief, unit, total_cost, materials_cost, labor_cost, administrative_cost, source_url, raw_payload")
       // Sem `.eq("source_key", …)`: esta tabela é só de CUB, e fixar a chave de
       // São Paulo era o que fazia a obra em Minas receber o preço paulista sem
       // aviso. O recorte por UF é feito depois, em `referenciasDaUf`.
@@ -268,7 +280,7 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
                         <optgroup key={familia} label={ROTULO_DE_FAMILIA[familia]}>
                           {itens.map((snapshot) => (
                             <option key={snapshot.id} value={snapshot.id}>
-                              {snapshot.reference_code} · {descricaoDaTipologia(snapshot.reference_code)} · {snapshot.tax_relief ? "com" : "sem"} desoneração · {formatDate(snapshot.base_date)} · {formatCurrency(Number(snapshot.total_cost))}/{snapshot.unit}
+                              {snapshot.reference_code} · {descricaoDaTipologia(snapshot.reference_code)} · {snapshot.tax_relief ? "com" : "sem"} desoneração · {formatDate(snapshot.base_date)} · {formatCurrency(Number(snapshot.total_cost))}/{snapshot.unit}{declaradaAMao(snapshot) ? " · declarado à mão" : ""}
                             </option>
                           ))}
                         </optgroup>
@@ -285,7 +297,11 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
                 </form>
                 {snapshotsDaUf[0] ? (
                   <p className="muted" style={{ marginTop: 12 }}>
-                    Última publicação carregada: {formatDate(snapshotsDaUf[0].publication_date)}. Fonte: {snapshotsDaUf[0].source_name}.
+                    Última publicação carregada: {formatDate(snapshotsDaUf[0].publication_date)}. Fonte: {snapshotsDaUf[0].source_name}
+                    {snapshotsDaUf.some(declaradaAMao) ? ", com referências declaradas à mão nesta lista" : ""}.{" "}
+                    <Link href={`/app/orcamentos/cub/importar?uf=${ufDoCub}&voltar=${budget.id}`}>
+                      Registrar outra publicação
+                    </Link>
                   </p>
                 ) : (
                   // "Este estado não tem" é diferente de "não há nenhum", e a
@@ -298,6 +314,18 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
                       {snapshots.length
                         ? ` Há referência para ${[...new Set(snapshots.map(item => String(item.region).trim().toUpperCase()))].sort().join(", ")}.`
                         : " Nenhum estado tem referência carregada ainda."}
+                    </div>
+                    {/* T-37.13b: dizer o que falta sem oferecer o caminho deixa
+                        uma saída só — trocar a UF para SP e usar o número de
+                        outro estado de propósito. Um clique daqui até o
+                        formulário, com a UF já escolhida e o caminho de volta. */}
+                    <div style={{ marginTop: 10 }}>
+                      <Link
+                        className="button button-secondary"
+                        href={`/app/orcamentos/cub/importar?uf=${ufDoCub}&voltar=${budget.id}`}
+                      >
+                        Importar o CUB de {ufDoCub}
+                      </Link>
                     </div>
                   </div>
                 )}

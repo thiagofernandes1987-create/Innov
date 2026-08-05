@@ -4034,3 +4034,27 @@ th.numero, td.numero { text-align: right; }
 @media (max-width: 620px) {
   .cub-seletor-uf { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Formulário de importação manual do CUB (T-37.13b). As pistas são `minmax(0,
+   1fr)` e os filhos têm `min-width: 0` pelo mesmo motivo de sempre: `1fr` não
+   encolhe abaixo do `min-content` do filho, e um `<select>` com "CSL-16A ·
+   Comercial salas e lojas, 16 pavimentos, padrão alto" dentro tem um
+   `min-content` largo. É a VACINA-044, na trilha explícita. */
+.cub-formulario { gap: 16px; }
+.cub-campos {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 12px;
+}
+.cub-campos > * { min-width: 0; }
+.cub-formulario select,
+.cub-formulario input { min-width: 0; max-width: 100%; }
+.cub-formulario button { min-height: 44px; justify-self: start; }
+
+.cub-parcelas {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin: 0;
+  min-width: 0;
+}
+.cub-parcelas legend { padding: 0 6px; font-size: 0.82rem; color: var(--muted); }
