@@ -3,6 +3,14 @@ import { writeFile } from "node:fs/promises";
 
 const EVIDENCE_PATH = process.env.WHATSAPP_TEST_EVIDENCE_PATH?.trim()
   || "whatsapp-meta-test-evidence.json";
+const REQUIRED_CONFIGURATION = [
+  "WHATSAPP_TEST_MODE",
+  "WHATSAPP_TEST_SEND_ENABLED",
+  "WHATSAPP_GRAPH_API_VERSION",
+  "WHATSAPP_ACCESS_TOKEN",
+  "WHATSAPP_TEST_PHONE_NUMBER_ID",
+  "WHATSAPP_TEST_RECIPIENT"
+];
 
 function required(name) {
   const value = process.env[name]?.trim();
@@ -64,6 +72,9 @@ async function metaRequest(url, init, token) {
 }
 
 async function main() {
+  const missing = REQUIRED_CONFIGURATION.filter(name => !process.env[name]?.trim());
+  if (missing.length) throw new Error(`CONFIG_MISSING:${missing.join(",")}`);
+
   if (required("WHATSAPP_TEST_MODE").toLowerCase() !== "true") {
     throw new Error("TEST_MODE_NOT_CONFIRMED");
   }
@@ -125,6 +136,7 @@ async function main() {
     schemaVersion: "1.0.0",
     executedAt: new Date().toISOString(),
     mode: "META_TEST_NUMBER",
+    ok: true,
     apiVersion,
     sender: {
       phoneNumberIdHash: sha256(phoneNumberId),
@@ -165,16 +177,17 @@ main().catch(async error => {
   const separator = message.indexOf(":");
   const errorCode = separator === -1 ? message : message.slice(0, separator);
   const rawDetail = separator === -1 ? "" : message.slice(separator + 1);
-  const configurationKey = /^CONFIG_(?:MISSING|INVALID)$/.test(errorCode) && /^[A-Z0-9_]+$/.test(rawDetail)
-    ? rawDetail
-    : null;
+  const configurationKeys = /^CONFIG_(?:MISSING|INVALID)$/.test(errorCode)
+    ? rawDetail.split(",").filter(name => /^WHATSAPP_[A-Z0-9_]+$/.test(name))
+    : [];
   const evidence = {
     schemaVersion: "1.0.0",
     executedAt: new Date().toISOString(),
     mode: "META_TEST_NUMBER",
     ok: false,
     errorCode,
-    configurationKey,
+    configurationKey: configurationKeys[0] ?? null,
+    configurationKeys,
     providerDetails: message.startsWith("META_REQUEST_FAILED:")
       ? JSON.parse(message.slice("META_REQUEST_FAILED:".length))
       : null,
@@ -185,7 +198,7 @@ main().catch(async error => {
   console.error(JSON.stringify({
     ok: false,
     errorCode: evidence.errorCode,
-    configurationKey: evidence.configurationKey,
+    configurationKeys: evidence.configurationKeys,
     evidencePath: EVIDENCE_PATH
   }));
   process.exit(1);
