@@ -33,6 +33,10 @@ jobs:
         run: |
           set -o pipefail
           node scripts/validate-personas-audit.mjs 2>&1 | tee personas-audit-validation.txt
+      - name: Validate module adjustment and capture inventory
+        run: |
+          set -o pipefail
+          node scripts/validate-module-qa.mjs 2>&1 | tee module-qa-validation.txt
       - name: Validate engineering vaccines
         run: |
           set -o pipefail
@@ -77,6 +81,7 @@ jobs:
           path: |
             documentation-validation.txt
             personas-audit-validation.txt
+            module-qa-validation.txt
             vaccines-validation.txt
             extension-functions-validation.txt
             operational-qa-validation.txt
@@ -135,6 +140,8 @@ jobs:
         run: pnpm validate:docs
       - name: Validate auditable persona contracts
         run: pnpm validate:personas-audit
+      - name: Validate module adjustment and capture inventory
+        run: pnpm validate:module-qa
       - name: Validate extension function qualification
         run: pnpm validate:extension-functions
       - name: Validate operational QA guards
