@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "1.0.0",
+  "executedAt": "2026-08-05T00:57:13.383Z",
+  "mode": "META_TEST_NUMBER",
+  "ok": false,
+  "errorCode": "CONFIG_MISSING",
+  "providerDetails": null,
+  "productionNumberUsed": false,
+  "baileysUsed": false
+}
