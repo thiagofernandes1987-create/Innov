@@ -26,8 +26,8 @@ jobs:
     permissions:
       contents: read
     env:
-      WHATSAPP_TEST_MODE: ${{ secrets.WHATSAPP_TEST_MODE || vars.WHATSAPP_TEST_MODE }}
-      WHATSAPP_TEST_SEND_ENABLED: ${{ secrets.WHATSAPP_TEST_SEND_ENABLED || vars.WHATSAPP_TEST_SEND_ENABLED }}
+      WHATSAPP_TEST_MODE: "true"
+      WHATSAPP_TEST_SEND_ENABLED: "true"
       WHATSAPP_GRAPH_API_VERSION: ${{ secrets.WHATSAPP_GRAPH_API_VERSION || vars.WHATSAPP_GRAPH_API_VERSION }}
       WHATSAPP_ACCESS_TOKEN: ${{ secrets.WHATSAPP_ACCESS_TOKEN }}
       WHATSAPP_TEST_PHONE_NUMBER_ID: ${{ secrets.WHATSAPP_TEST_PHONE_NUMBER_ID }}
@@ -57,7 +57,7 @@ jobs:
         run: |
           echo "## WhatsApp Meta Test Number E2E" >> "$GITHUB_STEP_SUMMARY"
           if [[ -f whatsapp-meta-test-evidence.json ]]; then
-            node -e 'const fs=require("fs"); const e=JSON.parse(fs.readFileSync("whatsapp-meta-test-evidence.json","utf8")); console.log(`- Resultado: ${e.message?.providerAccepted || e.ok ? "provider aceitou" : "bloqueado/falhou"}\n- Modo: ${e.mode}\n- Número comercial usado: ${e.productionNumberUsed ? "sim" : "não"}\n- Baileys usado: ${e.baileysUsed ? "sim" : "não"}\n- Delivery receipt observado: ${e.deliveryReceiptObserved ? "sim" : "não"}\n- Webhook inbound observado: ${e.inboundWebhookObserved ? "sim" : "não"}`)' >> "$GITHUB_STEP_SUMMARY"
+            node -e 'const fs=require("fs"); const e=JSON.parse(fs.readFileSync("whatsapp-meta-test-evidence.json","utf8")); console.log(`- Resultado: ${e.message?.providerAccepted || e.ok ? "provider aceitou" : "bloqueado/falhou"}\n- Modo: ${e.mode}\n- Configuração pendente: ${e.configurationKey || "nenhuma"}\n- Número comercial usado: ${e.productionNumberUsed ? "sim" : "não"}\n- Baileys usado: ${e.baileysUsed ? "sim" : "não"}\n- Delivery receipt observado: ${e.deliveryReceiptObserved ? "sim" : "não"}\n- Webhook inbound observado: ${e.inboundWebhookObserved ? "sim" : "não"}`)' >> "$GITHUB_STEP_SUMMARY"
           else
             echo "- Evidência não foi criada." >> "$GITHUB_STEP_SUMMARY"
           fi
@@ -107,6 +107,9 @@ jobs:
           }
           if (evidence.sender?.displayPhoneMasked && !/^\*+\d{4}$/.test(evidence.sender.displayPhoneMasked)) {
             throw new Error('EVIDENCE_SENDER_NOT_MASKED');
+          }
+          if (evidence.configurationKey && !/^WHATSAPP_[A-Z0-9_]+$/.test(evidence.configurationKey)) {
+            throw new Error('EVIDENCE_CONFIGURATION_KEY_INVALID');
           }
           NODE
 
