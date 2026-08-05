@@ -31,13 +31,13 @@ a ignorar.
 | Aplicativos no registro | 23 |
 | Rotas | 160 (142 páginas, 18 de API) |
 | Server actions | 183 em 32 arquivos |
-| Módulos de `lib/` | 94 |
+| Módulos de `lib/` | 95 |
 | Funções do banco declaradas | 233 |
 | Funções do banco chamadas do código | 117 |
-| Suítes de teste | 56, com 634 casos |
+| Suítes de teste | 57, com 648 casos |
 | Migrations | 164 |
 | Validadores de CI | 28 |
-| Módulos de `lib/` citados por algum teste | 54 de 94 |
+| Módulos de `lib/` citados por algum teste | 55 de 95 |
 
 ## 1. Aplicativos
 
@@ -648,6 +648,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/planejamento/eap` | sim | `compararCodigos`, `diferencas`, `partes`, `proximoCodigo`, `renumerar` |
 | `@/lib/planejamento/modelos-de-eap` | sim | `MINIMO_DE_OCORRENCIAS`, `modeloPara`, `modelosDeEtapa` |
 | `@/lib/planejamento/modelos-servidor` | não | `modelosDeEap` |
+| `@/lib/planilhas/pdf-texto` | sim | `LIMITES_PDF`, `decodificarAscii85`, `lerTextoDoPdf` |
 | `@/lib/planilhas/xlsx` | não | `LIMITES_XLSX`, `extractZipEntry`, `listZipEntries`, `parseWorkbook` |
 | `@/lib/procurement/comparison` | não | `compareProcurementQuotes`, `formatCurrency` |
 | `@/lib/projects/project-creation` | sim | `PROJECT_ENTRY_MODES`, `PROJECT_STATUSES_BY_MODE`, `classifyProjectCreationProviderError`, `validateContractProject`, `validateFlexibleProject` |
@@ -962,6 +963,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/personas-db-contract.test.ts` | 4 | contrato de personas no banco |
 | `tests/pipeline-datas.test.ts` | 13 | catálogo de códigos; situacaoDoPrazo |
 | `tests/pipeline-domain.test.ts` | 17 | montarColunas; prazoPrincipal; ordenarPorUrgencia; ordenarCodigos |
+| `tests/planilhas-pdf-texto.test.ts` | 14 | ASCII85 do PDF; texto de dentro do PDF; o que o leitor recusa |
 | `tests/project-creation-contract.test.ts` | 6 | criação segura de projetos |
 | `tests/qa-contraste.test.ts` | 19 | aritmética de cor; v4 — notação color(srgb …) lida como preto; opacidade nas três notações; mínimo exigido — 3:1 só para texto grande |
 | `tests/relatorio-perdas.test.ts` | 20 | Pareto ordena por valor, não por contagem; fatia e acumulado; casos que quebrariam a divisão; perda sem motivo entra na conta |
@@ -1023,7 +1025,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 40 de 94 |
+| Módulo de `lib/` sem teste que o cite | 40 de 95 |
 
 ### Módulos sem teste que os cite
 
