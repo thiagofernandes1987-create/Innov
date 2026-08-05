@@ -3,6 +3,7 @@ import { createTask, moveTask } from "@/app/actions/projects";
 import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
 import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
+import { calcular, type Dependencia, type TipoDependencia } from "@/lib/planejamento/cronograma";
 import { formatDate, formatPercent, taskColumns, taskStatusLabels } from "@/lib/stage12";
 
 export default async function TasksPage({
@@ -15,15 +16,17 @@ export default async function TasksPage({
   const { id } = await params;
   const { error: pageError } = await searchParams;
   const { supabase, organizationId } = await requireOrganizationContext();
-  const [projectResult, tasksResult, wbsResult, membershipsResult] = await Promise.all([
+  const [projectResult, tasksResult, dependenciesResult, wbsResult, membershipsResult] = await Promise.all([
     supabase.from("projects").select("id,code,name").eq("id", id).eq("organization_id", organizationId).maybeSingle(),
-    supabase.from("project_tasks").select("id,code,title,description,status,priority,progress,weight,planned_start,planned_end,responsible_id,blocked_reason,client_visible,wbs_id").eq("project_id", id).order("sequence"),
+    supabase.from("project_tasks").select("id,code,title,description,status,priority,progress,weight,planned_start,planned_end,duration_days,responsible_id,blocked_reason,client_visible,wbs_id").eq("project_id", id).order("sequence"),
+    supabase.from("task_dependencies").select("predecessor_task_id,successor_task_id,dependency_type,lag_days").eq("project_id", id).eq("organization_id", organizationId),
     supabase.from("work_breakdown_items").select("id,code,title").eq("project_id", id).order("sequence"),
     supabase.from("project_memberships").select("user_id,role").eq("project_id", id).eq("active", true)
   ]);
 
   reportDataAccessError("project-tasks.project", projectResult.error);
   reportDataAccessError("project-tasks.collection", tasksResult.error);
+  reportDataAccessError("project-tasks.dependencies", dependenciesResult.error);
   reportDataAccessError("project-tasks.wbs", wbsResult.error);
   reportDataAccessError("project-tasks.memberships", membershipsResult.error);
 
@@ -50,11 +53,27 @@ export default async function TasksPage({
   const tasks = tasksResult.data ?? [];
   const wbs = wbsResult.data ?? [];
   const memberships = membershipsResult.data ?? [];
-  const profilesById = new Map(
-    (profilesResult.data ?? []).map((profile) => [profile.id, profile.full_name || profile.email || profile.id.slice(0, 8)])
+  const tasksLoadFailed = Boolean(tasksResult.error || dependenciesResult.error);
+  const supportLoadFailed = Boolean(wbsResult.error || membershipsResult.error);
+  const schedule = calcular(
+    tasks
+      .filter(task => task.status !== "CANCELED")
+      .map(task => ({
+        id: task.id,
+        titulo: `${task.code} · ${task.title}`,
+        duracaoDias: Number(task.duration_days ?? 1),
+        inicioPlanejado: task.planned_start,
+        terminoPlanejado: task.planned_end,
+        progresso: Number(task.progress) || 0
+      })),
+    (dependenciesResult.data ?? []).map(dependency => ({
+      predecessorId: dependency.predecessor_task_id,
+      sucessorId: dependency.successor_task_id,
+      tipo: dependency.dependency_type as TipoDependencia,
+      folgaDias: Number(dependency.lag_days) || 0
+    } satisfies Dependencia))
   );
-  const tasksLoadFailed = Boolean(tasksResult.error);
-  const supportLoadFailed = Boolean(wbsResult.error || membershipsResult.error || profilesResult.error);
+  const effectiveDateByTask = new Map(schedule.barras.map(bar => [bar.id, bar]));
 
   return (
     <main className="content">
@@ -77,7 +96,9 @@ export default async function TasksPage({
             return (
               <section key={status} className="kanban-column" aria-labelledby={`column-${status}`}>
                 <div className="kanban-head"><span id={`column-${status}`}>{label}</span><span className="badge">{columnTasks.length}</span></div>
-                {columnTasks.map((task) => (
+                {columnTasks.map((task) => {
+                  const effective = effectiveDateByTask.get(task.id);
+                  return (
                   <article key={task.id} className="task-card">
                     <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                       <span className="mono muted">{task.code}</span>
@@ -89,7 +110,10 @@ export default async function TasksPage({
                       <div><span className="muted">Progresso</span><strong>{formatPercent(task.progress)}</strong></div>
                       <div className="progress-track"><div className="progress-fill" style={{ width: formatPercent(task.progress) }} /></div>
                     </div>
-                    <p className="muted" style={{ fontSize: 12 }}>{formatDate(task.planned_start)} → {formatDate(task.planned_end)} · Peso {formatPercent(task.weight, 1)}</p>
+                    <p className="muted" style={{ fontSize: 12 }}>
+                      {formatDate(effective?.inicio ?? task.planned_start)} → {formatDate(effective?.termino ?? task.planned_end)} · Peso {formatPercent(task.weight, 1)}
+                      {effective?.derivada ? <span className="badge" title="Data calculada pela rede de dependências">Calculada</span> : null}
+                    </p>
                     {task.blocked_reason ? <div className="validation blocking">{task.blocked_reason}</div> : null}
                     {!task.client_visible ? <span className="badge">Interna</span> : null}
                     <form action={moveTask}>
@@ -107,7 +131,8 @@ export default async function TasksPage({
                       <button className="button button-secondary" type="submit">Atualizar tarefa</button>
                     </form>
                   </article>
-                ))}
+                  );
+                })}
                 {!columnTasks.length ? <p className="muted" style={{ textAlign: "center", padding: 18 }}>Nenhuma tarefa.</p> : null}
               </section>
             );
@@ -138,7 +163,7 @@ export default async function TasksPage({
               <label>Status<select name="status" defaultValue="BACKLOG">{Object.entries(taskStatusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
               <label>Início planejado<input type="date" name="plannedStart" /></label>
               <label>Término planejado<input type="date" name="plannedEnd" /></label>
-              <label>Duração (dias)<input type="number" name="durationDays" min="0" step="0.5" defaultValue="1" /></label>
+              <label>Duração (dias úteis)<input type="number" name="durationDays" min="1" step="1" defaultValue="1" /></label>
               <label>Peso (%)<input type="number" name="weightPercent" min="0" max="100" step="0.01" /></label>
               <label>Sequência<input type="number" name="sequence" defaultValue="0" /></label>
               <label style={{ alignContent: "end" }}><span><input style={{ width: "auto" }} type="checkbox" name="clientVisible" defaultChecked /> Visível ao cliente</span></label>

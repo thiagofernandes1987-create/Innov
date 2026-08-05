@@ -141,13 +141,17 @@ describe("S-23 — fundação de interface", () => {
     expect(reports).toContain("Nenhum indicador, total ou estado vazio foi calculado");
   });
 
-  it("mantém o cronograma Gantt calculado com dependências", () => {
+  it("mantém o editor EAP e Gantt calculado com dependências", () => {
     const schedule = read("app/app/obras/[id]/cronograma/page.tsx");
-    const gantt = read("components/planejamento/gantt.tsx");
+    const planner = read("components/planejamento/schedule-planner.tsx");
 
-    expect(schedule).toContain('import { Gantt }');
-    expect(schedule).toContain("dependencias=");
-    expect(gantt).toMatch(/\bcalcular\(tarefas, dependencias, calendario\)/);
+    expect(schedule).toContain('import { SchedulePlanner }');
+    expect(schedule).toContain("dependencies=");
+    expect(schedule).toContain("wbsItems=");
+    expect(planner).toContain("calcular(");
+    expect(planner).toContain("createScheduleDependency");
+    expect(planner).toContain("Predecessoras e sucessoras");
+    expect(planner).toContain("openTaskEditor");
   });
 
   it("mantém o orçamento operável com inclusão, remoção e recálculo", () => {
