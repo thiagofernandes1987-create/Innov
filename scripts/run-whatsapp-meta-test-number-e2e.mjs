@@ -162,12 +162,19 @@ async function main() {
 
 main().catch(async error => {
   const message = error instanceof Error ? error.message : "UNKNOWN";
+  const separator = message.indexOf(":");
+  const errorCode = separator === -1 ? message : message.slice(0, separator);
+  const rawDetail = separator === -1 ? "" : message.slice(separator + 1);
+  const configurationKey = /^CONFIG_(?:MISSING|INVALID)$/.test(errorCode) && /^[A-Z0-9_]+$/.test(rawDetail)
+    ? rawDetail
+    : null;
   const evidence = {
     schemaVersion: "1.0.0",
     executedAt: new Date().toISOString(),
     mode: "META_TEST_NUMBER",
     ok: false,
-    errorCode: message.split(":", 1)[0],
+    errorCode,
+    configurationKey,
     providerDetails: message.startsWith("META_REQUEST_FAILED:")
       ? JSON.parse(message.slice("META_REQUEST_FAILED:".length))
       : null,
@@ -175,6 +182,11 @@ main().catch(async error => {
     baileysUsed: false
   };
   await writeFile(EVIDENCE_PATH, `${JSON.stringify(evidence, null, 2)}\n`, { mode: 0o600 }).catch(() => undefined);
-  console.error(JSON.stringify({ ok: false, errorCode: evidence.errorCode, evidencePath: EVIDENCE_PATH }));
+  console.error(JSON.stringify({
+    ok: false,
+    errorCode: evidence.errorCode,
+    configurationKey: evidence.configurationKey,
+    evidencePath: EVIDENCE_PATH
+  }));
   process.exit(1);
 });
