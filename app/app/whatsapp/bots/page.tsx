@@ -19,7 +19,9 @@ const pluginLabels: Record<string, string> = {
   HANDOFF: "Transferência para humano",
   AI_FALLBACK: "IA como último recurso"
 };
-const canonicalPluginMap = new Map(
+type CanonicalPluginPolicy = (typeof CANONICAL_MESSAGE_PLUGIN_POLICIES)[number];
+
+const canonicalPluginMap: ReadonlyMap<string, CanonicalPluginPolicy> = new Map(
   CANONICAL_MESSAGE_PLUGIN_POLICIES.map(policy => [policy.pluginId, policy])
 );
 
@@ -238,6 +240,7 @@ export default async function MessagingBotsPage({
         <div style={{ display: "grid", gap: 10 }}>
           {workspace.policies.map(policy => {
             const canonical = canonicalPluginMap.get(policy.pluginId);
+            const recognized = canonical !== undefined;
             const mandatory = canonical?.mandatory ?? false;
             return (
               <form
@@ -258,15 +261,26 @@ export default async function MessagingBotsPage({
                 </div>
                 <div>
                   <span className="eyebrow">ORDEM CANÔNICA</span>
-                  <strong style={{ display: "block" }}>{canonical?.priority ?? policy.priority}</strong>
+                  <strong style={{ display: "block" }}>
+                    {recognized ? canonical.priority : "ID INVÁLIDO"}
+                  </strong>
                 </div>
                 <label>
-                  <input name="enabled" type="checkbox" defaultChecked={mandatory || policy.enabled} disabled={mandatory} />
-                  {mandatory ? " Obrigatório" : " Habilitado"}
+                  <input
+                    name="enabled"
+                    type="checkbox"
+                    defaultChecked={mandatory || policy.enabled}
+                    disabled={mandatory || !recognized}
+                  />
+                  {!recognized ? " Bloqueado" : mandatory ? " Obrigatório" : " Habilitado"}
                 </label>
                 {mandatory ? <input type="hidden" name="enabled" value="on" /> : null}
-                <button className="button button-secondary" type="submit" disabled={!workspace.canManage || mandatory}>
-                  {mandatory ? "Protegido" : "Salvar estado"}
+                <button
+                  className="button button-secondary"
+                  type="submit"
+                  disabled={!workspace.canManage || mandatory || !recognized}
+                >
+                  {!recognized ? "Revisar cadastro" : mandatory ? "Protegido" : "Salvar estado"}
                 </button>
               </form>
             );
