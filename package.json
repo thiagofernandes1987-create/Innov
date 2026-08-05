@@ -25,6 +25,7 @@
     "validate:vaccines": "node scripts/validate-vaccines.mjs",
     "validate:inventory": "node scripts/validate-inventory.mjs",
     "validate:personas-audit": "node scripts/validate-personas-audit.mjs",
+    "validate:module-qa": "node scripts/validate-module-qa.mjs",
     "validate:extension-functions": "node scripts/validate-extension-functions.mjs",
     "validate:operational-qa": "node scripts/validate-operational-qa-guards.mjs",
     "validate:flexible-workflows": "node scripts/validate-flexible-commercial-workflows.mjs",

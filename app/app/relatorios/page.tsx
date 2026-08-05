@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { generateReportSnapshot } from "@/app/actions/reports";
+import { QuickReportSnapshotForm } from "@/components/reports/quick-report-snapshot-form";
 import { MetricCard } from "@/components/reports/metric-card";
 import { ReportNavigation } from "@/components/reports/report-navigation";
 import { requireCapability } from "@/lib/authorization";
@@ -146,13 +146,12 @@ export default async function ReportsDashboard({
         </div>
         <div className="page-actions">
           <Link className="button button-secondary" href={exportHref}>Exportar CSV</Link>
-          <form action={generateReportSnapshot}>
-            <input type="hidden" name="projectId" value={projectId ?? ""} />
-            <input type="hidden" name="periodStart" value={start} />
-            <input type="hidden" name="periodEnd" value={end} />
-            <input type="hidden" name="kind" value={projectId ? "PROJECT" : "EXECUTIVE"} />
-            <button className="button button-primary">Criar snapshot</button>
-          </form>
+          <QuickReportSnapshotForm
+            projectId={projectId}
+            periodStart={start}
+            periodEnd={end}
+            kind={projectId ? "PROJECT" : "EXECUTIVE"}
+          />
         </div>
       </section>
 

@@ -1,15 +1,42 @@
-import{archiveReportView,saveReportView}from"@/app/actions/reports";
-import{ReportNavigation}from"@/components/reports/report-navigation";
-import{hasCapability,requireCapability}from"@/lib/authorization";
-import{loadReportDashboard}from"@/lib/reports/server";
+import { archiveReportView } from "@/app/actions/reports";
+import { SavedReportForm } from "@/components/reports/report-action-forms";
+import { ReportNavigation } from "@/components/reports/report-navigation";
+import { hasCapability, requireCapability } from "@/lib/authorization";
+import { loadReportDashboard } from "@/lib/reports/server";
 
-export const dynamic="force-dynamic";
+export const dynamic = "force-dynamic";
 
-export default async function SavedReportsPage({searchParams}:{searchParams:Promise<{error?:string}>}){
- const query=await searchParams;const context=await requireCapability("relatorios","read");const canCreate=await hasCapability("relatorios","create",null,context);const canDelete=await hasCapability("relatorios","delete",null,context);const{dashboard}=await loadReportDashboard({});
- const{data:views}=await context.supabase.from("report_saved_views").select("id,name,description,kind,project_id,period_start,period_end,shared,owner_user_id,updated_at").eq("organization_id",context.organizationId).eq("active",true).order("updated_at",{ascending:false});
- const projectName=new Map(dashboard.projects.map(project=>[project.project_id,`${project.code} · ${project.name}`]));
- return <main className="content reports-app"><section className="page-heading"><div><span className="badge">RELATÓRIOS</span><h1>Relatórios salvos</h1><p>Filtros e visões reutilizáveis, particulares ou compartilhadas.</p></div></section><ReportNavigation/>{query.error&&<div className="validation blocking">{query.error}</div>}
- {canCreate&&<form action={saveReportView} className="card card-pad"><div className="section-heading"><div><span className="eyebrow">SALVAR VISÃO</span><h2>Novo relatório</h2></div></div><div className="form-grid form-grid-2"><label>Nome<input name="name" required/></label><label>Tipo<select name="kind"><option value="EXECUTIVE">Executivo</option><option value="PROJECT">Obra</option><option value="FINANCE">Financeiro</option><option value="PROCUREMENT">Compras</option><option value="QUALITY">Qualidade</option></select></label><label>Obra<select name="projectId"><option value="">Todas as obras</option>{dashboard.projects.map(project=><option key={project.project_id} value={project.project_id}>{project.code} · {project.name}</option>)}</select></label><label>Início<input type="date" name="periodStart"/></label><label>Fim<input type="date" name="periodEnd"/></label><label>Métricas visíveis<input name="visibleMetrics" placeholder="average_progress, nps, payable_open"/></label></div><label>Descrição<textarea name="description" rows={3}/></label><label className="checkbox-row"><input type="checkbox" name="shared"/> Compartilhar com outros usuários autorizados</label><button className="button button-primary">Salvar relatório</button></form>}
- <section className="report-saved-grid">{(views??[]).map(view=><article className="card card-pad" key={view.id}><header><div><span className="eyebrow">{view.kind}</span><h2>{view.name}</h2></div>{view.shared&&<span className="badge">Compartilhado</span>}</header><p>{view.description||"Sem descrição."}</p><dl className="detail-list"><div><dt>Escopo</dt><dd>{view.project_id?projectName.get(view.project_id)??"Obra restrita":"Todas as obras"}</dd></div><div><dt>Período</dt><dd>{view.period_start??"dinâmico"} → {view.period_end??"atual"}</dd></div><div><dt>Atualizado</dt><dd>{new Date(view.updated_at).toLocaleString("pt-BR")}</dd></div></dl><div className="page-actions"><a className="button button-secondary" href={`/app/relatorios${view.project_id?`?projectId=${view.project_id}`:""}${view.period_start?`${view.project_id?"&":"?"}start=${view.period_start}`:""}${view.period_end?`${view.project_id||view.period_start?"&":"?"}end=${view.period_end}`:""}`}>Abrir</a>{canDelete&&<form action={archiveReportView}><input type="hidden" name="id" value={view.id}/><input type="hidden" name="projectId" value={view.project_id??""}/><button className="button button-secondary">Arquivar</button></form>}</div></article>)}{!views?.length&&<div className="empty-state"><h3>Nenhum relatório salvo</h3><p>Salve uma visão para reutilizar os mesmos filtros.</p></div>}</section></main>;
+export default async function SavedReportsPage({ searchParams }: { searchParams: Promise<{ error?: string; created?: string; archived?: string }> }) {
+  const query = await searchParams;
+  const context = await requireCapability("relatorios", "read");
+  const canCreate = await hasCapability("relatorios", "create", null, context);
+  const canDelete = await hasCapability("relatorios", "delete", null, context);
+  const { dashboard } = await loadReportDashboard({});
+  const { data: views, error: viewsError } = await context.supabase
+    .from("report_saved_views")
+    .select("id,name,description,kind,project_id,period_start,period_end,shared,owner_user_id,updated_at")
+    .eq("organization_id", context.organizationId)
+    .eq("active", true)
+    .order("updated_at", { ascending: false });
+  const projectName = new Map(dashboard.projects.map(project => [project.project_id, `${project.code} · ${project.name}`]));
+  const projectOptions = dashboard.projects.map(project => ({ id: project.project_id, label: `${project.code} · ${project.name}` }));
+
+  return <main className="content reports-app">
+    <section className="page-heading"><div><span className="badge">RELATÓRIOS</span><h1>Relatórios salvos</h1><p>Filtros e visões reutilizáveis, particulares ou compartilhadas.</p></div></section>
+    <ReportNavigation/>
+    {query.error && <div className="validation blocking">{query.error}</div>}
+    {query.created && <div className="validation success">Relatório salvo com sucesso.</div>}
+    {query.archived && <div className="validation success">Relatório arquivado com sucesso.</div>}
+    {viewsError && <div className="validation blocking">Não foi possível carregar os relatórios salvos agora.</div>}
+    {canCreate && <SavedReportForm projects={projectOptions}/>} 
+    <section className="report-saved-grid">
+      {(views ?? []).map(view => <article className="card card-pad" key={view.id}>
+        <header><div><span className="eyebrow">{view.kind}</span><h2>{view.name}</h2></div>{view.shared && <span className="badge">Compartilhado</span>}</header>
+        <p>{view.description || "Sem descrição."}</p>
+        <dl className="detail-list"><div><dt>Escopo</dt><dd>{view.project_id ? projectName.get(view.project_id) ?? "Obra restrita" : "Todas as obras"}</dd></div><div><dt>Período</dt><dd>{view.period_start ?? "dinâmico"} → {view.period_end ?? "atual"}</dd></div><div><dt>Atualizado</dt><dd>{new Date(view.updated_at).toLocaleString("pt-BR")}</dd></div></dl>
+        <div className="page-actions"><a className="button button-secondary" href={`/app/relatorios${view.project_id ? `?projectId=${view.project_id}` : ""}${view.period_start ? `${view.project_id ? "&" : "?"}start=${view.period_start}` : ""}${view.period_end ? `${view.project_id || view.period_start ? "&" : "?"}end=${view.period_end}` : ""}`}>Abrir</a>{canDelete && <form action={archiveReportView}><input type="hidden" name="id" value={view.id}/><input type="hidden" name="projectId" value={view.project_id ?? ""}/><button className="button button-secondary">Arquivar</button></form>}</div>
+      </article>)}
+      {!viewsError && !views?.length && <div className="empty-state"><h3>Nenhum relatório salvo</h3><p>Salve uma visão para reutilizar os mesmos filtros.</p></div>}
+    </section>
+  </main>;
 }

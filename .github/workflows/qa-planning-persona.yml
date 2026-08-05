@@ -1,0 +1,53 @@
+name: QA Planejamento por Persona
+
+on:
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: URL imutável e compartilhável do deployment
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-planning-persona-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  gestor-de-obras:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
+    env:
+      PREVIEW_URL: ${{ inputs.preview_url }}
+      QA_PERSONAS_JSON: ${{ secrets.QA_PERSONAS_JSON }}
+      QA_OUTPUT_DIR: artifacts/planning-persona
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate immutable preview URL
+        run: |
+          case "$PREVIEW_URL" in
+            https://innov-git-*) echo "Use a URL imutável do deployment, não o alias do branch." >&2; exit 1 ;;
+            https://*.vercel.app*) ;;
+            *) echo "URL de preview inválida para o Planejamento." >&2; exit 1 ;;
+          esac
+
+      - name: Install Playwright runtime
+        run: npm install --no-save --no-package-lock playwright@1.55.0
+
+      - name: Run gestor de obras journey
+        run: node scripts/run-planning-persona-qa.mjs
+
+      - name: Upload screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: planning-persona-${{ github.run_id }}
+          path: artifacts/planning-persona/
+          if-no-files-found: warn
+          retention-days: 30

@@ -9,7 +9,7 @@ vi.mock("next/navigation", () => ({
 import { NavegacaoDoModulo } from "../components/casca/navegacao-do-modulo";
 
 describe("NavegacaoDoModulo", () => {
-  it("mantém os destinos do módulo disponíveis em tela estreita", () => {
+  it("mantém os destinos e um gatilho controlado disponíveis em tela estreita", () => {
     const html = renderToStaticMarkup(
       <NavegacaoDoModulo
         aplicativos={[
@@ -19,9 +19,12 @@ describe("NavegacaoDoModulo", () => {
     );
 
     expect(html).toContain('class="barra-menu-movel"');
-    expect(html).toContain("<summary");
+    expect(html).toContain('class="barra-menu-movel-gatilho"');
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).toContain('aria-controls="barra-menu-movel-conteudo"');
     expect(html).toContain("Menu de CRM e Vendas");
     expect(html).toContain('href="/app/crm/leads"');
+    expect(html).not.toContain("<summary");
   });
 
   it("troca o menu inline pelo compacto na largura de notebook", () => {

@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "previewUrl": "https://innov-70g7yvqva-apex-method.vercel.app/?_vercel_share=Duq7L6X9vADHu80MsMC6zBwywUUDf8bE",
+  "moduleKey": "dashboard",
+  "moduleRoute": "/app",
+  "persona": "administrador",
+  "sourceCommit": "2abbc1ae20a9025979c3a6a1ee7243aeece189fc",
+  "currentBranch": "fix/module-validation-loop-20260730",
+  "evidence": {
+    "launcherComponentSha": "ccf9020d0cb92a42b9f1341b2cc3deccbc541528",
+    "launcherCssSha": "51f87e23659f63dcb1ea8df38ad5a925ee04a55e",
+    "launcherPageSha": "ff1cfaeaaa2ade04862c1e27627737ab4af922fb",
+    "reason": "Os três arquivos da superfície visual do launcher são idênticos entre o deployment READY e o head atual; mudanças posteriores não alteram a renderização de /app."
+  }
+}

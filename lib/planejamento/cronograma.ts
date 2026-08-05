@@ -88,9 +88,9 @@ export type BarraCronograma = {
 /**
  * Ordem topológica das tarefas.
  *
- * Devolve `null` quando há ciclo. O banco já recusa ciclo na escrita, mas esta
- * função também roda sobre dados que chegaram por importação ou por uma versão
- * anterior do esquema — e travar a tela num laço infinito é pior que desenhar
+ * Devolve `null` quando há ciclo. A aplicação recusa ciclo antes da escrita; uma
+ * RPC transacional ainda é necessária para serializar gravações concorrentes. Esta função
+ * também protege dados importados ou de versões anteriores — e travar a tela é pior que desenhar
  * um cronograma incompleto.
  */
 export function ordenar(
