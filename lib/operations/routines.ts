@@ -1,6 +1,6 @@
 import { MODULE_BY_KEY } from "@/lib/modules/registry";
 import { planejarNotificacoesOperacionais, type OperationalObjectType } from "./notifications";
-import { PERSONAS_OPERACIONAIS, type PersonaId } from "@/lib/personas/catalog";
+import { PERSONAS_OPERACIONAIS, type PersonaId } from "@/lib/personas/runtime";
 
 export type OperationalRoutine = {
   persona: PersonaId;
@@ -29,6 +29,7 @@ const OBJECT_TYPE_BY_MODULE: Record<string, OperationalObjectType> = {
   estoque: "inventory",
   financeiro: "financial",
   sac: "ticket",
+  whatsapp: "ticket",
   relatorios: "project",
   auditoria: "security",
   administracao: "security"

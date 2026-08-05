@@ -1,6 +1,6 @@
 .planner {
   --left-pane: 660px;
-  --row-height: 42px;
+  --row-height: 44px;
   --header-height: 62px;
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -739,11 +739,190 @@
   .relationColumns { grid-template-columns: 1fr; }
 }
 
-/* Dica sob o campo de código: explica que vazio numera sozinho. O campo
-   continua aceitando valor manual para quem espelha uma EAP contratual. */
-.dica {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 0.72rem;
-  line-height: 1.35;
+
+/* QA_PLANNING_ITER2_RESPONSIVE */
+/* O editor mantém dimensões operacionais; no tablet/mobile as colunas auxiliares
+   ficam disponíveis no modal e o Gantt preserva uma faixa útil com rolagem interna. */
+.toolButton,
+.zoomButton,
+.primaryButton,
+.iconButton,
+.tab,
+.secondaryButton,
+.dangerButton {
+  min-height: 44px;
+}
+
+.iconButton,
+.zoomButton {
+  width: 44px;
+  min-width: 44px;
+}
+
+.collapseButton {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+}
+
+.field input,
+.field select,
+.field textarea,
+.fullField input,
+.fullField select,
+.fullField textarea {
+  min-height: 44px;
+}
+
+.relationRow {
+  min-height: 44px;
+}
+
+.viewport {
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.legend {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 860px) {
+  .planner {
+    --left-pane: clamp(220px, 44vw, 340px);
+  }
+
+  .viewport {
+    grid-template-columns: var(--left-pane) minmax(520px, 1fr);
+  }
+
+  .leftHeader,
+  .leftRow {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .leftHeader > :nth-child(n + 3),
+  .leftRow > :nth-child(n + 3) {
+    display: none;
+  }
+
+  .toolbar {
+    flex-wrap: wrap;
+  }
+
+  .toolbarGroup,
+  .toolbarActions {
+    width: 100%;
+  }
+
+  .toolbarActions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .planner {
+    --left-pane: 220px;
+  }
+
+  .toolbarGroup,
+  .toolbarActions {
+    gap: 6px;
+  }
+
+  .toolbarTitle {
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .toolButton,
+  .primaryButton {
+    padding-inline: 10px;
+  }
+
+  .legend {
+    gap: 8px 12px;
+    font-size: 0.68rem;
+  }
+}
+
+
+/* QA_PLANNING_ITER2_HIT_AREA */
+.nameButton {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+.dangerButton {
+  min-width: 44px;
+}
+
+.taskBar {
+  --bar-color: var(--brand);
+  top: 0;
+  height: 44px;
+  min-width: 44px;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.taskBar::before {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: var(--bar-offset, 0);
+  width: var(--bar-visual-width, 100%);
+  height: 24px;
+  border-radius: 5px;
+  background: var(--bar-color);
+  box-shadow: var(--shadow-xs);
+}
+
+.taskBar.critical {
+  --bar-color: var(--danger);
+  background: transparent;
+}
+
+.taskBar.delayed {
+  outline: 0;
+}
+
+.taskBar.delayed::before {
+  box-shadow: 0 0 0 2px var(--danger), var(--shadow-xs);
+}
+
+.taskBar.derived {
+  background-image: none;
+}
+
+.taskBar.derived::before {
+  background-color: var(--bar-color);
+  background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.16) 0 5px, transparent 5px 10px);
+}
+
+.progressFill {
+  top: 10px;
+  bottom: auto;
+  left: var(--bar-offset, 0);
+  height: 24px;
+  border-radius: 5px 0 0 5px;
+  z-index: 1;
+}
+
+.barLabel {
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+
+/* QA_PLANNING_ITER3_TEXT_ALIGNMENT */
+.nameButton {
+  justify-content: flex-start;
+  text-align: left;
 }

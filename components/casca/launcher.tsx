@@ -2,7 +2,8 @@
 
 import { ArrowRight, SlidersHorizontal } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { LauncherSummary, LauncherSummaryMap } from "@/lib/casca/launcher-domain";
 import { useBusca } from "./busca-da-barra";
 import { corDoModulo, IconeDoModulo } from "./icones";
 import type { Indicador } from "@/lib/casca/indicadores";
@@ -29,6 +30,16 @@ function normalizar(texto: string): string {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function resumoDe(chave: string, resumos: LauncherSummaryMap): LauncherSummary {
+  return resumos[chave] ?? {
+    label: "Acesso ao aplicativo",
+    value: "Ativo",
+    support: "Indicadores serão consolidados neste módulo",
+    progress: null,
+    available: false
+  };
+}
+
 export function Launcher({
   aplicativos,
   indicadores = {}
@@ -42,6 +53,28 @@ export function Launcher({
   const [personalizando, setPersonalizando] = useState(false);
   const [mostrarIndicadores, setMostrarIndicadores] = useState(true);
   const [compacto, setCompacto] = useState(false);
+  const personalizacaoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!personalizando) return;
+
+    function fecharAoClicarFora(evento: MouseEvent | TouchEvent) {
+      if (!personalizacaoRef.current?.contains(evento.target as Node)) setPersonalizando(false);
+    }
+
+    function fecharComEscape(evento: KeyboardEvent) {
+      if (evento.key === "Escape") setPersonalizando(false);
+    }
+
+    document.addEventListener("mousedown", fecharAoClicarFora);
+    document.addEventListener("touchstart", fecharAoClicarFora, { passive: true });
+    document.addEventListener("keydown", fecharComEscape);
+    return () => {
+      document.removeEventListener("mousedown", fecharAoClicarFora);
+      document.removeEventListener("touchstart", fecharAoClicarFora);
+      document.removeEventListener("keydown", fecharComEscape);
+    };
+  }, [personalizando]);
 
   const categorias = useMemo(() => {
     const contagem = new Map<string, number>();
@@ -54,9 +87,11 @@ export function Launcher({
     return aplicativos.filter(app => {
       if (categoria !== TODAS && app.categoria !== categoria) return false;
       if (!termo) return true;
-      return [app.nome, app.descricao, app.categoria].some(campo => normalizar(campo).includes(termo));
+      const resumo = resumoDe(app.chave, resumos);
+      return [app.nome, app.descricao, app.categoria, resumo.label, resumo.value, resumo.support ?? ""]
+        .some(campo => normalizar(campo).includes(termo));
     });
-  }, [aplicativos, busca, categoria]);
+  }, [aplicativos, busca, categoria, resumos]);
 
   const destaque = encontrados.find(app => app.chave === "crm") ?? null;
   const demais = destaque ? encontrados.filter(app => app.chave !== destaque.chave) : encontrados;
@@ -64,7 +99,10 @@ export function Launcher({
   return (
     <section className={compacto ? "launcher compacto" : "launcher"} aria-labelledby="launcher-titulo">
       <header className="launcher-faixa">
-        <h1 id="launcher-titulo">Aplicativos</h1>
+        <div className="launcher-titulo-grupo">
+          <h1 id="launcher-titulo">Aplicativos</h1>
+          <span>{encontrados.length} disponível(is)</span>
+        </div>
 
         {categorias.length > 1 ? (
           <div className="launcher-filtros" role="group" aria-label="Filtrar por categoria">
@@ -90,18 +128,19 @@ export function Launcher({
           </div>
         ) : null}
 
-        <div className="launcher-personalizacao">
+        <div className="launcher-personalizacao" ref={personalizacaoRef}>
           <button
             type="button"
             className="launcher-personalizar"
             aria-expanded={personalizando}
+            aria-controls="launcher-personalizar-painel"
             onClick={() => setPersonalizando(valor => !valor)}
           >
             <SlidersHorizontal size={17} weight="regular" aria-hidden="true" />
             Personalizar
           </button>
           {personalizando ? (
-            <div className="launcher-personalizar-painel" role="dialog" aria-label="Personalizar aplicativos">
+            <div id="launcher-personalizar-painel" className="launcher-personalizar-painel" role="dialog" aria-label="Personalizar aplicativos">
               <label>
                 <input
                   type="checkbox"
@@ -131,7 +170,9 @@ export function Launcher({
         </p>
       ) : (
         <div className={destaque ? "launcher-paineis com-destaque" : "launcher-paineis"}>
-          {destaque ? <AplicativoDestaque aplicativo={destaque} /> : null}
+          {destaque ? (
+            <AplicativoDestaque aplicativo={destaque} resumo={resumoDe(destaque.chave, resumos)} mostrarIndicadores={mostrarIndicadores} />
+          ) : null}
           <ul className="launcher-grade">
             {demais.map(app => (
               <li key={app.chave}>
@@ -149,7 +190,15 @@ export function Launcher({
   );
 }
 
-function AplicativoDestaque({ aplicativo }: { aplicativo: AplicativoAutorizado }) {
+function AplicativoDestaque({
+  aplicativo,
+  resumo,
+  mostrarIndicadores
+}: {
+  aplicativo: AplicativoAutorizado;
+  resumo: LauncherSummary;
+  mostrarIndicadores: boolean;
+}) {
   const cor = corDoModulo(aplicativo.chave);
   return (
     <article className="launcher-destaque" style={{ ["--cor-app" as string]: cor }}>
@@ -166,17 +215,39 @@ function AplicativoDestaque({ aplicativo }: { aplicativo: AplicativoAutorizado }
         <ArrowRight size={18} weight="regular" aria-hidden="true" />
       </Link>
 
-      <div className="launcher-recentes">
-        <strong>Recentes</strong>
-        <Link href={aplicativo.href}>
-          <span><b>OP-2026-1147</b><small>Oportunidade · Construtora Alfa</small></span>
-          <span><b>R$ 2,4 mi</b><small>Hoje</small></span>
-        </Link>
-        <Link href={aplicativo.href}>
-          <span><b>OP-2026-1132</b><small>Negociação · Residencial Vereda</small></span>
-          <span><b>R$ 980 mil</b><small>Ontem</small></span>
-        </Link>
-      </div>
+      {mostrarIndicadores ? (
+        <div className="launcher-destaque-resumo" data-available={resumo.available}>
+          <span>
+            <small>{resumo.label}</small>
+            <strong>{resumo.value}</strong>
+            {resumo.support ? <em>{resumo.support}</em> : null}
+          </span>
+          {resumo.secondaryLabel ? (
+            <span>
+              <small>{resumo.secondaryLabel}</small>
+              <strong>{resumo.secondaryValue ?? "—"}</strong>
+            </span>
+          ) : null}
+          <MiniGrafico progress={resumo.progress} />
+        </div>
+      ) : null}
+
+      {resumo.recent?.length ? (
+        <div className="launcher-recentes">
+          <strong>Recentes</strong>
+          {resumo.recent.map(item => (
+            <Link href={item.href} key={item.id}>
+              <span><b>{item.title}</b><small>{item.subtitle}</small></span>
+              <span><b>{item.meta ?? ""}</b><small>Abrir</small></span>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <div className="launcher-recentes launcher-recentes-vazio">
+          <strong>Recentes</strong>
+          <p>Nenhum registro recente confirmado.</p>
+        </div>
+      )}
 
       <Link href={aplicativo.href} className="launcher-ver-todas">
         Ver todas no aplicativo
@@ -188,11 +259,11 @@ function AplicativoDestaque({ aplicativo }: { aplicativo: AplicativoAutorizado }
 
 function AplicativoCard({
   aplicativo,
-  indicador,
+  resumo,
   mostrarIndicadores
 }: {
   aplicativo: AplicativoAutorizado;
-  indicador?: Indicador;
+  resumo: LauncherSummary;
   mostrarIndicadores: boolean;
 }) {
   const cor = corDoModulo(aplicativo.chave);
@@ -212,12 +283,18 @@ function AplicativoCard({
       <strong>{aplicativo.nome}</strong>
       <p>{aplicativo.descricao}</p>
 
-      {mostrarIndicadores && indicador ? (
-        <span className="launcher-indicador">
-          <small>{indicador.rotulo}</small>
-          <b>{indicador.valor}</b>
-          {indicador.apoio ? <em>{indicador.apoio}</em> : null}
-          <FormaDoIndicador indicador={indicador} />
+      {mostrarIndicadores ? (
+        <span className="launcher-indicador" data-available={resumo.available}>
+          <small>{resumo.label}</small>
+          <b>{resumo.value}</b>
+          {resumo.support ? <em>{resumo.support}</em> : null}
+          {resumo.secondaryLabel ? (
+            <span className="launcher-indicador-secundario">
+              <small>{resumo.secondaryLabel}</small>
+              <strong>{resumo.secondaryValue ?? "—"}</strong>
+            </span>
+          ) : null}
+          <MiniGrafico progress={resumo.progress} />
         </span>
       ) : null}
     </Link>

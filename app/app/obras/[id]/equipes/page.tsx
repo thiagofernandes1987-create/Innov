@@ -30,6 +30,13 @@ export default async function TeamsPage({
   reportDataAccessError("project-teams.resources", resourcesResult.error);
   reportDataAccessError("project-teams.memberships", membershipsResult.error);
 
+  const membershipIds = [...new Set((membershipsResult.data ?? []).map((membership) => membership.user_id))];
+  const profilesResult = membershipIds.length
+    ? await supabase.from("profiles").select("id,full_name,email").in("id", membershipIds)
+    : { data: [], error: null };
+
+  reportDataAccessError("project-teams.profiles", profilesResult.error);
+
   if (projectResult.error) {
     return (
       <main className="content">
@@ -49,7 +56,7 @@ export default async function TeamsPage({
   const nomePorUsuario = await nomesDosUsuarios(supabase, memberships.map(m => m.user_id));
   const teamsLoadFailed = Boolean(teamsResult.error);
   const resourcesLoadFailed = Boolean(resourcesResult.error);
-  const membershipsLoadFailed = Boolean(membershipsResult.error);
+  const membershipsLoadFailed = Boolean(membershipsResult.error || profilesResult.error);
   const loadFailed = teamsLoadFailed || resourcesLoadFailed || membershipsLoadFailed;
 
   return (

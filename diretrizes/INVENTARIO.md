@@ -1,10 +1,10 @@
 # Inventário canônico — Innovar Platform
 
-**Atualizado em:** 22 de julho de 2026  
+**Atualizado em:** 3 de agosto de 2026  
 **Base estável:** `main`  
-**Commit estável:** `55f4d56`  
-**Branch funcional ativa:** `feature/etapa-20-prontidao-producao`  
-**PR funcional:** `#23`, empilhado sobre o PR `#22`  
+**Commit-base da branch:** `ecf80482`  
+**Branch funcional ativa:** `feature/etapa-22-whatsapp-omnichannel`  
+**PR funcional:** `#39` — rascunho  
 **Versão:** 0.19.0  
 **Produção:** não liberada
 
@@ -17,8 +17,7 @@
 - Next.js 16, React 19 e TypeScript;
 - Supabase Auth, PostgreSQL, RLS e Storage;
 - projeto de homologação: `wyeojufebtwblsubkunr`;
-- CI estável da `main`: run `29885340336`, `success`;
-- CI atual da Etapa 20: run `29913636056`, `success`.
+- branch atual não está mesclada nem homologada.
 
 ## 2. Estado dos aplicativos
 
@@ -43,7 +42,8 @@
 | `compras` | Compras e Suprimentos | operacional; antimalware pendente | 14/20 |
 | `estoque` | Estoque, Inventário e Almoxarifado | homologado; concorrência real aprovada | 17/20 |
 | `financeiro` | Financeiro Operacional | operacional; antimalware pendente | 15/20 |
-| `sac` | Pós-venda e SAC | homologado; quarentena integrada na branch, homologação pendente | 18/20 |
+| `sac` | Pós-venda e SAC | homologado; quarentena integrada na branch da Etapa 20 | 18/20 |
+| `whatsapp` | WhatsApp e Atendimento | implementação em branch; não homologado; Cloud API oficial | 22 |
 | `relatorios` | Relatórios e Indicadores | operacional | 16 |
 | `auditoria` | Auditoria e Observabilidade | homologado e incorporado | 19 |
 | `administracao` | Administração | operacional | 12.1 |
@@ -67,7 +67,7 @@ diretrizes/
 └── HISTORICO-ETAPAS.md
 ```
 
-Documentos técnicos atuais:
+Documentos técnicos principais:
 
 ```text
 docs/ETAPA-17-ESTOQUE-INVENTARIO-ALMOXARIFADO.md
@@ -80,6 +80,8 @@ docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md
 docs/ETAPA-20-BACKUP-RESTAURACAO.md
 docs/ETAPA-20-PROTECAO-ANEXOS.md
 docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md
+docs/ETAPA-22-WHATSAPP-OMNICHANNEL.md
+docs/ANALISE-REFERENCIAS-WHATSAPP-OPEN-SOURCE-2026-08-03.md
 ```
 
 ## 4. Etapa 17 — Estoque
@@ -111,10 +113,9 @@ supabase/tests/stage17_inventory_homologation.sql
 - 14 testes transacionais com `ROLLBACK`;
 - migrations alinhadas ao ledger.
 
-### Concorrência de produção homologada na Etapa 20
+### Concorrência homologada
 
 ```text
-workflow: 29889168656
 status: passed
 cleanup: passed
 saldo inicial: 10
@@ -125,11 +126,7 @@ saldo após disputa: 4
 saldo após cleanup: 0
 ```
 
-O advisory lock serializou as transações e o banco rejeitou a segunda saída por estoque disponível insuficiente.
-
-### Pendência restante
-
-- carga e volumetria prolongadas.
+Pendência: carga e volumetria prolongadas.
 
 ## 5. Etapa 18 — CRM, Clientes e SAC
 
@@ -141,25 +138,19 @@ O advisory lock serializou as transações e o banco rejeitou a segunda saída p
 - anexos com SHA-256;
 - estados críticos por RPC;
 - zero RPC operacional para `anon`;
-- E2E concorrente run `29883182240` aprovado;
-- `cleanup: passed`;
-- PR `#18` mesclado.
+- E2E concorrente aprovado;
+- `cleanup: passed`.
 
 ### Hardening de anexos na Etapa 20
 
-- migration `20260722104500_stage20_sac_attachment_security.sql` versionada, ainda não aplicada;
 - upload interno e portal passam por `secureUpload` na branch;
 - validação de MIME, tamanho, nome e assinatura dos bytes;
 - quarentena `file-quarantine` privada;
 - ClamAV `INSTREAM` fail-closed;
 - promoção somente após `CLEAN`;
-- RPC exige `scanId`, provider e instante de análise;
-- anexos antigos permanecem `LEGACY` sem evidência artificial;
+- anexos antigos permanecem `LEGACY`;
 - portal recebe somente anexos `CLEAN`;
-- download assinado por 60 segundos e sem cache;
-- E2E local ClamAV run `29913636268` aprovado;
-- artefato `8526935275`;
-- provider real e E2E de homologação pendentes.
+- provider real e E2E de homologação permanecem pendentes.
 
 ## 6. Etapa 19 — Auditoria e Observabilidade
 
@@ -172,98 +163,24 @@ O advisory lock serializou as transações e o banco rejeitou a segunda saída p
 - diagnósticos globais protegidos;
 - zero função acessível por `anon`;
 - teste com `ROLLBACK`;
-- CI verde;
-- PRs `#19` e `#20` mesclados.
-
-Migrations:
-
-```text
-20260721100108_stage19_observability_schema.sql
-20260721100159_stage19_observability_security.sql
-20260721122302_stage19_observability_functions.sql
-20260721122355_stage19_observability_unified_stream.sql
-20260721122436_stage19_observability_module_performance.sql
-20260721123305_stage19_observability_hardening.sql
-```
+- incorporada à `main`.
 
 ## 7. Etapa 20 — Prontidão de Produção
 
-**Estado:** em implementação.
+**Estado:** em implementação; produção não liberada.
 
-### Fundação UI/UX e CI concluída
+### Concluído no escopo da branch
 
-```text
-diretrizes/UI-UX-PRO-MAX.md
-docs/ETAPA-20-PRONTIDAO-PRODUCAO.md
-scripts/validate-stage20.mjs
-app/globals.css
-app/stage20.css
-app/app/layout.tsx
-app/app/page.tsx
-.github/workflows/ci.yml
-```
+- fundação UI/UX e CI;
+- concorrência real do estoque;
+- backup e restauração lógica em ambiente isolado;
+- proteção de anexos do SAC com quarentena e antimalware local;
+- health check HMAC do provider de segurança.
 
-- identidade `Arquitetura em operação`;
-- azul profundo, cobre e materiais naturais;
-- link de salto, foco visível e alvos de 44px;
-- dashboard responsivo sem métricas inventadas;
-- forced colors e redução de movimento;
-- prevenção contra rosa/fúcsia;
-- CI completo run `29913636056` verde.
+### Pendente
 
-### Concorrência real concluída
-
-```text
-scripts/run-stage20-inventory-concurrency-e2e.mjs
-.github/workflows/stage20-inventory-concurrency-e2e.yml
-docs/ETAPA-20-E2E-CONCORRENCIA-ESTOQUE.md
-```
-
-- duas sessões independentes;
-- uma postagem e uma rejeição;
-- saldo não negativo;
-- cleanup com saldo zero;
-- artefato `8517620520`;
-- `VACINA-013` criada.
-
-### Backup e restauração concluídos no escopo lógico
-
-- run `29911179764` aprovado;
-- artefato `8526039714`;
-- dump custom de `1.812.078` bytes e `2.798` objetos;
-- RTO observado de `201` segundos;
-- snapshots equivalentes e smoke tests aprovados;
-- dump efêmero removido;
-- retenção durável, PITR, buckets e Auth permanecem pendentes.
-
-### Proteção de anexos integrada na branch
-
-```text
-lib/file-security/domain.ts
-lib/file-security/server.ts
-components/file-security/file-security-status.tsx
-scripts/run-stage20-file-security-e2e.mjs
-.github/workflows/stage20-file-security-e2e.yml
-.github/workflows/stage20-file-security-provider-health.yml
-supabase/migrations/20260722104500_stage20_sac_attachment_security.sql
-```
-
-- SAC integrado à quarentena;
-- assinatura dos bytes além do MIME;
-- estados `LEGACY` e `CLEAN` persistidos;
-- UI com estados semânticos e ação `Analisar e enviar`;
-- fixture limpa liberada e EICAR bloqueado;
-- E2E run `29913636268` e artefato `8526935275` aprovados;
-- migration e provider real ainda não ativados em homologação.
-
-### Próxima frente
-
-`attachment_provider_homologation`.
-
-### Escopo pendente
-
-- provider ClamAV real e health check;
-- aplicação coordenada da migration e da aplicação;
+- provider ClamAV real e health check em homologação;
+- aplicação coordenada das migrations;
 - E2E real do SAC e reanálise de legados;
 - antimalware nos demais módulos;
 - retenção durável, PITR, buckets e Auth;
@@ -277,7 +194,80 @@ supabase/migrations/20260722104500_stage20_sac_attachment_security.sql
 - revisão jurídica, contábil e LGPD;
 - publicação controlada.
 
-## 8. Storage privado
+## 8. Etapa 22 — WhatsApp e Atendimento
+
+**Estado:** implementação inicial no PR de rascunho `#39`; não homologada.
+
+### Arquitetura
+
+```text
+modelos/documentos versionados
+        ↓
+whatsapp_content_bindings
+        ↓
+resolução no envio
+        ↓
+snapshot + versão + SHA-256
+        ↓
+Meta Cloud API
+        ↓
+webhook HMAC + status + auditoria
+```
+
+### Código principal
+
+```text
+app/app/whatsapp/page.tsx
+app/actions/whatsapp.ts
+app/api/webhooks/whatsapp/route.ts
+lib/whatsapp/domain.ts
+lib/whatsapp/client.ts
+lib/whatsapp/source-resolver.ts
+lib/whatsapp/server.ts
+scripts/validate-stage22.mjs
+tests/whatsapp-domain.test.ts
+supabase/migrations/20260803190000_stage22_whatsapp_omnichannel.sql
+supabase/migrations/20260803191000_stage22_whatsapp_hardening.sql
+supabase/migrations/20260803192000_stage22_whatsapp_status_guard.sql
+```
+
+### Estado técnico atual
+
+- aplicativo registrado em `lib/modules/registry.ts`;
+- sete tabelas com RLS;
+- contas, contatos, conversas, mensagens, bindings, status e webhooks;
+- mensagens padrão referenciam modelos e documentos existentes;
+- texto, template e documento privado;
+- janela de 24 horas validada na aplicação e no banco;
+- HMAC SHA-256 no webhook;
+- idempotência por payload e por envio;
+- histórico sem exclusão direta;
+- estados de entrega monotônicos em TypeScript e PostgreSQL;
+- cliente oficial preparado para verificar número, registrar telefone e assinar WABA;
+- nenhum token ou segredo versionado;
+- nenhum runtime de `whatsapp-web.js`, Puppeteer ou Baileys.
+
+### Referências avaliadas
+
+- `ArnasDon/wacrm`: principal referência de padrões, licença MIT;
+- `evolution-foundation/evolution-api`: referência multiprovider/event-driven, uso direto sujeito a condições adicionais;
+- `sebferreira/WhatsControl`: referência visual; código não incorporado;
+- `wwebjs/whatsapp-web.js`: não aprovado como canal produtivo.
+
+### Pendências P0
+
+- aplicar migrations em homologação;
+- configurar as quatro variáveis do provider;
+- verificar número e registrar telefone/WABA;
+- sincronizar templates e qualidade;
+- integrar mídia recebida à quarentena;
+- testar isolamento multiempresa e escopo por obra;
+- E2E com número de teste da Meta;
+- CI completo verde;
+- revisão de UX mobile/desktop;
+- política de retenção LGPD.
+
+## 9. Storage privado
 
 ```text
 commercial-documents
@@ -295,7 +285,7 @@ file-quarantine
 
 `file-quarantine` deve permanecer privado. Objetos `PENDING`, `SCANNING`, `BLOCKED` ou `ERROR` nunca recebem URL funcional para o usuário.
 
-## 9. Variáveis conhecidas
+## 10. Variáveis conhecidas
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
@@ -310,17 +300,23 @@ DEMO_CLIENT_PASSWORD=
 SUPABASE_DB_URL=
 SUPABASE_RESTORE_DB_URL=
 SUPABASE_RESTORE_CONFIRMATION=
-FILE_SECURITY_PROVIDER=clamav
+FILE_SECURITY_PROVIDER=
 FILE_SECURITY_QUARANTINE_BUCKET=file-quarantine
+FILE_SECURITY_SCANNER_URL=
+FILE_SECURITY_SCANNER_SECRET=
 CLAMAV_HOST=
 CLAMAV_PORT=3310
 CLAMAV_TIMEOUT_MS=15000
 ALLOW_INSECURE_FILE_SCANNER=false
+WHATSAPP_GRAPH_API_VERSION=
+WHATSAPP_ACCESS_TOKEN=
+WHATSAPP_APP_SECRET=
+WHATSAPP_WEBHOOK_VERIFY_TOKEN=
 ```
 
-Somente nomes e finalidades são versionados.
+Somente nomes, defaults não sensíveis e finalidades são versionados.
 
-## 10. CI
+## 11. CI
 
 ```bash
 pnpm validate:docs
@@ -330,15 +326,17 @@ pnpm validate:stage17
 pnpm validate:stage18
 pnpm validate:stage19
 pnpm validate:stage20
+pnpm validate:stage22
 pnpm lint
 pnpm typecheck
 pnpm test
 pnpm test:python
 pnpm build
-pnpm test:e2e:stage20:file-security
 ```
 
-## 11. Recuperação
+O PR da Etapa 22 permanece em rascunho até todos os gates aplicáveis ficarem verdes.
+
+## 12. Recuperação
 
 Procedimento oficial: `diretrizes/RECUPERACAO.md`.
 

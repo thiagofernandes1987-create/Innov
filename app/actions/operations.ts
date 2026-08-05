@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAccessAdministration } from "@/lib/authorization";
-import { PERSONAS_OPERACIONAIS, type PersonaId } from "@/lib/personas/catalog";
+import { PERSONAS_OPERACIONAIS, type PersonaId } from "@/lib/personas/runtime";
 
 const PERSONA_IDS = new Set(PERSONAS_OPERACIONAIS.map(persona => persona.id));
 const ROTA = "/app/administracao/responsabilidades";

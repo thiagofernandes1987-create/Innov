@@ -4,12 +4,6 @@ import { carregarIndicadores } from "@/lib/casca/indicadores";
 
 export const dynamic = "force-dynamic";
 
-// Tela inicial: a grade de aplicativos que o perfil libera.
-//
-// É aqui que "plug and play" fica visível. Liberar um módulo para um perfil faz
-// o ícone aparecer nesta tela para quem tem aquele perfil, sem tocar em código
-// de navegação — porque a navegação é a consulta, não uma lista escrita à mão.
-
 export default async function CentralDeAplicativos() {
   const [{ applications }, indicadores] = await Promise.all([
     getEffectiveApplications(),
@@ -27,6 +21,8 @@ export default async function CentralDeAplicativos() {
       href: item.routePrefix,
       nivel: item.accessLevel
     }));
+
+  const resumos = await loadLauncherSummaries(context);
 
   return (
     <main className="content pagina-launcher">

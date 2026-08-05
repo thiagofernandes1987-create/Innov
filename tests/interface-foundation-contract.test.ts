@@ -141,20 +141,21 @@ describe("S-23 — fundação de interface", () => {
     expect(reports).toContain("Nenhum indicador, total ou estado vazio foi calculado");
   });
 
-  it("mantém o cronograma Gantt calculado com dependências", () => {
+  it("mantém o editor EAP e Gantt calculado com dependências", () => {
     const schedule = read("app/app/obras/[id]/cronograma/page.tsx");
     const planner = read("components/planejamento/schedule-planner.tsx");
 
-    // O contrato é a **invariante**, não o nome do arquivo: a tela de
-    // cronograma desenha barras cujas datas saem do cálculo de rede, e não de
-    // data digitada. Quando o espaço de trabalho de EAP e Gantt substituiu o
-    // componente `<Gantt>`, este teste reprovou por procurar o import antigo —
-    // o cálculo tinha sido preservado, só mudou de casa. Amarrar o teste ao
-    // import fez um refactor correto parecer regressão.
-    expect(schedule).toContain("SchedulePlanner");
-    expect(schedule).toContain("dependencies");
-    expect(planner).toMatch(/\bcalcular\(/);
-    expect(planner).toMatch(/\bcadeiaMaisLonga\(/);
+    expect(schedule).toContain('import { SchedulePlanner }');
+    expect(schedule).toContain("dependencies=");
+
+    const callStart = planner.indexOf("const result = calcular(");
+    const callEnd = planner.indexOf("\n    );", callStart);
+    expect(callStart).toBeGreaterThan(-1);
+    expect(callEnd).toBeGreaterThan(callStart);
+    const calculationCall = planner.slice(callStart, callEnd);
+    expect(calculationCall).toContain("calculationDependencies,");
+    expect(calculationCall).toContain("calendar");
+    expect(planner).toContain("dependencySvg");
   });
 
   it("mantém o orçamento operável com inclusão, remoção e recálculo", () => {

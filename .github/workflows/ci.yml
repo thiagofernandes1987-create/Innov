@@ -33,6 +33,10 @@ jobs:
         run: |
           set -o pipefail
           node scripts/validate-personas-audit.mjs 2>&1 | tee personas-audit-validation.txt
+      - name: Validate module adjustment and capture inventory
+        run: |
+          set -o pipefail
+          node scripts/validate-module-qa.mjs 2>&1 | tee module-qa-validation.txt
       - name: Validate engineering vaccines
         run: |
           set -o pipefail
@@ -69,6 +73,10 @@ jobs:
         run: |
           set -o pipefail
           node scripts/validate-stage20.mjs 2>&1 | tee stage20-validation.txt
+      - name: Validate Stage 22 WhatsApp omnichannel
+        run: |
+          set -o pipefail
+          node scripts/validate-stage22.mjs 2>&1 | tee stage22-validation.txt
       - name: Upload structural validation reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -77,6 +85,7 @@ jobs:
           path: |
             documentation-validation.txt
             personas-audit-validation.txt
+            module-qa-validation.txt
             vaccines-validation.txt
             extension-functions-validation.txt
             operational-qa-validation.txt
@@ -86,6 +95,7 @@ jobs:
             stage18-validation.txt
             stage19-validation.txt
             stage20-validation.txt
+            stage22-validation.txt
           if-no-files-found: warn
           retention-days: 7
       - name: Upload recent migrations
@@ -99,6 +109,7 @@ jobs:
             supabase/migrations/20260722*.sql
             supabase/migrations/20260728*.sql
             supabase/migrations/20260729*.sql
+            supabase/migrations/20260803*.sql
           if-no-files-found: warn
           retention-days: 7
 
@@ -145,6 +156,8 @@ jobs:
         run: pnpm validate:migrations-applied
       - name: Validate auditable persona contracts
         run: pnpm validate:personas-audit
+      - name: Validate module adjustment and capture inventory
+        run: pnpm validate:module-qa
       - name: Validate extension function qualification
         run: pnpm validate:extension-functions
       - name: Validate operational QA guards
@@ -175,6 +188,8 @@ jobs:
         run: pnpm validate:stage19
       - name: Validate Stage 20 production readiness
         run: pnpm validate:stage20
+      - name: Validate Stage 22 WhatsApp omnichannel
+        run: pnpm validate:stage22
       - name: Validate execution inventory
         run: pnpm validate:inventory
       - name: Validate Object Runtime invariants

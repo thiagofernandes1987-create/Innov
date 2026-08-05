@@ -99,8 +99,16 @@ requirePattern(proposalForm, /discountPercent/i,
   "Formulário de proposta não permite desconto.");
 requirePattern(proposalForm, /discountPercent > 7/i,
   "Interface não explica a alçada acima de 7%.");
-requirePattern(newProposalPage, /\.in\("status", \["APPROVAL_PENDING", "APPROVED"\]\)/i,
-  "Nova proposta não lista orçamentos calculados em estados utilizáveis.");
+for (const usableStatus of ["TECHNICAL_REVIEW", "FINANCIAL_REVIEW", "APPROVAL_PENDING", "APPROVED"]) {
+  requirePattern(newProposalPage, new RegExp(`["']${usableStatus}["']`),
+    `Nova proposta não contempla o estado utilizável ${usableStatus}.`);
+}
+requirePattern(newProposalPage, /proposalBudgetStatuses/i,
+  "Nova proposta não centraliza os estados utilizáveis de orçamento.");
+requirePattern(newProposalPage, /\.in\("status", \[\.\.\.proposalBudgetStatuses\]\)/i,
+  "Nova proposta não consulta os estados utilizáveis centralizados.");
+requirePattern(newProposalPage, /\.gt\("sale_price", 0\)/i,
+  "Nova proposta pode listar orçamento sem preço de venda calculado.");
 requirePattern(proposalsPage, /decideFlexibleProposalDiscount/i,
   "Carteira de propostas não apresenta decisão da diretoria.");
 
@@ -182,6 +190,7 @@ console.log(JSON.stringify({
     contractRolePreserved: true,
     legacyProjectPortsRevoked: true,
     fixedAndBudgetProposals: true,
+    calculatedBudgetsListedForProposals: true,
     discountAuthority: true,
     discountDecisionIndexes: true,
     districtSearch: true,
