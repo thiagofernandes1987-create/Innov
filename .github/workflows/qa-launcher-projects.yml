@@ -1,0 +1,65 @@
+name: QA Launcher e Projetos
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-launcher-projetos-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    container:
+      image: mcr.microsoft.com/playwright:v1.55.0-noble
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - module_key: dashboard
+            module_route: /app
+            persona: administrador
+            heading: Aplicativos
+          - module_key: obras
+            module_route: /app/pipeline/projeto
+            persona: gestor_de_obras
+            heading: Projetos|Pipeline|Obras
+    env:
+      PREVIEW_URL: https://innov-git-fix-module-validation-loop-20260730-apex-method.vercel.app
+      MODULE_KEY: ${{ matrix.module_key }}
+      MODULE_ROUTE: ${{ matrix.module_route }}
+      QA_PERSONA: ${{ matrix.persona }}
+      QA_EXPECTED_HEADING: ${{ matrix.heading }}
+      QA_PERSONAS_JSON: ${{ secrets.QA_PERSONAS_JSON }}
+      DEMO_ADMIN_EMAIL: ${{ secrets.DEMO_ADMIN_EMAIL }}
+      DEMO_ADMIN_PASSWORD: ${{ secrets.DEMO_ADMIN_PASSWORD }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      QA_OUTPUT_DIR: artifacts/module-visual-qa/${{ matrix.module_key }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate QA contracts
+        run: node scripts/validate-module-qa.mjs
+
+      - name: Install Playwright runtime
+        run: npm install --no-save --no-package-lock playwright@1.55.0
+
+      - name: Capture full-page matrix
+        run: node scripts/run-module-visual-qa.mjs
+
+      - name: Upload screenshots and report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: qa-${{ matrix.module_key }}-${{ github.run_id }}
+          path: artifacts/module-visual-qa/${{ matrix.module_key }}/
+          if-no-files-found: warn
+          retention-days: 30

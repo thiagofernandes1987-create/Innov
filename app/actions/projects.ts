@@ -4,6 +4,8 @@ import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
+import { createScheduleDependency } from "./schedule";
 
 const managementRoles = [
   "SUPER_ADMIN",
@@ -44,6 +46,21 @@ function bool(formData: FormData, name: string) {
 
 function fail(path: string, message: string): never {
   redirect(`${path}${path.includes("?") ? "&" : "?"}error=${encodeURIComponent(message)}`);
+}
+
+function failProjectDatabase(
+  path: string,
+  operation: string,
+  error: ScheduleDatabaseError,
+  fallback: string
+): never {
+  console.error(`[projects.${operation}]`, {
+    code: error.code ?? null,
+    message: error.message ?? null,
+    details: error.details ?? null,
+    hint: error.hint ?? null
+  });
+  fail(path, publicScheduleDatabaseMessage(error, fallback));
 }
 
 export async function createProjectFromContract(formData: FormData) {
@@ -88,117 +105,207 @@ export async function releaseProjectToClient(formData: FormData) {
 
 export async function createWbsItem(formData: FormData) {
   const projectId = text(formData, "projectId");
+  const path = `/app/obras/${projectId}/eap`;
+  const parentId = optionalText(formData, "parentId");
+  const code = text(formData, "code").toUpperCase();
+  const title = text(formData, "title");
+  const sequence = optionalNumber(formData, "sequence") ?? 0;
+  const weightPercent = optionalNumber(formData, "weightPercent") ?? 0;
+  const plannedStart = optionalText(formData, "plannedStart");
+  const plannedEnd = optionalText(formData, "plannedEnd");
+
+  if (!projectId || !code || !title) fail(path, "Informe código e nome da etapa da EAP.");
+  if (!Number.isInteger(sequence) || sequence < 0) fail(path, "A sequência deve ser um número inteiro não negativo.");
+  if (weightPercent < 0 || weightPercent > 100) fail(path, "O peso deve ficar entre 0% e 100%.");
+  if (plannedStart && plannedEnd && plannedEnd < plannedStart) fail(path, "A data de término não pode ser anterior à data de início.");
+
   const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
+  if (parentId) {
+    const { data: parent, error: parentError } = await supabase
+      .from("work_breakdown_items")
+      .select("id")
+      .eq("id", parentId)
+      .eq("project_id", projectId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (parentError) failProjectDatabase(path, "create-wbs.validate-parent", parentError, "Não foi possível validar a etapa superior.");
+    if (!parent) fail(path, "A etapa superior não pertence a esta obra.");
+  }
+
   const { error } = await supabase.from("work_breakdown_items").insert({
     organization_id: organizationId,
     project_id: projectId,
-    parent_id: optionalText(formData, "parentId"),
-    code: text(formData, "code").toUpperCase(),
-    title: text(formData, "title"),
+    parent_id: parentId,
+    code,
+    title,
     description: optionalText(formData, "description"),
-    sequence: optionalNumber(formData, "sequence") ?? 0,
-    weight: (optionalNumber(formData, "weightPercent") ?? 0) / 100,
-    planned_start: optionalText(formData, "plannedStart"),
-    planned_end: optionalText(formData, "plannedEnd"),
+    sequence,
+    weight: weightPercent / 100,
+    planned_start: plannedStart,
+    planned_end: plannedEnd,
     client_visible: bool(formData, "clientVisible"),
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/eap`, error.message);
-  revalidatePath(`/app/obras/${projectId}/eap`);
+  if (error) failProjectDatabase(path, "create-wbs", error, "Não foi possível adicionar a etapa da EAP.");
+  revalidatePath(path);
+  revalidatePath(`/app/obras/${projectId}/cronograma`);
 }
 
 export async function createTask(formData: FormData) {
   const projectId = text(formData, "projectId");
-  const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
+  const path = `/app/obras/${projectId}/tarefas`;
+  const code = text(formData, "code").toUpperCase();
+  const title = text(formData, "title");
   const plannedStart = optionalText(formData, "plannedStart");
   const plannedEnd = optionalText(formData, "plannedEnd");
+  const durationDays = optionalNumber(formData, "durationDays") ?? 1;
+  const sequence = optionalNumber(formData, "sequence") ?? 0;
+  const weightPercent = optionalNumber(formData, "weightPercent") ?? 0;
+  const status = text(formData, "status") || "BACKLOG";
+  const priority = text(formData, "priority") || "NORMAL";
+  const wbsId = optionalText(formData, "wbsId");
+  const responsibleId = optionalText(formData, "responsibleId");
+
+  if (!projectId || !code || !title) fail(path, "Informe código e título da atividade.");
+  if (plannedStart && plannedEnd && plannedEnd < plannedStart) fail(path, "A data de término não pode ser anterior à data de início.");
+  if (!Number.isInteger(durationDays) || durationDays < 1) fail(path, "A duração deve ser informada em dias úteis inteiros, a partir de 1.");
+  if (!Number.isInteger(sequence) || sequence < 0) fail(path, "A sequência deve ser um número inteiro não negativo.");
+  if (weightPercent < 0 || weightPercent > 100) fail(path, "O peso deve ficar entre 0% e 100%.");
+  if (!["BACKLOG", "READY", "IN_PROGRESS", "BLOCKED", "REVIEW", "COMPLETED", "CANCELED"].includes(status)) fail(path, "O status selecionado é inválido.");
+  if (!["LOW", "NORMAL", "HIGH", "CRITICAL"].includes(priority)) fail(path, "A prioridade selecionada é inválida.");
+
+  const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
+  if (wbsId) {
+    const { data: wbs, error: wbsError } = await supabase
+      .from("work_breakdown_items")
+      .select("id")
+      .eq("id", wbsId)
+      .eq("project_id", projectId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (wbsError) {
+      console.error("[projects.create-task.wbs]", wbsError);
+      fail(path, publicScheduleDatabaseMessage(wbsError, "Não foi possível validar a etapa da EAP."));
+    }
+    if (!wbs) fail(path, "A etapa da EAP selecionada não pertence a esta obra.");
+  }
+  if (responsibleId) {
+    const { data: membership, error: membershipError } = await supabase
+      .from("project_memberships")
+      .select("user_id")
+      .eq("project_id", projectId)
+      .eq("user_id", responsibleId)
+      .eq("active", true)
+      .maybeSingle();
+    if (membershipError) {
+      console.error("[projects.create-task.responsible]", membershipError);
+      fail(path, publicScheduleDatabaseMessage(membershipError, "Não foi possível validar o responsável."));
+    }
+    if (!membership) fail(path, "O responsável selecionado não participa desta obra.");
+  }
 
   const { error } = await supabase.from("project_tasks").insert({
     organization_id: organizationId,
     project_id: projectId,
-    wbs_id: optionalText(formData, "wbsId"),
-    parent_task_id: optionalText(formData, "parentTaskId"),
-    code: text(formData, "code").toUpperCase(),
-    title: text(formData, "title"),
+    wbs_id: wbsId,
+    parent_task_id: null,
+    code,
+    title,
     description: optionalText(formData, "description"),
-    status: text(formData, "status") || "BACKLOG",
-    priority: text(formData, "priority") || "NORMAL",
-    sequence: optionalNumber(formData, "sequence") ?? 0,
+    status,
+    priority,
+    sequence,
     planned_start: plannedStart,
     planned_end: plannedEnd,
-    duration_days: optionalNumber(formData, "durationDays") ?? 1,
-    weight: (optionalNumber(formData, "weightPercent") ?? 0) / 100,
-    responsible_id: optionalText(formData, "responsibleId"),
+    duration_days: durationDays,
+    weight: weightPercent / 100,
+    responsible_id: responsibleId,
     client_visible: bool(formData, "clientVisible"),
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/tarefas`, error.message);
-  revalidatePath(`/app/obras/${projectId}/tarefas`);
+  if (error) {
+    console.error("[projects.create-task]", error);
+    fail(path, publicScheduleDatabaseMessage(error, "Não foi possível adicionar a atividade."));
+  }
+  revalidatePath(path);
   revalidatePath(`/app/obras/${projectId}/cronograma`);
 }
 
 export async function moveTask(formData: FormData) {
   const projectId = text(formData, "projectId");
   const taskId = text(formData, "taskId");
-  const { supabase } = await requireOrganizationContext(managementRoles);
+  const path = `/app/obras/${projectId}/tarefas`;
+  const status = text(formData, "status");
+  const progressPercent = optionalNumber(formData, "progressPercent");
+  if (!projectId || !taskId) fail(path, "A tarefa informada é inválida.");
+  if (!["BACKLOG", "READY", "IN_PROGRESS", "BLOCKED", "REVIEW", "COMPLETED", "CANCELED"].includes(status)) fail(path, "O status selecionado é inválido.");
+  if (progressPercent !== null && (progressPercent < 0 || progressPercent > 100)) fail(path, "O progresso deve ficar entre 0% e 100%.");
+
+  const { supabase, organizationId } = await requireOrganizationContext(managementRoles);
+  const { data: scopedTask, error: taskError } = await supabase
+    .from("project_tasks")
+    .select("id")
+    .eq("id", taskId)
+    .eq("project_id", projectId)
+    .eq("organization_id", organizationId)
+    .maybeSingle();
+  if (taskError) failProjectDatabase(path, "move-task.validate-scope", taskError, "Não foi possível validar a tarefa.");
+  if (!scopedTask) fail(path, "A tarefa não pertence a esta obra.");
+
   const { error } = await supabase.rpc("move_project_task", {
     p_task_id: taskId,
-    p_status: text(formData, "status"),
-    p_progress: optionalNumber(formData, "progressPercent") == null
-      ? null
-      : (optionalNumber(formData, "progressPercent") as number) / 100,
+    p_status: status,
+    p_progress: progressPercent === null ? null : progressPercent / 100,
     p_reason: optionalText(formData, "reason")
   });
-  if (error) fail(`/app/obras/${projectId}/tarefas`, error.message);
+  if (error) failProjectDatabase(path, "move-task", error, "Não foi possível atualizar a tarefa.");
   revalidatePath(`/app/obras/${projectId}`);
-  revalidatePath(`/app/obras/${projectId}/tarefas`);
+  revalidatePath(path);
   revalidatePath(`/app/obras/${projectId}/cronograma`);
   revalidatePath("/cliente/obras");
 }
 
 export async function createDependency(formData: FormData) {
-  const projectId = text(formData, "projectId");
-  const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
-  const { error } = await supabase.from("task_dependencies").insert({
-    organization_id: organizationId,
-    project_id: projectId,
-    predecessor_task_id: text(formData, "predecessorTaskId"),
-    successor_task_id: text(formData, "successorTaskId"),
-    dependency_type: text(formData, "dependencyType") || "FS",
-    lag_days: optionalNumber(formData, "lagDays") ?? 0,
-    created_by: userId
-  });
-  if (error) fail(`/app/obras/${projectId}/cronograma`, error.message);
-  revalidatePath(`/app/obras/${projectId}/cronograma`);
+  return createScheduleDependency(formData);
 }
 
 export async function createMilestone(formData: FormData) {
   const projectId = text(formData, "projectId");
+  const path = `/app/obras/${projectId}/cronograma`;
+  const code = text(formData, "code").toUpperCase();
+  const title = text(formData, "title");
+  const plannedDate = text(formData, "plannedDate");
+  if (!projectId || !code || !title || !/^\d{4}-\d{2}-\d{2}$/.test(plannedDate)) fail(path, "Informe código, título e data válida do marco.");
+
   const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
   const { error } = await supabase.from("project_milestones").insert({
     organization_id: organizationId,
     project_id: projectId,
-    code: text(formData, "code").toUpperCase(),
-    title: text(formData, "title"),
+    code,
+    title,
     description: optionalText(formData, "description"),
-    planned_date: text(formData, "plannedDate"),
+    planned_date: plannedDate,
     client_visible: bool(formData, "clientVisible"),
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/cronograma`, error.message);
-  revalidatePath(`/app/obras/${projectId}/cronograma`);
+  if (error) failProjectDatabase(path, "create-milestone", error, "Não foi possível adicionar o marco.");
+  revalidatePath(path);
 }
 
 export async function createBaseline(formData: FormData) {
   const projectId = text(formData, "projectId");
+  const path = `/app/obras/${projectId}/cronograma`;
+  const name = text(formData, "name");
+  if (!projectId || !name) fail(path, "Informe o nome da baseline.");
+
   const { supabase } = await requireOrganizationContext(managementRoles);
   const { error } = await supabase.rpc("create_schedule_baseline", {
     p_project_id: projectId,
-    p_name: text(formData, "name"),
+    p_name: name,
     p_notes: optionalText(formData, "notes")
   });
-  if (error) fail(`/app/obras/${projectId}/cronograma`, error.message);
-  revalidatePath(`/app/obras/${projectId}/cronograma`);
+  if (error) failProjectDatabase(path, "create-baseline", error, "Não foi possível congelar a baseline.");
+  revalidatePath(path);
 }
 
 export async function createProjectResource(formData: FormData) {

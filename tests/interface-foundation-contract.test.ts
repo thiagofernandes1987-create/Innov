@@ -141,7 +141,7 @@ describe("S-23 — fundação de interface", () => {
     expect(reports).toContain("Nenhum indicador, total ou estado vazio foi calculado");
   });
 
-  it("mantém o cronograma Gantt calculado com dependências", () => {
+  it("mantém o editor EAP e Gantt calculado com dependências", () => {
     const schedule = read("app/app/obras/[id]/cronograma/page.tsx");
     const planner = read("components/planejamento/schedule-planner.tsx");
 
