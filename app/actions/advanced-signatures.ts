@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { requireCapability } from "@/lib/authorization";
+import { fileSecurityMessage } from "@/lib/file-security/domain";
+import { secureUpload } from "@/lib/file-security/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSigningToken, safeFileName, sha256 } from "@/lib/signatures/crypto";
 
@@ -40,8 +42,15 @@ export async function createAdvancedSignatureDocument(formData:FormData){
   const requestId=randomUUID();
   const fileName=safeFileName(file.name);
   const originalPath=`${context.organizationId}/documents/${requestId}/original/${fileName}`;
-  const{error:uploadError}=await context.supabase.storage.from("signature-artifacts").upload(originalPath,bytes,{contentType:file.type,upsert:false});
-  if(uploadError)fail("/app/assinaturas/novo",uploadError.message);
+  try{
+    await secureUpload({
+      targetBucket:"signature-artifacts",targetPath:originalPath,body:bytes,
+      filename:file.name,contentType:file.type,
+      organizationId:context.organizationId,actorUserId:context.userId,
+      correlationId:requestId,
+      policy:{allowedMimeTypes:new Set([PDF_MIME,DOCX_MIME]),maxBytes:MAX_DOCUMENT_SIZE}
+    });
+  }catch(error){fail("/app/assinaturas/novo",fileSecurityMessage(error,{maxBytesLabel:"50 MB",allowedLabel:"PDF ou DOCX"}));}
 
   const{data,error}=await context.supabase.rpc("create_advanced_signature_document",{
     p_organization_id:context.organizationId,

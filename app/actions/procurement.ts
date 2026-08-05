@@ -4,6 +4,8 @@ import {randomBytes,randomUUID} from "node:crypto";
 import {revalidatePath} from "next/cache";
 import {redirect} from "next/navigation";
 import {requireCapability} from "@/lib/authorization";
+import {fileSecurityMessage} from "@/lib/file-security/domain";
+import {secureUpload} from "@/lib/file-security/server";
 import {createSupabaseAdminClient} from "@/lib/supabase/admin";
 import {safeFileName,sha256} from "@/lib/signatures/crypto";
 
@@ -109,7 +111,15 @@ export async function submitSupplierProcurementQuote(formData:FormData){
   if(file instanceof File&&file.size>0){
     if(file.size>MAX_ATTACHMENT_SIZE||!ATTACHMENT_MIMES.has(file.type))fail(path,"Anexo inválido ou superior a 25 MB.");
     const bytes=new Uint8Array(await file.arrayBuffer());uploadedPath=`${invitation.organization_id}/quotes/${rfq.id}/${invitation.supplier_id}/${randomUUID()}-${safeFileName(file.name)}`;
-    const{error:uploadError}=await admin.storage.from("procurement-attachments").upload(uploadedPath,bytes,{contentType:file.type,upsert:false});if(uploadError)fail(path,uploadError.message);
+    try{
+      await secureUpload({
+        targetBucket:"procurement-attachments",targetPath:uploadedPath,body:bytes,
+        filename:file.name,contentType:file.type,
+        organizationId:invitation.organization_id,actorUserId:invitation.supplier_id,
+        correlationId:invitation.id,
+        policy:{allowedMimeTypes:ATTACHMENT_MIMES,maxBytes:MAX_ATTACHMENT_SIZE}
+      });
+    }catch(error){fail(path,fileSecurityMessage(error,{allowedLabel:"PDF, DOCX, XLSX, JPG, PNG ou WebP"}));}
     attachment={attachment_name:file.name,attachment_mime_type:file.type,attachment_size_bytes:file.size,attachment_storage_path:uploadedPath,attachment_sha256:sha256(bytes)};
   }
   const quoteId=randomUUID();const{error:quoteError}=await admin.from("procurement_quotes").insert({id:quoteId,organization_id:invitation.organization_id,rfq_id:rfq.id,supplier_id:invitation.supplier_id,invitation_id:invitation.id,status:"DRAFT",currency:rfq.currency,discount:numberValue(text(formData,"discount")),freight:numberValue(text(formData,"freight")),taxes:numberValue(text(formData,"taxes")),payment_terms:text(formData,"paymentTerms"),lead_time_days:optional(formData,"leadTimeDays")==null?null:numberValue(text(formData,"leadTimeDays")),validity_date:optional(formData,"validityDate"),notes:text(formData,"notes"),...attachment});
@@ -117,7 +127,7 @@ export async function submitSupplierProcurementQuote(formData:FormData){
   const{error:itemsError}=await admin.from("procurement_quote_items").insert(items.map(item=>({organization_id:invitation.organization_id,quote_id:quoteId,request_item_id:item.requestItemId,quantity:item.quantity,unit_price:item.unitPrice,brand:item.brand??null,offered_specification:item.offeredSpecification??"",notes:item.notes??""})));
   if(itemsError){await admin.from("procurement_quotes").delete().eq("id",quoteId);if(uploadedPath)await admin.storage.from("procurement-attachments").remove([uploadedPath]);fail(path,itemsError.message);}
   const{error:submitError}=await admin.rpc("finalize_procurement_quote",{p_quote_id:quoteId});if(submitError)fail(path,submitError.message);
-  await admin.from("procurement_supplier_invitations").update({opened_at:invitation.opened_at??new Date().toISOString(),access_count:Number(invitation.access_count??0)+1}).eq("id",invitation.id);
+  await admin.rpc("register_procurement_invitation_access",{p_invitation_id:invitation.id});
   redirect(`${path}?submitted=1`);
 }
 

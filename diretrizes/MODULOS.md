@@ -139,6 +139,17 @@ Escopo:
 - versão liberada é imutável;
 - integra documentos de obras, propostas, contratos e assinaturas.
 
+## `modelos` — Modelos e Documentações
+
+- rota `/app/modelos`;
+- operacional;
+- **uma biblioteca só**: proposta, orçamento, contrato, aditivo, termos, FVS, FVM, procedimento, mensagens de CRM, mensagem por etapa do funil, lembrete, agendamento, e-mail e e-mail marketing;
+- **todo aplicativo lê o mesmo acervo** — é o que permite enviar a proposta de dentro de Projetos e anexar o contrato assinado num atendimento;
+- `document_type` classifica; a Administração marca, por empresa, quais tipos cada aplicativo oferece (`document_module_types`) — isso é disponibilização, não permissão;
+- origem `PLATAFORMA` vale para todas as empresas e muda por migration; a empresa duplica e edita a cópia;
+- corpo em Markdown com variáveis `{{escopo.campo}}`; publicado exige a alçada mais alta do aplicativo;
+- importa DOCX, XLSX, CSV, TXT e Markdown, convertidos no navegador.
+
 ## `qualidade` — Qualidade
 
 - rota `/app/qualidade`;

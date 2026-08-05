@@ -1,0 +1,13 @@
+{
+  "_leia": "Débito conhecido do mapa do código, congelado para que o CI reprove apenas o que for novo. Conferido por `pnpm validate:code-map`. Item que deixa de ser problema tem que sair daqui — o próprio validador reprova lista desatualizada.",
+  "rpc": [
+    "has_module_permission",
+    "list_my_modules",
+    "set_profile_module_permission"
+  ],
+  "_rpc_responsavel": "S-22 — o repositório não reconstrói o banco. Replay em base limpa medido em 3 de agosto de 2026: 0 de 150 migrations. `has_module_permission` é chamada por 346 trechos de migration e não é criada por nenhuma; a única definição no repositório é um dublê de teste em supabase/tests/*/fixture.sql, que sempre concede.",
+  "libs": [],
+  "_libs_responsavel": "Vazio. `@/lib/planejamento/server` era uma segunda implementação da leitura que a página do cronograma já faz em linha, sem importador — removida na T-33.20.",
+  "acoes": [],
+  "_acoes_responsavel": "Vazio. As sete server actions sem uso foram decididas uma a uma na T-33.20: cinco removidas por terem equivalente ligado, duas ligadas à tela nova de categorias e unidades do estoque."
+}

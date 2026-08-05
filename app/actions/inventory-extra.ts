@@ -7,6 +7,8 @@ import{hasCapability,requireCapability}from"@/lib/authorization";
 function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
 function numberOrNull(value:unknown){if(value===null||value===undefined||String(value).trim()==="")return null;const parsed=Number(value);return Number.isFinite(parsed)?parsed:null;}
+const CATALOGO="/app/estoque/catalogo";
+
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}
 
 export async function createInventoryLot(data:FormData){
@@ -19,7 +21,7 @@ export async function createInventoryLot(data:FormData){
 }
 
 export async function createInventoryCategory(data:FormData){
- const context=await requireCapability("estoque","create");const path="/app/estoque/itens/novo";
+ const context=await requireCapability("estoque","create");const path=CATALOGO;
  const{error}=await context.supabase.from("inventory_categories").insert({
   organization_id:context.organizationId,parent_id:optional(data,"parentId"),code:text(data,"code").toUpperCase(),name:text(data,"name"),description:text(data,"description"),created_by:context.userId
  });
@@ -27,7 +29,7 @@ export async function createInventoryCategory(data:FormData){
 }
 
 export async function createInventoryUnit(data:FormData){
- const context=await requireCapability("estoque","create");const path="/app/estoque/itens/novo";
+ const context=await requireCapability("estoque","create");const path=CATALOGO;
  const{error}=await context.supabase.from("inventory_units").insert({
   organization_id:context.organizationId,code:text(data,"code"),name:text(data,"name"),decimal_places:numberOrNull(text(data,"decimalPlaces"))??4,created_by:context.userId
  });
@@ -44,4 +46,38 @@ export async function createInventoryMaintenance(data:FormData){
   cost,notes:text(data,"notes"),created_by:context.userId
  });
  if(error)fail(path,error.message);revalidatePath(path);
+}
+
+/**
+ * Tira de circulação — e **não exclui**.
+ *
+ * Categoria e unidade são escolhidas por itens já cadastrados: excluir
+ * arrancaria a unidade de um item que existe, e "kg" viraria nulo numa linha de
+ * estoque. Desativada some do formulário de item novo e continua explicando o
+ * que já foi cadastrado. É a mesma regra das listas cadastradas da S-34.
+ */
+export async function alternarCategoriaDeEstoque(data: FormData): Promise<void> {
+  const context = await requireCapability("estoque", "update");
+  const id = text(data, "id");
+  if (!id) return;
+  const { error } = await context.supabase
+    .from("inventory_categories")
+    .update({ active: text(data, "ativo") !== "sim", updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("organization_id", context.organizationId);
+  if (error) fail(CATALOGO, error.message);
+  revalidatePath(CATALOGO);
+}
+
+export async function alternarUnidadeDeEstoque(data: FormData): Promise<void> {
+  const context = await requireCapability("estoque", "update");
+  const id = text(data, "id");
+  if (!id) return;
+  const { error } = await context.supabase
+    .from("inventory_units")
+    .update({ active: text(data, "ativo") !== "sim", updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("organization_id", context.organizationId);
+  if (error) fail(CATALOGO, error.message);
+  revalidatePath(CATALOGO);
 }

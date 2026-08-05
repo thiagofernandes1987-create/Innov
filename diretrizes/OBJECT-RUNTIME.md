@@ -1,7 +1,7 @@
 # Object Runtime — motor de objetos dinâmicos da Innovar Platform
 
 **Documento canônico:** sim
-**Estado:** desenho aprovado para implementação faseada. Nenhuma fatia implementada.
+**Estado:** primeira fatia em execução. Aplicados e conferidos no banco em 04/08/2026: catálogo de definições com publicação imutável e checksum (item 1); camada compartilhada particionada em 64, com a política única de RLS e os índices de slot (item 2); `object_record_upsert` com preenchimento de slot, validação de payload e escrita direta revogada (item 3); classes `Cadastro` e `Extensão` (item 5); estúdio mínimo em `/app/administracao/objetos` (item 6). **Faltam:** leitura com paginação keyset e recusa de filtro não indexado (item 4) e o POC de carga com milhões de registros (item 7) — nada aqui foi medido sob carga.
 **Precedência:** abaixo de `SPEC.md` e `ARQUITETURA.md`, acima de qualquer documento técnico em `docs/`.
 **Método obrigatório de leitura e de trabalho:** `diretrizes/METODO-DE-TRABALHO.md`.
 
@@ -457,13 +457,13 @@ Nenhum mecanismo paralelo. Toda peça nova entra por um encaixe que já existe.
 
 Ordem deliberada: cada item é uma solução simples, verificável isoladamente, e nenhum depende do seguinte.
 
-1. Catálogo (`object_definitions`, `object_definition_versions`, `object_field_slots`) com publicação imutável e checksum.
-2. Camada compartilhada particionada, com a política única de RLS e os índices de slot.
-3. RPC `object_record_upsert` com preenchimento de slot, validação de payload e revogação de escrita direta.
-4. Leitura com paginação keyset e recusa de filtro não indexado.
-5. Duas classes apenas: `Cadastro` e `Extensão`. As demais entram depois.
-6. Estúdio mínimo: criar, publicar, listar — sob a diretriz de interface.
-7. POC de carga com **milhões** de registros antes de qualquer promessa de escala.
+1. ~~Catálogo (`object_definitions`, `object_definition_versions`, `object_field_slots`) com publicação imutável e checksum.~~ **Feito** — aplicado em 04/08/2026, com rascunho editável em `draft_spec` e escrita só por RPC.
+2. ~~Camada compartilhada particionada, com a política única de RLS e os índices de slot.~~ **Feito** — `object_records` em 64 partições por `hash(organization_id)`, uma política de leitura, catorze índices parciais de slot.
+3. ~~RPC `object_record_upsert` com preenchimento de slot, validação de payload e revogação de escrita direta.~~ **Feito** — mais o teto de 64 KB, a validação do pai da extensão e a inscrição de seguidor por campo de pessoa.
+4. Leitura com paginação keyset e recusa de filtro não indexado. **Falta.**
+5. ~~Duas classes apenas: `Cadastro` e `Extensão`.~~ **Feito** desde a migration do catálogo.
+6. ~~Estúdio mínimo: criar, publicar, listar — sob a diretriz de interface.~~ **Feito** — `/app/administracao/objetos`, onde a tela pergunta o que a informação faz em vez do tipo.
+7. POC de carga com **milhões** de registros antes de qualquer promessa de escala. **Falta** — nenhum número desta implementação foi medido sob carga.
 
 Camada dedicada, advisor, importação, aprovação e demais características ficam para fatias seguintes. A fundação primeiro.
 

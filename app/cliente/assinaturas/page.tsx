@@ -13,7 +13,7 @@ export default async function ClientSignaturesPage(){
     signature_signers(id,name,legal_name,email,role_label,signing_order,status,viewed_at,signed_at,copy_sent_at),
     signature_document_versions!signature_envelopes_document_version_id_fkey(
       id,version_number,final_pdf_sha256,audit_artifact_sha256,client_released_at,
-      signature_documents(id,title,category,status,projects(code,name))
+      signature_documents!signature_document_versions_document_id_fkey(id,title,category,status,projects(code,name))
     )
   `).order("created_at",{ascending:false});
 

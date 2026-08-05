@@ -20,7 +20,7 @@ export default async function NewProposalPage() {
   const [readyVersionsResult, reviewVersionsResult, clientsResult] = await Promise.all([
     context.supabase
       .from("budget_versions")
-      .select(budgetVersionSelect)
+      .select("id,version_number,sale_price,status,frozen_at,budgets!budget_versions_budget_id_fkey!inner(code,title,status,clients(legal_name,trade_name))")
       .eq("organization_id", context.organizationId)
       .in("status", ["APPROVAL_PENDING", "APPROVED"])
       .gt("sale_price", 0)

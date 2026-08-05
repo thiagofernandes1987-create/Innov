@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { inspectLatestSinapiOfficialPackage } from "@/lib/sinapi/automatic-update-v2";
+import { inspectLatestSinapiOfficialPackage } from "@/lib/sinapi/automatic-update";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;

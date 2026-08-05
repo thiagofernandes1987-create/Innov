@@ -14,6 +14,7 @@ import path from "node:path";
 const BOOTSTRAP = "supabase/tests/replay/bootstrap.sql";
 const MIGRATIONS = "supabase/migrations";
 const database = process.env.MIGRATION_REPLAY_DB ?? "migration_replay";
+const exigir = process.argv.includes("--exigir");
 
 if (!fs.existsSync(BOOTSTRAP)) {
   console.error(`Bootstrap ausente: ${BOOTSTRAP}`);
@@ -28,8 +29,16 @@ try {
   psql(["-U", "postgres", "-d", "postgres", "-tAc", `drop database if exists ${database}`]);
   psql(["-U", "postgres", "-d", "postgres", "-tAc", `create database ${database}`]);
 } catch (error) {
+  // Sair 0 aqui é o comportamento certo para quem roda na mão sem banco, e o
+  // errado para quem depende do resultado: "não rodou" fica indistinguível de
+  // "passou" para qualquer automação que só olhe o código de saída. Com
+  // `--exigir`, a ausência da dependência reprova (VACINA-056).
   console.log("PostgreSQL indisponível: replay das migrations NÃO foi executado.");
   console.log(`Motivo: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
+  if (exigir) {
+    console.error("`--exigir` foi pedido: sem banco não há verificação, e sem verificação não há aprovação.");
+    process.exit(1);
+  }
   process.exit(0);
 }
 

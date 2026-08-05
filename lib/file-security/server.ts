@@ -7,7 +7,9 @@ import{
  assertFileSecurityInput,
  FILE_SECURITY_MAX_BYTES,
  FileSecurityError,
+ hasKnownContentSignature,
  parseClamAvResponse,
+ type FileSecurityPolicy,
  type FileSecurityProvider,
  type FileSecurityScanResult
 }from"@/lib/file-security/domain";
@@ -31,6 +33,7 @@ type SecureUploadInput={
  actorUserId:string;
  correlationId?:string|null;
  upsert?:boolean;
+ policy?:FileSecurityPolicy;
 };
 
 export type SecureUploadResult={
@@ -218,8 +221,16 @@ async function uploadJson(bucket:string,path:string,value:unknown){
 
 export async function secureUpload(input:SecureUploadInput):Promise<SecureUploadResult>{
  const body=toBuffer(input.body);
- const validated=assertFileSecurityInput({filename:input.filename,contentType:input.contentType,sizeBytes:body.length});
- assertFileContentSignature(validated.contentType,body);
+ const validated=assertFileSecurityInput(
+  {filename:input.filename,contentType:input.contentType,sizeBytes:body.length},
+  input.policy
+ );
+ const requireSignature=input.policy?.requireContentSignature??true;
+ if(requireSignature||hasKnownContentSignature(validated.contentType)){
+  if(!hasKnownContentSignature(validated.contentType))
+   throw new FileSecurityError("FILE_SIGNATURE_MISMATCH","O conteúdo do arquivo não corresponde ao formato declarado.");
+  assertFileContentSignature(validated.contentType,body);
+ }
  const quarantineBucket=process.env.FILE_SECURITY_QUARANTINE_BUCKET?.trim()||DEFAULT_QUARANTINE_BUCKET;
  await ensurePrivateBucket(quarantineBucket);
  const scanId=randomUUID();

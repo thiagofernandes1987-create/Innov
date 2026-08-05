@@ -49,7 +49,10 @@
 .zoomButton,
 .primaryButton,
 .iconButton {
-  min-height: 34px;
+  /* 44px é o mínimo do protocolo, e a barra do planejador estava em 34.
+     Quatro botões de 34px lado a lado somam menos área de acerto que um
+     único alvo conforme — e a barra é usada em campo, com luva. */
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -77,7 +80,7 @@
 
 .iconButton,
 .zoomButton {
-  width: 34px;
+  width: 44px;
   padding: 0;
 }
 

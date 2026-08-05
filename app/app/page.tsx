@@ -1,11 +1,14 @@
 import { Launcher, type AplicativoAutorizado } from "@/components/casca/launcher";
 import { getEffectiveApplications } from "@/lib/authorization";
-import { loadLauncherSummaries } from "@/lib/casca/launcher-metrics";
+import { carregarIndicadores } from "@/lib/casca/indicadores";
 
 export const dynamic = "force-dynamic";
 
 export default async function CentralDeAplicativos() {
-  const { context, applications } = await getEffectiveApplications();
+  const [{ applications }, indicadores] = await Promise.all([
+    getEffectiveApplications(),
+    carregarIndicadores()
+  ]);
 
   const aplicativos: AplicativoAutorizado[] = applications
     .filter(item => item.applicationKey !== "dashboard" && item.accessLevel !== "NONE")
@@ -23,7 +26,7 @@ export default async function CentralDeAplicativos() {
 
   return (
     <main className="content pagina-launcher">
-      <Launcher aplicativos={aplicativos} resumos={resumos} />
+      <Launcher aplicativos={aplicativos} indicadores={indicadores} />
     </main>
   );
 }

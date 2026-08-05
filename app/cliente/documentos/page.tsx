@@ -6,7 +6,7 @@ export default async function ClientDocumentsPage() {
   const { supabase } = await requireClientContext();
   const { data, error } = await supabase
     .from("project_document_versions")
-    .select("id,project_id,version_number,status,storage_path,file_name,mime_type,size_bytes,sha256,change_summary,client_released_at,project_documents(code,title,discipline,category),projects(code,name)")
+    .select("id,project_id,version_number,status,storage_path,file_name,mime_type,size_bytes,sha256,change_summary,client_released_at,project_documents!project_document_versions_document_id_fkey(code,title,discipline,category),projects(code,name)")
     .not("client_released_at", "is", null)
     .eq("status", "RELEASED")
     .order("client_released_at", { ascending: false });

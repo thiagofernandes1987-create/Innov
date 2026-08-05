@@ -2,7 +2,7 @@ import Link from"next/link";
 
 const items=[
  ["/app/relatorios","Executivo"],["/app/relatorios/obras","Obras"],["/app/relatorios/financeiro","Financeiro"],
- ["/app/relatorios/compras","Compras"],["/app/relatorios/qualidade","Qualidade"],["/app/relatorios/metas","Metas"],
+ ["/app/relatorios/compras","Compras"],["/app/relatorios/qualidade","Qualidade"],["/app/relatorios/perdas","Perdas"],["/app/relatorios/metas","Metas"],
  ["/app/relatorios/salvos","Salvos"],["/app/relatorios/snapshots","Snapshots"]
 ]as const;
 

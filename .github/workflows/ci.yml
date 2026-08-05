@@ -144,6 +144,16 @@ jobs:
         run: pnpm validate:vaccines
       - name: Validate canonical documentation
         run: pnpm validate:docs
+      - name: Validate server actions exports (VACINA-047)
+        run: pnpm validate:server-actions
+      - name: Validate PostgREST embeds (VACINA-052)
+        run: pnpm validate:postgrest-embeds
+      - name: Validate module keys against app_modules (VACINA-053)
+        run: pnpm validate:module-keys
+      - name: Validate code map against the code
+        run: pnpm validate:code-map
+      - name: Validate migrations against the applied ledger (VACINA-057)
+        run: pnpm validate:migrations-applied
       - name: Validate auditable persona contracts
         run: pnpm validate:personas-audit
       - name: Validate module adjustment and capture inventory

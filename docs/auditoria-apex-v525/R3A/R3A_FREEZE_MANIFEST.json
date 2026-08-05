@@ -1,0 +1,19 @@
+{
+  "files": [
+    {
+      "bytes": 7987,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R3A/ARTIFACT_INDEX_R3A.yaml",
+      "sha256": "84f9a5e6ae105913e56f60f216b3125de192438e7ee73845b47dedb894e19010"
+    },
+    {
+      "bytes": 10203,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R3A/BLIND_EVIDENCE_LEDGER_R3A.yaml",
+      "sha256": "f95d9483f4b9286732d7d0d15ba4bfe1add4a7271347ce7ceca5d8e9f8d2b1ad"
+    },
+    {
+      "bytes": 10666,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R3A/PROVISIONAL_FINDING_LEDGER_R3A.yaml",
+      "sha256": "7200d5def71715cf1b262e3a353aa67bafddb90003bf14f27bc8b54e31b90cf5"
+    }
+  ]
+}

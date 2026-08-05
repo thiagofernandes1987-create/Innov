@@ -24,7 +24,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       exclusions, assumptions, commercial_summary, sale_price, payment_terms,
       deadline_text, warranty_text, notes, document_path, document_sha256,
       client_released_at,
-      proposals!inner(
+      proposals!proposal_versions_proposal_id_fkey!inner(
         id, organization_id, client_id, code, status, valid_until,
         clients!inner(legal_name, trade_name)
       )

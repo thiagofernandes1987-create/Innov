@@ -1,6 +1,8 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { fetchLatestSindusconCub, SINDUSCON_CUB_SOURCE_KEY } from "@/lib/cost-sources/sinduscon";
+import { buscarSerieHistoricaDoCub } from "@/lib/cost-sources/cub-fonte";
+import { familiaDaTipologia, padraoDeAcabamento } from "@/lib/cost-sources/cub-serie-historica";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -95,28 +97,84 @@ export async function GET(request: Request) {
       retrieved_at: new Date().toISOString()
     }));
 
+    // **As dezenove tipologias, não só a representativa.** T-37.14.
+    //
+    // A notícia acima publica o R8-N nos dois regimes; a série histórica
+    // publica as dezenove, sem desoneração. Sincronizar só a notícia deixaria
+    // dezoito paradas no mês anterior enquanto uma avança — e comparar
+    // tipologias de competências diferentes é pior que comparar dado velho,
+    // porque parece atual.
+    //
+    // Falha da série derruba a sincronização inteira, de propósito: gravar só a
+    // notícia produziria exatamente o desalinhamento que este bloco existe para
+    // impedir. Entre a publicação da notícia e a atualização da planilha há
+    // alguns dias, e uma execução reprovada nessa janela é o comportamento
+    // esperado — a mensagem nomeia as duas datas para não parecer defeito.
+    const serie = await buscarSerieHistoricaDoCub();
+    if (serie.dataBase < publication.baseDate) {
+      throw new Error(
+        `A série histórica está em ${serie.dataBase} e a publicação em ${publication.baseDate}.`
+      );
+    }
+    const linhasDaSerie = serie.registros.map(registro => ({
+      source_key: SINDUSCON_CUB_SOURCE_KEY,
+      source_name: "SindusCon-SP",
+      region: "SP",
+      reference_code: registro.codigo,
+      base_date: serie.dataBase,
+      publication_date: publication.publicationDate,
+      tax_relief: false,
+      unit: "m²",
+      total_cost: registro.global,
+      materials_cost: registro.material,
+      labor_cost: registro.maoDeObra,
+      administrative_cost: registro.administrativo,
+      equipment_cost: null,
+      monthly_change_rate: null,
+      year_change_rate: null,
+      twelve_month_change_rate: null,
+      source_url: serie.sourceUrl,
+      source_sha256: serie.arquivoSha256,
+      raw_payload: {
+        evidence: registro.descricao,
+        familia: familiaDaTipologia(registro.codigo),
+        padraoDeAcabamento: padraoDeAcabamento(registro.codigo),
+        retrievalMode: "serie-historica-oficial",
+        arquivoSha256: serie.arquivoSha256,
+        synchronizedAt: new Date().toISOString()
+      },
+      retrieved_at: new Date().toISOString()
+    }));
+
+    // A notícia por último: ela traz o R8-N **com** desoneração, que a série não
+    // publica, e o sem desoneração do mesmo mês, que a série também traz. Quando
+    // as duas descrevem a mesma linha, vale a série — é ela que carrega a
+    // decomposição conferida.
     const { error: upsertError } = await supabase
       .from("cost_reference_snapshots")
-      .upsert(rows, {
+      .upsert([...rows, ...linhasDaSerie], {
         onConflict: "source_key,region,reference_code,base_date,tax_relief",
         ignoreDuplicates: false
       });
     if (upsertError) throw new Error(`Falha ao persistir snapshots: ${upsertError.message}`);
 
-    const unchanged = latest?.base_date === publication.baseDate;
+    const unchanged = latest?.base_date === publication.baseDate && serie.dataBase === publication.baseDate;
     await supabase
       .from("cost_source_sync_runs")
       .update({
         status: unchanged ? "UNCHANGED" : "COMPLETED",
         source_url: publication.sourceUrl,
         finished_at: new Date().toISOString(),
-        imported_records: unchanged ? 0 : rows.length,
-        unchanged_records: unchanged ? rows.length : 0,
+        imported_records: unchanged ? 0 : rows.length + linhasDaSerie.length,
+        unchanged_records: unchanged ? rows.length + linhasDaSerie.length : 0,
         metadata: {
           trigger: "vercel-cron",
           baseDate: publication.baseDate,
           publicationDate: publication.publicationDate,
-          title: publication.title
+          title: publication.title,
+          serieDataBase: serie.dataBase,
+          serieTipologias: linhasDaSerie.length,
+          serieArquivoSha256: serie.arquivoSha256
         }
       })
       .eq("id", run.id);
@@ -125,7 +183,8 @@ export async function GET(request: Request) {
       status: unchanged ? "unchanged" : "completed",
       source: SINDUSCON_CUB_SOURCE_KEY,
       baseDate: publication.baseDate,
-      records: rows.length
+      serieDataBase: serie.dataBase,
+      records: rows.length + linhasDaSerie.length
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

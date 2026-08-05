@@ -1,69 +1,8 @@
-import { OpportunityForm } from "@/components/relationship/opportunity-form";
-import { RelationshipNavigation } from "@/components/relationship/relationship-navigation";
-import { requireCapability } from "@/lib/authorization";
-import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
+import { CampoMoeda } from "@/components/campos/campos-br";
+import{createCrmOpportunity}from"@/app/actions/relationship";
+import{RelationshipNavigation}from"@/components/relationship/relationship-navigation";
+import{requireCapability}from"@/lib/authorization";
+import{loadRelationshipOptions}from"@/lib/relationship/server";
 
-export const dynamic = "force-dynamic";
-
-export default async function NewOpportunityPage({
-  searchParams
-}: {
-  searchParams: Promise<{ clientId?: string; leadId?: string }>;
-}) {
-  const context = await requireCapability("crm", "create");
-  const query = await searchParams;
-  const [clientsResult, leadsResult] = await Promise.all([
-    context.supabase
-      .from("clients")
-      .select("id,legal_name,trade_name,city")
-      .eq("organization_id", context.organizationId)
-      .is("archived_at", null)
-      .order("legal_name"),
-    context.supabase
-      .from("crm_leads")
-      .select("id,code,full_name,company_name")
-      .eq("organization_id", context.organizationId)
-      .is("archived_at", null)
-      .order("created_at", { ascending: false })
-      .limit(250)
-  ]);
-
-  reportDataAccessError("new-opportunity.clients", clientsResult.error);
-  reportDataAccessError("new-opportunity.leads", leadsResult.error);
-
-  const clients = (clientsResult.data ?? []).map((client) => ({
-    id: client.id,
-    label: client.trade_name || client.legal_name,
-    city: client.city
-  }));
-  const leads = (leadsResult.data ?? []).map((lead) => ({
-    id: lead.id,
-    label: lead.full_name,
-    company: lead.company_name,
-    code: lead.code
-  }));
-  const initialClientId = clients.some((client) => client.id === query.clientId) ? query.clientId : "";
-  const initialLeadId = leads.some((lead) => lead.id === query.leadId) ? query.leadId : "";
-
-  return (
-    <main className="content relationship-app">
-      <section className="page-heading">
-        <div>
-          <span className="badge">CRM · NOVA OPORTUNIDADE</span>
-          <h1>Criar oportunidade</h1>
-          <p>Vincule a um cliente ou lead e defina valor, probabilidade e previsão.</p>
-        </div>
-      </section>
-      <RelationshipNavigation />
-      {clientsResult.error || leadsResult.error ? (
-        <div className="validation blocking" role="alert">{DATA_LOAD_ERROR_MESSAGE}</div>
-      ) : null}
-      <OpportunityForm
-        clients={clients}
-        leads={leads}
-        initialClientId={initialClientId}
-        initialLeadId={initialLeadId}
-      />
-    </main>
-  );
-}
+export const dynamic="force-dynamic";
+export default async function NewOpportunityPage({searchParams}:{searchParams:Promise<{error?:string;clientId?:string;leadId?:string}>}){await requireCapability("crm","create");const[query,options]=await Promise.all([searchParams,loadRelationshipOptions()]);return <main className="content relationship-app"><section className="page-heading"><div><span className="badge">CRM · NOVA OPORTUNIDADE</span><h1>Criar oportunidade</h1><p>Vincule a um cliente ou lead e defina valor, probabilidade e previsão.</p></div></section><RelationshipNavigation/>{query.error?<div className="validation blocking">{query.error}</div>:null}<form action={createCrmOpportunity} className="card card-pad relationship-form"><div className="form-grid"><label><span>Cliente</span><select name="clientId" defaultValue={query.clientId??""}><option value="">Sem cliente</option>{options.clients.map(client=><option key={client.id} value={client.id}>{client.trade_name||client.legal_name}</option>)}</select></label><label><span>ID do lead</span><input name="leadId" defaultValue={query.leadId??""} placeholder="Opcional"/></label><label className="span-2"><span>Título *</span><input name="title" required/></label><label><span>Estágio inicial</span><select name="stage"><option value="PROSPECTING">Prospecção</option><option value="QUALIFIED">Qualificada</option><option value="PROPOSAL">Proposta</option><option value="NEGOTIATION">Negociação</option></select></label><label><span>Probabilidade (%)</span><input name="probability" type="number" min="0" max="99.99" step="0.01" defaultValue="25"/></label><CampoMoeda name="estimatedValue" label="Valor estimado"/><label><span>Fechamento previsto</span><input name="expectedCloseDate" type="date"/></label><label><span>Origem</span><input name="source"/></label></div><label><span>Descrição</span><textarea name="description" rows={5}/></label><div className="form-actions"><button className="button button-primary" type="submit">Criar oportunidade</button></div></form></main>;}

@@ -9,11 +9,19 @@ import {
   type SinapiOfficialSource
 } from "./source-catalog";
 import {
-  parseSinapiZipPackage,
   type ParsedSinapiPackage,
   type SinapiCompositionImportRow,
   type SinapiInputImportRow
 } from "./xlsx-parser";
+// **Um leitor só, e um módulo só.** `parseSinapiZipPackage` procura um arquivo
+// por UF e por regime dentro do pacote, formato que a CAIXA não publica mais —
+// era ele que respondia "somente 0 insumos válidos" ao botão da tela. O leitor
+// do formato atual é `parseSinapiOfficialReferencePackage`.
+//
+// `automatic-update-v2.ts` existia porque a sonda foi corrigida sem o botão;
+// os dois módulos divergiram e falhavam em pontos diferentes pelo mesmo motivo.
+// Ele foi removido: botão e sonda entram por aqui. T-37.1 e T-37.7.
+import { parseSinapiOfficialReferencePackage } from "./official-reference-parser";
 
 const CAIXA_BASE_URL = "https://www.caixa.gov.br";
 const DOWNLOADS_PAGE = `${CAIXA_BASE_URL}/site/Paginas/downloads.aspx`;
@@ -324,7 +332,7 @@ async function loadOfficialPackage(region: string, taxRelief: boolean): Promise<
   const source = await discoverLatestSinapiXlsxSource();
   const { buffer, finalUrl } = await downloadOfficialPackage(source);
   const sourceSha256 = createHash("sha256").update(buffer).digest("hex");
-  const parsed = parseSinapiZipPackage(buffer, { sourceUrl: finalUrl, region, taxRelief });
+  const parsed = parseSinapiOfficialReferencePackage(buffer, { sourceUrl: finalUrl, region, taxRelief });
   validateBaseDate(parsed.baseDate, source.baseDate);
   return { source, finalUrl, buffer, sourceSha256, parsed };
 }
@@ -463,7 +471,7 @@ export async function runSinapiAutomaticUpdate(input: {
       p_source_sha256: sourceSha256,
       p_metadata: {
         automatic: true,
-        parserVersion: "5",
+        parserVersion: "6-official-reference",
         sourceFileName: source.fileName,
         sourceModifiedAt: source.modifiedAt,
         sourceDescription: source.description,
@@ -471,7 +479,11 @@ export async function runSinapiAutomaticUpdate(input: {
         sourceRectification: source.isRectification,
         downloadedBytes: buffer.length,
         xlsxFiles: parsed.xlsxFiles,
-        worksheets: parsed.worksheets
+        worksheets: parsed.worksheets,
+        // Quantos itens analíticos vieram junto. Zero aqui significa composição
+        // sem composição: o custo total entra, o "do que é feito" não — que era
+        // exatamente o furo da T-37.1.
+        analyticalItems: parsed.compositions.reduce((soma, item) => soma + item.items.length, 0)
       }
     });
     if (startError || !startedBatchId) throw new Error(startError?.message ?? "O lote SINAPI não foi iniciado.");

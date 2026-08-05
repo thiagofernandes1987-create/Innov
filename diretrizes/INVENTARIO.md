@@ -37,6 +37,7 @@
 | `aditivos` | Aditivos | operacional | 9 |
 | `assinaturas` | Assinaturas | sandbox; provider jurídico pendente | 9/12.2/20 |
 | `documentos` | Documentos | operacional; antimalware pendente | 12/13/20 |
+| `modelos` | Modelos e Documentações | biblioteca única de modelos, lida por todos os aplicativos; tipo classifica, Administração libera por aplicativo | 32 |
 | `qualidade` | Qualidade | operacional; antimalware pendente | 13/20 |
 | `compras` | Compras e Suprimentos | operacional; antimalware pendente | 14/20 |
 | `estoque` | Estoque, Inventário e Almoxarifado | homologado; concorrência real aprovada | 17/20 |

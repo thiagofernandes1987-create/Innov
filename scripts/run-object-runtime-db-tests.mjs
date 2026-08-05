@@ -11,7 +11,13 @@ const files = [
   "supabase/tests/object-runtime/fixture.sql",
   "supabase/migrations/20260726090000_object_runtime_definition_catalog.sql",
   "supabase/migrations/20260726093000_object_runtime_publication.sql",
-  "supabase/tests/object-runtime/catalog.test.sql"
+  "supabase/migrations/20260804000000_object_runtime_rascunho_de_definicao.sql",
+  "supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql",
+  "supabase/migrations/20260804002000_object_runtime_campo_arquivado.sql",
+  "supabase/migrations/20260804003000_object_runtime_registros.sql",
+  "supabase/tests/object-runtime/catalog.test.sql",
+  "supabase/tests/object-runtime/rascunho.test.sql",
+  "supabase/tests/object-runtime/registros.test.sql"
 ];
 
 for (const file of files) {
@@ -48,8 +54,14 @@ try {
     connection = ["-U", "postgres", "-d", database];
   }
 } catch (error) {
+  // Ver VACINA-056: com `--exigir`, faltar a dependência reprova, porque
+  // "não rodou" e "passou" não podem sair com o mesmo código.
   console.log("PostgreSQL indisponível neste ambiente: testes de banco do Object Runtime NÃO foram executados.");
   console.log(`Motivo: ${error instanceof Error ? error.message.split("\n")[0] : String(error)}`);
+  if (process.argv.includes("--exigir")) {
+    console.error("`--exigir` foi pedido: sem banco não há verificação, e sem verificação não há aprovação.");
+    process.exit(1);
+  }
   process.exit(0);
 }
 
@@ -78,7 +90,7 @@ for (const file of files) {
 
 // Sucesso silencioso é o modo de falha mais caro: o script sairia 0 se o
 // arquivo de teste não tivesse executado nenhum bloco.
-const EXPECTED_APPROVALS = 2;
+const EXPECTED_APPROVALS = 5;
 if (!failed && approvals < EXPECTED_APPROVALS) {
   console.error(
     `\nO script terminou sem erro mas produziu ${approvals} confirmação(ões) de ${EXPECTED_APPROVALS}. Os testes não executaram.`

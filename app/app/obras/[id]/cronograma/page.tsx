@@ -6,6 +6,8 @@ import type { TipoDependencia } from "@/lib/planejamento/cronograma";
 import { requireOrganizationContext } from "@/lib/auth";
 import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
 import { daysBetween, formatDate, formatPercent, statusBadge } from "@/lib/stage12";
+import { modelosDeEap } from "@/lib/planejamento/modelos-servidor";
+import { ESCOPOS, sugestoesDoEscopo } from "@/lib/sugestoes/servidor";
 
 export default async function SchedulePage({
   params,
@@ -82,6 +84,17 @@ export default async function SchedulePage({
   const totalDays = Math.max(daysBetween(project.planned_start, project.planned_end) ?? 1, 1);
   const delayed = tasks.filter(task => task.planned_end && new Date(`${task.planned_end}T23:59:59`) < new Date() && task.status !== "COMPLETED").length;
 
+  // Vocabulário da organização para os dois campos que mais se repetem entre
+  // obras. Carregado no servidor, e não no cliente, porque a leitura passa pela
+  // RLS: quem não tem acesso à organização não recebe catálogo nenhum.
+  const [sugestoesDeEtapa, sugestoesDeAtividade, modelosDeEapDaEmpresa] = await Promise.all([
+    sugestoesDoEscopo(supabase, organizationId, ESCOPOS.etapaDaEap),
+    sugestoesDoEscopo(supabase, organizationId, ESCOPOS.atividadeDaEap),
+    // O conjunto, não só a palavra: quem monta "Fundação" pela terceira vez
+    // recebe as atividades que vieram nas duas anteriores.
+    modelosDeEap(supabase, organizationId)
+  ]);
+
   return (
     <main className="content">
       <ProjectNav projectId={id} />
@@ -109,6 +122,9 @@ export default async function SchedulePage({
 
       {!scheduleLoadFailed ? (
         <SchedulePlanner
+          sugestoesDeEtapa={sugestoesDeEtapa}
+          modelosDeEap={modelosDeEapDaEmpresa}
+          sugestoesDeAtividade={sugestoesDeAtividade}
           projectId={id}
           projectStart={project.planned_start}
           projectEnd={project.planned_end}

@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { LauncherSummary, LauncherSummaryMap } from "@/lib/casca/launcher-domain";
 import { useBusca } from "./busca-da-barra";
 import { corDoModulo, IconeDoModulo } from "./icones";
+import type { Indicador } from "@/lib/casca/indicadores";
 
 export type AplicativoAutorizado = {
   chave: string;
@@ -15,6 +16,10 @@ export type AplicativoAutorizado = {
   href: string;
   nivel: string;
 };
+
+
+
+
 
 const TODAS = "__todas__";
 
@@ -37,10 +42,11 @@ function resumoDe(chave: string, resumos: LauncherSummaryMap): LauncherSummary {
 
 export function Launcher({
   aplicativos,
-  resumos
+  indicadores = {}
 }: {
   aplicativos: AplicativoAutorizado[];
-  resumos: LauncherSummaryMap;
+  /** Contagem real por módulo. Ausente = card sem indicador, nunca número inventado. */
+  indicadores?: Record<string, Indicador>;
 }) {
   const busca = useBusca();
   const [categoria, setCategoria] = useState(TODAS);
@@ -172,7 +178,7 @@ export function Launcher({
               <li key={app.chave}>
                 <AplicativoCard
                   aplicativo={app}
-                  resumo={resumoDe(app.chave, resumos)}
+                  indicador={indicadores[app.chave]}
                   mostrarIndicadores={mostrarIndicadores}
                 />
               </li>
@@ -295,15 +301,103 @@ function AplicativoCard({
   );
 }
 
-function MiniGrafico({ progress }: { progress?: number | null }) {
-  const normalized = progress == null ? null : Math.max(0, Math.min(100, progress));
-  const bars = normalized == null
-    ? [24, 38, 31, 46, 35, 42, 30, 48]
-    : [0.46, 0.64, 0.52, 0.78, 0.61, 0.86, 0.72, 1].map(factor => Math.max(12, Math.round(normalized * factor)));
+// ── Formas do micro-indicador ───────────────────────────────────────────────
+//
+// Alvo visual de 2 de agosto: a forma acompanha a natureza do dado, não o gosto
+// de quem desenha. Série para o que varia no tempo, etapas para o que percorre
+// um fluxo, faixas para o que se reparte entre estados, uso para o que enche,
+// barras para distribuição, pessoas para quem é gente.
+//
+// Tudo em SVG inline e CSS: nenhuma biblioteca de gráfico entra na tela inicial,
+// que é a primeira coisa que todo usuário carrega.
 
-  return (
-    <span className="launcher-mini-grafico" aria-hidden="true" data-empty={normalized == null}>
-      {bars.map((height, index) => <i key={index} style={{ height: `${height}%` }} />)}
-    </span>
-  );
+function FormaDoIndicador({ indicador }: { indicador: Indicador }) {
+  const forma = indicador.forma;
+  if (!forma) return null;
+
+  if (forma.tipo === "serie") {
+    const pontos = forma.pontos;
+    if (pontos.length < 2) return null;
+    const max = Math.max(...pontos);
+    const min = Math.min(...pontos);
+    const faixa = max - min || 1;
+    const d = pontos
+      .map((v, i) => `${(i / (pontos.length - 1)) * 100},${28 - ((v - min) / faixa) * 24}`)
+      .join(" L ");
+    return (
+      <svg className="ind-serie" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true">
+        <path d={`M ${d}`} fill="none" stroke="var(--cor-app, currentColor)" strokeWidth="1.6" vectorEffect="non-scaling-stroke" />
+      </svg>
+    );
+  }
+
+  if (forma.tipo === "etapas") {
+    return (
+      <span className="ind-etapas" aria-hidden="true">
+        {forma.etapas.map(etapa => (
+          <span key={etapa.rotulo} className={etapa.ativo ? "ind-etapa ativa" : "ind-etapa"}>
+            <i />
+            <small>{etapa.rotulo}</small>
+          </span>
+        ))}
+      </span>
+    );
+  }
+
+  if (forma.tipo === "faixas") {
+    const total = forma.faixas.reduce((soma, f) => soma + f.valor, 0) || 1;
+    return (
+      <span className="ind-faixas">
+        <span className="ind-faixas-barra" aria-hidden="true">
+          {forma.faixas.map(f => (
+            <i key={f.rotulo} data-tom={f.tom} style={{ width: `${(f.valor / total) * 100}%` }} />
+          ))}
+        </span>
+        <span className="ind-faixas-legenda">
+          {forma.faixas.map(f => (
+            <span key={f.rotulo}>
+              <i data-tom={f.tom} aria-hidden="true" />
+              {f.rotulo}
+              <b>{f.valor}</b>
+            </span>
+          ))}
+        </span>
+      </span>
+    );
+  }
+
+  if (forma.tipo === "uso") {
+    return (
+      <span className="ind-uso">
+        <progress max={100} value={forma.percentual} aria-label={`${indicador.rotulo}: ${forma.apoio}`} />
+        <small>{forma.apoio}</small>
+      </span>
+    );
+  }
+
+  if (forma.tipo === "barras") {
+    const max = Math.max(...forma.valores, 1);
+    return (
+      <span className="ind-barras" aria-hidden="true">
+        {forma.valores.map((v, i) => (
+          <i key={i} style={{ height: `${Math.max(8, (v / max) * 100)}%` }} />
+        ))}
+      </span>
+    );
+  }
+
+  if (forma.tipo === "pessoas") {
+    const bolhas = Math.min(5, forma.total);
+    const resto = forma.total - bolhas;
+    return (
+      <span className="ind-pessoas" aria-hidden="true">
+        {Array.from({ length: bolhas }, (_, i) => (
+          <i key={i} />
+        ))}
+        {resto > 0 ? <b>+{resto}</b> : null}
+      </span>
+    );
+  }
+
+  return null;
 }

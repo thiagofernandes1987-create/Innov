@@ -6,6 +6,7 @@ import { ehTipoAtividade } from "@/lib/pipeline/atividades";
 import { checarCamposBR } from "@/lib/validacao/formulario";
 import { CODIGOS_DATA, type CodigoData } from "@/lib/pipeline/datas";
 import { TRILHAS, type Trilha } from "@/lib/pipeline/domain";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 
 // Escrita do pipeline.
 //
@@ -188,38 +189,6 @@ export async function definirPrioridade(cardId: string, prioridade: number): Pro
 }
 
 /**
- * Instala uma trilha a partir de um preset.
- *
- * A permissão é conferida dentro da RPC, no banco: a mesma regra vale para
- * qualquer caminho que chegue lá, inclusive um que ainda não existe.
- */
-export async function instalarTrilha(preset: string, nome?: string): Promise<ResultadoAcao> {
-  const { supabase, organizationId } = await requireOrganizationContext();
-
-  const { error } = await supabase.rpc("pipeline_criar_do_preset", {
-    p_organization_id: organizationId,
-    p_preset: preset,
-    p_nome: nome?.trim() || null,
-    p_key: null,
-    p_padrao: true
-  });
-
-  if (error) {
-    if (/permissão/i.test(error.message)) return falha("Sem permissão de administração para criar a trilha.");
-    if (/desconhecido/i.test(error.message)) return falha("Modelo de trilha desconhecido.");
-    if (/duplicate key|unique/i.test(error.message)) return falha("Já existe uma trilha padrão desse tipo.");
-    return falha("Não foi possível criar a trilha.");
-  }
-
-  for (const trilha of TRILHAS) revalidar(trilha);
-  return { ok: true };
-}
-
-export async function trilhaEhValida(valor: string): Promise<boolean> {
-  return trilhaValida(valor);
-}
-
-/**
  * Seguir ou deixar de seguir o cartão.
  *
  * Seguir o que já se pode ler não aumenta acesso nenhum, então qualquer um que
@@ -340,6 +309,9 @@ export async function criarEtapa(pipelineId: string, nome: string): Promise<Resu
     return falha("Não foi possível criar a etapa. Talvez você não tenha permissão de edição nesta trilha.");
   }
 
+  // Depois de gravar, e só depois: nome que a pessoa digitou e abandonou não é
+  // vocabulário da empresa, e entraria na lista de todo mundo.
+  await registrarValorUsado(supabase, pipeline.organization_id, ESCOPOS.etapaDoFunil, titulo);
   revalidar(pipeline.trilha as Trilha);
   return { ok: true };
 }
