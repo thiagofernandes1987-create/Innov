@@ -5,6 +5,7 @@ const protocol = readFileSync(
   new URL("../docs/QA-VISUAL-POR-CAPTURAS.md", import.meta.url),
   "utf8"
 );
+const normalizedProtocol = protocol.toLocaleLowerCase("pt-BR");
 const vaccine = readFileSync(
   new URL(
     "../diretrizes/vacinas/VACINA-043-CORRECAO-VISUAL-EXIGE-CAPTURA-DO-PREVIEW.md",
@@ -25,8 +26,8 @@ describe("protocolo de QA visual por capturas", () => {
     }
   });
 
-  it("mantém a matriz mínima de viewports e temas", () => {
-    for (const token of ["1920x1080", "1366x768", "390x844", "Tema claro", "Tema escuro"]) {
+  it("mantém a matriz mínima de larguras e temas", () => {
+    for (const token of ["375px", "768px", "1280px", "Tema claro", "Tema escuro"]) {
       expect(protocol).toContain(token);
     }
   });
@@ -36,12 +37,13 @@ describe("protocolo de QA visual por capturas", () => {
       "contraste",
       "sobrepõem",
       "overflow horizontal",
-      "pt-BR",
-      "NaN",
-      "PGRST",
-      "estados vazio"
+      "pt-br",
+      "nan",
+      "pgrst",
+      "estados vazio",
+      "44px"
     ]) {
-      expect(protocol).toContain(token);
+      expect(normalizedProtocol).toContain(token);
     }
   });
 

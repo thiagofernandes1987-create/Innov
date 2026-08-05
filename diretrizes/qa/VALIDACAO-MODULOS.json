@@ -1,385 +1,159 @@
 {
   "schemaVersion": 1,
   "repository": "thiagofernandes1987-create/Innov",
-  "branch": "fix/qa-personas-visual-runtime-loop",
+  "branch": "fix/module-validation-loop-20260730",
   "issue": 32,
-  "updatedAt": "2026-07-30T08:14:53Z",
-  "allowedStatuses": [
-    "pendente",
-    "em_correcao",
-    "aguardando_preview",
-    "aguardando_captura",
-    "reprovado",
-    "aprovado"
-  ],
-  "requiredViewports": ["1920x1080", "1366x768", "390x844"],
+  "updatedAt": "2026-07-30T11:20:00Z",
+  "allowedStatuses": ["pendente", "em_correcao", "aguardando_preview", "aguardando_captura", "reprovado", "aprovado"],
+  "requiredViewports": ["375px", "768px", "1280px"],
   "requiredThemes": ["claro", "escuro"],
   "requiredAcceptanceCriteria": [
-    "layout_referencia",
-    "contraste",
-    "interacoes",
-    "sem_sobreposicao",
-    "sem_cortes",
-    "sem_overflow_acidental",
-    "dados_formatados",
-    "sem_erros_tecnicos_na_ui",
-    "estados_legiveis",
-    "console_limpo",
-    "servidor_limpo",
-    "fluxo_funcional",
-    "persona_conclui",
-    "permissoes_negativas"
+    "layout_referencia", "contraste", "interacoes", "alvos_44px", "sem_sobreposicao", "sem_cortes",
+    "sem_overflow_acidental", "dados_formatados", "sem_erros_tecnicos_na_ui", "estados_legiveis",
+    "console_limpo", "servidor_limpo", "fluxo_funcional", "persona_conclui", "permissoes_negativas", "integracao_pessimista"
   ],
   "modules": [
     {
-      "modulo": "dashboard",
-      "nome": "Início",
-      "rotaPrincipal": "/app",
-      "personaPrincipal": "administrador",
+      "modulo": "dashboard", "nome": "Início", "rotaPrincipal": "/app", "personaPrincipal": "administrador",
       "fluxoPrincipal": "abrir launcher, filtrar aplicativos, consultar gadgets e entrar em um módulo autorizado",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "em_correcao", "iteracoes": 2,
+      "problemasAbertos": [
+        "capturas autenticadas bloqueadas porque DEMO_ADMIN_PASSWORD não está configurada no GitHub Actions",
+        "preview protegido ainda não possui VERCEL_AUTOMATION_BYPASS_SECRET no GitHub Actions",
+        "comparação visual full-page em 375px, 768px e 1280px ainda não foi produzida"
+      ],
+      "problemasResolvidos": [
+        "alvos da casca e filtros elevados para 44px",
+        "painel de personalização limitado à largura da viewport",
+        "amostra visual atualizada para o contrato de resumos sem inventar indicadores"
+      ],
+      "criteriosAtendidos": ["alvos_44px"], "capturasAprovadas": [], "logs": null,
+      "vacinas": ["VACINA-019", "VACINA-027", "VACINA-031"]
     },
     {
-      "modulo": "crm",
-      "nome": "CRM e Vendas",
-      "rotaPrincipal": "/app/crm",
-      "personaPrincipal": "vendedor",
+      "modulo": "crm", "nome": "CRM e Vendas", "rotaPrincipal": "/app/crm", "personaPrincipal": "vendedor",
       "fluxoPrincipal": "criar lead, converter, criar oportunidade, movimentar pipeline e registrar atividade",
-      "status": "em_correcao",
-      "iteracoes": 1,
-      "problemasAbertos": [
-        "menu e busca precisam de validação visual no preview",
-        "fluxo de oportunidade precisa confirmar validação de UUID e erro de domínio"
-      ],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": ["VACINA-043"]
+      "status": "em_correcao", "iteracoes": 1,
+      "problemasAbertos": ["menu e busca precisam de validação visual no preview", "fluxo de oportunidade precisa confirmar validação de UUID e erro de domínio"],
+      "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": ["VACINA-043"]
     },
     {
-      "modulo": "clientes",
-      "nome": "Clientes",
-      "rotaPrincipal": "/app/clientes",
-      "personaPrincipal": "vendedor",
+      "modulo": "clientes", "nome": "Clientes", "rotaPrincipal": "/app/clientes", "personaPrincipal": "vendedor",
       "fluxoPrincipal": "buscar cliente, cadastrar, editar, registrar contato, consentimento e atividade",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "obras",
-      "nome": "Obras",
-      "rotaPrincipal": "/app/obras",
-      "personaPrincipal": "gestor_de_obras",
-      "fluxoPrincipal": "criar obra independente ou em andamento, abrir visão geral e navegar nos módulos contextuais",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": ["VACINA-040", "VACINA-043"]
+      "modulo": "obras", "nome": "Obras e Projetos", "rotaPrincipal": "/app/obras", "personaPrincipal": "gestor_de_obras",
+      "fluxoPrincipal": "abrir a carteira, alternar lista e Kanban, filtrar projetos e navegar para o planejamento contextual",
+      "status": "em_correcao", "iteracoes": 2,
+      "problemasAbertos": [
+        "simulação com gestor de obras ou planejador real está bloqueada por ausência de credencial de QA",
+        "controles Lista e Kanban precisam de captura e verificação por nome acessível",
+        "consistência com a referência visual de Projetos ainda precisa de revisão full-page"
+      ],
+      "problemasResolvidos": ["casca responsiva passou a preservar alvos mínimos de 44px"],
+      "criteriosAtendidos": ["alvos_44px"], "capturasAprovadas": [], "logs": null,
+      "vacinas": ["VACINA-019", "VACINA-027", "VACINA-040", "VACINA-043"]
     },
     {
-      "modulo": "planejamento",
-      "nome": "Planejamento",
-      "rotaPrincipal": "/app/planejamento",
-      "personaPrincipal": "planejador",
+      "modulo": "planejamento", "nome": "Planejamento", "rotaPrincipal": "/app/planejamento", "personaPrincipal": "planejador",
       "fluxoPrincipal": "selecionar projeto, criar EAP, cronograma, dependências, baseline e alocar recursos",
-      "status": "em_correcao",
-      "iteracoes": 1,
-      "problemasAbertos": [
-        "carregamento de responsáveis e equipes precisa ser confirmado no preview",
-        "contraste e responsividade de EAP, Gantt e navegação contextual precisam de captura"
-      ],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": ["VACINA-040", "VACINA-043"]
+      "status": "em_correcao", "iteracoes": 1,
+      "problemasAbertos": ["carregamento de responsáveis e equipes precisa ser confirmado no preview", "contraste e responsividade de EAP, Gantt e navegação contextual precisam de captura"],
+      "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": ["VACINA-040", "VACINA-043"]
     },
     {
-      "modulo": "tarefas",
-      "nome": "Tarefas",
-      "rotaPrincipal": "/app/tarefas",
-      "personaPrincipal": "planejador",
+      "modulo": "tarefas", "nome": "Tarefas", "rotaPrincipal": "/app/tarefas", "personaPrincipal": "planejador",
       "fluxoPrincipal": "criar tarefa, atribuir responsável, mover no Kanban, atualizar progresso e bloquear",
-      "status": "em_correcao",
-      "iteracoes": 1,
-      "problemasAbertos": [
-        "consulta de perfis sem relacionamento implícito precisa de validação de runtime",
-        "Kanban precisa passar pela matriz de contraste e overflow"
-      ],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": ["VACINA-043"]
+      "status": "em_correcao", "iteracoes": 1,
+      "problemasAbertos": ["consulta de perfis sem relacionamento implícito precisa de validação de runtime", "Kanban precisa passar pela matriz de contraste e overflow"],
+      "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": ["VACINA-043"]
     },
     {
-      "modulo": "diario",
-      "nome": "Diário de Obras",
-      "rotaPrincipal": "/app/diario",
-      "personaPrincipal": "gestor_de_obras",
+      "modulo": "diario", "nome": "Diário de Obras", "rotaPrincipal": "/app/diario", "personaPrincipal": "gestor_de_obras",
       "fluxoPrincipal": "registrar diário, ocorrência, equipe, clima, evidência e consultar histórico",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "equipes",
-      "nome": "Equipes",
-      "rotaPrincipal": "/app/equipes",
-      "personaPrincipal": "gestor_de_obras",
+      "modulo": "equipes", "nome": "Equipes", "rotaPrincipal": "/app/equipes", "personaPrincipal": "gestor_de_obras",
       "fluxoPrincipal": "consultar equipes, criar equipe, cadastrar recurso e vincular líder à obra",
-      "status": "em_correcao",
-      "iteracoes": 1,
-      "problemasAbertos": [
-        "consulta de perfis precisa ser confirmada sem PGRST200",
-        "porta de entrada global e contextual precisa ser validada pela persona"
-      ],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": ["VACINA-028", "VACINA-043"]
+      "status": "em_correcao", "iteracoes": 1,
+      "problemasAbertos": ["consulta de perfis precisa ser confirmada sem PGRST200", "porta de entrada global e contextual precisa ser validada pela persona"],
+      "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": ["VACINA-028", "VACINA-043"]
     },
     {
-      "modulo": "orcamentos",
-      "nome": "Orçamentos",
-      "rotaPrincipal": "/app/orcamentos",
-      "personaPrincipal": "orcamentista",
+      "modulo": "orcamentos", "nome": "Orçamentos", "rotaPrincipal": "/app/orcamentos", "personaPrincipal": "orcamentista",
       "fluxoPrincipal": "criar orçamento, adicionar composições, calcular preço, aplicar desconto, aprovar e congelar versão",
-      "status": "em_correcao",
-      "iteracoes": 1,
-      "problemasAbertos": [
-        "resumo financeiro não pode cobrir campos ou ações",
-        "ROI, payback, moeda e percentuais precisam de validação de domínio e captura",
-        "layout precisa eliminar overflow horizontal acidental"
-      ],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": ["VACINA-037", "VACINA-041", "VACINA-043"]
+      "status": "em_correcao", "iteracoes": 1,
+      "problemasAbertos": ["resumo financeiro não pode cobrir campos ou ações", "ROI, payback, moeda e percentuais precisam de validação de domínio e captura", "layout precisa eliminar overflow horizontal acidental"],
+      "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": ["VACINA-037", "VACINA-041", "VACINA-043"]
     },
     {
-      "modulo": "propostas",
-      "nome": "Propostas",
-      "rotaPrincipal": "/app/propostas",
-      "personaPrincipal": "vendedor",
+      "modulo": "propostas", "nome": "Propostas", "rotaPrincipal": "/app/propostas", "personaPrincipal": "vendedor",
       "fluxoPrincipal": "criar proposta fixa ou por orçamento, anexar PDF, aplicar desconto e enviar conforme alçada",
-      "status": "em_correcao",
-      "iteracoes": 1,
-      "problemasAbertos": [
-        "upload direto ao Storage precisa ser validado com PDF real acima de 1 MB",
-        "erros precisam permanecer no formulário sem mensagem técnica na URL",
-        "aprovação de desconto acima de 7% precisa de persona diretoria"
-      ],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": ["VACINA-040", "VACINA-041", "VACINA-042", "VACINA-043"]
+      "status": "em_correcao", "iteracoes": 1,
+      "problemasAbertos": ["upload direto ao Storage precisa ser validado com PDF real acima de 1 MB", "erros precisam permanecer no formulário sem mensagem técnica na URL", "aprovação de desconto acima de 7% precisa de persona diretoria"],
+      "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": ["VACINA-040", "VACINA-041", "VACINA-042", "VACINA-043"]
     },
     {
-      "modulo": "contratos",
-      "nome": "Contratos",
-      "rotaPrincipal": "/app/contratos",
-      "personaPrincipal": "gestor_de_contratos",
+      "modulo": "contratos", "nome": "Contratos", "rotaPrincipal": "/app/contratos", "personaPrincipal": "gestor_de_contratos",
       "fluxoPrincipal": "criar contrato, revisar versão, vincular partes, enviar para assinatura e ativar",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "aditivos",
-      "nome": "Aditivos",
-      "rotaPrincipal": "/app/aditivos",
-      "personaPrincipal": "gestor_de_contratos",
+      "modulo": "aditivos", "nome": "Aditivos", "rotaPrincipal": "/app/aditivos", "personaPrincipal": "gestor_de_contratos",
       "fluxoPrincipal": "criar aditivo de escopo, prazo ou valor, aprovar e encadear ao contrato",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "assinaturas",
-      "nome": "Assinaturas",
-      "rotaPrincipal": "/app/assinaturas",
-      "personaPrincipal": "gestor_de_contratos",
+      "modulo": "assinaturas", "nome": "Assinaturas", "rotaPrincipal": "/app/assinaturas", "personaPrincipal": "gestor_de_contratos",
       "fluxoPrincipal": "criar envelope, incluir signatários, enviar, acompanhar eventos e concluir",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "documentos",
-      "nome": "Documentos",
-      "rotaPrincipal": "/app/documentos",
-      "personaPrincipal": "administrador_documental",
+      "modulo": "documentos", "nome": "Documentos", "rotaPrincipal": "/app/documentos", "personaPrincipal": "administrador_documental",
       "fluxoPrincipal": "enviar arquivo, versionar, classificar, liberar e consultar permissão",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "qualidade",
-      "nome": "Qualidade",
-      "rotaPrincipal": "/app/qualidade",
-      "personaPrincipal": "qualidade",
+      "modulo": "qualidade", "nome": "Qualidade", "rotaPrincipal": "/app/qualidade", "personaPrincipal": "qualidade",
       "fluxoPrincipal": "preencher inspeção, registrar não conformidade, anexar evidência e encerrar ação",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "compras",
-      "nome": "Compras e Suprimentos",
-      "rotaPrincipal": "/app/compras",
-      "personaPrincipal": "comprador",
+      "modulo": "compras", "nome": "Compras e Suprimentos", "rotaPrincipal": "/app/compras", "personaPrincipal": "comprador",
       "fluxoPrincipal": "criar solicitação, cotar, comparar propostas, aprovar, emitir pedido e receber",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "estoque",
-      "nome": "Estoque",
-      "rotaPrincipal": "/app/estoque",
-      "personaPrincipal": "almoxarife",
+      "modulo": "estoque", "nome": "Estoque", "rotaPrincipal": "/app/estoque", "personaPrincipal": "almoxarife",
       "fluxoPrincipal": "registrar entrada, saída, transferência, inventário e consultar saldo",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "financeiro",
-      "nome": "Financeiro Operacional",
-      "rotaPrincipal": "/app/financeiro",
-      "personaPrincipal": "financeiro",
+      "modulo": "financeiro", "nome": "Financeiro Operacional", "rotaPrincipal": "/app/financeiro", "personaPrincipal": "financeiro",
       "fluxoPrincipal": "criar conta, parcela, medição, liquidação e consultar fluxo de caixa",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "sac",
-      "nome": "Pós-venda e SAC",
-      "rotaPrincipal": "/app/ocorrencias",
-      "personaPrincipal": "atendimento",
+      "modulo": "sac", "nome": "Pós-venda e SAC", "rotaPrincipal": "/app/ocorrencias", "personaPrincipal": "atendimento",
       "fluxoPrincipal": "abrir chamado, responder, anexar evidência, atribuir, transicionar e avaliar",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "relatorios",
-      "nome": "Relatórios e Indicadores",
-      "rotaPrincipal": "/app/relatorios",
-      "personaPrincipal": "diretoria",
+      "modulo": "relatorios", "nome": "Relatórios e Indicadores", "rotaPrincipal": "/app/relatorios", "personaPrincipal": "diretoria",
       "fluxoPrincipal": "filtrar indicadores, abrir detalhe, comparar períodos e exportar dados autorizados",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "auditoria",
-      "nome": "Auditoria",
-      "rotaPrincipal": "/app/auditoria",
-      "personaPrincipal": "auditor",
+      "modulo": "auditoria", "nome": "Auditoria", "rotaPrincipal": "/app/auditoria", "personaPrincipal": "auditor",
       "fluxoPrincipal": "pesquisar evento, filtrar ator e recurso, verificar trilha e exportar evidência",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
-      "modulo": "administracao",
-      "nome": "Administração",
-      "rotaPrincipal": "/app/administracao",
-      "personaPrincipal": "super_admin",
+      "modulo": "administracao", "nome": "Administração", "rotaPrincipal": "/app/administracao", "personaPrincipal": "super_admin",
       "fluxoPrincipal": "gerenciar aplicativos, perfis, usuários, permissões e configurações",
-      "status": "pendente",
-      "iteracoes": 0,
-      "problemasAbertos": [],
-      "problemasResolvidos": [],
-      "criteriosAtendidos": [],
-      "capturasAprovadas": [],
-      "logs": null,
-      "vacinas": []
+      "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     }
   ]
 }

@@ -19,11 +19,13 @@ Observar a interface publicada como o usuário a vê. A captura não substitui t
 
 ## Matriz mínima
 
+As imagens são full-page; a largura é o contrato obrigatório e a altura apenas define a janela inicial.
+
 | Superfície | Tema claro | Tema escuro |
 |---|---:|---:|
-| Desktop 1920x1080 | obrigatório | obrigatório |
-| Notebook 1366x768 | obrigatório | obrigatório |
-| Mobile 390x844 | obrigatório | obrigatório |
+| Mobile 375px | obrigatório | obrigatório |
+| Tablet 768px | obrigatório | obrigatório |
+| Desktop 1280px | obrigatório | obrigatório |
 
 Uma rota pode exigir viewports adicionais quando possuir tabela larga, Kanban, Gantt, modal, painel lateral ou documento incorporado.
 
@@ -31,7 +33,7 @@ Uma rota pode exigir viewports adicionais quando possuir tabela larga, Kanban, G
 
 ### Contraste e estados
 
-- texto, placeholder, ícone, borda e link são legíveis;
+- contraste de texto, placeholder, ícone, borda e link é legível;
 - item ativo, hover, foco e seleção são distinguíveis;
 - estados vazio, carregando, erro, sucesso, bloqueado e somente leitura não parecem iguais;
 - aviso e erro usam linguagem de domínio, nunca SQL, PGRST, constraint ou stack.
@@ -55,9 +57,9 @@ Uma rota pode exigir viewports adicionais quando possuir tabela larga, Kanban, G
 
 ### Responsividade e acessibilidade
 
-- conteúdo permanece utilizável nos três viewports mínimos;
+- conteúdo permanece utilizável nas três larguras mínimas;
 - teclado, foco e Escape funcionam em dropdowns e modais;
-- controles têm rótulo acessível e área de toque adequada;
+- controles têm rótulo acessível e área de toque mínima de 44px;
 - zoom e tamanho de fonte não tornam ações inacessíveis.
 
 ## Registro da evidência

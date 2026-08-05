@@ -1,0 +1,114 @@
+/* Regras transversais confirmadas no ciclo QA de launcher e Projetos. */
+.launcher-filtro,
+.launcher-personalizar,
+.launcher-acessar,
+.launcher-ver-todas,
+.barra-menu,
+.barra-menu-movel-gatilho,
+.barra-menu-movel > nav a {
+  min-height: 44px;
+}
+
+.launcher-acessar,
+.launcher-ver-todas {
+  display: flex;
+  align-items: center;
+}
+
+.launcher-ver-todas {
+  padding-block: 8px;
+}
+
+.alternador-tema-opcao {
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+}
+
+.launcher-personalizar-painel {
+  width: min(230px, calc(100vw - 24px));
+}
+
+/* Nunca fixar primeiro plano claro sobre superfícies que mudam de tema. */
+.launcher-destaque > p,
+.launcher-app > p,
+.launcher-categoria,
+.launcher-recentes small,
+.launcher-filtro,
+.launcher-personalizar {
+  color: var(--muted);
+}
+
+.launcher-filtro.ativo {
+  color: #fff;
+}
+
+.launcher-personalizar:hover {
+  color: var(--text);
+  background: var(--surface-muted);
+}
+
+.launcher-recentes b,
+.launcher-ver-todas {
+  color: var(--text);
+}
+
+/*
+ * O destaque e os cartões participam do mesmo grid. `display: contents`
+ * mantém o UL e seus LI no DOM sem criar uma segunda grade que deixe uma
+ * coluna vazia depois do destaque.
+ */
+.launcher-paineis.com-destaque {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+.launcher-paineis.com-destaque > .launcher-grade {
+  display: contents;
+}
+
+.launcher-paineis.com-destaque > .launcher-destaque {
+  grid-column: span 2;
+  grid-row: span 2;
+  min-height: 650px;
+  height: 100%;
+}
+
+@media (min-width: 601px) and (max-width: 1119px) {
+  .launcher-paineis.com-destaque {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .launcher-paineis.com-destaque > .launcher-destaque {
+    grid-column: span 2;
+  }
+
+  .launcher-titulo-grupo {
+    min-width: 0;
+    justify-content: flex-start;
+  }
+
+  .launcher-titulo-grupo > span {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .canto-botao,
+  .canto-avatar {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+  }
+
+  .launcher-paineis.com-destaque {
+    grid-template-columns: 1fr;
+  }
+
+  .launcher-paineis.com-destaque > .launcher-destaque {
+    grid-column: span 1;
+    grid-row: auto;
+    min-height: auto;
+  }
+}
