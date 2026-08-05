@@ -5,6 +5,28 @@ packages:
 overrides:
   ws: 8.21.1
 
+# Quais dependências podem rodar script de instalação.
+#
+# Isto é decisão, não formulário: o pnpm 11 **bloqueia todo `pnpm <script>`**
+# enquanto houver pacote sem resposta aqui — `ERR_PNPM_IGNORED_BUILDS` —, e as
+# duas linhas abaixo estiveram com o texto de exemplo do próprio pnpm no lugar
+# do valor. O efeito medido: num `pnpm install` comum, `pnpm lint`, `pnpm
+# typecheck` e `pnpm test` não rodavam. O CI não pegava porque instala com
+# `--ignore-scripts`, então ficava verde enquanto a máquina de quem desenvolve
+# ficava travada.
+#
+# `false` nos dois, com o que cada script faz conferido:
+#
+#   * `@whiskeysockets/baileys` — `preinstall` só confere a versão do Node, e
+#     `prepare` compila TypeScript, o que só acontece para dependência de git;
+#     o pacote publicado já traz `lib/`.
+#   * `protobufjs` — `postinstall` apenas emite aviso sobre esquema de versão.
+#
+# A prova de que não são necessários é a imagem do gateway: o Dockerfile
+# instala com `--ignore-scripts` e o smoke de contêiner passa inteiro, com
+# usuário 10001, sistema de arquivos somente leitura e rede desligada.
 allowBuilds:
+  '@whiskeysockets/baileys': false
+  protobufjs: false
   sharp: true
   unrs-resolver: true

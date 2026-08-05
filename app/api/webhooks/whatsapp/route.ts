@@ -258,18 +258,21 @@ export async function POST(request: Request) {
             }
             conversation = createdConversation;
           } else {
-            const receivedAt = occurredAt(message.timestamp);
-            const { error: updateError } = await admin
-              .from("whatsapp_conversations")
-              .update({
-                status: "OPEN",
-                last_customer_message_at: receivedAt,
-                last_message_at: receivedAt,
-                unread_count: Number(conversation.unread_count ?? 0) + 1,
-                updated_at: new Date().toISOString()
-              })
-              .eq("id", conversation.id);
-            if (updateError) throw updateError;
+            // A soma acontece **dentro do banco**. Fazer
+            // `unread_count = lido + 1` aqui é leitura-modificação-escrita, e o
+            // concorrente é a própria Meta: ela reentrega o mesmo evento quando
+            // não recebe 200 a tempo, duas entregas leem o mesmo valor e uma
+            // das mensagens some da contagem. É a FND-0008 voltando por outra
+            // porta — e o sintoma é uma contagem plausível e errada, que
+            // ninguém questiona.
+            const { error: contagemError } = await admin.rpc(
+              "registrar_mensagem_recebida_whatsapp",
+              {
+                p_conversation_id: conversation.id,
+                p_recebida_em: occurredAt(message.timestamp)
+              }
+            );
+            if (contagemError) throw contagemError;
           }
 
           const metadata = {
