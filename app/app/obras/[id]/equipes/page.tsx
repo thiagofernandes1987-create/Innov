@@ -18,13 +18,20 @@ export default async function TeamsPage({
     supabase.from("projects").select("id,code,name").eq("id", id).eq("organization_id", organizationId).maybeSingle(),
     supabase.from("project_teams").select("id,name,specialty,leader_user_id,active,project_team_members(id,display_name,role_label,active)").eq("project_id", id).order("name"),
     supabase.from("project_resources").select("id,resource_type,code,name,unit,hourly_cost,daily_cost,active").eq("project_id", id).order("resource_type").order("name"),
-    supabase.from("project_memberships").select("user_id,role,profiles(full_name)").eq("project_id", id).eq("active", true)
+    supabase.from("project_memberships").select("user_id,role").eq("project_id", id).eq("active", true)
   ]);
 
   reportDataAccessError("project-teams.project", projectResult.error);
   reportDataAccessError("project-teams.collection", teamsResult.error);
   reportDataAccessError("project-teams.resources", resourcesResult.error);
   reportDataAccessError("project-teams.memberships", membershipsResult.error);
+
+  const membershipIds = [...new Set((membershipsResult.data ?? []).map((membership) => membership.user_id))];
+  const profilesResult = membershipIds.length
+    ? await supabase.from("profiles").select("id,full_name,email").in("id", membershipIds)
+    : { data: [], error: null };
+
+  reportDataAccessError("project-teams.profiles", profilesResult.error);
 
   if (projectResult.error) {
     return (
@@ -42,9 +49,12 @@ export default async function TeamsPage({
   const teams = teamsResult.data ?? [];
   const resources = resourcesResult.data ?? [];
   const memberships = membershipsResult.data ?? [];
+  const profilesById = new Map(
+    (profilesResult.data ?? []).map((profile) => [profile.id, profile.full_name || profile.email || profile.id.slice(0, 8)])
+  );
   const teamsLoadFailed = Boolean(teamsResult.error);
   const resourcesLoadFailed = Boolean(resourcesResult.error);
-  const membershipsLoadFailed = Boolean(membershipsResult.error);
+  const membershipsLoadFailed = Boolean(membershipsResult.error || profilesResult.error);
   const loadFailed = teamsLoadFailed || resourcesLoadFailed || membershipsLoadFailed;
 
   return (
@@ -100,10 +110,11 @@ export default async function TeamsPage({
               <label>Nome<input name="name" placeholder="Equipe de estrutura" required /></label>
               <label>Especialidade<input name="specialty" placeholder="Formas e armação" /></label>
               <label>Líder
-                <select name="leaderUserId"><option value="">Não definido</option>{memberships.map((membership) => {
-                  const profile = Array.isArray(membership.profiles) ? membership.profiles[0] : membership.profiles;
-                  return <option key={membership.user_id} value={membership.user_id}>{profile?.full_name || membership.user_id.slice(0, 8)} · {membership.role}</option>;
-                })}</select>
+                <select name="leaderUserId"><option value="">Não definido</option>{memberships.map((membership) => (
+                  <option key={membership.user_id} value={membership.user_id}>
+                    {profilesById.get(membership.user_id) || membership.user_id.slice(0, 8)} · {membership.role}
+                  </option>
+                ))}</select>
               </label>
               <button className="button button-primary" type="submit">Criar equipe</button>
             </form>

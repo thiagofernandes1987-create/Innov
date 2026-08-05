@@ -2,7 +2,8 @@
 
 import { ArrowRight, SlidersHorizontal } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { LauncherSummary, LauncherSummaryMap } from "@/lib/casca/launcher-domain";
 import { useBusca } from "./busca-da-barra";
 import { corDoModulo, IconeDoModulo } from "./icones";
 
@@ -15,40 +16,6 @@ export type AplicativoAutorizado = {
   nivel: string;
 };
 
-type Indicador = {
-  rotulo: string;
-  valor: string;
-  apoio?: string;
-  progresso?: number;
-};
-
-const ROTULO_NIVEL: Record<string, string> = {
-  READ: "Leitura",
-  READ_WRITE: "Leitura e edição",
-  FULL: "Acesso completo"
-};
-
-const INDICADORES_DEMONSTRACAO: Record<string, Indicador> = {
-  clientes: { rotulo: "Clientes ativos", valor: "1.243", apoio: "+12%", progresso: 76 },
-  obras: { rotulo: "Em andamento", valor: "18", apoio: "12 em execução", progresso: 64 },
-  planejamento: { rotulo: "Cronogramas ativos", valor: "27", apoio: "4 exigem decisão", progresso: 58 },
-  tarefas: { rotulo: "Em aberto", valor: "142", apoio: "18 atrasadas", progresso: 72 },
-  diario: { rotulo: "Último registro", valor: "28/07/2026", apoio: "Obra Residencial Vereda", progresso: 82 },
-  equipes: { rotulo: "Pessoas alocadas", valor: "236", apoio: "12 equipes", progresso: 69 },
-  orcamentos: { rotulo: "Em análise", valor: "14", apoio: "R$ 3,8 mi", progresso: 61 },
-  propostas: { rotulo: "Enviadas", valor: "23", apoio: "7 aguardando retorno", progresso: 54 },
-  contratos: { rotulo: "Vigentes", valor: "31", apoio: "3 renovações próximas", progresso: 73 },
-  documentos: { rotulo: "Arquivos", valor: "8.742", apoio: "64% de 15 GB", progresso: 64 },
-  qualidade: { rotulo: "Não conformidades", valor: "9", apoio: "2 críticas", progresso: 32 },
-  financeiro: { rotulo: "Conciliação", valor: "94%", apoio: "7 pendências", progresso: 94 },
-  compras: { rotulo: "Pedidos abertos", valor: "38", apoio: "6 críticos", progresso: 66 },
-  estoque: { rotulo: "Itens monitorados", valor: "2.418", apoio: "11 abaixo do mínimo", progresso: 78 },
-  sac: { rotulo: "Chamados abertos", valor: "17", apoio: "3 vencendo hoje", progresso: 48 },
-  relatorios: { rotulo: "Painéis salvos", valor: "12", apoio: "Atualizados hoje", progresso: 85 },
-  auditoria: { rotulo: "Eventos hoje", valor: "286", apoio: "Sem bloqueios", progresso: 91 },
-  administracao: { rotulo: "Usuários ativos", valor: "84", apoio: "16 perfis", progresso: 80 }
-};
-
 const TODAS = "__todas__";
 
 function normalizar(texto: string): string {
@@ -58,18 +25,50 @@ function normalizar(texto: string): string {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
+function resumoDe(chave: string, resumos: LauncherSummaryMap): LauncherSummary {
+  return resumos[chave] ?? {
+    label: "Acesso ao aplicativo",
+    value: "Ativo",
+    support: "Indicadores serão consolidados neste módulo",
+    progress: null,
+    available: false
+  };
+}
+
 export function Launcher({
   aplicativos,
-  demonstracao = false
+  resumos
 }: {
   aplicativos: AplicativoAutorizado[];
-  demonstracao?: boolean;
+  resumos: LauncherSummaryMap;
 }) {
   const busca = useBusca();
   const [categoria, setCategoria] = useState(TODAS);
   const [personalizando, setPersonalizando] = useState(false);
   const [mostrarIndicadores, setMostrarIndicadores] = useState(true);
   const [compacto, setCompacto] = useState(false);
+  const personalizacaoRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!personalizando) return;
+
+    function fecharAoClicarFora(evento: MouseEvent | TouchEvent) {
+      if (!personalizacaoRef.current?.contains(evento.target as Node)) setPersonalizando(false);
+    }
+
+    function fecharComEscape(evento: KeyboardEvent) {
+      if (evento.key === "Escape") setPersonalizando(false);
+    }
+
+    document.addEventListener("mousedown", fecharAoClicarFora);
+    document.addEventListener("touchstart", fecharAoClicarFora, { passive: true });
+    document.addEventListener("keydown", fecharComEscape);
+    return () => {
+      document.removeEventListener("mousedown", fecharAoClicarFora);
+      document.removeEventListener("touchstart", fecharAoClicarFora);
+      document.removeEventListener("keydown", fecharComEscape);
+    };
+  }, [personalizando]);
 
   const categorias = useMemo(() => {
     const contagem = new Map<string, number>();
@@ -82,9 +81,11 @@ export function Launcher({
     return aplicativos.filter(app => {
       if (categoria !== TODAS && app.categoria !== categoria) return false;
       if (!termo) return true;
-      return [app.nome, app.descricao, app.categoria].some(campo => normalizar(campo).includes(termo));
+      const resumo = resumoDe(app.chave, resumos);
+      return [app.nome, app.descricao, app.categoria, resumo.label, resumo.value, resumo.support ?? ""]
+        .some(campo => normalizar(campo).includes(termo));
     });
-  }, [aplicativos, busca, categoria]);
+  }, [aplicativos, busca, categoria, resumos]);
 
   const destaque = encontrados.find(app => app.chave === "crm") ?? null;
   const demais = destaque ? encontrados.filter(app => app.chave !== destaque.chave) : encontrados;
@@ -92,7 +93,10 @@ export function Launcher({
   return (
     <section className={compacto ? "launcher compacto" : "launcher"} aria-labelledby="launcher-titulo">
       <header className="launcher-faixa">
-        <h1 id="launcher-titulo">Aplicativos</h1>
+        <div className="launcher-titulo-grupo">
+          <h1 id="launcher-titulo">Aplicativos</h1>
+          <span>{encontrados.length} disponível(is)</span>
+        </div>
 
         {categorias.length > 1 ? (
           <div className="launcher-filtros" role="group" aria-label="Filtrar por categoria">
@@ -118,18 +122,19 @@ export function Launcher({
           </div>
         ) : null}
 
-        <div className="launcher-personalizacao">
+        <div className="launcher-personalizacao" ref={personalizacaoRef}>
           <button
             type="button"
             className="launcher-personalizar"
             aria-expanded={personalizando}
+            aria-controls="launcher-personalizar-painel"
             onClick={() => setPersonalizando(valor => !valor)}
           >
             <SlidersHorizontal size={17} weight="regular" aria-hidden="true" />
             Personalizar
           </button>
           {personalizando ? (
-            <div className="launcher-personalizar-painel" role="dialog" aria-label="Personalizar aplicativos">
+            <div id="launcher-personalizar-painel" className="launcher-personalizar-painel" role="dialog" aria-label="Personalizar aplicativos">
               <label>
                 <input
                   type="checkbox"
@@ -159,13 +164,15 @@ export function Launcher({
         </p>
       ) : (
         <div className={destaque ? "launcher-paineis com-destaque" : "launcher-paineis"}>
-          {destaque ? <AplicativoDestaque aplicativo={destaque} /> : null}
+          {destaque ? (
+            <AplicativoDestaque aplicativo={destaque} resumo={resumoDe(destaque.chave, resumos)} mostrarIndicadores={mostrarIndicadores} />
+          ) : null}
           <ul className="launcher-grade">
             {demais.map(app => (
               <li key={app.chave}>
                 <AplicativoCard
                   aplicativo={app}
-                  indicador={demonstracao ? INDICADORES_DEMONSTRACAO[app.chave] : undefined}
+                  resumo={resumoDe(app.chave, resumos)}
                   mostrarIndicadores={mostrarIndicadores}
                 />
               </li>
@@ -177,7 +184,15 @@ export function Launcher({
   );
 }
 
-function AplicativoDestaque({ aplicativo }: { aplicativo: AplicativoAutorizado }) {
+function AplicativoDestaque({
+  aplicativo,
+  resumo,
+  mostrarIndicadores
+}: {
+  aplicativo: AplicativoAutorizado;
+  resumo: LauncherSummary;
+  mostrarIndicadores: boolean;
+}) {
   const cor = corDoModulo(aplicativo.chave);
   return (
     <article className="launcher-destaque" style={{ ["--cor-app" as string]: cor }}>
@@ -194,17 +209,39 @@ function AplicativoDestaque({ aplicativo }: { aplicativo: AplicativoAutorizado }
         <ArrowRight size={18} weight="regular" aria-hidden="true" />
       </Link>
 
-      <div className="launcher-recentes">
-        <strong>Recentes</strong>
-        <Link href={aplicativo.href}>
-          <span><b>OP-2026-1147</b><small>Oportunidade · Construtora Alfa</small></span>
-          <span><b>R$ 2,4 mi</b><small>Hoje</small></span>
-        </Link>
-        <Link href={aplicativo.href}>
-          <span><b>OP-2026-1132</b><small>Negociação · Residencial Vereda</small></span>
-          <span><b>R$ 980 mil</b><small>Ontem</small></span>
-        </Link>
-      </div>
+      {mostrarIndicadores ? (
+        <div className="launcher-destaque-resumo" data-available={resumo.available}>
+          <span>
+            <small>{resumo.label}</small>
+            <strong>{resumo.value}</strong>
+            {resumo.support ? <em>{resumo.support}</em> : null}
+          </span>
+          {resumo.secondaryLabel ? (
+            <span>
+              <small>{resumo.secondaryLabel}</small>
+              <strong>{resumo.secondaryValue ?? "—"}</strong>
+            </span>
+          ) : null}
+          <MiniGrafico progress={resumo.progress} />
+        </div>
+      ) : null}
+
+      {resumo.recent?.length ? (
+        <div className="launcher-recentes">
+          <strong>Recentes</strong>
+          {resumo.recent.map(item => (
+            <Link href={item.href} key={item.id}>
+              <span><b>{item.title}</b><small>{item.subtitle}</small></span>
+              <span><b>{item.meta ?? ""}</b><small>Abrir</small></span>
+            </Link>
+          ))}
+        </div>
+      ) : (
+        <div className="launcher-recentes launcher-recentes-vazio">
+          <strong>Recentes</strong>
+          <p>Nenhum registro recente confirmado.</p>
+        </div>
+      )}
 
       <Link href={aplicativo.href} className="launcher-ver-todas">
         Ver todas no aplicativo
@@ -216,11 +253,11 @@ function AplicativoDestaque({ aplicativo }: { aplicativo: AplicativoAutorizado }
 
 function AplicativoCard({
   aplicativo,
-  indicador,
+  resumo,
   mostrarIndicadores
 }: {
   aplicativo: AplicativoAutorizado;
-  indicador?: Indicador;
+  resumo: LauncherSummary;
   mostrarIndicadores: boolean;
 }) {
   const cor = corDoModulo(aplicativo.chave);
@@ -241,15 +278,32 @@ function AplicativoCard({
       <p>{aplicativo.descricao}</p>
 
       {mostrarIndicadores ? (
-        <span className="launcher-indicador">
-          <small>{indicador?.rotulo ?? "Permissão no módulo"}</small>
-          <b>{indicador?.valor ?? ROTULO_NIVEL[aplicativo.nivel] ?? aplicativo.nivel}</b>
-          {indicador?.apoio ? <em>{indicador.apoio}</em> : null}
-          {indicador?.progresso !== undefined ? (
-            <progress max={100} value={indicador.progresso} aria-label={`${indicador.rotulo}: ${indicador.valor}`} />
+        <span className="launcher-indicador" data-available={resumo.available}>
+          <small>{resumo.label}</small>
+          <b>{resumo.value}</b>
+          {resumo.support ? <em>{resumo.support}</em> : null}
+          {resumo.secondaryLabel ? (
+            <span className="launcher-indicador-secundario">
+              <small>{resumo.secondaryLabel}</small>
+              <strong>{resumo.secondaryValue ?? "—"}</strong>
+            </span>
           ) : null}
+          <MiniGrafico progress={resumo.progress} />
         </span>
       ) : null}
     </Link>
+  );
+}
+
+function MiniGrafico({ progress }: { progress?: number | null }) {
+  const normalized = progress == null ? null : Math.max(0, Math.min(100, progress));
+  const bars = normalized == null
+    ? [24, 38, 31, 46, 35, 42, 30, 48]
+    : [0.46, 0.64, 0.52, 0.78, 0.61, 0.86, 0.72, 1].map(factor => Math.max(12, Math.round(normalized * factor)));
+
+  return (
+    <span className="launcher-mini-grafico" aria-hidden="true" data-empty={normalized == null}>
+      {bars.map((height, index) => <i key={index} style={{ height: `${height}%` }} />)}
+    </span>
   );
 }
