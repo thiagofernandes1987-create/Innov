@@ -114,16 +114,52 @@ function desescapar(bruto: string): string {
   });
 }
 
-/** As strings literais de um fluxo de conteúdo, na ordem do fluxo. */
+/**
+ * As strings de um fluxo de conteúdo, na ordem do fluxo.
+ *
+ * **Só literais que são operando de operador de exibição de texto** — `Tj`,
+ * `TJ`, `'` e `"`. Extrair todo literal `(…)` do fluxo parece equivalente e
+ * não é: um fluxo de **imagem** em ASCII85 contém, por acaso, bytes que
+ * formam parênteses e a sequência `Tj`, e o leitor devolvia esse ruído
+ * misturado ao texto. Medido no `composicao_cub_julho_26.pdf`: 730 pedaços e
+ * 24.924 caracteres, contra os ~3.000 de texto que o arquivo realmente tem.
+ *
+ * Ancorar no operador é o que separa "isto é texto" de "isto tem a forma de
+ * texto". O ruído passava despercebido porque o texto verdadeiro vinha junto e
+ * as buscas por âncora continuavam achando o que procuravam — que é o pior
+ * jeito de um defeito existir.
+ */
 function textoDoFluxo(conteudo: string): string[] {
-  if (!/\bTj\b|\bTJ\b/.test(conteudo)) return [];
+  // Operador de texto só é válido dentro de um objeto de texto (`BT … ET`).
+  // Exigir isso é o segundo filtro contra fluxo de imagem: além de o literal
+  // precisar ser operando de `Tj`, o fluxo inteiro precisa ter a forma de um
+  // fluxo de conteúdo.
+  if (!/\bBT\b/.test(conteudo)) return [];
+
   const pedacos: string[] = [];
-  // Literal de PDF: parênteses balanceados, com `\(` e `\)` escapados.
-  const literais = conteudo.match(/\((?:\\.|[^()\\])*\)/g) ?? [];
-  for (const literal of literais) {
-    const texto = desescapar(literal.slice(1, -1));
-    if (texto) pedacos.push(texto);
+  const literal = "\\((?:\\\\.|[^()\\\\])*\\)";
+  // `(…) Tj` e as duas formas de próxima-linha, `(…) '` e `(…) "`.
+  const simples = new RegExp(`(${literal})\\s*(?:Tj|'|")`, "g");
+  // `[ (…) -250 (…) ] TJ` — o vetor mistura literais e ajustes de espaçamento.
+  const vetor = new RegExp(`\\[((?:${literal}|[^\\[\\]])*)\\]\\s*TJ`, "g");
+
+  type Achado = { posicao: number; texto: string };
+  const achados: Achado[] = [];
+
+  for (const marca of conteudo.matchAll(simples)) {
+    const texto = desescapar(marca[1].slice(1, -1));
+    if (texto) achados.push({ posicao: marca.index ?? 0, texto });
   }
+  for (const marca of conteudo.matchAll(vetor)) {
+    const partes = marca[1].match(new RegExp(literal, "g")) ?? [];
+    const texto = desescapar(partes.map(parte => parte.slice(1, -1)).join(""));
+    if (texto) achados.push({ posicao: marca.index ?? 0, texto });
+  }
+
+  // A ordem do fluxo é a única ordem que existe; as duas varreduras precisam
+  // ser reintercaladas pela posição.
+  achados.sort((a, b) => a.posicao - b.posicao);
+  for (const achado of achados) pedacos.push(achado.texto);
   return pedacos;
 }
 
@@ -174,7 +210,13 @@ export function lerTextoDoPdf(arquivo: Buffer, limites: LimitesDePdf = LIMITES_P
   let fluxosLidos = 0;
   let fluxosAbertos = 0;
 
-  const inicio = /stream\r?\n/g;
+  // `(?<![A-Za-z])` porque **`endstream` contém `stream`**: sem a guarda, cada
+  // fluxo é encontrado duas vezes — uma no início de verdade e outra no
+  // `endstream` que o fecha, cujo "conteúdo" varre até o próximo `endstream` e
+  // devolve o fluxo seguinte de novo. O sintoma é texto duplicado, que numa
+  // tabela de custo vira tipologia repetida com o mesmo valor: parece dado, não
+  // parece defeito.
+  const inicio = /(?<![A-Za-z])stream\r?\n/g;
   let marca: RegExpExecArray | null;
   while ((marca = inicio.exec(bruto)) !== null) {
     if (fluxosAbertos >= limites.fluxos) break;
@@ -187,16 +229,18 @@ export function lerTextoDoPdf(arquivo: Buffer, limites: LimitesDePdf = LIMITES_P
     const conteudoBruto = bruto.slice(abre, fecha);
     const candidatos: string[] = [];
 
-    // 1. Cru. 2. Só Flate. 3. ASCII85 e depois Flate. 4. Só ASCII85.
-    candidatos.push(conteudoBruto);
-    const soFlate = descomprimir(Buffer.from(conteudoBruto, "latin1"), limites);
-    if (soFlate) candidatos.push(soFlate.toString("latin1"));
+    // Decodificado primeiro, cru por último. Um fluxo ainda codificado que
+    // "parece" ter texto quase sempre é coincidência de bytes; o decodificado,
+    // quando existe, é a leitura correta do mesmo fluxo.
     const ascii85 = decodificarAscii85(conteudoBruto);
     if (ascii85.length) {
-      candidatos.push(ascii85.toString("latin1"));
       const encadeado = descomprimir(ascii85, limites);
       if (encadeado) candidatos.push(encadeado.toString("latin1"));
+      candidatos.push(ascii85.toString("latin1"));
     }
+    const soFlate = descomprimir(Buffer.from(conteudoBruto, "latin1"), limites);
+    if (soFlate) candidatos.push(soFlate.toString("latin1"));
+    candidatos.push(conteudoBruto);
 
     for (const candidato of candidatos) {
       const achados = textoDoFluxo(candidato);

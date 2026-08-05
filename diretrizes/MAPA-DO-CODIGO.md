@@ -34,7 +34,7 @@ a ignorar.
 | Módulos de `lib/` | 95 |
 | Funções do banco declaradas | 233 |
 | Funções do banco chamadas do código | 117 |
-| Suítes de teste | 57, com 648 casos |
+| Suítes de teste | 57, com 651 casos |
 | Migrations | 164 |
 | Validadores de CI | 28 |
 | Módulos de `lib/` citados por algum teste | 55 de 95 |
@@ -963,7 +963,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/personas-db-contract.test.ts` | 4 | contrato de personas no banco |
 | `tests/pipeline-datas.test.ts` | 13 | catálogo de códigos; situacaoDoPrazo |
 | `tests/pipeline-domain.test.ts` | 17 | montarColunas; prazoPrincipal; ordenarPorUrgencia; ordenarCodigos |
-| `tests/planilhas-pdf-texto.test.ts` | 14 | ASCII85 do PDF; texto de dentro do PDF; o que o leitor recusa |
+| `tests/planilhas-pdf-texto.test.ts` | 17 | ASCII85 do PDF; texto de dentro do PDF; o que o leitor recusa |
 | `tests/project-creation-contract.test.ts` | 6 | criação segura de projetos |
 | `tests/qa-contraste.test.ts` | 19 | aritmética de cor; v4 — notação color(srgb …) lida como preto; opacidade nas três notações; mínimo exigido — 3:1 só para texto grande |
 | `tests/relatorio-perdas.test.ts` | 20 | Pareto ordena por valor, não por contagem; fatia e acumulado; casos que quebrariam a divisão; perda sem motivo entra na conta |

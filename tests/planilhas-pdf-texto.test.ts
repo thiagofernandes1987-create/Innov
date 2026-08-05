@@ -104,6 +104,43 @@ describe("texto de dentro do PDF", () => {
     expect(lido.pedacos).toEqual(["Materiais", "1.158,95", "Total", "2.548,75"]);
   });
 
+  it("junta o vetor do TJ e o intercala com os Tj pela posição", () => {
+    // `TJ` recebe um vetor que mistura literais e ajustes de espaçamento; os
+    // ajustes não são texto, e as partes são pedaços da mesma palavra.
+    const lido = lerTextoDoPdf(pdfCom("BT (Item) Tj [(R8) -250 (-N)] TJ (2.548,75) Tj ET"));
+    expect(lido.pedacos).toEqual(["Item", "R8-N", "2.548,75"]);
+  });
+
+  it("só entra literal que é operando de operador de texto", () => {
+    // **A regressão que motivou esta guarda.** Extrair todo `(…)` do fluxo
+    // parece equivalente e não é: um fluxo de imagem em ASCII85 contém, por
+    // acaso, bytes que formam parênteses e a sequência `Tj`. Medido no
+    // `composicao_cub_julho_26.pdf` antes da correção: 730 pedaços e 24.924
+    // caracteres, contra 218 e 1.849 depois — o resto era ruído binário
+    // devolvido como se fosse texto da publicação.
+    //
+    // Passava despercebido porque o texto verdadeiro vinha junto e as buscas
+    // por âncora continuavam achando o que procuravam.
+    const lido = lerTextoDoPdf(
+      pdfCom("BT (texto de verdade) Tj ET (isto e um vetor de cor) 0 0 1 rg (nome de recurso) /Im0")
+    );
+    expect(lido.pedacos).toEqual(["texto de verdade"]);
+  });
+
+  it("fluxo sem objeto de texto não contribui, mesmo tendo parênteses e Tj soltos", () => {
+    const comImagem = Buffer.concat([
+      Buffer.from("%PDF-1.7\n1 0 obj\nstream\n", "latin1"),
+      // Bytes que imitam a forma sem ser um fluxo de conteúdo.
+      Buffer.from("(\\377\\330\\377) Tj (\\001\\002) Tj", "latin1"),
+      Buffer.from("\nendstream\n2 0 obj\nstream\n", "latin1"),
+      Buffer.from(FLUXO, "latin1"),
+      Buffer.from("\nendstream\n%%EOF\n", "latin1")
+    ]);
+    const lido = lerTextoDoPdf(comImagem);
+    expect(lido.pedacos).toEqual(["R8-N", "2.548,75"]);
+    expect(lido.fluxosLidos).toBe(1);
+  });
+
   it("pula fluxo que não abre em vez de abortar", () => {
     // Um PDF tem fluxos de imagem e de metadado que nada têm a ver com o texto.
     const misturado = Buffer.concat([
