@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MODULE_BY_KEY } from "../lib/modules/registry";
-import { PERSONAS_OPERACIONAIS } from "../lib/personas/catalog";
+import { PERSONAS_OPERACIONAIS } from "../lib/personas/runtime";
 import {
   executarCenariosDasPersonas,
   ROTINAS_OPERACIONAIS

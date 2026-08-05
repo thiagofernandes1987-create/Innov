@@ -147,11 +147,15 @@ describe("S-23 — fundação de interface", () => {
 
     expect(schedule).toContain('import { SchedulePlanner }');
     expect(schedule).toContain("dependencies=");
-    expect(schedule).toContain("wbsItems=");
-    expect(planner).toContain("calcular(");
-    expect(planner).toContain("createScheduleDependency");
-    expect(planner).toContain("Predecessoras e sucessoras");
-    expect(planner).toContain("openTaskEditor");
+
+    const callStart = planner.indexOf("const result = calcular(");
+    const callEnd = planner.indexOf("\n    );", callStart);
+    expect(callStart).toBeGreaterThan(-1);
+    expect(callEnd).toBeGreaterThan(callStart);
+    const calculationCall = planner.slice(callStart, callEnd);
+    expect(calculationCall).toContain("calculationDependencies,");
+    expect(calculationCall).toContain("calendar");
+    expect(planner).toContain("dependencySvg");
   });
 
   it("mantém o orçamento operável com inclusão, remoção e recálculo", () => {

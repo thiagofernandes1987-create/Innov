@@ -152,6 +152,13 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
     { rotulo: "Chamados", href: "/app/ocorrencias" },
     { rotulo: "Pipeline", href: "/app/pipeline/assistencia" },
     { rotulo: "Novo chamado", href: "/app/ocorrencias/novo" }
+  ],
+  whatsapp: [
+    { rotulo: "Caixa de entrada", href: "/app/whatsapp" },
+    { rotulo: "Clientes", href: "/app/clientes" },
+    { rotulo: "CRM", href: "/app/crm" },
+    { rotulo: "SAC", href: "/app/ocorrencias" },
+    { rotulo: "Documentos", href: "/app/documentos" }
   ]
 };
 

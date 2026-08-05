@@ -44,6 +44,7 @@
     "validate:stage18": "node scripts/validate-stage18.mjs",
     "validate:stage19": "node scripts/validate-stage19.mjs",
     "validate:stage20": "node scripts/validate-stage20.mjs",
+    "validate:stage22": "node scripts/validate-stage22.mjs",
     "worker:signature-conversion": "node scripts/run-signature-conversion-worker.mjs",
     "worker:signature-delivery": "node scripts/run-signature-delivery-worker.mjs",
     "provision:homologation": "node scripts/provision-homologation-users.mjs",

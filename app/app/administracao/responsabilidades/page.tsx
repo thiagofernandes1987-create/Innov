@@ -5,7 +5,7 @@ import {
 import Link from "next/link";
 import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
 import { requireAccessAdministration } from "@/lib/authorization";
-import { PERSONAS_OPERACIONAIS } from "@/lib/personas/catalog";
+import { PERSONAS_OPERACIONAIS } from "@/lib/personas/runtime";
 
 export default async function OperationalResponsibilitiesPage({
   searchParams

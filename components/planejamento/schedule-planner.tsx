@@ -400,6 +400,11 @@ export function SchedulePlanner({
     scrollToToday();
   }, [scrollToToday]);
 
+  function openTaskEditor(taskId: string): void {
+    setEditorTab("general");
+    setEditorTaskId(taskId);
+  }
+
   function toggleWbs(id: string): void {
     setCollapsed(current => {
       const next = new Set(current);
@@ -537,13 +542,7 @@ export function SchedulePlanner({
                   <div className={styles.cell}>
                     <span className={styles.treeIndent} style={{ "--depth": row.depth } as CSSProperties} />
                     <span className={styles.taskDot} />
-                    <button
-                      className={styles.nameButton}
-                      type="button"
-                      onClick={() => openTaskEditor(row.task.id)}
-                      title={`${row.task.code} · ${row.task.title}`}
-                      aria-label={`Abrir atividade ${row.task.code} · ${row.task.title}`}
-                    >
+                    <button className={styles.nameButton} type="button" onClick={() => openTaskEditor(row.task.id)} title="Abrir informações da atividade">
                       {row.task.title}
                     </button>
                   </div>
@@ -634,12 +633,7 @@ export function SchedulePlanner({
                             bar.derivada ? styles.derived : ""
                           ].filter(Boolean).join(" ")}
                           type="button"
-                          style={{
-                            left: (start - range.start) * dayWidth - hitOffset,
-                            width: hitWidth,
-                            "--bar-offset": `${hitOffset}px`,
-                            "--bar-visual-width": `${visualWidth}px`
-                          } as CSSProperties}
+                          style={{ left: (start - range.start) * dayWidth, width: (end - start + 1) * dayWidth }}
                           onClick={() => openTaskEditor(row.task.id)}
                           title={`${row.task.code} · ${row.task.title}: ${formatShortDate(bar.inicio)} a ${formatShortDate(bar.termino)}`}
                         >

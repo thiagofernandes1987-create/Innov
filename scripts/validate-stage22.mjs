@@ -1,0 +1,260 @@
+import fs from "node:fs";
+import path from "node:path";
+
+const root = process.cwd();
+const schemaMigration =
+  "supabase/migrations/20260803190000_stage22_whatsapp_omnichannel.sql";
+const hardeningMigration =
+  "supabase/migrations/20260803191000_stage22_whatsapp_hardening.sql";
+const statusGuardMigration =
+  "supabase/migrations/20260803192000_stage22_whatsapp_status_guard.sql";
+const analysisDocument =
+  "docs/ANALISE-REFERENCIAS-WHATSAPP-OPEN-SOURCE-2026-08-03.md";
+const requiredFiles = [
+  schemaMigration,
+  hardeningMigration,
+  statusGuardMigration,
+  "lib/whatsapp/domain.ts",
+  "lib/whatsapp/client.ts",
+  "lib/whatsapp/source-resolver.ts",
+  "lib/whatsapp/server.ts",
+  "lib/personas/runtime.ts",
+  "lib/operations/routines.ts",
+  "lib/casca/menus.ts",
+  "app/actions/whatsapp.ts",
+  "app/api/webhooks/whatsapp/route.ts",
+  "app/app/whatsapp/page.tsx",
+  "tests/whatsapp-domain.test.ts",
+  "tests/personas-catalog.test.ts",
+  "tests/operational-routines.test.ts",
+  "docs/ETAPA-22-WHATSAPP-OMNICHANNEL.md",
+  analysisDocument
+];
+
+const failures = [];
+for (const file of requiredFiles) {
+  if (!fs.existsSync(path.join(root, file))) failures.push(`Arquivo ausente: ${file}`);
+}
+
+function read(file) {
+  const full = path.join(root, file);
+  return fs.existsSync(full) ? fs.readFileSync(full, "utf8") : "";
+}
+
+const migration = read(schemaMigration);
+const hardening = read(hardeningMigration);
+const statusGuard = read(statusGuardMigration);
+const analysis = read(analysisDocument);
+const registry = read("lib/modules/registry.ts");
+const menus = read("lib/casca/menus.ts");
+const personas = read("lib/personas/runtime.ts");
+const routines = read("lib/operations/routines.ts");
+const webhook = read("app/api/webhooks/whatsapp/route.ts");
+const resolver = read("lib/whatsapp/source-resolver.ts");
+const client = read("lib/whatsapp/client.ts");
+const domain = read("lib/whatsapp/domain.ts");
+const tests = read("tests/whatsapp-domain.test.ts");
+const personaTests = read("tests/personas-catalog.test.ts");
+const routineTests = read("tests/operational-routines.test.ts");
+const actions = read("app/actions/whatsapp.ts");
+const env = read(".env.example");
+const page = read("app/app/whatsapp/page.tsx");
+
+for (const relation of [
+  "whatsapp_accounts",
+  "whatsapp_contacts",
+  "whatsapp_conversations",
+  "whatsapp_content_bindings",
+  "whatsapp_messages",
+  "whatsapp_message_status_events",
+  "whatsapp_webhook_events"
+]) {
+  if (!migration.includes(`public.${relation}`)) {
+    failures.push(`Relação ausente: ${relation}`);
+  }
+}
+
+for (const token of [
+  "enable row level security",
+  "queue_whatsapp_outbound_message",
+  "complete_whatsapp_outbound_message",
+  "has_module_permission",
+  "revoke insert,update,delete",
+  "'whatsapp'",
+  "app_module_dependencies",
+  "install_whatsapp_defaults",
+  "source_type",
+  "source_snapshot",
+  "payload_sha256"
+]) {
+  if (!migration.toLowerCase().includes(token.toLowerCase())) {
+    failures.push(`Controle de banco ausente: ${token}`);
+  }
+}
+
+for (const token of [
+  "whatsapp_accounts_created_by_idx",
+  "whatsapp_conversations_created_by_idx",
+  "whatsapp_content_bindings_created_by_idx",
+  "whatsapp_messages_org_idx",
+  "whatsapp_messages_created_by_idx",
+  "whatsapp_webhook_events_account_idx",
+  "revoke delete on public.whatsapp_accounts",
+  "revoke delete on public.whatsapp_contacts",
+  "revoke delete on public.whatsapp_conversations",
+  "revoke delete on public.whatsapp_content_bindings",
+  "default_enabled=true"
+]) {
+  if (!hardening.toLowerCase().includes(token.toLowerCase())) {
+    failures.push(`Hardening ausente: ${token}`);
+  }
+}
+
+for (const token of [
+  "guard_whatsapp_message_delivery_status",
+  "whatsapp_messages_guard_delivery_status",
+  "old.status='FAILED'",
+  "new.status='FAILED' and old.status not in ('QUEUED','SENT')"
+]) {
+  if (!statusGuard.includes(token)) failures.push(`Máquina de estados ausente: ${token}`);
+}
+
+for (const token of [
+  "canAdvanceWhatsAppDeliveryStatus",
+  "DELIVERY_LADDER",
+  "currentStatus === \"FAILED\""
+]) {
+  if (!domain.includes(token)) failures.push(`Domínio sem proteção de status: ${token}`);
+}
+for (const token of [
+  "impede regressão e falha tardia",
+  'canAdvanceWhatsAppDeliveryStatus("READ", "DELIVERED")',
+  'canAdvanceWhatsAppDeliveryStatus("DELIVERED", "FAILED")'
+]) {
+  if (!tests.includes(token)) failures.push(`Teste de status ausente: ${token}`);
+}
+
+for (const token of [
+  "wacrm",
+  "Evolution API",
+  "WhatsControl",
+  "whatsapp-web.js",
+  "META_CLOUD_DIRECT",
+  "Não adicionar `whatsapp-web.js`"
+]) {
+  if (!analysis.includes(token)) failures.push(`Análise de referência sem decisão: ${token}`);
+}
+
+if (!registry.includes('key:"whatsapp"') && !registry.includes('key: "whatsapp"')) {
+  failures.push("Módulo WhatsApp ausente do registry.");
+}
+if (!registry.includes('routePrefix:"/app/whatsapp"') &&
+    !registry.includes('routePrefix: "/app/whatsapp"')) {
+  failures.push("Rota do WhatsApp ausente do registry.");
+}
+
+for (const token of [
+  "whatsapp: [",
+  'rotulo: "Caixa de entrada", href: "/app/whatsapp"',
+  'rotulo: "Clientes", href: "/app/clientes"',
+  'rotulo: "SAC", href: "/app/ocorrencias"'
+]) {
+  if (!menus.includes(token)) failures.push(`Navegação interna ausente: ${token}`);
+}
+
+for (const token of [
+  'P1: ["whatsapp"]',
+  'P5: ["whatsapp"]',
+  "MODULOS_ADICIONAIS_POR_PERSONA"
+]) {
+  if (!personas.includes(token)) failures.push(`Cobertura de persona ausente: ${token}`);
+}
+if (!routines.includes('whatsapp: "ticket"')) {
+  failures.push("Rotina operacional do WhatsApp não está vinculada ao atendimento.");
+}
+if (!personaTests.includes('../lib/personas/runtime') ||
+    !routineTests.includes('../lib/personas/runtime')) {
+  failures.push("Testes de personas/rotinas não usam o catálogo operacional efetivo.");
+}
+
+for (const token of [
+  "x-hub-signature-256",
+  "verifyMetaWebhookSignature",
+  "whatsapp_business_account",
+  "payload_sha256"
+]) {
+  if (!webhook.includes(token)) failures.push(`Webhook sem controle: ${token}`);
+}
+
+for (const token of [
+  "CONTRACT_TEMPLATE",
+  "PROPOSAL_VERSION",
+  "CONTRACT_VERSION",
+  "AMENDMENT_VERSION",
+  "PROJECT_DOCUMENT_VERSION",
+  "project-documents",
+  "contract-documents",
+  "commercial-documents"
+]) {
+  if (!resolver.includes(token)) failures.push(`Resolvedor sem fonte: ${token}`);
+}
+
+if (resolver.includes("body_text") || migration.includes("body_text")) {
+  failures.push("Mensagem padrão duplicada em campo body_text.");
+}
+if (!page.includes("modelos e documentos existentes")) {
+  failures.push("Interface não declara a fonte canônica.");
+}
+if (!actions.includes("sourceSnapshot") || !actions.includes("source_binding_id")) {
+  failures.push("Envio não preserva a proveniência.");
+}
+if (!actions.includes("isSupportWindowOpen") ||
+    !migration.includes("interval '24 hours'")) {
+  failures.push("Janela de atendimento sem dupla validação.");
+}
+if (!client.includes("WHATSAPP_GRAPH_API_VERSION") ||
+    client.includes("v23.0") || client.includes("v24.0")) {
+  failures.push("Versão da Graph API precisa ser configurável e não fixada.");
+}
+for (const token of [
+  "verifyWhatsAppPhoneNumber",
+  "registerWhatsAppPhoneNumber",
+  "subscribeWhatsAppBusinessAccount"
+]) {
+  if (!client.includes(token)) failures.push(`Provisionamento oficial ausente: ${token}`);
+}
+
+for (const variable of [
+  "WHATSAPP_GRAPH_API_VERSION",
+  "WHATSAPP_ACCESS_TOKEN",
+  "WHATSAPP_APP_SECRET",
+  "WHATSAPP_WEBHOOK_VERIFY_TOKEN"
+]) {
+  if (!env.includes(variable)) failures.push(`Variável ausente: ${variable}`);
+}
+
+if (failures.length) {
+  console.error(failures.join("\n"));
+  process.exit(1);
+}
+
+console.log(
+  JSON.stringify(
+    {
+      ok: true,
+      stage: 22,
+      files: requiredFiles.length,
+      canonicalSources: 5,
+      relations: 7,
+      webhookSignature: "HMAC_SHA256",
+      freeFormWindowHours: 24,
+      directHistoryDeletion: false,
+      monotonicDeliveryStatuses: true,
+      officialPhoneProvisioning: true,
+      operationalPersonas: ["P1", "P5"],
+      unofficialWebSessionProvider: false
+    },
+    null,
+    2
+  )
+);
