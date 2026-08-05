@@ -32,10 +32,10 @@ a ignorar.
 | Rotas | 159 (141 páginas, 18 de API) |
 | Server actions | 182 em 31 arquivos |
 | Módulos de `lib/` | 93 |
-| Funções do banco declaradas | 229 |
+| Funções do banco declaradas | 233 |
 | Funções do banco chamadas do código | 116 |
 | Suítes de teste | 55, com 623 casos |
-| Migrations | 163 |
+| Migrations | 164 |
 | Validadores de CI | 28 |
 | Módulos de `lib/` citados por algum teste | 53 de 93 |
 
@@ -751,6 +751,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `finalize_procurement_receipt` | `supabase/migrations/20260729000500_typed_enum_state_transitions.sql` | `app/actions/procurement.ts` |
 | `finance_create_installments` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | — (só por SQL ou trigger) |
 | `finish_sinapi_import` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
+| `fonte_de_custo_oficial` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
 | `freeze_advanced_signature_layout` | `supabase/migrations/20260720054200_stage12_2_document_layout_workflow.sql` | `app/actions/advanced-signatures.ts` |
 | `freeze_budget_version` | `supabase/migrations/20260729010000_budget_readiness_and_cost_sources.sql` | `app/actions/budgets.ts` |
 | `freeze_quality_form_version` | `supabase/migrations/20260720080150_stage13_quality_forms_hardening.sql` | — (só por SQL ou trigger) |
@@ -769,7 +770,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `get_report_dashboard` | `supabase/migrations/20260720143100_stage16_reports_security.sql` | `app/api/relatorios/exportar/route.ts`, `app/app/relatorios/page.tsx`, `lib/reports/server.ts` |
 | `get_sac_dashboard` | `supabase/migrations/20260721013941_stage18_relationship_queries.sql` | `lib/relationship/server.ts` |
 | `get_sac_ticket_detail` | `supabase/migrations/20260722104500_stage20_sac_attachment_security.sql` | `lib/relationship/server.ts` |
-| `guard_official_cost_reference` | `supabase/migrations/20260804060000_referencia_oficial_nao_muda_de_dono.sql` | — (só por SQL ou trigger) |
+| `guard_official_cost_reference` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
 | `has_org_role` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |
 | `import_procurement_receipt_to_inventory` | `supabase/migrations/20260729001500_inventory_receipt_line_order.sql` | `app/actions/inventory.ts` |
 | `import_sinapi_compositions_chunk` | `supabase/migrations/20260804040000_composicao_registra_custo_ausente.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
@@ -858,6 +859,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `register_procurement_invitation_access` | `supabase/migrations/20260725120000_stage20_atomic_access_counters_and_cleanup.sql` | `app/actions/procurement.ts` |
 | `register_quality_public_link_access` | `supabase/migrations/20260725120000_stage20_atomic_access_counters_and_cleanup.sql` | `app/actions/quality.ts` |
 | `register_sac_ticket_attachment` | `supabase/migrations/20260722104500_stage20_sac_attachment_security.sql` | `app/actions/relationship.ts` |
+| `registrar_cub_manual` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
 | `registrar_valor_usado` | `supabase/migrations/20260803200000_catalogo_de_valores_usados.sql` | `lib/sugestoes/servidor.ts` |
 | `release_inventory_reservation` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | `app/actions/inventory.ts` |
 | `release_project_document_version` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | `app/actions/projects.ts` |
@@ -898,8 +900,10 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `task_dependency_sem_ciclo` | `supabase/migrations/20260727180000_planejamento_ciclo_dependencia.sql` | — (só por SQL ou trigger) |
 | `tg_semear_modelos_da_empresa` | `supabase/migrations/20260803160000_semear_modelos_da_empresa.sql` | — (só por SQL ou trigger) |
 | `tg_semear_motivos_de_perda` | `supabase/migrations/20260803235000_listas_cadastradas_por_escopo.sql` | — (só por SQL ou trigger) |
+| `tipologias_do_cub` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
 | `touch_updated_at` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |
 | `transition_sac_ticket` | `supabase/migrations/20260721013654_stage18_sac_functions.sql` | `app/actions/relationship.ts` |
+| `ufs_do_brasil` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
 | `validate_finance_child_organization` | `supabase/migrations/20260720123300_stage15_finance_hardening.sql` | — (só por SQL ou trigger) |
 | `validate_finance_entry_links` | `supabase/migrations/20260720123300_stage15_finance_hardening.sql` | — (só por SQL ou trigger) |
 | `validate_finance_measurement_links` | `supabase/migrations/20260720123300_stage15_finance_hardening.sql` | — (só por SQL ou trigger) |
