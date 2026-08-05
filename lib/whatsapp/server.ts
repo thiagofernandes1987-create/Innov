@@ -1,6 +1,14 @@
 import "server-only";
 
 import { hasCapability, requireCapability } from "@/lib/authorization";
+import {
+  BAILEYS_PLANNED_CAPABILITY_MATRIX,
+  WEB_CHAT_PLANNED_CAPABILITY_MATRIX,
+  deriveMessagingUiCapabilities
+} from "@/lib/messaging/capabilities";
+import type { ChannelProviderType } from "@/lib/messaging/domain";
+import { messagingProviderLabel } from "@/lib/messaging/inbox";
+import { resolveMetaCloudRuntimePolicy } from "@/lib/messaging/policy.server";
 
 function relationName(value: unknown, fallback: string) {
   if (Array.isArray(value)) return relationName(value[0], fallback);
@@ -9,6 +17,12 @@ function relationName(value: unknown, fallback: string) {
     return String(row.title ?? row.name ?? row.code ?? fallback);
   }
   return fallback;
+}
+
+function providerType(value: unknown): ChannelProviderType {
+  const candidate = String(value ?? "META_CLOUD");
+  if (candidate === "WHATSAPP_WEB_BAILEYS" || candidate === "WEB_CHAT") return candidate;
+  return "META_CLOUD";
 }
 
 export async function loadWhatsAppWorkspace(selectedConversationId?: string | null) {
@@ -29,13 +43,15 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
   ] = await Promise.all([
     context.supabase
       .from("whatsapp_accounts")
-      .select("id,waba_id,phone_number_id,display_phone_number,business_name,active,is_default")
+      .select(
+        "id,waba_id,phone_number_id,display_phone_number,business_name,active,is_default,provider_type,provider_account_id,provider_status"
+      )
       .eq("organization_id", context.organizationId)
       .order("is_default", { ascending: false }),
     context.supabase
       .from("whatsapp_conversations")
       .select(
-        "id,status,client_id,project_id,contract_id,sac_ticket_id,assigned_to,last_customer_message_at,last_message_at,unread_count,whatsapp_contacts(display_name,profile_name,phone_e164,wa_id),clients(legal_name,trade_name),projects(code,name)"
+        "id,account_id,status,client_id,project_id,contract_id,sac_ticket_id,assigned_to,last_customer_message_at,last_message_at,unread_count,channel_state,last_actor_kind,whatsapp_contacts(display_name,profile_name,phone_e164,wa_id),clients(legal_name,trade_name),projects(code,name)"
       )
       .eq("organization_id", context.organizationId)
       .order("last_message_at", { ascending: false, nullsFirst: false })
@@ -94,11 +110,35 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
       .limit(50)
   ]);
 
+  const accounts = accountsResult.data ?? [];
   const conversations = conversationsResult.data ?? [];
   const selectedId =
     selectedConversationId && conversations.some(item => item.id === selectedConversationId)
       ? selectedConversationId
       : conversations[0]?.id ?? null;
+  const selectedConversation = conversations.find(item => item.id === selectedId);
+  const selectedAccount = selectedConversation
+    ? accounts.find(account => account.id === selectedConversation.account_id) ?? null
+    : null;
+
+  const runtimePolicy = resolveMetaCloudRuntimePolicy(context.organizationId);
+  const providerPolicy = runtimePolicy.policy;
+  const metaUiCapabilities = runtimePolicy.ui;
+  const accountCapabilities = Object.fromEntries(
+    accounts.map(account => {
+      const type = providerType(account.provider_type);
+      if (type === "META_CLOUD") return [account.id, metaUiCapabilities];
+      if (type === "WHATSAPP_WEB_BAILEYS") {
+        return [account.id, deriveMessagingUiCapabilities(BAILEYS_PLANNED_CAPABILITY_MATRIX, false)];
+      }
+      return [account.id, deriveMessagingUiCapabilities(WEB_CHAT_PLANNED_CAPABILITY_MATRIX, false)];
+    })
+  );
+  const selectedProviderType = providerType(selectedAccount?.provider_type);
+  const selectedMessagingCapabilities = selectedConversation?.account_id
+    ? accountCapabilities[selectedConversation.account_id] ??
+      deriveMessagingUiCapabilities(runtimePolicy.matrix, false)
+    : metaUiCapabilities;
 
   const messagesResult = selectedId
     ? await context.supabase
@@ -174,14 +214,20 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
   return {
     context,
     canManage,
-    accounts: accountsResult.data ?? [],
+    accounts,
     conversations,
     bindings: bindingsResult.data ?? [],
     clients: clientsResult.data ?? [],
     projects: projectsResult.data ?? [],
     sourceCatalog,
     selectedConversationId: selectedId,
+    selectedAccount,
+    selectedProviderType,
+    selectedProviderLabel: messagingProviderLabel(selectedProviderType),
     messages: messagesResult.data ?? [],
+    providerPolicy,
+    accountCapabilities,
+    selectedMessagingCapabilities,
     errors: [
       accountsResult.error,
       conversationsResult.error,
@@ -193,7 +239,10 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
       contractVersionsResult.error,
       amendmentVersionsResult.error,
       projectDocumentVersionsResult.error,
-      messagesResult.error
+      messagesResult.error,
+      ...(!providerPolicy.configurationValid
+        ? [{ code: "MESSAGING_PROVIDER_FLAGS_INVALID" }]
+        : [])
     ]
       .filter(Boolean)
       .map(error => String(error?.code ?? "QUERY_FAILED"))

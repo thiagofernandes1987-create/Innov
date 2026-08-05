@@ -1,0 +1,26 @@
+{
+  "bomFormat": "CycloneDX-compatible-minimal",
+  "specVersion": "1.6",
+  "metadata": {
+    "component": {
+      "name": "@innovar/messaging-gateway",
+      "version": "0.2.0",
+      "type": "application"
+    },
+    "nodeEngine": ">=24 <25",
+    "lockfileSha256": "d681efc5acb88940b5a81f2019808ed5ef9d8cde9fa8d36d178076423dc35ed9",
+    "lifecycleScriptsExecuted": false,
+    "generatedAt": "2026-08-04T18:00:00.000Z"
+  },
+  "components": [
+    {
+      "name": "@whiskeysockets/baileys",
+      "version": "7.0.0-rc13",
+      "scope": "required",
+      "packageManager": "pnpm",
+      "license": "MIT",
+      "runtimeRegistered": false,
+      "externalConnectionExecuted": false
+    }
+  ]
+}

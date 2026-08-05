@@ -77,6 +77,30 @@ jobs:
         run: |
           set -o pipefail
           node scripts/validate-stage22.mjs 2>&1 | tee stage22-validation.txt
+      - name: Validate messaging engine boundaries
+        run: |
+          set -o pipefail
+          node scripts/validate-messaging-boundaries.mjs 2>&1 | tee messaging-boundaries-validation.txt
+      - name: Validate messaging multiprovider storage
+        run: |
+          set -o pipefail
+          node scripts/validate-messaging-storage.mjs 2>&1 | tee messaging-storage-validation.txt
+      - name: Validate messaging gateway skeleton
+        run: |
+          set -o pipefail
+          node scripts/validate-messaging-gateway.mjs 2>&1 | tee messaging-gateway-validation.txt
+      - name: Validate messaging session credential store
+        run: |
+          set -o pipefail
+          node scripts/validate-messaging-session-store.mjs 2>&1 | tee messaging-session-store-validation.txt
+      - name: Validate messaging runtime lifecycle
+        run: |
+          set -o pipefail
+          node scripts/validate-messaging-runtime-lifecycle.mjs 2>&1 | tee messaging-runtime-validation.txt
+      - name: Validate messaging ingress
+        run: |
+          set -o pipefail
+          node scripts/validate-messaging-ingress.mjs 2>&1 | tee messaging-ingress-validation.txt
       - name: Upload structural validation reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -96,6 +120,12 @@ jobs:
             stage19-validation.txt
             stage20-validation.txt
             stage22-validation.txt
+            messaging-boundaries-validation.txt
+            messaging-storage-validation.txt
+            messaging-gateway-validation.txt
+            messaging-session-store-validation.txt
+            messaging-runtime-validation.txt
+            messaging-ingress-validation.txt
           if-no-files-found: warn
           retention-days: 7
       - name: Upload recent migrations
@@ -110,18 +140,23 @@ jobs:
             supabase/migrations/20260728*.sql
             supabase/migrations/20260729*.sql
             supabase/migrations/20260803*.sql
+            supabase/migrations/20260804*.sql
           if-no-files-found: warn
           retention-days: 7
 
   quality:
     needs: preflight
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       SIGNATURE_PROVIDER: sandbox
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -134,12 +169,27 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.13"
+      - name: Start PostgreSQL test service
+        run: |
+          sudo systemctl start postgresql
+          sudo -u postgres psql -v ON_ERROR_STOP=1 -c "alter user postgres password 'postgres';"
+          pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER"
       - name: Enable pnpm
         run: |
           corepack enable
           corepack prepare pnpm@11.15.0 --activate
-      - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Install dependencies without lifecycle scripts
+        run: pnpm install --no-frozen-lockfile --ignore-scripts --reporter=append-only
+      - name: Verify resolved W-06 lockfile
+        run: pnpm validate:messaging-lockfile
+      - name: Upload resolved W-06 lockfile
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pnpm-lock-w06
+          path: pnpm-lock.yaml
+          if-no-files-found: error
+          retention-days: 7
       - name: Validate engineering vaccines
         run: pnpm validate:vaccines
       - name: Validate canonical documentation
@@ -180,6 +230,18 @@ jobs:
         run: pnpm validate:stage20
       - name: Validate Stage 22 WhatsApp omnichannel
         run: pnpm validate:stage22
+      - name: Validate messaging engine boundaries
+        run: pnpm validate:messaging-boundaries
+      - name: Validate messaging multiprovider storage
+        run: pnpm validate:messaging-storage
+      - name: Validate messaging gateway skeleton
+        run: pnpm validate:messaging-gateway
+      - name: Validate messaging session credential store
+        run: pnpm validate:messaging-session-store
+      - name: Validate messaging runtime lifecycle
+        run: pnpm validate:messaging-runtime
+      - name: Validate messaging ingress
+        run: pnpm validate:messaging-ingress
       - name: Validate execution inventory
         run: pnpm validate:inventory
       - name: Validate Object Runtime invariants
@@ -198,6 +260,24 @@ jobs:
         run: pnpm test:db:budgets
       - name: Commercial documents database tests
         run: pnpm test:db:commercial-documents
+      - name: Messaging multiprovider database tests
+        run: pnpm test:db:messaging-multiprovider
+      - name: Messaging session credential database tests
+        run: pnpm test:db:messaging-session-store
+      - name: Messaging runtime lease database tests
+        run: pnpm test:db:messaging-runtime
+      - name: Messaging ingress database tests
+        run: pnpm test:db:messaging-ingress
+      - name: Messaging gateway unit tests
+        run: pnpm test:messaging-gateway
+      - name: Baileys adapter contract tests
+        run: pnpm test:messaging-baileys
+      - name: Messaging session credential store tests
+        run: pnpm test:messaging-session-store
+      - name: Messaging runtime lifecycle tests
+        run: pnpm test:messaging-runtime
+      - name: Messaging ingress tests
+        run: pnpm test:messaging-ingress
       - name: Lint
         run: |
           set -o pipefail
@@ -208,7 +288,7 @@ jobs:
         with:
           name: lint-report
           path: lint-report.txt
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
       - name: Typecheck
         run: |
@@ -220,11 +300,15 @@ jobs:
         with:
           name: typecheck-report
           path: typecheck-report.txt
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
       - name: TypeScript unit tests
         run: pnpm test
       - name: Python quality form tests
         run: pnpm test:python
+      - name: Build messaging gateway
+        run: pnpm build:messaging-gateway
+      - name: Messaging gateway container smoke test
+        run: pnpm test:container:messaging-gateway
       - name: Build
         run: pnpm build

@@ -1,17 +1,8 @@
 # Recuperação completa a partir do repositório
 
-> ## ⚠️ Estado verificado em 25 de julho de 2026: este procedimento **não se cumpre hoje**
+> ## Estado conhecido
 >
-> O passo 8 foi executado contra um PostgreSQL limpo, por `pnpm test:db:replay`. Resultado: **0 de 111 migrations aplicaram**. A primeira já falha, com `function public.touch_updated_at() does not exist`.
->
-> Causa medida, em dois defeitos independentes:
->
-> 1. **Ausência.** 102 versões com SQL real estão aplicadas em homologação sem arquivo correspondente no repositório. Entre elas está `has_module_permission`, a função no centro do modelo de autorização, chamada por 41 dos 111 arquivos de migration e sem definição em nenhum lugar deste repositório.
-> 2. **Ordem.** Arquivos de endurecimento têm carimbo anterior ao dos arquivos que criam o que eles endurecem — `20260719214500_stage10_homologation_hardening` altera `touch_updated_at`, criada em `20260719230000_stage9_financial_contracts`. Em ordem lexical, quebram.
->
-> A regra do passo 8 que manda **comparar os arquivos locais com `supabase_migrations.schema_migrations`** já estava escrita aqui. Ela nunca foi executada; se tivesse sido, teria detectado isto.
->
-> Enquanto o replay não passar, trate este documento como **procedimento pretendido**, não como garantia. Fechar a lacuna é a sprint S-22 do `INVENTARIO-DE-EXECUCAO.md`.
+> O replay integral de migrations continua um gate obrigatório e deve falhar fechado quando o conjunto local não reconstruir um PostgreSQL limpo. Não tratar documentação, ledger parcial ou CI estrutural como substituto de `pnpm test:db:replay`.
 
 Este procedimento reconstrói a Innovar Platform após perda de contêiner, máquina local, ambiente de desenvolvimento ou histórico de conversa.
 
@@ -19,22 +10,27 @@ Este procedimento reconstrói a Innovar Platform após perda de contêiner, máq
 
 O GitHub é a fonte canônica. Não reconstruir por memória, conversa, ZIP antigo ou arquivo temporário quando o repositório estiver disponível.
 
-O Git recupera código, migrations, testes, vacinas, documentação e workflows. Segredos, dados reais, conteúdo de buckets, usuários Auth, DNS e backups permanecem externos.
+O Git recupera código, migrations, testes, vacinas, documentação e workflows. Não recupera secrets, dados reais, usuários Auth, buckets, DNS, KMS/HSM, credenciais de provider, número autorizado, sessão real ou backups físicos.
 
-## 2. Estado canônico atual
+## 2. Estado canônico
 
 Antes de executar qualquer comando, ler `diretrizes/ESTADO-ATUAL.json`.
 
-Estado registrado em 22 de julho de 2026:
+Estado estável:
 
-- base estável: `main`;
+- base: `main`;
 - versão: `0.19.0`;
-- última etapa concluída: 19;
-- próxima etapa: 20;
-- PRs `#18`, `#19` e `#20` mesclados;
-- E2E concorrente da Etapa 18: `passed`;
-- CI estável: `success`;
-- produção: ainda não liberada.
+- última etapa incorporada: 19;
+- próxima etapa oficial: 20;
+- produção: não liberada.
+
+Execução paralela da Etapa 22:
+
+- branch `feature/etapa-22-provider-whatsapp-web-baileys`;
+- PR `#40`, draft e não mesclado;
+- escopo técnico/documental fechado;
+- piloto `HOLD`;
+- produção `NOT_AUTHORIZED`.
 
 ## 3. Clonar e identificar o estado
 
@@ -46,7 +42,7 @@ git pull --ff-only
 git rev-parse HEAD
 ```
 
-Comparar o SHA recuperado com o manifesto. Branch de etapa somente deve ser usada quando estiver registrada como ativa e possuir PR correspondente.
+Para revisar a Etapa 22, trocar explicitamente para a branch registrada no manifesto. Não implantar uma branch experimental por engano.
 
 ## 4. Ler antes de executar
 
@@ -57,31 +53,32 @@ Comparar o SHA recuperado com o manifesto. Branch de etapa somente deve ser usad
 5. `diretrizes/ARQUITETURA.md`;
 6. `diretrizes/ROADMAP.md`;
 7. `diretrizes/VACINAS.md`;
-8. `diretrizes/UI-UX-PRO-MAX.md`, quando existir na branch da Etapa 20;
-9. `diretrizes/HISTORICO-ETAPAS.md`;
-10. documentos técnicos atuais em `docs/`.
+8. `docs/ETAPA-22-WHATSAPP-WEB-NAO-OFICIAL/ENCERRAMENTO-W22.md`;
+9. `docs/ETAPA-22-WHATSAPP-WEB-NAO-OFICIAL/DECISAO-PRODUCAO-W22.md`.
 
 ## 5. Pré-requisitos
 
 - Git;
-- Node.js 24 ou superior;
+- Node.js 24;
 - Corepack e `pnpm@11.15.0`;
 - Python 3.13;
+- PostgreSQL compatível;
 - Supabase CLI quando necessário;
-- acesso ao projeto Supabase correto;
-- acesso ao cofre de secrets;
+- Docker para smoke e testes isolados;
+- acesso ao projeto correto e ao cofre de secrets;
 - LibreOffice headless para conversão DOCX;
-- acesso à hospedagem e aos provedores externos.
+- acesso autorizado aos providers externos, quando aplicável.
 
 ## 6. Dependências
 
 ```bash
 corepack enable
 corepack prepare pnpm@11.15.0 --activate
-pnpm install --no-frozen-lockfile --reporter=append-only
+pnpm install --no-frozen-lockfile --ignore-scripts --reporter=append-only
+pnpm validate:messaging-lockfile
 ```
 
-A política transitória deve ser igual no CI e na homologação até a revisão formal do lockfile na Etapa 20.
+O Baileys deve resolver exatamente `7.0.0-rc13` no workspace `apps/messaging-gateway`. Lifecycle scripts permanecem bloqueados.
 
 ## 7. Ambiente
 
@@ -89,27 +86,14 @@ A política transitória deve ser igual no CI e na homologação até a revisão
 cp .env.example .env.local
 ```
 
-Configurar por cofre, nunca por documentação ou commit:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_APP_URL=
-SIGNATURE_PROVIDER=
-SIGNATURE_WEBHOOK_SECRET=
-SIGNATURE_EMAIL_WEBHOOK_URL=
-DEMO_ADMIN_PASSWORD=
-DEMO_CLIENT_PASSWORD=
-```
-
-Regras:
+Configurar valores apenas por cofre. Regras:
 
 - `.env.local` não é versionado;
 - Service Role somente no servidor;
 - segredo não aparece em PR, issue, log ou conversa;
-- segredo exposto é rotacionado antes da continuidade;
-- conta de homologação não reutiliza senha de produção.
+- segredo exposto é rotacionado;
+- ambiente experimental não reutiliza credenciais produtivas;
+- gateway deve falhar fechado sem HMAC válido.
 
 ## 8. Reconstruir o banco
 
@@ -124,124 +108,126 @@ Aplicar em ordem lexical:
 ```bash
 supabase link --project-ref <PROJECT_REF>
 pnpm validate:migrations
+pnpm test:db:replay
 supabase db push
 ```
 
-Regras inegociáveis:
+Regras:
 
 - migration aplicada nunca é editada;
 - correção exige novo timestamp;
-- não reaplicar manualmente migration registrada;
-- comparar arquivos locais com `supabase_migrations.schema_migrations`;
-- não criar nome lógico duplicado ou SQL duplicado com timestamp diferente;
-- backup obrigatório antes de alteração destrutiva;
-- **executar `pnpm test:db:replay` e exigir que ele passe.** Comparar ledger detecta divergência de carimbo; só o replay detecta que o conjunto não aplica. Foi essa diferença que deixou 102 migrations sem fonte passarem despercebidas.
+- comparar arquivos com `supabase_migrations.schema_migrations`;
+- replay em banco limpo precisa passar;
+- backup obrigatório antes de DDL destrutivo;
+- funções privilegiadas usam `search_path` explícito e privilégio mínimo.
 
-## 9. Confirmar a Etapa 17 — Estoque
+## 9. Confirmar os domínios estáveis
 
-- 18 tabelas com RLS;
-- seis views `security_invoker` sem leitura direta;
-- saldo derivado e movimentos imutáveis;
-- advisory lock por posição;
-- custos mascarados;
-- isolamento multiempresa e multiobra;
-- teste `supabase/tests/stage17_inventory_homologation.sql` com `ROLLBACK`.
+### Estoque
 
-Pendências produtivas permanecem na Etapa 20: concorrência real com múltiplas conexões, carga, backup e restauração.
+- saldos derivados;
+- movimentos imutáveis;
+- advisory locks;
+- teste com `ROLLBACK`;
+- concorrência e backup/restauração conforme evidências da Etapa 20.
 
-## 10. Confirmar a Etapa 18 — CRM, Clientes e SAC
+### CRM, Clientes e SAC
 
-- 10 tabelas novas com RLS;
-- pipeline comercial interno;
 - Cliente 360 multiobra;
-- SAC interno e portal;
-- mensagens e anexos internos ocultos do cliente;
-- bucket privado `crm-sac-attachments`;
-- zero RPC operacional para `anon`;
-- FKs indexadas;
-- teste SQL com `ROLLBACK`;
-- workflow `.github/workflows/stage18-concurrent-e2e.yml`.
+- mensagens internas invisíveis ao cliente;
+- anexos privados;
+- estados por RPC;
+- E2E concorrente e cleanup aprovados.
 
-Evidência funcional consolidada:
+### Auditoria
 
-```text
-run: 29883182240
-status: passed
-cleanup: passed
+- fluxo unificado;
+- sanitização;
+- idempotência;
+- alertas e health checks;
+- diagnósticos e retenção;
+- nenhuma RPC operacional para `anon`.
+
+## 10. Recuperar a Etapa 22
+
+### 10.1 Build e gates
+
+```bash
+pnpm validate:stage22
+pnpm validate:messaging-boundaries
+pnpm validate:messaging-storage
+pnpm validate:messaging-gateway
+pnpm validate:messaging-session-store
+pnpm validate:messaging-runtime
+pnpm validate:messaging-ingress
+pnpm validate:messaging-outbox
+node scripts/run-messaging-loop-gates.mjs
+node scripts/validate-messaging-w22-closure.mjs
+pnpm test
+pnpm lint
+pnpm typecheck
+pnpm build:messaging-gateway
+pnpm test:container:messaging-gateway
+pnpm build
 ```
 
-O cleanup preserva históricos append-only e registra `immutable_history` sem falhar por uma restrição legítima.
+### 10.2 Gateway
 
-## 11. Confirmar a Etapa 19 — Auditoria e Observabilidade
+O `messaging-gateway` deve iniciar com:
 
-Seis migrations alinhadas ao ledger remoto:
+- usuário non-root;
+- filesystem read-only;
+- limites de recursos;
+- HMAC e replay guard;
+- health/readiness/metrics;
+- `FakeChannelClient` por padrão;
+- nenhuma rede externa no smoke test.
 
-```text
-20260721100108_stage19_observability_schema.sql
-20260721100159_stage19_observability_security.sql
-20260721122302_stage19_observability_functions.sql
-20260721122355_stage19_observability_unified_stream.sql
-20260721122436_stage19_observability_module_performance.sql
-20260721123305_stage19_observability_hardening.sql
-```
+Não registrar o adapter Baileys no bootstrap durante recuperação. O código reconstruído não recupera sessão real, QR, pairing, número ou autorização operacional.
 
-Confirmar:
+### 10.3 Credenciais e sessão
 
-- seis tabelas com RLS;
-- 13 políticas e seis gatilhos não internos;
-- fluxo unificado de 12 origens;
-- sanitização recursiva;
-- zero função da Etapa 19 executável por `anon`;
-- diagnósticos globais somente para membro interno autorizado;
-- 16 FKs e zero FK sem índice líder;
-- seis health checks;
-- alertas `OPEN → ACKNOWLEDGED → RESOLVED`;
-- eventos append-only;
-- teste `supabase/tests/stage19_observability_homologation.sql` com `ROLLBACK`.
+O repositório recupera somente contratos, migrations e testes do session store. Material real depende de KMS/HSM, banco autorizado e backup externo.
 
-## 12. Buckets privados
+Se houver suspeita de comprometimento:
 
-```text
-commercial-documents
-contract-documents
-project-documents
-daily-log-media
-signature-artifacts
-quality-documents
-quality-form-attachments
-procurement-attachments
-finance-attachments
-crm-sac-attachments
-```
+1. manter feature flag desligada;
+2. revogar lease;
+3. bloquear workers;
+4. executar purge auditado das credenciais;
+5. rotacionar chaves externas;
+6. registrar incidente;
+7. não tentar reaproveitar sessão suspeita.
 
-A Etapa 19 não cria bucket nem armazena arquivo bruto de log.
+### 10.4 Restore sintético
 
-## 13. Workers
+Reexecutar testes de lease, fencing, key update, restart e restore em infraestrutura isolada. Resultado sintético não é evidência de recuperação de uma sessão WhatsApp real.
+
+## 11. Storage privado
+
+Buckets permanecem privados. Objetos `PENDING`, `SCANNING`, `BLOCKED` ou `ERROR` nunca recebem URL funcional. Confirmar quarentena, antivírus, MIME real, SHA-256 e expiração de URLs assinadas.
+
+## 12. Workers
 
 ```bash
 pnpm worker:signature-conversion
 pnpm worker:signature-delivery
 ```
 
-Rotinas técnicas podem usar Service Role somente no servidor. Rotinas de expiração e retenção exigem execução server-side autorizada.
+Workers de mensagens só podem ser ativados por decisão operacional posterior e com feature flags, leases, rate limits e runbooks aprovados.
 
-## 14. Validar a reconstrução
+## 13. Validar a reconstrução
 
 ```bash
 pnpm validate:docs
 pnpm validate:vaccines
 pnpm validate:migrations
-pnpm validate:stage9
-pnpm validate:stage12
-pnpm validate:stage12.1
-pnpm validate:stage12.2
-pnpm validate:stage13
-pnpm validate:stage14
-pnpm validate:stage15
-pnpm validate:stage16
 pnpm validate:stage17
 pnpm validate:stage18
 pnpm validate:stage19
+pnpm validate:stage20
+pnpm validate:stage22
+node scripts/run-messaging-loop-gates.mjs
 pnpm lint
 pnpm typecheck
 pnpm test
@@ -251,74 +237,64 @@ pnpm build
 
 A recuperação não está concluída enquanto algum comando falhar.
 
-## 15. Smoke tests
+## 14. Smoke tests
 
 ### Interno
 
-- login e perfil correto;
-- módulos exibidos conforme acesso;
-- operações comerciais e SAC;
-- estoque, financeiro e relatórios;
-- painel de auditoria;
-- alerta reconhecido e resolvido;
-- health snapshot;
-- diagnóstico global visível somente a interno autorizado.
+- login, organização e perfil corretos;
+- módulos conforme acesso;
+- operações comerciais, SAC, estoque e auditoria;
+- gateway saudável com cliente fake;
+- inbox sintética sem vazamento de conteúdo;
+- alertas reconhecidos e resolvidos.
 
 ### Cliente
 
 - somente cadastro, obras liberadas e chamados próprios;
-- mensagem e anexo interno ausentes;
-- ausência dos módulos internos;
-- ausência de custos e diagnósticos globais.
+- conteúdo interno ausente;
+- custos, diagnósticos e ferramentas internas ausentes.
 
 ### Segurança
 
-- organização diferente não lê dados;
-- RPC anônima é negada;
-- Service Role não aparece no bundle;
-- bucket privado não possui URL pública;
-- estado protegido não muda por escrita direta;
-- payload de auditoria não contém senha ou token;
-- migrations e ledger estão alinhados.
+- cross-tenant negado;
+- RPC anônima negada;
+- Service Role ausente do bundle;
+- bucket sem URL pública;
+- segredo e conteúdo de mensagem ausentes de logs;
+- HMAC inválido negado;
+- replay negado;
+- Baileys não registrado no runtime;
+- produção permanece `NOT_AUTHORIZED`.
 
-## 16. Advisors
+## 15. Estado que o Git não recupera
 
-Executar advisors de segurança e performance após DDL.
-
-Não criar policy permissiva apenas para silenciar aviso nem remover índice por `unused` em banco vazio. Classificar funções `SECURITY DEFINER`, FKs sem índice, `auth_rls_initplan`, policies sobrepostas, função anônima, proteção de senhas e MFA.
-
-Dívidas globais antigas pertencem à Etapa 20.
-
-## 17. Estado que o Git não recupera
-
-- valores de secrets;
-- conteúdo dos buckets;
+- secrets e chaves KMS/HSM;
 - dados operacionais reais;
-- usuários reais do Auth;
-- DNS;
+- usuários Auth;
+- conteúdo de buckets;
+- DNS e configuração externa;
 - credenciais de providers;
-- backups físicos;
-- configuração externa de telemetria.
+- sessão, QR, pairing ou número real;
+- autorizações jurídicas e operacionais;
+- backups físicos e PITR;
+- evidência de homologação ou piloto real.
 
-Esses itens exigem cofre e backup externos.
-
-## 18. Checklist final de recuperação
+## 16. Checklist final de recuperação
 
 - [ ] código clonado da fonte oficial;
 - [ ] `ESTADO-ATUAL.json` conferido;
-- [ ] branch e PR ativos identificados;
+- [ ] branch e PR identificados;
 - [ ] diretrizes lidas;
-- [ ] dependências instaladas;
+- [ ] dependências instaladas sem lifecycle scripts;
 - [ ] secrets configurados por cofre;
-- [ ] migrations e ledger alinhados;
+- [ ] migrations, ledger e replay alinhados;
 - [ ] RLS, privilégios e índices confirmados;
 - [ ] buckets privados confirmados;
-- [ ] testes SQL com `ROLLBACK` aprovados;
-- [ ] E2E autenticado confirmado;
-- [ ] advisors revisados;
+- [ ] testes SQL aprovados;
 - [ ] `pnpm validate:docs` aprovado;
 - [ ] `pnpm validate:vaccines` aprovado;
-- [ ] validadores estruturais aprovados;
-- [ ] lint, typecheck, testes e build verdes;
-- [ ] backup/restauração testados antes de produção;
-- [ ] documentação compatível com o commit implantado.
+- [ ] gates W-22 aprovados;
+- [ ] lint, typecheck, testes e builds verdes;
+- [ ] purge de sessão ensaiado em fixture;
+- [ ] decisão de produção conferida como `NOT_AUTHORIZED`;
+- [ ] documentação compatível com o commit revisado.

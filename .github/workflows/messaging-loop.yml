@@ -1,0 +1,54 @@
+name: Messaging Incremental Loop
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "feature/**"
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: messaging-loop-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  incremental:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Start PostgreSQL
+        run: |
+          sudo systemctl start postgresql
+          sudo -u postgres psql -v ON_ERROR_STOP=1 -c "alter user postgres password 'postgres';"
+          pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER"
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - name: Install without lifecycle scripts
+        run: pnpm install --no-frozen-lockfile --ignore-scripts --reporter=append-only
+      - name: Verify supply chain
+        run: pnpm validate:messaging-lockfile
+      - name: Run incremental messaging gates
+        run: node scripts/run-messaging-loop-gates.mjs
+      - name: Global TypeScript tests
+        run: pnpm test
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build gateway
+        run: pnpm build:messaging-gateway
