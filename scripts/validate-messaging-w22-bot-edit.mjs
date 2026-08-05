@@ -11,22 +11,23 @@ const files = {
 const failures = [];
 for (const file of Object.values(files)) if (!fs.existsSync(file)) failures.push(`Arquivo de edição de bot ausente: ${file}`);
 const read = key => fs.existsSync(files[key]) ? fs.readFileSync(files[key], "utf8") : "";
+const normalized = key => read(key).replace(/\s+/g, " ");
 
 for (const token of ["Editar ou pausar", "/app/whatsapp/bots/${profile.id}", "PAUSADO"])
-  if (!read("page").includes(token)) failures.push(`Lista de bots sem ${token}`);
+  if (!normalized("page").includes(token)) failures.push(`Lista de bots sem ${token}`);
 for (const token of [
   "profileId", "defaultChecked={profile.enabledForDrafts}", "Salvar alterações",
   "pausa novos testes", "Autonomia permanece DRAFT_ONLY", "notFound()"
-]) if (!read("editPage").includes(token)) failures.push(`Página de edição sem ${token}`);
+]) if (!normalized("editPage").includes(token)) failures.push(`Página de edição sem ${token}`);
 for (const token of ["p_profile_id: optional(data, \"profileId\")", "saveMessagingBotProfile"])
-  if (!read("action").includes(token)) failures.push(`Action de edição sem ${token}`);
+  if (!normalized("action").includes(token)) failures.push(`Action de edição sem ${token}`);
 for (const token of ["p_profile_id uuid default null", "where id=p_profile_id", "updated_at=clock_timestamp()"])
-  if (!read("migration").includes(token)) failures.push(`RPC de edição sem ${token}`);
+  if (!normalized("migration").includes(token)) failures.push(`RPC de edição sem ${token}`);
 for (const token of [
   "edição e pausa sem perda de identidade aprovadas", "updated.id <> existing_id",
   "updated.created_at <> original_created_at", "updated.autonomy_mode <> 'DRAFT_ONLY'"
-]) if (!read("dbTest").includes(token)) failures.push(`Teste de edição sem ${token}`);
-if (!read("runner").includes("supabase/tests/messaging-bots/edit.test.sql")) failures.push("Runner não executa teste de edição de bot.");
+]) if (!normalized("dbTest").includes(token)) failures.push(`Teste de edição sem ${token}`);
+if (!normalized("runner").includes("supabase/tests/messaging-bots/edit.test.sql")) failures.push("Runner não executa teste de edição de bot.");
 
 if (failures.length) {
   console.error(failures.join("\n"));
@@ -34,7 +35,8 @@ if (failures.length) {
 }
 console.log(JSON.stringify({
   ok: true,
-  contract: "messaging-bot-edit-boundary-v1",
+  contract: "messaging-bot-edit-boundary-v2",
+  formattingIndependent: true,
   existingProfileEditable: true,
   profileIdentityPreserved: true,
   profileCreationHistoryPreserved: true,
