@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.6.0  
+**Versão do índice:** 0.7.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -33,6 +33,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 05 | `PROJETO-RH-MODULO-05-JORNADAS-PONTO-E-BANCO-DE-HORAS.md` | especificação funcional inicial concluída |
 | ADR-006 | `PROJETO-RH-ADR-006-FERIAS-AFASTAMENTOS-E-AUSENCIAS.md` | decisão funcional registrada |
 | Módulo 06 | `PROJETO-RH-MODULO-06-FERIAS-AFASTAMENTOS-E-LICENCAS.md` | especificação funcional inicial concluída |
+| ADR-007 | `PROJETO-RH-ADR-007-BENEFICIOS-DEPENDENTES-E-DESCONTOS.md` | decisão funcional registrada |
+| Módulo 07 | `PROJETO-RH-MODULO-07-BENEFICIOS-DEPENDENTES-E-DESCONTOS.md` | especificação funcional inicial concluída |
 
 ---
 
@@ -186,6 +188,41 @@ Ausência detectada
 - alteração retroativa produzirá impactos e reprocessamentos;
 - eventos externos preservarão payload, recibo e correlação.
 
+### 3.9 Benefícios, dependentes, pensões e descontos
+
+```text
+Catálogo de benefício
+  → política e elegibilidade
+    → plano e preços
+      → adesão
+        → pessoas cobertas
+          → concessões, cobranças e conciliações
+
+Pessoa relacionada
+  → papéis independentes por finalidade
+
+Obrigação ou autorização
+  → fórmula versionada
+    → instrução por competência
+      → resultado da folha
+        → pagamento ou repasse
+```
+
+- relação familiar e papel por finalidade são objetos distintos;
+- pessoa coberta não será automaticamente dependente tributário;
+- alimentando não será automaticamente dependente;
+- beneficiário de seguro não será automaticamente pessoa coberta;
+- rubrica não substituirá catálogo, política ou adesão;
+- cobrança do fornecedor não criará adesão;
+- custo patronal, contribuição e coparticipação serão separados;
+- todo desconto possuirá fonte identificada;
+- fórmulas e autorizações terão versão e vigência;
+- valor não descontado não será considerado quitado;
+- estorno será movimento compensatório;
+- folha, fornecedor e financeiro serão conciliados;
+- dados familiares, judiciais e bancários terão acesso segregado;
+- parâmetros legais e externos serão versionados.
+
 ---
 
 ## 4. Progresso funcional
@@ -221,23 +258,35 @@ Ausência detectada
 - [x] eventos governamentais e correlação com SST;
 - [x] retorno, aptidão e restrições operacionais;
 - [x] matriz de sobreposição;
-- [x] permissões, auditoria, relatórios e testes do Módulo 06.
+- [x] decisão Benefício × Plano × Adesão × Cobertura × Dependente × Alimentando × Desconto;
+- [x] catálogo de benefícios e políticas por vigência;
+- [x] planos, fornecedores e tabelas de preço;
+- [x] adesões, coberturas, inclusões e exclusões;
+- [x] relações entre pessoas e papéis por finalidade;
+- [x] dependentes tributários e de benefícios;
+- [x] beneficiários de seguro e auxílios;
+- [x] vale-transporte, alimentação, saúde, odontologia e benefícios configuráveis;
+- [x] pensão alimentícia e retenções judiciais;
+- [x] descontos recorrentes e autorizações;
+- [x] movimentos financeiros e estornos;
+- [x] arquivos e conciliação de fornecedores;
+- [x] integração com folha, financeiro, eSocial e centros de custo;
+- [x] permissões, auditoria, relatórios e testes do Módulo 07.
 
 ### Próximo
 
-- [ ] Módulo 07 — Benefícios, Dependentes, Pensão Alimentícia e Descontos Recorrentes;
-- [ ] catálogo de benefícios e planos;
-- [ ] elegibilidade por vigência;
-- [ ] adesão, inclusão e exclusão;
-- [ ] dependentes e documentos;
-- [ ] pensão alimentícia e ordens;
-- [ ] coparticipações e descontos;
-- [ ] integração com folha e fornecedores;
-- [ ] impactos de afastamento, férias e desligamento.
+- [ ] Módulo 08 — Medicina e Segurança do Trabalho;
+- [ ] riscos ocupacionais, ambientes e exposições;
+- [ ] programas e inventários de prevenção;
+- [ ] exames ocupacionais e ASO;
+- [ ] aptidão, restrições e encaminhamentos;
+- [ ] acidentes, CAT e investigação;
+- [ ] treinamentos, EPIs e validade;
+- [ ] eventos S-2210, S-2220 e S-2240;
+- [ ] integração com obras, funções, afastamentos e retorno.
 
 ### Posterior
 
-- [ ] medicina e segurança;
 - [ ] folha;
 - [ ] rubricas e fórmulas;
 - [ ] obrigações digitais;
@@ -293,7 +342,22 @@ Em 6 de agosto de 2026 foram verificadas:
 - Manual WEB Geral, seção S-2230;
 - orientações oficiais sobre afastamentos e benefícios por incapacidade.
 
-A baseline atual diferencia direito, concessão, ausência, afastamento e evento externo. Campos, prazos, motivos, documentos, instrumentos coletivos e interpretações deverão ser verificados novamente antes da implementação, homologação e produção.
+A baseline atual diferencia direito, concessão, ausência, afastamento e evento externo.
+
+### 5.5 Benefícios, dependentes e descontos
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- documentação técnica do eSocial S-1.3 até NT 06/2026 e notas orientativas publicadas;
+- Tabela 07 de tipos de dependente;
+- grupos de dependentes, plano de saúde e pensão alimentícia;
+- Tabela 03 de naturezas de rubricas;
+- tabela de tributação de 2026 da Receita Federal;
+- Lei nº 7.418/1985 e Decreto nº 10.854/2021 para vale-transporte;
+- Lei nº 6.321/1976, Lei nº 14.442/2022 e regulamentação vigente do PAT;
+- texto compilado da CLT para descontos salariais.
+
+A baseline oficial diferencia dependência, cobertura, beneficiário, rubrica, desconto e pagamento. Campos, limites, incidências, documentos, instrumentos coletivos e interpretações deverão ser verificados novamente antes da implementação, homologação e produção.
 
 ---
 
@@ -311,31 +375,34 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 ## 7. Próximo módulo lógico
 
-**Módulo 07 — Benefícios, Dependentes, Pensão Alimentícia e Descontos Recorrentes.**
+**Módulo 08 — Medicina e Segurança do Trabalho, Riscos Ocupacionais, Exames, ASO, CAT, EPIs e Treinamentos.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Política e plano
-  → elegibilidade por vínculo e vigência
-  → adesão e dependentes
-  → aprovação e fornecedor
-  → cobrança, coparticipação ou desconto
-  → evento para folha
-  → alteração, suspensão ou encerramento
+Ambiente e atividade
+  → perigos e riscos
+  → medidas de controle
+  → trabalhador exposto
+  → exames e treinamentos aplicáveis
+  → aptidão, restrições e evidências
+  → acidente ou ocorrência
+  → investigação, CAT e afastamento
+  → eventos digitais e acompanhamento
 ```
 
 O próximo módulo deverá distinguir:
 
-1. catálogo de benefício;
-2. plano e fornecedor;
-3. regra de elegibilidade;
-4. adesão do titular;
-5. inclusão de dependente;
-6. cobrança do fornecedor;
-7. desconto em folha;
-8. ordem judicial de pensão;
-9. efeito de férias, afastamento e desligamento.
+1. ambiente e condição de trabalho;
+2. perigo, risco e exposição;
+3. medida de prevenção;
+4. exame e resultado ocupacional;
+5. ASO e aptidão;
+6. restrição operacional sem diagnóstico;
+7. acidente, incidente e doença ocupacional;
+8. CAT, afastamento e investigação;
+9. EPI entregue e efetivamente controlado;
+10. treinamento exigido, realizado e válido.
 
 ---
 
@@ -349,3 +416,4 @@ O próximo módulo deverá distinguir:
 | 0.4.0 | 06/08/2026 | ADR-004, Módulo 04 e baseline de contratos e alterações |
 | 0.5.0 | 06/08/2026 | ADR-005, Módulo 05 e baseline de jornadas e ponto |
 | 0.6.0 | 06/08/2026 | ADR-006, Módulo 06 e baseline de férias e afastamentos |
+| 0.7.0 | 06/08/2026 | ADR-007, Módulo 07 e baseline de benefícios, dependentes e descontos |
