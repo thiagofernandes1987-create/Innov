@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.15.0  
+**Versão do índice:** 0.16.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -10,7 +10,7 @@
 
 ## 1. Finalidade
 
-Este arquivo registra o estado atual da especificação funcional, técnica, de planejamento e de dados do Projeto RH sem substituir os documentos detalhados.
+Este arquivo registra o estado atual da especificação funcional, técnica, de planejamento, dados e contratos do Projeto RH sem substituir os documentos detalhados.
 
 A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`. Cada módulo e decisão arquitetural possui documento próprio para preservar o histórico e evitar que uma atualização de estado apague requisitos anteriores.
 
@@ -53,6 +53,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | ADR-015 | `PROJETO-RH-ADR-015-MODELO-FISICO-TENANCY-TEMPORALIDADE-E-ZONAS-DE-DADOS.md` | decisão de dados registrada |
 | Módulo 15 | `PROJETO-RH-MODULO-15-DESIGN-DE-DADOS-CATALOGO-RLS-E-MIGRATIONS.md` | design físico inicial concluído |
 | Anexo M15 | `PROJETO-RH-MODULO-15-ANEXO-A-CATALOGO-FISICO-DE-TABELAS.md` | catálogo físico detalhado concluído |
+| ADR-016 | `PROJETO-RH-ADR-016-CONTRATOS-COMANDOS-CONSULTAS-EVENTOS-E-JOBS.md` | decisão de contratos registrada |
+| Módulo 16 | `PROJETO-RH-MODULO-16-CONTRATOS-API-COMANDOS-CONSULTAS-EVENTOS-E-JOBS.md` | especificação de contratos concluída |
 
 ---
 
@@ -504,9 +506,44 @@ Storage privado
 - o catálogo de 233 tabelas representa o estado-alvo, não uma migration única;
 - nenhuma tabela será criada antes de sua onda e do gate correspondente.
 
+### 3.18 Contratos, comandos, eventos e processamento assíncrono
+
+```text
+Interface interna
+  → comando tipado
+    → autorização e validação
+      → RPC transacional
+        → fato + auditoria + outbox
+
+Evento externo
+  → autenticação
+    → inbox idempotente
+      → job com lease
+        → processamento e reconciliação
+```
+
+- comando expressará intenção de negócio e consulta não produzirá efeito;
+- Server Action será adaptador, não implementação de transação crítica;
+- RPC crítica verificará tenant, capability, estado, versão e lock;
+- resultado e erro terão envelopes estáveis e correlation ID;
+- idempotency key divergente por payload será conflito;
+- evento descreverá fato passado e terá versão imutável;
+- payloads de eventos serão minimizados e não carregarão conteúdo clínico ou bancário;
+- fato, auditoria e outbox serão gravados na mesma transação;
+- webhooks serão autenticados, protegidos contra replay e persistidos em inbox antes do processamento pesado;
+- Service Role não será autorização de negócio;
+- jobs usarão lease, tentativas, backoff, jitter, heartbeat e dead letter;
+- timeout após envio exigirá reconciliação antes de novo envio;
+- recibo, aceite e reconciliação permanecerão distintos;
+- adapters externos serão versionados e isolados do domínio;
+- consultas de alto volume usarão cursor e ordenação determinística;
+- download validará autorização atual, scan e retenção;
+- logs técnicos e auditoria de negócio compartilharão correlação sem compartilhar dados sensíveis;
+- nenhum contrato será implementado antes do Gate G00.
+
 ---
 
-## 4. Progresso funcional, técnico, de planejamento e dados
+## 4. Progresso funcional, técnico, de planejamento, dados e contratos
 
 ### Concluído
 
@@ -678,25 +715,37 @@ Storage privado
 - [x] índices, idempotência, outbox, jobs e reconciliação;
 - [x] 23 pacotes lógicos de migrations;
 - [x] estratégia expand/contract e backfills;
-- [x] 120 requisitos, 80 regras e 55 critérios de aceite do Módulo 15.
+- [x] 120 requisitos, 80 regras e 55 critérios de aceite do Módulo 15;
+- [x] decisão Contrato × Comando × Consulta × Evento × Job;
+- [x] envelopes de comando, consulta, evento e job;
+- [x] taxonomia de erros e resultados tipados;
+- [x] padrão de Server Actions e Route Handlers;
+- [x] requisitos de RPCs transacionais;
+- [x] catálogo inicial de eventos por bounded context;
+- [x] outbox, inbox, deduplicação e replay protection;
+- [x] jobs, leases, heartbeat, backoff e dead letter;
+- [x] adapters, resposta incerta e reconciliação;
+- [x] paginação por cursor, filtros e temporalidade de consultas;
+- [x] contratos de download, Storage e exportação;
+- [x] catálogo de comandos, consultas e RPCs por contexto;
+- [x] 120 requisitos, 80 regras e 55 critérios de aceite do Módulo 16.
 
 ### Próximo
 
-- [ ] Módulo 16 — Contratos de API, Comandos, Consultas, RPCs, Eventos, Jobs e Integrações;
-- [ ] envelope padrão de comando e consulta;
-- [ ] autenticação, autorização e escopo;
-- [ ] contratos Zod e TypeScript;
-- [ ] catálogo de Server Actions e Route Handlers;
-- [ ] assinatura e retorno de RPCs;
-- [ ] eventos de domínio e integração;
-- [ ] outbox, inbox, jobs, retries e dead letter;
-- [ ] idempotência, correlação e erros;
-- [ ] versionamento e compatibilidade de contratos;
-- [ ] testes de contrato e exemplos de payload.
+- [ ] Módulo 17 — Design de Interface, Fluxos, Componentes, Estados, Acessibilidade e Protótipos;
+- [ ] arquitetura de informação e navegação;
+- [ ] shell e entrada do aplicativo RH;
+- [ ] padrões de listas, detalhes, timelines e workspaces;
+- [ ] formulários, validações e autosave;
+- [ ] aprovações, conflitos e concorrência na interface;
+- [ ] estados vazio, carregando, parcial, bloqueado e erro;
+- [ ] dados sensíveis e visualizações minimizadas;
+- [ ] portal do trabalhador;
+- [ ] responsividade e acessibilidade;
+- [ ] protótipos por onda e critérios de aceite visual.
 
 ### Posterior
 
-- [ ] protótipos e design system;
 - [ ] execução do Sprint 00 após autorização;
 - [ ] execução das migrations;
 - [ ] implementação dos módulos;
@@ -888,6 +937,19 @@ Em 6 de agosto de 2026 foram reconciliados:
 
 O desenho do RH adota FK composta por tenant, zonas `public`, `rh_private` e `rh_ops`, temporalidade semiaberta, versões imutáveis, movimentos, RLS default deny, RPCs críticas e migrations em expand/contract. O catálogo permanece proposto e deverá ser reconciliado novamente com o banco real antes de gerar SQL.
 
+### 5.14 Contratos, webhooks e workers
+
+Em 6 de agosto de 2026 foram reconciliados:
+
+- `requireCapability` e o contexto de organização atuais;
+- Server Actions do Financeiro com autorização, uploads e chamadas de RPC;
+- webhook oficial do WhatsApp com corpo bruto, HMAC, hash e deduplicação;
+- worker de entrega de assinatura com reivindicação por RPC, assinatura HMAC e conclusão explícita;
+- RPCs `SECURITY DEFINER`, idempotency keys e eventos append-only existentes;
+- gaps de transações manuais, processamento síncrono longo e taxonomia de erros.
+
+O RH padroniza envelopes tipados, erros estáveis, RPCs transacionais, outbox/inbox, webhooks com aceitação durável, jobs com lease, adapters versionados e reconciliação de respostas incertas. Esses contratos permanecem documentais e deverão ser transformados em schemas e código somente após o Gate G00.
+
 ---
 
 ## 6. Estado técnico
@@ -896,9 +958,11 @@ Nenhuma tabela, migration, rota, Server Action, componente, motor de fórmula, c
 
 Nenhum schema `rh_private` ou `rh_ops`, tabela do catálogo, constraint, policy, RPC, view, índice, bucket, backfill ou teste SQL do Módulo 15 foi criado.
 
+Nenhum tipo TypeScript, schema Zod, contrato OpenAPI, Server Action, Route Handler, RPC, evento, inbox, job, worker ou adapter do Módulo 16 foi criado.
+
 Nenhuma história, sprint, issue, milestone, data ou gate do Módulo 14 foi iniciado ou aprovado para execução.
 
-A branch contém documentação funcional, técnica, de planejamento e de dados.
+A branch contém documentação funcional, técnica, de planejamento, dados e contratos.
 
 O CI do PR possui uma divergência preexistente na árvore combinada relacionada à numeração de vacinas a partir de `VACINA-044`. Os documentos do Projeto RH não alteraram vacinas.
 
@@ -908,30 +972,30 @@ Esse bloqueio deverá ser investigado no Sprint 00 para que a `main` e o PR volt
 
 ## 7. Próximo módulo lógico
 
-**Módulo 16 — Contratos de API, Comandos, Consultas, RPCs, Eventos, Jobs e Integrações.**
+**Módulo 17 — Design de Interface, Fluxos, Componentes, Estados, Acessibilidade e Protótipos.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Entidades e transições
-  → comandos e consultas tipados
-    → autorização e validação
-      → RPCs e transações
-        → eventos e outbox
-          → jobs e integrações
-            → respostas, erros e reconciliação
+Domínios, dados e contratos
+  → arquitetura de informação
+    → fluxos e workspaces
+      → componentes e estados
+        → protótipos responsivos
+          → acessibilidade e privacidade
+            → critérios visuais por onda
 ```
 
 O próximo módulo deverá distinguir:
 
-1. comando, consulta, evento e job;
-2. Server Action, Route Handler e RPC;
-3. autenticação, autorização, escopo e finalidade;
-4. validação estrutural e regra de negócio;
-5. erro de usuário, conflito, indisponibilidade e estado incerto;
-6. idempotência, correlação e causação;
-7. contrato interno e contrato externo;
-8. versão compatível e breaking change.
+1. navegação, página, workspace, painel e diálogo;
+2. lista operacional e dashboard analítico;
+3. visualização, edição, aprovação e execução;
+4. estado vazio, carregando, parcial, bloqueado e erro;
+5. aviso, erro impeditivo e conflito de versão;
+6. dado geral, sensível, clínico e próprio do trabalhador;
+7. desktop, tablet, campo e portal;
+8. protótipo aprovado e componente implementado.
 
 ---
 
@@ -954,3 +1018,4 @@ O próximo módulo deverá distinguir:
 | 0.13.0 | 06/08/2026 | ADR-013, Módulo 13 e arquitetura técnica, segurança, migrations e roadmap |
 | 0.14.0 | 06/08/2026 | ADR-014, Módulo 14 e backlog executável, sprints, gates e homologação |
 | 0.15.0 | 06/08/2026 | ADR-015, Módulo 15 e design físico, catálogo, RLS e ordem de migrations |
+| 0.16.0 | 06/08/2026 | ADR-016, Módulo 16 e contratos de API, eventos, jobs e integrações |
