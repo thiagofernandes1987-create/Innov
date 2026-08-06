@@ -1,0 +1,158 @@
+# Fluxo mínimo conforme https://baileys.wiki/authentication/qr-code
+name: Baileys Official Quickstart Lab
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - test/etapa-22-baileys-live-lab
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - feature/etapa-22-whatsapp-omnichannel
+
+permissions:
+  contents: write
+
+concurrency:
+  group: baileys-official-quickstart
+  cancel-in-progress: false
+
+jobs:
+  official-quickstart:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || !contains(github.event.head_commit.message, '[skip-baileys-lab]') }}
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 18
+    env:
+      BAILEYS_QUICKSTART_CONFIRM: I_ACCEPT_UNOFFICIAL_TEST_RISK
+      BAILEYS_QUICKSTART_ROOT: /tmp/baileys-official-quickstart
+      BAILEYS_QUICKSTART_AUTH_DIR: /tmp/baileys-official-quickstart/auth_info_baileys
+      BAILEYS_QUICKSTART_QR_PATH: /tmp/baileys-official-quickstart/qr.png
+      BAILEYS_QUICKSTART_STATUS_PATH: /tmp/baileys-official-quickstart/status.json
+      BAILEYS_QUICKSTART_EVIDENCE_PATH: /tmp/baileys-official-quickstart/evidence.json
+      BAILEYS_QUICKSTART_TIMEOUT_MS: '720000'
+      BAILEYS_QUICKSTART_MODULE_PATH: /tmp/baileys-official-quickstart/node_modules/@whiskeysockets/baileys/lib/index.js
+
+    steps:
+      - name: Checkout do laboratório
+        uses: actions/checkout@v6
+        with:
+          ref: test/etapa-22-baileys-live-lab
+          fetch-depth: 0
+
+      - name: Configurar Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Instalar quickstart oficial isolado
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$BAILEYS_QUICKSTART_ROOT"
+          cat > "$BAILEYS_QUICKSTART_ROOT/package.json" <<'JSON'
+          {
+            "name": "baileys-official-quickstart-lab",
+            "private": true,
+            "type": "module",
+            "dependencies": {
+              "@whiskeysockets/baileys": "7.0.0-rc13",
+              "qrcode": "1.5.4"
+            }
+          }
+          JSON
+          npm install \
+            --prefix "$BAILEYS_QUICKSTART_ROOT" \
+            --ignore-scripts \
+            --no-audit \
+            --no-fund \
+            --save-exact
+          actual="$(node -p "require('$BAILEYS_QUICKSTART_ROOT/node_modules/@whiskeysockets/baileys/package.json').version")"
+          test "$actual" = "7.0.0-rc13"
+
+      - name: Iniciar quickstart em segundo plano
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > /tmp/baileys-official-quickstart.log
+          env RUNNER_TRACKING_ID= \
+            nohup node scripts/run-baileys-official-quickstart-lab.mjs \
+            > /tmp/baileys-official-quickstart.log 2>&1 &
+          echo "$!" > /tmp/baileys-official-quickstart.pid
+          for attempt in $(seq 1 120); do
+            if [[ -s "$BAILEYS_QUICKSTART_QR_PATH" ]]; then
+              echo "QR oficial capturado."
+              exit 0
+            fi
+            pid="$(cat /tmp/baileys-official-quickstart.pid)"
+            if ! kill -0 "$pid" 2>/dev/null; then
+              echo "O quickstart encerrou antes de gerar QR."
+              cat /tmp/baileys-official-quickstart.log
+              exit 1
+            fi
+            sleep 1
+          done
+          echo "Timeout aguardando QR oficial."
+          cat /tmp/baileys-official-quickstart.log
+          exit 1
+
+      - name: Criptografar QR
+        shell: bash
+        run: |
+          set -euo pipefail
+          openssl cms -encrypt \
+            -binary \
+            -aes-256-cbc \
+            -in "$BAILEYS_QUICKSTART_QR_PATH" \
+            -out baileys-official-quickstart-qr.p7m \
+            -outform DER \
+            scripts/baileys-official-quickstart-qr-cert.pem
+          rm -f "$BAILEYS_QUICKSTART_QR_PATH"
+
+      - name: Registrar somente QR criptografado
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="docs/ETAPA-22-WHATSAPP-WEB-NAO-OFICIAL/BAILEYS-OFFICIAL-QUICKSTART-QR-LATEST.p7m"
+          cp baileys-official-quickstart-qr.p7m "$target"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$target"
+          git commit -m "test(baileys): registrar QR criptografado efêmero [skip-baileys-lab]"
+          git push origin HEAD:test/etapa-22-baileys-live-lab
+
+      - name: Aguardar pareamento, reconexão e envio
+        shell: bash
+        run: |
+          set -euo pipefail
+          pid="$(cat /tmp/baileys-official-quickstart.pid)"
+          exit_code=0
+          for attempt in $(seq 1 150); do
+            if ! kill -0 "$pid" 2>/dev/null; then
+              wait "$pid" || exit_code=$?
+              break
+            fi
+            sleep 5
+          done
+          if kill -0 "$pid" 2>/dev/null; then
+            kill -TERM "$pid" || true
+            sleep 3
+            kill -KILL "$pid" 2>/dev/null || true
+            exit_code=124
+          fi
+          cat /tmp/baileys-official-quickstart.log
+          if [[ -f "$BAILEYS_QUICKSTART_EVIDENCE_PATH" ]]; then
+            cp "$BAILEYS_QUICKSTART_EVIDENCE_PATH" baileys-official-quickstart-evidence.json
+          fi
+          exit "$exit_code"
+
+      - name: Publicar evidência sanitizada
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: baileys-official-quickstart-evidence-${{ github.run_id }}
+          path: baileys-official-quickstart-evidence.json
+          if-no-files-found: warn
+          retention-days: 3
