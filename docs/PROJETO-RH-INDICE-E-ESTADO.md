@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.9.0  
+**Versão do índice:** 0.10.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -40,6 +40,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Anexo M08 | `PROJETO-RH-MODULO-08-ANEXO-CONSTRUCAO-RISCOS-CRITICOS-E-PSICOSSOCIAIS.md` | complemento vinculante concluído |
 | ADR-009 | `PROJETO-RH-ADR-009-FOLHA-CALCULO-RUBRICAS-E-FECHAMENTO.md` | decisão funcional registrada |
 | Módulo 09 | `PROJETO-RH-MODULO-09-FOLHA-RUBRICAS-CALCULO-E-FECHAMENTO.md` | especificação funcional inicial concluída |
+| ADR-010 | `PROJETO-RH-ADR-010-FATO-PROJECAO-RECIBO-TOTALIZADOR-E-OBRIGACAO.md` | decisão funcional registrada |
+| Módulo 10 | `PROJETO-RH-MODULO-10-OBRIGACOES-DIGITAIS-E-RECONCILIACAO.md` | especificação funcional inicial concluída |
 
 ---
 
@@ -291,6 +293,38 @@ Competência
 - eventos externos manterão payload, hash, recibo e correlação;
 - nenhuma faixa, alíquota ou limite de 2026 será regra eterna no código.
 
+### 3.12 Fato, projeção, recibo, totalizador e obrigação
+
+```text
+Fato interno aprovado
+  → obrigação aplicável
+    → projeção versionada
+      → validação e aprovação
+        → lote e tentativa
+          → retorno e recibo
+            → totalizador ou declaração
+              → débito
+                → guia
+                  → pagamento
+                    → reconciliação
+```
+
+- fato interno não depende da disponibilidade externa;
+- projeção preservará snapshots e versões de origem;
+- payload aprovado será imutável;
+- tentativa de transmissão será append-only;
+- reenvio técnico, retificação, exclusão e reprocessamento serão distintos;
+- recibo não significará totalização, declaração ou quitação;
+- totalizador externo não substituirá a memória da folha;
+- fechamento do eSocial não será confundido com transmissão da DCTFWeb;
+- DCTFWeb será tratada como declaração derivada das escriturações aplicáveis;
+- FGTS Digital será reconciliado por trabalhador, competência, débito, guia e pagamento;
+- guia emitida não será considerada paga;
+- produção e produção restrita terão credenciais e filas segregadas;
+- certificados e segredos não aparecerão em logs;
+- indisponibilidade externa não apagará fato ou obrigação;
+- reconciliações de evento, totalizador, débito, guia e pagamento serão independentes.
+
 ---
 
 ## 4. Progresso funcional
@@ -348,7 +382,7 @@ Competência
 - [x] convocações, exames, ASOs, aptidão e restrições;
 - [x] segregação e auditoria de dados clínicos;
 - [x] incidentes, investigação e ações corretivas;
-- [x] CAT e eventos S-2210, S-2220 e S-2240;
+- [x] CAT e eventos S-2210, S-2220, S-2221 e S-2240;
 - [x] catálogo, estoque, entrega, inspeção e troca de EPI;
 - [x] treinamentos, certificados e reciclagens;
 - [x] habilitações e permissões de trabalho;
@@ -374,25 +408,43 @@ Competência
 - [x] Contabilidade, custos, obras e centros de custo;
 - [x] eventos S-1010, S-1200, S-1210, S-1298 e S-1299;
 - [x] FGTS Digital, totalizadores e reconciliações;
-- [x] permissões, auditoria, relatórios e testes do Módulo 09.
+- [x] permissões, auditoria, relatórios e testes do Módulo 09;
+- [x] decisão Fato × Obrigação × Projeção × Tentativa × Recibo × Totalizador × Débito × Guia × Pagamento;
+- [x] catálogo de sistemas, eventos, leiautes e regras;
+- [x] inscrições externas, CNO, ambientes e certificados;
+- [x] calendário de obrigações e prazos;
+- [x] projeções, hashes, idempotência e validações;
+- [x] aprovações, lotes, filas e tentativas;
+- [x] retornos, recibos e processamento assíncrono;
+- [x] retificações, exclusões e reenvios;
+- [x] períodos, pré-fechamento, fechamento e reabertura;
+- [x] totalizadores por trabalhador e contribuinte;
+- [x] reconciliação em camadas;
+- [x] DCTFWeb, declarações, DARFs e pagamentos;
+- [x] FGTS Digital, débitos, guias e saldos;
+- [x] contingências e indisponibilidades;
+- [x] permissões, auditoria, relatórios e testes do Módulo 10.
 
 ### Próximo
 
-- [ ] Módulo 10 — Obrigações Digitais e Reconciliação Governamental;
-- [ ] catálogo versionado de obrigações e leiautes;
-- [ ] agenda e matriz de aplicabilidade;
-- [ ] eventos não periódicos e periódicos;
-- [ ] lotes, filas, recibos e totalizadores;
-- [ ] eSocial, FGTS Digital, DCTFWeb e integrações correlatas;
-- [ ] reaberturas, retificações e exclusões;
-- [ ] divergências entre cadastro, folha, pagamento e declarações;
-- [ ] dossiê de conformidade por competência.
+- [ ] Módulo 11 — Desligamentos, Rescisões, Avisos, Verbas, Homologações e Offboarding;
+- [ ] iniciativa, motivo e tipo de desligamento;
+- [ ] aviso prévio e datas relevantes;
+- [ ] estabilidade, bloqueios e validações;
+- [ ] cálculo rescisório e memória;
+- [ ] documentos, assinatura e homologação;
+- [ ] pagamentos e quitações;
+- [ ] devolução de ativos, acessos, EPIs e benefícios;
+- [ ] eventos externos e reconciliação;
+- [ ] reintegração e cancelamento.
 
 ### Posterior
 
-- [ ] desligamentos e rescisões;
 - [ ] relatórios consolidados;
-- [ ] plano de implementação.
+- [ ] analytics e indicadores;
+- [ ] plano de implementação;
+- [ ] backlog técnico e migrations;
+- [ ] estratégia de homologação e produção.
 
 ---
 
@@ -489,11 +541,29 @@ Em 6 de agosto de 2026 foram verificadas:
 
 A baseline oficial diferencia tabela de rubricas, remuneração devida, pagamento efetivo e fechamento periódico. Faixas, valores, incidências, códigos, prazos e interpretações deverão ser novamente validados antes da implementação, homologação e produção.
 
+### 5.8 Obrigações digitais e reconciliação
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- Manual de Orientação do eSocial consolidado até NO 11/2026;
+- eventos S-1298, S-1299, S-3000 e totalizadores S-5001, S-5002, S-5003, S-5011, S-5012 e S-5013;
+- regras de transmissão durante o processamento do fechamento;
+- regras de exclusão e retificação em períodos fechados;
+- orientações da Receita Federal publicadas em 2026 sobre integração entre eSocial, EFD-Reinf e DCTFWeb;
+- serviço e Manual de Orientação da DCTFWeb;
+- Manual do FGTS Digital versão 1.70, de 12 de junho de 2026;
+- comunicados de 2026 sobre FGTS de processos trabalhistas.
+
+A baseline oficial confirma que o encerramento bem-sucedido das escriturações sensibiliza automaticamente a DCTFWeb; que correções em escriturações encerradas exigem reabertura, retificação e novo encerramento; e que o FGTS Digital utiliza remunerações declaradas no eSocial para individualizar débitos e gerar guias.
+
+Leiautes, regras, endpoints, certificados, prazos, códigos e interpretações deverão ser novamente validados antes da implementação, homologação e produção.
+
 ---
 
 ## 6. Estado técnico
 
-Nenhuma tabela, migration, rota, Server Action, componente, coletor, motor de fórmula, cálculo de folha ou integração foi implementada pelo Projeto RH.
+Nenhuma tabela, migration, rota, Server Action, componente, motor de fórmula, cálculo de folha, conector governamental, certificado, fila, transmissão, guia ou pagamento foi implementado pelo Projeto RH.
 
 A branch contém apenas documentação funcional.
 
@@ -505,32 +575,32 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 ## 7. Próximo módulo lógico
 
-**Módulo 10 — Obrigações Digitais, Eventos Trabalhistas, Totalizadores e Reconciliação Governamental.**
+**Módulo 11 — Desligamentos, Rescisões, Avisos, Verbas, Homologações e Offboarding.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Fato interno aprovado
-  → obrigação aplicável e versão do leiaute
-  → projeção canônica
-  → validação
-  → lote e transmissão
-  → recibo, retorno e totalizadores
-  → reconciliação
-  → retificação, exclusão ou reabertura quando necessária
-  → dossiê de conformidade
+Iniciativa ou fato de desligamento
+  → caso rescisório auditável
+  → motivo, datas, aviso e estabilidade
+  → apuração de ponto, férias, benefícios e ativos
+  → cálculo rescisório versionado
+  → documentos, aprovações e comunicação
+  → pagamento, quitação e eventos externos
+  → encerramento de acessos e obrigações
+  → reconciliação ou reintegração
 ```
 
 O próximo módulo deverá distinguir:
 
-1. fato interno e declaração externa;
-2. obrigação e versão do leiaute;
-3. evento, lote e transmissão;
-4. aceite técnico e conformidade do conteúdo;
-5. recibo, totalizador, guia e pagamento;
-6. retificação, exclusão e reabertura;
-7. divergência e plano de correção;
-8. ambiente de produção restrita e produção.
+1. intenção de desligamento e desligamento efetivo;
+2. iniciativa, motivo interno e código externo;
+3. aviso concedido, trabalhado, indenizado e projetado;
+4. cálculo rescisório e pagamento;
+5. documento, assinatura, homologação e quitação;
+6. encerramento de vínculo e offboarding operacional;
+7. cancelamento, retificação e reintegração;
+8. evento externo, recibo, FGTS e reconciliação.
 
 ---
 
@@ -547,3 +617,4 @@ O próximo módulo deverá distinguir:
 | 0.7.0 | 06/08/2026 | ADR-007, Módulo 07 e baseline de benefícios, dependentes e descontos |
 | 0.8.0 | 06/08/2026 | ADR-008, Módulo 08 e baseline de SST, riscos, saúde e habilitações |
 | 0.9.0 | 06/08/2026 | ADR-009, Módulo 09 e baseline de folha, rubricas, cálculo e fechamento |
+| 0.10.0 | 06/08/2026 | ADR-010, Módulo 10 e baseline de obrigações digitais e reconciliação |
