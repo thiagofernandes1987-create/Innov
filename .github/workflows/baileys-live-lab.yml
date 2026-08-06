@@ -1,4 +1,4 @@
-name: Baileys Live Lab
+name: Baileys Official Quickstart Lab
 
 on:
   pull_request:
@@ -10,22 +10,24 @@ permissions:
   contents: read
 
 concurrency:
-  group: baileys-live-lab-${{ github.event.pull_request.number }}
+  group: baileys-official-quickstart-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
-  live-lab:
+  official-quickstart:
     if: github.head_ref == 'test/etapa-22-baileys-live-lab'
     runs-on: ubuntu-latest
     environment: homologation
-    timeout-minutes: 12
+    timeout-minutes: 18
     env:
-      BAILEYS_LAB_CONFIRM: I_ACCEPT_UNOFFICIAL_TEST_RISK
-      BAILEYS_LAB_TIMEOUT_MS: "480000"
-      BAILEYS_LAB_EVIDENCE_PATH: baileys-live-lab-evidence.json
-      BAILEYS_LAB_QR_MODULE: /tmp/baileys-live-lab-qr/node_modules/qrcode-terminal/lib/main.js
-      BAILEYS_LAB_RUNTIME_VERSION: "6.7.23"
-      BAILEYS_OFFICIAL_PINNED_VERSION: "7.0.0-rc13"
+      BAILEYS_QUICKSTART_CONFIRM: I_ACCEPT_UNOFFICIAL_TEST_RISK
+      BAILEYS_QUICKSTART_ROOT: /tmp/baileys-official-quickstart
+      BAILEYS_QUICKSTART_AUTH_DIR: /tmp/baileys-official-quickstart/auth_info_baileys
+      BAILEYS_QUICKSTART_QR_PATH: /tmp/baileys-official-quickstart/qr.png
+      BAILEYS_QUICKSTART_STATUS_PATH: /tmp/baileys-official-quickstart/status.json
+      BAILEYS_QUICKSTART_EVIDENCE_PATH: /tmp/baileys-official-quickstart/evidence.json
+      BAILEYS_QUICKSTART_TIMEOUT_MS: '720000'
+      BAILEYS_QUICKSTART_MODULE_PATH: /tmp/baileys-official-quickstart/node_modules/@whiskeysockets/baileys/lib/index.js
 
     steps:
       - name: Checkout do laboratório
@@ -39,91 +41,124 @@ jobs:
           node-version: 24
           package-manager-cache: false
 
-      - name: Habilitar pnpm
+      - name: Instalar quickstart oficial isolado
+        shell: bash
         run: |
-          corepack enable
-          corepack prepare pnpm@11.15.0 --activate
-
-      - name: Instalar workspace sem lifecycle scripts
-        run: pnpm install --no-frozen-lockfile --ignore-scripts --reporter=append-only
-
-      - name: Instalar renderizador QR efêmero e fixado
-        run: |
+          set -euo pipefail
+          mkdir -p "$BAILEYS_QUICKSTART_ROOT"
+          cat > "$BAILEYS_QUICKSTART_ROOT/package.json" <<'JSON'
+          {
+            "name": "baileys-official-quickstart-lab",
+            "private": true,
+            "type": "module",
+            "dependencies": {
+              "@whiskeysockets/baileys": "7.0.0-rc13",
+              "qrcode": "1.5.4"
+            }
+          }
+          JSON
           npm install \
-            --prefix /tmp/baileys-live-lab-qr \
+            --prefix "$BAILEYS_QUICKSTART_ROOT" \
             --ignore-scripts \
             --no-audit \
             --no-fund \
-            --save-exact \
-            qrcode-terminal@0.12.0
+            --save-exact
+          actual="$(node -p "require('$BAILEYS_QUICKSTART_ROOT/node_modules/@whiskeysockets/baileys/package.json').version")"
+          test "$actual" = "7.0.0-rc13"
 
-      - name: Verificar cadeia oficial Baileys
-        run: pnpm validate:messaging-lockfile
-
-      - name: Compilar gateway contra versão oficial fixada
-        run: pnpm build:messaging-gateway
-
-      - name: Preparar runtime compatível isolado 6.7.23
+      - name: Iniciar quickstart em segundo plano
+        shell: bash
         run: |
-          npm install \
-            --prefix /tmp/baileys-live-lab-runtime \
-            --ignore-scripts \
-            --no-audit \
-            --no-fund \
-            --save-exact \
-            @whiskeysockets/baileys@6.7.23
-          rm -rf apps/messaging-gateway/node_modules/@whiskeysockets/baileys
-          ln -s /tmp/baileys-live-lab-runtime/node_modules/@whiskeysockets/baileys \
-            apps/messaging-gateway/node_modules/@whiskeysockets/baileys
-          actual="$(node -p "require('./apps/messaging-gateway/node_modules/@whiskeysockets/baileys/package.json').version")"
-          test "$actual" = "$BAILEYS_LAB_RUNTIME_VERSION"
-          echo "Runtime efêmero validado: $actual"
+          set -euo pipefail
+          : > /tmp/baileys-official-quickstart.log
+          env RUNNER_TRACKING_ID= \
+            nohup node scripts/run-baileys-official-quickstart-lab.mjs \
+            > /tmp/baileys-official-quickstart.log 2>&1 &
+          echo "$!" > /tmp/baileys-official-quickstart.pid
+          for attempt in $(seq 1 120); do
+            if [[ -s "$BAILEYS_QUICKSTART_QR_PATH" ]]; then
+              echo "QR oficial capturado."
+              exit 0
+            fi
+            pid="$(cat /tmp/baileys-official-quickstart.pid)"
+            if ! kill -0 "$pid" 2>/dev/null; then
+              echo "O quickstart encerrou antes de gerar QR."
+              cat /tmp/baileys-official-quickstart.log
+              exit 1
+            fi
+            sleep 1
+          done
+          echo "Timeout aguardando QR oficial."
+          cat /tmp/baileys-official-quickstart.log
+          exit 1
 
-      - name: Executar laboratório — escaneie o QR nos logs
-        run: node apps/messaging-gateway/dist/engines/baileys/live-lab.js
-
-      - name: Anotar matriz de compatibilidade na evidência
-        if: always()
+      - name: Criptografar QR antes de publicar
+        shell: bash
         run: |
-          if [[ -f baileys-live-lab-evidence.json ]]; then
-            node <<'NODE'
-          const fs = require('fs');
-          const path = 'baileys-live-lab-evidence.json';
-          const evidence = JSON.parse(fs.readFileSync(path, 'utf8'));
-          evidence.packageVersion = process.env.BAILEYS_LAB_RUNTIME_VERSION;
-          evidence.officialPinnedVersion = process.env.BAILEYS_OFFICIAL_PINNED_VERSION;
-          evidence.compatibilityFallback = true;
-          evidence.officialPinnedRuntimeResult = 'FAIL_BEFORE_QR';
-          fs.writeFileSync(path, `${JSON.stringify(evidence, null, 2)}\n`, { mode: 0o600 });
-          NODE
+          set -euo pipefail
+          openssl cms -encrypt \
+            -binary \
+            -aes-256-cbc \
+            -in "$BAILEYS_QUICKSTART_QR_PATH" \
+            -out baileys-official-quickstart-qr.p7m \
+            -outform DER \
+            scripts/baileys-official-quickstart-qr-cert.pem
+          rm -f "$BAILEYS_QUICKSTART_QR_PATH"
+
+      - name: Publicar QR criptografado temporário
+        uses: actions/upload-artifact@v7
+        with:
+          name: baileys-official-quickstart-private-qr-${{ github.run_id }}
+          path: baileys-official-quickstart-qr.p7m
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+      - name: Aguardar pareamento, reconexão e envio
+        shell: bash
+        run: |
+          set -euo pipefail
+          pid="$(cat /tmp/baileys-official-quickstart.pid)"
+          exit_code=0
+          for attempt in $(seq 1 150); do
+            if ! kill -0 "$pid" 2>/dev/null; then
+              wait "$pid" || exit_code=$?
+              break
+            fi
+            sleep 5
+          done
+          if kill -0 "$pid" 2>/dev/null; then
+            kill -TERM "$pid" || true
+            sleep 3
+            kill -KILL "$pid" 2>/dev/null || true
+            exit_code=124
           fi
+          cat /tmp/baileys-official-quickstart.log
+          if [[ -f "$BAILEYS_QUICKSTART_EVIDENCE_PATH" ]]; then
+            cp "$BAILEYS_QUICKSTART_EVIDENCE_PATH" baileys-official-quickstart-evidence.json
+          fi
+          exit "$exit_code"
 
       - name: Resumo sanitizado
         if: always()
         shell: bash
         run: |
-          echo "## Baileys Live Lab" >> "$GITHUB_STEP_SUMMARY"
-          if [[ -f baileys-live-lab-evidence.json ]]; then
+          echo "## Baileys Official Quickstart" >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f baileys-official-quickstart-evidence.json ]]; then
             node <<'NODE' >> "$GITHUB_STEP_SUMMARY"
           const fs = require('fs');
-          const e = JSON.parse(fs.readFileSync('baileys-live-lab-evidence.json', 'utf8'));
-          console.log(`- Runtime testado: ${e.packageVersion}`);
-          console.log(`- Versão oficial fixada: ${e.officialPinnedVersion}`);
+          const e = JSON.parse(fs.readFileSync('baileys-official-quickstart-evidence.json', 'utf8'));
           console.log(`- Resultado: ${e.outcome}`);
           console.log(`- QR observado: ${e.qrObserved ? 'sim' : 'não'}`);
-          console.log(`- QR renderizado em logs restritos: ${e.qrRenderedInRestrictedLogs ? 'sim' : 'não'}`);
-          console.log(`- Reconexões: ${e.reconnectAttempts}`);
-          console.log(`- Socket aberto: ${e.socketOpened ? 'sim' : 'não'}`);
-          console.log(`- Credenciais cifradas: ${e.credentialsPersistedEncrypted ? 'sim' : 'não'}`);
-          console.log(`- Envio canônico aceito: ${e.canonicalSendAccepted ? 'sim' : 'não'}`);
-          console.log(`- Evento próprio observado: ${e.rawOwnMessageObserved ? 'sim' : 'não'}`);
-          console.log(`- Inbound canônico externo: ${e.canonicalInboundObserved ? 'sim' : 'não'}`);
-          console.log(`- Receipt: ${e.receiptObserved ? 'sim' : 'não'}`);
-          console.log(`- Timeout: ${e.timedOut ? 'sim' : 'não'}`);
+          console.log(`- Gerações de QR: ${e.qrGenerationCount}`);
+          console.log(`- Conexão aberta: ${e.connectionOpened ? 'sim' : 'não'}`);
+          console.log(`- Restart required observado: ${e.restartRequiredObserved ? 'sim' : 'não'}`);
+          console.log(`- Reconexões: ${e.reconnectCount}`);
+          console.log(`- Credenciais atualizadas: ${e.credentialsUpdated ? 'sim' : 'não'}`);
+          console.log(`- Envio aceito: ${e.sendAccepted ? 'sim' : 'não'}`);
           console.log(`- Número de produção: ${e.productionNumberUsed ? 'sim' : 'não'}`);
           console.log(`- Meta Cloud: ${e.metaCloudUsed ? 'sim' : 'não'}`);
           console.log(`- IA autônoma: ${e.autonomousAiUsed ? 'sim' : 'não'}`);
-          console.log(`- Erros: ${(e.engineErrorCodes || []).join(', ') || 'nenhum'}`);
           NODE
           else
             echo "- Evidência não foi criada." >> "$GITHUB_STEP_SUMMARY"
@@ -133,7 +168,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: baileys-live-lab-evidence-${{ github.run_id }}
-          path: baileys-live-lab-evidence.json
+          name: baileys-official-quickstart-evidence-${{ github.run_id }}
+          path: baileys-official-quickstart-evidence.json
           if-no-files-found: warn
           retention-days: 3
