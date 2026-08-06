@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.8.0  
+**Versão do índice:** 0.9.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -37,6 +37,9 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 07 | `PROJETO-RH-MODULO-07-BENEFICIOS-DEPENDENTES-E-DESCONTOS.md` | especificação funcional inicial concluída |
 | ADR-008 | `PROJETO-RH-ADR-008-SST-RISCOS-SAUDE-E-HABILITACAO.md` | decisão funcional registrada |
 | Módulo 08 | `PROJETO-RH-MODULO-08-SST-RISCOS-EXAMES-E-HABILITACOES.md` | especificação funcional inicial concluída |
+| Anexo M08 | `PROJETO-RH-MODULO-08-ANEXO-CONSTRUCAO-RISCOS-CRITICOS-E-PSICOSSOCIAIS.md` | complemento vinculante concluído |
+| ADR-009 | `PROJETO-RH-ADR-009-FOLHA-CALCULO-RUBRICAS-E-FECHAMENTO.md` | decisão funcional registrada |
+| Módulo 09 | `PROJETO-RH-MODULO-09-FOLHA-RUBRICAS-CALCULO-E-FECHAMENTO.md` | especificação funcional inicial concluída |
 
 ---
 
@@ -260,6 +263,34 @@ EPI + treinamento + aptidão + permissão
 - Diário de Obras será evidência complementar, não fonte canônica de SST;
 - acesso clínico e exportações sensíveis terão auditoria reforçada.
 
+### 3.11 Folha, rubricas, cálculo e fechamento
+
+```text
+Competência
+  → ciclo e população congelada
+    → fatos e entradas versionadas
+      → rubricas, fórmulas e parâmetros vigentes
+        → execução determinística
+          → demonstrativos, bases e encargos
+            → conferência e aprovação
+              → fechamento
+                → pagamentos, contabilidade e eventos externos
+```
+
+- fato, entrada, rubrica, fórmula e resultado são objetos diferentes;
+- rubricas, fórmulas, parâmetros e arredondamentos terão versão e vigência;
+- fórmulas serão declarativas e não executarão código arbitrário;
+- cálculos e demonstrativos não serão sobrescritos;
+- ajuste manual será explícito e aprovado;
+- valor devido e pagamento efetivo serão separados;
+- remuneração, pagamento e fechamento externo serão projeções distintas;
+- folha complementar e diferença retroativa preservarão a folha originária;
+- fechamento será atômico;
+- reabertura preservará todas as versões anteriores;
+- rateio por obra ou centro de custo não alterará o líquido;
+- eventos externos manterão payload, hash, recibo e correlação;
+- nenhuma faixa, alíquota ou limite de 2026 será regra eterna no código.
+
 ---
 
 ## 4. Progresso funcional
@@ -322,23 +353,43 @@ EPI + treinamento + aptidão + permissão
 - [x] treinamentos, certificados e reciclagens;
 - [x] habilitações e permissões de trabalho;
 - [x] integração com Obras, RH, ponto, afastamentos, folha e Financeiro;
-- [x] permissões, alertas, relatórios e testes do Módulo 08.
+- [x] construção, riscos críticos, terceiros, emergência e fatores psicossociais;
+- [x] permissões, alertas, relatórios e testes do Módulo 08;
+- [x] decisão Folha × Fato × Entrada × Rubrica × Fórmula × Resultado × Pagamento;
+- [x] calendários, competências e tipos de processamento;
+- [x] ciclos e população congelada;
+- [x] catálogo e versões de rubricas;
+- [x] motor declarativo de fórmulas;
+- [x] parâmetros e tabelas por vigência;
+- [x] contratos de entrada e idempotência;
+- [x] cálculo individual e em lote;
+- [x] bases, incidências, encargos e rateios;
+- [x] memória de cálculo e explicabilidade;
+- [x] folhas mensal, férias, décimo terceiro e complementar;
+- [x] retroatividades e diferenças;
+- [x] ajustes manuais, conferência e aprovação;
+- [x] fechamento e reabertura;
+- [x] demonstrativos e portal do trabalhador;
+- [x] pagamentos e retorno bancário;
+- [x] Contabilidade, custos, obras e centros de custo;
+- [x] eventos S-1010, S-1200, S-1210, S-1298 e S-1299;
+- [x] FGTS Digital, totalizadores e reconciliações;
+- [x] permissões, auditoria, relatórios e testes do Módulo 09.
 
 ### Próximo
 
-- [ ] Módulo 09 — Folha de Pagamento, Rubricas, Bases, Cálculo e Fechamento;
-- [ ] competências e períodos de cálculo;
-- [ ] catálogo e versões de rubricas;
-- [ ] fórmulas, incidências e bases;
-- [ ] entradas de ponto, férias, afastamentos e benefícios;
-- [ ] cálculo bruto, descontos, encargos e líquido;
-- [ ] memória de cálculo e explicabilidade;
-- [ ] prévia, conferência, aprovação, fechamento e reabertura;
-- [ ] integração financeira e eventos periódicos.
+- [ ] Módulo 10 — Obrigações Digitais e Reconciliação Governamental;
+- [ ] catálogo versionado de obrigações e leiautes;
+- [ ] agenda e matriz de aplicabilidade;
+- [ ] eventos não periódicos e periódicos;
+- [ ] lotes, filas, recibos e totalizadores;
+- [ ] eSocial, FGTS Digital, DCTFWeb e integrações correlatas;
+- [ ] reaberturas, retificações e exclusões;
+- [ ] divergências entre cadastro, folha, pagamento e declarações;
+- [ ] dossiê de conformidade por competência.
 
 ### Posterior
 
-- [ ] obrigações digitais e reconciliação governamental;
 - [ ] desligamentos e rescisões;
 - [ ] relatórios consolidados;
 - [ ] plano de implementação.
@@ -416,19 +467,33 @@ Em 6 de agosto de 2026 foram verificadas:
 - NR-1 e materiais oficiais de GRO/PGR;
 - NR-6 e orientações oficiais sobre EPI e CA;
 - NR-7 e PCMSO;
-- NR-18 atualizada em 2026 para a indústria da construção;
+- NR-10, NR-12, NR-17, NR-18, NR-33 e NR-35;
 - documentação técnica do eSocial S-1.3 até NT 06/2026;
 - Manual de Orientação do eSocial consolidado até NO 11/2026;
 - Manual WEB Geral de SST;
-- eventos S-2210, S-2220 e S-2240.
+- eventos S-2210, S-2220, S-2221 e S-2240.
 
 A baseline oficial diferencia gerenciamento de riscos, monitoramento da saúde, comunicação de acidente e exposição a agentes. Requisitos, textos consolidados, prazos, tabelas, códigos, cargas horárias e interpretações deverão ser verificados novamente antes da implementação, homologação e produção.
+
+### 5.7 Folha de pagamento
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- eventos S-1010, S-1200, S-1210, S-1298 e S-1299;
+- regras de remuneração, pagamento, exclusão, fechamento e reabertura;
+- tabelas previdenciárias vigentes desde janeiro de 2026;
+- tabelas de tributação do imposto de renda de 2026;
+- Manual do FGTS Digital versão 1.70, de 12 de junho de 2026;
+- notas orientativas e documentação técnica correlata.
+
+A baseline oficial diferencia tabela de rubricas, remuneração devida, pagamento efetivo e fechamento periódico. Faixas, valores, incidências, códigos, prazos e interpretações deverão ser novamente validados antes da implementação, homologação e produção.
 
 ---
 
 ## 6. Estado técnico
 
-Nenhuma tabela, migration, rota, Server Action, componente, coletor, cálculo ou integração foi implementada pelo Projeto RH.
+Nenhuma tabela, migration, rota, Server Action, componente, coletor, motor de fórmula, cálculo de folha ou integração foi implementada pelo Projeto RH.
 
 A branch contém apenas documentação funcional.
 
@@ -440,32 +505,32 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 ## 7. Próximo módulo lógico
 
-**Módulo 09 — Folha de Pagamento, Rubricas, Bases, Fórmulas, Cálculo e Fechamento.**
+**Módulo 10 — Obrigações Digitais, Eventos Trabalhistas, Totalizadores e Reconciliação Governamental.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Competência e população elegível
-  → versões contratuais e cadastrais
-  → entradas de ponto, férias, afastamentos, benefícios e SST
-  → rubricas e fórmulas versionadas
-  → cálculo bruto, bases, descontos e encargos
-  → memória de cálculo
-  → conferência e aprovação
-  → fechamento
-  → financeiro e eventos periódicos
+Fato interno aprovado
+  → obrigação aplicável e versão do leiaute
+  → projeção canônica
+  → validação
+  → lote e transmissão
+  → recibo, retorno e totalizadores
+  → reconciliação
+  → retificação, exclusão ou reabertura quando necessária
+  → dossiê de conformidade
 ```
 
 O próximo módulo deverá distinguir:
 
-1. rubrica e sua versão;
-2. fórmula e parâmetro;
-3. entrada de cálculo e fato de origem;
-4. resultado calculado e ajuste manual;
-5. base de incidência e tributo;
-6. prévia, cálculo oficial e recálculo;
-7. fechamento e reabertura;
-8. pagamento e obrigação digital.
+1. fato interno e declaração externa;
+2. obrigação e versão do leiaute;
+3. evento, lote e transmissão;
+4. aceite técnico e conformidade do conteúdo;
+5. recibo, totalizador, guia e pagamento;
+6. retificação, exclusão e reabertura;
+7. divergência e plano de correção;
+8. ambiente de produção restrita e produção.
 
 ---
 
@@ -481,3 +546,4 @@ O próximo módulo deverá distinguir:
 | 0.6.0 | 06/08/2026 | ADR-006, Módulo 06 e baseline de férias e afastamentos |
 | 0.7.0 | 06/08/2026 | ADR-007, Módulo 07 e baseline de benefícios, dependentes e descontos |
 | 0.8.0 | 06/08/2026 | ADR-008, Módulo 08 e baseline de SST, riscos, saúde e habilitações |
+| 0.9.0 | 06/08/2026 | ADR-009, Módulo 09 e baseline de folha, rubricas, cálculo e fechamento |
