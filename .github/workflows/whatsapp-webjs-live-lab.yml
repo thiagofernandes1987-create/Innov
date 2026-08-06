@@ -1,0 +1,164 @@
+name: WhatsApp Web.js Live Lab
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - feature/etapa-22-whatsapp-omnichannel
+
+permissions:
+  contents: read
+
+concurrency:
+  group: whatsapp-webjs-live-lab-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  live-lab:
+    if: github.head_ref == 'test/etapa-22-whatsapp-webjs-live-lab'
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 18
+    env:
+      WWEBJS_LAB_CONFIRM: I_ACCEPT_UNOFFICIAL_TEST_RISK
+      WWEBJS_LAB_ROOT: /tmp/whatsapp-webjs-live-lab
+      WWEBJS_LAB_QR_PATH: /tmp/whatsapp-webjs-live-lab/qr.png
+      WWEBJS_LAB_STATUS_PATH: /tmp/whatsapp-webjs-live-lab/status.json
+      WWEBJS_LAB_EVIDENCE_PATH: /tmp/whatsapp-webjs-live-lab/evidence.json
+      WWEBJS_LAB_TIMEOUT_MS: '720000'
+
+    steps:
+      - name: Checkout do laboratório
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          package-manager-cache: false
+
+      - name: Preparar Chromium e dependências efêmeras
+        shell: bash
+        run: |
+          set -euo pipefail
+          chrome="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium)"
+          test -x "$chrome"
+          echo "WWEBJS_CHROME_PATH=$chrome" >> "$GITHUB_ENV"
+          mkdir -p "$WWEBJS_LAB_ROOT"
+          cat > "$WWEBJS_LAB_ROOT/package.json" <<'JSON'
+          {
+            "name": "whatsapp-webjs-live-lab",
+            "private": true,
+            "dependencies": {
+              "qrcode": "1.5.4",
+              "whatsapp-web.js": "1.34.7"
+            }
+          }
+          JSON
+          npm install \
+            --prefix "$WWEBJS_LAB_ROOT" \
+            --ignore-scripts \
+            --no-audit \
+            --no-fund \
+            --save-exact
+          actual="$(node -p "require('$WWEBJS_LAB_ROOT/node_modules/whatsapp-web.js/package.json').version")"
+          test "$actual" = "1.34.7"
+          "$chrome" --version
+
+      - name: Iniciar laboratório em segundo plano
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > /tmp/whatsapp-webjs-live-lab.log
+          env RUNNER_TRACKING_ID= \
+            nohup node scripts/run-whatsapp-webjs-live-lab.mjs \
+            > /tmp/whatsapp-webjs-live-lab.log 2>&1 &
+          echo "$!" > /tmp/whatsapp-webjs-live-lab.pid
+          for attempt in $(seq 1 120); do
+            if [[ -s "$WWEBJS_LAB_QR_PATH" ]]; then
+              echo "QR privado gerado."
+              cp "$WWEBJS_LAB_QR_PATH" whatsapp-webjs-qr.png
+              exit 0
+            fi
+            pid="$(cat /tmp/whatsapp-webjs-live-lab.pid)"
+            if ! kill -0 "$pid" 2>/dev/null; then
+              echo "O laboratório encerrou antes de gerar QR."
+              cat /tmp/whatsapp-webjs-live-lab.log
+              exit 1
+            fi
+            sleep 1
+          done
+          echo "Timeout aguardando QR."
+          cat /tmp/whatsapp-webjs-live-lab.log
+          exit 1
+
+      - name: Publicar QR privado temporário
+        uses: actions/upload-artifact@v7
+        with:
+          name: whatsapp-webjs-private-qr-${{ github.run_id }}
+          path: whatsapp-webjs-qr.png
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+      - name: Aguardar pareamento e teste de mensagem
+        shell: bash
+        run: |
+          set -euo pipefail
+          pid="$(cat /tmp/whatsapp-webjs-live-lab.pid)"
+          exit_code=0
+          for attempt in $(seq 1 150); do
+            if ! kill -0 "$pid" 2>/dev/null; then
+              wait "$pid" || exit_code=$?
+              break
+            fi
+            sleep 5
+          done
+          if kill -0 "$pid" 2>/dev/null; then
+            kill -TERM "$pid" || true
+            sleep 3
+            kill -KILL "$pid" 2>/dev/null || true
+            exit_code=124
+          fi
+          cat /tmp/whatsapp-webjs-live-lab.log
+          if [[ -f "$WWEBJS_LAB_EVIDENCE_PATH" ]]; then
+            cp "$WWEBJS_LAB_EVIDENCE_PATH" whatsapp-webjs-live-lab-evidence.json
+          fi
+          exit "$exit_code"
+
+      - name: Resumo sanitizado
+        if: always()
+        shell: bash
+        run: |
+          echo "## WhatsApp Web.js Live Lab" >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f whatsapp-webjs-live-lab-evidence.json ]]; then
+            node <<'NODE' >> "$GITHUB_STEP_SUMMARY"
+          const fs = require('fs');
+          const e = JSON.parse(fs.readFileSync('whatsapp-webjs-live-lab-evidence.json', 'utf8'));
+          console.log(`- Biblioteca: ${e.library}@${e.libraryVersion}`);
+          console.log(`- Resultado: ${e.outcome}`);
+          console.log(`- QR gerado: ${e.qrGenerated ? 'sim' : 'não'}`);
+          console.log(`- Autenticado: ${e.authenticated ? 'sim' : 'não'}`);
+          console.log(`- Ready: ${e.ready ? 'sim' : 'não'}`);
+          console.log(`- Envio aceito: ${e.sendAccepted ? 'sim' : 'não'}`);
+          console.log(`- Mensagem própria observada: ${e.ownMessageObserved ? 'sim' : 'não'}`);
+          console.log(`- ACK observado: ${e.messageAckObserved ? 'sim' : 'não'}`);
+          console.log(`- Sessão persistida: ${e.sessionPersisted ? 'sim' : 'não'}`);
+          console.log(`- Número de produção: ${e.productionNumberUsed ? 'sim' : 'não'}`);
+          console.log(`- Meta Cloud: ${e.metaCloudUsed ? 'sim' : 'não'}`);
+          console.log(`- Baileys: ${e.baileysUsed ? 'sim' : 'não'}`);
+          NODE
+          else
+            echo "- Evidência não foi criada." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Publicar evidência sanitizada
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: whatsapp-webjs-live-lab-evidence-${{ github.run_id }}
+          path: whatsapp-webjs-live-lab-evidence.json
+          if-no-files-found: warn
+          retention-days: 3
