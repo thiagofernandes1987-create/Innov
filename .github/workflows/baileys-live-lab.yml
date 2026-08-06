@@ -24,6 +24,8 @@ jobs:
       BAILEYS_LAB_TIMEOUT_MS: "480000"
       BAILEYS_LAB_EVIDENCE_PATH: baileys-live-lab-evidence.json
       BAILEYS_LAB_QR_MODULE: /tmp/baileys-live-lab-qr/node_modules/qrcode-terminal/lib/main.js
+      BAILEYS_LAB_RUNTIME_VERSION: "6.7.23"
+      BAILEYS_OFFICIAL_PINNED_VERSION: "7.0.0-rc13"
 
     steps:
       - name: Checkout do laboratório
@@ -42,7 +44,7 @@ jobs:
           corepack enable
           corepack prepare pnpm@11.15.0 --activate
 
-      - name: Instalar sem lifecycle scripts
+      - name: Instalar workspace sem lifecycle scripts
         run: pnpm install --no-frozen-lockfile --ignore-scripts --reporter=append-only
 
       - name: Instalar renderizador QR efêmero e fixado
@@ -55,14 +57,46 @@ jobs:
             --save-exact \
             qrcode-terminal@0.12.0
 
-      - name: Verificar cadeia Baileys
+      - name: Verificar cadeia oficial Baileys
         run: pnpm validate:messaging-lockfile
 
-      - name: Compilar gateway
+      - name: Compilar gateway contra versão oficial fixada
         run: pnpm build:messaging-gateway
+
+      - name: Preparar runtime compatível isolado 6.7.23
+        run: |
+          npm install \
+            --prefix /tmp/baileys-live-lab-runtime \
+            --ignore-scripts \
+            --no-audit \
+            --no-fund \
+            --save-exact \
+            @whiskeysockets/baileys@6.7.23
+          rm -rf apps/messaging-gateway/node_modules/@whiskeysockets/baileys
+          ln -s /tmp/baileys-live-lab-runtime/node_modules/@whiskeysockets/baileys \
+            apps/messaging-gateway/node_modules/@whiskeysockets/baileys
+          actual="$(node -p "require('./apps/messaging-gateway/node_modules/@whiskeysockets/baileys/package.json').version")"
+          test "$actual" = "$BAILEYS_LAB_RUNTIME_VERSION"
+          echo "Runtime efêmero validado: $actual"
 
       - name: Executar laboratório — escaneie o QR nos logs
         run: node apps/messaging-gateway/dist/engines/baileys/live-lab.js
+
+      - name: Anotar matriz de compatibilidade na evidência
+        if: always()
+        run: |
+          if [[ -f baileys-live-lab-evidence.json ]]; then
+            node <<'NODE'
+          const fs = require('fs');
+          const path = 'baileys-live-lab-evidence.json';
+          const evidence = JSON.parse(fs.readFileSync(path, 'utf8'));
+          evidence.packageVersion = process.env.BAILEYS_LAB_RUNTIME_VERSION;
+          evidence.officialPinnedVersion = process.env.BAILEYS_OFFICIAL_PINNED_VERSION;
+          evidence.compatibilityFallback = true;
+          evidence.officialPinnedRuntimeResult = 'FAIL_BEFORE_QR';
+          fs.writeFileSync(path, `${JSON.stringify(evidence, null, 2)}\n`, { mode: 0o600 });
+          NODE
+          fi
 
       - name: Resumo sanitizado
         if: always()
@@ -73,6 +107,8 @@ jobs:
             node <<'NODE' >> "$GITHUB_STEP_SUMMARY"
           const fs = require('fs');
           const e = JSON.parse(fs.readFileSync('baileys-live-lab-evidence.json', 'utf8'));
+          console.log(`- Runtime testado: ${e.packageVersion}`);
+          console.log(`- Versão oficial fixada: ${e.officialPinnedVersion}`);
           console.log(`- Resultado: ${e.outcome}`);
           console.log(`- QR observado: ${e.qrObserved ? 'sim' : 'não'}`);
           console.log(`- QR renderizado em logs restritos: ${e.qrRenderedInRestrictedLogs ? 'sim' : 'não'}`);
