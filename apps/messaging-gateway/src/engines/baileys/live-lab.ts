@@ -98,7 +98,7 @@ async function main(): Promise<void> {
   const storedAuth = await createStoredBaileysAuthenticationState({
     store,
     scope,
-    audit: { actorType: "SYSTEM", actorId: "baileys-live-lab" }
+    audit: { actorId: "baileys-live-lab" }
   });
 
   let rawSocket: WASocket | null = null;
@@ -129,7 +129,7 @@ async function main(): Promise<void> {
       });
       rawSocket = socket;
       socket.ev.on("creds.update", async () => {
-        await storedAuth.saveCreds({ actorType: "SYSTEM", actorId: "baileys-live-lab" });
+        await storedAuth.saveCreds({ actorId: "baileys-live-lab" });
         evidence.credentialsPersistedEncrypted = true;
       });
       return socket as unknown as BaileysSocketPort;
@@ -241,7 +241,9 @@ async function main(): Promise<void> {
 }
 
 main().catch(async error => {
-  const code = error instanceof Error ? error.message.split(":", 1)[0] : "BAILEYS_LAB_UNKNOWN";
+  const code = error instanceof Error
+    ? (error.message.split(":", 1)[0] ?? "BAILEYS_LAB_UNKNOWN")
+    : "BAILEYS_LAB_UNKNOWN";
   evidence.engineErrorCodes.push(code);
   await persistEvidence().catch(() => undefined);
   console.error(JSON.stringify({ ok: false, code, evidencePath: EVIDENCE_PATH }));
