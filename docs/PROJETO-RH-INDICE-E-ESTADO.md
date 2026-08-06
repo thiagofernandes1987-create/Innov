@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.13.0  
+**Versão do índice:** 0.14.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -10,7 +10,7 @@
 
 ## 1. Finalidade
 
-Este arquivo registra o estado atual da especificação funcional e técnica do Projeto RH sem substituir os documentos detalhados.
+Este arquivo registra o estado atual da especificação funcional, técnica e de planejamento do Projeto RH sem substituir os documentos detalhados.
 
 A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`. Cada módulo e decisão arquitetural possui documento próprio para preservar o histórico e evitar que uma atualização de estado apague requisitos anteriores.
 
@@ -48,6 +48,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 12 | `PROJETO-RH-MODULO-12-RELATORIOS-PEOPLE-ANALYTICS-E-PLANEJAMENTO.md` | especificação funcional inicial concluída |
 | ADR-013 | `PROJETO-RH-ADR-013-MONOLITO-MODULAR-TRANSACOES-E-PROJECOES.md` | decisão técnica registrada |
 | Módulo 13 | `PROJETO-RH-MODULO-13-ARQUITETURA-TECNICA-DADOS-APIS-SEGURANCA-E-ROADMAP.md` | especificação técnica inicial concluída |
+| ADR-014 | `PROJETO-RH-ADR-014-PLANO-EXECUCAO-EVIDENCIA-E-LIBERACAO.md` | decisão de planejamento registrada |
+| Módulo 14 | `PROJETO-RH-MODULO-14-BACKLOG-EXECUTAVEL-SPRINTS-GATES-E-HOMOLOGACAO.md` | planejamento executável inicial concluído |
 
 ---
 
@@ -433,9 +435,41 @@ Interface Next.js
 - microserviços, particionamento e data warehouse dependerão de evidência de escala;
 - produção dependerá de gates, rollback, backup/restore e operação assistida.
 
+### 3.16 Plano, execução, evidência e liberação
+
+```text
+Objetivo do produto
+  → épico
+    → história ou enabler
+      → tarefas e testes
+        → implementação
+          → evidências reproduzíveis
+            → homologação técnica
+              → aceite funcional
+                → decisão de liberação
+                  → operação assistida
+```
+
+- planejamento não será evidência de entrega;
+- sprint será unidade lógica e não promessa de prazo;
+- backlog será rastreável aos requisitos e critérios dos módulos 01 a 13;
+- dependências formarão grafo acíclico;
+- Sprint 00 saneará branch, mergeabilidade, CI, vacinas, ledger e ambientes;
+- nenhuma migration RH começará antes do Gate G00;
+- Definition of Ready será obrigatória;
+- Definition of Done incluirá código, segurança, testes, documentação, CI e evidências;
+- implementado, verificado, homologado, aceito, liberado e estabilizado serão estados distintos;
+- homologação usará dados artificiais e cleanup;
+- folha oficial dependerá de cálculo sombra e reconciliação;
+- obrigações digitais dependerão de produção restrita;
+- estimativas serão relativas até existir capacidade observada;
+- gate crítico não será autodeclarado pelo implementador;
+- merge não autorizará produção automática;
+- rollout será gradual, reversível e assistido.
+
 ---
 
-## 4. Progresso funcional e técnico
+## 4. Progresso funcional, técnico e de planejamento
 
 ### Concluído
 
@@ -579,24 +613,38 @@ Interface Next.js
 - [x] migrations append-only, expand/contract e backfills;
 - [x] reconciliação, rollback e feature flags;
 - [x] ambientes, observabilidade, testes e validadores;
-- [x] gates e ondas de implementação do Módulo 13.
+- [x] gates e ondas de implementação do Módulo 13;
+- [x] decisão Plano × Execução × Evidência × Homologação × Liberação;
+- [x] Definition of Ready e Definition of Done;
+- [x] estados de planejamento, implementação, homologação e estabilização;
+- [x] 15 épicos e 120 itens executáveis;
+- [x] 33 sprints lógicas sem datas inventadas;
+- [x] 11 gates do saneamento à estabilização;
+- [x] dependências críticas e sequência de ondas;
+- [x] plano de homologação em doze camadas;
+- [x] ambientes, fixtures, cleanup e evidências;
+- [x] estratégia de branches e PRs;
+- [x] regras de folha sombra e produção restrita;
+- [x] plano de piloto, rollout e operação assistida;
+- [x] 80 regras de planejamento e 55 critérios de aceite do Módulo 14.
 
 ### Próximo
 
-- [ ] Módulo 14 — Backlog Executável, Épicos, Sprints, Dependências, Gates e Plano de Homologação;
-- [ ] decomposição das ondas em épicos e histórias;
-- [ ] Definition of Ready e Definition of Done;
-- [ ] dependências técnicas e funcionais;
-- [ ] sequência de migrations e backfills;
-- [ ] plano de testes por sprint;
-- [ ] evidências e critérios de bloqueio;
-- [ ] pilotos, rollout e operação assistida;
-- [ ] estimativas e capacidade sem inventar datas;
-- [ ] critérios para iniciar implementação.
+- [ ] Módulo 15 — Design de Dados Detalhado, Catálogo de Tabelas, Campos, Chaves, Constraints, RLS e Ordem de Migrations;
+- [ ] catálogo físico por bounded context;
+- [ ] tipos, nulabilidade, PKs e FKs;
+- [ ] uniques, checks e exclusões temporais;
+- [ ] índices e padrões de consulta;
+- [ ] ownership, grants e matriz de RLS;
+- [ ] schemas privados e dados sensíveis;
+- [ ] Storage e metadados documentais;
+- [ ] ordem expand/contract de migrations;
+- [ ] backfills, reconciliações e testes SQL esperados.
 
 ### Posterior
 
 - [ ] protótipos e design system;
+- [ ] execução do Sprint 00 após autorização;
 - [ ] execução das migrations;
 - [ ] implementação dos módulos;
 - [ ] homologação por onda;
@@ -760,47 +808,62 @@ Em 6 de agosto de 2026 foram verificadas:
 
 A baseline confirma o uso do monólito modular, do App Router, de TypeScript estrito, de PostgreSQL/Supabase, de RLS, de RPCs transacionais, de migrations append-only e de Service Role restrita ao servidor. Versões, defaults de grants, chaves, APIs e recomendações deverão ser revalidados antes da implementação e produção.
 
+### 5.12 Planejamento executável e homologação
+
+Em 6 de agosto de 2026 foram reconciliados:
+
+- o roadmap oficial da Innovar Platform;
+- a regra de que planejamento não equivale a funcionalidade entregue;
+- Definitions of Done já utilizadas nas etapas 17 a 21;
+- validadores, migrations append-only, testes SQL com `ROLLBACK`, evidências, artifacts, cleanup e gates existentes;
+- o inventário canônico e o estado atual dos aplicativos;
+- a arquitetura e as ondas definidas no Módulo 13.
+
+O planejamento do RH adota sprints lógicas sem datas, Definition of Ready, Definition of Done multidimensional, gates formais, cálculo sombra, produção restrita, piloto, rollout gradual e estabilização. Datas e capacidade deverão ser definidas somente após o saneamento da base e confirmação da equipe.
+
 ---
 
 ## 6. Estado técnico
 
 Nenhuma tabela, migration, rota, Server Action, componente, motor de fórmula, cálculo de folha, cálculo rescisório, conector governamental, certificado, fila, transmissão, guia, pagamento, offboarding, camada semântica, métrica executável, dashboard, exportação, modelo preditivo, cenário executável, outbox ou worker do RH foi implementado.
 
-A branch contém documentação funcional e técnica.
+Nenhuma história, sprint, issue, milestone, data ou gate do Módulo 14 foi iniciado ou aprovado para execução.
 
-O CI do PR reprova no validador de documentação por uma divergência preexistente na árvore combinada: a numeração de vacinas possui duplicidade a partir de `VACINA-044`. Os documentos do Projeto RH não alteraram vacinas.
+A branch contém documentação funcional, técnica e de planejamento.
 
-Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` volte a representar evidência confiável. O PR de RH não mascarará o problema alterando o validador ou renumerando vacinas sem análise de referências.
+O CI do PR possui uma divergência preexistente na árvore combinada relacionada à numeração de vacinas a partir de `VACINA-044`. Os documentos do Projeto RH não alteraram vacinas.
+
+Esse bloqueio deverá ser investigado no Sprint 00 para que a `main` e o PR voltem a oferecer evidência confiável. O PR de RH não mascarará o problema alterando o validador ou renumerando vacinas sem análise de referências.
 
 ---
 
 ## 7. Próximo módulo lógico
 
-**Módulo 14 — Backlog Executável, Épicos, Sprints, Dependências, Gates e Plano de Homologação.**
+**Módulo 15 — Design de Dados Detalhado, Catálogo de Tabelas, Campos, Chaves, Constraints, RLS e Ordem de Migrations.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Arquitetura funcional e técnica
-  → épicos e histórias ordenadas
-    → dependências e gates
-      → sprints com testes e evidências
-        → piloto e cálculo sombra
-          → homologação por onda
-            → rollout gradual
-              → operação assistida
+Arquitetura e backlog aprovados
+  → catálogo físico por contexto
+    → tabelas, campos e chaves
+      → constraints e temporalidade
+        → índices e RLS
+          → ordem expand/contract
+            → backfills e reconciliação
+              → testes SQL esperados
 ```
 
 O próximo módulo deverá distinguir:
 
-1. épico, história, tarefa e spike;
-2. Definition of Ready e Definition of Done;
-3. entrega documental e entrega executável;
-4. dependência bloqueante e paralelizável;
-5. estimativa e compromisso de data;
-6. teste planejado e evidência executada;
-7. homologação técnica e aceite funcional;
-8. feature concluída e feature liberada em produção.
+1. entidade funcional e tabela física;
+2. dado canônico e projeção;
+3. coluna obrigatória e dado ainda desconhecido;
+4. FK, unique, check e exclusão temporal;
+5. índice de integridade e índice de desempenho;
+6. RLS, grant, capability e finalidade;
+7. schema público, privado, clínico e técnico;
+8. migration planejada e migration executada.
 
 ---
 
@@ -821,3 +884,4 @@ O próximo módulo deverá distinguir:
 | 0.11.0 | 06/08/2026 | ADR-011, Módulo 11 e baseline de desligamentos, rescisões e offboarding |
 | 0.12.0 | 06/08/2026 | ADR-012, Módulo 12 e baseline de People Analytics, privacidade e planejamento |
 | 0.13.0 | 06/08/2026 | ADR-013, Módulo 13 e arquitetura técnica, segurança, migrations e roadmap |
+| 0.14.0 | 06/08/2026 | ADR-014, Módulo 14 e backlog executável, sprints, gates e homologação |
