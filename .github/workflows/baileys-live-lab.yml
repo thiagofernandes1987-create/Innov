@@ -23,6 +23,7 @@ jobs:
       BAILEYS_LAB_CONFIRM: I_ACCEPT_UNOFFICIAL_TEST_RISK
       BAILEYS_LAB_TIMEOUT_MS: "480000"
       BAILEYS_LAB_EVIDENCE_PATH: baileys-live-lab-evidence.json
+      BAILEYS_LAB_QR_MODULE: /tmp/baileys-live-lab-qr/node_modules/qrcode-terminal/lib/main.js
 
     steps:
       - name: Checkout do laboratório
@@ -44,6 +45,16 @@ jobs:
       - name: Instalar sem lifecycle scripts
         run: pnpm install --no-frozen-lockfile --ignore-scripts --reporter=append-only
 
+      - name: Instalar renderizador QR efêmero e fixado
+        run: |
+          npm install \
+            --prefix /tmp/baileys-live-lab-qr \
+            --ignore-scripts \
+            --no-audit \
+            --no-fund \
+            --save-exact \
+            qrcode-terminal@0.12.0
+
       - name: Verificar cadeia Baileys
         run: pnpm validate:messaging-lockfile
 
@@ -62,11 +73,15 @@ jobs:
             node <<'NODE' >> "$GITHUB_STEP_SUMMARY"
           const fs = require('fs');
           const e = JSON.parse(fs.readFileSync('baileys-live-lab-evidence.json', 'utf8'));
+          console.log(`- Resultado: ${e.outcome}`);
           console.log(`- QR observado: ${e.qrObserved ? 'sim' : 'não'}`);
+          console.log(`- QR renderizado em logs restritos: ${e.qrRenderedInRestrictedLogs ? 'sim' : 'não'}`);
+          console.log(`- Reconexões: ${e.reconnectAttempts}`);
           console.log(`- Socket aberto: ${e.socketOpened ? 'sim' : 'não'}`);
           console.log(`- Credenciais cifradas: ${e.credentialsPersistedEncrypted ? 'sim' : 'não'}`);
           console.log(`- Envio canônico aceito: ${e.canonicalSendAccepted ? 'sim' : 'não'}`);
-          console.log(`- Eco inbound canônico: ${e.canonicalInboundObserved ? 'sim' : 'não'}`);
+          console.log(`- Evento próprio observado: ${e.rawOwnMessageObserved ? 'sim' : 'não'}`);
+          console.log(`- Inbound canônico externo: ${e.canonicalInboundObserved ? 'sim' : 'não'}`);
           console.log(`- Receipt: ${e.receiptObserved ? 'sim' : 'não'}`);
           console.log(`- Timeout: ${e.timedOut ? 'sim' : 'não'}`);
           console.log(`- Número de produção: ${e.productionNumberUsed ? 'sim' : 'não'}`);
