@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.14.0  
+**Versão do índice:** 0.15.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -10,7 +10,7 @@
 
 ## 1. Finalidade
 
-Este arquivo registra o estado atual da especificação funcional, técnica e de planejamento do Projeto RH sem substituir os documentos detalhados.
+Este arquivo registra o estado atual da especificação funcional, técnica, de planejamento e de dados do Projeto RH sem substituir os documentos detalhados.
 
 A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`. Cada módulo e decisão arquitetural possui documento próprio para preservar o histórico e evitar que uma atualização de estado apague requisitos anteriores.
 
@@ -50,6 +50,9 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 13 | `PROJETO-RH-MODULO-13-ARQUITETURA-TECNICA-DADOS-APIS-SEGURANCA-E-ROADMAP.md` | especificação técnica inicial concluída |
 | ADR-014 | `PROJETO-RH-ADR-014-PLANO-EXECUCAO-EVIDENCIA-E-LIBERACAO.md` | decisão de planejamento registrada |
 | Módulo 14 | `PROJETO-RH-MODULO-14-BACKLOG-EXECUTAVEL-SPRINTS-GATES-E-HOMOLOGACAO.md` | planejamento executável inicial concluído |
+| ADR-015 | `PROJETO-RH-ADR-015-MODELO-FISICO-TENANCY-TEMPORALIDADE-E-ZONAS-DE-DADOS.md` | decisão de dados registrada |
+| Módulo 15 | `PROJETO-RH-MODULO-15-DESIGN-DE-DADOS-CATALOGO-RLS-E-MIGRATIONS.md` | design físico inicial concluído |
+| Anexo M15 | `PROJETO-RH-MODULO-15-ANEXO-A-CATALOGO-FISICO-DE-TABELAS.md` | catálogo físico detalhado concluído |
 
 ---
 
@@ -467,9 +470,43 @@ Objetivo do produto
 - merge não autorizará produção automática;
 - rollout será gradual, reversível e assistido.
 
+### 3.17 Modelo físico, tenancy e zonas de dados
+
+```text
+public
+  → dados de negócio sob RLS
+
+rh_private
+  → conteúdo clínico, judicial e pessoal excepcional
+
+rh_ops
+  → outbox, jobs, payloads e backfills
+
+Storage privado
+  → bytes e evidências versionadas
+```
+
+- toda entidade tenant-scoped terá `organization_id` e unique `(organization_id,id)`;
+- FKs entre entidades tenant-scoped carregarão também `organization_id`;
+- RLS não será tratada como substituta da integridade referencial;
+- tenant, empresa, estabelecimento, obra e centro de custo permanecerão distintos;
+- intervalos de vigência serão semiabertos;
+- conteúdo aprovado ou usado será imutável;
+- saldos serão derivados de movimentos;
+- dinheiro usará `numeric` e competências serão normalizadas;
+- JSONB ficará restrito a snapshots, metadados e payloads extensíveis;
+- prontuário e conteúdo judicial não ficarão na Data API comum;
+- operações críticas ocorrerão por RPC;
+- views expostas usarão `security_invoker`;
+- documentos terão hash, MIME, tamanho, scan, retenção e legal hold;
+- migrations serão divididas por onda e seguirão expand/contract;
+- backfills terão dry-run, checkpoint, idempotência e reconciliação;
+- o catálogo de 233 tabelas representa o estado-alvo, não uma migration única;
+- nenhuma tabela será criada antes de sua onda e do gate correspondente.
+
 ---
 
-## 4. Progresso funcional, técnico e de planejamento
+## 4. Progresso funcional, técnico, de planejamento e dados
 
 ### Concluído
 
@@ -626,20 +663,36 @@ Objetivo do produto
 - [x] estratégia de branches e PRs;
 - [x] regras de folha sombra e produção restrita;
 - [x] plano de piloto, rollout e operação assistida;
-- [x] 80 regras de planejamento e 55 critérios de aceite do Módulo 14.
+- [x] 80 regras de planejamento e 55 critérios de aceite do Módulo 14;
+- [x] decisão Modelo Físico × Tenancy × Temporalidade × Zonas de Dados;
+- [x] schemas `public`, `rh_private` e `rh_ops` propostos;
+- [x] catálogo físico inicial de 233 tabelas;
+- [x] ownership e classificação por bounded context;
+- [x] convenções de PK, FK, códigos, versões e eventos;
+- [x] integridade multi-tenant por FK composta;
+- [x] intervalos temporais e sobreposições;
+- [x] entidades raízes, versões, movimentos e execuções;
+- [x] perfis de RLS e acesso self-service minimizado;
+- [x] dados clínicos, judiciais, financeiros e técnicos segregados;
+- [x] documentos, Storage, hashes, scan, retenção e legal hold;
+- [x] índices, idempotência, outbox, jobs e reconciliação;
+- [x] 23 pacotes lógicos de migrations;
+- [x] estratégia expand/contract e backfills;
+- [x] 120 requisitos, 80 regras e 55 critérios de aceite do Módulo 15.
 
 ### Próximo
 
-- [ ] Módulo 15 — Design de Dados Detalhado, Catálogo de Tabelas, Campos, Chaves, Constraints, RLS e Ordem de Migrations;
-- [ ] catálogo físico por bounded context;
-- [ ] tipos, nulabilidade, PKs e FKs;
-- [ ] uniques, checks e exclusões temporais;
-- [ ] índices e padrões de consulta;
-- [ ] ownership, grants e matriz de RLS;
-- [ ] schemas privados e dados sensíveis;
-- [ ] Storage e metadados documentais;
-- [ ] ordem expand/contract de migrations;
-- [ ] backfills, reconciliações e testes SQL esperados.
+- [ ] Módulo 16 — Contratos de API, Comandos, Consultas, RPCs, Eventos, Jobs e Integrações;
+- [ ] envelope padrão de comando e consulta;
+- [ ] autenticação, autorização e escopo;
+- [ ] contratos Zod e TypeScript;
+- [ ] catálogo de Server Actions e Route Handlers;
+- [ ] assinatura e retorno de RPCs;
+- [ ] eventos de domínio e integração;
+- [ ] outbox, inbox, jobs, retries e dead letter;
+- [ ] idempotência, correlação e erros;
+- [ ] versionamento e compatibilidade de contratos;
+- [ ] testes de contrato e exemplos de payload.
 
 ### Posterior
 
@@ -652,7 +705,7 @@ Objetivo do produto
 
 ---
 
-## 5. Baselines oficiais consultadas
+## 5. Baselines oficiais e técnicas consultadas
 
 ### 5.1 Admissão
 
@@ -821,15 +874,31 @@ Em 6 de agosto de 2026 foram reconciliados:
 
 O planejamento do RH adota sprints lógicas sem datas, Definition of Ready, Definition of Done multidimensional, gates formais, cálculo sombra, produção restrita, piloto, rollout gradual e estabilização. Datas e capacidade deverão ser definidas somente após o saneamento da base e confirmação da equipe.
 
+### 5.13 Design físico e dados
+
+Em 6 de agosto de 2026 foram reconciliados:
+
+- migrations atuais com UUID, `organization_id`, timestamps, RLS, RPCs e índices;
+- uso de `security_invoker=true` em views financeiras;
+- uso de idempotency keys, snapshots e eventos append-only em integrações existentes;
+- `finance_cost_centers` como catálogo canônico a ser reutilizado;
+- Storage privado, hashes e quarentena já previstos na plataforma;
+- gaps de integridade tenant em FKs simples de módulos legados;
+- necessidade de separar dados de negócio, conteúdo privado e operação técnica.
+
+O desenho do RH adota FK composta por tenant, zonas `public`, `rh_private` e `rh_ops`, temporalidade semiaberta, versões imutáveis, movimentos, RLS default deny, RPCs críticas e migrations em expand/contract. O catálogo permanece proposto e deverá ser reconciliado novamente com o banco real antes de gerar SQL.
+
 ---
 
 ## 6. Estado técnico
 
 Nenhuma tabela, migration, rota, Server Action, componente, motor de fórmula, cálculo de folha, cálculo rescisório, conector governamental, certificado, fila, transmissão, guia, pagamento, offboarding, camada semântica, métrica executável, dashboard, exportação, modelo preditivo, cenário executável, outbox ou worker do RH foi implementado.
 
+Nenhum schema `rh_private` ou `rh_ops`, tabela do catálogo, constraint, policy, RPC, view, índice, bucket, backfill ou teste SQL do Módulo 15 foi criado.
+
 Nenhuma história, sprint, issue, milestone, data ou gate do Módulo 14 foi iniciado ou aprovado para execução.
 
-A branch contém documentação funcional, técnica e de planejamento.
+A branch contém documentação funcional, técnica, de planejamento e de dados.
 
 O CI do PR possui uma divergência preexistente na árvore combinada relacionada à numeração de vacinas a partir de `VACINA-044`. Os documentos do Projeto RH não alteraram vacinas.
 
@@ -839,31 +908,30 @@ Esse bloqueio deverá ser investigado no Sprint 00 para que a `main` e o PR volt
 
 ## 7. Próximo módulo lógico
 
-**Módulo 15 — Design de Dados Detalhado, Catálogo de Tabelas, Campos, Chaves, Constraints, RLS e Ordem de Migrations.**
+**Módulo 16 — Contratos de API, Comandos, Consultas, RPCs, Eventos, Jobs e Integrações.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Arquitetura e backlog aprovados
-  → catálogo físico por contexto
-    → tabelas, campos e chaves
-      → constraints e temporalidade
-        → índices e RLS
-          → ordem expand/contract
-            → backfills e reconciliação
-              → testes SQL esperados
+Entidades e transições
+  → comandos e consultas tipados
+    → autorização e validação
+      → RPCs e transações
+        → eventos e outbox
+          → jobs e integrações
+            → respostas, erros e reconciliação
 ```
 
 O próximo módulo deverá distinguir:
 
-1. entidade funcional e tabela física;
-2. dado canônico e projeção;
-3. coluna obrigatória e dado ainda desconhecido;
-4. FK, unique, check e exclusão temporal;
-5. índice de integridade e índice de desempenho;
-6. RLS, grant, capability e finalidade;
-7. schema público, privado, clínico e técnico;
-8. migration planejada e migration executada.
+1. comando, consulta, evento e job;
+2. Server Action, Route Handler e RPC;
+3. autenticação, autorização, escopo e finalidade;
+4. validação estrutural e regra de negócio;
+5. erro de usuário, conflito, indisponibilidade e estado incerto;
+6. idempotência, correlação e causação;
+7. contrato interno e contrato externo;
+8. versão compatível e breaking change.
 
 ---
 
@@ -885,3 +953,4 @@ O próximo módulo deverá distinguir:
 | 0.12.0 | 06/08/2026 | ADR-012, Módulo 12 e baseline de People Analytics, privacidade e planejamento |
 | 0.13.0 | 06/08/2026 | ADR-013, Módulo 13 e arquitetura técnica, segurança, migrations e roadmap |
 | 0.14.0 | 06/08/2026 | ADR-014, Módulo 14 e backlog executável, sprints, gates e homologação |
+| 0.15.0 | 06/08/2026 | ADR-015, Módulo 15 e design físico, catálogo, RLS e ordem de migrations |
