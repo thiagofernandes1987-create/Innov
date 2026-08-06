@@ -1,0 +1,88 @@
+name: Baileys Live Lab
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - feature/etapa-22-whatsapp-omnichannel
+
+permissions:
+  contents: read
+
+concurrency:
+  group: baileys-live-lab-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  live-lab:
+    if: github.head_ref == 'test/etapa-22-baileys-live-lab'
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 12
+    env:
+      BAILEYS_LAB_CONFIRM: I_ACCEPT_UNOFFICIAL_TEST_RISK
+      BAILEYS_LAB_TIMEOUT_MS: "480000"
+      BAILEYS_LAB_EVIDENCE_PATH: baileys-live-lab-evidence.json
+
+    steps:
+      - name: Checkout do laboratório
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Configurar Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Habilitar pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+
+      - name: Instalar sem lifecycle scripts
+        run: pnpm install --no-frozen-lockfile --ignore-scripts --reporter=append-only
+
+      - name: Verificar cadeia Baileys
+        run: pnpm validate:messaging-lockfile
+
+      - name: Compilar gateway
+        run: pnpm build:messaging-gateway
+
+      - name: Executar laboratório — escaneie o QR nos logs
+        run: node apps/messaging-gateway/dist/engines/baileys/live-lab.js
+
+      - name: Resumo sanitizado
+        if: always()
+        shell: bash
+        run: |
+          echo "## Baileys Live Lab" >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f baileys-live-lab-evidence.json ]]; then
+            node <<'NODE' >> "$GITHUB_STEP_SUMMARY"
+          const fs = require('fs');
+          const e = JSON.parse(fs.readFileSync('baileys-live-lab-evidence.json', 'utf8'));
+          console.log(`- QR observado: ${e.qrObserved ? 'sim' : 'não'}`);
+          console.log(`- Socket aberto: ${e.socketOpened ? 'sim' : 'não'}`);
+          console.log(`- Credenciais cifradas: ${e.credentialsPersistedEncrypted ? 'sim' : 'não'}`);
+          console.log(`- Envio canônico aceito: ${e.canonicalSendAccepted ? 'sim' : 'não'}`);
+          console.log(`- Eco inbound canônico: ${e.canonicalInboundObserved ? 'sim' : 'não'}`);
+          console.log(`- Receipt: ${e.receiptObserved ? 'sim' : 'não'}`);
+          console.log(`- Timeout: ${e.timedOut ? 'sim' : 'não'}`);
+          console.log(`- Número de produção: ${e.productionNumberUsed ? 'sim' : 'não'}`);
+          console.log(`- Meta Cloud: ${e.metaCloudUsed ? 'sim' : 'não'}`);
+          console.log(`- IA autônoma: ${e.autonomousAiUsed ? 'sim' : 'não'}`);
+          console.log(`- Erros: ${(e.engineErrorCodes || []).join(', ') || 'nenhum'}`);
+          NODE
+          else
+            echo "- Evidência não foi criada." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Publicar evidência sanitizada
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: baileys-live-lab-evidence-${{ github.run_id }}
+          path: baileys-live-lab-evidence.json
+          if-no-files-found: warn
+          retention-days: 3
