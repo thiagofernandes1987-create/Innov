@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.2.0  
+**Versão do índice:** 0.3.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -25,6 +25,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 01 | `PROJETO-RH-MODULO-01-CADASTRO-MESTRE.md` | especificação funcional inicial concluída |
 | ADR-002 | `PROJETO-RH-ADR-002-TENANT-EMPRESA-ESTABELECIMENTO.md` | decisão funcional registrada |
 | Módulo 02 | `PROJETO-RH-MODULO-02-ESTRUTURA-ORGANIZACIONAL.md` | especificação funcional inicial concluída |
+| ADR-003 | `PROJETO-RH-ADR-003-ADMISSAO-CASO-AUDITAVEL.md` | decisão funcional registrada |
+| Módulo 03 | `PROJETO-RH-MODULO-03-ADMISSAO-PRE-ADMISSAO.md` | especificação funcional inicial concluída |
 
 ---
 
@@ -72,6 +74,26 @@ Organização da plataforma
 - migration futura deverá preservar referências existentes sempre que possível;
 - alocação em obra não altera rateio contábil silenciosamente.
 
+### 3.5 Admissão como caso auditável
+
+```text
+Pessoa
+  → Trabalhador
+    → Caso de admissão
+      → Checklist, documentos, condições, aprovações e eventos
+        → Ativação explícita
+          → Vínculo ativo
+```
+
+- pré-admissão não será vínculo ativo;
+- registro preliminar externo não será tratado como admissão concluída;
+- o checklist aplicado manterá versão e vigência;
+- documento recebido não equivale a documento conferido;
+- pendência impeditiva bloqueará ativação;
+- dispensa exigirá permissão, justificativa e auditoria;
+- ativação será transacional, explícita e idempotente;
+- caso cancelado ou rejeitado permanecerá no histórico.
+
 ---
 
 ## 4. Progresso funcional
@@ -92,21 +114,30 @@ Organização da plataforma
 - [x] Lotações;
 - [x] Centros de Custo e Rateios;
 - [x] integração conceitual com Obras, Equipes e Financeiro;
-- [x] regras, exceções, alertas, relatórios e critérios de aceite do Módulo 02.
+- [x] decisão Admissão como Caso Auditável;
+- [x] Admissão e Pré-admissão;
+- [x] convite seguro e coleta externa;
+- [x] checklist documental versionado;
+- [x] conferência e solicitações de correção;
+- [x] condições propostas;
+- [x] aprovações e exceções;
+- [x] estados de eventos digitais;
+- [x] gate de ativação e idempotência;
+- [x] cancelamento, rejeição, expiração e reabertura controlada;
+- [x] regras, exceções, alertas, relatórios e critérios de aceite do Módulo 03.
 
 ### Próximo
 
-- [ ] Módulo 03 — Admissão e Pré-admissão;
-- [ ] conferência documental;
-- [ ] condições iniciais do vínculo;
-- [ ] pendências impeditivas e não impeditivas;
-- [ ] aprovação e ativação;
-- [ ] cancelamento e retomada;
-- [ ] integração com jornada, documentos e obrigações futuras.
+- [ ] Módulo 04 — Contratos de Trabalho e Alterações Contratuais;
+- [ ] tipos e versões de contrato;
+- [ ] histórico por vigência;
+- [ ] alterações de salário, cargo, função, jornada e lotação;
+- [ ] documentos, termos e assinaturas;
+- [ ] aprovações e efeitos futuros;
+- [ ] integração com folha e obrigações.
 
 ### Posterior
 
-- [ ] contratos e alterações;
 - [ ] jornadas, escalas e ponto;
 - [ ] férias;
 - [ ] afastamentos;
@@ -122,7 +153,19 @@ Organização da plataforma
 
 ---
 
-## 5. Estado técnico
+## 5. Baseline oficial consultada para o Módulo 03
+
+Em 6 de agosto de 2026 foram verificadas fontes oficiais do Portal eSocial:
+
+- Leiautes da versão S-1.3, Nota Técnica 06/2026;
+- regras da versão S-1.3;
+- Manual WEB Geral, capítulos de registro preliminar e admissão.
+
+A documentação mantém eventos distintos para registro preliminar e admissão completa. A especificação registra apenas a arquitetura necessária para suportar esse fluxo; campos, prazos e obrigatoriedades deverão ser verificados novamente antes da implementação e da homologação.
+
+---
+
+## 6. Estado técnico
 
 Nenhuma tabela, migration, rota, Server Action, componente, cálculo ou integração foi implementada pelo Projeto RH.
 
@@ -134,32 +177,32 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 ---
 
-## 6. Próximo módulo lógico
+## 7. Próximo módulo lógico
 
-**Módulo 03 — Admissão, Pré-admissão, Conferência Documental e Ativação do Vínculo.**
+**Módulo 04 — Contratos de Trabalho, Alterações Contratuais, Histórico por Vigência e Documentos do Vínculo.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Pessoa selecionada
-  → Trabalhador ou candidato identificado
-  → Pré-admissão
-  → Empresa e estabelecimento
-  → Cargo, função, lotação e jornada
-  → Documentos e condições iniciais
-  → Validações e pendências
-  → Conferência
+Vínculo ativo ou em admissão
+  → Contrato inicial versionado
+  → Condições vigentes
+  → Proposta de alteração
+  → Validações e efeitos
   → Aprovação
-  → Ativação do vínculo
+  → Documento e assinatura
+  → Aplicação na data de vigência
+  → Integração com folha e obrigações
 ```
 
-Nenhum vínculo deverá ser ativado quando faltar requisito classificado como impeditivo. Pendências não impeditivas deverão permanecer identificadas, atribuídas e com prazo, sem desaparecer após a ativação.
+Nenhuma alteração deverá reescrever condições históricas. Alterações futuras serão registradas como novas versões ou eventos com vigência, mantendo a capacidade de consultar a situação válida em qualquer data.
 
 ---
 
-## 7. Controle de versão
+## 8. Controle de versão
 
 | Versão | Data | Alteração |
 |---|---|---|
 | 0.1.0 | 05/08/2026 | início do Projeto RH, ADR-001 e Módulo 01 |
 | 0.2.0 | 06/08/2026 | ADR-002, Módulo 02 e consolidação do índice |
+| 0.3.0 | 06/08/2026 | ADR-003, Módulo 03 e baseline oficial de admissão |
