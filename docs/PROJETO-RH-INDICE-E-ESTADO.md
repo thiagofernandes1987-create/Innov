@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.11.0  
+**Versão do índice:** 0.12.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -44,6 +44,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 10 | `PROJETO-RH-MODULO-10-OBRIGACOES-DIGITAIS-E-RECONCILIACAO.md` | especificação funcional inicial concluída |
 | ADR-011 | `PROJETO-RH-ADR-011-DESLIGAMENTO-CASO-RESCISAO-E-OFFBOARDING.md` | decisão funcional registrada |
 | Módulo 11 | `PROJETO-RH-MODULO-11-DESLIGAMENTOS-RESCISOES-E-OFFBOARDING.md` | especificação funcional inicial concluída |
+| ADR-012 | `PROJETO-RH-ADR-012-METRICA-ANALISE-CENARIO-E-DECISAO.md` | decisão funcional registrada |
+| Módulo 12 | `PROJETO-RH-MODULO-12-RELATORIOS-PEOPLE-ANALYTICS-E-PLANEJAMENTO.md` | especificação funcional inicial concluída |
 
 ---
 
@@ -358,6 +360,41 @@ Intenção ou gatilho
 - reintegração não apagará o desligamento original;
 - conclusão exigirá pendências obrigatórias resolvidas ou formalmente excepcionadas.
 
+### 3.14 Métrica, análise, cenário e decisão
+
+```text
+Fato canônico
+  → definição versionada de métrica
+    → execução reproduzível
+      → observação agregada
+        → relatório ou dashboard
+          → análise
+            → cenário ou previsão
+              → recomendação
+                → decisão humana registrada
+```
+
+- analytics não será fonte canônica dos fatos;
+- dashboard não será definição de métrica;
+- métrica e observação serão objetos diferentes;
+- toda observação manterá versão, fontes, filtros, população, corte e qualidade;
+- pessoa, vínculo, posição, headcount e FTE não serão confundidos;
+- fato, vigência, registro, processamento e publicação terão tempos próprios;
+- correção retroativa não apagará a observação originalmente publicada;
+- grupos pequenos serão suprimidos ou generalizados conforme política versionada;
+- dados sensíveis terão finalidade, acesso e agregação reforçados;
+- relatório operacional e relatório estatístico terão contratos diferentes;
+- exportação será distinta de visualização e terá auditoria própria;
+- usuários de negócio não executarão SQL arbitrário;
+- correlação não será apresentada como causalidade;
+- modelos terão versões, explicabilidade, testes de viés e monitoramento de drift;
+- decisão relevante não será tomada exclusivamente por automação;
+- score único de trabalhador, ranking por atestados ou acidentes e inferência de emoção serão proibidos;
+- cenário não será posição, contratação, orçamento ou ação aprovada;
+- planejamento de obras considerará capacidade, competência, segurança, qualidade, método e contexto;
+- recomendações somente originarão propostas para fluxos canônicos;
+- decisões humanas e divergências em relação ao modelo serão auditáveis.
+
 ---
 
 ## 4. Progresso funcional
@@ -471,26 +508,42 @@ Intenção ou gatilho
 - [x] offboarding de acessos, ativos, EPIs e responsabilidades;
 - [x] desligamentos coletivos e programas;
 - [x] reintegrações, correções e diferenças posteriores;
-- [x] permissões, auditoria, relatórios e testes do Módulo 11.
+- [x] permissões, auditoria, relatórios e testes do Módulo 11;
+- [x] decisão Fato × Métrica × Observação × Análise × Cenário × Recomendação × Decisão;
+- [x] catálogo e versões de métricas;
+- [x] dimensões conformadas e temporalidade;
+- [x] contratos de fontes, qualidade e reconciliação;
+- [x] execuções, observações, snapshots e linhagem;
+- [x] relatórios operacionais e estatísticos;
+- [x] dashboards, alertas, assinaturas e exportações;
+- [x] privacidade, agregação, supressão e dados sensíveis;
+- [x] People Analytics, explicabilidade, viés e drift;
+- [x] revisão humana e contestação de recomendações;
+- [x] indicadores de quadro, movimentação, jornada, ausências, benefícios, SST, folha e conformidade;
+- [x] planejamento de força de trabalho por empresa, unidade e obra;
+- [x] demanda, capacidade, lacunas, custos e cenários;
+- [x] integração de propostas com módulos canônicos;
+- [x] permissões, auditoria, relatórios e testes do Módulo 12.
 
 ### Próximo
 
-- [ ] Módulo 12 — Relatórios Consolidados, People Analytics, Indicadores e Planejamento da Força de Trabalho;
-- [ ] camada semântica e catálogo de métricas;
-- [ ] indicadores históricos e temporais;
-- [ ] headcount, movimentações, custos e capacidade;
-- [ ] absenteísmo, turnover, jornada e produtividade;
-- [ ] segurança, diversidade e conformidade com privacidade;
-- [ ] planejamento de equipes por obra;
-- [ ] cenários e projeções;
-- [ ] alertas gerenciais e explicabilidade;
-- [ ] exportações e dossiês executivos.
+- [ ] Módulo 13 — Arquitetura Técnica, Dados, APIs, Segurança, Migrações e Roadmap de Implementação;
+- [ ] inventário do modelo atual e análise de gaps;
+- [ ] bounded contexts e dependências;
+- [ ] esquema alvo e estratégia temporal;
+- [ ] APIs, commands, queries, eventos e idempotência;
+- [ ] RLS, capacidades, escopos e segregação;
+- [ ] criptografia, documentos e dados clínicos;
+- [ ] jobs, filas, observabilidade e retenção;
+- [ ] migrations, backfill, reconciliação e rollback;
+- [ ] ondas de entrega, testes, homologação e produção.
 
 ### Posterior
 
-- [ ] plano de implementação;
-- [ ] backlog técnico e migrations;
-- [ ] estratégia de homologação e produção;
+- [ ] backlog executável por sprint;
+- [ ] protótipos e design system;
+- [ ] execução das migrations;
+- [ ] implementação dos módulos;
 - [ ] operação assistida e evolução contínua.
 
 ---
@@ -621,11 +674,27 @@ Em 6 de agosto de 2026 foram verificadas:
 
 A baseline oficial diferencia comunicação do desligamento, aviso, verbas devidas, pagamento, evento de desligamento, recolhimento do FGTS, acesso ao seguro-desemprego e reintegração. Prazos, motivos, verbas, códigos, incidências, instrumentos coletivos e interpretações deverão ser novamente validados antes da implementação, homologação e produção.
 
+### 5.10 People Analytics, privacidade e não discriminação
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- Lei Geral de Proteção de Dados Pessoais em texto compilado;
+- definições de dado pessoal, dado sensível, anonimização e relatório de impacto;
+- princípios de finalidade, adequação, necessidade, qualidade, transparência, segurança, prevenção, não discriminação e prestação de contas;
+- requisitos para tratamento de dados sensíveis;
+- direito de solicitar revisão de decisões tomadas unicamente com base em tratamento automatizado que afetem interesses;
+- deveres de registro, segurança desde a concepção e governança;
+- Lei nº 9.029/1995 sobre práticas discriminatórias e limitativas na relação de trabalho;
+- Agenda Regulatória da ANPD 2025–2026;
+- Mapa de Temas Prioritários da ANPD 2026–2027, incluindo direitos dos titulares e inteligência artificial e tecnologias emergentes.
+
+A implementação deverá revalidar legislação, regulamentação e orientações vigentes, especialmente para decisões automatizadas, inteligência artificial, tratamentos de alto risco, anonimização, pseudonimização, biometria, saúde, relatórios de impacto e exercício de direitos dos titulares.
+
 ---
 
 ## 6. Estado técnico
 
-Nenhuma tabela, migration, rota, Server Action, componente, motor de fórmula, cálculo de folha, cálculo rescisório, conector governamental, certificado, fila, transmissão, guia, pagamento, offboarding ou revogação de acesso foi implementado pelo Projeto RH.
+Nenhuma tabela, migration, rota, Server Action, componente, motor de fórmula, cálculo de folha, cálculo rescisório, conector governamental, certificado, fila, transmissão, guia, pagamento, offboarding, camada semântica, métrica executável, dashboard, exportação, modelo preditivo ou cenário executável foi implementado pelo Projeto RH.
 
 A branch contém apenas documentação funcional.
 
@@ -637,30 +706,32 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 ## 7. Próximo módulo lógico
 
-**Módulo 12 — Relatórios Consolidados, People Analytics, Indicadores e Planejamento da Força de Trabalho.**
+**Módulo 13 — Arquitetura Técnica, Dados, APIs, Segurança, Migrações e Roadmap de Implementação.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Fatos temporais dos módulos 01 a 11
-  → camada semântica versionada
-    → métricas reproduzíveis
-      → indicadores por período, empresa, obra e população
-        → comparações e cenários
-          → alertas e explicações
-            → decisão gerencial auditável
+Especificação funcional dos módulos 01 a 12
+  → inventário técnico do repositório e banco atual
+    → bounded contexts e modelo alvo
+      → contratos de API, eventos, jobs e permissões
+        → migrations e backfills reversíveis
+          → implementação por ondas
+            → testes e homologação
+              → operação assistida
+                → produção e evolução
 ```
 
 O próximo módulo deverá distinguir:
 
-1. fato operacional e métrica derivada;
-2. dimensão atual e dimensão histórica;
-3. indicador, meta, alerta e decisão;
-4. correlação e causalidade;
-5. dado individual e resultado agregado;
-6. relatório operacional e análise estratégica;
-7. projeção, cenário e compromisso;
-8. acesso gerencial e privacidade do trabalhador.
+1. modelo funcional e esquema físico;
+2. entidade canônica e projeção de leitura;
+3. comando, consulta, evento e job;
+4. migration, backfill, reconciliação e rollback;
+5. dado comum, sensível, clínico e judicial;
+6. permissão, capacidade, escopo e finalidade;
+7. desenvolvimento, produção restrita, homologação e produção;
+8. documentação concluída e software efetivamente implementado.
 
 ---
 
@@ -679,3 +750,4 @@ O próximo módulo deverá distinguir:
 | 0.9.0 | 06/08/2026 | ADR-009, Módulo 09 e baseline de folha, rubricas, cálculo e fechamento |
 | 0.10.0 | 06/08/2026 | ADR-010, Módulo 10 e baseline de obrigações digitais e reconciliação |
 | 0.11.0 | 06/08/2026 | ADR-011, Módulo 11 e baseline de desligamentos, rescisões e offboarding |
+| 0.12.0 | 06/08/2026 | ADR-012, Módulo 12 e baseline de People Analytics, privacidade e planejamento |
