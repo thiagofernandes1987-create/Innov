@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.4.0  
+**Versão do índice:** 0.5.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -12,7 +12,7 @@
 
 Este arquivo registra o estado atual da especificação funcional do Projeto RH sem substituir os documentos detalhados.
 
-A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`. Cada módulo possui documento próprio para evitar que atualizações de estado apaguem requisitos anteriores.
+A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`. Cada módulo e decisão arquitetural possui documento próprio para preservar o histórico e evitar que uma atualização de estado apague requisitos anteriores.
 
 ---
 
@@ -29,6 +29,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 03 | `PROJETO-RH-MODULO-03-ADMISSAO-PRE-ADMISSAO.md` | especificação funcional inicial concluída |
 | ADR-004 | `PROJETO-RH-ADR-004-CONTRATO-VERSOES-E-ALTERACOES.md` | decisão funcional registrada |
 | Módulo 04 | `PROJETO-RH-MODULO-04-CONTRATOS-E-ALTERACOES.md` | especificação funcional inicial concluída |
+| ADR-005 | `PROJETO-RH-ADR-005-JORNADA-MARCACAO-TRATAMENTO-E-BANCO.md` | decisão funcional registrada |
+| Módulo 05 | `PROJETO-RH-MODULO-05-JORNADAS-PONTO-E-BANCO-DE-HORAS.md` | especificação funcional inicial concluída |
 
 ---
 
@@ -124,63 +126,82 @@ Solicitação de alteração
 - aplicação será transacional e idempotente;
 - folha e eventos externos referenciarão a versão utilizada.
 
+### 3.7 Jornada, marcação, tratamento e banco de horas
+
+```text
+Jornada contratual versionada
+  → Escala planejada
+    → Turno concreto
+      → Marcações originais
+        → Tratamentos aprovados
+          → Apuração versionada
+            → Banco de horas e eventos para folha
+              → Fechamento
+```
+
+- jornada contratual não gera marcação automática;
+- escala planejada não prova trabalho realizado;
+- marcação original será append-only;
+- tratamento não altera o evento bruto;
+- marcação fora do horário planejado será recebida e sinalizada;
+- falta de autorização de sobrejornada não impedirá a marcação;
+- eventos offline manterão hora do fato e hora de sincronização;
+- Diário de Obras e tarefas servirão como evidência, não como fonte canônica do ponto;
+- políticas de apuração possuirão versão e vigência;
+- banco de horas exigirá acordo aplicável;
+- saldo será derivado de razão imutável de movimentos;
+- período fechado somente mudará por reabertura controlada;
+- folha receberá lote fechado, versionado e idempotente;
+- localização e biometria terão finalidade e autorização segregadas.
+
 ---
 
 ## 4. Progresso funcional
 
 ### Concluído
 
-- [x] visão de produto;
-- [x] mapa preliminar dos domínios;
-- [x] perfis e capacidades iniciais;
-- [x] requisitos transversais iniciais;
+- [x] visão de produto e mapa preliminar dos domínios;
+- [x] perfis, capacidades e requisitos transversais iniciais;
 - [x] Cadastro Mestre;
 - [x] decisão Pessoa × Usuário × Trabalhador × Vínculo;
 - [x] decisão Tenant × Empresa × Estabelecimento;
-- [x] Empresas e Estabelecimentos;
-- [x] Unidades Organizacionais;
-- [x] Cargos e Funções;
-- [x] Posições e Quadro Planejado;
-- [x] Lotações;
-- [x] Centros de Custo e Rateios;
+- [x] empresas, estabelecimentos e estrutura organizacional;
+- [x] unidades, cargos, funções, posições e lotações;
+- [x] centros de custo e rateios;
 - [x] integração conceitual com Obras, Equipes e Financeiro;
 - [x] decisão Admissão como Caso Auditável;
-- [x] Admissão e Pré-admissão;
-- [x] convite seguro e coleta externa;
-- [x] checklist documental versionado;
-- [x] conferência e solicitações de correção;
-- [x] condições propostas;
-- [x] aprovações e exceções;
-- [x] estados de eventos digitais;
-- [x] gate de ativação e idempotência;
-- [x] cancelamento, rejeição, expiração e reabertura controlada;
+- [x] admissão, pré-admissão, checklist, conferência e ativação;
 - [x] decisão Contrato × Versão × Alteração × Documento;
-- [x] contratos e versões contratuais;
-- [x] histórico por vigência e instante de registro;
-- [x] alterações futuras, imediatas e retroativas;
-- [x] correção e retificação controladas;
-- [x] alterações de remuneração, cargo, função, posição, unidade, estabelecimento, local, jornada e modalidade;
-- [x] prorrogação, conversão e contratos a prazo;
-- [x] documentos, ciência e assinatura;
-- [x] impactos derivados e integração externa;
-- [x] regras, exceções, alertas, relatórios e critérios de aceite do Módulo 04.
+- [x] contratos, versões, alterações, documentos e impactos;
+- [x] decisão Jornada × Escala × Marcação × Tratamento × Apuração × Banco;
+- [x] políticas de jornada e horários;
+- [x] modelos de escala, calendários e turnos;
+- [x] marcação web, móvel, quiosque, REP, API e contingência;
+- [x] operação offline e idempotência;
+- [x] comprovantes e dispositivos;
+- [x] ocorrências e tratamentos;
+- [x] autorização de sobrejornada;
+- [x] motor de apuração e memória de cálculo;
+- [x] jornadas que atravessam meia-noite e fusos;
+- [x] acordos, contas e razão de banco de horas;
+- [x] fechamento, reabertura e integração com folha;
+- [x] integração com Obras, Diário de Obras, Equipes, Tarefas e custos;
+- [x] portal do trabalhador, permissões, auditoria, relatórios e testes do Módulo 05.
 
 ### Próximo
 
-- [ ] Módulo 05 — Jornadas, Horários, Escalas, Controle de Ponto e Banco de Horas;
-- [ ] jornada contratual;
-- [ ] horários e escalas;
-- [ ] marcações e ocorrências;
-- [ ] apuração;
-- [ ] autorizações;
-- [ ] banco de horas;
-- [ ] reflexos em folha;
-- [ ] integração com obras e diário de campo.
+- [ ] Módulo 06 — Férias, Afastamentos, Ausências e Licenças;
+- [ ] períodos aquisitivos e concessivos;
+- [ ] programação e aprovação de férias;
+- [ ] fracionamento e conflitos;
+- [ ] afastamentos e documentos;
+- [ ] ausências, justificativas e abonos;
+- [ ] reflexos em escala, ponto, folha e obrigações;
+- [ ] retorno e prorrogação;
+- [ ] histórico e eventos digitais.
 
 ### Posterior
 
-- [ ] férias;
-- [ ] afastamentos;
 - [ ] benefícios;
 - [ ] dependentes e pensão;
 - [ ] medicina e segurança;
@@ -214,13 +235,26 @@ Em 6 de agosto de 2026 foram verificadas:
 - Manual WEB Geral, capítulo de alteração de contrato;
 - eventos de admissão, alteração cadastral, alteração contratual e alteração de trabalhador sem vínculo.
 
-A baseline oficial diferencia fato novo contratual de correção de informação enviada incorretamente. Campos, prazos, obrigatoriedades e interpretações deverão ser verificados novamente antes da implementação, homologação e produção.
+A baseline oficial diferencia fato novo contratual de correção de informação enviada incorretamente.
+
+### 5.3 Jornadas e ponto
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- CLT compilada, incluindo duração, compensação, jornadas especiais e registro de horário;
+- Decreto nº 10.854/2021;
+- Portaria MTP nº 671/2021 na página oficial consolidada;
+- página oficial de Registro Eletrônico de Ponto;
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- campos e tipos de horário contratual.
+
+A baseline atual exige preservação fiel das marcações no controle eletrônico e diferencia jornada contratual do fato registrado. Formatos, limites, prazos, obrigatoriedades, instrumentos e interpretações deverão ser verificados novamente antes da implementação, homologação e produção.
 
 ---
 
 ## 6. Estado técnico
 
-Nenhuma tabela, migration, rota, Server Action, componente, cálculo ou integração foi implementada pelo Projeto RH.
+Nenhuma tabela, migration, rota, Server Action, componente, coletor, cálculo ou integração foi implementada pelo Projeto RH.
 
 A branch contém apenas documentação funcional.
 
@@ -232,24 +266,29 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 ## 7. Próximo módulo lógico
 
-**Módulo 05 — Jornadas, Horários, Escalas, Controle de Ponto e Banco de Horas.**
+**Módulo 06 — Férias, Afastamentos, Ausências e Licenças.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Jornada contratual versionada
-  → horário ou escala planejada
-  → marcações e evidências
-  → ocorrências e justificativas
-  → apuração
+Direito ou ocorrência
+  → solicitação ou registro
+  → documentos e validações
   → aprovação
-  → banco de horas ou evento para folha
+  → período vigente
+  → bloqueio ou ajuste de escala e ponto
+  → efeitos em folha e obrigações
+  → retorno, prorrogação ou encerramento
 ```
 
-O próximo módulo deverá impedir duas confusões:
+O próximo módulo deverá distinguir:
 
-1. marcação operacional não reescreve a jornada contratual;
-2. alteração contratual de jornada não apaga escalas, marcações ou apurações históricas.
+1. férias planejadas;
+2. afastamento por fato ocorrido;
+3. ausência diária;
+4. licença configurada;
+5. abono ou justificativa;
+6. efeito contratual, previdenciário, de ponto e de folha.
 
 ---
 
@@ -261,3 +300,4 @@ O próximo módulo deverá impedir duas confusões:
 | 0.2.0 | 06/08/2026 | ADR-002, Módulo 02 e consolidação do índice |
 | 0.3.0 | 06/08/2026 | ADR-003, Módulo 03 e baseline oficial de admissão |
 | 0.4.0 | 06/08/2026 | ADR-004, Módulo 04 e baseline de contratos e alterações |
+| 0.5.0 | 06/08/2026 | ADR-005, Módulo 05 e baseline de jornadas e ponto |
