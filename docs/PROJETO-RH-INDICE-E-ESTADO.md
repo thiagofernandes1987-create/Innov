@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.10.0  
+**Versão do índice:** 0.11.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -42,6 +42,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 09 | `PROJETO-RH-MODULO-09-FOLHA-RUBRICAS-CALCULO-E-FECHAMENTO.md` | especificação funcional inicial concluída |
 | ADR-010 | `PROJETO-RH-ADR-010-FATO-PROJECAO-RECIBO-TOTALIZADOR-E-OBRIGACAO.md` | decisão funcional registrada |
 | Módulo 10 | `PROJETO-RH-MODULO-10-OBRIGACOES-DIGITAIS-E-RECONCILIACAO.md` | especificação funcional inicial concluída |
+| ADR-011 | `PROJETO-RH-ADR-011-DESLIGAMENTO-CASO-RESCISAO-E-OFFBOARDING.md` | decisão funcional registrada |
+| Módulo 11 | `PROJETO-RH-MODULO-11-DESLIGAMENTOS-RESCISOES-E-OFFBOARDING.md` | especificação funcional inicial concluída |
 
 ---
 
@@ -325,6 +327,37 @@ Fato interno aprovado
 - indisponibilidade externa não apagará fato ou obrigação;
 - reconciliações de evento, totalizador, débito, guia e pagamento serão independentes.
 
+### 3.13 Desligamento, rescisão e offboarding
+
+```text
+Intenção ou gatilho
+  → caso auditável
+    → fundamento, proteções e aprovação
+      → aviso e projeção
+        → término confirmado
+          → cálculo rescisório versionado
+            → documentos e pagamento
+              → eventos e recolhimentos
+                → offboarding
+                  → conclusão
+```
+
+- solicitação de desligamento não encerrará o vínculo;
+- razão interna, fundamento jurídico e código externo serão separados;
+- aviso, último dia trabalhado, desligamento e projeção terão datas próprias;
+- proteções e estabilidades serão avaliadas por regra vigente;
+- justa causa exigirá evidências, análise e aprovação segregadas;
+- cálculo aprovado será imutável e reproduzível;
+- valor devido, pago e declarado permanecerão reconciliáveis;
+- documento será evidência, não única fonte canônica;
+- S-2299 e S-2399 serão projeções externas;
+- FGTS, guia e pagamento terão estados independentes;
+- revogação emergencial de acesso não encerrará o vínculo;
+- ausência de devolução de ativo não gerará desconto automático;
+- caso coletivo não substituirá casos individuais;
+- reintegração não apagará o desligamento original;
+- conclusão exigirá pendências obrigatórias resolvidas ou formalmente excepcionadas.
+
 ---
 
 ## 4. Progresso funcional
@@ -423,28 +456,42 @@ Fato interno aprovado
 - [x] DCTFWeb, declarações, DARFs e pagamentos;
 - [x] FGTS Digital, débitos, guias e saldos;
 - [x] contingências e indisponibilidades;
-- [x] permissões, auditoria, relatórios e testes do Módulo 10.
+- [x] permissões, auditoria, relatórios e testes do Módulo 10;
+- [x] decisão Desligamento × Aviso × Término × Cálculo × Pagamento × Evento × Offboarding;
+- [x] catálogo de motivos, fundamentos e mapeamentos externos;
+- [x] casos, triagem, proteções e aprovações;
+- [x] pedido de demissão, acordo, justa causa e contratos a termo;
+- [x] aviso prévio e projeções;
+- [x] ocorrência de término e encerramento temporal do vínculo;
+- [x] cálculo rescisório, memória e ajustes;
+- [x] documentos, assinatura, entrega e ciência;
+- [x] pagamentos, retornos, complementos e estornos;
+- [x] FGTS rescisório e seguro-desemprego;
+- [x] eventos S-2299, S-2399, S-1210 e S-2298;
+- [x] offboarding de acessos, ativos, EPIs e responsabilidades;
+- [x] desligamentos coletivos e programas;
+- [x] reintegrações, correções e diferenças posteriores;
+- [x] permissões, auditoria, relatórios e testes do Módulo 11.
 
 ### Próximo
 
-- [ ] Módulo 11 — Desligamentos, Rescisões, Avisos, Verbas, Homologações e Offboarding;
-- [ ] iniciativa, motivo e tipo de desligamento;
-- [ ] aviso prévio e datas relevantes;
-- [ ] estabilidade, bloqueios e validações;
-- [ ] cálculo rescisório e memória;
-- [ ] documentos, assinatura e homologação;
-- [ ] pagamentos e quitações;
-- [ ] devolução de ativos, acessos, EPIs e benefícios;
-- [ ] eventos externos e reconciliação;
-- [ ] reintegração e cancelamento.
+- [ ] Módulo 12 — Relatórios Consolidados, People Analytics, Indicadores e Planejamento da Força de Trabalho;
+- [ ] camada semântica e catálogo de métricas;
+- [ ] indicadores históricos e temporais;
+- [ ] headcount, movimentações, custos e capacidade;
+- [ ] absenteísmo, turnover, jornada e produtividade;
+- [ ] segurança, diversidade e conformidade com privacidade;
+- [ ] planejamento de equipes por obra;
+- [ ] cenários e projeções;
+- [ ] alertas gerenciais e explicabilidade;
+- [ ] exportações e dossiês executivos.
 
 ### Posterior
 
-- [ ] relatórios consolidados;
-- [ ] analytics e indicadores;
 - [ ] plano de implementação;
 - [ ] backlog técnico e migrations;
-- [ ] estratégia de homologação e produção.
+- [ ] estratégia de homologação e produção;
+- [ ] operação assistida e evolução contínua.
 
 ---
 
@@ -559,11 +606,26 @@ A baseline oficial confirma que o encerramento bem-sucedido das escriturações 
 
 Leiautes, regras, endpoints, certificados, prazos, códigos e interpretações deverão ser novamente validados antes da implementação, homologação e produção.
 
+### 5.9 Desligamentos e rescisões
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- CLT compilada, especialmente arts. 477, 479, 480, 482, 483, 484-A e 487 a 491;
+- Lei nº 12.506/2011;
+- Lei nº 8.036/1990 e regulamentação do FGTS;
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- regras e orientações dos eventos S-2298, S-2299, S-2399, S-1210 e S-3000;
+- Manual do FGTS Digital versão 1.70, de 12 de junho de 2026;
+- leiaute de Remunerações para Fins Rescisórios versão 1.2;
+- orientações oficiais sobre seguro-desemprego.
+
+A baseline oficial diferencia comunicação do desligamento, aviso, verbas devidas, pagamento, evento de desligamento, recolhimento do FGTS, acesso ao seguro-desemprego e reintegração. Prazos, motivos, verbas, códigos, incidências, instrumentos coletivos e interpretações deverão ser novamente validados antes da implementação, homologação e produção.
+
 ---
 
 ## 6. Estado técnico
 
-Nenhuma tabela, migration, rota, Server Action, componente, motor de fórmula, cálculo de folha, conector governamental, certificado, fila, transmissão, guia ou pagamento foi implementado pelo Projeto RH.
+Nenhuma tabela, migration, rota, Server Action, componente, motor de fórmula, cálculo de folha, cálculo rescisório, conector governamental, certificado, fila, transmissão, guia, pagamento, offboarding ou revogação de acesso foi implementado pelo Projeto RH.
 
 A branch contém apenas documentação funcional.
 
@@ -575,32 +637,30 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 ## 7. Próximo módulo lógico
 
-**Módulo 11 — Desligamentos, Rescisões, Avisos, Verbas, Homologações e Offboarding.**
+**Módulo 12 — Relatórios Consolidados, People Analytics, Indicadores e Planejamento da Força de Trabalho.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Iniciativa ou fato de desligamento
-  → caso rescisório auditável
-  → motivo, datas, aviso e estabilidade
-  → apuração de ponto, férias, benefícios e ativos
-  → cálculo rescisório versionado
-  → documentos, aprovações e comunicação
-  → pagamento, quitação e eventos externos
-  → encerramento de acessos e obrigações
-  → reconciliação ou reintegração
+Fatos temporais dos módulos 01 a 11
+  → camada semântica versionada
+    → métricas reproduzíveis
+      → indicadores por período, empresa, obra e população
+        → comparações e cenários
+          → alertas e explicações
+            → decisão gerencial auditável
 ```
 
 O próximo módulo deverá distinguir:
 
-1. intenção de desligamento e desligamento efetivo;
-2. iniciativa, motivo interno e código externo;
-3. aviso concedido, trabalhado, indenizado e projetado;
-4. cálculo rescisório e pagamento;
-5. documento, assinatura, homologação e quitação;
-6. encerramento de vínculo e offboarding operacional;
-7. cancelamento, retificação e reintegração;
-8. evento externo, recibo, FGTS e reconciliação.
+1. fato operacional e métrica derivada;
+2. dimensão atual e dimensão histórica;
+3. indicador, meta, alerta e decisão;
+4. correlação e causalidade;
+5. dado individual e resultado agregado;
+6. relatório operacional e análise estratégica;
+7. projeção, cenário e compromisso;
+8. acesso gerencial e privacidade do trabalhador.
 
 ---
 
@@ -618,3 +678,4 @@ O próximo módulo deverá distinguir:
 | 0.8.0 | 06/08/2026 | ADR-008, Módulo 08 e baseline de SST, riscos, saúde e habilitações |
 | 0.9.0 | 06/08/2026 | ADR-009, Módulo 09 e baseline de folha, rubricas, cálculo e fechamento |
 | 0.10.0 | 06/08/2026 | ADR-010, Módulo 10 e baseline de obrigações digitais e reconciliação |
+| 0.11.0 | 06/08/2026 | ADR-011, Módulo 11 e baseline de desligamentos, rescisões e offboarding |
