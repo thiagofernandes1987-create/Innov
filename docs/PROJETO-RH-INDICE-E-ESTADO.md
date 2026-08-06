@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.12.0  
+**Versão do índice:** 0.13.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -10,7 +10,7 @@
 
 ## 1. Finalidade
 
-Este arquivo registra o estado atual da especificação funcional do Projeto RH sem substituir os documentos detalhados.
+Este arquivo registra o estado atual da especificação funcional e técnica do Projeto RH sem substituir os documentos detalhados.
 
 A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`. Cada módulo e decisão arquitetural possui documento próprio para preservar o histórico e evitar que uma atualização de estado apague requisitos anteriores.
 
@@ -46,6 +46,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 11 | `PROJETO-RH-MODULO-11-DESLIGAMENTOS-RESCISOES-E-OFFBOARDING.md` | especificação funcional inicial concluída |
 | ADR-012 | `PROJETO-RH-ADR-012-METRICA-ANALISE-CENARIO-E-DECISAO.md` | decisão funcional registrada |
 | Módulo 12 | `PROJETO-RH-MODULO-12-RELATORIOS-PEOPLE-ANALYTICS-E-PLANEJAMENTO.md` | especificação funcional inicial concluída |
+| ADR-013 | `PROJETO-RH-ADR-013-MONOLITO-MODULAR-TRANSACOES-E-PROJECOES.md` | decisão técnica registrada |
+| Módulo 13 | `PROJETO-RH-MODULO-13-ARQUITETURA-TECNICA-DADOS-APIS-SEGURANCA-E-ROADMAP.md` | especificação técnica inicial concluída |
 
 ---
 
@@ -395,9 +397,45 @@ Fato canônico
 - recomendações somente originarão propostas para fluxos canônicos;
 - decisões humanas e divergências em relação ao modelo serão auditáveis.
 
+### 3.15 Arquitetura técnica, transações e projeções
+
+```text
+Interface Next.js
+  → comando ou consulta tipada
+    → autorização e validação
+      → RPC ou transação de domínio
+        → estado canônico e trilha
+          → outbox e jobs
+            → integração externa
+              → projeção reconstruível
+```
+
+- o RH permanecerá no monólito modular nesta fase;
+- bounded contexts possuirão ownership explícito de tabelas;
+- contexto não gravará diretamente em tabela interna de outro contexto;
+- Server Components serão padrão de leitura;
+- Server Actions coordenarão comandos internos autenticados;
+- Route Handlers serão usados para APIs, webhooks e downloads;
+- invariantes multi-tabela ficarão em RPCs transacionais;
+- `SECURITY DEFINER` terá `search_path`, autorização e grants mínimos;
+- capacidades de domínio complementarão as capacidades genéricas existentes;
+- RLS e grants serão explícitos e default deny;
+- dados clínicos, judiciais, jobs e payloads protegidos poderão usar schemas privados;
+- fatos e outbox serão confirmados na mesma transação;
+- consumidores e integrações serão idempotentes;
+- entrega externa será tratada como pelo menos uma vez;
+- timeout externo poderá exigir estado incerto e reconciliação;
+- migrations serão append-only e usarão expand/contract;
+- backfills terão dry-run, checkpoint, idempotência e reconciliação;
+- feature flags controlarão rollout, sem substituir autorização;
+- folha iniciará em cálculo sombra;
+- analytics começará com projeções PostgreSQL governadas;
+- microserviços, particionamento e data warehouse dependerão de evidência de escala;
+- produção dependerá de gates, rollback, backup/restore e operação assistida.
+
 ---
 
-## 4. Progresso funcional
+## 4. Progresso funcional e técnico
 
 ### Concluído
 
@@ -523,27 +561,45 @@ Fato canônico
 - [x] planejamento de força de trabalho por empresa, unidade e obra;
 - [x] demanda, capacidade, lacunas, custos e cenários;
 - [x] integração de propostas com módulos canônicos;
-- [x] permissões, auditoria, relatórios e testes do Módulo 12.
+- [x] permissões, auditoria, relatórios e testes do Módulo 12;
+- [x] inventário da stack, arquitetura e convenções atuais;
+- [x] análise de gaps técnicos do RH;
+- [x] decisão de monólito modular e bounded contexts;
+- [x] estrutura alvo de rotas, actions, componentes e `lib/rh`;
+- [x] ownership de dados e contratos entre contextos;
+- [x] padrões de comando, consulta, evento e job;
+- [x] transações, RPCs, idempotência e concorrência;
+- [x] outbox, filas, retries, dead letter e reconciliação;
+- [x] estratégia de schemas, RLS, grants e capacidades;
+- [x] segregação de dados clínicos, judiciais e financeiros;
+- [x] Storage privado, hashes, retenção e legal hold;
+- [x] adapters externos, webhooks e resposta incerta;
+- [x] arquitetura do motor declarativo de folha;
+- [x] estratégia inicial de analytics no PostgreSQL;
+- [x] migrations append-only, expand/contract e backfills;
+- [x] reconciliação, rollback e feature flags;
+- [x] ambientes, observabilidade, testes e validadores;
+- [x] gates e ondas de implementação do Módulo 13.
 
 ### Próximo
 
-- [ ] Módulo 13 — Arquitetura Técnica, Dados, APIs, Segurança, Migrações e Roadmap de Implementação;
-- [ ] inventário do modelo atual e análise de gaps;
-- [ ] bounded contexts e dependências;
-- [ ] esquema alvo e estratégia temporal;
-- [ ] APIs, commands, queries, eventos e idempotência;
-- [ ] RLS, capacidades, escopos e segregação;
-- [ ] criptografia, documentos e dados clínicos;
-- [ ] jobs, filas, observabilidade e retenção;
-- [ ] migrations, backfill, reconciliação e rollback;
-- [ ] ondas de entrega, testes, homologação e produção.
+- [ ] Módulo 14 — Backlog Executável, Épicos, Sprints, Dependências, Gates e Plano de Homologação;
+- [ ] decomposição das ondas em épicos e histórias;
+- [ ] Definition of Ready e Definition of Done;
+- [ ] dependências técnicas e funcionais;
+- [ ] sequência de migrations e backfills;
+- [ ] plano de testes por sprint;
+- [ ] evidências e critérios de bloqueio;
+- [ ] pilotos, rollout e operação assistida;
+- [ ] estimativas e capacidade sem inventar datas;
+- [ ] critérios para iniciar implementação.
 
 ### Posterior
 
-- [ ] backlog executável por sprint;
 - [ ] protótipos e design system;
 - [ ] execução das migrations;
 - [ ] implementação dos módulos;
+- [ ] homologação por onda;
 - [ ] operação assistida e evolução contínua.
 
 ---
@@ -690,13 +746,27 @@ Em 6 de agosto de 2026 foram verificadas:
 
 A implementação deverá revalidar legislação, regulamentação e orientações vigentes, especialmente para decisões automatizadas, inteligência artificial, tratamentos de alto risco, anonimização, pseudonimização, biometria, saúde, relatórios de impacto e exercício de direitos dos titulares.
 
+### 5.11 Arquitetura técnica
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- arquitetura canônica e README do repositório;
+- registry de módulos e camada atual de autorização;
+- `package.json` e `tsconfig.json` da branch;
+- padrão existente de Server Actions e RPCs;
+- documentação oficial do Next.js App Router, Server Components, Server Actions e Route Handlers;
+- documentação oficial do Supabase sobre Data API, grants, RLS, papéis, chaves públicas e secretas;
+- documentação atual do PostgreSQL sobre Row Level Security, locks e particionamento.
+
+A baseline confirma o uso do monólito modular, do App Router, de TypeScript estrito, de PostgreSQL/Supabase, de RLS, de RPCs transacionais, de migrations append-only e de Service Role restrita ao servidor. Versões, defaults de grants, chaves, APIs e recomendações deverão ser revalidados antes da implementação e produção.
+
 ---
 
 ## 6. Estado técnico
 
-Nenhuma tabela, migration, rota, Server Action, componente, motor de fórmula, cálculo de folha, cálculo rescisório, conector governamental, certificado, fila, transmissão, guia, pagamento, offboarding, camada semântica, métrica executável, dashboard, exportação, modelo preditivo ou cenário executável foi implementado pelo Projeto RH.
+Nenhuma tabela, migration, rota, Server Action, componente, motor de fórmula, cálculo de folha, cálculo rescisório, conector governamental, certificado, fila, transmissão, guia, pagamento, offboarding, camada semântica, métrica executável, dashboard, exportação, modelo preditivo, cenário executável, outbox ou worker do RH foi implementado.
 
-A branch contém apenas documentação funcional.
+A branch contém documentação funcional e técnica.
 
 O CI do PR reprova no validador de documentação por uma divergência preexistente na árvore combinada: a numeração de vacinas possui duplicidade a partir de `VACINA-044`. Os documentos do Projeto RH não alteraram vacinas.
 
@@ -706,32 +776,31 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 ## 7. Próximo módulo lógico
 
-**Módulo 13 — Arquitetura Técnica, Dados, APIs, Segurança, Migrações e Roadmap de Implementação.**
+**Módulo 14 — Backlog Executável, Épicos, Sprints, Dependências, Gates e Plano de Homologação.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Especificação funcional dos módulos 01 a 12
-  → inventário técnico do repositório e banco atual
-    → bounded contexts e modelo alvo
-      → contratos de API, eventos, jobs e permissões
-        → migrations e backfills reversíveis
-          → implementação por ondas
-            → testes e homologação
+Arquitetura funcional e técnica
+  → épicos e histórias ordenadas
+    → dependências e gates
+      → sprints com testes e evidências
+        → piloto e cálculo sombra
+          → homologação por onda
+            → rollout gradual
               → operação assistida
-                → produção e evolução
 ```
 
 O próximo módulo deverá distinguir:
 
-1. modelo funcional e esquema físico;
-2. entidade canônica e projeção de leitura;
-3. comando, consulta, evento e job;
-4. migration, backfill, reconciliação e rollback;
-5. dado comum, sensível, clínico e judicial;
-6. permissão, capacidade, escopo e finalidade;
-7. desenvolvimento, produção restrita, homologação e produção;
-8. documentação concluída e software efetivamente implementado.
+1. épico, história, tarefa e spike;
+2. Definition of Ready e Definition of Done;
+3. entrega documental e entrega executável;
+4. dependência bloqueante e paralelizável;
+5. estimativa e compromisso de data;
+6. teste planejado e evidência executada;
+7. homologação técnica e aceite funcional;
+8. feature concluída e feature liberada em produção.
 
 ---
 
@@ -751,3 +820,4 @@ O próximo módulo deverá distinguir:
 | 0.10.0 | 06/08/2026 | ADR-010, Módulo 10 e baseline de obrigações digitais e reconciliação |
 | 0.11.0 | 06/08/2026 | ADR-011, Módulo 11 e baseline de desligamentos, rescisões e offboarding |
 | 0.12.0 | 06/08/2026 | ADR-012, Módulo 12 e baseline de People Analytics, privacidade e planejamento |
+| 0.13.0 | 06/08/2026 | ADR-013, Módulo 13 e arquitetura técnica, segurança, migrations e roadmap |
