@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.17.0  
+**Versão do índice:** 0.18.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -10,7 +10,7 @@
 
 ## 1. Finalidade
 
-Este arquivo registra o estado consolidado da especificação funcional, técnica, de planejamento, dados, contratos e experiência do Projeto RH sem substituir os documentos detalhados.
+Este arquivo registra o estado consolidado da especificação funcional, técnica, de planejamento, dados, contratos, experiência e qualidade do Projeto RH sem substituir os documentos detalhados.
 
 A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`. Cada módulo, ADR e anexo possui documento próprio para preservar decisões, requisitos, regras, critérios e histórico.
 
@@ -58,6 +58,9 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | ADR-017 | `PROJETO-RH-ADR-017-INTERFACE-CONTEXTO-ESTADO-E-DECISAO.md` | decisão de experiência registrada |
 | Módulo 17 | `PROJETO-RH-MODULO-17-DESIGN-DE-INTERFACE-FLUXOS-COMPONENTES-E-ACESSIBILIDADE.md` | especificação de experiência concluída |
 | Anexo M17 | `PROJETO-RH-MODULO-17-ANEXO-A-MAPA-DE-TELAS-E-PROTOTIPOS-TEXTUAIS.md` | mapa de telas e wireframes textuais concluído |
+| ADR-018 | `PROJETO-RH-ADR-018-EVIDENCIA-RISCO-OBSERVABILIDADE-E-LIBERACAO.md` | decisão de qualidade e segurança registrada |
+| Módulo 18 | `PROJETO-RH-MODULO-18-QUALIDADE-TESTES-OBSERVABILIDADE-SEGURANCA-E-EVIDENCIAS.md` | estratégia de qualidade concluída |
+| Anexo M18 | `PROJETO-RH-MODULO-18-ANEXO-A-MATRIZ-DE-TESTES-E-EVIDENCIAS.md` | matriz de testes e evidências concluída |
 
 ---
 
@@ -189,6 +192,38 @@ Aplicativo RH
 - HTML semântico, teclado, foco, contraste, reflow, temas e leitores de tela serão requisitos;
 - protótipo aprovado não será tratado como implementação entregue.
 
+### 3.19 Evidência, risco, observabilidade e liberação
+
+```text
+Risco e requisito
+  → critério de aceite
+    → estratégia de verificação
+      → execução reproduzível
+        → evidência íntegra
+          → revisão independente
+            → decisão de gate
+              → monitoramento em operação
+```
+
+- teste planejado, implementado, executado e aceito são estados diferentes;
+- alterações serão classificadas de Q0 a Q4;
+- evidência exigida crescerá conforme risco, sensibilidade e reversibilidade;
+- cobertura de linhas não substituirá cobertura de invariantes, transições, RLS e erros;
+- cálculos usarão datasets dourados, propriedades, memória e reconciliação granular;
+- logs, auditoria, métricas, traces, alertas e incidentes permanecerão distintos;
+- telemetria será estruturada, correlacionada e redigida;
+- SLIs e SLOs serão definidos por capacidade, sem números inventados nesta fase;
+- alertas críticos terão owner, severidade e runbook;
+- ASVS 5.0.0, OWASP Top 10:2025, API Top 10:2023 e NIST SSDF servirão como referências versionadas;
+- conformidade não será declarada apenas por citar um padrão;
+- CI deverá usar lockfile congelado antes da implementação;
+- artifacts efêmeros e evidências críticas terão retenções diferentes;
+- backup sem restore verificado não satisfará gate;
+- cálculo sombra, produção restrita, piloto e produção serão estágios diferentes;
+- evidence packages terão manifesto, commit, ambiente, comandos, resultados, hashes, limitações, executor e revisor;
+- gates poderão ser invalidados por mudança material ou nova evidência;
+- merge, deployment, ativação e estabilização não serão confundidos.
+
 ---
 
 ## 4. Progresso consolidado
@@ -234,18 +269,38 @@ Aplicativo RH
 - [x] dez wireframes textuais e matriz de estados;
 - [x] ordem de prototipação UX-0 a UX-4.
 
+### Qualidade, segurança e evidências concluídas
+
+- [x] ADR-018 — Evidência × Risco × Observabilidade × Liberação;
+- [x] classes de risco Q0 a Q4;
+- [x] pirâmide com onze camadas de verificação;
+- [x] gates QG0 a QG9;
+- [x] estratégia de unit, property, SQL, RLS, contracts, integration, E2E, visual e acessibilidade;
+- [x] estratégia de performance, concorrência, resiliência, migrations e restore;
+- [x] datasets dourados e cálculo sombra especificados;
+- [x] SLIs, SLOs, alertas, severidades e runbooks especificados;
+- [x] integração proposta com a observabilidade da Etapa 19;
+- [x] baseline ASVS, OWASP Top 10, API Top 10 e NIST SSDF;
+- [x] supply chain, lockfile, scans, SBOM e licenças planejados;
+- [x] evidence package, manifesto, hashes, retenção e invalidação definidos;
+- [x] **120 requisitos de qualidade**;
+- [x] **80 regras de qualidade**;
+- [x] **55 critérios de aceite**;
+- [x] **120 famílias de teste**;
+- [x] **18 tipos de evidence package**.
+
 ### Próximo
 
-- [ ] Módulo 18 — Estratégia de Qualidade, Testes, Observabilidade, Segurança Operacional e Evidências;
-- [ ] pirâmide e matriz de testes por risco;
-- [ ] testes SQL, unitários, contrato, integração, E2E e acessibilidade;
-- [ ] segurança ofensiva e validação de RLS;
-- [ ] observabilidade, métricas, logs, traces e correlation IDs;
-- [ ] SLOs, alertas, runbooks e resposta a incidentes;
-- [ ] backup, restauração, continuidade e disaster recovery;
-- [ ] evidências por gate, retenção e cadeia de custódia;
-- [ ] critérios de cálculo sombra, produção restrita e go-live;
-- [ ] estratégia de testes de usabilidade e acessibilidade.
+- [ ] Módulo 19 — Implantação, Cutover, Treinamento, Suporte e Gestão da Mudança;
+- [ ] estratégia de rollout por organização, empresa e população;
+- [ ] plano de cutover e freeze;
+- [ ] migração operacional e reconciliação final;
+- [ ] treinamento por persona;
+- [ ] materiais, ambiente de prática e certificação interna;
+- [ ] comunicação e gestão de resistência;
+- [ ] suporte N1, N2, N3 e especialistas de domínio;
+- [ ] operação assistida e hypercare;
+- [ ] critérios de adoção, estabilização e encerramento do projeto.
 
 ### Posterior
 
@@ -294,11 +349,32 @@ Foram reconciliados:
 
 A implementação deverá verificar HTML semântico, teclado, foco, zoom, reflow, contraste, temas, redução de movimento, leitor de tela e automação de acessibilidade.
 
+### 5.16 — Qualidade, observabilidade e segurança
+
+Em 6 de agosto de 2026 foram reconciliados:
+
+- scripts e dependências atuais do `package.json`;
+- Vitest e configuração de cobertura sem thresholds;
+- workflow principal de CI, artifacts e retenção de sete dias;
+- instalação atual com `--no-frozen-lockfile`;
+- Playwright e harness visual em três viewports e dois temas;
+- testes atuais de segurança, redirecionamento e erro público sanitizado;
+- Etapa 19 de auditoria e observabilidade, incluindo eventos, alertas, health checks, diagnósticos, sanitização e correlação;
+- scripts existentes de replay, E2E concorrente, file security e backup/restore;
+- OWASP ASVS 5.0.0;
+- OWASP Top 10:2025;
+- OWASP API Security Top 10:2023;
+- OWASP Logging Cheat Sheet;
+- NIST SSDF 1.1, observando que a revisão 1.2 permanece draft;
+- sinais de traces, metrics, logs e baggage do OpenTelemetry.
+
+O RH adotará essas referências como catálogo e baseline de rastreabilidade, sem declarar conformidade ou prontidão antes da execução das verificações.
+
 ---
 
 ## 6. Estado técnico honesto
 
-A branch contém somente documentação funcional, técnica, de planejamento, dados, contratos e experiência do Projeto RH.
+A branch contém somente documentação funcional, técnica, de planejamento, dados, contratos, experiência e qualidade do Projeto RH.
 
 Não foram implementados pelo Projeto RH:
 
@@ -308,7 +384,11 @@ Não foram implementados pelo Projeto RH:
 - schemas, tabelas, migrations, constraints, policies, RPCs ou views;
 - outbox, inbox, jobs, workers ou adapters;
 - motor de folha, cálculo, transmissão ou integração;
-- fixtures, testes executados ou evidências de homologação;
+- fixtures, datasets dourados, testes do RH ou evidências executadas;
+- thresholds de coverage, scans, SBOM, pentest ou evidence store;
+- fontes observáveis, SLIs, SLOs, alertas ou runbooks do RH;
+- cálculo sombra, load test, chaos test ou restore específico do RH;
+- gates de qualidade aprovados;
 - histórias, sprints, issues, milestones ou datas de execução.
 
 O CI do PR possui dívida estrutural preexistente relacionada à numeração das vacinas a partir de `VACINA-044`. Os documentos do RH não alteraram vacinas. A investigação pertence ao Sprint 00 e não será mascarada.
@@ -317,28 +397,29 @@ O CI do PR possui dívida estrutural preexistente relacionada à numeração das
 
 ## 7. Próximo módulo lógico
 
-**Módulo 18 — Estratégia de Qualidade, Testes, Observabilidade, Segurança Operacional e Evidências.**
+**Módulo 19 — Implantação, Cutover, Treinamento, Suporte e Gestão da Mudança.**
 
 ```text
-Requisitos, dados, contratos e UX
-  → riscos e controles
-    → estratégia de testes
-      → observabilidade e SLOs
-        → segurança e continuidade
-          → evidências por gate
-            → critérios de liberação
+Produto verificado
+  → preparação organizacional
+    → treinamento e comunicação
+      → migração operacional
+        → cutover e Go/No-Go
+          → piloto e rollout
+            → suporte e hypercare
+              → adoção e estabilização
 ```
 
 O próximo módulo deverá distinguir:
 
-1. teste planejado e teste executado;
-2. evidência automática e aceite humano;
-3. log técnico, auditoria de negócio e dado sensível;
-4. erro, alerta, incidente e problema;
-5. disponibilidade, integridade, confidencialidade e recuperabilidade;
-6. backup realizado e restauração comprovada;
-7. cálculo sombra, produção restrita, piloto e produção;
-8. gate aprovado e funcionalidade liberada.
+1. sistema tecnicamente pronto e organização pronta;
+2. treinamento ministrado e competência demonstrada;
+3. migração concluída e dados reconciliados;
+4. deployment, feature flag, ativação e cutover;
+5. usuário-chave, suporte, operação e especialista de domínio;
+6. incidente, dúvida, defeito e solicitação de melhoria;
+7. uso, adoção, conformidade de processo e resultado de negócio;
+8. hypercare concluído e operação estabilizada.
 
 ---
 
@@ -363,3 +444,4 @@ O próximo módulo deverá distinguir:
 | 0.15.0 | 06/08/2026 | ADR-015, Módulo 15 e design físico |
 | 0.16.0 | 06/08/2026 | ADR-016, Módulo 16 e contratos de API/jobs |
 | 0.17.0 | 06/08/2026 | ADR-017, Módulo 17, mapa de telas, acessibilidade e protótipos textuais |
+| 0.18.0 | 06/08/2026 | ADR-018, Módulo 18, matriz de testes, observabilidade, segurança e evidências |
