@@ -1,25 +1,21 @@
-# Fluxo mínimo conforme https://baileys.wiki/quickstart
+# Fluxo mínimo conforme https://baileys.wiki/authentication/qr-code
 name: Baileys Official Quickstart Lab
 
 on:
   push:
     branches:
       - test/etapa-22-baileys-live-lab
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - feature/etapa-22-whatsapp-omnichannel
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: baileys-official-quickstart-${{ github.event.pull_request.number || github.ref_name }}
-  cancel-in-progress: true
+  group: baileys-official-quickstart
+  cancel-in-progress: false
 
 jobs:
   official-quickstart:
-    if: github.event_name == 'push' || github.head_ref == 'test/etapa-22-baileys-live-lab'
+    if: ${{ !contains(github.event.head_commit.message, '[skip-baileys-lab]') }}
     runs-on: ubuntu-latest
     environment: homologation
     timeout-minutes: 18
@@ -37,7 +33,8 @@ jobs:
       - name: Checkout do laboratório
         uses: actions/checkout@v6
         with:
-          persist-credentials: false
+          ref: test/etapa-22-baileys-live-lab
+          fetch-depth: 0
 
       - name: Configurar Node.js 24
         uses: actions/setup-node@v6
@@ -96,7 +93,7 @@ jobs:
           cat /tmp/baileys-official-quickstart.log
           exit 1
 
-      - name: Criptografar QR antes de publicar
+      - name: Criptografar QR
         shell: bash
         run: |
           set -euo pipefail
@@ -109,14 +106,17 @@ jobs:
             scripts/baileys-official-quickstart-qr-cert.pem
           rm -f "$BAILEYS_QUICKSTART_QR_PATH"
 
-      - name: Publicar QR criptografado temporário
-        uses: actions/upload-artifact@v7
-        with:
-          name: baileys-official-quickstart-private-qr-${{ github.run_id }}
-          path: baileys-official-quickstart-qr.p7m
-          if-no-files-found: error
-          retention-days: 1
-          compression-level: 0
+      - name: Registrar somente QR criptografado
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="docs/ETAPA-22-WHATSAPP-WEB-NAO-OFICIAL/BAILEYS-OFFICIAL-QUICKSTART-QR-LATEST.p7m"
+          cp baileys-official-quickstart-qr.p7m "$target"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$target"
+          git commit -m "test(baileys): registrar QR criptografado efêmero [skip-baileys-lab]"
+          git push origin HEAD:test/etapa-22-baileys-live-lab
 
       - name: Aguardar pareamento, reconexão e envio
         shell: bash
@@ -142,31 +142,6 @@ jobs:
             cp "$BAILEYS_QUICKSTART_EVIDENCE_PATH" baileys-official-quickstart-evidence.json
           fi
           exit "$exit_code"
-
-      - name: Resumo sanitizado
-        if: always()
-        shell: bash
-        run: |
-          echo "## Baileys Official Quickstart" >> "$GITHUB_STEP_SUMMARY"
-          if [[ -f baileys-official-quickstart-evidence.json ]]; then
-            node <<'NODE' >> "$GITHUB_STEP_SUMMARY"
-          const fs = require('fs');
-          const e = JSON.parse(fs.readFileSync('baileys-official-quickstart-evidence.json', 'utf8'));
-          console.log(`- Resultado: ${e.outcome}`);
-          console.log(`- QR observado: ${e.qrObserved ? 'sim' : 'não'}`);
-          console.log(`- Gerações de QR: ${e.qrGenerationCount}`);
-          console.log(`- Conexão aberta: ${e.connectionOpened ? 'sim' : 'não'}`);
-          console.log(`- Restart required observado: ${e.restartRequiredObserved ? 'sim' : 'não'}`);
-          console.log(`- Reconexões: ${e.reconnectCount}`);
-          console.log(`- Credenciais atualizadas: ${e.credentialsUpdated ? 'sim' : 'não'}`);
-          console.log(`- Envio aceito: ${e.sendAccepted ? 'sim' : 'não'}`);
-          console.log(`- Número de produção: ${e.productionNumberUsed ? 'sim' : 'não'}`);
-          console.log(`- Meta Cloud: ${e.metaCloudUsed ? 'sim' : 'não'}`);
-          console.log(`- IA autônoma: ${e.autonomousAiUsed ? 'sim' : 'não'}`);
-          NODE
-          else
-            echo "- Evidência não foi criada." >> "$GITHUB_STEP_SUMMARY"
-          fi
 
       - name: Publicar evidência sanitizada
         if: always()
