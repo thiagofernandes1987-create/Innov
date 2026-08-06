@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.7.0  
+**Versão do índice:** 0.8.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -35,6 +35,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 06 | `PROJETO-RH-MODULO-06-FERIAS-AFASTAMENTOS-E-LICENCAS.md` | especificação funcional inicial concluída |
 | ADR-007 | `PROJETO-RH-ADR-007-BENEFICIOS-DEPENDENTES-E-DESCONTOS.md` | decisão funcional registrada |
 | Módulo 07 | `PROJETO-RH-MODULO-07-BENEFICIOS-DEPENDENTES-E-DESCONTOS.md` | especificação funcional inicial concluída |
+| ADR-008 | `PROJETO-RH-ADR-008-SST-RISCOS-SAUDE-E-HABILITACAO.md` | decisão funcional registrada |
+| Módulo 08 | `PROJETO-RH-MODULO-08-SST-RISCOS-EXAMES-E-HABILITACOES.md` | especificação funcional inicial concluída |
 
 ---
 
@@ -223,6 +225,41 @@ Obrigação ou autorização
 - dados familiares, judiciais e bancários terão acesso segregado;
 - parâmetros legais e externos serão versionados.
 
+### 3.10 Riscos, saúde ocupacional, incidentes e habilitação
+
+```text
+Contexto de trabalho
+  → perigos e avaliações versionadas
+    → medidas e plano de ação
+      → grupos e perfis individuais de exposição
+
+Programa médico
+  → necessidade de exame
+    → atendimento e documentos clínicos protegidos
+      → ASO e conclusão operacional
+
+Incidente
+  → investigação e ações
+    → CAT quando aplicável
+
+EPI + treinamento + aptidão + permissão
+  → habilitação operacional
+```
+
+- risco, exposição, exame, ASO, EPI, treinamento e autorização são objetos diferentes;
+- inventários, avaliações e perfis terão vigência;
+- alteração não reescreverá o histórico;
+- EPI não substituirá automaticamente controle coletivo;
+- entrega não comprovará uso ou eficácia;
+- ASO não será prontuário clínico;
+- gestores verão aptidão e restrições operacionais, não diagnóstico;
+- treinamento concluído não produzirá habilitação sem os demais requisitos;
+- certificado vencido poderá suspender a autorização correspondente;
+- incidente não criará CAT automaticamente;
+- CAT e eventos externos manterão payload, hash, recibo e correlação;
+- Diário de Obras será evidência complementar, não fonte canônica de SST;
+- acesso clínico e exportações sensíveis terão auditoria reforçada.
+
 ---
 
 ## 4. Progresso funcional
@@ -271,26 +308,38 @@ Obrigação ou autorização
 - [x] movimentos financeiros e estornos;
 - [x] arquivos e conciliação de fornecedores;
 - [x] integração com folha, financeiro, eSocial e centros de custo;
-- [x] permissões, auditoria, relatórios e testes do Módulo 07.
+- [x] permissões, auditoria, relatórios e testes do Módulo 07;
+- [x] decisão Risco × Exposição × Saúde × Incidente × EPI × Treinamento × Habilitação;
+- [x] contextos de trabalho e inventários de riscos;
+- [x] avaliações, medições, medidas e plano de ação;
+- [x] grupos e perfis individuais de exposição;
+- [x] programa médico e necessidades de exame;
+- [x] convocações, exames, ASOs, aptidão e restrições;
+- [x] segregação e auditoria de dados clínicos;
+- [x] incidentes, investigação e ações corretivas;
+- [x] CAT e eventos S-2210, S-2220 e S-2240;
+- [x] catálogo, estoque, entrega, inspeção e troca de EPI;
+- [x] treinamentos, certificados e reciclagens;
+- [x] habilitações e permissões de trabalho;
+- [x] integração com Obras, RH, ponto, afastamentos, folha e Financeiro;
+- [x] permissões, alertas, relatórios e testes do Módulo 08.
 
 ### Próximo
 
-- [ ] Módulo 08 — Medicina e Segurança do Trabalho;
-- [ ] riscos ocupacionais, ambientes e exposições;
-- [ ] programas e inventários de prevenção;
-- [ ] exames ocupacionais e ASO;
-- [ ] aptidão, restrições e encaminhamentos;
-- [ ] acidentes, CAT e investigação;
-- [ ] treinamentos, EPIs e validade;
-- [ ] eventos S-2210, S-2220 e S-2240;
-- [ ] integração com obras, funções, afastamentos e retorno.
+- [ ] Módulo 09 — Folha de Pagamento, Rubricas, Bases, Cálculo e Fechamento;
+- [ ] competências e períodos de cálculo;
+- [ ] catálogo e versões de rubricas;
+- [ ] fórmulas, incidências e bases;
+- [ ] entradas de ponto, férias, afastamentos e benefícios;
+- [ ] cálculo bruto, descontos, encargos e líquido;
+- [ ] memória de cálculo e explicabilidade;
+- [ ] prévia, conferência, aprovação, fechamento e reabertura;
+- [ ] integração financeira e eventos periódicos.
 
 ### Posterior
 
-- [ ] folha;
-- [ ] rubricas e fórmulas;
-- [ ] obrigações digitais;
-- [ ] desligamentos;
+- [ ] obrigações digitais e reconciliação governamental;
+- [ ] desligamentos e rescisões;
 - [ ] relatórios consolidados;
 - [ ] plano de implementação.
 
@@ -357,7 +406,23 @@ Em 6 de agosto de 2026 foram verificadas:
 - Lei nº 6.321/1976, Lei nº 14.442/2022 e regulamentação vigente do PAT;
 - texto compilado da CLT para descontos salariais.
 
-A baseline oficial diferencia dependência, cobertura, beneficiário, rubrica, desconto e pagamento. Campos, limites, incidências, documentos, instrumentos coletivos e interpretações deverão ser verificados novamente antes da implementação, homologação e produção.
+A baseline oficial diferencia dependência, cobertura, beneficiário, rubrica, desconto e pagamento.
+
+### 5.6 Segurança e saúde no trabalho
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- página oficial de Normas Regulamentadoras vigentes;
+- NR-1 e materiais oficiais de GRO/PGR;
+- NR-6 e orientações oficiais sobre EPI e CA;
+- NR-7 e PCMSO;
+- NR-18 atualizada em 2026 para a indústria da construção;
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- Manual de Orientação do eSocial consolidado até NO 11/2026;
+- Manual WEB Geral de SST;
+- eventos S-2210, S-2220 e S-2240.
+
+A baseline oficial diferencia gerenciamento de riscos, monitoramento da saúde, comunicação de acidente e exposição a agentes. Requisitos, textos consolidados, prazos, tabelas, códigos, cargas horárias e interpretações deverão ser verificados novamente antes da implementação, homologação e produção.
 
 ---
 
@@ -375,34 +440,32 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 ## 7. Próximo módulo lógico
 
-**Módulo 08 — Medicina e Segurança do Trabalho, Riscos Ocupacionais, Exames, ASO, CAT, EPIs e Treinamentos.**
+**Módulo 09 — Folha de Pagamento, Rubricas, Bases, Fórmulas, Cálculo e Fechamento.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Ambiente e atividade
-  → perigos e riscos
-  → medidas de controle
-  → trabalhador exposto
-  → exames e treinamentos aplicáveis
-  → aptidão, restrições e evidências
-  → acidente ou ocorrência
-  → investigação, CAT e afastamento
-  → eventos digitais e acompanhamento
+Competência e população elegível
+  → versões contratuais e cadastrais
+  → entradas de ponto, férias, afastamentos, benefícios e SST
+  → rubricas e fórmulas versionadas
+  → cálculo bruto, bases, descontos e encargos
+  → memória de cálculo
+  → conferência e aprovação
+  → fechamento
+  → financeiro e eventos periódicos
 ```
 
 O próximo módulo deverá distinguir:
 
-1. ambiente e condição de trabalho;
-2. perigo, risco e exposição;
-3. medida de prevenção;
-4. exame e resultado ocupacional;
-5. ASO e aptidão;
-6. restrição operacional sem diagnóstico;
-7. acidente, incidente e doença ocupacional;
-8. CAT, afastamento e investigação;
-9. EPI entregue e efetivamente controlado;
-10. treinamento exigido, realizado e válido.
+1. rubrica e sua versão;
+2. fórmula e parâmetro;
+3. entrada de cálculo e fato de origem;
+4. resultado calculado e ajuste manual;
+5. base de incidência e tributo;
+6. prévia, cálculo oficial e recálculo;
+7. fechamento e reabertura;
+8. pagamento e obrigação digital.
 
 ---
 
@@ -417,3 +480,4 @@ O próximo módulo deverá distinguir:
 | 0.5.0 | 06/08/2026 | ADR-005, Módulo 05 e baseline de jornadas e ponto |
 | 0.6.0 | 06/08/2026 | ADR-006, Módulo 06 e baseline de férias e afastamentos |
 | 0.7.0 | 06/08/2026 | ADR-007, Módulo 07 e baseline de benefícios, dependentes e descontos |
+| 0.8.0 | 06/08/2026 | ADR-008, Módulo 08 e baseline de SST, riscos, saúde e habilitações |
