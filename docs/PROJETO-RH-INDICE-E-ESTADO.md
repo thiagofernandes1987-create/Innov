@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.3.0  
+**Versão do índice:** 0.4.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -27,6 +27,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 02 | `PROJETO-RH-MODULO-02-ESTRUTURA-ORGANIZACIONAL.md` | especificação funcional inicial concluída |
 | ADR-003 | `PROJETO-RH-ADR-003-ADMISSAO-CASO-AUDITAVEL.md` | decisão funcional registrada |
 | Módulo 03 | `PROJETO-RH-MODULO-03-ADMISSAO-PRE-ADMISSAO.md` | especificação funcional inicial concluída |
+| ADR-004 | `PROJETO-RH-ADR-004-CONTRATO-VERSOES-E-ALTERACOES.md` | decisão funcional registrada |
+| Módulo 04 | `PROJETO-RH-MODULO-04-CONTRATOS-E-ALTERACOES.md` | especificação funcional inicial concluída |
 
 ---
 
@@ -87,12 +89,40 @@ Pessoa
 
 - pré-admissão não será vínculo ativo;
 - registro preliminar externo não será tratado como admissão concluída;
-- o checklist aplicado manterá versão e vigência;
+- checklist aplicado manterá versão e vigência;
 - documento recebido não equivale a documento conferido;
 - pendência impeditiva bloqueará ativação;
 - dispensa exigirá permissão, justificativa e auditoria;
 - ativação será transacional, explícita e idempotente;
 - caso cancelado ou rejeitado permanecerá no histórico.
+
+### 3.6 Contrato, versões e alterações
+
+```text
+Vínculo
+  └─ Contrato
+       ├─ Versão contratual atual
+       ├─ Versões históricas
+       └─ Versões futuras
+
+Solicitação de alteração
+  → diferenças
+  → validações
+  → aprovações
+  → documentos
+  → aplicação
+  → nova versão imutável
+```
+
+- vínculo permanece raiz estável;
+- condições contratuais serão versões imutáveis;
+- vigência e instante de registro serão tempos distintos;
+- alteração, correção, retificação externa e reprocessamento são objetos diferentes;
+- documento é evidência e não única fonte canônica;
+- alteração futura não substituirá antecipadamente a condição atual;
+- alteração retroativa gerará impactos explícitos;
+- aplicação será transacional e idempotente;
+- folha e eventos externos referenciarão a versão utilizada.
 
 ---
 
@@ -124,21 +154,31 @@ Pessoa
 - [x] estados de eventos digitais;
 - [x] gate de ativação e idempotência;
 - [x] cancelamento, rejeição, expiração e reabertura controlada;
-- [x] regras, exceções, alertas, relatórios e critérios de aceite do Módulo 03.
+- [x] decisão Contrato × Versão × Alteração × Documento;
+- [x] contratos e versões contratuais;
+- [x] histórico por vigência e instante de registro;
+- [x] alterações futuras, imediatas e retroativas;
+- [x] correção e retificação controladas;
+- [x] alterações de remuneração, cargo, função, posição, unidade, estabelecimento, local, jornada e modalidade;
+- [x] prorrogação, conversão e contratos a prazo;
+- [x] documentos, ciência e assinatura;
+- [x] impactos derivados e integração externa;
+- [x] regras, exceções, alertas, relatórios e critérios de aceite do Módulo 04.
 
 ### Próximo
 
-- [ ] Módulo 04 — Contratos de Trabalho e Alterações Contratuais;
-- [ ] tipos e versões de contrato;
-- [ ] histórico por vigência;
-- [ ] alterações de salário, cargo, função, jornada e lotação;
-- [ ] documentos, termos e assinaturas;
-- [ ] aprovações e efeitos futuros;
-- [ ] integração com folha e obrigações.
+- [ ] Módulo 05 — Jornadas, Horários, Escalas, Controle de Ponto e Banco de Horas;
+- [ ] jornada contratual;
+- [ ] horários e escalas;
+- [ ] marcações e ocorrências;
+- [ ] apuração;
+- [ ] autorizações;
+- [ ] banco de horas;
+- [ ] reflexos em folha;
+- [ ] integração com obras e diário de campo.
 
 ### Posterior
 
-- [ ] jornadas, escalas e ponto;
 - [ ] férias;
 - [ ] afastamentos;
 - [ ] benefícios;
@@ -153,7 +193,9 @@ Pessoa
 
 ---
 
-## 5. Baseline oficial consultada para o Módulo 03
+## 5. Baselines oficiais consultadas
+
+### 5.1 Admissão
 
 Em 6 de agosto de 2026 foram verificadas fontes oficiais do Portal eSocial:
 
@@ -161,7 +203,18 @@ Em 6 de agosto de 2026 foram verificadas fontes oficiais do Portal eSocial:
 - regras da versão S-1.3;
 - Manual WEB Geral, capítulos de registro preliminar e admissão.
 
-A documentação mantém eventos distintos para registro preliminar e admissão completa. A especificação registra apenas a arquitetura necessária para suportar esse fluxo; campos, prazos e obrigatoriedades deverão ser verificados novamente antes da implementação e da homologação.
+A documentação mantém eventos distintos para registro preliminar e admissão completa.
+
+### 5.2 Contratos e alterações
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- Consolidação das Leis do Trabalho em texto compilado;
+- documentação técnica do eSocial S-1.3;
+- Manual WEB Geral, capítulo de alteração de contrato;
+- eventos de admissão, alteração cadastral, alteração contratual e alteração de trabalhador sem vínculo.
+
+A baseline oficial diferencia fato novo contratual de correção de informação enviada incorretamente. Campos, prazos, obrigatoriedades e interpretações deverão ser verificados novamente antes da implementação, homologação e produção.
 
 ---
 
@@ -171,7 +224,7 @@ Nenhuma tabela, migration, rota, Server Action, componente, cálculo ou integra�
 
 A branch contém apenas documentação funcional.
 
-O primeiro CI do PR reprovou no validador de documentação por uma divergência preexistente na árvore combinada: a numeração de vacinas possui duplicidade a partir de `VACINA-044`. Os documentos do Projeto RH não alteraram vacinas.
+O CI do PR reprova no validador de documentação por uma divergência preexistente na árvore combinada: a numeração de vacinas possui duplicidade a partir de `VACINA-044`. Os documentos do Projeto RH não alteraram vacinas.
 
 Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` volte a representar evidência confiável. O PR de RH não mascarará o problema alterando o validador ou renumerando vacinas sem análise de referências.
 
@@ -179,23 +232,24 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 ## 7. Próximo módulo lógico
 
-**Módulo 04 — Contratos de Trabalho, Alterações Contratuais, Histórico por Vigência e Documentos do Vínculo.**
+**Módulo 05 — Jornadas, Horários, Escalas, Controle de Ponto e Banco de Horas.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Vínculo ativo ou em admissão
-  → Contrato inicial versionado
-  → Condições vigentes
-  → Proposta de alteração
-  → Validações e efeitos
-  → Aprovação
-  → Documento e assinatura
-  → Aplicação na data de vigência
-  → Integração com folha e obrigações
+Jornada contratual versionada
+  → horário ou escala planejada
+  → marcações e evidências
+  → ocorrências e justificativas
+  → apuração
+  → aprovação
+  → banco de horas ou evento para folha
 ```
 
-Nenhuma alteração deverá reescrever condições históricas. Alterações futuras serão registradas como novas versões ou eventos com vigência, mantendo a capacidade de consultar a situação válida em qualquer data.
+O próximo módulo deverá impedir duas confusões:
+
+1. marcação operacional não reescreve a jornada contratual;
+2. alteração contratual de jornada não apaga escalas, marcações ou apurações históricas.
 
 ---
 
@@ -206,3 +260,4 @@ Nenhuma alteração deverá reescrever condições históricas. Alterações fut
 | 0.1.0 | 05/08/2026 | início do Projeto RH, ADR-001 e Módulo 01 |
 | 0.2.0 | 06/08/2026 | ADR-002, Módulo 02 e consolidação do índice |
 | 0.3.0 | 06/08/2026 | ADR-003, Módulo 03 e baseline oficial de admissão |
+| 0.4.0 | 06/08/2026 | ADR-004, Módulo 04 e baseline de contratos e alterações |
