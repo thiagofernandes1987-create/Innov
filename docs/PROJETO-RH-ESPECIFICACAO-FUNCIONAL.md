@@ -2,8 +2,9 @@
 
 **Subtítulo:** Módulo de Recursos Humanos, Departamento Pessoal, Folha de Pagamento e Integrações Governamentais  
 **Documento:** especificação funcional em elaboração  
-**Versão:** 0.1.0  
+**Versão:** 0.2.0  
 **Data de início:** 5 de agosto de 2026  
+**Última atualização:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Produção:** não implementado  
 **Responsável pelo produto:** pendente de validação  
@@ -16,21 +17,24 @@
 
 - visão inicial do produto;
 - fronteiras entre pessoa, usuário, trabalhador, vínculo e equipe de obra;
+- separação entre tenant, empresa empregadora e estabelecimento;
 - mapa preliminar dos módulos de RH;
 - definição inicial do produto mínimo viável;
 - perfis de usuários;
 - princípios de segurança e proteção de dados;
 - requisitos funcionais e regras de negócio iniciais;
 - dependências com os módulos existentes da Innovar Platform;
-- backlog inicial por versões.
+- backlog inicial por versões;
+- Módulo 01 — Cadastro Mestre de Pessoas, Trabalhadores e Vínculos;
+- Módulo 02 — Empresas, Estabelecimentos e Estrutura Organizacional.
 
-### Em elaboração nas próximas seções deste documento
+### Em elaboração nas próximas entregas
 
-- detalhamento funcional dos cadastros mestres;
-- fluxo de admissão;
-- contratos de trabalho;
+- admissão e pré-admissão;
+- contratos de trabalho e alterações;
 - jornada, ponto e banco de horas;
 - férias, afastamentos e benefícios;
+- medicina e segurança do trabalho;
 - folha de pagamento;
 - parametrização de rubricas;
 - obrigações governamentais;
@@ -38,7 +42,7 @@
 
 ### Situação geral
 
-A especificação foi iniciada. Nenhum módulo, tabela, tela, migration, integração ou cálculo de folha foi declarado implementado.
+A especificação funcional está em andamento. Nenhum módulo, tabela, tela, migration, integração ou cálculo de folha foi declarado implementado.
 
 ---
 
@@ -67,6 +71,8 @@ O módulo deverá resolver, no mínimo, os seguintes problemas empresariais:
 - ausência de histórico confiável de alterações contratuais;
 - uso do cadastro de usuário como se fosse cadastro de empregado;
 - duplicação de pessoas em equipes, obras e folha;
+- confusão entre tenant, empresa empregadora, estabelecimento e obra;
+- duplicação de centros de custo entre RH e Financeiro;
 - fórmulas de folha fixadas diretamente no código;
 - perda da regra utilizada em folhas antigas após mudança legal ou parametrização;
 - dificuldade para identificar pendências de admissão, férias, documentos e afastamentos;
@@ -88,7 +94,10 @@ O produto deverá permitir que:
 - a pessoa seja cadastrada uma vez;
 - cada vínculo possua histórico próprio;
 - a mesma pessoa possa ter ou não acesso ao sistema;
+- uma organização da plataforma administre uma ou mais empresas empregadoras;
+- empresa, estabelecimento e obra mantenham finalidades distintas;
 - a alocação em obra não substitua o vínculo trabalhista;
+- RH e Financeiro compartilhem o mesmo centro de custo canônico;
 - toda regra de folha possua versão e vigência;
 - toda competência possa ser reconstruída com as regras utilizadas na época;
 - eventos governamentais possuam estado, protocolo, retorno e histórico;
@@ -97,29 +106,41 @@ O produto deverá permitir que:
 
 ---
 
-## 5. Decisão arquitetural fundamental
+## 5. Decisões arquiteturais fundamentais
 
 ### 5.1 Entidades que não podem ser confundidas
 
-O sistema deverá separar explicitamente:
-
 | Entidade | Finalidade |
 |---|---|
+| Organização | tenant, autorização, módulos e isolamento |
+| Empresa empregadora | entidade empresarial à qual o vínculo pertence |
+| Estabelecimento | unidade vinculada à empresa empregadora |
 | Usuário | identidade que acessa a plataforma |
 | Pessoa | identidade civil ou cadastral comum |
 | Trabalhador | pessoa que presta ou prestou atividade à organização |
-| Vínculo | relação jurídica ou contratual entre trabalhador e organização |
+| Vínculo | relação jurídica ou contratual entre trabalhador e empresa |
 | Contrato de trabalho | condições aplicáveis a determinado vínculo e período |
-| Alocação organizacional | empresa, estabelecimento, departamento, centro de custo, cargo e função |
+| Unidade organizacional | diretoria, área, departamento, setor ou unidade equivalente |
+| Cargo | posição contratual ou ocupacional prevista |
+| Função | atividades efetivamente exercidas |
+| Posição | posto estrutural planejado ou ocupado |
+| Lotação | associação vigente do vínculo à estrutura |
+| Centro de custo | dimensão contábil ou gerencial compartilhada |
 | Alocação em obra | participação operacional em projeto, equipe, tarefa ou recurso |
 
 ### 5.2 Relação recomendada
 
 ```text
+Organização
+  └─ Empresa empregadora
+       └─ Estabelecimento
+            └─ Estrutura organizacional
+
 Pessoa
   ├─ pode possuir Usuário de acesso
   └─ pode possuir um ou mais Trabalhadores/Vínculos
        ├─ Contrato e alterações
+       ├─ Lotação, cargo e função
        ├─ Jornada
        ├─ Benefícios
        ├─ Férias e afastamentos
@@ -131,7 +152,9 @@ Pessoa
 
 As estruturas atuais `project_teams`, `project_team_members`, `project_resources` e `task_resource_allocations` continuarão representando a operação da obra. Elas não deverão se tornar o cadastro mestre de empregados.
 
-Quando o trabalhador for alocado a uma equipe de obra, a alocação deverá referenciar o trabalhador ou vínculo canônico. Trabalhadores sem acesso à plataforma não deverão ser obrigados a possuir conta em `auth.users`.
+A estrutura atual `finance_cost_centers` não será copiada para um catálogo paralelo de RH. A arquitetura futura deverá generalizar ou migrar o cadastro de forma compatível, preservando referências existentes sempre que possível.
+
+Trabalhadores sem acesso à plataforma não deverão ser obrigados a possuir conta em `auth.users`.
 
 ---
 
@@ -147,7 +170,8 @@ Quando o trabalhador for alocado a uma equipe de obra, a alocação deverá refe
 - banco de talentos;
 - cadastro de pessoas;
 - cadastro de trabalhadores;
-- cargos e funções;
+- estrutura organizacional;
+- cargos, funções e posições;
 - competências;
 - treinamentos;
 - avaliações;
@@ -157,7 +181,8 @@ Quando o trabalhador for alocado a uma equipe de obra, a alocação deverá refe
 ### 6.2 Departamento Pessoal
 
 - empresas e estabelecimentos;
-- lotações e departamentos;
+- unidades, lotações e departamentos;
+- centros de custo e rateios;
 - vínculos;
 - matrículas;
 - contratos;
@@ -195,7 +220,7 @@ Quando o trabalhador for alocado a uma equipe de obra, a alocação deverá refe
 - diferenças retroativas;
 - provisões;
 - encargos;
-- contabilização;
+- rateios e contabilização;
 - fechamento;
 - reabertura;
 - retificação;
@@ -220,376 +245,250 @@ Quando o trabalhador for alocado a uma equipe de obra, a alocação deverá refe
 
 ---
 
-## 7. Produto mínimo viável
+## 7. Documentos detalhados disponíveis
 
-O MVP deverá priorizar uma operação segura e rastreável antes de automações governamentais completas.
-
-### 7.1 Incluído no MVP
-
-- cadastro de empresas e estabelecimentos;
-- cadastro canônico de pessoas e trabalhadores;
-- vínculos e matrículas;
-- cargos, funções e departamentos;
-- contratos e alterações contratuais;
-- jornadas e escalas básicas;
-- dependentes;
-- benefícios básicos;
-- férias;
-- afastamentos;
-- desligamentos;
-- documentos privados;
-- alertas de pendências e vencimentos;
-- perfis e permissões específicas;
-- relatórios cadastrais;
-- histórico e auditoria;
-- integração de trabalhadores com equipes e obras.
-
-### 7.2 Preparação obrigatória no MVP para a folha
-
-Mesmo que a folha completa entre em uma versão posterior, o MVP deverá prever:
-
-- salário contratual com vigência;
-- jornada contratual com vigência;
-- lotação e centro de custo com vigência;
-- sindicato e enquadramento com vigência;
-- eventos recorrentes;
-- trilha de alterações;
-- identificadores estáveis para integrações futuras.
-
-### 7.3 Fora do primeiro corte
-
-- transmissão real ao eSocial;
-- assinatura com certificado real;
-- DCTFWeb automatizada;
-- FGTS Digital automatizado;
-- medicina ocupacional completa;
-- recrutamento com inteligência artificial;
-- integrações bancárias de pagamento;
-- contabilidade oficial completa;
-- aplicação de regras legais sem validação por responsável técnico.
-
----
-
-## 8. Perfis de usuários
-
-| Perfil | Responsabilidade principal |
+| Documento | Estado |
 |---|---|
-| Administrador da plataforma | configura organizações, módulos e acessos |
-| Gestor de RH | administra pessoas, vagas, treinamentos e indicadores |
-| Analista de RH | executa rotinas de pessoas sem acesso amplo à folha |
-| Gestor de Departamento Pessoal | administra vínculos, contratos, férias, afastamentos e desligamentos |
-| Analista de Departamento Pessoal | executa cadastros e rotinas autorizadas |
-| Gestor de Folha | configura, calcula, revisa, fecha e reabre competências |
-| Analista de Folha | realiza lançamentos e conferências conforme alçada |
-| Medicina e Segurança | acessa exclusivamente dados ocupacionais autorizados |
-| Financeiro | recebe valores contabilizados e pagamentos autorizados, sem acesso irrestrito aos documentos pessoais |
-| Contabilidade | acessa integrações e relatórios contábeis permitidos |
-| Gestor de Obras | consulta alocações e disponibilidade, sem acesso automático a salário ou dados médicos |
-| Empregado | acessa seus próprios documentos, recibos, férias e solicitações liberadas |
-| Auditor | consulta trilhas e evidências conforme autorização, sem alterar dados operacionais |
+| `PROJETO-RH-ADR-001-PESSOA-TRABALHADOR-VINCULO.md` | decisão funcional registrada |
+| `PROJETO-RH-ADR-002-TENANT-EMPRESA-ESTABELECIMENTO.md` | decisão funcional registrada |
+| `PROJETO-RH-MODULO-01-CADASTRO-MESTRE.md` | especificação inicial concluída |
+| `PROJETO-RH-MODULO-02-ESTRUTURA-ORGANIZACIONAL.md` | especificação inicial concluída |
 
 ---
 
-## 9. Princípios de acesso e segurança
-
-O módulo deverá seguir negação por padrão e segregação por finalidade.
-
-Capacidades mínimas a serem acrescentadas ou representadas no modelo de autorização:
-
-- `view_personal_data`;
-- `view_salary`;
-- `view_medical_data`;
-- `manage_employment_contract`;
-- `manage_time_records`;
-- `approve_leave`;
-- `manage_payroll_entries`;
-- `calculate_payroll`;
-- `close_payroll`;
-- `reopen_payroll`;
-- `rectify_payroll`;
-- `manage_rubrics`;
-- `transmit_government_events`;
-- `view_government_returns`;
-- `export_payroll_data`.
-
-Regras iniciais:
-
-- acesso à folha não será concedido apenas por acesso ao módulo Financeiro;
-- acesso a salário não concederá acesso automático a dados médicos;
-- gestores de obra não visualizarão remuneração sem permissão específica;
-- o empregado visualizará somente seus próprios dados liberados;
-- consultas e exportações sensíveis deverão produzir auditoria;
-- documentos deverão permanecer em armazenamento privado;
-- links de download deverão ser temporários ou passar por rota autenticada;
-- competências fechadas não poderão ser alteradas silenciosamente;
-- alterações de parâmetros deverão guardar versão, vigência, autor e justificativa.
-
----
-
-## 10. Integração com módulos existentes
-
-| Módulo existente | Integração prevista |
-|---|---|
-| Administração | organizações, usuários, perfis, permissões e configurações |
-| Obras | alocação de trabalhadores e custos por obra |
-| Equipes | composição de equipes a partir do trabalhador canônico |
-| Planejamento | necessidade de recursos e disponibilidade |
-| Tarefas | responsabilidade e esforço, sem substituir ponto ou jornada |
-| Diário de Obras | presença e recursos registrados em campo como evidência operacional |
-| Financeiro | pagamentos, provisões e lançamentos autorizados |
-| Relatórios | indicadores de RH, DP e folha conforme permissão |
-| Auditoria | acessos, alterações, fechamentos, reaberturas e transmissões |
-| Documentos | contratos, recibos, atestados e documentos privados |
-| Modelos | modelos versionados de contratos, comunicados e documentos |
-| Qualidade | treinamentos, habilitações e requisitos por atividade |
-
----
-
-## 11. Requisitos funcionais iniciais
-
-### RF-RH-001 — Cadastrar pessoa
-
-- **Objetivo:** manter uma identidade canônica sem obrigar a criação de usuário.
-- **Atores:** RH e Departamento Pessoal autorizados.
-- **Dados principais:** nome, identificação, contatos, endereço e documentos necessários.
-- **Resultado:** pessoa criada com identificador estável.
-- **Prioridade:** crítica.
-- **Versão:** MVP.
-- **Critério de aceite:** o sistema impede duplicidade conforme regras configuradas e registra o responsável pelo cadastro.
-
-### RF-RH-002 — Cadastrar trabalhador
-
-- **Objetivo:** representar uma pessoa que presta ou prestou atividade para uma organização.
-- **Dependência:** RF-RH-001.
-- **Resultado:** trabalhador associado à pessoa e à organização.
-- **Prioridade:** crítica.
-- **Versão:** MVP.
-
-### RF-DP-001 — Criar vínculo
-
-- **Objetivo:** registrar a relação contratual entre trabalhador e organização.
-- **Dados principais:** matrícula, categoria, admissão, estabelecimento, lotação, cargo, função, jornada e salário inicial.
-- **Prioridade:** crítica.
-- **Versão:** MVP.
-- **Critério de aceite:** não é possível criar vínculo sem pessoa, trabalhador, organização e vigência válidos.
-
-### RF-DP-002 — Versionar alterações contratuais
-
-- **Objetivo:** preservar o histórico sem reescrever o passado.
-- **Fluxo:** selecionar vínculo, informar alteração, data de vigência, justificativa e documento de suporte.
-- **Prioridade:** crítica.
-- **Versão:** MVP.
-- **Critério de aceite:** consultar uma data passada devolve as condições vigentes naquela data.
-
-### RF-DP-003 — Alocar trabalhador em obra
-
-- **Objetivo:** conectar o vínculo ao módulo Equipes sem duplicar o empregado.
-- **Prioridade:** alta.
-- **Versão:** MVP.
-- **Critério de aceite:** a remoção da alocação não exclui a pessoa, o trabalhador ou o vínculo.
-
-### RF-SEG-001 — Restringir dados salariais
-
-- **Objetivo:** impedir exposição de remuneração a perfis sem finalidade autorizada.
-- **Prioridade:** crítica.
-- **Versão:** MVP.
-- **Critério de aceite:** usuário sem `view_salary` não recebe o valor nem por tela, exportação, RPC ou resposta de API.
-
-### RF-FOL-001 — Cadastrar rubrica versionada
-
-- **Objetivo:** permitir configuração de vencimentos e descontos sem gravar a regra exclusivamente no código.
-- **Dados principais:** código, descrição, tipo, fórmula, prioridade, incidências, vigência e versão.
-- **Prioridade:** crítica.
-- **Versão:** 1.1.
-- **Critério de aceite:** alterar uma versão futura não muda competências antigas.
-
-### RF-FOL-002 — Calcular folha de forma reproduzível
-
-- **Objetivo:** gerar resultado detalhado a partir de dados, parâmetros e versões identificáveis.
-- **Prioridade:** crítica.
-- **Versão:** 1.1.
-- **Critério de aceite:** o mesmo conjunto de entradas e versões produz o mesmo resultado e apresenta memória de cálculo.
-
-### RF-FOL-003 — Fechar competência
-
-- **Objetivo:** congelar os resultados aprovados.
-- **Prioridade:** crítica.
-- **Versão:** 1.1.
-- **Critério de aceite:** após o fechamento, alteração exige reabertura autorizada, justificativa e auditoria.
-
-### RF-OBR-001 — Preparar evento governamental
-
-- **Objetivo:** transformar dados validados em evento versionado, sem alegar transmissão real.
-- **Prioridade:** alta.
-- **Versão:** 2.
-- **Critério de aceite:** o evento guarda origem, versão, competência, trabalhador, hash e estado de processamento.
-
----
-
-## 12. Regras de negócio iniciais
-
-### RN-RH-001 — Pessoa não depende de login
-
-Uma pessoa ou trabalhador poderá existir sem conta de acesso à plataforma.
-
-### RN-RH-002 — Login não representa vínculo
-
-Uma conta de acesso não comprova emprego, categoria ou contrato.
-
-### RN-DP-001 — Histórico por vigência
-
-Cargo, função, salário, jornada, lotação, sindicato e demais condições variáveis deverão possuir início e, quando aplicável, fim de vigência.
-
-### RN-DP-002 — Desligamento não apaga histórico
-
-O desligamento encerrará o vínculo, mas manterá documentos, cálculos, auditoria e alocações históricas conforme a política de retenção.
-
-### RN-FOL-001 — Regra legal não ficará apenas no código
-
-Rubricas, incidências, prioridades e fórmulas deverão ser parametrizáveis e versionadas. O código poderá implementar o motor seguro de execução, mas não será a única fonte das condições aplicadas.
-
-### RN-FOL-002 — Competência fechada é imutável
-
-A competência fechada não aceitará mutação direta. Correções ocorrerão por reabertura, retificação, folha complementar ou procedimento equivalente definido no fluxo funcional.
-
-### RN-FOL-003 — Exemplo não é parâmetro universal
-
-Qualquer rubrica apresentada na documentação será identificada como exemplo, configuração vigente verificada ou configuração dependente do caso concreto.
-
-### RN-OBR-001 — Transmissão possui estado
-
-Nenhuma integração será representada apenas por um campo “enviado”. O fluxo deverá diferenciar preparação, validação, assinatura, fila, transmissão, protocolo, processamento, recibo, advertência, rejeição, correção e retificação.
-
----
-
-## 13. Requisitos não funcionais iniciais
-
-### RNF-SEG-001 — Proteção em profundidade
-
-A autorização deverá existir na rota, ação, função, tabela, arquivo e exportação, conforme o risco da operação.
-
-### RNF-AUD-001 — Auditoria de operações críticas
-
-Alterações contratuais, acesso a salário, cálculo, fechamento, reabertura, retificação, exportação e transmissão deverão produzir eventos de auditoria.
-
-### RNF-PER-001 — Reprodutibilidade da folha
-
-O sistema deverá manter dados suficientes para reconstruir o cálculo de uma competência com as versões utilizadas.
-
-### RNF-LGPD-001 — Minimização e finalidade
-
-Cada dado pessoal deverá possuir finalidade funcional identificável, acesso proporcional e política de retenção.
-
-### RNF-DOC-001 — Documentos privados
-
-Documentos pessoais, médicos e salariais não deverão ser públicos nem entregues por endereço permanente sem autorização.
-
-### RNF-INT-001 — Idempotência
-
-Comandos repetidos de integração ou geração não deverão duplicar eventos, protocolos, recibos ou lançamentos.
-
----
-
-## 14. Backlog inicial
-
-### MVP
-
-- pessoas;
-- trabalhadores;
-- vínculos;
-- empresas e estabelecimentos;
-- cargos, funções e lotações;
-- alterações contratuais;
-- jornadas básicas;
-- dependentes;
-- benefícios básicos;
-- férias;
-- afastamentos;
-- desligamentos;
-- documentos;
-- alertas;
-- permissões sensíveis;
-- integração com equipes e obras;
-- relatórios cadastrais.
+## 8. MVP funcional inicial
+
+O MVP não deverá tentar entregar folha e obrigações antes da fundação cadastral.
+
+### MVP — Fundação
+
+1. organizações e empresas empregadoras;
+2. estabelecimentos;
+3. cadastro mestre de pessoas;
+4. trabalhadores;
+5. vínculos;
+6. unidades organizacionais;
+7. cargos e funções;
+8. lotações;
+9. centro de custo compartilhado;
+10. documentos;
+11. permissões sensíveis;
+12. auditoria e histórico.
 
 ### Versão 1.1
 
-- ponto e banco de horas;
-- rubricas;
-- eventos fixos e variáveis;
-- folha mensal;
-- férias calculadas;
-- décimo terceiro;
-- rescisões;
-- folha complementar;
-- provisões;
-- fechamento, reabertura e retificação;
-- recibos;
-- contabilização.
+- posições e quadro planejado;
+- rateios;
+- admissão completa;
+- contratos e alterações;
+- jornadas;
+- férias e afastamentos;
+- benefícios;
+- relatórios operacionais.
 
 ### Versão 2
 
-- integração governamental;
-- assinatura digital;
-- eventos, lotes, protocolos e recibos;
-- reconciliação de obrigações;
-- medicina e segurança avançadas;
-- portal completo do empregado;
-- integrações bancárias e contábeis;
-- analytics avançado.
+- folha de pagamento;
+- rubricas e fórmulas;
+- décimo terceiro;
+- férias calculadas;
+- rescisões;
+- provisões e contabilização;
+- obrigações digitais.
+
+A ordem poderá ser ajustada por dependências comprovadas, sem iniciar cálculo antes de a base temporal e cadastral estar definida.
 
 ---
 
-## 15. Riscos iniciais
+## 9. Perfis e segregação inicial
 
-| Risco | Consequência | Tratamento recomendado |
-|---|---|---|
-| Reutilizar usuário como empregado | vínculos incorretos e exclusão de histórico | separar pessoa, trabalhador, vínculo e usuário |
-| Reutilizar equipe de obra como cadastro mestre | duplicidade e falta de dados trabalhistas | equipe referencia trabalhador canônico |
-| Fixar incidências no código | manutenção legislativa arriscada | parametrização, versão e vigência |
-| Permissão genérica demais | exposição de salário ou dado médico | capacidades específicas e negação por padrão |
-| Folha sem memória de cálculo | impossibilidade de auditoria | registrar entradas, versões, ordem e resultados |
-| Integração síncrona em clique | perda de retorno e duplicidade | outbox, worker, idempotência e estados |
-| Iniciar com dados reais antes da prontidão | risco operacional e de proteção de dados | usar dados sintéticos até os gates de produção |
-
----
-
-## 16. Decisões pendentes
-
-- público inicial: uso exclusivo da Innovar ou produto multiempresa comercial;
-- operação interna da folha ou apoio a escritório contábil;
-- existência de múltiplos vínculos simultâneos para a mesma pessoa;
-- grau de integração com o módulo Financeiro;
-- estratégia de motor de fórmulas;
-- política de retenção por categoria de documento;
-- provedor e arquitetura de assinatura digital;
-- interfaces oficiais efetivamente disponíveis para cada obrigação;
-- responsabilidade técnica pela validação trabalhista, previdenciária e contábil.
-
-A ausência dessas decisões não impede a continuidade da especificação. As premissas serão registradas e revistas sem reescrever requisitos já aprovados.
+| Perfil | Acesso esperado |
+|---|---|
+| Gestor de RH | pessoas, estrutura, cargos, posições e processos de RH |
+| Analista de RH | manutenção autorizada de cadastros e processos |
+| Gestor de DP | empresas, estabelecimentos, vínculos, contratos e aprovações |
+| Analista de DP | operação cadastral e documental |
+| Gestor de Folha | parametrização e fechamento, sem administração geral automática |
+| Analista de Folha | lançamentos e conferência conforme alçada |
+| Medicina e Segurança | dados ocupacionais segregados |
+| Financeiro | centros de custo e integração contábil autorizada |
+| Gestor de Obras | alocação operacional sem salário ou documento pessoal completo |
+| Direção | aprovações e relatórios consolidados autorizados |
+| Auditor | leitura histórica e evidências sem mutação |
+| Empregado | autosserviço dos próprios dados liberados |
+| Administrador técnico | configuração técnica sem acesso automático a conteúdo sensível |
 
 ---
 
-## 17. Próxima entrega lógica
+## 10. Capacidades sensíveis previstas
 
-A próxima seção a ser produzida é o **Cadastro Mestre de Pessoas, Trabalhadores e Vínculos**, contendo:
+- visualizar dados pessoais;
+- visualizar documentos cadastrais;
+- visualizar salário;
+- visualizar dados médicos;
+- administrar empresa e estabelecimento;
+- administrar estrutura organizacional;
+- aprovar estrutura;
+- administrar vínculos;
+- aprovar admissão;
+- administrar cargos, funções e posições;
+- administrar centros de custo;
+- aprovar rateios;
+- alterar informação retroativa;
+- calcular folha;
+- fechar folha;
+- reabrir folha;
+- retificar folha;
+- administrar rubricas;
+- transmitir eventos governamentais;
+- visualizar retornos e protocolos;
+- exportar dados de folha.
 
-- telas;
-- campos;
-- estados;
-- permissões;
-- fluxo principal;
-- exceções;
-- validações;
-- requisitos numerados;
-- critérios de aceite;
-- integração com usuários, equipes e obras;
-- proposta inicial de entidades sem gerar migration prematura.
+Os nomes técnicos e o mapeamento ao modelo atual serão definidos antes da implementação.
 
 ---
 
-## 18. Controle de versão
+## 11. Integrações com módulos existentes
 
-| Versão | Data | Seções alteradas | Motivo | Responsável |
-|---|---|---|---|---|
-| 0.1.0 | 05/08/2026 | documento inicial | início formal do Projeto RH | elaboração assistida; validação pendente |
+### Administração
+
+Organização, usuários, perfis, módulos e overrides.
+
+### Obras e Equipes
+
+Alocação de trabalhador canônico em obra e equipe, sem duplicação cadastral.
+
+### Planejamento
+
+Posições, capacidade e alocação operacional, sem alterar contrato.
+
+### Financeiro
+
+Centro de custo canônico, provisões, lançamentos e contabilização futura.
+
+### Documentos e Modelos
+
+Modelos, contratos, documentos pessoais, evidências e arquivos versionados.
+
+### Relatórios
+
+Dados autorizados por organização, empresa, estabelecimento, vínculo e competência.
+
+### Auditoria
+
+Eventos críticos, correlação, sanitização e investigação.
+
+---
+
+## 12. Regras transversais iniciais
+
+### RN-RH-001
+
+Pessoa não dependerá de login.
+
+### RN-RH-002
+
+Usuário não será prova de vínculo.
+
+### RN-RH-003
+
+Trabalhador desligado permanecerá disponível para histórico autorizado.
+
+### RN-RH-004
+
+Vínculo terá empresa empregadora explícita.
+
+### RN-RH-005
+
+Estabelecimento usado no vínculo pertencerá à empresa do vínculo.
+
+### RN-RH-006
+
+Obra não será automaticamente estabelecimento.
+
+### RN-RH-007
+
+Cargo, função e posição serão conceitos distintos.
+
+### RN-RH-008
+
+Lotação e condições contratuais relevantes terão vigência.
+
+### RN-RH-009
+
+Alocação em obra não alterará automaticamente salário, jornada ou cargo.
+
+### RN-RH-010
+
+RH e Financeiro não manterão centros de custo manuais concorrentes.
+
+### RN-RH-011
+
+Cadastro referenciado será encerrado, não apagado.
+
+### RN-RH-012
+
+Competência fechada não será modificada silenciosamente por alteração retroativa.
+
+### RN-RH-013
+
+Folha deverá conservar regra, versão, entradas e resultado utilizados.
+
+### RN-RH-014
+
+Integração governamental deverá conservar payload, protocolo, recibo, retorno e histórico.
+
+### RN-RH-015
+
+Falha de consulta não será apresentada como estado vazio verdadeiro.
+
+---
+
+## 13. Backlog de especificação
+
+### Concluído
+
+- [x] visão e arquitetura funcional inicial;
+- [x] ADR de Pessoa, Trabalhador e Vínculo;
+- [x] Cadastro Mestre;
+- [x] ADR de Tenant, Empresa e Estabelecimento;
+- [x] Empresas, Estabelecimentos e Estrutura Organizacional.
+
+### Próximo
+
+- [ ] Admissão e pré-admissão;
+- [ ] conferência documental;
+- [ ] condições iniciais do vínculo;
+- [ ] ativação e cancelamento de admissão;
+- [ ] integrações e pendências da admissão.
+
+### Posterior
+
+- [ ] contratos e alterações;
+- [ ] jornada e ponto;
+- [ ] férias;
+- [ ] afastamentos;
+- [ ] benefícios;
+- [ ] medicina e segurança;
+- [ ] folha;
+- [ ] rubricas;
+- [ ] obrigações digitais;
+- [ ] desligamentos;
+- [ ] relatórios consolidados;
+- [ ] critérios de aceite finais.
+
+---
+
+## 14. Estado técnico
+
+Nenhuma migration, tabela, rota, ação, componente ou integração foi implementada nesta branch.
+
+O CI da primeira rodada reprovou no validador de documentação por uma divergência preexistente na numeração das vacinas da árvore combinada, com duplicidade a partir de `VACINA-044`. O Projeto RH não alterou arquivos de vacinas e não mascarará essa falha dentro deste PR funcional.
+
+---
+
+## 15. Próxima entrega lógica
+
+**Módulo 03 — Admissão, Pré-admissão, Conferência Documental e Ativação do Vínculo.**
+
+A admissão deverá consumir somente empresas, estabelecimentos, estruturas, cargos, funções, jornadas e documentos válidos, sem criar atalhos que contornem o Cadastro Mestre ou a aprovação da estrutura.
