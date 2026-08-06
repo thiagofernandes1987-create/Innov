@@ -1,6 +1,9 @@
 name: Baileys Official Quickstart Lab
 
 on:
+  push:
+    branches:
+      - test/etapa-22-baileys-live-lab
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
@@ -10,12 +13,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: baileys-official-quickstart-${{ github.event.pull_request.number }}
+  group: baileys-official-quickstart-${{ github.event.pull_request.number || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
   official-quickstart:
-    if: github.head_ref == 'test/etapa-22-baileys-live-lab'
+    if: github.event_name == 'push' || github.head_ref == 'test/etapa-22-baileys-live-lab'
     runs-on: ubuntu-latest
     environment: homologation
     timeout-minutes: 18
