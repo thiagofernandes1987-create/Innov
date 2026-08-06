@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.5.0  
+**Versão do índice:** 0.6.0  
 **Atualizado em:** 6 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -31,6 +31,8 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | Módulo 04 | `PROJETO-RH-MODULO-04-CONTRATOS-E-ALTERACOES.md` | especificação funcional inicial concluída |
 | ADR-005 | `PROJETO-RH-ADR-005-JORNADA-MARCACAO-TRATAMENTO-E-BANCO.md` | decisão funcional registrada |
 | Módulo 05 | `PROJETO-RH-MODULO-05-JORNADAS-PONTO-E-BANCO-DE-HORAS.md` | especificação funcional inicial concluída |
+| ADR-006 | `PROJETO-RH-ADR-006-FERIAS-AFASTAMENTOS-E-AUSENCIAS.md` | decisão funcional registrada |
+| Módulo 06 | `PROJETO-RH-MODULO-06-FERIAS-AFASTAMENTOS-E-LICENCAS.md` | especificação funcional inicial concluída |
 
 ---
 
@@ -154,6 +156,36 @@ Jornada contratual versionada
 - folha receberá lote fechado, versionado e idempotente;
 - localização e biometria terão finalidade e autorização segregadas.
 
+### 3.8 Férias, ausências, afastamentos e retorno
+
+```text
+Direito de férias
+  → programação
+  → aviso e ciência
+  → cálculo e pagamento
+  → gozo
+
+Ausência detectada
+  → justificativa ou caso de afastamento
+  → documentos e decisões
+  → benefício e evento externo
+  → retorno explícito
+```
+
+- período aquisitivo será distinto da concessão;
+- saldo será reproduzível por movimentos imutáveis;
+- programação não será tratada como gozo;
+- ausência do ponto não será afastamento automático;
+- documento recebido não será decisão automática;
+- atestado e benefício externo serão objetos diferentes;
+- motivo interno e código externo serão mapeados, não unificados;
+- férias pagas canceladas gerarão tratamento financeiro;
+- sobreposições serão resolvidas por matriz versionada;
+- retorno poderá exigir avaliação ocupacional;
+- restrição operacional não revelará diagnóstico;
+- alteração retroativa produzirá impactos e reprocessamentos;
+- eventos externos preservarão payload, recibo e correlação.
+
 ---
 
 ## 4. Progresso funcional
@@ -174,36 +206,37 @@ Jornada contratual versionada
 - [x] decisão Contrato × Versão × Alteração × Documento;
 - [x] contratos, versões, alterações, documentos e impactos;
 - [x] decisão Jornada × Escala × Marcação × Tratamento × Apuração × Banco;
-- [x] políticas de jornada e horários;
-- [x] modelos de escala, calendários e turnos;
-- [x] marcação web, móvel, quiosque, REP, API e contingência;
-- [x] operação offline e idempotência;
-- [x] comprovantes e dispositivos;
-- [x] ocorrências e tratamentos;
-- [x] autorização de sobrejornada;
-- [x] motor de apuração e memória de cálculo;
-- [x] jornadas que atravessam meia-noite e fusos;
-- [x] acordos, contas e razão de banco de horas;
+- [x] políticas de jornada, escalas, marcações, tratamentos, apuração e banco de horas;
 - [x] fechamento, reabertura e integração com folha;
 - [x] integração com Obras, Diário de Obras, Equipes, Tarefas e custos;
-- [x] portal do trabalhador, permissões, auditoria, relatórios e testes do Módulo 05.
+- [x] decisão Direito de Férias × Concessão × Ausência × Afastamento × Benefício × Retorno;
+- [x] políticas e motivos de férias e afastamentos;
+- [x] períodos aquisitivos e movimentos de saldo;
+- [x] férias individuais, fracionamento e abono;
+- [x] aviso, ciência, cálculo, pagamento e gozo;
+- [x] remarcação, cancelamento e férias coletivas;
+- [x] ausências, justificativas e reconciliação com ponto;
+- [x] casos de afastamento, documentos e prorrogações;
+- [x] benefícios e decisões externas;
+- [x] eventos governamentais e correlação com SST;
+- [x] retorno, aptidão e restrições operacionais;
+- [x] matriz de sobreposição;
+- [x] permissões, auditoria, relatórios e testes do Módulo 06.
 
 ### Próximo
 
-- [ ] Módulo 06 — Férias, Afastamentos, Ausências e Licenças;
-- [ ] períodos aquisitivos e concessivos;
-- [ ] programação e aprovação de férias;
-- [ ] fracionamento e conflitos;
-- [ ] afastamentos e documentos;
-- [ ] ausências, justificativas e abonos;
-- [ ] reflexos em escala, ponto, folha e obrigações;
-- [ ] retorno e prorrogação;
-- [ ] histórico e eventos digitais.
+- [ ] Módulo 07 — Benefícios, Dependentes, Pensão Alimentícia e Descontos Recorrentes;
+- [ ] catálogo de benefícios e planos;
+- [ ] elegibilidade por vigência;
+- [ ] adesão, inclusão e exclusão;
+- [ ] dependentes e documentos;
+- [ ] pensão alimentícia e ordens;
+- [ ] coparticipações e descontos;
+- [ ] integração com folha e fornecedores;
+- [ ] impactos de afastamento, férias e desligamento.
 
 ### Posterior
 
-- [ ] benefícios;
-- [ ] dependentes e pensão;
 - [ ] medicina e segurança;
 - [ ] folha;
 - [ ] rubricas e fórmulas;
@@ -248,7 +281,19 @@ Em 6 de agosto de 2026 foram verificadas:
 - documentação técnica do eSocial S-1.3 até NT 06/2026;
 - campos e tipos de horário contratual.
 
-A baseline atual exige preservação fiel das marcações no controle eletrônico e diferencia jornada contratual do fato registrado. Formatos, limites, prazos, obrigatoriedades, instrumentos e interpretações deverão ser verificados novamente antes da implementação, homologação e produção.
+A baseline atual exige preservação fiel das marcações no controle eletrônico e diferencia jornada contratual do fato registrado.
+
+### 5.4 Férias e afastamentos
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- CLT compilada, especialmente regras de férias, ausências justificadas, maternidade e suspensão contratual;
+- orientações do Ministério do Trabalho e Emprego sobre férias;
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- Manual WEB Geral, seção S-2230;
+- orientações oficiais sobre afastamentos e benefícios por incapacidade.
+
+A baseline atual diferencia direito, concessão, ausência, afastamento e evento externo. Campos, prazos, motivos, documentos, instrumentos coletivos e interpretações deverão ser verificados novamente antes da implementação, homologação e produção.
 
 ---
 
@@ -266,29 +311,31 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 ## 7. Próximo módulo lógico
 
-**Módulo 06 — Férias, Afastamentos, Ausências e Licenças.**
+**Módulo 07 — Benefícios, Dependentes, Pensão Alimentícia e Descontos Recorrentes.**
 
 Fluxo de alto nível previsto:
 
 ```text
-Direito ou ocorrência
-  → solicitação ou registro
-  → documentos e validações
-  → aprovação
-  → período vigente
-  → bloqueio ou ajuste de escala e ponto
-  → efeitos em folha e obrigações
-  → retorno, prorrogação ou encerramento
+Política e plano
+  → elegibilidade por vínculo e vigência
+  → adesão e dependentes
+  → aprovação e fornecedor
+  → cobrança, coparticipação ou desconto
+  → evento para folha
+  → alteração, suspensão ou encerramento
 ```
 
 O próximo módulo deverá distinguir:
 
-1. férias planejadas;
-2. afastamento por fato ocorrido;
-3. ausência diária;
-4. licença configurada;
-5. abono ou justificativa;
-6. efeito contratual, previdenciário, de ponto e de folha.
+1. catálogo de benefício;
+2. plano e fornecedor;
+3. regra de elegibilidade;
+4. adesão do titular;
+5. inclusão de dependente;
+6. cobrança do fornecedor;
+7. desconto em folha;
+8. ordem judicial de pensão;
+9. efeito de férias, afastamento e desligamento.
 
 ---
 
@@ -301,3 +348,4 @@ O próximo módulo deverá distinguir:
 | 0.3.0 | 06/08/2026 | ADR-003, Módulo 03 e baseline oficial de admissão |
 | 0.4.0 | 06/08/2026 | ADR-004, Módulo 04 e baseline de contratos e alterações |
 | 0.5.0 | 06/08/2026 | ADR-005, Módulo 05 e baseline de jornadas e ponto |
+| 0.6.0 | 06/08/2026 | ADR-006, Módulo 06 e baseline de férias e afastamentos |
