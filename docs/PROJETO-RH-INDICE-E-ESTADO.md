@@ -439,9 +439,129 @@ Interface Next.js
 
 ### Concluído
 
-- [x] Módulos funcionais 01 a 12 e ADRs 001 a 012;
-- [x] requisitos transversais, estados, permissões e critérios de aceite;
-- [x] integração conceitual com Obras, Equipes, Financeiro, Estoque, Documentos, Relatórios e Auditoria;
+- [x] visão de produto e mapa preliminar dos domínios;
+- [x] perfis, capacidades e requisitos transversais iniciais;
+- [x] Cadastro Mestre;
+- [x] decisão Pessoa × Usuário × Trabalhador × Vínculo;
+- [x] decisão Tenant × Empresa × Estabelecimento;
+- [x] empresas, estabelecimentos e estrutura organizacional;
+- [x] unidades, cargos, funções, posições e lotações;
+- [x] centros de custo e rateios;
+- [x] integração conceitual com Obras, Equipes e Financeiro;
+- [x] decisão Admissão como Caso Auditável;
+- [x] admissão, pré-admissão, checklist, conferência e ativação;
+- [x] decisão Contrato × Versão × Alteração × Documento;
+- [x] contratos, versões, alterações, documentos e impactos;
+- [x] decisão Jornada × Escala × Marcação × Tratamento × Apuração × Banco;
+- [x] políticas de jornada, escalas, marcações, tratamentos, apuração e banco de horas;
+- [x] fechamento, reabertura e integração com folha;
+- [x] integração com Obras, Diário de Obras, Equipes, Tarefas e custos;
+- [x] decisão Direito de Férias × Concessão × Ausência × Afastamento × Benefício × Retorno;
+- [x] políticas e motivos de férias e afastamentos;
+- [x] períodos aquisitivos e movimentos de saldo;
+- [x] férias individuais, fracionamento e abono;
+- [x] aviso, ciência, cálculo, pagamento e gozo;
+- [x] remarcação, cancelamento e férias coletivas;
+- [x] ausências, justificativas e reconciliação com ponto;
+- [x] casos de afastamento, documentos e prorrogações;
+- [x] benefícios e decisões externas;
+- [x] eventos governamentais e correlação com SST;
+- [x] retorno, aptidão e restrições operacionais;
+- [x] matriz de sobreposição;
+- [x] decisão Benefício × Plano × Adesão × Cobertura × Dependente × Alimentando × Desconto;
+- [x] catálogo de benefícios e políticas por vigência;
+- [x] planos, fornecedores e tabelas de preço;
+- [x] adesões, coberturas, inclusões e exclusões;
+- [x] relações entre pessoas e papéis por finalidade;
+- [x] dependentes tributários e de benefícios;
+- [x] beneficiários de seguro e auxílios;
+- [x] vale-transporte, alimentação, saúde, odontologia e benefícios configuráveis;
+- [x] pensão alimentícia e retenções judiciais;
+- [x] descontos recorrentes e autorizações;
+- [x] movimentos financeiros e estornos;
+- [x] arquivos e conciliação de fornecedores;
+- [x] integração com folha, financeiro, eSocial e centros de custo;
+- [x] permissões, auditoria, relatórios e testes do Módulo 07;
+- [x] decisão Risco × Exposição × Saúde × Incidente × EPI × Treinamento × Habilitação;
+- [x] contextos de trabalho e inventários de riscos;
+- [x] avaliações, medições, medidas e plano de ação;
+- [x] grupos e perfis individuais de exposição;
+- [x] programa médico e necessidades de exame;
+- [x] convocações, exames, ASOs, aptidão e restrições;
+- [x] segregação e auditoria de dados clínicos;
+- [x] incidentes, investigação e ações corretivas;
+- [x] CAT e eventos S-2210, S-2220, S-2221 e S-2240;
+- [x] catálogo, estoque, entrega, inspeção e troca de EPI;
+- [x] treinamentos, certificados e reciclagens;
+- [x] habilitações e permissões de trabalho;
+- [x] integração com Obras, RH, ponto, afastamentos, folha e Financeiro;
+- [x] construção, riscos críticos, terceiros, emergência e fatores psicossociais;
+- [x] permissões, alertas, relatórios e testes do Módulo 08;
+- [x] decisão Folha × Fato × Entrada × Rubrica × Fórmula × Resultado × Pagamento;
+- [x] calendários, competências e tipos de processamento;
+- [x] ciclos e população congelada;
+- [x] catálogo e versões de rubricas;
+- [x] motor declarativo de fórmulas;
+- [x] parâmetros e tabelas por vigência;
+- [x] contratos de entrada e idempotência;
+- [x] cálculo individual e em lote;
+- [x] bases, incidências, encargos e rateios;
+- [x] memória de cálculo e explicabilidade;
+- [x] folhas mensal, férias, décimo terceiro e complementar;
+- [x] retroatividades e diferenças;
+- [x] ajustes manuais, conferência e aprovação;
+- [x] fechamento e reabertura;
+- [x] demonstrativos e portal do trabalhador;
+- [x] pagamentos e retorno bancário;
+- [x] Contabilidade, custos, obras e centros de custo;
+- [x] eventos S-1010, S-1200, S-1210, S-1298 e S-1299;
+- [x] FGTS Digital, totalizadores e reconciliações;
+- [x] permissões, auditoria, relatórios e testes do Módulo 09;
+- [x] decisão Fato × Obrigação × Projeção × Tentativa × Recibo × Totalizador × Débito × Guia × Pagamento;
+- [x] catálogo de sistemas, eventos, leiautes e regras;
+- [x] inscrições externas, CNO, ambientes e certificados;
+- [x] calendário de obrigações e prazos;
+- [x] projeções, hashes, idempotência e validações;
+- [x] aprovações, lotes, filas e tentativas;
+- [x] retornos, recibos e processamento assíncrono;
+- [x] retificações, exclusões e reenvios;
+- [x] períodos, pré-fechamento, fechamento e reabertura;
+- [x] totalizadores por trabalhador e contribuinte;
+- [x] reconciliação em camadas;
+- [x] DCTFWeb, declarações, DARFs e pagamentos;
+- [x] FGTS Digital, débitos, guias e saldos;
+- [x] contingências e indisponibilidades;
+- [x] permissões, auditoria, relatórios e testes do Módulo 10;
+- [x] decisão Desligamento × Aviso × Término × Cálculo × Pagamento × Evento × Offboarding;
+- [x] catálogo de motivos, fundamentos e mapeamentos externos;
+- [x] casos, triagem, proteções e aprovações;
+- [x] pedido de demissão, acordo, justa causa e contratos a termo;
+- [x] aviso prévio e projeções;
+- [x] ocorrência de término e encerramento temporal do vínculo;
+- [x] cálculo rescisório, memória e ajustes;
+- [x] documentos, assinatura, entrega e ciência;
+- [x] pagamentos, retornos, complementos e estornos;
+- [x] FGTS rescisório e seguro-desemprego;
+- [x] eventos S-2299, S-2399, S-1210 e S-2298;
+- [x] offboarding de acessos, ativos, EPIs e responsabilidades;
+- [x] desligamentos coletivos e programas;
+- [x] reintegrações, correções e diferenças posteriores;
+- [x] permissões, auditoria, relatórios e testes do Módulo 11;
+- [x] decisão Fato × Métrica × Observação × Análise × Cenário × Recomendação × Decisão;
+- [x] catálogo e versões de métricas;
+- [x] dimensões conformadas e temporalidade;
+- [x] contratos de fontes, qualidade e reconciliação;
+- [x] execuções, observações, snapshots e linhagem;
+- [x] relatórios operacionais e estatísticos;
+- [x] dashboards, alertas, assinaturas e exportações;
+- [x] privacidade, agregação, supressão e dados sensíveis;
+- [x] People Analytics, explicabilidade, viés e drift;
+- [x] revisão humana e contestação de recomendações;
+- [x] indicadores de quadro, movimentação, jornada, ausências, benefícios, SST, folha e conformidade;
+- [x] planejamento de força de trabalho por empresa, unidade e obra;
+- [x] demanda, capacidade, lacunas, custos e cenários;
+- [x] integração de propostas com módulos canônicos;
+- [x] permissões, auditoria, relatórios e testes do Módulo 12;
 - [x] inventário da stack, arquitetura e convenções atuais;
 - [x] análise de gaps técnicos do RH;
 - [x] decisão de monólito modular e bounded contexts;
@@ -486,15 +606,149 @@ Interface Next.js
 
 ## 5. Baselines oficiais consultadas
 
-### 5.1 Funcional, trabalhista e governamental
+### 5.1 Admissão
 
-Em 5 e 6 de agosto de 2026 foram verificadas as baselines oficiais registradas nos módulos 01 a 12, incluindo CLT, eSocial S-1.3, FGTS Digital, DCTFWeb, normas de SST, LGPD, não discriminação e orientações oficiais relacionadas a admissão, contratos, jornada, afastamentos, benefícios, folha, desligamentos e People Analytics.
+Em 6 de agosto de 2026 foram verificadas fontes oficiais do Portal eSocial:
 
-Cada módulo detalhado preserva as fontes e ressalvas aplicáveis. Regras, prazos, códigos, leiautes, alíquotas, interpretações e versões deverão ser revalidados antes da implementação, homologação e produção.
+- Leiautes da versão S-1.3, Nota Técnica 06/2026;
+- regras da versão S-1.3;
+- Manual WEB Geral, capítulos de registro preliminar e admissão.
 
-### 5.2 Arquitetura técnica
+A documentação mantém eventos distintos para registro preliminar e admissão completa.
 
-Em 6 de agosto de 2026 foram verificados:
+### 5.2 Contratos e alterações
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- Consolidação das Leis do Trabalho em texto compilado;
+- documentação técnica do eSocial S-1.3;
+- Manual WEB Geral, capítulo de alteração de contrato;
+- eventos de admissão, alteração cadastral, alteração contratual e alteração de trabalhador sem vínculo.
+
+A baseline oficial diferencia fato novo contratual de correção de informação enviada incorretamente.
+
+### 5.3 Jornadas e ponto
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- CLT compilada, incluindo duração, compensação, jornadas especiais e registro de horário;
+- Decreto nº 10.854/2021;
+- Portaria MTP nº 671/2021 na página oficial consolidada;
+- página oficial de Registro Eletrônico de Ponto;
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- campos e tipos de horário contratual.
+
+A baseline atual exige preservação fiel das marcações no controle eletrônico e diferencia jornada contratual do fato registrado.
+
+### 5.4 Férias e afastamentos
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- CLT compilada, especialmente regras de férias, ausências justificadas, maternidade e suspensão contratual;
+- orientações do Ministério do Trabalho e Emprego sobre férias;
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- Manual WEB Geral, seção S-2230;
+- orientações oficiais sobre afastamentos e benefícios por incapacidade.
+
+A baseline atual diferencia direito, concessão, ausência, afastamento e evento externo.
+
+### 5.5 Benefícios, dependentes e descontos
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- documentação técnica do eSocial S-1.3 até NT 06/2026 e notas orientativas publicadas;
+- Tabela 07 de tipos de dependente;
+- grupos de dependentes, plano de saúde e pensão alimentícia;
+- Tabela 03 de naturezas de rubricas;
+- tabela de tributação de 2026 da Receita Federal;
+- Lei nº 7.418/1985 e Decreto nº 10.854/2021 para vale-transporte;
+- Lei nº 6.321/1976, Lei nº 14.442/2022 e regulamentação vigente do PAT;
+- texto compilado da CLT para descontos salariais.
+
+A baseline oficial diferencia dependência, cobertura, beneficiário, rubrica, desconto e pagamento.
+
+### 5.6 Segurança e saúde no trabalho
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- página oficial de Normas Regulamentadoras vigentes;
+- NR-1 e materiais oficiais de GRO/PGR;
+- NR-6 e orientações oficiais sobre EPI e CA;
+- NR-7 e PCMSO;
+- NR-10, NR-12, NR-17, NR-18, NR-33 e NR-35;
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- Manual de Orientação do eSocial consolidado até NO 11/2026;
+- Manual WEB Geral de SST;
+- eventos S-2210, S-2220, S-2221 e S-2240.
+
+A baseline oficial diferencia gerenciamento de riscos, monitoramento da saúde, comunicação de acidente e exposição a agentes. Requisitos, textos consolidados, prazos, tabelas, códigos, cargas horárias e interpretações deverão ser verificados novamente antes da implementação, homologação e produção.
+
+### 5.7 Folha de pagamento
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- eventos S-1010, S-1200, S-1210, S-1298 e S-1299;
+- regras de remuneração, pagamento, exclusão, fechamento e reabertura;
+- tabelas previdenciárias vigentes desde janeiro de 2026;
+- tabelas de tributação do imposto de renda de 2026;
+- Manual do FGTS Digital versão 1.70, de 12 de junho de 2026;
+- notas orientativas e documentação técnica correlata.
+
+A baseline oficial diferencia tabela de rubricas, remuneração devida, pagamento efetivo e fechamento periódico. Faixas, valores, incidências, códigos, prazos e interpretações deverão ser novamente validados antes da implementação, homologação e produção.
+
+### 5.8 Obrigações digitais e reconciliação
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- Manual de Orientação do eSocial consolidado até NO 11/2026;
+- eventos S-1298, S-1299, S-3000 e totalizadores S-5001, S-5002, S-5003, S-5011, S-5012 e S-5013;
+- regras de transmissão durante o processamento do fechamento;
+- regras de exclusão e retificação em períodos fechados;
+- orientações da Receita Federal publicadas em 2026 sobre integração entre eSocial, EFD-Reinf e DCTFWeb;
+- serviço e Manual de Orientação da DCTFWeb;
+- Manual do FGTS Digital versão 1.70, de 12 de junho de 2026;
+- comunicados de 2026 sobre FGTS de processos trabalhistas.
+
+A baseline oficial confirma que o encerramento bem-sucedido das escriturações sensibiliza automaticamente a DCTFWeb; que correções em escriturações encerradas exigem reabertura, retificação e novo encerramento; e que o FGTS Digital utiliza remunerações declaradas no eSocial para individualizar débitos e gerar guias.
+
+Leiautes, regras, endpoints, certificados, prazos, códigos e interpretações deverão ser novamente validados antes da implementação, homologação e produção.
+
+### 5.9 Desligamentos e rescisões
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- CLT compilada, especialmente arts. 477, 479, 480, 482, 483, 484-A e 487 a 491;
+- Lei nº 12.506/2011;
+- Lei nº 8.036/1990 e regulamentação do FGTS;
+- documentação técnica do eSocial S-1.3 até NT 06/2026;
+- regras e orientações dos eventos S-2298, S-2299, S-2399, S-1210 e S-3000;
+- Manual do FGTS Digital versão 1.70, de 12 de junho de 2026;
+- leiaute de Remunerações para Fins Rescisórios versão 1.2;
+- orientações oficiais sobre seguro-desemprego.
+
+A baseline oficial diferencia comunicação do desligamento, aviso, verbas devidas, pagamento, evento de desligamento, recolhimento do FGTS, acesso ao seguro-desemprego e reintegração. Prazos, motivos, verbas, códigos, incidências, instrumentos coletivos e interpretações deverão ser novamente validados antes da implementação, homologação e produção.
+
+### 5.10 People Analytics, privacidade e não discriminação
+
+Em 6 de agosto de 2026 foram verificadas:
+
+- Lei Geral de Proteção de Dados Pessoais em texto compilado;
+- definições de dado pessoal, dado sensível, anonimização e relatório de impacto;
+- princípios de finalidade, adequação, necessidade, qualidade, transparência, segurança, prevenção, não discriminação e prestação de contas;
+- requisitos para tratamento de dados sensíveis;
+- direito de solicitar revisão de decisões tomadas unicamente com base em tratamento automatizado que afetem interesses;
+- deveres de registro, segurança desde a concepção e governança;
+- Lei nº 9.029/1995 sobre práticas discriminatórias e limitativas na relação de trabalho;
+- Agenda Regulatória da ANPD 2025–2026;
+- Mapa de Temas Prioritários da ANPD 2026–2027, incluindo direitos dos titulares e inteligência artificial e tecnologias emergentes.
+
+A implementação deverá revalidar legislação, regulamentação e orientações vigentes, especialmente para decisões automatizadas, inteligência artificial, tratamentos de alto risco, anonimização, pseudonimização, biometria, saúde, relatórios de impacto e exercício de direitos dos titulares.
+
+### 5.11 Arquitetura técnica
+
+Em 6 de agosto de 2026 foram verificadas:
 
 - arquitetura canônica e README do repositório;
 - registry de módulos e camada atual de autorização;
@@ -524,6 +778,8 @@ Esse bloqueio deverá ser corrigido em escopo próprio para que o CI da `main` v
 
 **Módulo 14 — Backlog Executável, Épicos, Sprints, Dependências, Gates e Plano de Homologação.**
 
+Fluxo de alto nível previsto:
+
 ```text
 Arquitetura funcional e técnica
   → épicos e histórias ordenadas
@@ -535,7 +791,16 @@ Arquitetura funcional e técnica
               → operação assistida
 ```
 
-O próximo módulo deverá distinguir épico, história, tarefa e spike; Definition of Ready e Definition of Done; entrega documental e executável; dependência bloqueante e paralelizável; estimativa e compromisso; teste planejado e evidência executada; homologação técnica e aceite funcional; feature concluída e feature liberada.
+O próximo módulo deverá distinguir:
+
+1. épico, história, tarefa e spike;
+2. Definition of Ready e Definition of Done;
+3. entrega documental e entrega executável;
+4. dependência bloqueante e paralelizável;
+5. estimativa e compromisso de data;
+6. teste planejado e evidência executada;
+7. homologação técnica e aceite funcional;
+8. feature concluída e feature liberada em produção.
 
 ---
 
