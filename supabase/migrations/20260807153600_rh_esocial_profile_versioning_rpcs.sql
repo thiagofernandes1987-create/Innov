@@ -44,5 +44,5 @@ begin
  return v_new;
 end$$;
 
-grant execute on function public.create_rh_worker_esocial_profile_version(uuid,date,text,text,text,integer,integer,text,text,text,text,text,text,text,text,text,text,text,text,text,text) to authenticated;
+grant execute on function public.create_rh_worker_esocial_profile_version(uuid,date,text,text,text,integer,integer,text,text,text,text,text,text,text,text,text,text,text,text,text) to authenticated;
 grant execute on function public.create_rh_employment_esocial_contract_profile_version(uuid,date,integer,integer,integer,integer,integer,integer,date,text,text,integer,integer,text) to authenticated;
