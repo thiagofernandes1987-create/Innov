@@ -1,0 +1,62 @@
+name: RH eSocial Generation
+
+on:
+  pull_request:
+    paths:
+      - "lib/rh/integrations/esocial-*.ts"
+      - "app/actions/rh-esocial-*.ts"
+      - "app/actions/rh-admission-esocial.ts"
+      - "app/app/rh/obrigacoes/esocial/**"
+      - "app/app/rh/admissoes/**"
+      - "supabase/migrations/*_rh_esocial_*.sql"
+      - "supabase/migrations/*_rh_admission_esocial_*.sql"
+      - "tests/rh/esocial-generation-signature.test.ts"
+      - "tsconfig.rh.json"
+      - ".github/workflows/rh-esocial-generation.yml"
+  push:
+    branches:
+      - "feature/**"
+    paths:
+      - "lib/rh/integrations/esocial-*.ts"
+      - "app/actions/rh-esocial-*.ts"
+      - "app/actions/rh-admission-esocial.ts"
+      - "app/app/rh/obrigacoes/esocial/**"
+      - "app/app/rh/admissoes/**"
+      - "tests/rh/esocial-generation-signature.test.ts"
+      - ".github/workflows/rh-esocial-generation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-esocial-generation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generation-signature:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Validate migrations
+        run: pnpm validate:migrations
+      - name: Test XML generation and XMLDSig
+        run: pnpm exec vitest run tests/rh/esocial-generation-signature.test.ts
+      - name: RH scoped typecheck
+        run: pnpm exec tsc --noEmit -p tsconfig.rh.json
+      - name: RH eSocial lint
+        run: pnpm exec eslint lib/rh/integrations/esocial-*.ts app/actions/rh-esocial-*.ts app/actions/rh-admission-esocial.ts app/app/rh/obrigacoes/esocial app/app/rh/admissoes --max-warnings=0
