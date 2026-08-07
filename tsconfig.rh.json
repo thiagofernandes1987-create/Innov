@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": false,
+    "plugins": []
+  },
+  "include": [
+    "next-env.d.ts",
+    "app/app/rh/**/*.ts",
+    "app/app/rh/**/*.tsx",
+    "app/actions/rh.ts",
+    "app/actions/rh-*.ts",
+    "lib/rh/**/*.ts",
+    "lib/modules/registry.ts",
+    "lib/casca/menus.ts"
+  ],
+  "exclude": ["node_modules", ".next", "docs/referencias"]
+}
