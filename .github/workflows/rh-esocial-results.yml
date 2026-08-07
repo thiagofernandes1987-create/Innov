@@ -1,0 +1,41 @@
+name: RH eSocial Results
+
+on:
+  pull_request:
+    paths:
+      - "supabase/migrations/*_rh_*.sql"
+      - "supabase/tests/rh/esocial-individual-results.test.sql"
+      - "scripts/run-rh-esocial-results-db-tests.mjs"
+      - ".github/workflows/rh-esocial-results.yml"
+  push:
+    branches:
+      - "feature/**"
+    paths:
+      - "supabase/migrations/*_rh_*.sql"
+      - "supabase/tests/rh/esocial-individual-results.test.sql"
+      - "scripts/run-rh-esocial-results-db-tests.mjs"
+      - ".github/workflows/rh-esocial-results.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  results:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Validate migrations
+        run: pnpm validate:migrations
+      - name: Event result database tests
+        run: node scripts/run-rh-esocial-results-db-tests.mjs
