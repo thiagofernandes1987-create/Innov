@@ -36,6 +36,7 @@
     "validate:menus": "node scripts/validate-menus.mjs",
     "test:db:pipeline": "node scripts/run-pipeline-db-tests.mjs",
     "test:db:planejamento": "node scripts/run-planning-db-tests.mjs",
+    "test:db:rh": "node scripts/run-rh-db-tests.mjs",
     "test:db:operations": "node scripts/run-operational-notifications-db-tests.mjs",
     "test:db:budgets": "node scripts/run-budget-db-tests.mjs",
     "test:db:commercial-documents": "node scripts/run-commercial-documents-db-tests.mjs",
