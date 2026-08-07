@@ -16,8 +16,9 @@ runPostgresFiles({
     "supabase/tests/rh/fixture.sql",
     ...migrations,
     "supabase/tests/rh/payroll-v1.test.sql",
-    "supabase/tests/rh/structure.test.sql"
+    "supabase/tests/rh/structure.test.sql",
+    "supabase/tests/rh/admission.test.sql"
   ],
-  expectedApprovals:2,
-  successMessage:"Verticais RH empregado/estrutura/folha V1 aprovadas."
+  expectedApprovals:3,
+  successMessage:"Verticais RH empregado/estrutura/admissão/folha V1 aprovadas."
 });
