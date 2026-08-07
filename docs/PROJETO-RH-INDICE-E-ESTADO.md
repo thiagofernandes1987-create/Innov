@@ -469,6 +469,8 @@ Não foram implementados pelo Projeto RH:
 
 A documentação de recuperação do repositório registrou em 25 de julho de 2026 uma falha de replay completo das migrations. Essa condição deverá ser reavaliada no Sprint 00; este índice não presume que o problema permaneça ou esteja resolvido sem nova evidência.
 
+No momento desta atualização, o GitHub reporta o PR #42 como mesclável. O PR permanece em rascunho, e mergeabilidade por si só não satisfaz o Gate G00 nem autoriza implementação, review final ou merge.
+
 ---
 
 ## 7. Próximo módulo lógico
