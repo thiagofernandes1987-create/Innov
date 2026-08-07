@@ -12,7 +12,12 @@ console.log(`Migrations RH no encadeamento: ${migrations.length}`);
 runPostgresFiles({
   containerPrefix:"innov-rh-tests",
   database:"rh_test",
-  files:["supabase/tests/rh/fixture.sql",...migrations,"supabase/tests/rh/payroll-v1.test.sql"],
-  expectedApprovals:1,
-  successMessage:"Vertical RH empregado/folha V1 aprovada."
+  files:[
+    "supabase/tests/rh/fixture.sql",
+    ...migrations,
+    "supabase/tests/rh/payroll-v1.test.sql",
+    "supabase/tests/rh/structure.test.sql"
+  ],
+  expectedApprovals:2,
+  successMessage:"Verticais RH empregado/estrutura/folha V1 aprovadas."
 });
