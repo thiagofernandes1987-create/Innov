@@ -1,0 +1,15 @@
+alter table public.rh_sst_exposure_agents add constraint rh_sst_exposure_agents_org_id_uq unique(organization_id,id);
+
+alter table public.rh_sst_cat_body_parts drop constraint if exists rh_sst_cat_body_parts_cat_case_id_fkey;
+alter table public.rh_sst_cat_agents drop constraint if exists rh_sst_cat_agents_cat_case_id_fkey;
+alter table public.rh_sst_cat_medical_attestations drop constraint if exists rh_sst_cat_medical_attestations_cat_case_id_fkey;
+alter table public.rh_sst_exam_procedures drop constraint if exists rh_sst_exam_procedures_aso_id_fkey;
+alter table public.rh_sst_exposure_agents drop constraint if exists rh_sst_exposure_agents_exposure_period_id_fkey;
+alter table public.rh_sst_exposure_epi_documents drop constraint if exists rh_sst_exposure_epi_documents_exposure_agent_id_fkey;
+
+alter table public.rh_sst_cat_body_parts add constraint rh_sst_cat_body_parts_tenant_fk foreign key(organization_id,cat_case_id) references public.rh_sst_cat_cases(organization_id,id) on delete cascade;
+alter table public.rh_sst_cat_agents add constraint rh_sst_cat_agents_tenant_fk foreign key(organization_id,cat_case_id) references public.rh_sst_cat_cases(organization_id,id) on delete cascade;
+alter table public.rh_sst_cat_medical_attestations add constraint rh_sst_cat_attestations_tenant_fk foreign key(organization_id,cat_case_id) references public.rh_sst_cat_cases(organization_id,id) on delete cascade;
+alter table public.rh_sst_exam_procedures add constraint rh_sst_exam_procedures_tenant_fk foreign key(organization_id,aso_id) references public.rh_sst_aso_records(organization_id,id) on delete cascade;
+alter table public.rh_sst_exposure_agents add constraint rh_sst_exposure_agents_tenant_fk foreign key(organization_id,exposure_period_id) references public.rh_sst_exposure_periods(organization_id,id) on delete cascade;
+alter table public.rh_sst_exposure_epi_documents add constraint rh_sst_exposure_epi_documents_tenant_fk foreign key(organization_id,exposure_agent_id) references public.rh_sst_exposure_agents(organization_id,id) on delete cascade;
