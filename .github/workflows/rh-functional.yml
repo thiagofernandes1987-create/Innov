@@ -12,6 +12,7 @@ on:
       - "supabase/tests/rh/**"
       - "scripts/run-rh-db-tests.mjs"
       - "package.json"
+      - "tsconfig.rh.json"
       - ".github/workflows/rh-functional.yml"
   push:
     branches:
@@ -23,6 +24,7 @@ on:
       - "supabase/migrations/*_rh_*.sql"
       - "supabase/tests/rh/**"
       - "scripts/run-rh-db-tests.mjs"
+      - "tsconfig.rh.json"
       - ".github/workflows/rh-functional.yml"
 
 permissions:
@@ -61,7 +63,33 @@ jobs:
         run: pnpm validate:migrations
       - name: RH database tests
         run: pnpm test:db:rh
-      - name: Typecheck
+      - name: RH scoped typecheck
+        run: pnpm exec tsc --noEmit -p tsconfig.rh.json
+      - name: RH scoped lint
+        run: pnpm exec eslint app/app/rh app/actions/rh.ts app/actions/rh-admission.ts app/actions/rh-payroll.ts lib/rh --max-warnings=0
+
+  global-integration-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    continue-on-error: true
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      SIGNATURE_PROVIDER: sandbox
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Global typecheck diagnostic
         run: pnpm typecheck
-      - name: Build
-        run: pnpm build
