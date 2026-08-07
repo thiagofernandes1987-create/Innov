@@ -1,7 +1,7 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.18.0  
-**Atualizado em:** 6 de agosto de 2026  
+**Versão do índice:** 0.19.0  
+**Atualizado em:** 7 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
 **Produção:** não liberada  
@@ -10,7 +10,7 @@
 
 ## 1. Finalidade
 
-Este arquivo registra o estado consolidado da especificação funcional, técnica, de planejamento, dados, contratos, experiência e qualidade do Projeto RH sem substituir os documentos detalhados.
+Este arquivo registra o estado consolidado da especificação funcional, técnica, de planejamento, dados, contratos, experiência, qualidade e preparação operacional do Projeto RH sem substituir os documentos detalhados.
 
 A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`. Cada módulo, ADR e anexo possui documento próprio para preservar decisões, requisitos, regras, critérios e histórico.
 
@@ -61,6 +61,9 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | ADR-018 | `PROJETO-RH-ADR-018-EVIDENCIA-RISCO-OBSERVABILIDADE-E-LIBERACAO.md` | decisão de qualidade e segurança registrada |
 | Módulo 18 | `PROJETO-RH-MODULO-18-QUALIDADE-TESTES-OBSERVABILIDADE-SEGURANCA-E-EVIDENCIAS.md` | estratégia de qualidade concluída |
 | Anexo M18 | `PROJETO-RH-MODULO-18-ANEXO-A-MATRIZ-DE-TESTES-E-EVIDENCIAS.md` | matriz de testes e evidências concluída |
+| ADR-019 | `PROJETO-RH-ADR-019-CUTOVER-ATIVACAO-SUPORTE-E-GESTAO-DA-MUDANCA.md` | decisão de implantação e mudança registrada |
+| Módulo 19 | `PROJETO-RH-MODULO-19-IMPLANTACAO-CUTOVER-TREINAMENTO-SUPORTE-E-MUDANCA.md` | preparação operacional especificada |
+| Anexo M19 | `PROJETO-RH-MODULO-19-ANEXO-A-CUTOVER-TREINAMENTO-SUPORTE-E-HYPERCARE.md` | matriz de cutover, treinamento e suporte concluída |
 
 ---
 
@@ -224,6 +227,38 @@ Risco e requisito
 - gates poderão ser invalidados por mudança material ou nova evidência;
 - merge, deployment, ativação e estabilização não serão confundidos.
 
+### 3.20 Cutover, ativação, suporte e gestão da mudança
+
+```text
+Incremento homologado
+  → readiness operacional
+    → rehearsal
+      → GO / NO_GO / CONDITIONAL_GO
+        → deployment
+          → ativação por coorte
+            → cutover de negócio e dados
+              → validação pós-cutover
+                → hypercare
+                  → estabilização
+```
+
+- merge, release, deployment, ativação, cutover, go-live e estabilização são estados diferentes;
+- rollout será progressivo por organização, empresa, estabelecimento, módulo, capability, perfil, coorte ou competência;
+- cutover técnico e cutover de negócio terão runbooks próprios;
+- dados legados terão inventário, mapping, dry-run, exceções, carga e reconciliação;
+- saldos de abertura manterão procedência e data de corte;
+- dupla operação somente será usada quando produzir evidência útil e tiver prazo;
+- freeze respeitará competências e processos críticos;
+- GO/NO_GO terá responsáveis funcionais e técnicos;
+- CONDITIONAL_GO não poderá contornar falha Q4;
+- treinamento será por persona e tarefa, sem conceder autorização automaticamente;
+- suporte terá níveis L0, L1, L2 funcional/técnico, L3 e L4 externo;
+- tickets usarão correlation ID e não carregarão conteúdo sensível desnecessário;
+- rollback técnico, roll-forward e compensação de negócio serão estratégias distintas;
+- fatos imutáveis serão compensados ou retificados, não apagados;
+- hypercare terá indicadores e critérios explícitos de saída;
+- legado não será desativado antes de estratégia de retenção, consulta e integridade final.
+
 ---
 
 ## 4. Progresso consolidado
@@ -289,18 +324,40 @@ Risco e requisito
 - [x] **120 famílias de teste**;
 - [x] **18 tipos de evidence package**.
 
+### Implantação e gestão da mudança especificadas
+
+- [x] ADR-019 — Cutover × Ativação × Suporte × Gestão da Mudança;
+- [x] release candidate e manifesto de release;
+- [x] rollout progressivo e blast radius;
+- [x] cutover técnico e cutover de negócio;
+- [x] migração de dados, saldos de abertura e legado;
+- [x] freeze por processo e competência;
+- [x] decisão GO/NO_GO/CONDITIONAL_GO;
+- [x] treinamento por persona e tarefa;
+- [x] comunicação da mudança;
+- [x] suporte L0–L4 e severidades SEV-0–SEV-4;
+- [x] hypercare, war room e estabilização;
+- [x] rollback, roll-forward e compensação;
+- [x] **120 requisitos operacionais**;
+- [x] **80 regras operacionais**;
+- [x] **55 critérios de aceite**;
+- [x] **72 atividades de cutover**;
+- [x] **12 trilhas de treinamento**;
+- [x] **16 runbooks mínimos**;
+- [x] dossiê de implantação com 18 tipos de evidência.
+
 ### Próximo
 
-- [ ] Módulo 19 — Implantação, Cutover, Treinamento, Suporte e Gestão da Mudança;
-- [ ] estratégia de rollout por organização, empresa e população;
-- [ ] plano de cutover e freeze;
-- [ ] migração operacional e reconciliação final;
-- [ ] treinamento por persona;
-- [ ] materiais, ambiente de prática e certificação interna;
-- [ ] comunicação e gestão de resistência;
-- [ ] suporte N1, N2, N3 e especialistas de domínio;
-- [ ] operação assistida e hypercare;
-- [ ] critérios de adoção, estabilização e encerramento do projeto.
+- [ ] Módulo 20 — Governança Operacional, Calendário Legal, Administração, Atualização Regulatória e Evolução Contínua;
+- [ ] ownership permanente de cada bounded context;
+- [ ] calendário de obrigações, parâmetros e revisões;
+- [ ] processo de atualização legal e normativa;
+- [ ] governança de rubricas, fórmulas, tabelas e versões;
+- [ ] gestão de acessos e recertificação;
+- [ ] retenção, privacidade e direitos dos titulares em operação;
+- [ ] gestão de fornecedores e certificados;
+- [ ] manutenção de runbooks, materiais e base de conhecimento;
+- [ ] métricas de operação, problemas recorrentes e melhoria contínua.
 
 ### Posterior
 
@@ -308,6 +365,7 @@ Risco e requisito
 - [ ] execução do Sprint 00 após autorização;
 - [ ] migrations e código por onda;
 - [ ] homologação funcional, técnica e de segurança;
+- [ ] implantação real por coortes;
 - [ ] operação assistida e evolução contínua.
 
 ---
@@ -370,11 +428,26 @@ Em 6 de agosto de 2026 foram reconciliados:
 
 O RH adotará essas referências como catálogo e baseline de rastreabilidade, sem declarar conformidade ou prontidão antes da execução das verificações.
 
+### 5.17 — Prontidão, recuperação e cutover
+
+Em 7 de agosto de 2026 foram reconciliados:
+
+- `ETAPA-20-PRONTIDAO-PRODUCAO.md`, que separa branch, homologação e publicação, adota decisão GO/NO_GO/CONDITIONAL_GO e exige evidência específica antes de produção;
+- estratégia de deployment coordenado entre aplicação e migrations;
+- backup e restauração lógica ensaiados pela Etapa 20 como referência de procedimento;
+- `diretrizes/RECUPERACAO.md`, que registra explicitamente que documentação de recovery não comprova recuperação se o replay real não estiver reproduzível;
+- disciplina de migrations append-only;
+- observabilidade e auditoria existentes;
+- SAC e fluxos de suporte existentes na plataforma;
+- produção ainda não liberada como princípio de governança nas frentes não concluídas.
+
+O Projeto RH herda essa disciplina e adiciona release manifest, coortes, cutover de negócio, treinamento, suporte e hypercare. Nenhuma evidência da Etapa 20 será reutilizada como se comprovasse o RH; cada onda produzirá evidências próprias.
+
 ---
 
 ## 6. Estado técnico honesto
 
-A branch contém somente documentação funcional, técnica, de planejamento, dados, contratos, experiência e qualidade do Projeto RH.
+A branch contém somente documentação funcional, técnica, de planejamento, dados, contratos, experiência, qualidade e preparação operacional do Projeto RH.
 
 Não foram implementados pelo Projeto RH:
 
@@ -386,40 +459,43 @@ Não foram implementados pelo Projeto RH:
 - motor de folha, cálculo, transmissão ou integração;
 - fixtures, datasets dourados, testes do RH ou evidências executadas;
 - thresholds de coverage, scans, SBOM, pentest ou evidence store;
-- fontes observáveis, SLIs, SLOs, alertas ou runbooks do RH;
+- fontes observáveis, SLIs, SLOs, alertas ou runbooks implementados do RH;
 - cálculo sombra, load test, chaos test ou restore específico do RH;
 - gates de qualidade aprovados;
+- release manifest executado, rehearsal, migration de dados ou cutover;
+- coorte piloto, treinamento real, comunicação de go-live ou suporte dedicado;
+- war room, hypercare, rollback ensaiado ou decisão GO/NO_GO do RH;
 - histórias, sprints, issues, milestones ou datas de execução.
 
-O CI do PR possui dívida estrutural preexistente relacionada à numeração das vacinas a partir de `VACINA-044`. Os documentos do RH não alteraram vacinas. A investigação pertence ao Sprint 00 e não será mascarada.
+A documentação de recuperação do repositório registrou em 25 de julho de 2026 uma falha de replay completo das migrations. Essa condição deverá ser reavaliada no Sprint 00; este índice não presume que o problema permaneça ou esteja resolvido sem nova evidência.
 
 ---
 
 ## 7. Próximo módulo lógico
 
-**Módulo 19 — Implantação, Cutover, Treinamento, Suporte e Gestão da Mudança.**
+**Módulo 20 — Governança Operacional, Calendário Legal, Administração, Atualização Regulatória e Evolução Contínua.**
 
 ```text
-Produto verificado
-  → preparação organizacional
-    → treinamento e comunicação
-      → migração operacional
-        → cutover e Go/No-Go
-          → piloto e rollout
-            → suporte e hypercare
-              → adoção e estabilização
+Sistema estabilizado
+  → ownership permanente
+    → operação e calendário
+      → monitoramento de mudanças legais
+        → atualização versionada de regras
+          → recertificação e privacidade
+            → gestão de fornecedores
+              → melhoria contínua baseada em evidências
 ```
 
 O próximo módulo deverá distinguir:
 
-1. sistema tecnicamente pronto e organização pronta;
-2. treinamento ministrado e competência demonstrada;
-3. migração concluída e dados reconciliados;
-4. deployment, feature flag, ativação e cutover;
-5. usuário-chave, suporte, operação e especialista de domínio;
-6. incidente, dúvida, defeito e solicitação de melhoria;
-7. uso, adoção, conformidade de processo e resultado de negócio;
-8. hypercare concluído e operação estabilizada.
+1. operação do sistema e evolução do produto;
+2. mudança legal e mudança de configuração;
+3. parâmetro futuro e correção retroativa;
+4. owner funcional, técnico, segurança e compliance;
+5. acesso concedido e acesso recertificado;
+6. incidente resolvido e problema eliminado;
+7. fornecedor saudável e contrato/credencial válido;
+8. melhoria sugerida, priorizada, implementada e validada.
 
 ---
 
@@ -445,3 +521,4 @@ O próximo módulo deverá distinguir:
 | 0.16.0 | 06/08/2026 | ADR-016, Módulo 16 e contratos de API/jobs |
 | 0.17.0 | 06/08/2026 | ADR-017, Módulo 17, mapa de telas, acessibilidade e protótipos textuais |
 | 0.18.0 | 06/08/2026 | ADR-018, Módulo 18, matriz de testes, observabilidade, segurança e evidências |
+| 0.19.0 | 07/08/2026 | ADR-019, Módulo 19, cutover, treinamento, suporte e gestão da mudança |
