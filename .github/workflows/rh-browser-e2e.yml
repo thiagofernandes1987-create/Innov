@@ -1,0 +1,50 @@
+name: RH Browser E2E
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: rh-homologation
+    env:
+      RH_E2E_BASE_URL: ${{ vars.RH_E2E_BASE_URL }}
+      RH_E2E_EMAIL: ${{ secrets.RH_E2E_EMAIL }}
+      RH_E2E_PASSWORD: ${{ secrets.RH_E2E_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+          pnpm install --no-frozen-lockfile --reporter=append-only
+          pnpm exec playwright install --with-deps chromium
+      - name: Validate homologation contract
+        shell: bash
+        run: |
+          test -n "$RH_E2E_BASE_URL" || { echo "RH_E2E_BASE_URL ausente" >&2; exit 1; }
+          test -n "$RH_E2E_EMAIL" || { echo "RH_E2E_EMAIL ausente" >&2; exit 1; }
+          test -n "$RH_E2E_PASSWORD" || { echo "RH_E2E_PASSWORD ausente" >&2; exit 1; }
+          case "$RH_E2E_BASE_URL" in
+            https://*) ;;
+            *) echo "Homologação deve usar HTTPS" >&2; exit 1;;
+          esac
+      - name: Run professional RH browser smoke
+        run: pnpm exec playwright test tests/e2e/rh-professional-smoke.spec.ts --project=chromium
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: rh-browser-e2e-${{ github.run_id }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 14
