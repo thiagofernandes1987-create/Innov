@@ -1,0 +1,67 @@
+name: RH Functional
+
+on:
+  pull_request:
+    paths:
+      - "app/app/rh/**"
+      - "app/actions/rh*.ts"
+      - "lib/rh/**"
+      - "lib/modules/registry.ts"
+      - "lib/casca/menus.ts"
+      - "supabase/migrations/*_rh_*.sql"
+      - "supabase/tests/rh/**"
+      - "scripts/run-rh-db-tests.mjs"
+      - "package.json"
+      - ".github/workflows/rh-functional.yml"
+  push:
+    branches:
+      - "feature/**"
+    paths:
+      - "app/app/rh/**"
+      - "app/actions/rh*.ts"
+      - "lib/rh/**"
+      - "supabase/migrations/*_rh_*.sql"
+      - "supabase/tests/rh/**"
+      - "scripts/run-rh-db-tests.mjs"
+      - ".github/workflows/rh-functional.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-functional-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rh-functional:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      SIGNATURE_PROVIDER: sandbox
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Validate RH menu destinations
+        run: pnpm validate:menus
+      - name: Validate migrations
+        run: pnpm validate:migrations
+      - name: RH database tests
+        run: pnpm test:db:rh
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build
+        run: pnpm build
