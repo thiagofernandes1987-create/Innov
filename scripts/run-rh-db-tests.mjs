@@ -19,8 +19,9 @@ runPostgresFiles({
     "supabase/tests/rh/structure.test.sql",
     "supabase/tests/rh/admission.test.sql",
     "supabase/tests/rh/payroll-v2.test.sql",
-    "supabase/tests/rh/payroll-regulatory-config.test.sql"
+    "supabase/tests/rh/payroll-regulatory-config.test.sql",
+    "supabase/tests/rh/payroll-irrf-2026.test.sql"
   ],
-  expectedApprovals:5,
-  successMessage:"Verticais RH empregado/estrutura/admissão/folha V1/V2/regulatório aprovadas."
+  expectedApprovals:6,
+  successMessage:"Verticais RH empregado/estrutura/admissão/folha V1/V2/regulatório/IRRF 2026 aprovadas."
 });
