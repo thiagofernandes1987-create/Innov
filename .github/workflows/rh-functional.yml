@@ -66,7 +66,7 @@ jobs:
       - name: RH scoped typecheck
         run: pnpm exec tsc --noEmit -p tsconfig.rh.json
       - name: RH scoped lint
-        run: pnpm exec eslint app/app/rh app/actions/rh.ts app/actions/rh-admission.ts app/actions/rh-payroll.ts lib/rh --max-warnings=0
+        run: pnpm exec eslint app/app/rh app/actions/rh*.ts lib/rh --max-warnings=0
 
   global-integration-diagnostic:
     runs-on: ubuntu-latest
