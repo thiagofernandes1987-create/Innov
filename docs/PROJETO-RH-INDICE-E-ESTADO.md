@@ -1,6 +1,6 @@
 # Projeto RH — Índice e Estado Consolidado
 
-**Versão do índice:** 0.19.0  
+**Versão do índice:** 0.20.0  
 **Atualizado em:** 7 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **Implementação:** não iniciada  
@@ -10,7 +10,7 @@
 
 ## 1. Finalidade
 
-Este arquivo registra o estado consolidado da especificação funcional, técnica, de planejamento, dados, contratos, experiência, qualidade e preparação operacional do Projeto RH sem substituir os documentos detalhados.
+Este arquivo registra o estado consolidado da especificação funcional, técnica, de planejamento, dados, contratos, experiência, qualidade, preparação operacional e governança contínua do Projeto RH sem substituir os documentos detalhados.
 
 A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`. Cada módulo, ADR e anexo possui documento próprio para preservar decisões, requisitos, regras, critérios e histórico.
 
@@ -64,6 +64,9 @@ A especificação principal permanece em `PROJETO-RH-ESPECIFICACAO-FUNCIONAL.md`
 | ADR-019 | `PROJETO-RH-ADR-019-CUTOVER-ATIVACAO-SUPORTE-E-GESTAO-DA-MUDANCA.md` | decisão de implantação e mudança registrada |
 | Módulo 19 | `PROJETO-RH-MODULO-19-IMPLANTACAO-CUTOVER-TREINAMENTO-SUPORTE-E-MUDANCA.md` | preparação operacional especificada |
 | Anexo M19 | `PROJETO-RH-MODULO-19-ANEXO-A-CUTOVER-TREINAMENTO-SUPORTE-E-HYPERCARE.md` | matriz de cutover, treinamento e suporte concluída |
+| ADR-020 | `PROJETO-RH-ADR-020-GOVERNANCA-REGULATORIA-PARAMETROS-E-EVOLUCAO.md` | decisão de governança contínua registrada |
+| Módulo 20 | `PROJETO-RH-MODULO-20-GOVERNANCA-OPERACIONAL-CALENDARIO-LEGAL-E-EVOLUCAO.md` | governança operacional especificada |
+| Anexo M20 | `PROJETO-RH-MODULO-20-ANEXO-A-MATRIZ-DE-GOVERNANCA-E-CALENDARIO.md` | matriz de governança e calendário concluída |
 
 ---
 
@@ -259,6 +262,36 @@ Incremento homologado
 - hypercare terá indicadores e critérios explícitos de saída;
 - legado não será desativado antes de estratégia de retenção, consulta e integridade final.
 
+### 3.21 Governança regulatória, parâmetros e evolução
+
+```text
+Fonte ou necessidade
+  → change record
+    → análise de aplicabilidade
+      → impacto
+        → regra/parâmetro versionado
+          → testes e aprovação
+            → vigência
+              → monitoramento
+                → substituição ou evolução
+```
+
+- fontes oficiais terão autoridade, versão, captura, vigência e procedência;
+- detecção automatizada não substituirá interpretação humana de mudança crítica;
+- mudanças regulatórias serão classificadas de R0 a R4;
+- regra histórica não será sobrescrita para representar regra nova;
+- parâmetros, fórmulas e calendários críticos terão versionamento e maker-checker;
+- deadline será derivado de obrigação, competência, regra de vencimento, calendário e exceções;
+- prazo interno e prazo legal serão distintos;
+- núcleo modular existente será reutilizado para perfis, capabilities, overrides e auditoria;
+- acessos sensíveis, temporários e break-glass serão recertificáveis e auditáveis;
+- segredos permanecerão fora de tabelas comuns; certificados e procurações terão metadados, owner e expiração;
+- retenção será por categoria e respeitará legal hold;
+- provider e API externos terão owner, versão, health, contingência e processo de mudança;
+- incidentes, problems, findings, dívida técnica e mudanças regulatórias alimentarão backlog governado;
+- software version e rule version permanecerão independentes;
+- depreciação preservará consulta histórica e consumidores conhecidos.
+
 ---
 
 ## 4. Progresso consolidado
@@ -346,23 +379,41 @@ Incremento homologado
 - [x] **16 runbooks mínimos**;
 - [x] dossiê de implantação com 18 tipos de evidência.
 
+### Governança contínua especificada
+
+- [x] ADR-020 — Governança Regulatória × Parâmetros × Evolução;
+- [x] ownership funcional, técnico, de dados, segurança, privacidade, compliance e integrações;
+- [x] source registry e hierarquia de confiança definidos;
+- [x] pipeline de mudança regulatória e classes R0–R4;
+- [x] impact assessment de mudanças externas;
+- [x] versionamento de regras, parâmetros e fórmulas;
+- [x] calendário legal derivado e deadlines reproduzíveis;
+- [x] maker-checker para configuração crítica;
+- [x] recertificação, acesso temporário e break-glass;
+- [x] inventário conceitual de certificados, procurações e providers;
+- [x] retenção por categoria e legal hold;
+- [x] problem management, PIR, depreciação e melhoria contínua;
+- [x] **120 requisitos de governança**;
+- [x] **80 regras de governança**;
+- [x] **55 critérios de aceite**;
+- [x] **80 rotinas de governança**;
+- [x] **16 tipos de dossiê de governança**.
+
 ### Próximo
 
-- [ ] Módulo 20 — Governança Operacional, Calendário Legal, Administração, Atualização Regulatória e Evolução Contínua;
-- [ ] ownership permanente de cada bounded context;
-- [ ] calendário de obrigações, parâmetros e revisões;
-- [ ] processo de atualização legal e normativa;
-- [ ] governança de rubricas, fórmulas, tabelas e versões;
-- [ ] gestão de acessos e recertificação;
-- [ ] retenção, privacidade e direitos dos titulares em operação;
-- [ ] gestão de fornecedores e certificados;
-- [ ] manutenção de runbooks, materiais e base de conhecimento;
-- [ ] métricas de operação, problemas recorrentes e melhoria contínua.
+- [ ] Módulo 21 — Matriz Mestre de Rastreabilidade, Revisão Cruzada e Gate de Prontidão da Especificação;
+- [ ] mapear requisitos funcionais, técnicos, UX, dados, qualidade, operação e governança;
+- [ ] verificar conflitos e lacunas entre módulos 01–20;
+- [ ] construir matriz requisito → regra → dado → contrato → tela → teste → evidência → gate;
+- [ ] classificar pendências, ambiguidades e decisões abertas;
+- [ ] revisar dependências e sequência do backlog;
+- [ ] definir Definition of Ready final para o Sprint 00;
+- [ ] produzir parecer GO/NO_GO para iniciar execução, sem iniciar código automaticamente.
 
 ### Posterior
 
 - [ ] protótipos visuais e navegáveis após aprovação;
-- [ ] execução do Sprint 00 após autorização;
+- [ ] execução do Sprint 00 após autorização e Gate de Prontidão;
 - [ ] migrations e código por onda;
 - [ ] homologação funcional, técnica e de segurança;
 - [ ] implantação real por coortes;
@@ -443,11 +494,25 @@ Em 7 de agosto de 2026 foram reconciliados:
 
 O Projeto RH herda essa disciplina e adiciona release manifest, coortes, cutover de negócio, treinamento, suporte e hypercare. Nenhuma evidência da Etapa 20 será reutilizada como se comprovasse o RH; cada onda produzirá evidências próprias.
 
+### 5.18 — Governança regulatória e administração contínua
+
+Em 7 de agosto de 2026 foram reconciliados:
+
+- núcleo modular e controle de acesso da Etapa 12.1, incluindo `app_modules`, perfis, capabilities, overrides e `permission_change_events`;
+- governança de observabilidade e auditoria da Etapa 19;
+- disciplina de prontidão, recuperação, certificados e providers da Etapa 20;
+- documentação técnica oficial do eSocial, que apresenta S-1.3 com atualizações e notas de 2026;
+- portal oficial do FGTS Digital, com Manual versão 1.70 na consulta atual;
+- página oficial da DCTFWeb e seus manuais/leiautes;
+- catálogo oficial de Normas Regulamentadoras vigentes do MTE.
+
+Essas versões externas são baselines datadas e não constantes permanentes. A governança do RH deverá detectar, analisar, versionar e ativar mudanças com vigência e evidência próprias.
+
 ---
 
 ## 6. Estado técnico honesto
 
-A branch contém somente documentação funcional, técnica, de planejamento, dados, contratos, experiência, qualidade e preparação operacional do Projeto RH.
+A branch contém somente documentação funcional, técnica, de planejamento, dados, contratos, experiência, qualidade, preparação operacional e governança contínua do Projeto RH.
 
 Não foram implementados pelo Projeto RH:
 
@@ -465,39 +530,45 @@ Não foram implementados pelo Projeto RH:
 - release manifest executado, rehearsal, migration de dados ou cutover;
 - coorte piloto, treinamento real, comunicação de go-live ou suporte dedicado;
 - war room, hypercare, rollback ensaiado ou decisão GO/NO_GO do RH;
+- regulatory source registry executável, crawler ou monitor de fontes;
+- calendário legal executável ou jobs de deadline;
+- painel de parâmetros, maker-checker ou publicação de regras;
+- recertificação automatizada ou break-glass específico do RH;
+- inventário executável de certificados, rotação ou alertas de expiração;
+- retention jobs, legal hold ou automação de problem management;
 - histórias, sprints, issues, milestones ou datas de execução.
 
 A documentação de recuperação do repositório registrou em 25 de julho de 2026 uma falha de replay completo das migrations. Essa condição deverá ser reavaliada no Sprint 00; este índice não presume que o problema permaneça ou esteja resolvido sem nova evidência.
 
-No momento desta atualização, o GitHub reporta o PR #42 como mesclável. O PR permanece em rascunho, e mergeabilidade por si só não satisfaz o Gate G00 nem autoriza implementação, revisão final ou merge.
+No momento desta atualização, o PR #42 continua em rascunho. Mergeabilidade técnica, quando presente, não satisfaz o Gate G00 nem autoriza implementação, revisão final ou merge.
 
 ---
 
 ## 7. Próximo módulo lógico
 
-**Módulo 20 — Governança Operacional, Calendário Legal, Administração, Atualização Regulatória e Evolução Contínua.**
+**Módulo 21 — Matriz Mestre de Rastreabilidade, Revisão Cruzada e Gate de Prontidão da Especificação.**
 
 ```text
-Sistema estabilizado
-  → ownership permanente
-    → operação e calendário
-      → monitoramento de mudanças legais
-        → atualização versionada de regras
-          → recertificação e privacidade
-            → gestão de fornecedores
-              → melhoria contínua baseada em evidências
+Módulos 01–20
+  → inventário de requisitos e decisões
+    → rastreabilidade ponta a ponta
+      → revisão de conflitos e lacunas
+        → análise de dependências
+          → pendências classificadas
+            → Definition of Ready final
+              → decisão GO / NO_GO para Sprint 00
 ```
 
 O próximo módulo deverá distinguir:
 
-1. operação do sistema e evolução do produto;
-2. mudança legal e mudança de configuração;
-3. parâmetro futuro e correção retroativa;
-4. owner funcional, técnico, segurança e compliance;
-5. acesso concedido e acesso recertificado;
-6. incidente resolvido e problema eliminado;
-7. fornecedor saudável e contrato/credencial válido;
-8. melhoria sugerida, priorizada, implementada e validada.
+1. requisito coberto e requisito apenas citado;
+2. regra coerente e regra conflitante;
+3. decisão fechada e decisão pendente;
+4. tabela proposta e tabela realmente necessária na primeira onda;
+5. contrato definido e implementação existente;
+6. critério de aceite e evidência executada;
+7. backlog sequenciado e item realmente READY;
+8. especificação completa e autorização para implementação.
 
 ---
 
@@ -524,3 +595,4 @@ O próximo módulo deverá distinguir:
 | 0.17.0 | 06/08/2026 | ADR-017, Módulo 17, mapa de telas, acessibilidade e protótipos textuais |
 | 0.18.0 | 06/08/2026 | ADR-018, Módulo 18, matriz de testes, observabilidade, segurança e evidências |
 | 0.19.0 | 07/08/2026 | ADR-019, Módulo 19, cutover, treinamento, suporte e gestão da mudança |
+| 0.20.0 | 07/08/2026 | ADR-020, Módulo 20, governança regulatória, calendário legal e evolução contínua |
