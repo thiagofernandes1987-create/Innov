@@ -48,7 +48,7 @@ export async function generateSignedEsocialTableEvent(data:FormData){
   if(!sourceId)fail(path,"Fonte do evento obrigatória.");
   if(env==="PRODUCTION"&&process.env.ESOCIAL_ENABLE_PRODUCTION!=="true")fail(path,"Produção permanece bloqueada até homologação formal em Produção Restrita.");
 
-  let unsignedXml="";let sourceType="";let employerTaxId="";
+  let unsignedXml="";let sourceType="";let employerTaxId="";let persistedEventId="";
   try{
     if(eventType==="S-1000"){
       const{data:profile,error}=await context.supabase.from("rh_esocial_employer_profiles").select("id,employer_id,valid_from,valid_to,class_trib,ind_coop,ind_constr,ind_des_folha,ind_opt_reg_eletron,ind_ent_ed,ind_ett").eq("organization_id",context.organizationId).eq("id",sourceId).maybeSingle();
@@ -96,7 +96,8 @@ export async function generateSignedEsocialTableEvent(data:FormData){
 
     const signed=signEsocialXml(unsignedXml);
     const eType=employerType(employerTaxId);const tx=transmitter(eType,employerTaxId);
-    const eventId=await persist({organizationId:context.organizationId,eventType,eventKey:signed.eventKey,eventGroup:1,environment:env,operation:op,sourceType,sourceId,employerType:eType,employerNumber:employerTaxId,transmitterType:tx.type,transmitterNumber:tx.number,unsignedXml,signedXml:signed.signedXml,signedSha256:signed.payloadSha256},context.supabase);
-    redirect(`${BASE}/eventos/${eventId}`);
+    persistedEventId=await persist({organizationId:context.organizationId,eventType,eventKey:signed.eventKey,eventGroup:1,environment:env,operation:op,sourceType,sourceId,employerType:eType,employerNumber:employerTaxId,transmitterType:tx.type,transmitterNumber:tx.number,unsignedXml,signedXml:signed.signedXml,signedSha256:signed.payloadSha256},context.supabase);
   }catch(error){fail(path,error instanceof Error?error.message:"Falha ao gerar evento eSocial.");}
+  if(!persistedEventId)fail(path,"Evento eSocial não foi persistido.");
+  redirect(`${BASE}/eventos/${persistedEventId}`);
 }
