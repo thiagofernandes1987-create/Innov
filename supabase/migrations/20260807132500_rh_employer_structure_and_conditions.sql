@@ -41,7 +41,7 @@ create table if not exists public.rh_tax_allocations(
  created_by uuid references auth.users(id) on delete set null,
  created_at timestamptz not null default now(),
  unique(organization_id,code),
- check(valid_to is null or valid_to>=valid_from)
+ check(valid_to is null or valid_to>valid_from)
 );
 
 create table if not exists public.rh_positions(
@@ -81,7 +81,7 @@ create table if not exists public.rh_unions(
  created_by uuid references auth.users(id) on delete set null,
  created_at timestamptz not null default now(),
  unique(organization_id,code),
- check(valid_to is null or valid_from is null or valid_to>=valid_from)
+ check(valid_to is null or valid_from is null or valid_to>valid_from)
 );
 
 create table if not exists public.rh_work_schedules(
@@ -114,7 +114,7 @@ create table if not exists public.rh_employment_conditions(
  change_reason text,
  created_by uuid references auth.users(id) on delete set null,
  created_at timestamptz not null default now(),
- check(valid_to is null or valid_to>=valid_from)
+ check(valid_to is null or valid_to>valid_from)
 );
 create index if not exists rh_employment_conditions_current_idx on public.rh_employment_conditions(organization_id,employment_id,valid_from,valid_to);
 
@@ -139,11 +139,12 @@ alter table public.rh_employment_conditions add constraint rh_condition_function
 alter table public.rh_employment_conditions add constraint rh_condition_union_tenant_fk foreign key(organization_id,union_id) references public.rh_unions(organization_id,id) on delete restrict;
 alter table public.rh_employment_conditions add constraint rh_condition_schedule_tenant_fk foreign key(organization_id,work_schedule_id) references public.rh_work_schedules(organization_id,id) on delete restrict;
 
--- Evita duas condições vigentes sobrepostas para o mesmo vínculo.
+-- Intervalos de vigência são semiabertos [início,fim): uma condição pode terminar
+-- exatamente quando a próxima começa sem produzir sobreposição artificial.
 create extension if not exists btree_gist;
 alter table public.rh_employment_conditions add constraint rh_employment_conditions_no_overlap exclude using gist(
  employment_id with =,
- daterange(valid_from,coalesce(valid_to,'infinity'::date),'[]') with &&
+ daterange(valid_from,valid_to,'[)') with &&
 );
 
 -- RLS por capability do RH.
