@@ -3,7 +3,7 @@ import { createTask, moveTask } from "@/app/actions/projects";
 import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
 import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
-import { nomesDosUsuarios } from "@/lib/pessoas/nomes";
+import { calcular, type Dependencia, type TipoDependencia } from "@/lib/planejamento/cronograma";
 import { formatDate, formatPercent, taskColumns, taskStatusLabels } from "@/lib/stage12";
 
 export default async function TasksPage({
@@ -21,11 +21,6 @@ export default async function TasksPage({
     supabase.from("project_tasks").select("id,code,title,description,status,priority,progress,weight,planned_start,planned_end,duration_days,responsible_id,blocked_reason,client_visible,wbs_id").eq("project_id", id).order("sequence"),
     supabase.from("task_dependencies").select("predecessor_task_id,successor_task_id,dependency_type,lag_days").eq("project_id", id).eq("organization_id", organizationId),
     supabase.from("work_breakdown_items").select("id,code,title").eq("project_id", id).order("sequence"),
-    // Sem embed de `profiles`: `project_memberships.user_id` aponta para
-    // `auth.users`, não para `public.profiles`, então `profiles(full_name)`
-    // devolvia PGRST200 — relação inexistente — e a consulta inteira falhava.
-    // O nome vem numa segunda leitura, como nas outras cinco telas que já
-    // resolvem pessoa assim.
     supabase.from("project_memberships").select("user_id,role").eq("project_id", id).eq("active", true)
   ]);
 
@@ -58,8 +53,7 @@ export default async function TasksPage({
   const tasks = tasksResult.data ?? [];
   const wbs = wbsResult.data ?? [];
   const memberships = membershipsResult.data ?? [];
-  const nomePorUsuario = await nomesDosUsuarios(supabase, memberships.map(m => m.user_id));
-  const tasksLoadFailed = Boolean(tasksResult.error);
+  const tasksLoadFailed = Boolean(tasksResult.error || dependenciesResult.error);
   const supportLoadFailed = Boolean(wbsResult.error || membershipsResult.error);
   const schedule = calcular(
     tasks
@@ -161,7 +155,7 @@ export default async function TasksPage({
               <label>Responsável
                 <select name="responsibleId"><option value="">Não definido</option>{memberships.map((membership) => (
                   <option key={membership.user_id} value={membership.user_id}>
-                    {nomePorUsuario.get(membership.user_id) || membership.user_id.slice(0, 8)} · {membership.role}
+                    {profilesById.get(membership.user_id) || membership.user_id.slice(0, 8)} · {membership.role}
                   </option>
                 ))}</select>
               </label>
