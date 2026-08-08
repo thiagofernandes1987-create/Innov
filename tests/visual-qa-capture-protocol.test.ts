@@ -8,7 +8,7 @@ const protocol = readFileSync(
 const normalizedProtocol = protocol.toLocaleLowerCase("pt-BR");
 const vaccine = readFileSync(
   new URL(
-    "../diretrizes/vacinas/VACINA-043-CORRECAO-VISUAL-EXIGE-CAPTURA-DO-PREVIEW.md",
+    "../diretrizes/vacinas/VACINA-062-CORRECAO-VISUAL-EXIGE-CAPTURA-DO-PREVIEW.md",
     import.meta.url
   ),
   "utf8"
