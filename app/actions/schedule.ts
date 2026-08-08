@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { proximoCodigo } from "@/lib/planejamento/eap";
 import {
   isScheduleDependencyType,
   publicScheduleDatabaseMessage,
@@ -10,6 +11,7 @@ import {
   wouldCreateTaskHierarchyCycle,
   type ScheduleDatabaseError
 } from "@/lib/planejamento/schedule-validation";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 
 const scheduleRoles = [
   "SUPER_ADMIN",
@@ -144,9 +146,124 @@ async function validateTaskPlacement(
   }
 }
 
+async function automaticWbsCode(
+  supabase: ScheduleSupabase,
+  organizationId: string,
+  projectId: string,
+  parentId: string | null,
+  informed: string
+): Promise<string> {
+  if (informed) return informed;
+  const { data, error } = await supabase
+    .from("work_breakdown_items")
+    .select("id,code")
+    .eq("project_id", projectId)
+    .eq("organization_id", organizationId);
+  if (error) failDatabase(projectId, "number-wbs", error, "Não foi possível calcular o próximo código da EAP.");
+
+  const rows = data ?? [];
+  const parentCode = parentId
+    ? String(rows.find(row => row.id === parentId)?.code ?? "") || null
+    : null;
+  if (parentId && !parentCode) fail(projectId, "A etapa superior não pôde ser usada para numerar a nova etapa.");
+  return proximoCodigo(rows.map(row => String(row.code ?? "")), parentCode);
+}
+
+async function automaticTaskCode(
+  supabase: ScheduleSupabase,
+  organizationId: string,
+  projectId: string,
+  wbsId: string | null,
+  informed: string
+): Promise<string> {
+  if (informed) return informed;
+  const [{ data: tasks, error: taskError }, wbsResult] = await Promise.all([
+    supabase
+      .from("project_tasks")
+      .select("code")
+      .eq("project_id", projectId)
+      .eq("organization_id", organizationId),
+    wbsId
+      ? supabase
+          .from("work_breakdown_items")
+          .select("code")
+          .eq("id", wbsId)
+          .eq("project_id", projectId)
+          .eq("organization_id", organizationId)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null })
+  ]);
+
+  if (taskError) failDatabase(projectId, "number-task", taskError, "Não foi possível calcular o próximo código da atividade.");
+  if (wbsResult.error) failDatabase(projectId, "number-task-wbs", wbsResult.error, "Não foi possível consultar a etapa da EAP.");
+  const parentCode = wbsResult.data ? String(wbsResult.data.code ?? "") || null : null;
+  return proximoCodigo((tasks ?? []).map(task => String(task.code ?? "")), parentCode);
+}
+
+async function createModelActivities(
+  supabase: ScheduleSupabase,
+  formData: FormData,
+  context: {
+    projectId: string;
+    organizationId: string;
+    userId: string;
+    wbsId: string;
+    wbsCode: string;
+  }
+): Promise<void> {
+  const selected = [...new Set(
+    formData
+      .getAll("atividadeDoModelo")
+      .map(value => String(value).trim().slice(0, 160))
+      .filter(Boolean)
+  )].slice(0, 50);
+  if (!selected.length) return;
+
+  const { data: existing, error: existingError } = await supabase
+    .from("project_tasks")
+    .select("code,sequence")
+    .eq("project_id", context.projectId)
+    .eq("organization_id", context.organizationId);
+  if (existingError) {
+    console.error("[schedule.create-model-activities.list]", existingError);
+    return;
+  }
+
+  const assignedCodes = (existing ?? []).map(row => String(row.code ?? ""));
+  const maxSequence = (existing ?? []).reduce((max, row) => Math.max(max, Number(row.sequence) || 0), 0);
+  const rows = selected.map((title, index) => {
+    const code = proximoCodigo(assignedCodes, context.wbsCode);
+    assignedCodes.push(code);
+    return {
+      organization_id: context.organizationId,
+      project_id: context.projectId,
+      wbs_id: context.wbsId,
+      parent_task_id: null,
+      code,
+      title,
+      status: "BACKLOG",
+      priority: "NORMAL",
+      sequence: maxSequence + index + 1,
+      duration_days: 1,
+      progress: 0,
+      client_visible: true,
+      created_by: context.userId
+    };
+  });
+
+  const { error } = await supabase.from("project_tasks").insert(rows);
+  if (error) {
+    console.error("[schedule.create-model-activities.insert]", error);
+    return;
+  }
+  for (const title of selected) {
+    await registrarValorUsado(supabase, context.organizationId, ESCOPOS.atividadeDaEap, title);
+  }
+}
+
 export async function createScheduleWbs(formData: FormData) {
   const projectId = text(formData, "projectId");
-  const code = text(formData, "code").toUpperCase();
+  const informedCode = text(formData, "code").toUpperCase();
   const title = text(formData, "title");
   const parentId = optionalText(formData, "parentId");
   const plannedStart = optionalIsoDate(formData, "plannedStart", projectId);
@@ -158,33 +275,48 @@ export async function createScheduleWbs(formData: FormData) {
     label: "A ordem"
   });
 
-  if (!projectId || !code || !title) fail(projectId, "Informe o código e o nome da etapa da EAP.");
+  if (!projectId || !title) fail(projectId, "Informe o nome da etapa da EAP.");
   validatePeriod(projectId, plannedStart, plannedEnd);
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(scheduleRoles);
   await ensureWbsBelongsToProject(supabase, organizationId, projectId, parentId);
+  const code = await automaticWbsCode(supabase, organizationId, projectId, parentId, informedCode);
 
-  const { error } = await supabase.from("work_breakdown_items").insert({
-    organization_id: organizationId,
-    project_id: projectId,
-    parent_id: parentId,
-    code,
-    title,
-    description: optionalText(formData, "description"),
-    sequence,
-    planned_start: plannedStart,
-    planned_end: plannedEnd,
-    client_visible: true,
-    created_by: userId
-  });
+  const { data: created, error } = await supabase
+    .from("work_breakdown_items")
+    .insert({
+      organization_id: organizationId,
+      project_id: projectId,
+      parent_id: parentId,
+      code,
+      title,
+      description: optionalText(formData, "description"),
+      sequence,
+      planned_start: plannedStart,
+      planned_end: plannedEnd,
+      client_visible: true,
+      created_by: userId
+    })
+    .select("id")
+    .maybeSingle();
 
   if (error) failDatabase(projectId, "create-wbs", error, "Não foi possível adicionar a etapa da EAP.");
+  if (!created) fail(projectId, "A etapa foi processada, mas o registro criado não pôde ser confirmado.");
+
+  await registrarValorUsado(supabase, organizationId, ESCOPOS.etapaDaEap, title);
+  await createModelActivities(supabase, formData, {
+    projectId,
+    organizationId,
+    userId,
+    wbsId: created.id,
+    wbsCode: code
+  });
   revalidateSchedule(projectId);
 }
 
 export async function createScheduleTask(formData: FormData) {
   const projectId = text(formData, "projectId");
-  const code = text(formData, "code").toUpperCase();
+  const informedCode = text(formData, "code").toUpperCase();
   const title = text(formData, "title");
   const wbsId = optionalText(formData, "wbsId");
   const parentTaskId = optionalText(formData, "parentTaskId");
@@ -203,11 +335,12 @@ export async function createScheduleTask(formData: FormData) {
     label: "A ordem"
   });
 
-  if (!projectId || !code || !title) fail(projectId, "Informe o código e o nome da atividade.");
+  if (!projectId || !title) fail(projectId, "Informe o nome da atividade.");
   validatePeriod(projectId, plannedStart, plannedEnd);
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(scheduleRoles);
   await validateTaskPlacement(supabase, organizationId, projectId, null, wbsId, parentTaskId);
+  const code = await automaticTaskCode(supabase, organizationId, projectId, wbsId, informedCode);
 
   const { error } = await supabase.from("project_tasks").insert({
     organization_id: organizationId,
@@ -229,6 +362,7 @@ export async function createScheduleTask(formData: FormData) {
   });
 
   if (error) failDatabase(projectId, "create-task", error, "Não foi possível adicionar a atividade.");
+  await registrarValorUsado(supabase, organizationId, ESCOPOS.atividadeDaEap, title);
   revalidateSchedule(projectId);
 }
 
