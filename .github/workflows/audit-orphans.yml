@@ -4,7 +4,7 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: audit-orphans-${{ github.ref }}
@@ -15,8 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout
+      - name: Checkout PR branch
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Audit reachable code graph
         continue-on-error: true
@@ -32,6 +34,19 @@ jobs:
 
       - name: Generate canonical code map
         run: node scripts/gerar-mapa-do-codigo.mjs
+
+      - name: Commit generated code map when changed
+        shell: bash
+        run: |
+          if git diff --quiet -- diretrizes/MAPA-DO-CODIGO.md; then
+            echo "Mapa do código já está sincronizado."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add diretrizes/MAPA-DO-CODIGO.md
+          git commit -m "docs(code-map): regenera mapa canônico"
+          git push origin HEAD:${{ github.head_ref }}
 
       - name: Upload orphan audit reports
         if: always()
