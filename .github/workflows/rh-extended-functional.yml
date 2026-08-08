@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - "app/app/rh/**"
+      - "app/api/rh/**"
       - "app/actions/rh-*.ts"
       - "lib/rh/**"
       - "supabase/migrations/*_rh_*.sql"
@@ -16,6 +17,7 @@ on:
     branches: ["feature/**"]
     paths:
       - "app/app/rh/**"
+      - "app/api/rh/**"
       - "app/actions/rh-*.ts"
       - "lib/rh/**"
       - "supabase/migrations/*_rh_*.sql"
@@ -60,7 +62,7 @@ jobs:
         run: pnpm test:db:rh
       - name: RH scoped typecheck
         run: pnpm exec tsc --noEmit -p tsconfig.rh.json
-      - name: Lint every RH action, page and integration
-        run: pnpm exec eslint 'app/actions/rh-*.ts' app/app/rh lib/rh tests/rh --max-warnings=0
-      - name: eSocial generation suites
-        run: pnpm exec vitest run tests/rh/esocial-generation-signature.test.ts tests/rh/esocial-periodic-termination.test.ts
+      - name: Lint every RH action, page, API and integration
+        run: pnpm exec eslint 'app/actions/rh-*.ts' app/app/rh app/api/rh lib/rh tests/rh --max-warnings=0
+      - name: RH unit and contract suites
+        run: pnpm exec vitest run tests/rh
