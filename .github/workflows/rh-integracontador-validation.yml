@@ -1,0 +1,79 @@
+name: RH Integra Contador Contract Validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-integracontador-validation
+  cancel-in-progress: false
+
+jobs:
+  validate-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: rh-integracontador
+    env:
+      INTEGRA_CONTADOR_CONSUMER_KEY: ${{ secrets.INTEGRA_CONTADOR_CONSUMER_KEY }}
+      INTEGRA_CONTADOR_CONSUMER_SECRET: ${{ secrets.INTEGRA_CONTADOR_CONSUMER_SECRET }}
+      INTEGRA_CONTADOR_VALIDATION_BASE_URL: ${{ vars.INTEGRA_CONTADOR_VALIDATION_BASE_URL || 'https://gateway-val.apiserpro.serpro.gov.br' }}
+      INTEGRA_CONTADOR_VALIDATION_PATH: ${{ vars.INTEGRA_CONTADOR_VALIDATION_PATH }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Validate contracted credential prerequisites
+        shell: bash
+        run: |
+          test -n "$INTEGRA_CONTADOR_CONSUMER_KEY" || { echo "Consumer Key ausente" >&2; exit 1; }
+          test -n "$INTEGRA_CONTADOR_CONSUMER_SECRET" || { echo "Consumer Secret ausente" >&2; exit 1; }
+          case "$INTEGRA_CONTADOR_VALIDATION_BASE_URL" in
+            https://gateway-val.apiserpro.serpro.gov.br|https://gateway.apiserpro.serpro.gov.br) ;;
+            *) echo "Gateway SERPRO não permitido" >&2; exit 1;;
+          esac
+      - name: Obtain OAuth token from SERPRO validation gateway
+        shell: bash
+        run: |
+          token_file="$(mktemp)"
+          status="$(curl --silent --show-error --location --output "$token_file" --write-out '%{http_code}' \
+            --user "$INTEGRA_CONTADOR_CONSUMER_KEY:$INTEGRA_CONTADOR_CONSUMER_SECRET" \
+            --header 'Content-Type: application/x-www-form-urlencoded' \
+            --data 'grant_type=client_credentials' \
+            "$INTEGRA_CONTADOR_VALIDATION_BASE_URL/token")"
+          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+            echo "Gateway SERPRO recusou token: HTTP $status" >&2
+            exit 1
+          fi
+          TOKEN_FILE="$token_file" node - <<'NODE'
+          const fs=require('fs');
+          const payload=JSON.parse(fs.readFileSync(process.env.TOKEN_FILE,'utf8'));
+          if(!payload.access_token)throw new Error('Resposta sem access_token');
+          const evidence={tokenType:payload.token_type||'Bearer',expiresIn:Number(payload.expires_in||0),scope:payload.scope||null,validatedAt:new Date().toISOString()};
+          fs.mkdirSync('test-results',{recursive:true});
+          fs.writeFileSync('test-results/integra-contador-contract.json',JSON.stringify(evidence,null,2));
+          NODE
+          rm -f "$token_file"
+      - name: Validate configured service path contract
+        if: ${{ env.INTEGRA_CONTADOR_VALIDATION_PATH != '' }}
+        shell: bash
+        run: |
+          case "$INTEGRA_CONTADOR_VALIDATION_PATH" in
+            /*) ;;
+            *) echo "Path deve ser relativo ao gateway" >&2; exit 1;;
+          esac
+          case "$INTEGRA_CONTADOR_VALIDATION_PATH" in
+            //*|*\\*|*$'\r'*|*$'\n'*) echo "Path inválido" >&2; exit 1;;
+          esac
+          echo "Path contratual configurado sem ser executado automaticamente: $INTEGRA_CONTADOR_VALIDATION_PATH" >> test-results/integra-contador-path.txt
+      - name: Upload sanitized contract evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rh-integracontador-contract-${{ github.run_id }}-${{ github.run_attempt }}
+          path: test-results/
+          if-no-files-found: warn
+          retention-days: 14

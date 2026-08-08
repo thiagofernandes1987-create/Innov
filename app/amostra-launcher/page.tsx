@@ -92,28 +92,29 @@ export default async function Amostra({ searchParams }: { searchParams: Promise<
 
   return (
     <ProvedorDeBusca>
-    <div className="casca">
-      {/* O estado normal permanece sem contadores inventados. `cenario=problema`
-          é uma fixture visual explícita para verificar o estado pessimista. */}
-      <BarraSuperior
-        aplicativos={[]}
-        email={email}
-        papel={papel}
-        tema={tema}
-        avisos={{
-          mensagens: [],
-          atividades: [],
-          operacionais,
-          naoLidas: 0,
-          pendentes: operacionais.length
-        }}
-        podeAdministrar={perfil === "admin"}
-        persistirAvisos={false}
-      />
-      <div className="casca-conteudo">
-        <main className="content pagina-launcher">
-          <Launcher aplicativos={aplicativos} indicadores={INDICADORES_DA_AMOSTRA} />
-        </main>
+      <div className="casca">
+        {/* O estado normal permanece sem contadores inventados. `cenario=problema`
+            é uma fixture visual explícita para verificar o estado pessimista. */}
+        <BarraSuperior
+          aplicativos={[]}
+          email={email}
+          papel={papel}
+          tema={tema}
+          avisos={{
+            mensagens: [],
+            atividades: [],
+            operacionais,
+            naoLidas: 0,
+            pendentes: operacionais.length
+          }}
+          podeAdministrar={perfil === "admin"}
+          persistirAvisos={false}
+        />
+        <div className="casca-conteudo">
+          <main className="content pagina-launcher">
+            <Launcher aplicativos={aplicativos} indicadores={INDICADORES_DA_AMOSTRA} />
+          </main>
+        </div>
       </div>
     </ProvedorDeBusca>
   );

@@ -1,0 +1,44 @@
+name: RH Time
+on:
+  pull_request:
+    paths:
+      - "app/app/rh/jornada/**"
+      - "app/actions/rh-time.ts"
+      - "supabase/migrations/*_rh_*.sql"
+      - "supabase/tests/rh/time-v1-executable.test.sql"
+      - "scripts/run-rh-time-db-tests.mjs"
+      - ".github/workflows/rh-time.yml"
+  push:
+    branches: ["feature/**"]
+    paths:
+      - "app/app/rh/jornada/**"
+      - "app/actions/rh-time.ts"
+      - "supabase/migrations/*_rh_*.sql"
+      - "supabase/tests/rh/time-v1-executable.test.sql"
+      - "scripts/run-rh-time-db-tests.mjs"
+      - ".github/workflows/rh-time.yml"
+permissions:
+  contents: read
+jobs:
+  time:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      SIGNATURE_PROVIDER: sandbox
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - run: pnpm validate:migrations
+      - run: node scripts/run-rh-time-db-tests.mjs
+      - run: pnpm exec tsc --noEmit -p tsconfig.rh.json
+      - run: pnpm exec eslint app/app/rh/jornada app/actions/rh-time.ts --max-warnings=0

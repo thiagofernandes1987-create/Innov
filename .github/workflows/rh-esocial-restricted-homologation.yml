@@ -1,0 +1,67 @@
+name: RH eSocial Restricted Homologation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_NO_WARNINGS: "1"
+
+jobs:
+  homologate:
+    name: producao-restrita-real
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: rh-esocial-restricted
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Refuse production configuration
+        shell: bash
+        run: |
+          if [ "${ESOCIAL_ENABLE_PRODUCTION:-false}" = "true" ]; then
+            echo "Este workflow é exclusivo de Produção Restrita." >&2
+            exit 1
+          fi
+      - name: Validate required restricted secrets
+        shell: bash
+        env:
+          ESOCIAL_CERTIFICATE_PFX_BASE64: ${{ secrets.ESOCIAL_CERTIFICATE_PFX_BASE64 }}
+          ESOCIAL_SIGNING_CERTIFICATE_PEM: ${{ secrets.ESOCIAL_SIGNING_CERTIFICATE_PEM }}
+          ESOCIAL_SIGNING_PRIVATE_KEY_PEM: ${{ secrets.ESOCIAL_SIGNING_PRIVATE_KEY_PEM }}
+          ESOCIAL_HOMOLOGATION_UNSIGNED_EVENT_BASE64: ${{ secrets.ESOCIAL_HOMOLOGATION_UNSIGNED_EVENT_BASE64 }}
+          ESOCIAL_HOMOLOGATION_EMPLOYER_TYPE: ${{ secrets.ESOCIAL_HOMOLOGATION_EMPLOYER_TYPE }}
+          ESOCIAL_HOMOLOGATION_EMPLOYER_NUMBER: ${{ secrets.ESOCIAL_HOMOLOGATION_EMPLOYER_NUMBER }}
+          ESOCIAL_TRANSMITTER_REGISTRATION_TYPE: ${{ secrets.ESOCIAL_TRANSMITTER_REGISTRATION_TYPE }}
+          ESOCIAL_TRANSMITTER_REGISTRATION_NUMBER: ${{ secrets.ESOCIAL_TRANSMITTER_REGISTRATION_NUMBER }}
+        run: |
+          required=(ESOCIAL_CERTIFICATE_PFX_BASE64 ESOCIAL_SIGNING_CERTIFICATE_PEM ESOCIAL_SIGNING_PRIVATE_KEY_PEM ESOCIAL_HOMOLOGATION_UNSIGNED_EVENT_BASE64 ESOCIAL_HOMOLOGATION_EMPLOYER_TYPE ESOCIAL_HOMOLOGATION_EMPLOYER_NUMBER ESOCIAL_TRANSMITTER_REGISTRATION_TYPE ESOCIAL_TRANSMITTER_REGISTRATION_NUMBER)
+          for name in "${required[@]}"; do
+            if [ -z "${!name:-}" ]; then echo "Secret ausente: $name" >&2; exit 1; fi
+          done
+      - name: Execute real Restricted Production exchange
+        env:
+          ESOCIAL_CERTIFICATE_PFX_BASE64: ${{ secrets.ESOCIAL_CERTIFICATE_PFX_BASE64 }}
+          ESOCIAL_CERTIFICATE_PASSPHRASE: ${{ secrets.ESOCIAL_CERTIFICATE_PASSPHRASE }}
+          ESOCIAL_SIGNING_CERTIFICATE_PEM: ${{ secrets.ESOCIAL_SIGNING_CERTIFICATE_PEM }}
+          ESOCIAL_SIGNING_PRIVATE_KEY_PEM: ${{ secrets.ESOCIAL_SIGNING_PRIVATE_KEY_PEM }}
+          ESOCIAL_HOMOLOGATION_UNSIGNED_EVENT_BASE64: ${{ secrets.ESOCIAL_HOMOLOGATION_UNSIGNED_EVENT_BASE64 }}
+          ESOCIAL_HOMOLOGATION_EMPLOYER_TYPE: ${{ secrets.ESOCIAL_HOMOLOGATION_EMPLOYER_TYPE }}
+          ESOCIAL_HOMOLOGATION_EMPLOYER_NUMBER: ${{ secrets.ESOCIAL_HOMOLOGATION_EMPLOYER_NUMBER }}
+          ESOCIAL_TRANSMITTER_REGISTRATION_TYPE: ${{ secrets.ESOCIAL_TRANSMITTER_REGISTRATION_TYPE }}
+          ESOCIAL_TRANSMITTER_REGISTRATION_NUMBER: ${{ secrets.ESOCIAL_TRANSMITTER_REGISTRATION_NUMBER }}
+          ESOCIAL_HOMOLOGATION_EVENT_GROUP: ${{ vars.ESOCIAL_HOMOLOGATION_EVENT_GROUP || '1' }}
+        run: node scripts/run-rh-esocial-restricted-homologation.mjs
+      - name: Upload sanitized evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: rh-esocial-restricted-evidence-${{ github.run_id }}
+          path: .evidence/rh/esocial-restricted-homologation.json
+          if-no-files-found: warn
+          retention-days: 30
