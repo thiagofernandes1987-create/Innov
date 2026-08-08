@@ -223,8 +223,8 @@ Aplicadas nesta rodada:
 - `VACINA-025` — warning de lint não foi aceito;
 - `VACINA-027` — captura comparada à referência visual;
 - `VACINA-031` — temas e primeiro plano mantidos por tokens;
-- `VACINA-043` — captura do preview como gate obrigatório;
-- `VACINA-044` — nova, estado `parcial`, para integridade da rede lógica.
+- `VACINA-062` — captura do preview como gate obrigatório;
+- `VACINA-063` — estado `parcial`, para integridade da rede lógica.
 
 ## Próximos portões
 

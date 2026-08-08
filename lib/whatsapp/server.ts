@@ -76,19 +76,19 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
       .limit(50),
     context.supabase
       .from("contract_versions")
-      .select("id,version_number,document_path,contracts(title,code)")
+      .select("id,version_number,document_path,contracts!contract_versions_contract_id_fkey(title,code)")
       .eq("organization_id", context.organizationId)
       .order("created_at", { ascending: false })
       .limit(50),
     context.supabase
       .from("amendment_versions")
-      .select("id,version_number,document_path,amendments(code)")
+      .select("id,version_number,document_path,amendments!amendment_versions_amendment_id_fkey(code)")
       .eq("organization_id", context.organizationId)
       .order("created_at", { ascending: false })
       .limit(50),
     context.supabase
       .from("project_document_versions")
-      .select("id,version_number,file_name,project_documents(title,code)")
+      .select("id,version_number,file_name,project_documents!project_document_versions_document_id_fkey(title,code)")
       .eq("organization_id", context.organizationId)
       .order("created_at", { ascending: false })
       .limit(50)

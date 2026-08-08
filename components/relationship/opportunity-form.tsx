@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { CampoMoeda } from "@/components/campos/campos-br";
 import {
   createCrmOpportunitySafe,
   type OpportunityCreationState
@@ -66,7 +67,7 @@ export function OpportunityForm({
         <label className="span-2"><span>Título *</span><input name="title" required /></label>
         <label><span>Estágio inicial</span><select name="stage" defaultValue="PROSPECTING"><option value="PROSPECTING">Prospecção</option><option value="QUALIFIED">Qualificada</option><option value="PROPOSAL">Proposta</option><option value="NEGOTIATION">Negociação</option></select></label>
         <label><span>Probabilidade (%)</span><input name="probability" type="number" min="0" max="100" step="0.01" defaultValue="25" /></label>
-        <label><span>Valor estimado</span><input name="estimatedValue" type="number" inputMode="decimal" min="0" step="0.01" placeholder="150.000,00" /></label>
+        <CampoMoeda name="estimatedValue" label="Valor estimado" />
         <label><span>Fechamento previsto</span><input name="expectedCloseDate" type="date" /></label>
         <label><span>Origem</span><input name="source" /></label>
       </div>

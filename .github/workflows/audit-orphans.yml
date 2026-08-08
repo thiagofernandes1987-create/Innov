@@ -1,0 +1,96 @@
+name: Audit Orphan Surfaces
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: audit-orphans-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Remove confirmed orphan server actions
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+
+          const projectsPath = "app/actions/projects.ts";
+          let projects = fs.readFileSync(projectsPath, "utf8");
+          projects = projects.replace('import { createScheduleDependency } from "./schedule";\n', "");
+          projects = projects.replace(
+            /export async function createDependency\(formData: FormData\) \{\n  return createScheduleDependency\(formData\);\n\}\n\n/,
+            ""
+          );
+          fs.writeFileSync(projectsPath, projects);
+
+          const relationshipPath = "app/actions/relationship.ts";
+          let relationship = fs.readFileSync(relationshipPath, "utf8");
+          relationship = relationship.replace(
+            /export async function createCrmOpportunity\(formData:FormData\)\{[\s\S]*?\}\nexport async function moveCrmOpportunity/,
+            "export async function moveCrmOpportunity"
+          );
+          fs.writeFileSync(relationshipPath, relationship);
+          NODE
+
+      - name: Audit reachable code graph
+        continue-on-error: true
+        run: node scripts/auditar-alcancabilidade.mjs --json > reachability-audit.json
+
+      - name: Audit unused server action symbols
+        run: node scripts/auditar-server-actions-sem-chamada.mjs --json > server-actions-audit.json
+
+      - name: Assert no unused server action symbols remain
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const report = JSON.parse(fs.readFileSync("server-actions-audit.json", "utf8"));
+          if (report.unusedCount !== 0) {
+            console.error(JSON.stringify(report.unused, null, 2));
+            process.exit(1);
+          }
+          NODE
+
+      - name: Audit Supabase surfaces without JS consumers
+        continue-on-error: true
+        run: node scripts/auditar-superficies-supabase.mjs --json > supabase-surface-audit.json
+
+      - name: Generate canonical code map
+        run: node scripts/gerar-mapa-do-codigo.mjs
+
+      - name: Commit confirmed cleanup and generated map
+        shell: bash
+        run: |
+          if git diff --quiet -- app/actions/projects.ts app/actions/relationship.ts diretrizes/MAPA-DO-CODIGO.md; then
+            echo "Actions órfãs já removidas e mapa sincronizado."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/actions/projects.ts app/actions/relationship.ts diretrizes/MAPA-DO-CODIGO.md
+          git commit -m "refactor(dead-code): remove actions órfãs e regenera mapa"
+          git push origin HEAD:${{ github.head_ref }}
+
+      - name: Upload orphan audit reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: orphan-surface-audit
+          path: |
+            reachability-audit.json
+            server-actions-audit.json
+            supabase-surface-audit.json
+            diretrizes/MAPA-DO-CODIGO.md
+          if-no-files-found: warn
+          retention-days: 14

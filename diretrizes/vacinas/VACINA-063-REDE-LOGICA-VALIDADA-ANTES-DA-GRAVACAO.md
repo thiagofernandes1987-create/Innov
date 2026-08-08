@@ -1,8 +1,8 @@
-# VACINA-044 — Rede lógica validada antes da gravação
+# VACINA-063 — Rede lógica validada antes da gravação
 
 **Estado:** parcial  
 **Detectada em:** PR #38 — loop de QA do Planejamento em 30 de julho de 2026  
-**Reserva de numeração:** `VACINA-043` já está reservada no PR #34.
+**Reserva de numeração:** `VACINA-043` já estava reservada no PR #34; a identificação foi normalizada para 063 na auditoria de regressão de 8 de agosto de 2026.
 
 ## Qual foi o problema
 

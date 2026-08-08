@@ -6,7 +6,9 @@ import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
 import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
+import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
 import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
+import { createScheduleDependency } from "./schedule";
 
 const managementRoles = [
   "SUPER_ADMIN",
@@ -62,33 +64,6 @@ function failProjectDatabase(
     hint: error.hint ?? null
   });
   fail(path, publicScheduleDatabaseMessage(error, fallback));
-}
-
-export async function createProjectFromContract(formData: FormData) {
-  const { supabase } = await requireOrganizationContext(managementRoles);
-  const contractId = text(formData, "contractId");
-  const code = text(formData, "code");
-  const name = text(formData, "name");
-  const plannedStart = text(formData, "plannedStart");
-  const plannedEnd = text(formData, "plannedEnd");
-
-  if (!contractId || !code || !name || !plannedStart || !plannedEnd) {
-    fail("/app/obras/novo", "Preencha contrato, código, nome e período planejado.");
-  }
-
-  const { data, error } = await supabase.rpc("create_project_from_contract", {
-    p_contract_id: contractId,
-    p_code: code,
-    p_name: name,
-    p_planned_start: plannedStart,
-    p_planned_end: plannedEnd,
-    p_address_line: optionalText(formData, "addressLine"),
-    p_city: optionalText(formData, "city"),
-    p_state: optionalText(formData, "state")
-  });
-
-  if (error || !data) fail("/app/obras/novo", error?.message ?? "Não foi possível criar a obra.");
-  redirect(`/app/obras/${data}`);
 }
 
 export async function releaseProjectToClient(formData: FormData) {
@@ -412,9 +387,10 @@ export async function addDailyLogActivity(formData: FormData) {
 export async function uploadDailyLogMedia(formData: FormData) {
   const projectId = text(formData, "projectId");
   const dailyLogId = text(formData, "dailyLogId");
+  const path = `/app/obras/${projectId}/diario/${dailyLogId}`;
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, "Selecione um arquivo.");
-  if (file.size > 150 * 1024 * 1024) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, "O arquivo excede 150 MB.");
+  if (!(file instanceof File) || file.size === 0) fail(path, "Selecione um arquivo.");
+  if (file.size > 150 * 1024 * 1024) fail(path, "O arquivo excede 150 MB.");
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(fieldRoles);
   const bytes = Buffer.from(await file.arrayBuffer());
@@ -432,13 +408,14 @@ export async function uploadDailyLogMedia(formData: FormData) {
       organizationId,
       actorUserId: userId,
       correlationId: dailyLogId,
-      // O diário de obra sempre aceitou qualquer tipo até 150 MB. A política é
-      // preservada; o que muda é que o arquivo passa pela quarentena e só é
-      // promovido depois de liberado pela análise antimalware.
-      policy: { allowedMimeTypes: null, maxBytes: 150 * 1024 * 1024, requireContentSignature: false }
+      policy: {
+        allowedMimeTypes: null,
+        maxBytes: 150 * 1024 * 1024,
+        requireContentSignature: false
+      }
     });
   } catch (error) {
-    fail(`/app/obras/${projectId}/diario/${dailyLogId}`, fileSecurityMessage(error, { maxBytesLabel: "150 MB" }));
+    fail(path, fileSecurityMessage(error, { maxBytesLabel: "150 MB" }));
   }
 
   const { error } = await supabase.from("daily_log_media").insert({
@@ -457,9 +434,9 @@ export async function uploadDailyLogMedia(formData: FormData) {
   });
   if (error) {
     await supabase.storage.from("daily-log-media").remove([storagePath]);
-    fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+    fail(path, error.message);
   }
-  revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
+  revalidatePath(path);
 }
 
 export async function submitDailyLog(formData: FormData) {
@@ -498,6 +475,7 @@ export async function uploadProjectDocument(formData: FormData) {
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
   const code = text(formData, "code").toUpperCase();
+  const discipline = text(formData, "discipline");
   const bytes = Buffer.from(await file.arrayBuffer());
   const hash = createHash("sha256").update(bytes).digest("hex");
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
@@ -517,15 +495,13 @@ export async function uploadProjectDocument(formData: FormData) {
       project_id: projectId,
       code,
       title: text(formData, "title"),
-      discipline: text(formData, "discipline"),
+      discipline,
       category: text(formData, "category"),
       created_by: userId
     }).select("id").single();
     if (error || !data) fail(errorPath, error?.message ?? "Falha ao criar documento.");
     documentId = data.id;
-    // Só depois de o documento existir: disciplina digitada e abandonada não
-    // vira vocabulário da empresa.
-    await registrarValorUsado(supabase, organizationId, ESCOPOS.disciplina, text(formData, "discipline"));
+    await registrarValorUsado(supabase, organizationId, ESCOPOS.disciplina, discipline);
   }
 
   const { count } = await supabase
@@ -544,13 +520,13 @@ export async function uploadProjectDocument(formData: FormData) {
       organizationId,
       actorUserId: userId,
       correlationId: documentId,
-      // Projeto executivo aceita formatos técnicos além da allowlist transversal;
-      // o limite de 50 MB e os tipos permanecem como estavam.
-      policy: { allowedMimeTypes: null, maxBytes: 50 * 1024 * 1024, requireContentSignature: false }
+      policy: {
+        allowedMimeTypes: null,
+        maxBytes: 50 * 1024 * 1024,
+        requireContentSignature: false
+      }
     });
   } catch (error) {
-    // `errorPath` porque o envio passou a existir também fora da obra; a
-    // varredura antimalware da auditoria continua valendo nos dois caminhos.
     fail(errorPath, fileSecurityMessage(error, { maxBytesLabel: "50 MB" }));
   }
 
