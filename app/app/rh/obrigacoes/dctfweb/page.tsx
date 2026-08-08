@@ -8,49 +8,12 @@ export const dynamic = "force-dynamic";
 export default async function DctfwebPage({ searchParams }: { searchParams: Promise<{ error?: string; success?: string }> }) {
   const context = await requireCapability("rh", "read");
   const query = await searchParams;
-  const { data, error } = await context.supabase
-    .from("rh_dctfweb_declarations")
-    .select("id,reference_month,category,declaration_type,status,esocial_period_closed,reinf_period_closed,mit_required,mit_status,external_declaration_id,receipt_number,total_debt,total_paid,last_external_update_at")
-    .eq("organization_id", context.organizationId)
-    .order("reference_month", { ascending: false });
+  const { data, error } = await context.supabase.from("rh_dctfweb_declarations").select("id,reference_month,category,declaration_type,status,esocial_period_closed,reinf_period_closed,mit_required,mit_status,external_declaration_id,receipt_number,total_debt,total_paid,last_external_update_at").eq("organization_id", context.organizationId).order("reference_month", { ascending: false });
   if (error) throw new Error(error.message);
-
   return <main className="content">
-    <section className="page-heading"><div><span className="badge">OBRIGAÇÕES · DCTFWEB</span><h1>DCTFWeb</h1><p>Reconciliação da declaração sensibilizada pelas escriturações e canais oficiais disponíveis à organização.</p></div></section>
-    {query.error ? <div className="validation blocking">{query.error}</div> : null}
-    {query.success ? <div className="alert alert-success">{query.success}</div> : null}
-
-    <section className="card card-pad">
-      <div className="section-heading"><div><span className="eyebrow">NOVA COMPETÊNCIA</span><h2>Acompanhar declaração</h2></div></div>
-      <form action={createDctfwebDeclaration} className="relationship-form">
-        <div className="form-grid">
-          <label><span>Competência *</span><input type="month" name="referenceMonth" required /></label>
-          <label><span>Categoria</span><input name="category" defaultValue="GENERAL" /></label>
-          <label><span><input type="checkbox" name="esocialClosed" /> eSocial fechado/processado</span></label>
-          <label><span><input type="checkbox" name="reinfClosed" /> EFD-Reinf fechada/processada</span></label>
-          <label><span><input type="checkbox" name="mitRequired" /> MIT aplicável</span></label>
-          <label className="span-2"><span>Referência da origem</span><input name="sourceReference" placeholder="Fechamento, consulta oficial, protocolo ou evidência" /></label>
-          <label className="span-2"><span>Observação de origem</span><input name="sourceNote" /></label>
-        </div>
-        <div className="validation"><strong>Fluxo real:</strong> a folha não reenviará remunerações para a DCTFWeb. O fechamento processado do eSocial/EFD-Reinf sensibiliza a declaração dentro do ambiente governamental; este workspace acompanha, consulta/importa quando houver capability e reconcilia.</div>
-        <div className="form-actions"><button className="button button-primary" type="submit">Criar acompanhamento</button></div>
-      </form>
-    </section>
-
-    <section className="card" style={{ overflowX: "auto" }}>
-      <div className="section-heading card-pad"><div><span className="eyebrow">DECLARAÇÕES</span><h2>Competências acompanhadas</h2></div></div>
-      <table className="data-table"><thead><tr><th>Competência</th><th>Tipo</th><th>Fechamentos</th><th>MIT</th><th>Débito</th><th>Pago</th><th>Status</th></tr></thead><tbody>
-        {(data ?? []).map(item => <tr key={item.id}>
-          <td><Link className="text-link" href={`/app/rh/obrigacoes/dctfweb/${item.id}`}><strong>{String(item.reference_month).slice(0,7)}</strong></Link></td>
-          <td>{item.declaration_type} · {item.category}</td>
-          <td><small>eSocial {item.esocial_period_closed ? "✓" : "—"} · Reinf {item.reinf_period_closed ? "✓" : "—"}</small></td>
-          <td>{item.mit_required ? item.mit_status : "N/A"}</td>
-          <td>{item.total_debt != null ? formatMoney(Number(item.total_debt)) : "—"}</td>
-          <td>{formatMoney(Number(item.total_paid ?? 0))}</td>
-          <td><span className="badge">{item.status}</span></td>
-        </tr>)}
-        {!data?.length ? <tr><td colSpan={7}><div className="empty-state"><h3>Nenhuma competência</h3><p>Crie o acompanhamento após identificar a competência que deve sensibilizar a DCTFWeb.</p></div></td></tr> : null}
-      </tbody></table>
-    </section>
+    <section className="page-heading"><div><span className="badge">OBRIGAÇÕES · DCTFWEB</span><h1>DCTFWeb</h1><p>Reconciliação da declaração sensibilizada pelas escriturações e canais oficiais disponíveis à organização.</p></div><div className="page-actions"><Link className="button button-secondary" href="/app/rh/obrigacoes/dctfweb/mit">MIT JSON</Link></div></section>
+    {query.error ? <div className="validation blocking">{query.error}</div> : null}{query.success ? <div className="alert alert-success">{query.success}</div> : null}
+    <section className="card card-pad"><div className="section-heading"><div><span className="eyebrow">NOVA COMPETÊNCIA</span><h2>Acompanhar declaração</h2></div></div><form action={createDctfwebDeclaration} className="relationship-form"><div className="form-grid"><label><span>Competência *</span><input type="month" name="referenceMonth" required /></label><label><span>Categoria</span><input name="category" defaultValue="GENERAL" /></label><label><span><input type="checkbox" name="esocialClosed" /> eSocial fechado/processado</span></label><label><span><input type="checkbox" name="reinfClosed" /> EFD-Reinf fechada/processada</span></label><label><span><input type="checkbox" name="mitRequired" /> MIT aplicável</span></label><label className="span-2"><span>Referência da origem</span><input name="sourceReference" placeholder="Fechamento, consulta oficial, protocolo ou evidência" /></label><label className="span-2"><span>Observação de origem</span><input name="sourceNote" /></label></div><div className="validation"><strong>Fluxo real:</strong> a folha não reenviará remunerações para a DCTFWeb. O fechamento processado do eSocial/EFD-Reinf sensibiliza a declaração dentro do ambiente governamental; o MIT possui editor JSON separado para as informações que lhe são próprias.</div><div className="form-actions"><button className="button button-primary" type="submit">Criar acompanhamento</button></div></form></section>
+    <section className="card" style={{ overflowX: "auto" }}><div className="section-heading card-pad"><div><span className="eyebrow">DECLARAÇÕES</span><h2>Competências acompanhadas</h2></div></div><table className="data-table"><thead><tr><th>Competência</th><th>Tipo</th><th>Fechamentos</th><th>MIT</th><th>Débito</th><th>Pago</th><th>Status</th></tr></thead><tbody>{(data ?? []).map(item => <tr key={item.id}><td><Link className="text-link" href={`/app/rh/obrigacoes/dctfweb/${item.id}`}><strong>{String(item.reference_month).slice(0,7)}</strong></Link></td><td>{item.declaration_type} · {item.category}</td><td><small>eSocial {item.esocial_period_closed ? "✓" : "—"} · Reinf {item.reinf_period_closed ? "✓" : "—"}</small></td><td>{item.mit_required ? item.mit_status : "N/A"}</td><td>{item.total_debt != null ? formatMoney(Number(item.total_debt)) : "—"}</td><td>{formatMoney(Number(item.total_paid ?? 0))}</td><td><span className="badge">{item.status}</span></td></tr>)}{!data?.length ? <tr><td colSpan={7}><div className="empty-state"><h3>Nenhuma competência</h3><p>Crie o acompanhamento após identificar a competência que deve sensibilizar a DCTFWeb.</p></div></td></tr> : null}</tbody></table></section>
   </main>;
 }
