@@ -62,7 +62,10 @@ function resolverImport(importador, spec) {
 function especificadores(texto) {
   const specs = new Set();
   const padroes = [
-    /(?:import|export)\s+(?:[^"'`]*?\s+from\s+)?["'`]([^"'`]+)["'`]/g,
+    // Espaço depois de `import`/`export` e antes de `from` é opcional. Parte
+    // do legado foi minificada (`import{a}from"x"`); exigir whitespace fazia
+    // o auditor declarar módulos ativos como ilhas órfãs.
+    /(?:import|export)\s*(?:[^"'`]*?\s*from\s*)?["'`]([^"'`]+)["'`]/g,
     /import\s*\(\s*["'`]([^"'`]+)["'`]\s*\)/g,
     /require\s*\(\s*["'`]([^"'`]+)["'`]\s*\)/g
   ];
