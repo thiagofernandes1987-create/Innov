@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "test:python": "node scripts/run-python-tests.mjs",
     "audit:reachability": "node scripts/auditar-alcancabilidade.mjs",
+    "audit:server-actions": "node scripts/auditar-server-actions-sem-chamada.mjs",
     "audit:supabase-surface": "node scripts/auditar-superficies-supabase.mjs",
     "validate:docs": "node scripts/validate-documentation.mjs",
     "validate:server-actions": "node scripts/validate-server-actions.mjs",
