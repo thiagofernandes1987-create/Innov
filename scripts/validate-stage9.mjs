@@ -71,7 +71,6 @@ const tables = [
   "cost_compositions",
   "cost_composition_versions",
   "cost_composition_items",
-  "fixed_costs",
   "administrative_fee_models",
   "bdi_models",
   "bdi_model_versions",
