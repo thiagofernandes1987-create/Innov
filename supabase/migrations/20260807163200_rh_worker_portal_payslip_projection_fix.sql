@@ -1,4 +1,6 @@
-create or replace function public.get_my_rh_payslip_lines(p_publication_id uuid)
+drop function if exists public.get_my_rh_payslip_lines(uuid);
+
+create function public.get_my_rh_payslip_lines(p_publication_id uuid)
 returns table(line_id uuid,rubric_code text,rubric_name text,payroll_kind text,quantity numeric,amount numeric,calculation_trace jsonb)
 language plpgsql security definer set search_path=public,pg_temp as $$
 declare v_wr uuid;begin
