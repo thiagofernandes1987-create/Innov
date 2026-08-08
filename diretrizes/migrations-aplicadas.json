@@ -1,7 +1,7 @@
 {
   "_leia": "Instantâneo do que está aplicado no banco, para o CI comparar sem alcançar o banco. A comparação é pelo NOME LÓGICO: o ledger carimba a versão no momento da aplicação, então o número do arquivo e o da versão aplicada não coincidem — comparar por número produziria um resultado sem sentido. Atualize com `SUPABASE_DB_URL=... pnpm ledger:atualizar` (scripts/atualizar-ledger-de-migrations.mjs) e commite junto da migration.",
   "projeto": "wyeojufebtwblsubkunr",
-  "atualizado_em": "2026-08-05T02:34:16Z",
+  "atualizado_em": "2026-08-08T14:35:00Z",
   "aplicadas": [
     "accept_proposal_client_audit",
     "aplicativo_modelos_e_documentacoes",
@@ -197,6 +197,7 @@
     "stage19_observability_security",
     "stage19_observability_unified_stream",
     "stage20_atomic_access_counters_and_cleanup",
+    "stage22_whatsapp_omnichannel",
     "stage9_apply_amendment",
     "stage9_client_signature_policies",
     "stage9_financial_contracts",
@@ -207,7 +208,7 @@
     "unidade_funde_expoente"
   ],
   "debito": {
-    "_responsavel": "S-22 — o repositório não reconstrói o banco. Divergência medida em 3 de agosto de 2026; qualquer divergência NOVA reprova.",
+    "_responsavel": "S-22 + PR #44 — divergências históricas congeladas; migrations destrutivas da auditoria de regressão só saem do débito após deploy de código compatível, aplicação controlada e testes DB. Qualquer divergência NOVA fora destas listas reprova.",
     "aplicadas_sem_arquivo": [
       "aplicativo_modelos_e_documentacoes",
       "biblioteca_de_modelos_acervo_unico",
@@ -267,8 +268,13 @@
     ],
     "arquivos_sem_aplicacao": [
       "biblioteca_de_modelos_e_documentacoes",
+      "close_direct_legacy_contract_project_rpc",
+      "converge_budget_pricing_to_markup",
       "documentos_emitidos",
+      "drop_legacy_create_budget_version_rpc",
+      "drop_revoked_legacy_project_creation_rpcs",
       "r2_stage14_procurement_parent_chain",
+      "remove_unused_fixed_costs_table",
       "stage10_homologation_hardening",
       "stage13_quality_forms_hardening",
       "stage13_quality_forms_seed",
