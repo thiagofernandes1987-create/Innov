@@ -42,12 +42,13 @@ export function xmlSha256(xml:string){return createHash("sha256").update(xml).di
 export type S1000Input={
   eventKey:string;environment:EsocialEnvironment;operation:EsocialOperation;employerType:1|2;employerNumber:string;
   validFrom:string|Date;validTo?:string|Date|null;classTrib:string;indCoop:number;indConstr:number;indDesFolha:number;
-  indOptRegEletron:number;indEntEd:number;indEtt:number;newValidity?:{from:string|Date;to?:string|Date|null};
+  indOptRegEletron:number;indEntEd?:number;indEtt?:number;indTribFolhaPisPasep?:number|null;indPertIRRF?:number|null;newValidity?:{from:string|Date;to?:string|Date|null};
 };
 export function buildS1000(input:S1000Input){
   const ns=`http://www.esocial.gov.br/schema/evt/evtInfoEmpregador/${LAYOUT}`;
   const identity=period(input.validFrom,input.validTo);
-  const data=`<infoCadastro>${tag("classTrib",input.classTrib)}${tag("indCoop",input.indCoop)}${tag("indConstr",input.indConstr)}${tag("indDesFolha",input.indDesFolha)}${tag("indOptRegEletron",input.indOptRegEletron)}${tag("indEntEd",input.indEntEd)}${tag("indEtt",input.indEtt)}</infoCadastro>`;
+  // indEntEd/indEtt existiam em versões anteriores, mas não pertencem ao infoCadastro S-1.3 vigente.
+  const data=`<infoCadastro>${tag("classTrib",input.classTrib)}${tag("indCoop",input.indCoop)}${tag("indConstr",input.indConstr)}${tag("indDesFolha",input.indDesFolha)}${tag("indOptRegEletron",input.indOptRegEletron)}${opt("indTribFolhaPisPasep",input.indTribFolhaPisPasep)}${opt("indPertIRRF",input.indPertIRRF)}</infoCadastro>`;
   return root(ns,"evtInfoEmpregador",input.eventKey,`${ideEvento(input.environment)}${ideEmpregador(input.employerType,input.employerNumber)}${tableBlock("infoEmpregador",input.operation,identity,data,input.newValidity)}`);
 }
 
