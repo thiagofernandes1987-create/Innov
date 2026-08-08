@@ -47,7 +47,6 @@ export type S1000Input={
 export function buildS1000(input:S1000Input){
   const ns=`http://www.esocial.gov.br/schema/evt/evtInfoEmpregador/${LAYOUT}`;
   const identity=period(input.validFrom,input.validTo);
-  // indEntEd/indEtt existiam em versões anteriores, mas não pertencem ao infoCadastro S-1.3 vigente.
   const data=`<infoCadastro>${tag("classTrib",input.classTrib)}${tag("indCoop",input.indCoop)}${tag("indConstr",input.indConstr)}${tag("indDesFolha",input.indDesFolha)}${tag("indOptRegEletron",input.indOptRegEletron)}${opt("indTribFolhaPisPasep",input.indTribFolhaPisPasep)}${opt("indPertIRRF",input.indPertIRRF)}</infoCadastro>`;
   return root(ns,"evtInfoEmpregador",input.eventKey,`${ideEvento(input.environment)}${ideEmpregador(input.employerType,input.employerNumber)}${tableBlock("infoEmpregador",input.operation,identity,data,input.newValidity)}`);
 }
@@ -78,12 +77,16 @@ export function buildS1010(input:S1010Input){
 
 export type S1020Input={
   eventKey:string;environment:EsocialEnvironment;operation:EsocialOperation;employerType:1|2;employerNumber:string;
-  lotacaoCode:string;validFrom:string|Date;validTo?:string|Date|null;lotacaoType:string;fpasCode:string;thirdPartiesCode?:string|null;
-  newValidity?:{from:string|Date;to?:string|Date|null};
+  lotacaoCode:string;validFrom:string|Date;validTo?:string|Date|null;lotacaoType:string;
+  lotacaoRegistrationType?:1|2|4|null;lotacaoRegistrationNumber?:string|null;
+  fpasCode:string;thirdPartiesCode:string;newValidity?:{from:string|Date;to?:string|Date|null};
 };
 export function buildS1020(input:S1020Input){
   const ns=`http://www.esocial.gov.br/schema/evt/evtTabLotacao/${LAYOUT}`;
   const identity=`<ideLotacao>${tag("codLotacao",input.lotacaoCode)}${tag("iniValid",ym(input.validFrom))}${input.validTo?tag("fimValid",ym(input.validTo)):""}</ideLotacao>`;
-  const data=`<dadosLotacao>${tag("tpLotacao",input.lotacaoType)}${tag("fpas",input.fpasCode)}${opt("codTercs",input.thirdPartiesCode)}</dadosLotacao>`;
+  if(input.lotacaoRegistrationType&&!input.lotacaoRegistrationNumber)throw new Error("S-1020 exige nrInsc quando tpInsc da lotação é informado.");
+  if(!/^\d{4}$/.test(input.thirdPartiesCode))throw new Error("S-1020 exige codTercs com 4 dígitos.");
+  const registration=input.lotacaoRegistrationType?`${tag("tpInsc",input.lotacaoRegistrationType)}${tag("nrInsc",digits(input.lotacaoRegistrationNumber??""))}`:"";
+  const data=`<dadosLotacao>${tag("tpLotacao",input.lotacaoType)}${registration}<fpasLotacao>${tag("fpas",input.fpasCode)}${tag("codTercs",input.thirdPartiesCode)}</fpasLotacao></dadosLotacao>`;
   return root(ns,"evtTabLotacao",input.eventKey,`${ideEvento(input.environment)}${ideEmpregador(input.employerType,input.employerNumber)}${tableBlock("infoLotacao",input.operation,identity,data,input.newValidity)}`);
 }
