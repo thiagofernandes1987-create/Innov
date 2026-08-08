@@ -10,9 +10,13 @@ on:
       - "supabase/migrations/*_rh_*.sql"
       - "supabase/tests/rh/**"
       - "tests/rh/**"
+      - "tests/e2e/rh-*.spec.ts"
       - "scripts/run-rh-*.mjs"
+      - "scripts/seed-rh-browser-e2e.mjs"
+      - "scripts/verify-rh-browser-e2e.mjs"
       - "tsconfig.rh.json"
       - ".github/workflows/rh-extended-functional.yml"
+      - ".github/workflows/rh-browser-e2e.yml"
   push:
     branches: ["feature/**"]
     paths:
@@ -23,8 +27,12 @@ on:
       - "supabase/migrations/*_rh_*.sql"
       - "supabase/tests/rh/**"
       - "tests/rh/**"
+      - "tests/e2e/rh-*.spec.ts"
       - "scripts/run-rh-*.mjs"
+      - "scripts/seed-rh-browser-e2e.mjs"
+      - "scripts/verify-rh-browser-e2e.mjs"
       - ".github/workflows/rh-extended-functional.yml"
+      - ".github/workflows/rh-browser-e2e.yml"
 
 permissions:
   contents: read
@@ -62,7 +70,7 @@ jobs:
         run: pnpm test:db:rh
       - name: RH scoped typecheck
         run: pnpm exec tsc --noEmit -p tsconfig.rh.json
-      - name: Lint every RH action, page, API and integration
-        run: pnpm exec eslint 'app/actions/rh-*.ts' app/app/rh app/api/rh lib/rh tests/rh --max-warnings=0
+      - name: Lint RH actions, pages, APIs, integrations and E2E harness
+        run: pnpm exec eslint 'app/actions/rh-*.ts' app/app/rh app/api/rh lib/rh tests/rh 'tests/e2e/rh-*.spec.ts' scripts/seed-rh-browser-e2e.mjs scripts/verify-rh-browser-e2e.mjs --max-warnings=0
       - name: RH unit and contract suites
         run: pnpm exec vitest run tests/rh
