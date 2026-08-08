@@ -30,6 +30,9 @@ jobs:
         continue-on-error: true
         run: node scripts/auditar-superficies-supabase.mjs --json > supabase-surface-audit.json
 
+      - name: Generate canonical code map
+        run: node scripts/gerar-mapa-do-codigo.mjs
+
       - name: Upload orphan audit reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -39,5 +42,6 @@ jobs:
             reachability-audit.json
             server-actions-audit.json
             supabase-surface-audit.json
+            diretrizes/MAPA-DO-CODIGO.md
           if-no-files-found: warn
           retention-days: 14
