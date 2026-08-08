@@ -1,0 +1,43 @@
+name: Audit Orphan Surfaces
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit-orphans-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Audit reachable code graph
+        continue-on-error: true
+        run: node scripts/auditar-alcancabilidade.mjs --json > reachability-audit.json
+
+      - name: Audit unused server action symbols
+        continue-on-error: true
+        run: node scripts/auditar-server-actions-sem-chamada.mjs --json > server-actions-audit.json
+
+      - name: Audit Supabase surfaces without JS consumers
+        continue-on-error: true
+        run: node scripts/auditar-superficies-supabase.mjs --json > supabase-surface-audit.json
+
+      - name: Upload orphan audit reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: orphan-surface-audit
+          path: |
+            reachability-audit.json
+            server-actions-audit.json
+            supabase-surface-audit.json
+          if-no-files-found: warn
+          retention-days: 14
