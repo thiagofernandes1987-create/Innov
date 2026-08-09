@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { COOKIE_TEMA, temaValido } from "@/lib/tema";
 import { BarraSuperior } from "@/components/casca/barra-superior";
 import { ProvedorDeBusca } from "@/components/casca/busca-da-barra";
-import type { Indicador } from "@/lib/casca/indicadores";
 import { Launcher, type AplicativoAutorizado } from "@/components/casca/launcher";
 import type { LauncherSummaryMap } from "@/lib/casca/launcher-domain";
 
@@ -55,29 +54,7 @@ const PERFIS: Record<string, string[]> = {
   admin: TODOS.map(a => a.chave)
 };
 
-// Esta é a página de **amostra visual**, não a tela real: aqui o número
-// declaradamente ilustra a forma do indicador. A tela real
-// (`app/app/page.tsx`) só mostra contagem vinda do banco — número inventado com
-// cara de número real é exatamente o que ela não pode fazer.
-const INDICADORES_DA_AMOSTRA: Record<string, Indicador> = {
-  clientes: { rotulo: "Clientes ativos", valor: "1.243", apoio: "+12%",
-    forma: { tipo: "serie", pontos: [8, 11, 9, 14, 12, 17, 15, 19, 18, 22] } },
-  obras: { rotulo: "Em andamento", valor: "18",
-    forma: { tipo: "etapas", etapas: [
-      { rotulo: "Planejamento", ativo: true }, { rotulo: "Execução", ativo: true }, { rotulo: "Finalização", ativo: false }] } },
-  tarefas: { rotulo: "Em aberto", valor: "142",
-    forma: { tipo: "faixas", faixas: [
-      { rotulo: "Atrasadas", valor: 18, tom: "atraso" },
-      { rotulo: "Hoje", valor: 34, tom: "hoje" },
-      { rotulo: "No prazo", valor: 90, tom: "prazo" }] } },
-  equipes: { rotulo: "Pessoas alocadas", valor: "236", forma: { tipo: "pessoas", total: 236 } },
-  orcamentos: { rotulo: "Em análise", valor: "14",
-    forma: { tipo: "serie", pontos: [6, 9, 7, 11, 10, 13, 12, 14] } },
-  documentos: { rotulo: "Arquivos", valor: "8.742",
-    forma: { tipo: "uso", percentual: 64, apoio: "64% de 15 GB" } },
-  qualidade: { rotulo: "Não conformidades abertas", valor: "9",
-    forma: { tipo: "barras", valores: [2, 4, 3, 6, 5, 9, 7, 8, 6, 9] } }
-};
+// Esta é a página de amostra visual; os valores abaixo pertencem somente a RESUMOS_DEMONSTRACAO.
 
 export default async function Amostra({ searchParams }: { searchParams: Promise<{ perfil?: string; cenario?: string }> }) {
   const { perfil = "admin", cenario = "normal" } = await searchParams;
@@ -112,7 +89,7 @@ export default async function Amostra({ searchParams }: { searchParams: Promise<
         />
         <div className="casca-conteudo">
           <main className="content pagina-launcher">
-            <Launcher aplicativos={aplicativos} indicadores={INDICADORES_DA_AMOSTRA} />
+            <Launcher aplicativos={aplicativos} resumos={RESUMOS_DEMONSTRACAO} />
           </main>
         </div>
       </div>

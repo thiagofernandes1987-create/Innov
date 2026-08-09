@@ -300,7 +300,7 @@ function AplicativoCard({
   );
 }
 
-function MiniGrafico({ progress }: { progress: number | null }) {
+function MiniGrafico({ progress }: { progress?: number | null }) {
   if (progress === null || !Number.isFinite(progress)) return null;
   const value = Math.max(0, Math.min(100, progress));
   return (

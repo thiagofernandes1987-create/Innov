@@ -1,6 +1,6 @@
 import{expect,test}from"playwright/test";
 
-const base=process.env.RH_E2E_BASE_URL?.replace(/\/$/,"");const email=process.env.RH_E2E_EMAIL;const password=process.env.RH_E2E_PASSWORD;
+const base=process.env.RH_E2E_BASE_URL?.replace(/\/$/,"")??"";const email=process.env.RH_E2E_EMAIL??"";const password=process.env.RH_E2E_PASSWORD??"";
 if(!base||!email||!password)throw new Error("RH_E2E_BASE_URL, RH_E2E_EMAIL e RH_E2E_PASSWORD são obrigatórios para o E2E profissional.");
 
 async function login(page:import("playwright/test").Page){await page.goto(`${base}/login`,{waitUntil:"domcontentloaded"});const emailInput=page.locator('input[type="email"], input[name="email"]').first();const passwordInput=page.locator('input[type="password"], input[name="password"]').first();await expect(emailInput).toBeVisible();await emailInput.fill(email);await passwordInput.fill(password);await page.locator('button[type="submit"]').first().click();await page.waitForLoadState("networkidle");expect(page.url()).not.toContain("/login");}
