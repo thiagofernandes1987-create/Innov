@@ -7,7 +7,6 @@ import { requireOrganizationContext } from "@/lib/auth";
 import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
 import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
-import { createScheduleDependency } from "@/app/actions/schedule";
 import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
 
 const managementRoles = [
@@ -64,33 +63,6 @@ function failProjectDatabase(
     hint: error.hint ?? null
   });
   fail(path, publicScheduleDatabaseMessage(error, fallback));
-}
-
-export async function createProjectFromContract(formData: FormData) {
-  const { supabase } = await requireOrganizationContext(managementRoles);
-  const contractId = text(formData, "contractId");
-  const code = text(formData, "code");
-  const name = text(formData, "name");
-  const plannedStart = text(formData, "plannedStart");
-  const plannedEnd = text(formData, "plannedEnd");
-
-  if (!contractId || !code || !name || !plannedStart || !plannedEnd) {
-    fail("/app/obras/novo", "Preencha contrato, código, nome e período planejado.");
-  }
-
-  const { data, error } = await supabase.rpc("create_project_from_contract", {
-    p_contract_id: contractId,
-    p_code: code,
-    p_name: name,
-    p_planned_start: plannedStart,
-    p_planned_end: plannedEnd,
-    p_address_line: optionalText(formData, "addressLine"),
-    p_city: optionalText(formData, "city"),
-    p_state: optionalText(formData, "state")
-  });
-
-  if (error || !data) fail("/app/obras/novo", error?.message ?? "Não foi possível criar a obra.");
-  redirect(`/app/obras/${data}`);
 }
 
 export async function releaseProjectToClient(formData: FormData) {
@@ -266,10 +238,6 @@ export async function moveTask(formData: FormData) {
   revalidatePath(path);
   revalidatePath(`/app/obras/${projectId}/cronograma`);
   revalidatePath("/cliente/obras");
-}
-
-export async function createDependency(formData: FormData) {
-  return createScheduleDependency(formData);
 }
 
 export async function createMilestone(formData: FormData) {

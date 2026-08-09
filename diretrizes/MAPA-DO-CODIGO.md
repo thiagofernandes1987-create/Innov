@@ -29,15 +29,15 @@ a ignorar.
 | | |
 |---|---|
 | Aplicativos no registro | 25 |
-| Rotas | 224 (200 páginas, 24 de API) |
-| Server actions | 317 em 67 arquivos |
-| Módulos de `lib/` | 123 |
+| Rotas | 225 (201 páginas, 24 de API) |
+| Server actions | 311 em 68 arquivos |
+| Módulos de `lib/` | 124 |
 | Funções do banco declaradas | 317 |
-| Funções do banco chamadas do código | 185 |
-| Suítes de teste | 75, com 747 casos |
-| Migrations | 228 |
+| Funções do banco chamadas do código | 184 |
+| Suítes de teste | 76, com 761 casos |
+| Migrations | 234 |
 | Validadores de CI | 30 |
-| Módulos de `lib/` citados por algum teste | 71 de 123 |
+| Módulos de `lib/` citados por algum teste | 73 de 124 |
 
 ## 1. Aplicativos
 
@@ -275,6 +275,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/rh/sst` | página | rh:read | `app/app/rh/sst/page.tsx` |
 | `/app/rh/tsv` | página | rh:read | `app/app/rh/tsv/page.tsx` |
 | `/app/rh/tsv/[id]` | página | rh:read | `app/app/rh/tsv/[id]/page.tsx` |
+| `/app/rh/tsv/[id]/especial` | página | rh:read | `app/app/rh/tsv/[id]/especial/page.tsx` |
 | `/app/tarefas` | página | sessão da organização | `app/app/tarefas/page.tsx` |
 | `/app/whatsapp` | página | — | `app/app/whatsapp/page.tsx` |
 | `/assinar/[token]` | página | — | `app/assinar/[token]/page.tsx` |
@@ -558,9 +559,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `addDailyLogActivity` | sessão da organização |
 | `createBaseline` | sessão da organização |
 | `createDailyLog` | sessão da organização |
-| `createDependency` | sessão da organização |
 | `createMilestone` | sessão da organização |
-| `createProjectFromContract` | sessão da organização |
 | `createProjectResource` | sessão da organização |
 | `createTask` | — |
 | `createTeam` | sessão da organização |
@@ -711,7 +710,6 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | Função | Guarda |
 |---|---|
 | `createEsocialBatch` | rh:update |
-| `queryEsocialBatchAction` | rh:update |
 | `saveSignedEsocialEvent` | rh:update |
 | `sendEsocialBatchAction` | rh:approve |
 
@@ -766,13 +764,9 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | Função | Guarda |
 |---|---|
 | `approveVacationCase` | rh:approve |
-| `createBenefit` | rh:configure |
-| `createBenefitCharge` | rh:update |
 | `createLeaveCase` | rh:create |
 | `createVacationCase` | rh:create |
 | `createVacationEntitlement` | rh:create |
-| `enrollBenefit` | rh:update |
-| `exportBenefitCharge` | rh:update |
 | `exportVacationToPayroll` | rh:update |
 
 ### `app/actions/rh-payments.ts`
@@ -896,8 +890,15 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 
 | Função | Guarda |
 |---|---|
-| `generateS2300` | rh:update |
+| `generateTsvS2300` | rh:update |
 | `saveTsvEsocialProfile` | rh:update |
+
+### `app/actions/rh-tsv-special-esocial.ts`
+
+| Função | Guarda |
+|---|---|
+| `generateTsvSpecialS2300` | rh:update |
+| `saveTsvSpecialEsocialProfile` | rh:update |
 
 ### `app/actions/rh.ts`
 
@@ -911,7 +912,6 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `createRhFunction` | rh:configure |
 | `createRhPayrollPeriod` | rh:create |
 | `createRhPosition` | rh:configure |
-| `createRhRubric` | rh:configure |
 | `createRhTaxAllocation` | rh:configure |
 | `createRhUnion` | rh:configure |
 | `createRhWorker` | rh:create |
@@ -966,7 +966,6 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/auth` | não | `requireClientContext`, `requireOrganizationContext`, `requireUser` |
 | `@/lib/authorization` | não | `getEffectiveApplications`, `hasCapability`, `requireAccessAdministration`, `requireCapability` |
 | `@/lib/casca/avisos` | não | `COOKIE_VISTO_ATIVIDADES`, `COOKIE_VISTO_MENSAGENS`, `carregarAvisos` |
-| `@/lib/casca/indicadores` | não | `carregarIndicadores` |
 | `@/lib/casca/launcher-domain` | não | `clampProgress`, `formatCompactCurrency`, `formatCompactNumber`, `unavailableSummary` |
 | `@/lib/casca/launcher-metrics` | não | `loadLauncherSummaries` |
 | `@/lib/casca/menus` | sim | `MENUS_DO_MODULO`, `menusDe` |
@@ -1050,7 +1049,9 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/rh/integrations/esocial-sst-xml` | sim | `buildS2210`, `buildS2220`, `buildS2240` |
 | `@/lib/rh/integrations/esocial-termination-xml` | sim | `buildS2299`, `buildS2399` |
 | `@/lib/rh/integrations/esocial-transport` | não | `assertSignedEsocialEvent`, `buildEsocialBatchXml`, `buildQuerySoapEnvelope`, `buildQueryXml`, `buildSendSoapEnvelope`, `extractEsocialProtocol`, `extractEsocialResponseStatus`, `queryEsocialBatch`, `sendEsocialBatch`, `sha256` |
-| `@/lib/rh/integrations/esocial-tsv-xml` | sim | `buildS2300Category721` |
+| `@/lib/rh/integrations/esocial-tsv-special-xml` | sim | `buildS2300Special` |
+| `@/lib/rh/integrations/esocial-tsv-student-xml` | sim | `buildS2300Student` |
+| `@/lib/rh/integrations/esocial-tsv-xml` | sim | `S2300_CONTRIBUTOR_CATEGORIES`, `buildS2300Category721`, `buildS2300Contributor` |
 | `@/lib/rh/integrations/esocial-worker-transition-xml` | sim | `buildS2200TransitionClt` |
 | `@/lib/rh/integrations/esocial-worker-xml` | sim | `buildS2190`, `buildS2200StandardClt` |
 | `@/lib/rh/integrations/esocial-xml` | sim | `buildS1000`, `buildS1005`, `buildS1010`, `buildS1020`, `makeEsocialEventId`, `normalizeEmployerRegistrationNumber`, `xmlSha256` |
@@ -1155,7 +1156,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `create_next_budget_version` | `supabase/migrations/20260729013000_budget_next_version.sql` | `app/actions/budget-versions.ts` |
 | `create_object_definition` | `supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql` | `app/actions/objetos.ts` |
 | `create_operational_event` | `supabase/migrations/20260728150000_operational_client_event_origin.sql` | — (só por SQL ou trigger) |
-| `create_project_from_contract` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | `app/actions/projects.ts` |
+| `create_project_from_contract` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | — (só por SQL ou trigger) |
 | `create_project_from_contract_v2` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | `app/actions/project-creation.ts` |
 | `create_proposal_from_budget_version` | `supabase/migrations/20260728162026_workflow_documental_descobrivel.sql` | — (só por SQL ou trigger) |
 | `create_report_snapshot` | `supabase/migrations/20260728233000_qualify_pgcrypto_functions.sql` | `app/actions/reports.ts` |
@@ -1196,7 +1197,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `ensure_organization_module_defaults` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | — (só por SQL ou trigger) |
 | `ensure_organization_module_defaults_trigger` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | — (só por SQL ou trigger) |
 | `expire_inventory_reservations` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | — (só por SQL ou trigger) |
-| `export_rh_benefit_charge_to_payroll` | `supabase/migrations/20260807154500_rh_movements_payroll_contract_fix.sql` | `app/actions/rh-benefits.ts`, `app/actions/rh-movements.ts` |
+| `export_rh_benefit_charge_to_payroll` | `supabase/migrations/20260807154500_rh_movements_payroll_contract_fix.sql` | `app/actions/rh-benefits.ts` |
 | `export_rh_payroll_difference_case` | `supabase/migrations/20260807164000_rh_payroll_difference_approval_export.sql` | `app/actions/rh-payroll-special.ts` |
 | `export_rh_thirteenth` | `supabase/migrations/20260807162000_rh_thirteenth_retroactive_payroll.sql` | `app/actions/rh-payroll-special.ts` |
 | `export_rh_vacation_to_payroll` | `supabase/migrations/20260807154500_rh_movements_payroll_contract_fix.sql` | `app/actions/rh-movements.ts` |
@@ -1288,7 +1289,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `organizations_install_report_defaults` | `supabase/migrations/20260720143200_stage16_reports_module.sql` | — (só por SQL ou trigger) |
 | `organizations_install_stage18_relationship_defaults` | `supabase/migrations/20260721014030_stage18_relationship_module.sql` | — (só por SQL ou trigger) |
 | `pay_rh_benefit_provider_invoice` | `supabase/migrations/20260809110000_rh_benefit_invoice_lifecycle.sql` | `app/actions/rh-benefits.ts` |
-| `persist_rh_esocial_generated_event` | `supabase/migrations/20260807151500_rh_esocial_generated_event_persistence.sql` | `app/actions/rh-admission-esocial-transition.ts`, `app/actions/rh-admission-esocial.ts`, `app/actions/rh-esocial-changes.ts`, `app/actions/rh-esocial-generation.ts`, `app/actions/rh-leave-esocial.ts`, `app/actions/rh-payroll-esocial.ts`, `app/actions/rh-sst-esocial.ts`, `app/actions/rh-termination-esocial.ts`, `app/actions/rh-tsv-esocial.ts` |
+| `persist_rh_esocial_generated_event` | `supabase/migrations/20260807151500_rh_esocial_generated_event_persistence.sql` | `app/actions/rh-admission-esocial-transition.ts`, `app/actions/rh-admission-esocial.ts`, `app/actions/rh-esocial-changes.ts`, `app/actions/rh-esocial-generation.ts`, `app/actions/rh-leave-esocial.ts`, `app/actions/rh-payroll-esocial.ts`, `app/actions/rh-sst-esocial.ts`, `app/actions/rh-termination-esocial.ts`, `app/actions/rh-tsv-esocial.ts`, `app/actions/rh-tsv-special-esocial.ts` |
 | `pipeline_cards_congelar_origem` | `supabase/migrations/20260726190000_pipeline_endurecimento.sql` | — (só por SQL ou trigger) |
 | `pipeline_cards_registrar_etapa` | `supabase/migrations/20260726120000_pipeline_trilhas.sql` | — (só por SQL ou trigger) |
 | `pipeline_codigo_data` | `supabase/migrations/20260726190000_pipeline_endurecimento.sql` | — (só por SQL ou trigger) |
@@ -1465,7 +1466,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/rh/esocial-result-parser.test.ts` | 5 | parseEsocialIndividualResults |
 | `tests/rh/esocial-special-paths.test.ts` | 5 | eSocial special paths |
 | `tests/rh/esocial-termination-special.test.ts` | 6 | eSocial desligamentos especiais |
-| `tests/rh/esocial-tsv.test.ts` | 3 | S-2300 TSVE categoria 721 |
+| `tests/rh/esocial-tsv-special.test.ts` | 8 | S-2300 grupos especiais do serviço público/sindical |
+| `tests/rh/esocial-tsv.test.ts` | 9 | S-2300 TSVE contribuinte individual; S-2300 estágio e serviço civil |
 | `tests/rh/esocial-xmlsec-interoperability.test.ts` | 1 | eSocial XMLDSig interoperability |
 | `tests/rh/fgts-rescisory-file.test.ts` | 4 | FGTS Digital rescisório 1.2 |
 | `tests/rh/mit-json.test.ts` | 9 | MIT JSON 1.0 |
@@ -1530,9 +1532,9 @@ Declaradas em migration e chamadas por `.rpc()`.
 | Lacuna | Quantidade |
 |---|---|
 | RPC chamada sem declaração em migration | 3 |
-| Módulo de `lib/` nunca importado | 1 |
-| Server action nunca referenciada | 15 |
-| Módulo de `lib/` sem teste que o cite | 52 de 123 |
+| Módulo de `lib/` nunca importado | 0 |
+| Server action nunca referenciada | 0 |
+| Módulo de `lib/` sem teste que o cite | 51 de 124 |
 
 ### Módulos sem teste que os cite
 
@@ -1541,7 +1543,6 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/auth`
 - `@/lib/authorization`
 - `@/lib/casca/avisos`
-- `@/lib/casca/indicadores`
 - `@/lib/casca/launcher-domain`
 - `@/lib/casca/launcher-metrics`
 - `@/lib/documentos/resolucao`
