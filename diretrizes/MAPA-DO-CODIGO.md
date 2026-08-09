@@ -34,7 +34,7 @@ a ignorar.
 | Módulos de `lib/` | 101 |
 | Funções do banco declaradas | 239 |
 | Funções do banco chamadas do código | 119 |
-| Suítes de teste | 68, com 694 casos |
+| Suítes de teste | 69, com 697 casos |
 | Migrations | 173 |
 | Validadores de CI | 29 |
 | Módulos de `lib/` citados por algum teste | 58 de 101 |
@@ -1010,6 +1010,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/project-resource-usage-integration.test.ts` | 3 | recursos operacionais da obra |
 | `tests/proposal-direct-upload.test.ts` | 4 | upload de PDF da proposta |
 | `tests/qa-contraste.test.ts` | 19 | aritmética de cor; v4 — notação color(srgb …) lida como preto; opacidade nas três notações; mínimo exigido — 3:1 só para texto grande |
+| `tests/qa-persona-provisioning.test.ts` | 3 | provisionamento de personas QA |
 | `tests/relatorio-perdas.test.ts` | 20 | Pareto ordena por valor, não por contagem; fatia e acumulado; casos que quebrariam a divisão; perda sem motivo entra na conta |
 | `tests/report-actions-contract.test.ts` | 4 | ações seguras de relatórios |
 | `tests/schedule-validation.test.ts` | 5 | schedule validation |
