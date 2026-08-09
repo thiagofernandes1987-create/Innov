@@ -1,0 +1,140 @@
+name: Temp Fix Global Typecheck
+
+on:
+  push:
+    branches:
+      - feature/projeto-rh-especificacao-funcional
+    paths:
+      - .github/workflows/temp-fix-global-typecheck.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/projeto-rh-especificacao-funcional
+          fetch-depth: 0
+      - name: Synchronize exact branch head
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin feature/projeto-rh-especificacao-funcional
+          git reset --hard origin/feature/projeto-rh-especificacao-funcional
+          echo "FIX_HEAD=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Apply deterministic fixes
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p=Path(path); text=p.read_text()
+              count=text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{path}: esperado 1 match, encontrado {count}: {old[:80]!r}")
+              p.write_text(text.replace(old,new,1))
+
+          # projects.ts: símbolos já existentes no domínio de cronograma.
+          replace_once(
+              'app/actions/projects.ts',
+              'import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";\n',
+              'import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";\nimport { createScheduleDependency } from "@/app/actions/schedule";\nimport { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";\n'
+          )
+
+          # schedule.ts: restaura imports, elimina declarações duplicadas e usa valores já validados.
+          replace_once(
+              'app/actions/schedule.ts',
+              'import { requireOrganizationContext } from "@/lib/auth";\n',
+              'import { requireOrganizationContext } from "@/lib/auth";\nimport { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";\n'
+          )
+          replace_once('app/actions/schedule.ts','  const { supabase, organizationId, userId } = await requireOrganizationContext(scheduleRoles);\n  const parentId = optionalText(formData, "parentId");\n  const { data: criada, error } = await supabase\n','  const { supabase, organizationId, userId } = await requireOrganizationContext(scheduleRoles);\n  const { data: criada, error } = await supabase\n')
+          replace_once('app/actions/schedule.ts','      sequence: optionalNumber(formData, "sequence") ?? 0,\n','      sequence,\n')
+          replace_once('app/actions/schedule.ts','  const { supabase, organizationId, userId } = await requireOrganizationContext(scheduleRoles);\n  const wbsId = optionalText(formData, "wbsId");\n  const { error } = await supabase.from("project_tasks").insert({\n','  const { supabase, organizationId, userId } = await requireOrganizationContext(scheduleRoles);\n  await validateTaskPlacement(supabase, organizationId, projectId, "", wbsId, parentTaskId);\n  const { error } = await supabase.from("project_tasks").insert({\n')
+          replace_once('app/actions/schedule.ts','    parent_task_id: optionalText(formData, "parentTaskId"),\n','    parent_task_id: parentTaskId,\n')
+          marker='function revalidateSchedule(projectId: string): void {\n  revalidatePath(schedulePath(projectId));\n  revalidatePath(`/app/obras/${projectId}/eap`);\n  revalidatePath(`/app/obras/${projectId}/tarefas`);\n}\n'
+          helper='''function revalidateSchedule(projectId: string): void {\n  revalidatePath(schedulePath(projectId));\n  revalidatePath(`/app/obras/${projectId}/eap`);\n  revalidatePath(`/app/obras/${projectId}/tarefas`);\n}\n\nasync function validateTaskPlacement(\n  supabase: ScheduleSupabase,\n  organizationId: string,\n  projectId: string,\n  taskId: string,\n  wbsId: string | null,\n  parentTaskId: string | null\n): Promise<void> {\n  if (wbsId) {\n    const { data: wbs, error } = await supabase\n      .from("work_breakdown_items")\n      .select("id")\n      .eq("id", wbsId)\n      .eq("project_id", projectId)\n      .eq("organization_id", organizationId)\n      .maybeSingle();\n    if (error) failDatabase(projectId, "validate-placement.wbs", error, "Não foi possível validar a etapa da EAP.");\n    if (!wbs) fail(projectId, "A etapa da EAP selecionada não pertence a esta obra.");\n  }\n\n  const { data: tasks, error } = await supabase\n    .from("project_tasks")\n    .select("id,parent_task_id")\n    .eq("project_id", projectId)\n    .eq("organization_id", organizationId);\n  if (error) failDatabase(projectId, "validate-placement.tasks", error, "Não foi possível validar a hierarquia das atividades.");\n\n  const parentByTask = new Map<string, string | null>(\n    (tasks ?? []).map(row => [String(row.id), row.parent_task_id ? String(row.parent_task_id) : null])\n  );\n  if (parentTaskId && !parentByTask.has(parentTaskId)) fail(projectId, "A atividade superior não pertence a esta obra.");\n  if (taskId && wouldCreateTaskHierarchyCycle(parentByTask, taskId, parentTaskId)) {\n    fail(projectId, "A atividade superior criaria um ciclo na hierarquia.");\n  }\n}\n'''
+          replace_once('app/actions/schedule.ts', marker, helper)
+
+          # Página de tarefas: usa o motor de cronograma já existente.
+          replace_once(
+              'app/app/obras/[id]/tarefas/page.tsx',
+              'import { nomesDosUsuarios } from "@/lib/pessoas/nomes";\n',
+              'import { nomesDosUsuarios } from "@/lib/pessoas/nomes";\nimport { calcular, type Dependencia, type TipoDependencia } from "@/lib/planejamento/cronograma";\n'
+          )
+
+          # Launcher: conclui a migração para summaries em vez de misturar a API antiga de indicadores.
+          Path('app/app/page.tsx').write_text('''import { Launcher, type AplicativoAutorizado } from "@/components/casca/launcher";\nimport { getEffectiveApplications } from "@/lib/authorization";\nimport { loadLauncherSummaries } from "@/lib/casca/launcher-metrics";\n\nexport const dynamic = "force-dynamic";\n\nexport default async function CentralDeAplicativos() {\n  const { context, applications } = await getEffectiveApplications();\n  const resumos = await loadLauncherSummaries(context);\n\n  const aplicativos: AplicativoAutorizado[] = applications\n    .filter(item => item.applicationKey !== "dashboard" && item.accessLevel !== "NONE")\n    .sort((a, b) => a.sortOrder - b.sortOrder)\n    .map(item => ({\n      chave: item.applicationKey,\n      nome: item.name,\n      descricao: item.description,\n      categoria: item.category,\n      href: item.routePrefix,\n      nivel: item.accessLevel\n    }));\n\n  return (\n    <main className="content pagina-launcher">\n      <Launcher aplicativos={aplicativos} resumos={resumos} />\n    </main>\n  );\n}\n''')
+
+          p=Path('components/casca/launcher.tsx'); text=p.read_text()
+          text=text.replace('import type { Indicador } from "@/lib/casca/indicadores";\n','')
+          old='''export function Launcher({\n  aplicativos,\n  indicadores = {}\n}: {\n  aplicativos: AplicativoAutorizado[];\n  /** Contagem real por módulo. Ausente = card sem indicador, nunca número inventado. */\n  indicadores?: Record<string, Indicador>;\n}) {'''
+          new='''export function Launcher({\n  aplicativos,\n  resumos = {}\n}: {\n  aplicativos: AplicativoAutorizado[];\n  /** Resumos reais carregados no servidor. Ausente = estado explicitamente indisponível. */\n  resumos?: LauncherSummaryMap;\n}) {'''
+          if text.count(old)!=1: raise SystemExit('launcher: assinatura esperada não encontrada')
+          text=text.replace(old,new,1)
+          oldcard='''                <AplicativoCard\n                  aplicativo={app}\n                  indicador={indicadores[app.chave]}\n                  mostrarIndicadores={mostrarIndicadores}\n                />'''
+          newcard='''                <AplicativoCard\n                  aplicativo={app}\n                  resumo={resumoDe(app.chave, resumos)}\n                  mostrarIndicadores={mostrarIndicadores}\n                />'''
+          if text.count(oldcard)!=1: raise SystemExit('launcher: chamada de card esperada não encontrada')
+          text=text.replace(oldcard,newcard,1)
+          cut=text.find('// ── Formas do micro-indicador')
+          if cut<0: raise SystemExit('launcher: bloco legado de indicador não encontrado')
+          text=text[:cut]+'''function MiniGrafico({ progress }: { progress: number | null }) {\n  if (progress === null || !Number.isFinite(progress)) return null;\n  const value = Math.max(0, Math.min(100, progress));\n  return (\n    <span className="launcher-mini-grafico" aria-label={`Progresso ${Math.round(value)}%`}>\n      <span style={{ width: `${value}%` }} />\n    </span>\n  );\n}\n'''
+          p.write_text(text)
+
+          # Remove apenas a segunda implementação idêntica do editor no planner.
+          p=Path('components/planejamento/schedule-planner.tsx'); text=p.read_text()
+          block='''  function openTaskEditor(taskId: string): void {\n    setEditorTab("general");\n    setEditorTaskId(taskId);\n  }\n'''
+          if text.count(block)!=2: raise SystemExit(f'schedule-planner: esperado duplicado 2x, encontrado {text.count(block)}')
+          first=text.find(block); second=text.find(block, first+len(block)); text=text[:second]+text[second+len(block):]; p.write_text(text)
+
+          # Playwright está instalado como pacote `playwright`; seu export de test runner é `playwright/test`.
+          for path in ['tests/e2e/rh-professional-smoke.spec.ts','tests/e2e/rh-professional-transaction.spec.ts']:
+              p=Path(path); text=p.read_text();
+              if '@playwright/test' not in text: raise SystemExit(f'{path}: import @playwright/test não encontrado')
+              p.write_text(text.replace('@playwright/test','playwright/test'))
+          PY
+      - name: Run global typecheck after fixes
+        id: typecheck
+        shell: bash
+        run: |
+          set +e
+          pnpm typecheck 2>&1 | tee /tmp/typecheck.txt
+          status=${PIPESTATUS[0]}
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+      - name: Commit fixes if branch did not move
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin feature/projeto-rh-especificacao-funcional
+          remote_head="$(git rev-parse origin/feature/projeto-rh-especificacao-funcional)"
+          if [ "$remote_head" != "$FIX_HEAD" ]; then
+            echo "Branch mudou durante a correção: $FIX_HEAD -> $remote_head. Abortando commit obsoleto." >&2
+            exit 2
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/actions/projects.ts app/actions/schedule.ts app/app/obras/'[id]'/tarefas/page.tsx app/app/page.tsx components/casca/launcher.tsx components/planejamento/schedule-planner.tsx tests/e2e/rh-professional-smoke.spec.ts tests/e2e/rh-professional-transaction.spec.ts
+          git commit -m 'fix: restaura contratos de planejamento launcher e e2e'
+          git push origin HEAD:feature/projeto-rh-especificacao-funcional
+      - name: Report remaining typecheck status
+        shell: bash
+        run: |
+          if [ '${{ steps.typecheck.outputs.status }}' != '0' ]; then
+            echo 'O primeiro lote foi commitado, mas ainda restam erros de typecheck; o próximo ciclo tratará os achados residuais.' >&2
+            exit 1
+          fi
