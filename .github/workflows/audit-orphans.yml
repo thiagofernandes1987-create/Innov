@@ -26,36 +26,39 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from "node:fs";
 
+          function removeBetween(content, startMarker, endMarker, label) {
+            const start = content.indexOf(startMarker);
+            if (start < 0) {
+              console.log(`${label}: já ausente.`);
+              return content;
+            }
+            const end = content.indexOf(endMarker, start + startMarker.length);
+            if (end <= start) {
+              throw new Error(`${label}: marcador final não encontrado.`);
+            }
+            console.log(`${label}: removido.`);
+            return `${content.slice(0, start)}${content.slice(end)}`;
+          }
+
           const projectsPath = "app/actions/projects.ts";
           let projects = fs.readFileSync(projectsPath, "utf8");
-          const dependencyImport = 'import { createScheduleDependency } from "./schedule";';
-          const dependencyStart = 'export async function createDependency(formData: FormData) {';
-          const dependencyEnd = 'export async function createMilestone(formData: FormData) {';
-
-          if (!projects.includes(dependencyImport)) {
-            throw new Error("Import legado createScheduleDependency não encontrado em projects.ts.");
-          }
-          const dependencyStartIndex = projects.indexOf(dependencyStart);
-          const dependencyEndIndex = projects.indexOf(dependencyEnd);
-          if (dependencyStartIndex < 0 || dependencyEndIndex <= dependencyStartIndex) {
-            throw new Error("Marcadores de createDependency não encontrados em projects.ts.");
-          }
-          projects = projects.replace(`${dependencyImport}\n`, "");
-          const dependencyStartIndexAfterImport = projects.indexOf(dependencyStart);
-          const dependencyEndIndexAfterImport = projects.indexOf(dependencyEnd);
-          projects = `${projects.slice(0, dependencyStartIndexAfterImport)}${projects.slice(dependencyEndIndexAfterImport)}`;
+          projects = projects.replace('import { createScheduleDependency } from "./schedule";\n', "");
+          projects = removeBetween(
+            projects,
+            'export async function createDependency(formData: FormData) {',
+            'export async function createMilestone(formData: FormData) {',
+            'projects.ts#createDependency'
+          );
           fs.writeFileSync(projectsPath, projects);
 
           const relationshipPath = "app/actions/relationship.ts";
           let relationship = fs.readFileSync(relationshipPath, "utf8");
-          const crmStart = "export async function createCrmOpportunity";
-          const crmEnd = "export async function moveCrmOpportunityStage";
-          const crmStartIndex = relationship.indexOf(crmStart);
-          const crmEndIndex = relationship.indexOf(crmEnd);
-          if (crmStartIndex < 0 || crmEndIndex <= crmStartIndex) {
-            throw new Error("Marcadores de createCrmOpportunity não encontrados em relationship.ts.");
-          }
-          relationship = `${relationship.slice(0, crmStartIndex)}${relationship.slice(crmEndIndex)}`;
+          relationship = removeBetween(
+            relationship,
+            'export async function createCrmOpportunity',
+            'export async function moveCrmOpportunityStage',
+            'relationship.ts#createCrmOpportunity'
+          );
           fs.writeFileSync(relationshipPath, relationship);
           NODE
 
