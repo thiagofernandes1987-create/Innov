@@ -119,6 +119,14 @@ describe("mapPublicOperationError", () => {
     const relationship = fs.readFileSync("app/actions/relationship.ts", "utf8");
     expect(relationship).not.toMatch(/\berror\??\.message\b/);
     expect(relationship).toContain("safeInternalReturnPath");
+
+    for (const path of ["lib/reports/server.ts", "lib/inventory/server.ts", "lib/relationship/server.ts"]) {
+      const source = fs.readFileSync(path, "utf8");
+      expect(source, path).toContain("reportDataAccessError");
+      expect(source, path).not.toMatch(/\b(?:error|pipelineResult\.error|leadResult\.error|opportunityResult\.error|dashboardResult\.error|portalResult\.error)\??\.message\b/);
+    }
+    const relationshipLoader = fs.readFileSync("lib/relationship/server.ts", "utf8");
+    expect(relationshipLoader).not.toContain("map(error=>error?.message)");
   });
 
   it("registra o código interno apenas no log estruturado", () => {
