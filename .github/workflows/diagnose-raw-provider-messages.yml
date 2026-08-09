@@ -1,0 +1,51 @@
+name: Diagnose raw provider messages (temporary)
+
+on:
+  push:
+    branches:
+      - audit/regressao-main-20260808
+    paths:
+      - ".github/workflows/diagnose-raw-provider-messages.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@v6
+        with:
+          ref: audit/regressao-main-20260808
+      - name: Scan current server actions
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const safe = new Set(['validationError', 'responseFailure']);
+          const files = fs.readdirSync('app/actions', {withFileTypes:true})
+            .filter(e => e.isFile() && /\.tsx?$/.test(e.name))
+            .map(e => path.join('app/actions', e.name)).sort();
+          const out = [];
+          for (const file of files) {
+            const src = fs.readFileSync(file, 'utf8');
+            for (const match of src.matchAll(/\b([A-Za-z_$][A-Za-z0-9_$]*)\??\.message\b/g)) {
+              const variable = match[1];
+              if ((variable === 'error' || variable.endsWith('Error')) && !safe.has(variable)) {
+                const line = src.slice(0, match.index).split('\n').length;
+                out.push(`${file}:${line}:${match[0]}`);
+              }
+            }
+          }
+          fs.writeFileSync('diretrizes/tmp-provider-message-audit.txt', out.length ? out.join('\n') + '\n' : 'ZERO\n');
+          NODE
+      - name: Commit short diagnostic report
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add diretrizes/tmp-provider-message-audit.txt
+          git commit -m "chore: record temporary provider message audit"
+          git push origin HEAD:audit/regressao-main-20260808
