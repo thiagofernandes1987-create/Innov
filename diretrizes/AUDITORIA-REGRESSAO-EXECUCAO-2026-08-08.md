@@ -56,7 +56,6 @@ Os dez buckets privados existentes possuem consumidores reais e foram preservado
 Não classificar como órfã apenas por ausência de chamada `.rpc()`/`.from()` direta:
 
 - `write_audit` e `record_audit_event` — infraestrutura interna de auditoria;
-- `create_project_from_contract` — núcleo usado por `create_project_from_contract_v2`;
 - `can_access_project`, `can_access_sac_ticket`, `is_project_client`, `pipeline_permite_cartao` e `quality_client_matches` — helpers ativos de RLS;
 - `pipeline_codigo_data` — chamado por dois `CHECK` constraints e uma coluna gerada;
 - `record_observability_diagnostic` — API técnica deliberada da Etapa 19, protegida por autorização interna/service-role;
@@ -86,13 +85,18 @@ Migration: `20260808133000_drop_revoked_legacy_project_creation_rpcs.sql`
 
 As versões antigas já estavam revogadas para usuários e não possuem objetos dependentes. Dry-run `BEGIN/ROLLBACK` executado no banco ativo com sucesso.
 
-### Núcleo de criação por contrato
+### Core legado de criação por contrato
 
 Migration: `20260808133500_close_direct_legacy_contract_project_rpc.sql`
 
-- preserva `create_project_from_contract` como núcleo interno;
-- retira execução direta de `anon/authenticated`;
-- mantém `create_project_from_contract_v2` como porta pública autenticada.
+A auditoria inicialmente tratava `create_project_from_contract` como núcleo interno de `create_project_from_contract_v2`. A inspeção do corpo real da v2 provou que essa hipótese estava desatualizada: a v2 implementa o fluxo completo sozinha.
+
+- 0 referências em corpos de outras funções;
+- 0 dependências de catálogo;
+- nenhum consumidor da aplicação;
+- `create_project_from_contract_v2` permanece a porta pública autenticada.
+
+A migration agora valida em tempo de deploy que a v2 continua autônoma e, somente então, remove `create_project_from_contract` com `DROP FUNCTION` sem `CASCADE`. Se a v2 voltar a depender do core, o deploy aborta e exige reclassificação. A lógica exata passou em `BEGIN ... ROLLBACK`: core ausente dentro da transação, v2 preservada, banco restaurado depois.
 
 ### `fixed_costs`
 
@@ -134,6 +138,8 @@ A migration:
 4. remove os dois FKs/IDs legados de `budget_versions`;
 5. remove as tabelas BDI/admin vazias.
 
+O cruzamento de função confirmou que os únicos consumidores dos campos/tipos legados são `create_budget_version` (removida no passo anterior), `calculate_budget_version_core`, `create_next_budget_version` e `prevent_frozen_budget_version_mutation` (todos reescritos antes da retirada do schema antigo).
+
 O script completo foi validado no PostgreSQL real dentro de `BEGIN ... ROLLBACK`, incluindo os `DROP`; o dry-run passou. Não foi persistido.
 
 ### Superfícies superseded de contratos, inventário e relatórios
@@ -160,7 +166,7 @@ As migrations estruturais acima **não devem ser aplicadas antes do código dest
 A ordem dos arquivos destrutivos é deliberada:
 
 1. `13:30` — remover portas `create_independent_project` revogadas;
-2. `13:35` — fechar execução direta do núcleo `create_project_from_contract`;
+2. `13:35` — remover o core legado `create_project_from_contract`, preservando a v2 autônoma;
 3. `13:40` — remover `fixed_costs`, já sem consumidor real;
 4. `13:45` — remover `create_budget_version`, antes de retirar os campos que ela copia;
 5. `13:50` — reescrever cálculo/versionamento e convergir BDI/admin para markup;
@@ -178,7 +184,7 @@ Sequência operacional segura:
 
 ## 6. Estado dos gates e pendências finais
 
-Checkpoint anterior a esta atualização documental (`d7be130896d23603951deacd4044293d35772797`):
+Checkpoint anterior à correção do core legado (`d7be130896d23603951deacd4044293d35772797`):
 
 - CI #3975: verde;
 - Audit Orphan Surfaces #105: verde;
@@ -191,7 +197,7 @@ Checkpoint anterior a esta atualização documental (`d7be130896d23603951deacd40
 Pendências:
 
 - obter uma execução Stage 18 limpa no HEAD final;
-- revisar dependências cruzadas do lote destrutivo como conjunto;
+- concluir os gates do HEAD que contém a classificação corrigida do core legado;
 - aplicar o lote somente em ambiente compatível, nunca no banco ativo antes do deploy;
 - repetir testes DB, CI, auditores e QA depois da aplicação controlada;
 - manter a PR em Draft até todos os gates finais.
