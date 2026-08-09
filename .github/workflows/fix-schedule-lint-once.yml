@@ -28,7 +28,7 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
-      - name: Remove only the unused hitOffset declaration and validate
+      - name: Remove unused hit geometry declarations and validate
         shell: bash
         run: |
           set -euo pipefail
@@ -39,11 +39,16 @@ jobs:
           from pathlib import Path
           p=Path('components/planejamento/schedule-planner.tsx')
           text=p.read_text()
-          target='                    const hitOffset = (hitWidth - visualWidth) / 2;\n'
-          count=text.count(target)
-          if count != 1:
-              raise SystemExit(f'hitOffset esperado exatamente 1x, encontrado {count}')
-          p.write_text(text.replace(target,'',1))
+          targets=[
+              '                    const hitWidth = Math.max(44, visualWidth);\n',
+              '                    const hitOffset = (hitWidth - visualWidth) / 2;\n',
+          ]
+          for target in targets:
+              count=text.count(target)
+              if count != 1:
+                  raise SystemExit(f'declaração esperada exatamente 1x, encontrada {count}: {target.strip()}')
+              text=text.replace(target,'',1)
+          p.write_text(text)
           PY
           corepack enable
           corepack prepare pnpm@11.15.0 --activate
@@ -54,5 +59,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add components/planejamento/schedule-planner.tsx
           git diff --cached --check
-          git commit -m 'fix(planning): remove variável não usada do Gantt'
+          git commit -m 'fix(planning): remove geometria de hit não usada do Gantt'
           git push origin "HEAD:$branch"
