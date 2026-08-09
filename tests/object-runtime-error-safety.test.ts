@@ -18,9 +18,9 @@ describe("segurança do Estúdio de Objetos", () => {
     expect(studio).not.toMatch(/\berror\.message\b/);
   });
 
-  it("mantém object_record_upsert latente até a leitura paginada existir", () => {
-    expect(contract).toContain("Leitura paginada");
-    expect(contract).toContain("keyset");
+  it("mantém object_record_upsert latente até a leitura keyset existir", () => {
+    expect(contract).toMatch(/leitura com paginação keyset/i);
+    expect(contract).toMatch(/4\.\s+Leitura com paginação keyset[^\n]*\*\*Falta\.\*\*/i);
     expect(actions).not.toContain('rpc("object_record_upsert"');
   });
 });
