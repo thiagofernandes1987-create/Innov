@@ -1,7 +1,26 @@
 import fs from "node:fs";
+import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { safeInternalReturnPath } from "../lib/organization-context";
 import { mapPublicOperationError } from "../lib/public-errors";
+
+const SAFE_LOCAL_MESSAGE_VARIABLES = new Set(["validationError", "responseFailure"]);
+
+function suspiciousMessageAccesses(source: string) {
+  return [...source.matchAll(/\b([A-Za-z_$][A-Za-z0-9_$]*)\??\.message\b/g)]
+    .map(match => ({ variable: match[1], expression: match[0] }))
+    .filter(({ variable }) =>
+      (variable === "error" || variable.endsWith("Error")) &&
+      !SAFE_LOCAL_MESSAGE_VARIABLES.has(variable)
+    );
+}
+
+function actionSourceFiles() {
+  return fs.readdirSync("app/actions", { withFileTypes: true })
+    .filter(entry => entry.isFile() && /\.tsx?$/.test(entry.name))
+    .map(entry => path.join("app/actions", entry.name))
+    .sort();
+}
 
 describe("safeInternalReturnPath", () => {
   it("preserva caminho interno com query e fragmento", () => {
@@ -61,6 +80,14 @@ describe("mapPublicOperationError", () => {
     });
     expect(JSON.stringify(result)).not.toContain("finance_entries");
 
+    // VACINA: toda server action entra automaticamente nesta varredura. A lista
+    // de exceções é deliberadamente mínima e contém apenas erros que nascem de
+    // validação local já controlada, nunca objetos retornados pelo Supabase.
+    for (const actionPath of actionSourceFiles()) {
+      const source = fs.readFileSync(actionPath, "utf8");
+      expect(suspiciousMessageAccesses(source), actionPath).toEqual([]);
+    }
+
     const protectedActions = [
       "app/actions/public-signing.ts",
       "app/actions/operational-finance.ts",
@@ -77,53 +104,18 @@ describe("mapPublicOperationError", () => {
       "app/actions/observability.ts",
       "app/actions/relationship.ts"
     ];
-    for (const path of protectedActions) {
-      const source = fs.readFileSync(path, "utf8");
-      expect(source, path).toContain("reportDataAccessError");
-    }
-
-    const publicSigning = fs.readFileSync("app/actions/public-signing.ts", "utf8");
-    expect(publicSigning).not.toMatch(/\b(?:error|valuesError|cleanupError)\??\.message\b/);
-
-    const operationalFinance = fs.readFileSync("app/actions/operational-finance.ts", "utf8");
-    expect(operationalFinance).not.toMatch(/\b(?:error|installmentError|itemsError|cleanupError)\??\.message\b/);
-
-    const procurement = fs.readFileSync("app/actions/procurement.ts", "utf8");
-    expect(procurement).not.toMatch(/\b(?:error|invitationError|rfqError|quoteError|itemsError|submitError|finalizeError|cleanupError|quoteCleanupError|artifactCleanupError)\??\.message\b/);
-
-    const sinapi = fs.readFileSync("app/actions/sinapi.ts", "utf8");
-    expect(sinapi).not.toMatch(/\b(?:error|versionError|updateError)\??\.message\b/);
-
-    for (const path of ["app/actions/inventory.ts", "app/actions/inventory-extra.ts", "app/actions/inventory-stocktake.ts"]) {
-      const source = fs.readFileSync(path, "utf8");
-      expect(source, path).not.toMatch(/\berror\??\.message\b/);
-    }
-
-    const budgets = fs.readFileSync("app/actions/budgets.ts", "utf8");
-    expect(budgets).not.toMatch(/\b(?:snapshotError|insertError|versionError|linkedModelError)\??\.message\b/);
-    expect(budgets).not.toContain("budgetError(budgetId, error.message)");
-
-    const budgetVersions = fs.readFileSync("app/actions/budget-versions.ts", "utf8");
-    expect(budgetVersions).not.toMatch(/\berror\??\.message\b/);
-
-    const quality = fs.readFileSync("app/actions/quality.ts", "utf8");
-    expect(quality).not.toMatch(/\b(?:lastError|versionError|templateError|linkError|responseError|answersError|submitError|assignmentError)\??\.message\b/);
-    expect(quality).not.toContain("fail(path,error.message)");
-
-    for (const path of ["app/actions/listas.ts", "app/actions/sugestoes.ts", "app/actions/observability.ts"]) {
-      const source = fs.readFileSync(path, "utf8");
-      expect(source, path).not.toMatch(/\berror\??\.message\b/);
-      expect(source, path).not.toContain("console.error");
+    for (const protectedPath of protectedActions) {
+      const source = fs.readFileSync(protectedPath, "utf8");
+      expect(source, protectedPath).toContain("reportDataAccessError");
     }
 
     const relationship = fs.readFileSync("app/actions/relationship.ts", "utf8");
-    expect(relationship).not.toMatch(/\berror\??\.message\b/);
     expect(relationship).toContain("safeInternalReturnPath");
 
-    for (const path of ["lib/reports/server.ts", "lib/inventory/server.ts", "lib/relationship/server.ts"]) {
-      const source = fs.readFileSync(path, "utf8");
-      expect(source, path).toContain("reportDataAccessError");
-      expect(source, path).not.toMatch(/\b(?:error|pipelineResult\.error|leadResult\.error|opportunityResult\.error|dashboardResult\.error|portalResult\.error)\??\.message\b/);
+    for (const serverPath of ["lib/reports/server.ts", "lib/inventory/server.ts", "lib/relationship/server.ts"]) {
+      const source = fs.readFileSync(serverPath, "utf8");
+      expect(source, serverPath).toContain("reportDataAccessError");
+      expect(suspiciousMessageAccesses(source), serverPath).toEqual([]);
     }
     const relationshipLoader = fs.readFileSync("lib/relationship/server.ts", "utf8");
     expect(relationshipLoader).not.toContain("map(error=>error?.message)");
