@@ -22,8 +22,9 @@ runPostgresFiles({
     "supabase/tests/rh/payroll-regulatory-config.test.sql",
     "supabase/tests/rh/payroll-irrf-2026.test.sql",
     "supabase/tests/rh/mit-json.test.sql",
-    "supabase/tests/rh/payroll-shadow.test.sql"
+    "supabase/tests/rh/payroll-shadow.test.sql",
+    "supabase/tests/rh/benefits-documents.test.sql"
   ],
-  expectedApprovals:8,
-  successMessage:"Verticais RH empregado/estrutura/admissão/folha V1/V2/regulatório/IRRF 2026/MIT/folha sombra aprovadas."
+  expectedApprovals:9,
+  successMessage:"Verticais RH empregado/estrutura/admissão/folha V1/V2/regulatório/IRRF 2026/MIT/folha sombra/benefícios/documentos aprovadas."
 });
