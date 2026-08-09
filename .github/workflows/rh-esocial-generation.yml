@@ -4,14 +4,15 @@ on:
   pull_request:
     paths:
       - "lib/rh/integrations/esocial-*.ts"
-      - "app/actions/rh-esocial-*.ts"
-      - "app/actions/rh-admission-esocial.ts"
-      - "app/actions/rh-payroll-esocial.ts"
-      - "app/actions/rh-termination-esocial.ts"
+      - "app/actions/rh-*.ts"
       - "app/app/rh/obrigacoes/esocial/**"
       - "app/app/rh/admissoes/**"
+      - "app/app/rh/afastamentos/**"
+      - "app/app/rh/desligamentos/**"
       - "supabase/migrations/*_rh_esocial_*.sql"
       - "supabase/migrations/*_rh_admission_esocial_*.sql"
+      - "supabase/migrations/*_rh_leave_esocial_*.sql"
+      - "supabase/migrations/*_rh_termination_esocial_*.sql"
       - "tests/rh/esocial-*.ts"
       - "scripts/run-rh-esocial-restricted-homologation.mjs"
       - "tsconfig.rh.json"
@@ -22,14 +23,18 @@ on:
       - "feature/**"
     paths:
       - "lib/rh/integrations/esocial-*.ts"
-      - "app/actions/rh-esocial-*.ts"
-      - "app/actions/rh-admission-esocial.ts"
-      - "app/actions/rh-payroll-esocial.ts"
-      - "app/actions/rh-termination-esocial.ts"
+      - "app/actions/rh-*.ts"
       - "app/app/rh/obrigacoes/esocial/**"
       - "app/app/rh/admissoes/**"
+      - "app/app/rh/afastamentos/**"
+      - "app/app/rh/desligamentos/**"
+      - "supabase/migrations/*_rh_esocial_*.sql"
+      - "supabase/migrations/*_rh_admission_esocial_*.sql"
+      - "supabase/migrations/*_rh_leave_esocial_*.sql"
+      - "supabase/migrations/*_rh_termination_esocial_*.sql"
       - "tests/rh/esocial-*.ts"
       - "scripts/run-rh-esocial-restricted-homologation.mjs"
+      - "tsconfig.rh.json"
       - ".github/workflows/rh-esocial-generation.yml"
       - ".github/workflows/rh-esocial-restricted-homologation.yml"
 
@@ -82,9 +87,9 @@ jobs:
         run: node --experimental-strip-types scripts/run-rh-esocial-restricted-homologation.mjs
       - name: Validate migrations
         run: pnpm validate:migrations
-      - name: Test XML generation, XMLDSig, XMLSec and official XSD
-        run: pnpm exec vitest run tests/rh/esocial-generation-signature.test.ts tests/rh/esocial-periodic-termination.test.ts tests/rh/esocial-xmlsec-interoperability.test.ts
+      - name: Test all eSocial XML generation, XMLDSig, XMLSec and official XSD suites
+        run: pnpm exec vitest run 'tests/rh/esocial-*.test.ts'
       - name: RH scoped typecheck
         run: pnpm exec tsc --noEmit -p tsconfig.rh.json
       - name: RH eSocial lint
-        run: pnpm exec eslint lib/rh/integrations/esocial-*.ts app/actions/rh-esocial-*.ts app/actions/rh-admission-esocial.ts app/actions/rh-payroll-esocial.ts app/actions/rh-termination-esocial.ts app/app/rh/obrigacoes/esocial app/app/rh/admissoes tests/rh/esocial-*.ts --max-warnings=0
+        run: pnpm exec eslint 'lib/rh/integrations/esocial-*.ts' 'app/actions/rh-*.ts' app/app/rh/obrigacoes/esocial app/app/rh/admissoes app/app/rh/afastamentos app/app/rh/desligamentos 'tests/rh/esocial-*.ts' --max-warnings=0
