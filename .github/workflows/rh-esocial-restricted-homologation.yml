@@ -9,7 +9,10 @@ permissions:
 env:
   NODE_NO_WARNINGS: "1"
   ESOCIAL_XSD_DIR: /tmp/esocial-xsd
+  ESOCIAL_XSD_ZIP: /tmp/esocial-xsd.zip
+  ESOCIAL_XSD_SHA256: 32535dba33d0470cf44afce410840af450028fd32d3ddf9123f601c45cf9af8e
   ESOCIAL_XSD_URL: https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/2026-07-01_esquemas_xsd_v_s_01_03_00.zip
+  ESOCIAL_XSD_DOWNLOAD_URL: https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/2026-07-01_esquemas_xsd_v_s_01_03_00.zip/@@download/file
 
 jobs:
   homologate:
@@ -23,21 +26,18 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+      - name: Restore pinned official eSocial XSD cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/esocial-xsd.zip
+          key: esocial-xsd-s1-3-20260701-32535dba33d0470cf44afce410840af450028fd32d3ddf9123f601c45cf9af8e
       - name: Install official XML validation tooling
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends libxml2-utils xmlsec1 openssl unzip >/dev/null
-          rm -rf "$ESOCIAL_XSD_DIR" /tmp/esocial-xsd.zip
-          mkdir -p "$ESOCIAL_XSD_DIR"
-          curl --fail --silent --show-error --location \
-            --retry 5 --retry-delay 3 --retry-all-errors \
-            --connect-timeout 15 --max-time 120 \
-            "$ESOCIAL_XSD_URL" --output /tmp/esocial-xsd.zip
-          unzip -q /tmp/esocial-xsd.zip -d "$ESOCIAL_XSD_DIR"
-          test "$(find "$ESOCIAL_XSD_DIR" -type f -name '*.xsd' | wc -l)" -gt 0
-          sha256sum /tmp/esocial-xsd.zip
+          bash scripts/fetch-rh-esocial-xsd.sh
           xmlsec1 --version
       - name: Validate real homologation runner before secrets/network
         env:
