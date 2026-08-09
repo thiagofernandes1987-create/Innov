@@ -17,6 +17,8 @@ on:
       - "tsconfig.rh.json"
       - ".github/workflows/rh-extended-functional.yml"
       - ".github/workflows/rh-browser-e2e.yml"
+      - ".github/workflows/rh-esocial-generation.yml"
+      - ".github/workflows/rh-esocial-restricted-homologation.yml"
   push:
     branches: ["feature/**"]
     paths:
@@ -33,6 +35,8 @@ on:
       - "scripts/verify-rh-browser-e2e.mjs"
       - ".github/workflows/rh-extended-functional.yml"
       - ".github/workflows/rh-browser-e2e.yml"
+      - ".github/workflows/rh-esocial-generation.yml"
+      - ".github/workflows/rh-esocial-restricted-homologation.yml"
 
 permissions:
   contents: read
