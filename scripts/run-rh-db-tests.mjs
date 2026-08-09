@@ -27,11 +27,12 @@ runPostgresFiles({
     "supabase/tests/rh/benefits-documents.test.sql",
     "supabase/tests/rh/tsv-esocial.test.sql",
     "supabase/tests/rh/tsv-esocial-special.test.sql",
+    "supabase/tests/rh/tsv-special.test.sql",
     "supabase/tests/rh/fk-postgrest.test.sql"
   ],
   // fk-postgrest.test.sql é deliberadamente silencioso para este contador:
   // ele falha por exception quando há FK redundante, mas o NOTICE de sucesso
   // não contém "aprovad"/"verificad" e portanto não entra em approvalPattern.
-  expectedApprovals:12,
+  expectedApprovals:13,
   successMessage:"Verticais RH empregado/estrutura/admissão/transição S-2200/folha V1/V2/regulatório/IRRF 2026/MIT/folha sombra/benefícios/documentos/TSVE/S-2300 especial/PostgREST aprovadas."
 });
