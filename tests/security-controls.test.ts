@@ -61,25 +61,36 @@ describe("mapPublicOperationError", () => {
     });
     expect(JSON.stringify(result)).not.toContain("finance_entries");
 
+    const protectedActions = [
+      "app/actions/public-signing.ts",
+      "app/actions/operational-finance.ts",
+      "app/actions/procurement.ts",
+      "app/actions/sinapi.ts",
+      "app/actions/inventory.ts",
+      "app/actions/inventory-extra.ts",
+      "app/actions/inventory-stocktake.ts"
+    ];
+    for (const path of protectedActions) {
+      const source = fs.readFileSync(path, "utf8");
+      expect(source, path).toContain("reportDataAccessError");
+    }
+
     const publicSigning = fs.readFileSync("app/actions/public-signing.ts", "utf8");
-    expect(publicSigning).toContain("reportDataAccessError");
     expect(publicSigning).not.toMatch(/\b(?:error|valuesError|cleanupError)\??\.message\b/);
 
     const operationalFinance = fs.readFileSync("app/actions/operational-finance.ts", "utf8");
-    expect(operationalFinance).toContain("reportDataAccessError");
     expect(operationalFinance).not.toMatch(/\b(?:error|installmentError|itemsError|cleanupError)\??\.message\b/);
 
     const procurement = fs.readFileSync("app/actions/procurement.ts", "utf8");
-    expect(procurement).toContain("reportDataAccessError");
     expect(procurement).not.toMatch(/\b(?:error|invitationError|rfqError|quoteError|itemsError|submitError|finalizeError|cleanupError|quoteCleanupError|artifactCleanupError)\??\.message\b/);
 
     const sinapi = fs.readFileSync("app/actions/sinapi.ts", "utf8");
-    expect(sinapi).toContain("reportDataAccessError");
     expect(sinapi).not.toMatch(/\b(?:error|versionError|updateError)\??\.message\b/);
 
-    const inventory = fs.readFileSync("app/actions/inventory.ts", "utf8");
-    expect(inventory).toContain("reportDataAccessError");
-    expect(inventory).not.toMatch(/\berror\??\.message\b/);
+    for (const path of ["app/actions/inventory.ts", "app/actions/inventory-extra.ts", "app/actions/inventory-stocktake.ts"]) {
+      const source = fs.readFileSync(path, "utf8");
+      expect(source, path).not.toMatch(/\berror\??\.message\b/);
+    }
   });
 
   it("registra o código interno apenas no log estruturado", () => {
