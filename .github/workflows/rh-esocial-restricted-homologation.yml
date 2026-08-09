@@ -8,6 +8,8 @@ permissions:
 
 env:
   NODE_NO_WARNINGS: "1"
+  ESOCIAL_XSD_DIR: /tmp/esocial-xsd
+  ESOCIAL_XSD_URL: https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/2026-07-01_esquemas_xsd_v_s_01_03_00.zip
 
 jobs:
   homologate:
@@ -21,6 +23,20 @@ jobs:
         with:
           node-version: 24
           package-manager-cache: false
+      - name: Install official XML validation tooling
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libxml2-utils unzip >/dev/null
+          rm -rf "$ESOCIAL_XSD_DIR" /tmp/esocial-xsd.zip
+          mkdir -p "$ESOCIAL_XSD_DIR"
+          curl --fail --silent --show-error --location "$ESOCIAL_XSD_URL" --output /tmp/esocial-xsd.zip
+          unzip -q /tmp/esocial-xsd.zip -d "$ESOCIAL_XSD_DIR"
+          test "$(find "$ESOCIAL_XSD_DIR" -type f -name '*.xsd' | wc -l)" -gt 0
+          sha256sum /tmp/esocial-xsd.zip
+      - name: Validate shared signer runtime
+        run: node --experimental-strip-types -e "import('./lib/rh/integrations/esocial-signature-core.ts').then(m=>{if(typeof m.signEsocialXmlWithMaterial!=='function')process.exit(1)})"
       - name: Refuse production configuration
         shell: bash
         run: |
@@ -56,7 +72,7 @@ jobs:
           ESOCIAL_TRANSMITTER_REGISTRATION_TYPE: ${{ secrets.ESOCIAL_TRANSMITTER_REGISTRATION_TYPE }}
           ESOCIAL_TRANSMITTER_REGISTRATION_NUMBER: ${{ secrets.ESOCIAL_TRANSMITTER_REGISTRATION_NUMBER }}
           ESOCIAL_HOMOLOGATION_EVENT_GROUP: ${{ vars.ESOCIAL_HOMOLOGATION_EVENT_GROUP || '1' }}
-        run: node scripts/run-rh-esocial-restricted-homologation.mjs
+        run: node --experimental-strip-types scripts/run-rh-esocial-restricted-homologation.mjs
       - name: Upload sanitized evidence
         if: always()
         uses: actions/upload-artifact@v6
