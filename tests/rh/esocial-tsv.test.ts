@@ -5,6 +5,7 @@ import {
   S2300_CONTRIBUTOR_CATEGORIES,
   type S2300ContributorCategory
 } from "@/lib/rh/integrations/esocial-tsv-xml";
+import { buildS2300Student } from "@/lib/rh/integrations/esocial-tsv-student-xml";
 import { validateWithOfficialEsocialXsd } from "./esocial-official-xsd";
 
 const base = {
@@ -65,5 +66,87 @@ describe("S-2300 TSVE contribuinte individual", () => {
     const xml = buildS2300Contributor({ ...base, categoryCode: "723", cpf: "12345678902", fullName: "Contribuinte Imigrante", birthCountryCode: "063", nationalityCountryCode: "063", immigrant: { residenceTerm: 2, entryCondition: 4 } });
     validateWithOfficialEsocialXsd(xml, "S-2300-723-imigrante");
     expect(xml).toContain("<trabImig><tmpResid>2</tmpResid><condIng>4</condIng></trabImig>");
+  });
+});
+
+describe("S-2300 estágio e serviço civil", () => {
+  it("gera categoria 901 com instituição, agente e supervisor", () => {
+    const xml = buildS2300Student({
+      ...base,
+      cpf: "12345678903",
+      fullName: "Estagiário Teste",
+      registrationNumber: "EST001",
+      categoryCode: "901",
+      positionName: null,
+      cboCode: null,
+      salary: null,
+      salaryUnit: null,
+      student: {
+        nature: "N",
+        level: 4,
+        area: "Engenharia civil",
+        policyNumber: "APOLICE-2026-001",
+        expectedEndDate: "2027-07-31",
+        institution: { cnpj: "22345678000188" },
+        integrationAgentCnpj: "33456789000177",
+        supervisorCpf: "98765432100"
+      }
+    });
+    validateWithOfficialEsocialXsd(xml, "S-2300-901");
+    expect(xml).toContain("<codCateg>901</codCateg>");
+    expect(xml).toContain("<infoEstagiario>");
+    expect(xml).toContain("<nivEstagio>4</nivEstagio>");
+    expect(xml).toContain("<ageIntegracao>");
+    expect(xml).toContain("<supervisorEstagio>");
+    expect(xml).toContain("<localTrabGeral>");
+  });
+
+  it("gera categoria 906 com remuneração e sem agente/supervisor", () => {
+    const xml = buildS2300Student({
+      ...base,
+      cpf: "12345678904",
+      fullName: "Serviço Civil Teste",
+      registrationNumber: "SCV001",
+      categoryCode: "906",
+      positionName: null,
+      cboCode: null,
+      salary: 1800,
+      salaryUnit: 5,
+      student: {
+        nature: "N",
+        level: 3,
+        area: "40.00",
+        expectedEndDate: "2027-01-31",
+        institution: { cnpj: "22345678000188" }
+      }
+    });
+    validateWithOfficialEsocialXsd(xml, "S-2300-906");
+    expect(xml).toContain("<codCateg>906</codCateg>");
+    expect(xml).toContain("<remuneracao><vrSalFx>1800.00</vrSalFx><undSalFixo>5</undSalFixo></remuneracao>");
+    expect(xml).toContain("<natEstagio>N</natEstagio>");
+    expect(xml).not.toContain("<ageIntegracao>");
+    expect(xml).not.toContain("<supervisorEstagio>");
+  });
+
+  it("bloqueia nível ausente na categoria 901", () => {
+    expect(() => buildS2300Student({
+      ...base,
+      categoryCode: "901",
+      positionName: null,
+      cboCode: null,
+      salary: null,
+      salaryUnit: null,
+      student: { nature: "N", expectedEndDate: "2027-07-31", institution: { cnpj: "22345678000188" } }
+    })).toThrow(/nível do estágio/);
+  });
+
+  it("bloqueia agente/supervisor na categoria 906", () => {
+    expect(() => buildS2300Student({
+      ...base,
+      categoryCode: "906",
+      salary: 1800,
+      salaryUnit: 5,
+      student: { nature: "N", level: 3, expectedEndDate: "2027-01-31", institution: { cnpj: "22345678000188" }, integrationAgentCnpj: "33456789000177" }
+    })).toThrow(/não admite agente/);
   });
 });
