@@ -13,8 +13,10 @@ on:
       - "supabase/migrations/*_rh_esocial_*.sql"
       - "supabase/migrations/*_rh_admission_esocial_*.sql"
       - "tests/rh/esocial-*.ts"
+      - "scripts/run-rh-esocial-restricted-homologation.mjs"
       - "tsconfig.rh.json"
       - ".github/workflows/rh-esocial-generation.yml"
+      - ".github/workflows/rh-esocial-restricted-homologation.yml"
   push:
     branches:
       - "feature/**"
@@ -27,7 +29,9 @@ on:
       - "app/app/rh/obrigacoes/esocial/**"
       - "app/app/rh/admissoes/**"
       - "tests/rh/esocial-*.ts"
+      - "scripts/run-rh-esocial-restricted-homologation.mjs"
       - ".github/workflows/rh-esocial-generation.yml"
+      - ".github/workflows/rh-esocial-restricted-homologation.yml"
 
 permissions:
   contents: read
@@ -68,6 +72,8 @@ jobs:
           unzip -q /tmp/esocial-xsd.zip -d "$ESOCIAL_XSD_DIR"
           test "$(find "$ESOCIAL_XSD_DIR" -type f -name '*.xsd' | wc -l)" -gt 0
           xmlsec1 --version
+      - name: Validate shared signer runtime used by Restricted Production
+        run: node --experimental-strip-types -e "import('./lib/rh/integrations/esocial-signature-core.ts').then(m=>{if(typeof m.signEsocialXmlWithMaterial!=='function')process.exit(1)})"
       - name: Validate migrations
         run: pnpm validate:migrations
       - name: Test XML generation, XMLDSig, XMLSec and official XSD
