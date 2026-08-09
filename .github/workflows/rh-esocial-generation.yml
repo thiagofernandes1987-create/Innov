@@ -58,8 +58,8 @@ jobs:
           corepack prepare pnpm@11.15.0 --activate
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile --reporter=append-only
-      - name: Install XML validator
-        run: sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils unzip
+      - name: Install XML validators and XMLDSig verifier
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils xmlsec1 openssl unzip
       - name: Download official eSocial S-1.3 XSD package
         run: |
           rm -rf "$ESOCIAL_XSD_DIR" /tmp/esocial-xsd.zip
@@ -67,10 +67,11 @@ jobs:
           curl --fail --silent --show-error --location "$ESOCIAL_XSD_URL" --output /tmp/esocial-xsd.zip
           unzip -q /tmp/esocial-xsd.zip -d "$ESOCIAL_XSD_DIR"
           test "$(find "$ESOCIAL_XSD_DIR" -type f -name '*.xsd' | wc -l)" -gt 0
+          xmlsec1 --version
       - name: Validate migrations
         run: pnpm validate:migrations
-      - name: Test XML generation, XMLDSig and official XSD
-        run: pnpm exec vitest run tests/rh/esocial-generation-signature.test.ts tests/rh/esocial-periodic-termination.test.ts
+      - name: Test XML generation, XMLDSig, XMLSec and official XSD
+        run: pnpm exec vitest run tests/rh/esocial-generation-signature.test.ts tests/rh/esocial-periodic-termination.test.ts tests/rh/esocial-xmlsec-interoperability.test.ts
       - name: RH scoped typecheck
         run: pnpm exec tsc --noEmit -p tsconfig.rh.json
       - name: RH eSocial lint
