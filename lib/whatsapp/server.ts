@@ -1,25 +1,19 @@
 import "server-only";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { requireOrganizationContext } from "@/lib/auth";
+import { WhatsAppDomainError } from "./domain";
+import type { WhatsAppDashboardData } from "./types";
 
-import { hasCapability, requireCapability } from "@/lib/authorization";
-
-function relationName(value: unknown, fallback: string) {
-  if (Array.isArray(value)) return relationName(value[0], fallback);
-  if (value && typeof value === "object") {
-    const row = value as Record<string, unknown>;
-    return String(row.title ?? row.name ?? row.code ?? fallback);
-  }
-  return fallback;
-}
-
-export async function loadWhatsAppWorkspace(selectedConversationId?: string | null) {
-  const context = await requireCapability("whatsapp", "read");
-  const canManage = await hasCapability("whatsapp", "manage", null, context);
+export async function getWhatsAppDashboard(selectedConversationId?: string | null): Promise<WhatsAppDashboardData> {
+  const context = await requireOrganizationContext();
 
   const [
     accountsResult,
     conversationsResult,
-    bindingsResult,
-    clientsResult,
+    contactsResult,
+    templatesResult,
+    automationResult,
+    sourcesResult,
     projectsResult,
     contractTemplatesResult,
     proposalVersionsResult,
@@ -29,32 +23,36 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
   ] = await Promise.all([
     context.supabase
       .from("whatsapp_accounts")
-      .select("id,waba_id,phone_number_id,display_phone_number,business_name,active,is_default")
+      .select("id,name,phone_number,status,provider,health_status,last_connected_at")
       .eq("organization_id", context.organizationId)
-      .order("is_default", { ascending: false }),
-    context.supabase
-      .from("whatsapp_conversations")
-      .select(
-        "id,status,client_id,project_id,contract_id,sac_ticket_id,assigned_to,last_customer_message_at,last_message_at,unread_count,whatsapp_contacts(display_name,profile_name,phone_e164,wa_id),clients(legal_name,trade_name),projects(code,name)"
-      )
-      .eq("organization_id", context.organizationId)
-      .order("last_message_at", { ascending: false, nullsFirst: false })
-      .limit(200),
-    context.supabase
-      .from("whatsapp_content_bindings")
-      .select(
-        "id,name,source_type,source_id,source_field,meta_template_name,language_code,parameter_order,active"
-      )
-      .eq("organization_id", context.organizationId)
-      .eq("active", true)
       .order("name"),
     context.supabase
-      .from("clients")
-      .select("id,legal_name,trade_name,phone")
+      .from("whatsapp_conversations")
+      .select("id,contact_id,status,assigned_to,last_message_at,unread_count,whatsapp_contacts(id,display_name,phone_number)")
       .eq("organization_id", context.organizationId)
-      .is("archived_at", null)
-      .order("legal_name")
+      .order("last_message_at", { ascending: false })
+      .limit(100),
+    context.supabase
+      .from("whatsapp_contacts")
+      .select("id,display_name,phone_number,client_id,lead_id")
+      .eq("organization_id", context.organizationId)
+      .order("display_name")
       .limit(300),
+    context.supabase
+      .from("whatsapp_templates")
+      .select("id,name,category,status,language,provider_template_name")
+      .eq("organization_id", context.organizationId)
+      .order("name"),
+    context.supabase
+      .from("whatsapp_automation_rules")
+      .select("id,name,trigger_type,enabled,priority")
+      .eq("organization_id", context.organizationId)
+      .order("priority"),
+    context.supabase
+      .from("whatsapp_content_bindings")
+      .select("id,name,source_type,source_id,source_field,active")
+      .eq("organization_id", context.organizationId)
+      .order("name"),
     context.supabase
       .from("projects")
       .select("id,client_id,code,name,status")
@@ -76,19 +74,19 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
       .limit(50),
     context.supabase
       .from("contract_versions")
-      .select("id,version_number,document_path,contracts(title,code)")
+      .select("id,version_number,document_path,contracts!contract_versions_contract_id_fkey(title,code)")
       .eq("organization_id", context.organizationId)
       .order("created_at", { ascending: false })
       .limit(50),
     context.supabase
       .from("amendment_versions")
-      .select("id,version_number,document_path,amendments(code)")
+      .select("id,version_number,document_path,amendments!amendment_versions_amendment_id_fkey(code)")
       .eq("organization_id", context.organizationId)
       .order("created_at", { ascending: false })
       .limit(50),
     context.supabase
       .from("project_document_versions")
-      .select("id,version_number,file_name,project_documents(title,code)")
+      .select("id,version_number,file_name,project_documents!project_document_versions_document_id_fkey(title,code)")
       .eq("organization_id", context.organizationId)
       .order("created_at", { ascending: false })
       .limit(50)
@@ -103,99 +101,53 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
   const messagesResult = selectedId
     ? await context.supabase
         .from("whatsapp_messages")
-        .select(
-          "id,direction,message_type,status,body,caption,source_binding_id,source_snapshot,error_code,error_message,occurred_at"
-        )
-        .eq("conversation_id", selectedId)
+        .select("id,conversation_id,direction,type,status,text_body,created_at,sent_at,delivered_at,read_at,failed_at,error_code,error_message,source_snapshot")
         .eq("organization_id", context.organizationId)
-        .order("occurred_at", { ascending: true })
-        .limit(500)
+        .eq("conversation_id", selectedId)
+        .order("created_at", { ascending: true })
+        .limit(300)
     : { data: [], error: null };
 
-  const sourceCatalog = [
-    ...(contractTemplatesResult.data ?? []).map(item => ({
-      token: `CONTRACT_TEMPLATE|${item.id}|BODY_TEMPLATE`,
-      label: `${item.name} · modelo contratual V${item.version_number}`
-    })),
-    ...(proposalVersionsResult.data ?? []).flatMap(item => [
-      {
-        token: `PROPOSAL_VERSION|${item.id}|COMMERCIAL_SUMMARY`,
-        label: `${item.title} · resumo comercial V${item.version_number}`
-      },
-      ...(item.document_path
-        ? [
-            {
-              token: `PROPOSAL_VERSION|${item.id}|DOCUMENT`,
-              label: `${item.title} · documento V${item.version_number}`
-            }
-          ]
-        : [])
-    ]),
-    ...(contractVersionsResult.data ?? []).flatMap(item => {
-      const name = relationName(item.contracts, "Contrato");
-      return [
-        {
-          token: `CONTRACT_VERSION|${item.id}|RENDERED_BODY`,
-          label: `${name} · corpo contratual V${item.version_number}`
-        },
-        ...(item.document_path
-          ? [
-              {
-                token: `CONTRACT_VERSION|${item.id}|DOCUMENT`,
-                label: `${name} · documento V${item.version_number}`
-              }
-            ]
-          : [])
-      ];
-    }),
-    ...(amendmentVersionsResult.data ?? []).flatMap(item => {
-      const name = relationName(item.amendments, "Aditivo");
-      return [
-        {
-          token: `AMENDMENT_VERSION|${item.id}|RENDERED_BODY`,
-          label: `${name} · texto V${item.version_number}`
-        },
-        ...(item.document_path
-          ? [
-              {
-                token: `AMENDMENT_VERSION|${item.id}|DOCUMENT`,
-                label: `${name} · documento V${item.version_number}`
-              }
-            ]
-          : [])
-      ];
-    }),
-    ...(projectDocumentVersionsResult.data ?? []).map(item => ({
-      token: `PROJECT_DOCUMENT_VERSION|${item.id}|DOCUMENT`,
-      label: `${relationName(item.project_documents, item.file_name)} · documento V${item.version_number}`
-    }))
-  ];
+  const errors = [
+    accountsResult.error,
+    conversationsResult.error,
+    contactsResult.error,
+    templatesResult.error,
+    automationResult.error,
+    sourcesResult.error,
+    projectsResult.error,
+    contractTemplatesResult.error,
+    proposalVersionsResult.error,
+    contractVersionsResult.error,
+    amendmentVersionsResult.error,
+    projectDocumentVersionsResult.error,
+    messagesResult.error
+  ].filter(Boolean);
+
+  if (errors.length) {
+    throw new WhatsAppDomainError("DASHBOARD_LOAD_FAILED", errors[0]?.message ?? "Falha ao carregar WhatsApp.");
+  }
 
   return {
     context,
-    canManage,
     accounts: accountsResult.data ?? [],
     conversations,
-    bindings: bindingsResult.data ?? [],
-    clients: clientsResult.data ?? [],
+    contacts: contactsResult.data ?? [],
+    templates: templatesResult.data ?? [],
+    automationRules: automationResult.data ?? [],
+    contentBindings: sourcesResult.data ?? [],
     projects: projectsResult.data ?? [],
-    sourceCatalog,
+    contractTemplates: contractTemplatesResult.data ?? [],
+    proposalVersions: proposalVersionsResult.data ?? [],
+    contractVersions: contractVersionsResult.data ?? [],
+    amendmentVersions: amendmentVersionsResult.data ?? [],
+    projectDocumentVersions: projectDocumentVersionsResult.data ?? [],
     selectedConversationId: selectedId,
-    messages: messagesResult.data ?? [],
-    errors: [
-      accountsResult.error,
-      conversationsResult.error,
-      bindingsResult.error,
-      clientsResult.error,
-      projectsResult.error,
-      contractTemplatesResult.error,
-      proposalVersionsResult.error,
-      contractVersionsResult.error,
-      amendmentVersionsResult.error,
-      projectDocumentVersionsResult.error,
-      messagesResult.error
-    ]
-      .filter(Boolean)
-      .map(error => String(error?.code ?? "QUERY_FAILED"))
+    messages: messagesResult.data ?? []
   };
+}
+
+export async function getWhatsAppAdminClient() {
+  const context = await requireOrganizationContext();
+  return { context, supabase: await createSupabaseServerClient() };
 }
