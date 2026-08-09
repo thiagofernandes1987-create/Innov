@@ -73,7 +73,7 @@ export async function releaseProjectToClient(formData: FormData) {
     .from("projects")
     .update({ client_released_at: release ? new Date().toISOString() : null })
     .eq("id", projectId);
-  if (error) fail(`/app/obras/${projectId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}`);
   revalidatePath("/cliente/obras");
 }
@@ -293,7 +293,7 @@ export async function createProjectResource(formData: FormData) {
     daily_cost: optionalNumber(formData, "dailyCost"),
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/equipes`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/equipes`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/equipes`);
 }
 
@@ -308,7 +308,7 @@ export async function createTeam(formData: FormData) {
     leader_user_id: optionalText(formData, "leaderUserId"),
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/equipes`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/equipes`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/equipes`);
 }
 
@@ -353,7 +353,7 @@ export async function updateDailyLog(formData: FormData) {
     delay_notes: optionalText(formData, "delayNotes"),
     updated_at: new Date().toISOString()
   }).eq("id", dailyLogId).in("status", ["DRAFT", "REJECTED"]);
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
 }
 
@@ -375,7 +375,7 @@ export async function addDailyLogActivity(formData: FormData) {
     progress_after: progressAfter == null ? null : progressAfter / 100,
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
 }
 
@@ -429,7 +429,7 @@ export async function uploadDailyLogMedia(formData: FormData) {
   });
   if (error) {
     await supabase.storage.from("daily-log-media").remove([storagePath]);
-    fail(path, error.message);
+    failProjectDatabase(path, "project-write", error, "Não foi possível concluir a operação.");
   }
   revalidatePath(path);
 }
@@ -439,7 +439,7 @@ export async function submitDailyLog(formData: FormData) {
   const dailyLogId = text(formData, "dailyLogId");
   const { supabase } = await requireOrganizationContext(fieldRoles);
   const { error } = await supabase.rpc("submit_daily_log", { p_daily_log_id: dailyLogId });
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
 }
 
@@ -454,7 +454,7 @@ export async function decideDailyLog(formData: FormData) {
     p_reason: optionalText(formData, "reason"),
     p_release_client: bool(formData, "releaseClient")
   });
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
   revalidatePath(`/cliente/obras/${projectId}`);
 }
@@ -540,7 +540,7 @@ export async function uploadProjectDocument(formData: FormData) {
   });
   if (error) {
     await supabase.storage.from("project-documents").remove([storagePath]);
-    fail(errorPath, error.message);
+    failProjectDatabase(errorPath, "project-write", error, "Não foi possível concluir a operação.");
   }
   revalidatePath(`/app/obras/${projectId}/documentos`);
   revalidatePath("/app/documentos");
@@ -552,7 +552,7 @@ export async function releaseProjectDocument(formData: FormData) {
   const versionId = text(formData, "versionId");
   const { supabase } = await requireOrganizationContext(managementRoles);
   const { error } = await supabase.rpc("release_project_document_version", { p_version_id: versionId });
-  if (error) fail(`/app/obras/${projectId}/documentos`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/documentos`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/documentos`);
   revalidatePath(`/cliente/obras/${projectId}`);
 }
