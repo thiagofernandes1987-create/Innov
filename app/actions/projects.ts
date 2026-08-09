@@ -8,7 +8,6 @@ import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
 import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
 import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
-import { createScheduleDependency } from "./schedule";
 
 const managementRoles = [
   "SUPER_ADMIN",
@@ -239,10 +238,6 @@ export async function moveTask(formData: FormData) {
   revalidatePath(path);
   revalidatePath(`/app/obras/${projectId}/cronograma`);
   revalidatePath("/cliente/obras");
-}
-
-export async function createDependency(formData: FormData) {
-  return createScheduleDependency(formData);
 }
 
 export async function createMilestone(formData: FormData) {

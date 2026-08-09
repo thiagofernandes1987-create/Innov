@@ -58,21 +58,6 @@ export async function convertCrmLead(data:FormData){
  if(error)fail(`/app/crm/leads/${id}`,error.message);const result=conversion&&typeof conversion==="object"?conversion as Record<string,unknown>:{};redirect(`/app/clientes/${result.clientId??""}`);
 }
 
-export async function createCrmOpportunity(data:FormData){
- const context=await requireCapability("crm","create");const path="/app/crm/oportunidades/novo";
- const{data:opportunity,error}=await context.supabase.rpc("create_crm_opportunity",{
-  p_organization_id:context.organizationId,p_client_id:optional(data,"clientId"),p_lead_id:optional(data,"leadId"),p_title:text(data,"title"),
-  p_description:optional(data,"description"),p_estimated_value:numberOrNull(text(data,"estimatedValue")),p_stage:text(data,"stage")||"PROSPECTING",
-  p_probability:numberOrNull(text(data,"probability"))??25,p_expected_close_date:optional(data,"expectedCloseDate"),p_source:optional(data,"source"),p_owner_id:optional(data,"ownerId")
- });
- if(error)fail(path,error.message);const row=resultRow(opportunity as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/app/crm/oportunidades/${row?.id??""}`);
-}
-
-// Motivo e observação são dois campos, não um. Motivo é **escolhido** de uma
-// lista curada, porque alimenta contagem — "quantos perdemos por preço neste
-// trimestre" — e contagem sobre texto que cada pessoa escreve do seu jeito não
-// fecha. Observação é prosa daquele negócio, livre, e não entra em contagem
-// nenhuma.
 export async function moveCrmOpportunityStage(data:FormData){
  const id=text(data,"opportunityId");const context=await requireCapability("crm","update");
  const path=`/app/crm/oportunidades/${id}`;

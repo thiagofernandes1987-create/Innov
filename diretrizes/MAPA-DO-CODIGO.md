@@ -30,12 +30,12 @@ a ignorar.
 |---|---|
 | Aplicativos no registro | 24 |
 | Rotas | 163 (144 páginas, 19 de API) |
-| Server actions | 190 em 34 arquivos |
+| Server actions | 188 em 34 arquivos |
 | Módulos de `lib/` | 101 |
 | Funções do banco declaradas | 239 |
 | Funções do banco chamadas do código | 119 |
 | Suítes de teste | 65, com 687 casos |
-| Migrations | 172 |
+| Migrations | 173 |
 | Validadores de CI | 29 |
 | Módulos de `lib/` citados por algum teste | 57 de 101 |
 
@@ -496,7 +496,6 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `addDailyLogActivity` | sessão da organização |
 | `createBaseline` | sessão da organização |
 | `createDailyLog` | sessão da organização |
-| `createDependency` | sessão da organização |
 | `createMilestone` | sessão da organização |
 | `createProjectResource` | sessão da organização |
 | `createTask` | — |
@@ -542,7 +541,6 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `convertCrmLead` | crm:update |
 | `createClientSacTicket` | sac:update |
 | `createCrmLead` | crm:create |
-| `createCrmOpportunity` | crm:create |
 | `createRelationshipClient` | clientes:create |
 | `createSacTicket` | sac:create |
 | `moveCrmLeadStage` | crm:update |
@@ -749,7 +747,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `create_commercial_proposal` | `supabase/migrations/20260729163500_flexible_projects_proposals_discounts.sql` | `app/actions/flexible-workflows.ts` |
 | `create_contract_from_proposal` | `supabase/migrations/20260719231500_stage9_workflows.sql` | `app/actions/commercial-documents.ts` |
 | `create_crm_lead` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/relationship.ts` |
-| `create_crm_opportunity` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/crm-opportunities.ts`, `app/actions/relationship.ts` |
+| `create_crm_opportunity` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/crm-opportunities.ts` |
 | `create_finance_entry_from_contract` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | `app/actions/operational-finance.ts` |
 | `create_finance_entry_from_procurement_order` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | `app/actions/operational-finance.ts` |
 | `create_independent_project` | `supabase/migrations/20260729163500_flexible_projects_proposals_discounts.sql` | — (só por SQL ou trigger) |
@@ -1066,7 +1064,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 |---|---|
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
-| Server action nunca referenciada | 2 |
+| Server action nunca referenciada | 0 |
 | Módulo de `lib/` sem teste que o cite | 44 de 101 |
 
 ### Módulos sem teste que os cite
