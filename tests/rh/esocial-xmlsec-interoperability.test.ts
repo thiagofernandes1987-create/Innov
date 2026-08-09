@@ -3,13 +3,14 @@ import{mkdtempSync,readFileSync,writeFileSync}from"node:fs";
 import{tmpdir}from"node:os";
 import{join}from"node:path";
 import{describe,expect,it}from"vitest";
-import{buildS1010}from"@/lib/rh/integrations/esocial-xml";
+import{buildS1010,makeEsocialEventId}from"@/lib/rh/integrations/esocial-xml";
 import{canonicalizeEsocialSignableElement,signEsocialXmlWithMaterial}from"@/lib/rh/integrations/esocial-signature-core";
 
 function requireBinary(name:string,args=["--version"]){const probe=spawnSync(name,args,{encoding:"utf8"});if(probe.error||probe.status!==0)throw new Error(`${name} é obrigatório para o gate de interoperabilidade XMLDSig.`);}
 function certBase64(pem:string){return pem.replace(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|\s+/g,"");}
 
-const unsigned=buildS1010({environment:"RESTRICTED",operation:"INCLUDE",employerType:1,employerNumber:"12345678000199",rubricCode:"XMLSEC",tableCode:"1",validFrom:"2026-01-01",description:"Rubrica XMLSec",natureCode:"1000",rubricType:"1",codIncCP:"11",codIncIRRF:"11",codIncFGTS:"11"});
+const eventKey=makeEsocialEventId(1,"12345678000199",new Date("2026-08-09T11:00:00Z"),1);
+const unsigned=buildS1010({eventKey,environment:"RESTRICTED",operation:"INCLUDE",employerType:1,employerNumber:"12345678000199",rubricCode:"XMLSEC",tableCode:"1",validFrom:"2026-01-01",description:"Rubrica XMLSec",natureCode:"1000",rubricType:"1",codIncCP:"11",codIncIRRF:"11",codIncFGTS:"11"});
 
 describe("eSocial XMLDSig interoperability",()=>{
  it("produz a mesma C14N do xmllint e assinatura verificável pelo xmlsec1",()=>{
