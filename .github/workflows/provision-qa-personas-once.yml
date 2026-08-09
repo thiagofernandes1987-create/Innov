@@ -29,8 +29,13 @@ jobs:
           node-version: 24
           package-manager-cache: false
 
-      - name: Install Supabase runtime
-        run: npm install --no-save --no-package-lock @supabase/supabase-js@2.57.4
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
 
       - name: Provision authenticated QA personas
-        run: node scripts/provision-qa-personas.mjs
+        run: pnpm provision:qa-personas
