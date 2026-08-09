@@ -77,7 +77,9 @@ Foram consolidados:
 - remoção do wrapper antigo `createDependency`, pois o planner usa `createScheduleDependency` diretamente;
 - remoção de `createProjectFromContract` legado, substituído por `createProjectFromContractSafe` + RPC `create_project_from_contract_v2`.
 
-No commit `aa6e8e0ccc3f87ccfc14c5cb854f8554216f80ea`, o gerador canônico foi executado e verificado sem confrontos, `diretrizes/MAPA-DO-CODIGO.md` foi regenerado e o workflow temporário de manutenção se auto removeu. Os workflows disparados pelo commit do `github-actions[bot]` ficaram em `action_required`; este commit documental normal existe para reabrir os gates sobre o mesmo conteúdo funcional, sem tratar `action_required` como falha de código.
+No commit `aa6e8e0ccc3f87ccfc14c5cb854f8554216f80ea`, o gerador canônico foi executado e verificado sem confrontos, `diretrizes/MAPA-DO-CODIGO.md` foi regenerado e o workflow temporário de manutenção se auto removeu.
+
+A VACINA-057 também foi reconciliada sem afirmar aplicação inexistente: 70 migrations RH/Stage 22 presentes no branch e ausentes do ledger real foram registradas em `debito.arquivos_sem_aplicacao`, com responsável e bloqueio explícito até existir homologação isolada. O próprio `validate-migrations-applied` confirmou 234 arquivos, 202 migrations aplicadas e nenhuma divergência **nova**; isso não transforma as 70 pendentes em funcionalidade disponível no banco principal.
 
 ## 4. Homologação eSocial real — pronta para execução, mas externa
 
