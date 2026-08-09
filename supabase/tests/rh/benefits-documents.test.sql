@@ -25,6 +25,10 @@ begin
  if v_matched<>1 or v_divergent<>0 or v_missing<>0 or abs(v_diff)>0.01 then raise exception 'BENEFIT 1 falhou: reconciliação idêntica incorreta';end if;
  if (select status from public.rh_benefit_provider_invoices where id=v_invoice)<>'RECONCILED' then raise exception 'BENEFIT 2 falhou: fatura não reconciliada';end if;
  if (select charge_id from public.rh_benefit_provider_invoice_items where invoice_id=v_invoice)<>v_charge then raise exception 'BENEFIT 3 falhou: cobrança interna não vinculada';end if;
+ perform public.approve_rh_benefit_provider_invoice(v_invoice);
+ if (select status from public.rh_benefit_provider_invoices where id=v_invoice)<>'APPROVED' then raise exception 'BENEFIT 4 falhou: fatura não aprovada';end if;
+ perform public.pay_rh_benefit_provider_invoice(v_invoice,'PAG-TESTE-001','comprovante-beneficio.pdf');
+ if not exists(select 1 from public.rh_benefit_provider_invoices where id=v_invoice and status='PAID' and payment_reference='PAG-TESTE-001' and evidence_reference='comprovante-beneficio.pdf') then raise exception 'BENEFIT 5 falhou: pagamento/evidência não persistidos';end if;
 
  insert into public.rh_documents(organization_id,worker_id,employment_id,category,title,description,sensitivity,status,visible_to_worker,created_by)
  values(v_org,v_worker,v_emp,'PAYROLL','Comunicado ao trabalhador','Documento de teste','STANDARD','DRAFT',false,v_user) returning id into v_doc;
@@ -43,5 +47,5 @@ begin
  if v_auth<>1 or not coalesce(v_self,false) then raise exception 'DOC 4 falhou: autorização self-service não concedida';end if;
  if not exists(select 1 from public.rh_document_access_log where document_version_id=v_version and actor_user_id=v_user and worker_self_service and access_kind='SIGNED_URL') then raise exception 'DOC 5 falhou: acesso não auditado';end if;
 
- raise notice 'RH benefícios/documentos — reconciliação e Meu RH aprovados.';
+ raise notice 'RH benefícios/documentos — reconciliação, pagamento e Meu RH aprovados.';
 end$$;
