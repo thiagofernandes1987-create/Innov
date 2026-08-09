@@ -5,31 +5,31 @@ import { formatCurrency } from "@/lib/domain";
 import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
 import { singleRelation } from "@/lib/supabase/relations";
 
-const proposalBudgetStatusLabels: Record<string, string> = {
+const proposalBudgetStatuses = [
+  "TECHNICAL_REVIEW",
+  "FINANCIAL_REVIEW",
+  "APPROVAL_PENDING",
+  "APPROVED"
+] as const;
+
+const proposalBudgetStatusLabels: Record<(typeof proposalBudgetStatuses)[number], string> = {
   TECHNICAL_REVIEW: "Revisão técnica",
   FINANCIAL_REVIEW: "Revisão financeira",
   APPROVAL_PENDING: "Em aprovação",
   APPROVED: "Aprovado"
 };
 
-const budgetVersionSelect = "id,version_number,sale_price,status,frozen_at,budgets!inner(code,title,status,clients(legal_name,trade_name))";
+const budgetVersionSelect = "id,version_number,sale_price,status,frozen_at,budgets!budget_versions_budget_id_fkey!inner(code,title,status,clients(legal_name,trade_name))";
 
 export default async function NewProposalPage() {
   const context = await requireCapability("propostas", "create");
 
-  const [readyVersionsResult, reviewVersionsResult, clientsResult] = await Promise.all([
-    context.supabase
-      .from("budget_versions")
-      .select("id,version_number,sale_price,status,frozen_at,budgets!budget_versions_budget_id_fkey!inner(code,title,status,clients(legal_name,trade_name))")
-      .eq("organization_id", context.organizationId)
-      .in("status", ["APPROVAL_PENDING", "APPROVED"])
-      .gt("sale_price", 0)
-      .order("created_at", { ascending: false }),
+  const [budgetVersionsResult, clientsResult] = await Promise.all([
     context.supabase
       .from("budget_versions")
       .select(budgetVersionSelect)
       .eq("organization_id", context.organizationId)
-      .in("status", ["TECHNICAL_REVIEW", "FINANCIAL_REVIEW"])
+      .in("status", [...proposalBudgetStatuses])
       .gt("sale_price", 0)
       .order("created_at", { ascending: false }),
     context.supabase
@@ -40,24 +40,19 @@ export default async function NewProposalPage() {
       .order("legal_name")
   ]);
 
-  reportDataAccessError("new-proposal.ready-budget-versions", readyVersionsResult.error);
-  reportDataAccessError("new-proposal.review-budget-versions", reviewVersionsResult.error);
+  reportDataAccessError("new-proposal.budget-versions", budgetVersionsResult.error);
   reportDataAccessError("new-proposal.clients", clientsResult.error);
 
-  const versionsById = new Map(
-    [...(readyVersionsResult.data ?? []), ...(reviewVersionsResult.data ?? [])]
-      .map(version => [version.id, version] as const)
-  );
-
-  const budgetOptions = [...versionsById.values()].map((version) => {
+  const budgetOptions = (budgetVersionsResult.data ?? []).map((version) => {
     const budget = singleRelation(version.budgets);
     const client = singleRelation(budget?.clients);
-    const approved = version.status === "APPROVED";
-    const state = proposalBudgetStatusLabels[version.status] ?? version.status;
+    const status = version.status as (typeof proposalBudgetStatuses)[number];
+    const approved = status === "APPROVED";
+    const state = proposalBudgetStatusLabels[status] ?? status;
     return {
       id: version.id,
       price: Number(version.sale_price),
-      status: version.status,
+      status,
       approved,
       label: `${budget?.code ?? "ORÇ"} · V${version.version_number} · ${client?.trade_name || client?.legal_name || "Cliente"} · ${formatCurrency(Number(version.sale_price))} · ${state}${version.frozen_at ? " · congelado" : " · calculado"}`
     };
@@ -69,7 +64,7 @@ export default async function NewProposalPage() {
     city: client.city
   }));
 
-  const dependencyFailed = Boolean(readyVersionsResult.error || reviewVersionsResult.error || clientsResult.error);
+  const dependencyFailed = Boolean(budgetVersionsResult.error || clientsResult.error);
 
   return (
     <main className="content">
