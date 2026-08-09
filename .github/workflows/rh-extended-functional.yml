@@ -88,6 +88,13 @@ jobs:
         run: pnpm validate:migrations
       - name: Run RH database regression suite
         run: pnpm test:db:rh
+      - name: Run RH dedicated database suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/run-rh-esocial-results-db-tests.mjs
+          node scripts/run-rh-government-db-tests.mjs
+          node scripts/run-rh-time-db-tests.mjs
       - name: RH scoped typecheck
         run: pnpm exec tsc --noEmit -p tsconfig.rh.json
       - name: Lint RH actions, pages, APIs, integrations and E2E harness
