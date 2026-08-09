@@ -1,9 +1,9 @@
 name: Refresh Code Map Once
 
 on:
-  push:
+  pull_request:
     branches:
-      - feature/projeto-rh-especificacao-funcional
+      - main
     paths:
       - .github/workflows/refresh-code-map-once.yml
 
@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   refresh:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -23,7 +24,7 @@ jobs:
         with:
           ref: feature/projeto-rh-especificacao-funcional
           fetch-depth: 0
-      - name: Synchronize branch and generate canonical map
+      - name: Generate, verify and commit canonical map
         shell: bash
         run: |
           set -euo pipefail
