@@ -81,6 +81,8 @@ No commit `aa6e8e0ccc3f87ccfc14c5cb854f8554216f80ea`, o gerador canônico foi ex
 
 A VACINA-057 também foi reconciliada sem afirmar aplicação inexistente: 70 migrations RH/Stage 22 presentes no branch e ausentes do ledger real foram registradas em `debito.arquivos_sem_aplicacao`, com responsável e bloqueio explícito até existir homologação isolada. O próprio `validate-migrations-applied` confirmou 234 arquivos, 202 migrations aplicadas e nenhuma divergência **nova**; isso não transforma as 70 pendentes em funcionalidade disponível no banco principal.
 
+O CI global `#4007` atravessou todos os validadores estruturais e os cinco blocos de testes PostgreSQL globais antes de parar em um único warning de lint no Gantt. O commit `6ccf4c2c5b45110d6b349e58a3271dbed6d30acf` removeu somente `hitWidth` e `hitOffset`, ambos sem consumidores, e o ESLint isolado do planner foi aprovado com `--max-warnings=0`. Como esse commit foi produzido pelo `github-actions[bot]`, os workflows associados ficaram em `action_required`; este commit documental normal apenas reabre os gates sobre o mesmo conteúdo, sem alterar comportamento.
+
 ## 4. Homologação eSocial real — pronta para execução, mas externa
 
 O workflow manual:
