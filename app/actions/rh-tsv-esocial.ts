@@ -8,6 +8,7 @@ import {
   S2300_CONTRIBUTOR_CATEGORIES,
   type S2300ContributorCategory
 } from "@/lib/rh/integrations/esocial-tsv-xml";
+import { buildS2300Student, type S2300StudentCategory } from "@/lib/rh/integrations/esocial-tsv-student-xml";
 import { signEsocialXml } from "@/lib/rh/integrations/esocial-signature";
 import { xmlSha256, type EsocialEnvironment } from "@/lib/rh/integrations/esocial-xml";
 
@@ -26,12 +27,16 @@ function transmitter(type: 1 | 2, number: string) {
 function isContributorCategory(value: string): value is S2300ContributorCategory {
   return (S2300_CONTRIBUTOR_CATEGORIES as readonly string[]).includes(value);
 }
+function isStudentCategory(value: string): value is S2300StudentCategory { return value === "901" || value === "906"; }
+function nullableDigits(data: FormData, key: string) { const value = digits(text(data, key)); return value || null; }
 
 export async function saveTsvEsocialProfile(data: FormData) {
   const employmentId = text(data, "employmentId");
   const context = await requireCapability("rh", "update");
   const categoryCode = text(data, "categoryCode") || "721";
-  if (!isContributorCategory(categoryCode)) fail(employmentId, "Categoria S-2300 ainda não suportada por esta vertical de contribuinte individual.");
+  if (!isContributorCategory(categoryCode) && !isStudentCategory(categoryCode)) fail(employmentId, "Categoria S-2300 ainda não suportada por esta vertical.");
+  const student = isStudentCategory(categoryCode);
+  const institutionCnpj = student ? nullableDigits(data, "educationInstitutionCnpj") : null;
 
   const payload = {
     organization_id: context.organizationId,
@@ -57,10 +62,32 @@ export async function saveTsvEsocialProfile(data: FormData) {
     variable_salary_description: text(data, "variableSalaryDescription") || null,
     fgts_option_date: categoryCode === "721" ? text(data, "fgtsOptionDate") || null : null,
     judicial_process_number: text(data, "judicialProcessNumber") ? digits(text(data, "judicialProcessNumber")) : null,
+    internship_nature: student ? text(data, "internshipNature") || null : null,
+    internship_level: student ? num(data, "internshipLevel") : null,
+    internship_area: student ? text(data, "internshipArea") || null : null,
+    internship_policy_number: student ? text(data, "internshipPolicyNumber") || null : null,
+    internship_expected_end: student ? text(data, "internshipExpectedEnd") || null : null,
+    education_institution_cnpj: institutionCnpj,
+    education_institution_name: student && !institutionCnpj ? text(data, "educationInstitutionName") || null : null,
+    education_institution_street: student && !institutionCnpj ? text(data, "educationInstitutionStreet") || null : null,
+    education_institution_number: student && !institutionCnpj ? text(data, "educationInstitutionNumber") || null : null,
+    education_institution_neighborhood: student && !institutionCnpj ? text(data, "educationInstitutionNeighborhood") || null : null,
+    education_institution_postal_code: student && !institutionCnpj ? nullableDigits(data, "educationInstitutionPostalCode") : null,
+    education_institution_city_ibge_code: student && !institutionCnpj ? nullableDigits(data, "educationInstitutionCityIbgeCode") : null,
+    education_institution_state_code: student && !institutionCnpj ? text(data, "educationInstitutionStateCode").toUpperCase() || null : null,
+    integration_agent_cnpj: categoryCode === "901" ? nullableDigits(data, "integrationAgentCnpj") : null,
+    internship_supervisor_cpf: categoryCode === "901" ? nullableDigits(data, "internshipSupervisorCpf") : null,
     created_by: context.userId,
     updated_at: new Date().toISOString()
   };
+
   if (categoryCode === "721" && !payload.fgts_option_date) fail(employmentId, "Categoria 721 exige data de opção pelo FGTS.");
+  if (categoryCode === "901" && !payload.internship_level) fail(employmentId, "Categoria 901 exige nível do estágio.");
+  if (categoryCode === "906" && payload.internship_nature !== "N") fail(employmentId, "Categoria 906 exige natureza N.");
+  if (student && !payload.internship_expected_end) fail(employmentId, "Estágio/serviço civil exige data prevista de término.");
+  if (student && !institutionCnpj && (!payload.education_institution_name || !payload.education_institution_street || !payload.education_institution_number || !payload.education_institution_neighborhood)) {
+    fail(employmentId, "Instituição sem CNPJ exige razão social e endereço.");
+  }
 
   const { error } = await context.supabase.from("rh_tsv_esocial_profiles").upsert(payload, { onConflict: "organization_id,employment_id" });
   if (error) fail(employmentId, error.message);
@@ -93,7 +120,9 @@ export async function generateS2300(data: FormData) {
     if (profileError || workerError || conditionError) throw new Error(profileError?.message ?? workerError?.message ?? conditionError?.message ?? "Falha ao carregar TSVE.");
     if (!profile) throw new Error("Preencha o perfil S-2300 do TSVE.");
     if (!worker || !condition) throw new Error("TSVE exige trabalhador e condição organizacional vigentes no início.");
-    if (!isContributorCategory(profile.category_code)) throw new Error("Categoria TSVE exige uma vertical específica ainda não implementada.");
+    const contributor = isContributorCategory(profile.category_code);
+    const student = isStudentCategory(profile.category_code);
+    if (!contributor && !student) throw new Error("Categoria TSVE exige uma vertical específica ainda não implementada.");
 
     const [{ data: person }, { data: employer }, { data: establishment }, { data: position }] = await Promise.all([
       context.supabase.from("rh_people").select("full_name,cpf,birth_date,email,phone").eq("organization_id", context.organizationId).eq("id", worker.person_id).single(),
@@ -102,51 +131,75 @@ export async function generateS2300(data: FormData) {
       condition.position_id ? context.supabase.from("rh_positions").select("name,cbo_code").eq("organization_id", context.organizationId).eq("id", condition.position_id).single() : Promise.resolve({ data: null, error: null })
     ]);
     if (!person?.cpf || !person.birth_date) throw new Error("TSVE exige CPF e data de nascimento.");
-    if (!employer || !establishment || !position?.cbo_code) throw new Error("TSVE contribuinte individual exige empregador, estabelecimento e cargo/CBO na condição vigente.");
+    if (!employer || !establishment) throw new Error("TSVE exige empregador e estabelecimento na condição vigente.");
+    if (contributor && !position?.cbo_code) throw new Error("Contribuinte individual exige cargo/CBO na condição vigente.");
 
     const eType = employerType(employer.tax_id);
     const immigrant = profile.nationality_country_code !== "105"
       ? { residenceTerm: Number(profile.immigrant_residence_term) as 1 | 2, entryCondition: Number(profile.immigrant_entry_condition) as 1 | 2 | 3 | 4 | 5 | 6 | 7 }
       : null;
-    const unsigned = buildS2300Contributor({
+    const common = {
       environment,
       employerType: eType,
       employerNumber: employer.tax_id,
       cpf: person.cpf,
       fullName: person.full_name,
-      sex: profile.sex,
-      raceColor: profile.race_color,
-      maritalStatus: profile.marital_status,
+      sex: profile.sex as "M" | "F",
+      raceColor: profile.race_color as 1 | 2 | 3 | 4 | 5,
+      maritalStatus: profile.marital_status as 1 | 2 | 3 | 4 | 5 | null,
       educationLevel: profile.education_level,
       birthDate: person.birth_date,
       birthCountryCode: profile.birth_country_code,
       nationalityCountryCode: profile.nationality_country_code,
-      address: {
-        streetType: profile.street_type,
-        street: profile.street,
-        number: profile.street_number,
-        complement: profile.complement,
-        neighborhood: profile.neighborhood,
-        postalCode: profile.postal_code,
-        cityIbgeCode: profile.city_ibge_code,
-        state: profile.state_code
-      },
+      address: { streetType: profile.street_type, street: profile.street, number: profile.street_number, complement: profile.complement, neighborhood: profile.neighborhood, postalCode: profile.postal_code, cityIbgeCode: profile.city_ibge_code, state: profile.state_code },
       phone: person.phone,
       email: person.email,
       immigrant,
       registrationNumber: employment.registration_number,
-      categoryCode: profile.category_code,
       startDate: employment.admission_date,
       judicialProcessNumber: profile.judicial_process_number,
-      positionName: position.name,
-      cboCode: position.cbo_code,
-      salary: Number(condition.base_salary ?? employment.base_salary),
-      salaryUnit: profile.salary_unit,
-      variableSalaryDescription: profile.variable_salary_description,
-      fgtsOptionDate: profile.category_code === "721" ? profile.fgts_option_date : null,
       establishmentType: estType(establishment.registration_type),
       establishmentNumber: establishment.registration_number
-    });
+    };
+
+    let unsigned: string;
+    if (contributor) {
+      unsigned = buildS2300Contributor({
+        ...common,
+        categoryCode: profile.category_code,
+        positionName: position!.name,
+        cboCode: position!.cbo_code,
+        salary: Number(condition.base_salary ?? employment.base_salary),
+        salaryUnit: profile.salary_unit,
+        variableSalaryDescription: profile.variable_salary_description,
+        fgtsOptionDate: profile.category_code === "721" ? profile.fgts_option_date : null
+      });
+    } else {
+      const institution = profile.education_institution_cnpj
+        ? { cnpj: profile.education_institution_cnpj }
+        : { cnpj: null as const, name: String(profile.education_institution_name ?? ""), street: String(profile.education_institution_street ?? ""), number: String(profile.education_institution_number ?? ""), neighborhood: String(profile.education_institution_neighborhood ?? ""), postalCode: profile.education_institution_postal_code, cityIbgeCode: profile.education_institution_city_ibge_code, state: profile.education_institution_state_code };
+      const salary = Number(condition.base_salary ?? employment.base_salary);
+      unsigned = buildS2300Student({
+        ...common,
+        categoryCode: profile.category_code as S2300StudentCategory,
+        positionName: position?.name ?? null,
+        cboCode: position?.cbo_code ?? null,
+        salary: profile.category_code === "906" || salary > 0 ? salary : null,
+        salaryUnit: profile.category_code === "906" || salary > 0 ? profile.salary_unit : null,
+        variableSalaryDescription: profile.variable_salary_description,
+        student: {
+          nature: profile.internship_nature as "O" | "N",
+          level: profile.internship_level as 1 | 2 | 3 | 4 | 8 | 9 | null,
+          area: profile.internship_area,
+          policyNumber: profile.internship_policy_number,
+          expectedEndDate: profile.internship_expected_end,
+          institution,
+          integrationAgentCnpj: profile.integration_agent_cnpj,
+          supervisorCpf: profile.internship_supervisor_cpf
+        }
+      });
+    }
+
     const signed = signEsocialXml(unsigned);
     const tx = transmitter(eType, employer.tax_id);
     if (!tx.number) throw new Error("Transmissor eSocial não configurado.");
