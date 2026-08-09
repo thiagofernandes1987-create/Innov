@@ -63,7 +63,10 @@ jobs:
         run: pnpm exec playwright test tests/e2e/rh-professional-transaction.spec.ts --reporter=line,html
       - name: Verify persisted transaction
         run: node scripts/verify-rh-browser-e2e.mjs
-      - name: Upload browser and DB evidence
+      - name: Cleanup isolated transaction and restore test role
+        if: always()
+        run: node scripts/cleanup-rh-browser-e2e.mjs
+      - name: Upload browser, database and cleanup evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
