@@ -16,10 +16,6 @@ export type AplicativoAutorizado = {
   nivel: string;
 };
 
-
-
-
-
 const TODAS = "__todas__";
 
 function normalizar(texto: string): string {
@@ -301,7 +297,7 @@ function AplicativoCard({
 }
 
 function MiniGrafico({ progress }: { progress?: number | null }) {
-  if (progress === null || !Number.isFinite(progress)) return null;
+  if (progress == null || !Number.isFinite(progress)) return null;
   const value = Math.max(0, Math.min(100, progress));
   return (
     <span className="launcher-mini-grafico" aria-label={`Progresso ${Math.round(value)}%`}>
