@@ -88,7 +88,7 @@ jobs:
       - name: Validate migrations
         run: pnpm validate:migrations
       - name: Test all eSocial XML generation, XMLDSig, XMLSec and official XSD suites
-        run: pnpm exec vitest run 'tests/rh/esocial-*.test.ts'
+        run: pnpm exec vitest run tests/rh/esocial-*.test.ts
       - name: RH scoped typecheck
         run: pnpm exec tsc --noEmit -p tsconfig.rh.json
       - name: RH eSocial lint
