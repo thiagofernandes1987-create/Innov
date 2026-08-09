@@ -22,6 +22,11 @@ const viewports = [
 ];
 const themes = ["claro", "escuro"];
 
+function isPreviewOnlyVercelNoise(text) {
+  return text.includes("vercel.live/_next-live/feedback/feedback.js")
+    && text.includes("Content Security Policy");
+}
+
 await fs.mkdir(outputRoot, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 const report = {
@@ -47,14 +52,19 @@ try {
       await context.addCookies([{ name: "innovar-tema", value: theme, url: origin }]);
       const page = await context.newPage();
       const consoleErrors = [];
+      const ignoredPreviewConsoleErrors = [];
       const consoleWarnings = [];
       const pageErrors = [];
       const failedResponses = [];
       const findings = [];
 
       page.on("console", message => {
-        if (message.type() === "error") consoleErrors.push(message.text());
-        if (message.type() === "warning") consoleWarnings.push(message.text());
+        const text = message.text();
+        if (message.type() === "error") {
+          if (isPreviewOnlyVercelNoise(text)) ignoredPreviewConsoleErrors.push(text);
+          else consoleErrors.push(text);
+        }
+        if (message.type() === "warning") consoleWarnings.push(text);
       });
       page.on("pageerror", error => pageErrors.push(error.message));
       page.on("response", response => {
@@ -115,6 +125,7 @@ try {
           geometry,
           undersizedTargets,
           consoleErrors,
+          ignoredPreviewConsoleErrors,
           consoleWarnings,
           pageErrors,
           failedResponses,
