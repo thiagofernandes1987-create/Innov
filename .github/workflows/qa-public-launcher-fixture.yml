@@ -16,21 +16,23 @@ concurrency:
 jobs:
   capture:
     runs-on: ubuntu-latest
+    environment: homologation
     timeout-minutes: 20
     container:
       image: mcr.microsoft.com/playwright:v1.55.0-noble
     env:
-      PREVIEW_URL: ${{ vars.QA_PUBLIC_PREVIEW_URL }}
+      PREVIEW_URL: ${{ vars.QA_PUBLIC_PREVIEW_URL || 'https://innov-git-audit-regressao-main-20260808-apex-method.vercel.app/amostra-launcher' }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
       QA_OUTPUT_DIR: artifacts/public-launcher-fixture
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Validate fresh public preview
+      - name: Validate current public preview
         shell: bash
         run: |
           if [ -z "$PREVIEW_URL" ]; then
-            echo "::error::QA público bloqueado: configure QA_PUBLIC_PREVIEW_URL com a URL atual de /amostra-launcher acessível sem login."
+            echo "::error::QA público bloqueado: preview da branch ausente."
             exit 1
           fi
 
