@@ -31,7 +31,7 @@ jobs:
           - module_key: obras
             module_route: /app/pipeline/projeto
             persona: gestor_de_obras
-            heading: Projetos|Pipeline|Obras
+            heading: Trilha do projeto
     env:
       PREVIEW_URL: ${{ vars.QA_PREVIEW_URL || 'https://innov-git-audit-regressao-main-20260808-apex-method.vercel.app' }}
       MODULE_KEY: ${{ matrix.module_key }}
