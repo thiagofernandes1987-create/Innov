@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { generateS2300, saveTsvEsocialProfile } from "@/app/actions/rh-tsv-esocial";
+import { generateTsvS2300, saveTsvEsocialProfile } from "@/app/actions/rh-tsv-esocial";
 import { requireCapability } from "@/lib/authorization";
 
 export const dynamic = "force-dynamic";
@@ -96,6 +96,6 @@ export default async function TsvDetailPage({ params, searchParams }: { params: 
       <div className="form-actions"><button className="button button-primary" type="submit">Salvar perfil S-2300</button></div>
     </form>
 
-    <section className="card card-pad"><span className="eyebrow">PRODUÇÃO RESTRITA</span><h2>Gerar e assinar S-2300</h2><form action={generateS2300}><input type="hidden" name="employmentId" value={employment.id} /><input type="hidden" name="environment" value="RESTRICTED" /><button className="button button-primary" type="submit" disabled={!profile || !condition}>Gerar + assinar S-2300</button></form>{studentCategory ? <p className="validation">O XML inclui infoEstagiario e local de trabalho conforme a categoria e a data de início.</p> : null}{event ? <p>Último evento: <Link className="text-link" href={`/app/rh/obrigacoes/esocial/eventos/${event.id}`}>{event.status}{event.receipt_number ? ` · recibo ${event.receipt_number}` : ""}</Link></p> : null}</section>
+    <section className="card card-pad"><span className="eyebrow">PRODUÇÃO RESTRITA</span><h2>Gerar e assinar S-2300</h2><form action={generateTsvS2300}><input type="hidden" name="employmentId" value={employment.id} /><input type="hidden" name="environment" value="RESTRICTED" /><button className="button button-primary" type="submit" disabled={!profile || !condition}>Gerar + assinar S-2300</button></form>{studentCategory ? <p className="validation">O XML inclui infoEstagiario e local de trabalho conforme a categoria e a data de início.</p> : null}{event ? <p>Último evento: <Link className="text-link" href={`/app/rh/obrigacoes/esocial/eventos/${event.id}`}>{event.status}{event.receipt_number ? ` · recibo ${event.receipt_number}` : ""}</Link></p> : null}</section>
   </main>;
 }
