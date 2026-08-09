@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { safeInternalReturnPath } from "../lib/organization-context";
 import { mapPublicOperationError } from "../lib/public-errors";
@@ -45,7 +46,7 @@ describe("mapPublicOperationError", () => {
     vi.restoreAllMocks();
   });
 
-  it("não expõe a mensagem interna e devolve identificador de correlação", () => {
+  it("não expõe a mensagem interna e mantém a assinatura pública sanitizada", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     const result = mapPublicOperationError(
       { code: "42501", message: "permission denied for table finance_entries" },
@@ -59,6 +60,12 @@ describe("mapPublicOperationError", () => {
       correlationId: expect.stringMatching(/^[0-9a-f-]{36}$/)
     });
     expect(JSON.stringify(result)).not.toContain("finance_entries");
+
+    const publicSigning = fs.readFileSync("app/actions/public-signing.ts", "utf8");
+    expect(publicSigning).toContain("reportDataAccessError");
+    expect(publicSigning).not.toMatch(/\b(?:error|valuesError|cleanupError)\??\.message\b/);
+    expect(publicSigning).not.toContain("fail(token,error.message)");
+    expect(publicSigning).not.toContain("fail(token,valuesError.message)");
   });
 
   it("registra o código interno apenas no log estruturado", () => {
