@@ -46,7 +46,7 @@ describe("mapPublicOperationError", () => {
     vi.restoreAllMocks();
   });
 
-  it("não expõe a mensagem interna e mantém a assinatura pública sanitizada", () => {
+  it("não expõe mensagens internas nas superfícies protegidas", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     const result = mapPublicOperationError(
       { code: "42501", message: "permission denied for table finance_entries" },
@@ -66,6 +66,10 @@ describe("mapPublicOperationError", () => {
     expect(publicSigning).not.toMatch(/\b(?:error|valuesError|cleanupError)\??\.message\b/);
     expect(publicSigning).not.toContain("fail(token,error.message)");
     expect(publicSigning).not.toContain("fail(token,valuesError.message)");
+
+    const operationalFinance = fs.readFileSync("app/actions/operational-finance.ts", "utf8");
+    expect(operationalFinance).toContain("reportDataAccessError");
+    expect(operationalFinance).not.toMatch(/\b(?:error|installmentError|itemsError|cleanupError)\??\.message\b/);
   });
 
   it("registra o código interno apenas no log estruturado", () => {
