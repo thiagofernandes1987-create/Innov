@@ -1,0 +1,136 @@
+name: Patch provider message findings (temporary)
+
+on:
+  push:
+    branches:
+      - audit/regressao-main-20260808
+    paths:
+      - ".github/workflows/patch-provider-message-findings.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@v6
+        with:
+          ref: audit/regressao-main-20260808
+      - name: Apply exact reviewed replacements
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+
+          def replace_once(file, old, new):
+              p = Path(file)
+              src = p.read_text()
+              count = src.count(old)
+              if count != 1:
+                  raise SystemExit(f"{file}: expected exactly 1 occurrence, found {count}: {old[:100]!r}")
+              p.write_text(src.replace(old, new, 1))
+
+          # create-budget.ts
+          replace_once("app/actions/create-budget.ts",
+              'import { requireOrganizationContext } from "@/lib/auth";\n',
+              'import { requireOrganizationContext } from "@/lib/auth";\nimport { reportDataAccessError } from "@/lib/errors/data-access";\n')
+          replace_once("app/actions/create-budget.ts",
+              '  if (error || !projectId) {\n    redirect(`/app/obras/nova?error=${encodeURIComponent(error?.message ?? "Não foi possível criar a obra")}`);\n  }',
+              '  if (error || !projectId) {\n    reportDataAccessError("create-budget.create-independent-project", error);\n    redirect(`/app/obras/nova?error=${encodeURIComponent("Não foi possível criar a obra.")}`);\n  }')
+
+          # cub.ts: validações locais continuam detalhadas; RPC nunca devolve texto bruto.
+          replace_once("app/actions/cub.ts",
+              'import { requireOrganizationContext } from "@/lib/auth";\n',
+              'import { requireOrganizationContext } from "@/lib/auth";\nimport { reportDataAccessError } from "@/lib/errors/data-access";\n')
+          replace_once("app/actions/cub.ts",
+              '  if (error) {\n    redirect(`/app/orcamentos/cub/novo?error=${encodeURIComponent(error.message)}`);\n  }',
+              '  if (error) {\n    reportDataAccessError("cub.register-manual-reference", error);\n    redirect(`/app/orcamentos/cub/novo?error=${encodeURIComponent("Não foi possível registrar a referência CUB.")}`);\n  }')
+
+          # budgets.ts: `error` aqui é validação local, não provedor; nome explícito evita falso positivo.
+          replace_once("app/actions/budgets.ts",
+              '  } catch (error) {\n    return error instanceof Error ? error.message : "Dados inválidos.";\n  }',
+              '  } catch (validationError) {\n    return validationError instanceof Error ? validationError.message : "Dados inválidos.";\n  }')
+
+          # schedule.ts
+          replace_once("app/actions/schedule.ts",
+              'import { requireOrganizationContext } from "@/lib/auth";\n',
+              'import { requireOrganizationContext } from "@/lib/auth";\nimport { reportDataAccessError } from "@/lib/errors/data-access";\n')
+          replace_once("app/actions/schedule.ts",
+              '''  console.error(`[schedule.${operation}]`, {\n    code: error.code ?? null,\n    message: error.message ?? null,\n    details: error.details ?? null,\n    hint: error.hint ?? null\n  });\n  fail(projectId, publicScheduleDatabaseMessage(error, fallback));''',
+              '''  reportDataAccessError(`schedule.${operation}`, error);\n  fail(projectId, publicScheduleDatabaseMessage(error, fallback));''')
+
+          # whatsapp.ts: WhatsAppDomainError é erro de domínio local; manter mensagem e explicitar a natureza.
+          replace_once("app/actions/whatsapp.ts",
+              '''function safeActionMessage(error: unknown, fallback: string) {\n  if (error instanceof WhatsAppDomainError) return error.message;\n  return fallback;\n}''',
+              '''function safeActionMessage(domainFailure: unknown, fallback: string) {\n  if (domainFailure instanceof WhatsAppDomainError) return domainFailure.message;\n  return fallback;\n}''')
+
+          # projects.ts
+          replace_once("app/actions/projects.ts",
+              'import { requireOrganizationContext } from "@/lib/auth";\n',
+              'import { requireOrganizationContext } from "@/lib/auth";\nimport { reportDataAccessError } from "@/lib/errors/data-access";\n')
+          replace_once("app/actions/projects.ts",
+              '''function failProjectDatabase(path:string,operation:string,error:ProjectDatabaseError|null|undefined,fallback:string):never{\n  console.error("[projects.database]",{operation,code:error?.code??"UNKNOWN",message:error?.message??null,details:error?.details??null,hint:error?.hint??null});\n  fail(path,fallback);\n}''',
+              '''function failProjectDatabase(path:string,operation:string,error:ProjectDatabaseError|null|undefined,fallback:string):never{\n  reportDataAccessError(`projects.${operation}`, error);\n  fail(path,fallback);\n}''')
+          replace_once("app/actions/projects.ts",
+              'if(wbsError)console.error("[projects.create-task.wbs]",wbsError);',
+              'if(wbsError)reportDataAccessError("projects.create-task.wbs",wbsError);')
+          replace_once("app/actions/projects.ts",
+              'if(responsibleError)console.error("[projects.create-task.responsible]",responsibleError);',
+              'if(responsibleError)reportDataAccessError("projects.create-task.responsible",responsibleError);')
+          replace_once("app/actions/projects.ts",
+              'if(projectError)console.error("[projects.create-task.project]",projectError);',
+              'if(projectError)reportDataAccessError("projects.create-task.project",projectError);')
+          replace_once("app/actions/projects.ts",
+              '  if(error||!data)fail(`/app/obras/${projectId}`,error?.message??"Não foi possível criar o diário.");',
+              '  if(error||!data)failProjectDatabase(`/app/obras/${projectId}`,"create-daily-log",error,"Não foi possível criar o diário.");')
+          replace_once("app/actions/projects.ts",
+              '  if(error||!data)fail(`/app/obras/${projectId}`,error?.message??"Não foi possível registrar o documento.");',
+              '  if(error||!data)failProjectDatabase(`/app/obras/${projectId}`,"create-project-document",error,"Não foi possível registrar o documento.");')
+
+          # pipeline.ts
+          replace_once("app/actions/pipeline.ts",
+              'import { requireOrganizationContext } from "@/lib/auth";\n',
+              'import { requireOrganizationContext } from "@/lib/auth";\nimport { reportDataAccessError } from "@/lib/errors/data-access";\n')
+          replace_once("app/actions/pipeline.ts",
+              '''  if (error) {\n    if (/duplicate key|unique/i.test(error.message)) return falha("Já existe uma etapa com esse nome.");\n    return falha("Não foi possível criar a etapa. Talvez você não tenha permissão de edição nesta trilha.");\n  }''',
+              '''  if (error) {\n    reportDataAccessError("pipeline.create-stage", error);\n    if (error.code === "23505") return falha("Já existe uma etapa com esse nome.");\n    if (error.code === "42501") return falha("Sem permissão para criar etapa nesta trilha.");\n    return falha("Não foi possível criar a etapa.");\n  }''')
+          replace_once("app/actions/pipeline.ts",
+              '''  if (error) {\n    if (/foreign key|violates/i.test(error.message)) {\n      return falha("Esta etapa ainda tem registros ligados a ela. Mova-os antes de excluir.");\n    }\n    return falha("Não foi possível excluir a etapa.");\n  }''',
+              '''  if (error) {\n    reportDataAccessError("pipeline.delete-stage", error);\n    if (error.code === "23503") {\n      return falha("Esta etapa ainda tem registros ligados a ela. Mova-os antes de excluir.");\n    }\n    return falha("Não foi possível excluir a etapa.");\n  }''')
+          replace_once("app/actions/pipeline.ts",
+              '''  if (error) {\n    if (/pipeline_cards_origem_coerente/i.test(error.message)) {\n      return falha("O registro escolhido não serve para esta trilha.");\n    }\n    return falha("Não foi possível criar o cartão.");\n  }''',
+              '''  if (error) {\n    reportDataAccessError("pipeline.create-card", error);\n    if (error.code === "23514") {\n      return falha("O registro escolhido não serve para esta trilha.");\n    }\n    return falha("Não foi possível criar o cartão.");\n  }''')
+          replace_once("app/actions/pipeline.ts",
+              '''    if (error) {\n      if (/permissão/i.test(error.message)) return falha("Sem permissão para criar funil nesta trilha.");\n      if (/desconhecido/i.test(error.message)) return falha("Modelo de funil desconhecido.");\n      if (/duplicate key|unique/i.test(error.message)) return falha("Já existe um funil com esse nome.");\n      return falha("Não foi possível criar o funil.");\n    }''',
+              '''    if (error) {\n      reportDataAccessError("pipeline.create-from-preset", error);\n      if (error.code === "42501") return falha("Sem permissão para criar funil nesta trilha.");\n      if (error.code === "23505") return falha("Já existe um funil com esse nome.");\n      return falha("Não foi possível criar o funil.");\n    }''')
+          replace_once("app/actions/pipeline.ts",
+              '''  if (error) {\n    if (/duplicate key|unique/i.test(error.message)) return falha("Já existe um funil com esse nome.");\n    if (/row-level security|policy/i.test(error.message)) return falha("Sem permissão para criar funil nesta trilha.");\n    return falha("Não foi possível criar o funil.");\n  }''',
+              '''  if (error) {\n    reportDataAccessError("pipeline.create-empty", error);\n    if (error.code === "23505") return falha("Já existe um funil com esse nome.");\n    if (error.code === "42501") return falha("Sem permissão para criar funil nesta trilha.");\n    return falha("Não foi possível criar o funil.");\n  }''')
+          replace_once("app/actions/pipeline.ts",
+              '''  if (error) {\n    if (/foreign key|violates/i.test(error.message)) {\n      return falha("Este funil ainda tem registros ligados a ele. Arquive em vez de excluir.");\n    }\n    return falha("Não foi possível excluir o funil.");\n  }''',
+              '''  if (error) {\n    reportDataAccessError("pipeline.delete", error);\n    if (error.code === "23503") {\n      return falha("Este funil ainda tem registros ligados a ele. Arquive em vez de excluir.");\n    }\n    return falha("Não foi possível excluir o funil.");\n  }''')
+          replace_once("app/actions/pipeline.ts",
+              '''  if (error) {\n    if (/pipeline_cards_origem_coerente/i.test(error.message)) {\n      return falha("O registro criado não serve para esta trilha.");\n    }\n    return falha("O registro foi criado, mas o cartão não. Vincule pelo `+` da coluna.");\n  }''',
+              '''  if (error) {\n    reportDataAccessError("pipeline.link-created-record", error);\n    if (error.code === "23514") {\n      return falha("O registro criado não serve para esta trilha.");\n    }\n    return falha("O registro foi criado, mas o cartão não. Vincule pelo `+` da coluna.");\n  }''')
+          replace_once("app/actions/pipeline.ts",
+              '''  if (error || !cliente) {\n    if (/duplicate key|unique/i.test(error?.message ?? "")) return falha("Já existe um cliente com esse documento.");\n    if (/row-level security|policy/i.test(error?.message ?? "")) return falha("Sem permissão para cadastrar cliente.");\n    // Violação de CHECK chegando como "não foi possível" é o defeito D2 de\n    // novo: o usuário fica sem saber qual campo recusar.\n    if (/check constraint/i.test(error?.message ?? "")) {\n      return falha("Um dos valores não é aceito pelo cadastro de clientes. Revise tipo, documento e canal.");\n    }\n    return falha("Não foi possível cadastrar o cliente.");\n  }''',
+              '''  if (error || !cliente) {\n    reportDataAccessError("pipeline.create-client", error);\n    if (error?.code === "23505") return falha("Já existe um cliente com esse documento.");\n    if (error?.code === "42501") return falha("Sem permissão para cadastrar cliente.");\n    if (error?.code === "23514") {\n      return falha("Um dos valores não é aceito pelo cadastro de clientes. Revise tipo, documento e canal.");\n    }\n    return falha("Não foi possível cadastrar o cliente.");\n  }''')
+          replace_once("app/actions/pipeline.ts",
+              '''  if (error || !projeto) {\n    if (/duplicate key|unique/i.test(error?.message ?? "")) return falha(`Já existe um projeto com o código ${code}.`);\n    if (/row-level security|policy/i.test(error?.message ?? "")) return falha("Sem permissão para cadastrar projeto.");\n    return falha("Não foi possível cadastrar o projeto.");\n  }''',
+              '''  if (error || !projeto) {\n    reportDataAccessError("pipeline.create-project", error);\n    if (error?.code === "23505") return falha(`Já existe um projeto com o código ${code}.`);\n    if (error?.code === "42501") return falha("Sem permissão para cadastrar projeto.");\n    return falha("Não foi possível cadastrar o projeto.");\n  }''')
+          replace_once("app/actions/pipeline.ts",
+              '''  if (error) {\n    if (/permissão|permission|policy/i.test(error.message)) return falha("Sem permissão para abrir chamado.");\n    return falha("Não foi possível abrir o chamado.");\n  }''',
+              '''  if (error) {\n    reportDataAccessError("pipeline.create-sac-ticket", error);\n    if (error.code === "42501") return falha("Sem permissão para abrir chamado.");\n    return falha("Não foi possível abrir o chamado.");\n  }''')
+
+          print("Reviewed provider-message patch applied successfully.")
+          PY
+      - name: Commit patched sources
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/actions/create-budget.ts app/actions/cub.ts app/actions/budgets.ts app/actions/schedule.ts app/actions/whatsapp.ts app/actions/projects.ts app/actions/pipeline.ts
+          git commit -m "security: eliminate remaining raw provider messages"
+          git push origin HEAD:audit/regressao-main-20260808
