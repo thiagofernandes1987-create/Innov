@@ -1,0 +1,41 @@
+name: Refresh Code Map Once
+
+on:
+  push:
+    branches:
+      - feature/projeto-rh-especificacao-funcional
+    paths:
+      - .github/workflows/refresh-code-map-once.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-code-map-once
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/projeto-rh-especificacao-funcional
+          fetch-depth: 0
+      - name: Synchronize branch and generate canonical map
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch=feature/projeto-rh-especificacao-funcional
+          git fetch origin "$branch"
+          git reset --hard "origin/$branch"
+          node scripts/gerar-mapa-do-codigo.mjs
+          node scripts/gerar-mapa-do-codigo.mjs --verificar
+          git rm .github/workflows/refresh-code-map-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add diretrizes/MAPA-DO-CODIGO.md
+          git diff --cached --check
+          git commit -m 'docs: regenera mapa canônico do código'
+          git push origin "HEAD:$branch"
