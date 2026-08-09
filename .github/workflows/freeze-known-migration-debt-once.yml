@@ -1,0 +1,81 @@
+name: Freeze Known Migration Debt Once
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/freeze-known-migration-debt-once.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: freeze-known-migration-debt-once
+  cancel-in-progress: false
+
+jobs:
+  freeze:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/projeto-rh-especificacao-funcional
+          fetch-depth: 0
+      - name: Freeze only RH and Stage 22 unapplied migrations as explicit debt
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch=feature/projeto-rh-especificacao-funcional
+          git fetch origin "$branch"
+          git reset --hard "origin/$branch"
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import json, re
+
+          ledger_path = Path('diretrizes/migrations-aplicadas.json')
+          migrations_dir = Path('supabase/migrations')
+          ledger = json.loads(ledger_path.read_text())
+          applied = set(ledger.get('aplicadas', []))
+          debt = ledger.setdefault('debito', {})
+          known = set(debt.setdefault('arquivos_sem_aplicacao', []))
+
+          def logical(filename: str) -> str:
+              return re.sub(r'^\d{14}_', '', filename).removesuffix('.sql')
+
+          candidates = []
+          for path in sorted(migrations_dir.glob('*.sql')):
+              name = logical(path.name)
+              if name in applied or name in known:
+                  continue
+              if name.startswith('rh_') or name.startswith('stage22_whatsapp_'):
+                  candidates.append(name)
+
+          if not candidates:
+              raise SystemExit('Nenhum débito novo RH/Stage22 encontrado; não há o que congelar.')
+
+          debt['arquivos_sem_aplicacao'] = sorted(known | set(candidates))
+          debt['_responsavel'] = (
+              'Projeto RH / Stage 22 — migrations presentes no branch e ainda NÃO aplicadas. '
+              'Aplicação bloqueada até ambiente isolado de homologação e evidência real; '
+              'este registro não equivale a aplicação nem autoriza merge/produção.'
+          )
+          debt['_registrado_em'] = '2026-08-09'
+          debt['_novos_neste_checkpoint'] = len(candidates)
+          ledger_path.write_text(json.dumps(ledger, ensure_ascii=False, indent=2) + '\n')
+          print(f'Débito congelado explicitamente: {len(candidates)} migration(s).')
+          for name in candidates:
+              print(f'  - {name}')
+          PY
+
+          node scripts/validate-migrations-applied.mjs
+          git rm .github/workflows/freeze-known-migration-debt-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add diretrizes/migrations-aplicadas.json
+          git diff --cached --check
+          git commit -m 'chore: congela débito conhecido de migrations RH e Stage 22'
+          git push origin "HEAD:$branch"
