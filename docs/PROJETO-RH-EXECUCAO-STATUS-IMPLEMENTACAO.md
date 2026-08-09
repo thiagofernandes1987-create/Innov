@@ -3,253 +3,201 @@
 **Data-base:** 9 de agosto de 2026  
 **Branch:** `feature/projeto-rh-especificacao-funcional`  
 **PR:** #42  
-**Regra:** planejamento não conta como entrega. `VALIDADO` exige código existente e gate executado com sucesso. Integrações externas só são `VALIDADAS EXTERNAMENTE` após resposta oficial/credencial/ambiente real.
+**Regra:** planejamento não conta como entrega. `VALIDADO` exige código existente e gate executado com sucesso. `VALIDADO EXTERNAMENTE` exige resposta oficial/credencial/ambiente real.
 
-## 1. Checkpoint automatizado atual
+## 1. Checkpoint interno candidato
 
-No head `89b97e9aeb0aee6a5f4eddb256a3bef1565775e2` os gates específicos do RH encerraram verdes:
+No head `b7b3aa01849dc7b1d45ff61d05d682984422cb30` os gates RH específicos encerraram verdes:
 
-- `[x]` `RH Extended Functional #184` — pacote XSD oficial eSocial S-1.3, migrations RH, regressão PostgreSQL principal, suítes DB dedicadas, typecheck RH, lint RH e `tests/rh`;
-- `[x]` `RH Functional #430`;
-- `[x]` `RH eSocial Generation #166`;
-- `[x]` `RH eSocial Results #243`;
-- `[x]` `RH eSocial Parser #201`;
-- `[x]` `RH Government Workspaces #236`;
-- `[x]` `RH Time #218`;
-- `[x]` `Stage 18 Concurrent E2E #385`;
-- `[x]` `Stage 20 File Security E2E #874`.
+- `[x]` `RH Extended Functional #217`;
+- `[x]` `RH Functional #452`;
+- `[x]` `RH eSocial Generation #198`;
+- `[x]` `RH eSocial Results #264`;
+- `[x]` `RH eSocial Parser #222`;
+- `[x]` `RH Government Workspaces #257`;
+- `[x]` `RH Time #239`;
+- `[x]` `Stage 18 Concurrent E2E #426`;
+- `[x]` `Stage 20 File Security E2E #915`.
 
-Os workflows globais `CI`, `QA Launcher e Projetos` e `QA Fixture Pública do Launcher` permanecem vermelhos por dívidas do monólito fora do RH; não são mascarados por este projeto.
+O gate estendido provou no mesmo SHA:
+
+- pacote oficial eSocial S-1.3 de 01/07/2026: **52 XSDs**;
+- SHA-256 do pacote observado no run: `32535dba33d0470cf44afce410840af450028fd32d3ddf9123f601c45cf9af8e`;
+- replay de **53 migrations RH**;
+- regressão PostgreSQL de empregado, estrutura, admissão, folha V1/V2, regulatório, IRRF 2026, MIT, folha-sombra, benefícios, documentos, eSocial-results, DCTFWeb/FGTS e ponto;
+- `tsc --noEmit -p tsconfig.rh.json` verde;
+- lint RH com zero warnings;
+- **37 testes** unitários/contratuais em 6 arquivos verdes;
+- XMLDSig comparado com `xmllint --c14n` e verificado por `xmlsec1` externo;
+- backup/restore isolado: **112 tabelas RH**, **29 linhas sintéticas** restauradas, catálogo/RLS/policies/funções/contagens comparados;
+- evidência de restore publicada como artifact `rh-backup-restore-evidence-31310912855`, digest `sha256:f3675e3eb46e02189c76e8814d83e47087f7baef35691eecfa9cd0133abf5669`.
+
+Os workflows globais `CI`, `QA Launcher e Projetos` e `QA Fixture Pública do Launcher` continuam vermelhos por dívidas do monólito fora do RH. Nenhum validador foi enfraquecido para mascará-las.
 
 ## 2. Fundação RH/DP — VALIDADO
 
-- `[x]` aplicativo `rh` no launcher e navegação contextual;
-- `[x]` autorização por capability e RLS por organização;
-- `[x]` proteção cross-tenant por FKs compostas;
+- `[x]` módulo RH nativo, menus e autorização por capability;
+- `[x]` RLS multi-tenant e FKs compostas;
 - `[x]` pessoas, trabalhadores, vínculos e matrículas;
-- `[x]` empresas empregadoras, estabelecimentos e lotações tributárias;
+- `[x]` empresas, estabelecimentos e lotações tributárias;
 - `[x]` cargos/CBO, funções, sindicatos/categorias e jornadas;
-- `[x]` condições contratuais versionadas por vigência e bloqueio de sobreposição;
-- `[x]` admissão como caso auditável, checklist, aprovação e ativação transacional/idempotente;
+- `[x]` condições contratuais versionadas por vigência;
+- `[x]` admissão auditável, checklist, aprovação e ativação transacional/idempotente;
 - `[x]` alterações cadastrais e contratuais versionadas.
 
-## 3. Jornada e ponto — VALIDADO
+## 3. Jornada, férias, afastamentos e benefícios — VALIDADO
 
-- `[x]` escala semanal e política de apuração;
-- `[x]` marcação bruta append-only;
-- `[x]` sequência `IN/OUT` e pendências de marcação;
-- `[x]` apuração diária e tratamentos;
-- `[x]` fechamento do período;
-- `[x]` exportação idempotente de horas/faltas para a folha;
-- `[x]` integração corrigida com o contrato atual de lançamentos da folha.
+- `[x]` marcação bruta append-only, apuração, tratamento e fechamento de ponto;
+- `[x]` exportação idempotente do ponto para folha;
+- `[x]` férias: direito, concessão, 1/3, abono e folha;
+- `[x]` afastamento separado de ausência, início/retorno e projeção eSocial nos caminhos suportados;
+- `[x]` benefícios: catálogo, adesão, cobrança, folha, fatura de fornecedor e reconciliação;
+- `[x]` aprovação de fatura somente após reconciliação/conferência do total;
+- `[x]` pagamento de fornecedor com referência e evidência.
 
 ## 4. Folha de pagamento — VALIDADO NO NÚCLEO IMPLEMENTADO
 
-### 4.1 Motor e parametrização
-
-- `[x]` competência, processamento, execução e resultado por trabalhador;
-- `[x]` rubricas estáveis + versões por vigência;
-- `[x]` bases declarativas e composição explícita por rubrica/fator;
-- `[x]` memória de cálculo por linha;
+- `[x]` competência, execução, resultado por trabalhador e memória de cálculo;
+- `[x]` rubricas/versionamento e bases declarativas;
 - `[x]` fórmulas `MANUAL`, `FIXED`, `QUANTITY_X_RATE`, `PERCENT_OF_AMOUNT`, `PERCENT_OF_BASE`, `BRACKET_DEDUCTION`, `MARGINAL_PROGRESSIVE`;
-- `[x]` parâmetros regulatórios versionados, sem regra tributária rígida no código-fonte;
-- `[x]` teste negativo permanente contra contaminação indevida de base;
-- `[x]` fechamento e proteção contra recálculo de período fechado.
-
-### 4.2 Cálculos especializados
-
-- `[x]` IRRF 2026: tabela progressiva, deduções legais × simplificada, redução mensal de 2026 e contexto acumulado;
-- `[x]` múltiplos vínculos/bases externas para acumulação;
-- `[x]` 13º: adiantamento e quitação separados;
-- `[x]` férias: direito, concessão, 1/3, abono e exportação à folha;
-- `[x]` rescisão: cálculo versionado, ajustes explícitos, aprovação e efetivação;
+- `[x]` parâmetros regulatórios versionados;
+- `[x]` IRRF 2026: tabela progressiva, deduções legal × simplificada, redução e acumulados;
+- `[x]` múltiplos vínculos/bases externas;
+- `[x]` 13º especializado;
+- `[x]` férias e rescisão especializadas;
 - `[x]` retroativos/complementares por diferença entre execuções imutáveis;
-- `[x]` provisões parametrizadas por base, percentual e vigência;
-- `[x]` contabilização por rubrica, lote balanceado e bloqueio de rubrica sem mapeamento;
-- `[x]` ordens de pagamento, conta/PIX, lote, liquidação e evidência;
-- `[x]` folha-sombra com reconciliação, tolerância, divergência e aceite bloqueado quando não conciliada.
+- `[x]` provisões;
+- `[x]` contabilização balanceada;
+- `[x]` conta/PIX, ordens, lotes, liquidação e evidência;
+- `[x]` folha-sombra/reconciliação e gate de aceite.
 
-**Limitação explícita:** CNAB/API bancária específica depende do banco/provider contratado. O arquivo operacional genérico não é rotulado como CNAB.
+**Condicional:** CNAB/API bancária específica depende do banco/provider efetivamente contratado.
 
-## 5. Benefícios — VALIDADO
+## 5. SST — VALIDADO NOS CAMINHOS SUPORTADOS
 
-- `[x]` catálogo, adesão e vigência;
-- `[x]` cobrança por competência, parte empresa, parte empregado e coparticipação;
-- `[x]` exportação para a folha;
-- `[x]` fatura de fornecedor por trabalhador/adesão;
-- `[x]` reconciliação fornecedor × cobrança interna;
-- `[x]` divergência/missing explícitos;
-- `[x]` aprovação somente após reconciliação e conferência do total;
-- `[x]` registro de pagamento com referência e evidência.
-
-## 6. Afastamentos e SST — VALIDADO NOS CAMINHOS SUPORTADOS
-
-- `[x]` afastamento como fato separado de ausência de ponto;
-- `[x]` início e retorno;
 - `[x]` CAT;
 - `[x]` ASO/procedimentos;
 - `[x]` exposição ocupacional;
 - `[x]` EPC/EPI e entregas;
 - `[x]` segregação de informação clínica sensível;
-- `[x]` projeção eSocial do estado do domínio.
+- `[x]` S-2210/S-2220/S-2240 e projeção do retorno para o domínio.
 
-## 7. Desligamento/offboarding — VALIDADO NOS CAMINHOS SUPORTADOS
+## 6. Desligamento/offboarding — VALIDADO NOS CAMINHOS SUPORTADOS
 
-- `[x]` caso de desligamento e motivo explícito;
-- `[x]` cálculo rescisório versionado;
-- `[x]` ajustes com evidência;
-- `[x]` aprovação e efetivação do vínculo;
-- `[x]` offboarding separado: acessos, ativos, benefícios, documentos, Financeiro e SST;
-- `[x]` mapeamento de verbas rescisórias para rubricas eSocial;
-- `[x]` integração com o fluxo rescisório do FGTS Digital.
+- `[x]` caso de desligamento;
+- `[x]` cálculo rescisório versionado e ajustes com evidência;
+- `[x]` aprovação/efetivação;
+- `[x]` offboarding separado para acessos, ativos, benefícios, documentos, Financeiro e SST;
+- `[x]` mapeamento das verbas para eSocial;
+- `[x]` integração com fluxo rescisório do FGTS Digital.
 
-## 8. eSocial — VALIDADO INTERNAMENTE NOS EVENTOS SUPORTADOS
+## 7. eSocial — VALIDADO INTERNAMENTE NOS EVENTOS SUPORTADOS
 
-### 8.1 Geração e assinatura
+### Geração
 
-- `[x]` S-1000;
-- `[x]` S-1005;
-- `[x]` S-1010;
-- `[x]` S-1020;
-- `[x]` S-2190;
-- `[x]` S-2200 — caminho CLT padrão;
-- `[x]` S-2205;
-- `[x]` S-2206;
-- `[x]` S-2230 — caminho suportado;
-- `[x]` S-2210;
-- `[x]` S-2220;
-- `[x]` S-2240;
-- `[x]` S-2299 — caminho suportado;
-- `[x]` S-2399 — caminho suportado;
-- `[x]` S-1200;
-- `[x]` S-1210;
-- `[x]` S-1298;
-- `[x]` S-1299;
-- `[x]` XMLDSig automática RSA-SHA256/digest SHA-256;
-- `[x]` todos os XMLs acima testados contra o pacote XSD oficial S-1.3 de produção publicado em 01/07/2026.
+- `[x]` S-1000/S-1005/S-1010/S-1020;
+- `[x]` S-2190/S-2200 CLT padrão/S-2205/S-2206;
+- `[x]` S-2230;
+- `[x]` S-2210/S-2220/S-2240;
+- `[x]` S-2299/S-2399 nos caminhos suportados;
+- `[x]` S-1200/S-1210/S-1298/S-1299;
+- `[x]` XMLDSig RSA-SHA256/SHA-256;
+- `[x]` canonicalização comparada com `xmllint --c14n`;
+- `[x]` assinatura completa aceita pelo `xmlsec1` independente;
+- `[x]` XMLs liberados validados contra XSD oficial vigente.
 
-### 8.2 Transporte e retorno
+### Transporte e retorno
 
-- `[x]` endpoints separados de Produção Restrita/Produção;
-- `[x]` Produção bloqueada por padrão;
-- `[x]` mTLS com material de certificado somente no servidor;
-- `[x]` lote com 1–50 eventos e homogeneidade de ambiente/grupo/empregador/transmissor;
-- `[x]` persistência de evento, lote, tentativa, protocolo e payload sanitizado;
-- `[x]` timeout como estado indeterminado, exigindo consulta/reconciliação;
-- `[x]` parser por `Id` do evento;
-- `[x]` recibo, código de resposta, descrição e ocorrências por evento;
-- `[x]` estados individuais `ACCEPTED`, `REJECTED`, `PROCESSING`, `UNKNOWN`;
-- `[x]` fechamento do lote derivado dos filhos.
+- `[x]` Produção Restrita/Produção separadas e Produção bloqueada por padrão;
+- `[x]` mTLS e material criptográfico apenas no servidor;
+- `[x]` lote 1–50 e homogeneidade de grupo/empregador/transmissor/ambiente;
+- `[x]` evento, lote, tentativa, protocolo e payload sanitizado;
+- `[x]` timeout como estado indeterminado;
+- `[x]` consulta, parser por `Id`, recibo e ocorrências por evento;
+- `[x]` runner real de Produção Restrita reutiliza o mesmo signer validado pelo app;
+- `[x]` preflight do runner sem secrets/rede validado no gate automático;
+- `[x]` runner real valida chave↔certificado, XSD e XMLSec antes do envio.
 
-**Ainda externo:** nenhuma homologação real é declarada concluída até existir protocolo/retorno oficial obtido em Produção Restrita com certificado e inscrições autorizadas.
+**Externo:** Produção Restrita só será concluída depois de protocolo/retorno oficial com certificado e inscrições autorizadas.
 
-**Casos intencionalmente bloqueados até implementação específica:** grupos especiais de S-2200, motivos de S-2230 que exigem estruturas adicionais e causas/grupos especiais de S-2299/S-2399 não cobertos pelo gerador padrão.
+**Bloqueados por design:** casos especiais de S-2200, S-2230, S-2299 e S-2399 que exigem grupos ainda não modelados continuam rejeitados pelo gerador em vez de produzir XML incompleto.
 
-## 9. DCTFWeb / MIT — VALIDADO INTERNAMENTE
+## 8. DCTFWeb / MIT / Integra Contador — VALIDADO INTERNAMENTE
 
-- `[x]` workspace por competência, estados, snapshots e reconciliação;
-- `[x]` distinção fechamento eSocial/EFD-Reinf → sensibilização DCTFWeb;
-- `[x]` recibos, débitos, pagamentos e divergências;
+- `[x]` workspace DCTFWeb, estados, snapshots e reconciliação;
 - `[x]` MIT JSON leiaute 1.0;
-- `[x]` regra de nome do arquivo;
-- `[x]` grupos de débito, eventos especiais e IDs sequenciais;
-- `[x]` regras condicionais de qualificação/tributação;
-- `[x]` `BalancoLucroReal` quando aplicável;
-- `[x]` `ListaDebitosAposEvento` condicionada a evento especial compatível;
-- `[x]` suspensões administrativas/judiciais e referências a débitos;
-- `[x]` renderer e testes contra a documentação oficial vigente do MIT.
-
-### Integra Contador
-
-- `[x]` adapter server-only;
-- `[x]` allowlist dos gateways SERPRO de validação/produção;
-- `[x]` OAuth `client_credentials`;
-- `[x]` timeout, correlação, tratamento HTTP e produção bloqueada por padrão;
-- `[x]` paths de serviço são capabilities configuradas, não endpoints inventados;
+- `[x]` eventos especiais, IDs sequenciais, grupos tributários condicionais, `BalancoLucroReal`, `ListaDebitosAposEvento` e suspensões;
+- `[x]` adapter Integra Contador server-only;
+- `[x]` allowlist dos gateways SERPRO, OAuth `client_credentials`, timeout e correlação;
+- `[x]` paths externos como capabilities configuradas, sem endpoints inventados;
 - `[x]` workflow manual de validação contratual.
 
-**Ainda externo:** consumo real dos serviços DCTFWeb/Integra Contador depende de contratação, `Consumer Key/Secret`, procurações/perfis e paths efetivamente habilitados ao contratante.
+**Externo:** consumo real depende de contrato, Consumer Key/Secret, procurações/perfis e serviços habilitados ao contratante.
 
-## 10. FGTS Digital — VALIDADO INTERNAMENTE
+## 9. FGTS Digital — VALIDADO INTERNAMENTE
 
-- `[x]` workspace por competência e trabalhador;
-- `[x]` base/valor esperado derivados da folha configurada;
-- `[x]` valor externo, divergência, guia, pagamento e conciliação;
-- `[x]` canais `PORTAL_ASSISTED`, `OFFICIAL_FILE_IMPORT` e `DIRECT_API` condicionada à existência real da capability;
-- `[x]` arquivo oficial de Remunerações para Fins Rescisórios — leiaute 1.2 de 03/10/2025;
-- `[x]` linhas tipo 1/2, separador `;`, decimal brasileiro, limite 5.000 linhas/130 KB;
-- `[x]` bloqueio de competências a partir de março/2024 no arquivo de recomposição;
-- `[x]` múltiplos trabalhadores somente do mesmo empregador.
+- `[x]` workspace por competência/trabalhador;
+- `[x]` base/valor esperado derivados da folha;
+- `[x]` divergência, guia, pagamento e conciliação;
+- `[x]` canais `PORTAL_ASSISTED`, `OFFICIAL_FILE_IMPORT` e `DIRECT_API` somente quando comprovada;
+- `[x]` arquivo Remunerações para Fins Rescisórios leiaute 1.2 de 03/10/2025;
+- `[x]` limites, decimal brasileiro, competências e empregador validados.
 
-**Ainda externo:** ações que o FGTS Digital mantém exclusivamente em portal permanecem assistidas, com evidência e reconciliação; não existe API geral fictícia no projeto.
+## 10. Documentos, recibos, portal e relatórios — VALIDADO
 
-## 11. Documentos, recibos e Meu RH — VALIDADO
+- `[x]` Storage privado, versões, SHA-256, MIME, sensibilidade, legal hold/retention;
+- `[x]` publicação/revogação e trilha de acesso;
+- `[x]` vínculo `auth user ↔ worker`;
+- `[x]` recibos publicados e PDF server-side;
+- `[x]` Meu RH somente do próprio trabalhador;
+- `[x]` download auditado;
+- `[x]` relatórios agregados de RH/folha/SST/eSocial.
 
-- `[x]` documentos RH por categoria e sensibilidade;
-- `[x]` versões, SHA-256, MIME real, limite de tamanho e Storage privado;
-- `[x]` publicação/revogação lógica e versão anterior superseded;
-- `[x]` legal hold/retention no modelo;
-- `[x]` autorização segregada para documentos clínicos/judiciais;
-- `[x]` vínculo explícito `auth user ↔ worker`;
-- `[x]` publicação controlada de recibos;
-- `[x]` acesso self-service somente ao próprio trabalhador;
-- `[x]` autorização de download auditada;
-- `[x]` recibo PDF gerado server-side com hash SHA-256 e `Cache-Control: private, no-store`;
-- `[x]` documentos publicados aparecem no Meu RH.
+## 11. Recuperação — VALIDADO EM AMBIENTE ISOLADO
 
-## 12. Relatórios e indicadores — IMPLEMENTADO E COBERTO PELO GATE RH
+- `[x]` banco PostgreSQL descartável;
+- `[x]` todas as migrations RH aplicadas;
+- `[x]` dados sintéticos inseridos;
+- `[x]` `pg_dump` em formato custom;
+- `[x]` `pg_restore` em banco distinto;
+- `[x]` comparação de 112 tabelas RH, contagens, RLS, policies e funções;
+- `[x]` artifact de evidência com retenção de 30 dias.
 
-- `[x]` relatórios operacionais agregados de RH;
-- `[x]` folha;
-- `[x]` SST;
-- `[x]` eSocial/obrigações;
-- `[x]` navegação protegida por capability.
+Isso comprova o mecanismo em ambiente isolado. Não substitui um rehearsal de cutover do ambiente real.
 
-## 13. E2E e homologação
+## 12. E2E/homologação — IMPLEMENTADO, EXECUÇÃO EXTERNA PENDENTE
 
-### Implementado
-
-- `[x]` smoke Playwright profissional;
+- `[x]` smoke Playwright;
 - `[x]` jornada transacional folha → publicação → Meu RH;
 - `[x]` seed isolado e verificação persistida;
-- `[x]` workflow manual `RH Browser E2E` protegido pelo environment `rh-homologation`;
-- `[x]` workflow manual `RH eSocial Restricted Homologation`;
-- `[x]` workflow manual `RH Integra Contador Contract Validation`.
+- `[x]` workflow `RH Browser E2E` protegido por `rh-homologation`;
+- `[x]` workflow `RH eSocial Restricted Homologation`;
+- `[x]` workflow `RH Integra Contador Contract Validation`.
 
-### Ainda exige execução externa com evidência
+Ainda exigem ambiente/credenciais/evidência real:
 
-- `[ ]` executar Browser E2E contra homologação HTTPS com credenciais válidas;
-- `[ ]` obter protocolo/retorno oficial em Produção Restrita eSocial com certificado válido;
-- `[ ]` validar OAuth/serviço Integra Contador com contrato/chaves reais;
-- `[ ]` executar folha-sombra contra fonte/folha autorizada de referência e obter reconciliação aceita;
+- `[ ]` Browser E2E contra homologação HTTPS;
+- `[ ]` protocolo/retorno oficial em Produção Restrita eSocial;
+- `[ ]` Integra Contador com contrato/chaves reais;
+- `[ ]` folha-sombra contra fonte real autorizada;
+- `[ ]` rehearsal de cutover/rollback do ambiente real;
 - `[ ]` piloto controlado;
-- `[ ]` rehearsal de cutover/rollback;
 - `[ ]` GO/NO_GO de negócio;
 - `[ ]` produção.
 
-## 14. Gate para piloto/produção
+## 13. Gate de produção
 
-Não liberar produção enquanto faltar qualquer item abaixo:
+Não liberar enquanto faltar qualquer item abaixo:
 
-1. head candidato com `RH Extended Functional` verde;
-2. XMLs eSocial liberados passando XSD oficial vigente;
-3. Produção Restrita eSocial com protocolo/retorno oficial;
-4. Browser E2E transacional executado no ambiente de homologação;
+1. head candidato com gates RH verdes;
+2. XSD/XMLSec oficiais verdes;
+3. Produção Restrita com protocolo/retorno oficial;
+4. Browser E2E no ambiente de homologação;
 5. folha-sombra/reconciliação aceita com fonte autorizada;
-6. validação legal/tributária dos parâmetros configurados;
-7. restore/recovery aplicável ao conjunto RH;
-8. piloto controlado sem divergência crítica aberta;
-9. plano de cutover/rollback com responsáveis;
-10. GO de negócio documentado.
+6. parâmetros legais/tributários aprovados pelo responsável competente;
+7. recovery isolado verde e rehearsal do ambiente real;
+8. piloto sem divergência crítica;
+9. cutover/rollback e responsáveis aprovados;
+10. GO formal de negócio.
 
-## 15. Próxima ordem de execução
-
-O trabalho interno principal não deve voltar para novos módulos abstratos. A sequência é:
-
-1. manter o gate estendido verde a cada correção;
-2. executar os workflows externos quando os environments/secrets forem fornecidos;
-3. corrigir rejeições reais encontradas na Produção Restrita ou E2E;
-4. rodar folha-sombra e conciliar;
-5. piloto;
-6. cutover controlado;
-7. produção somente após GO formal.
+O PR permanece `draft` e este documento não autoriza merge ou produção.
