@@ -34,10 +34,10 @@ a ignorar.
 | Módulos de `lib/` | 101 |
 | Funções do banco declaradas | 239 |
 | Funções do banco chamadas do código | 119 |
-| Suítes de teste | 65, com 687 casos |
+| Suítes de teste | 65, com 688 casos |
 | Migrations | 173 |
 | Validadores de CI | 29 |
-| Módulos de `lib/` citados por algum teste | 57 de 101 |
+| Módulos de `lib/` citados por algum teste | 58 de 101 |
 
 ## 1. Aplicativos
 
@@ -658,7 +658,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/pdf` | não | `generateCommercialPdf`, `sha256Hex` |
 | `@/lib/personas/catalog` | não | `PERSONAS_OPERACIONAIS` |
 | `@/lib/personas/runtime` | sim | `PERSONAS_OPERACIONAIS` |
-| `@/lib/pessoas/nomes` | não | `nomesDosUsuarios` |
+| `@/lib/pessoas/nomes` | sim | `nomesDosUsuarios` |
 | `@/lib/pipeline/atividades` | não | `ROTULO_ATIVIDADE`, `ROTULO_OBSERVACAO`, `TIPOS_ATIVIDADE`, `TIPOS_OBSERVACAO`, `ehTipoAtividade`, `saiDaCasa` |
 | `@/lib/pipeline/datas` | sim | `CODIGOS_DATA`, `MARCOS`, `NATUREZAS`, `codigoDe`, `decompor`, `descrever`, `situacaoDoPrazo` |
 | `@/lib/pipeline/domain` | sim | `ROTULO_TRILHA`, `TRILHAS`, `formatarData`, `formatarMoeda`, `montarColunas`, `ordenarCodigos`, `ordenarPorUrgencia`, `prazoPrincipal`, `rotuloSituacao` |
@@ -998,7 +998,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/planilhas-pdf-texto.test.ts` | 17 | ASCII85 do PDF; texto de dentro do PDF; o que o leitor recusa |
 | `tests/planning-task-integration.test.ts` | 6 | Planejamento ↔ Tarefas |
 | `tests/project-creation-contract.test.ts` | 6 | criação segura de projetos |
-| `tests/project-membership-resolution.test.ts` | 1 | resolução de responsáveis de projeto |
+| `tests/project-membership-resolution.test.ts` | 2 | resolução de responsáveis de projeto |
 | `tests/proposal-direct-upload.test.ts` | 4 | upload de PDF da proposta |
 | `tests/qa-contraste.test.ts` | 19 | aritmética de cor; v4 — notação color(srgb …) lida como preto; opacidade nas três notações; mínimo exigido — 3:1 só para texto grande |
 | `tests/relatorio-perdas.test.ts` | 20 | Pareto ordena por valor, não por contagem; fatia e acumulado; casos que quebrariam a divisão; perda sem motivo entra na conta |
@@ -1065,7 +1065,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 44 de 101 |
+| Módulo de `lib/` sem teste que o cite | 43 de 101 |
 
 ### Módulos sem teste que os cite
 
@@ -1091,7 +1091,6 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/observability/server`
 - `@/lib/pdf`
 - `@/lib/personas/catalog`
-- `@/lib/pessoas/nomes`
 - `@/lib/pipeline/atividades`
 - `@/lib/pipeline/server`
 - `@/lib/planejamento/modelos-servidor`
