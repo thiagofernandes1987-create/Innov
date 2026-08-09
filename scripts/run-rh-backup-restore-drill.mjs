@@ -1,11 +1,9 @@
 import{spawnSync}from"node:child_process";
-import{createHash}from"node:crypto";
 import fs from"node:fs";
 
 function docker(args,options={}){return spawnSync("docker",args,{encoding:"utf8",timeout:180_000,...options});}
 function output(result){return`${result.stdout??""}\n${result.stderr??""}`.trim();}
 function must(result,label){if(result.status!==0)throw new Error(`${label} falhou.\n${output(result)}`);return result;}
-function exec(container,args,options={}){return docker(["exec",...args.slice(0,1),container,...args.slice(1)],options);}
 function psql(container,database,sql){return must(docker(["exec",container,"psql","-U","postgres","-d",database,"-v","ON_ERROR_STOP=1","-Atc",sql]),`psql ${database}`).stdout.trim();}
 function applyFile(container,database,file){if(!fs.existsSync(file))throw new Error(`Arquivo ausente: ${file}`);const result=docker(["exec","--interactive",container,"psql","-U","postgres","-d",database,"-v","ON_ERROR_STOP=1","-q"],{input:fs.readFileSync(file,"utf8")});must(result,`aplicação ${file}`);}
 function snapshot(container,database){
