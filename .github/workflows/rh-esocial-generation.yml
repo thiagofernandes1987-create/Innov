@@ -9,6 +9,7 @@ on:
       - "app/app/rh/admissoes/**"
       - "app/app/rh/afastamentos/**"
       - "app/app/rh/desligamentos/**"
+      - "app/app/rh/tsv/**"
       - "supabase/migrations/*_rh_esocial_*.sql"
       - "supabase/migrations/*_rh_admission_esocial_*.sql"
       - "supabase/migrations/*_rh_leave_esocial_*.sql"
@@ -28,6 +29,7 @@ on:
       - "app/app/rh/admissoes/**"
       - "app/app/rh/afastamentos/**"
       - "app/app/rh/desligamentos/**"
+      - "app/app/rh/tsv/**"
       - "supabase/migrations/*_rh_esocial_*.sql"
       - "supabase/migrations/*_rh_admission_esocial_*.sql"
       - "supabase/migrations/*_rh_leave_esocial_*.sql"
@@ -92,4 +94,4 @@ jobs:
       - name: RH scoped typecheck
         run: pnpm exec tsc --noEmit -p tsconfig.rh.json
       - name: RH eSocial lint
-        run: pnpm exec eslint 'lib/rh/integrations/esocial-*.ts' 'app/actions/rh-*.ts' app/app/rh/obrigacoes/esocial app/app/rh/admissoes app/app/rh/afastamentos app/app/rh/desligamentos 'tests/rh/esocial-*.ts' --max-warnings=0
+        run: pnpm exec eslint 'lib/rh/integrations/esocial-*.ts' 'app/actions/rh-*.ts' app/app/rh/obrigacoes/esocial app/app/rh/admissoes app/app/rh/afastamentos app/app/rh/desligamentos app/app/rh/tsv 'tests/rh/esocial-*.ts' --max-warnings=0
