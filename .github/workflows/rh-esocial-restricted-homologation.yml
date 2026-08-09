@@ -28,15 +28,18 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends libxml2-utils unzip >/dev/null
+          sudo apt-get install -y --no-install-recommends libxml2-utils xmlsec1 openssl unzip >/dev/null
           rm -rf "$ESOCIAL_XSD_DIR" /tmp/esocial-xsd.zip
           mkdir -p "$ESOCIAL_XSD_DIR"
           curl --fail --silent --show-error --location "$ESOCIAL_XSD_URL" --output /tmp/esocial-xsd.zip
           unzip -q /tmp/esocial-xsd.zip -d "$ESOCIAL_XSD_DIR"
           test "$(find "$ESOCIAL_XSD_DIR" -type f -name '*.xsd' | wc -l)" -gt 0
           sha256sum /tmp/esocial-xsd.zip
-      - name: Validate shared signer runtime
-        run: node --experimental-strip-types -e "import('./lib/rh/integrations/esocial-signature-core.ts').then(m=>{if(typeof m.signEsocialXmlWithMaterial!=='function')process.exit(1)})"
+          xmlsec1 --version
+      - name: Validate real homologation runner before secrets/network
+        env:
+          ESOCIAL_HOMOLOGATION_PREFLIGHT_ONLY: "true"
+        run: node --experimental-strip-types scripts/run-rh-esocial-restricted-homologation.mjs
       - name: Refuse production configuration
         shell: bash
         run: |
