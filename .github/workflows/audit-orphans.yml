@@ -4,7 +4,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: audit-orphans-${{ github.ref }}
@@ -15,29 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout PR branch
+      - name: Checkout
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref }}
-
-      - name: Remove duplicated openTaskEditor implementation
-        run: |
-          node --input-type=module <<'NODE'
-          import fs from "node:fs";
-          const file = "components/planejamento/schedule-planner.tsx";
-          let source = fs.readFileSync(file, "utf8");
-          const block = '  function openTaskEditor(taskId: string): void {\n    setEditorTab("general");\n    setEditorTaskId(taskId);\n  }\n\n';
-          const first = source.indexOf(block);
-          const second = first < 0 ? -1 : source.indexOf(block, first + block.length);
-          if (first < 0 || second < 0) {
-            throw new Error("Esperadas duas implementações idênticas de openTaskEditor.");
-          }
-          source = `${source.slice(0, first)}${source.slice(first + block.length)}`;
-          if (source.indexOf(block) < 0 || source.indexOf(block, source.indexOf(block) + block.length) >= 0) {
-            throw new Error("A normalização não resultou em exatamente uma implementação.");
-          }
-          fs.writeFileSync(file, source);
-          NODE
 
       - name: Audit reachable code graph
         run: node scripts/auditar-alcancabilidade.mjs --json > reachability-audit.json
@@ -65,19 +44,6 @@ jobs:
         run: |
           node scripts/gerar-mapa-do-codigo.mjs
           git diff --exit-code -- diretrizes/MAPA-DO-CODIGO.md
-
-      - name: Commit TypeScript cleanup
-        shell: bash
-        run: |
-          if git diff --quiet -- components/planejamento/schedule-planner.tsx; then
-            echo "SchedulePlanner já possui uma única implementação."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add components/planejamento/schedule-planner.tsx
-          git commit -m "fix(planning): remove implementação duplicada do editor"
-          git push origin HEAD:${{ github.head_ref }}
 
       - name: Upload orphan audit reports
         if: always()
