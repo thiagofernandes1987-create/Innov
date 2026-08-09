@@ -276,6 +276,7 @@
       "documentos_emitidos",
       "drop_legacy_create_budget_version_rpc",
       "drop_revoked_legacy_project_creation_rpcs",
+      "drop_superseded_contract_inventory_report_surfaces",
       "r2_stage14_procurement_parent_chain",
       "remove_unused_fixed_costs_table",
       "stage10_homologation_hardening",
