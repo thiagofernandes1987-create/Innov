@@ -31,7 +31,10 @@ jobs:
           sudo apt-get install -y --no-install-recommends libxml2-utils xmlsec1 openssl unzip >/dev/null
           rm -rf "$ESOCIAL_XSD_DIR" /tmp/esocial-xsd.zip
           mkdir -p "$ESOCIAL_XSD_DIR"
-          curl --fail --silent --show-error --location "$ESOCIAL_XSD_URL" --output /tmp/esocial-xsd.zip
+          curl --fail --silent --show-error --location \
+            --retry 5 --retry-delay 3 --retry-all-errors \
+            --connect-timeout 15 --max-time 120 \
+            "$ESOCIAL_XSD_URL" --output /tmp/esocial-xsd.zip
           unzip -q /tmp/esocial-xsd.zip -d "$ESOCIAL_XSD_DIR"
           test "$(find "$ESOCIAL_XSD_DIR" -type f -name '*.xsd' | wc -l)" -gt 0
           sha256sum /tmp/esocial-xsd.zip
