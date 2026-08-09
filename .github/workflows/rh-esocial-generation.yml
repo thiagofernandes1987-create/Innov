@@ -72,8 +72,10 @@ jobs:
           unzip -q /tmp/esocial-xsd.zip -d "$ESOCIAL_XSD_DIR"
           test "$(find "$ESOCIAL_XSD_DIR" -type f -name '*.xsd' | wc -l)" -gt 0
           xmlsec1 --version
-      - name: Validate shared signer runtime used by Restricted Production
-        run: node --experimental-strip-types -e "import('./lib/rh/integrations/esocial-signature-core.ts').then(m=>{if(typeof m.signEsocialXmlWithMaterial!=='function')process.exit(1)})"
+      - name: Execute preflight of the real Restricted Production runner
+        env:
+          ESOCIAL_HOMOLOGATION_PREFLIGHT_ONLY: "true"
+        run: node --experimental-strip-types scripts/run-rh-esocial-restricted-homologation.mjs
       - name: Validate migrations
         run: pnpm validate:migrations
       - name: Test XML generation, XMLDSig, XMLSec and official XSD
