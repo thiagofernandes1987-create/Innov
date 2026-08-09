@@ -7,6 +7,13 @@ if (!process.env.PREVIEW_URL) throw new Error("PREVIEW_URL é obrigatória.");
 const sharedUrl = new URL(process.env.PREVIEW_URL);
 const origin = sharedUrl.origin;
 const route = sharedUrl.pathname;
+const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET ?? "";
+const extraHTTPHeaders = bypassSecret
+  ? {
+      "x-vercel-protection-bypass": bypassSecret,
+      "x-vercel-set-bypass-cookie": "samesitenone"
+    }
+  : {};
 const outputRoot = process.env.QA_OUTPUT_DIR ?? path.join("artifacts", "public-launcher-fixture");
 const viewports = [
   { name: "375px", width: 375, height: 812 },
@@ -34,7 +41,8 @@ try {
         viewport: { width: viewport.width, height: viewport.height },
         colorScheme: theme === "escuro" ? "dark" : "light",
         locale: "pt-BR",
-        timezoneId: "America/Sao_Paulo"
+        timezoneId: "America/Sao_Paulo",
+        extraHTTPHeaders
       });
       await context.addCookies([{ name: "innovar-tema", value: theme, url: origin }]);
       const page = await context.newPage();
