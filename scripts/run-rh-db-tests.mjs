@@ -24,8 +24,9 @@ runPostgresFiles({
     "supabase/tests/rh/mit-json.test.sql",
     "supabase/tests/rh/payroll-shadow.test.sql",
     "supabase/tests/rh/benefits-documents.test.sql",
-    "supabase/tests/rh/tsv-esocial.test.sql"
+    "supabase/tests/rh/tsv-esocial.test.sql",
+    "supabase/tests/rh/fk-postgrest.test.sql"
   ],
-  expectedApprovals:10,
-  successMessage:"Verticais RH empregado/estrutura/admissão/folha V1/V2/regulatório/IRRF 2026/MIT/folha sombra/benefícios/documentos/TSVE aprovadas."
+  expectedApprovals:11,
+  successMessage:"Verticais RH empregado/estrutura/admissão/folha V1/V2/regulatório/IRRF 2026/MIT/folha sombra/benefícios/documentos/TSVE/PostgREST aprovadas."
 });
