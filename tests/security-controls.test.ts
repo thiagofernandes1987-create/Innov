@@ -64,12 +64,14 @@ describe("mapPublicOperationError", () => {
     const publicSigning = fs.readFileSync("app/actions/public-signing.ts", "utf8");
     expect(publicSigning).toContain("reportDataAccessError");
     expect(publicSigning).not.toMatch(/\b(?:error|valuesError|cleanupError)\??\.message\b/);
-    expect(publicSigning).not.toContain("fail(token,error.message)");
-    expect(publicSigning).not.toContain("fail(token,valuesError.message)");
 
     const operationalFinance = fs.readFileSync("app/actions/operational-finance.ts", "utf8");
     expect(operationalFinance).toContain("reportDataAccessError");
     expect(operationalFinance).not.toMatch(/\b(?:error|installmentError|itemsError|cleanupError)\??\.message\b/);
+
+    const procurement = fs.readFileSync("app/actions/procurement.ts", "utf8");
+    expect(procurement).toContain("reportDataAccessError");
+    expect(procurement).not.toMatch(/\b(?:error|invitationError|rfqError|quoteError|itemsError|submitError|finalizeError|cleanupError|quoteCleanupError|artifactCleanupError)\??\.message\b/);
   });
 
   it("registra o código interno apenas no log estruturado", () => {
