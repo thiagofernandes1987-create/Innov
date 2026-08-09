@@ -491,10 +491,6 @@ export function SchedulePlanner({
     });
   }
 
-  function openTaskEditor(taskId: string): void {
-    setEditorTab("general");
-    setEditorTaskId(taskId);
-  }
 
   function predecessorLabel(taskId: string): string {
     return (incomingByTask.get(taskId) ?? [])

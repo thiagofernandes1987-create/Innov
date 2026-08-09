@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { proximoCodigo } from "@/lib/planejamento/eap";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 import {
   isScheduleDependencyType,
   publicScheduleDatabaseMessage,
@@ -94,6 +95,42 @@ function revalidateSchedule(projectId: string): void {
   revalidatePath(`/app/obras/${projectId}/tarefas`);
 }
 
+async function validateTaskPlacement(
+  supabase: ScheduleSupabase,
+  organizationId: string,
+  projectId: string,
+  taskId: string,
+  wbsId: string | null,
+  parentTaskId: string | null
+): Promise<void> {
+  if (wbsId) {
+    const { data: wbs, error } = await supabase
+      .from("work_breakdown_items")
+      .select("id")
+      .eq("id", wbsId)
+      .eq("project_id", projectId)
+      .eq("organization_id", organizationId)
+      .maybeSingle();
+    if (error) failDatabase(projectId, "validate-placement.wbs", error, "Não foi possível validar a etapa da EAP.");
+    if (!wbs) fail(projectId, "A etapa da EAP selecionada não pertence a esta obra.");
+  }
+
+  const { data: tasks, error } = await supabase
+    .from("project_tasks")
+    .select("id,parent_task_id")
+    .eq("project_id", projectId)
+    .eq("organization_id", organizationId);
+  if (error) failDatabase(projectId, "validate-placement.tasks", error, "Não foi possível validar a hierarquia das atividades.");
+
+  const parentByTask = new Map<string, string | null>(
+    (tasks ?? []).map(row => [String(row.id), row.parent_task_id ? String(row.parent_task_id) : null])
+  );
+  if (parentTaskId && !parentByTask.has(parentTaskId)) fail(projectId, "A atividade superior não pertence a esta obra.");
+  if (taskId && wouldCreateTaskHierarchyCycle(parentByTask, taskId, parentTaskId)) {
+    fail(projectId, "A atividade superior criaria um ciclo na hierarquia.");
+  }
+}
+
 
 /**
  * Código da EAP calculado, não digitado.
@@ -161,7 +198,6 @@ export async function createScheduleWbs(formData: FormData) {
   validatePeriod(projectId, plannedStart, plannedEnd);
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(scheduleRoles);
-  const parentId = optionalText(formData, "parentId");
   const { data: criada, error } = await supabase
     .from("work_breakdown_items")
     .insert({
@@ -171,7 +207,7 @@ export async function createScheduleWbs(formData: FormData) {
       code: await codigoDaEtapa(supabase, projectId, parentId, code),
       title,
       description: optionalText(formData, "description"),
-      sequence: optionalNumber(formData, "sequence") ?? 0,
+      sequence,
       planned_start: plannedStart,
       planned_end: plannedEnd,
       client_visible: true,
@@ -286,12 +322,12 @@ export async function createScheduleTask(formData: FormData) {
   validatePeriod(projectId, plannedStart, plannedEnd);
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(scheduleRoles);
-  const wbsId = optionalText(formData, "wbsId");
+  await validateTaskPlacement(supabase, organizationId, projectId, "", wbsId, parentTaskId);
   const { error } = await supabase.from("project_tasks").insert({
     organization_id: organizationId,
     project_id: projectId,
     wbs_id: wbsId,
-    parent_task_id: optionalText(formData, "parentTaskId"),
+    parent_task_id: parentTaskId,
     code: await codigoDaAtividade(supabase, projectId, wbsId, code),
     title,
     description: optionalText(formData, "description"),

@@ -4,6 +4,7 @@ import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
 import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
 import { nomesDosUsuarios } from "@/lib/pessoas/nomes";
+import { calcular, type Dependencia, type TipoDependencia } from "@/lib/planejamento/cronograma";
 import { formatDate, formatPercent, taskColumns, taskStatusLabels } from "@/lib/stage12";
 
 export default async function TasksPage({

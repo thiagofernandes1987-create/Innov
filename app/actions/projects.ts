@@ -7,6 +7,8 @@ import { requireOrganizationContext } from "@/lib/auth";
 import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
 import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
+import { createScheduleDependency } from "@/app/actions/schedule";
+import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
 
 const managementRoles = [
   "SUPER_ADMIN",

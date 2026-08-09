@@ -1,9 +1,9 @@
-import{expect,test}from"@playwright/test";
+import{expect,test}from"playwright/test";
 
 const base=process.env.RH_E2E_BASE_URL?.replace(/\/$/,"");const email=process.env.RH_E2E_EMAIL;const password=process.env.RH_E2E_PASSWORD;
 if(!base||!email||!password)throw new Error("RH_E2E_BASE_URL, RH_E2E_EMAIL e RH_E2E_PASSWORD são obrigatórios para o E2E profissional.");
 
-async function login(page:import("@playwright/test").Page){await page.goto(`${base}/login`,{waitUntil:"domcontentloaded"});const emailInput=page.locator('input[type="email"], input[name="email"]').first();const passwordInput=page.locator('input[type="password"], input[name="password"]').first();await expect(emailInput).toBeVisible();await emailInput.fill(email);await passwordInput.fill(password);await page.locator('button[type="submit"]').first().click();await page.waitForLoadState("networkidle");expect(page.url()).not.toContain("/login");}
+async function login(page:import("playwright/test").Page){await page.goto(`${base}/login`,{waitUntil:"domcontentloaded"});const emailInput=page.locator('input[type="email"], input[name="email"]').first();const passwordInput=page.locator('input[type="password"], input[name="password"]').first();await expect(emailInput).toBeVisible();await emailInput.fill(email);await passwordInput.fill(password);await page.locator('button[type="submit"]').first().click();await page.waitForLoadState("networkidle");expect(page.url()).not.toContain("/login");}
 
 test.describe("RH profissional",()=>{test.beforeEach(async({page})=>{await login(page);});const routes=[
   ["/app/rh","RH"],["/app/rh/pessoas","Pessoas"],["/app/rh/admissoes","Admiss"],["/app/rh/folha","Folha"],["/app/rh/folha/decimo-terceiro","Décimo"],["/app/rh/folha/retroativos","Complementares"],["/app/rh/folha/pagamentos","Pagamentos"],["/app/rh/afastamentos","Afastamentos"],["/app/rh/sst","Saúde"],["/app/rh/desligamentos","Rescis"],["/app/rh/obrigacoes","Obriga"],["/app/rh/relatorios","Painel"]
