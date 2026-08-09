@@ -40,6 +40,7 @@ const baseWorker = {
   originalAdmissionDate: "2020-02-03"
 };
 const severanceLine = { lineCode: "SALARY_BALANCE", amount: 2500, rubricCode: "SALDO", tableCode: "1", establishmentType: 1 as const, establishmentNumber: "12345678000199", lotacaoCode: "ADM" };
+const validReceipt = "1.2.0000000000000000001";
 function official(xml: string, label: string) { validateWithOfficialEsocialXsd(xml, label); return xml; }
 
 describe("eSocial special paths", () => {
@@ -79,7 +80,7 @@ describe("eSocial special paths", () => {
     expect(union).toContain("<infoMandSind>");
     const elective = official(buildS2230({ ...employer, cpf: "12345678901", registrationNumber: "MAT001", mode: "START", startDate: "2026-08-01", reasonCode: "22", electiveMandate: { cnpj: "99888777000166", electedPositionRemuneration: "N" } }), "S-2230-mandato-eletivo");
     expect(elective).toContain("<infoMandElet>");
-    const rectified = official(buildS2230({ ...employer, cpf: "12345678901", registrationNumber: "MAT001", mode: "START", startDate: "2026-08-01", reasonCode: "03", receipt: "1.2.000000000000001", rectification: { previousReasonCode: "01", origin: 2, processType: 2, processNumber: "12345678901234567890" } }), "S-2230-retificacao");
+    const rectified = official(buildS2230({ ...employer, cpf: "12345678901", registrationNumber: "MAT001", mode: "START", startDate: "2026-08-01", reasonCode: "03", receipt: validReceipt, rectification: { previousReasonCode: "01", origin: 2, processType: 2, processNumber: "12345678901234567890" } }), "S-2230-retificacao");
     expect(rectified).toContain("<infoRetif>");
   });
 
