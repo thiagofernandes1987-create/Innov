@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createTask, moveTask } from "@/app/actions/projects";
+import { upsertTaskResourceAllocation } from "@/app/actions/project-resource-usage";
 import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
 import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
@@ -17,12 +19,14 @@ export default async function TasksPage({
   const { id } = await params;
   const { error: pageError } = await searchParams;
   const { supabase, organizationId } = await requireOrganizationContext();
-  const [projectResult, tasksResult, dependenciesResult, wbsResult, membershipsResult] = await Promise.all([
+  const [projectResult, tasksResult, dependenciesResult, wbsResult, membershipsResult, resourcesResult, allocationsResult] = await Promise.all([
     supabase.from("projects").select("id,code,name").eq("id", id).eq("organization_id", organizationId).maybeSingle(),
     supabase.from("project_tasks").select("id,code,title,description,status,priority,progress,weight,planned_start,planned_end,duration_days,responsible_id,blocked_reason,client_visible,wbs_id").eq("project_id", id).order("sequence"),
     supabase.from("task_dependencies").select("predecessor_task_id,successor_task_id,dependency_type,lag_days").eq("project_id", id).eq("organization_id", organizationId),
     supabase.from("work_breakdown_items").select("id,code,title").eq("project_id", id).order("sequence"),
-    supabase.from("project_memberships").select("user_id,role").eq("project_id", id).eq("active", true)
+    supabase.from("project_memberships").select("user_id,role").eq("project_id", id).eq("active", true),
+    supabase.from("project_resources").select("id,name,unit,resource_type").eq("project_id", id).eq("organization_id", organizationId).order("name"),
+    supabase.from("task_resource_allocations").select("id,task_id,resource_id,planned_quantity,actual_quantity,planned_hours,actual_hours,planned_start,planned_end").eq("project_id", id).eq("organization_id", organizationId).order("created_at")
   ]);
 
   reportDataAccessError("project-tasks.project", projectResult.error);
@@ -30,6 +34,8 @@ export default async function TasksPage({
   reportDataAccessError("project-tasks.dependencies", dependenciesResult.error);
   reportDataAccessError("project-tasks.wbs", wbsResult.error);
   reportDataAccessError("project-tasks.memberships", membershipsResult.error);
+  reportDataAccessError("project-tasks.resources", resourcesResult.error);
+  reportDataAccessError("project-tasks.allocations", allocationsResult.error);
 
   if (projectResult.error) {
     return (
@@ -47,9 +53,14 @@ export default async function TasksPage({
   const tasks = tasksResult.data ?? [];
   const wbs = wbsResult.data ?? [];
   const memberships = membershipsResult.data ?? [];
+  const resources = resourcesResult.data ?? [];
+  const allocations = allocationsResult.data ?? [];
   const nomePorUsuario = await nomesDosUsuarios(supabase, memberships.map(membership => membership.user_id));
   const tasksLoadFailed = Boolean(tasksResult.error || dependenciesResult.error);
   const supportLoadFailed = Boolean(wbsResult.error || membershipsResult.error);
+  const resourceLoadFailed = Boolean(resourcesResult.error || allocationsResult.error);
+  const taskById = new Map(tasks.map(task => [task.id, task]));
+  const resourceById = new Map(resources.map(resource => [resource.id, resource]));
   const schedule = calcular(
     tasks
       .filter(task => task.status !== "CANCELED")
@@ -77,7 +88,7 @@ export default async function TasksPage({
         <div>
           <span className="badge">{project.code}</span>
           <h1>Tarefas</h1>
-          <p className="muted">Kanban operacional com datas, peso, progresso e responsável.</p>
+          <p className="muted">Kanban operacional com datas, peso, progresso, responsável e recursos.</p>
         </div>
       </div>
 
@@ -93,6 +104,7 @@ export default async function TasksPage({
                 <div className="kanban-head"><span id={`column-${status}`}>{label}</span><span className="badge">{columnTasks.length}</span></div>
                 {columnTasks.map(task => {
                   const effective = effectiveDateByTask.get(task.id);
+                  const taskAllocations = allocations.filter(allocation => allocation.task_id === task.id);
                   return (
                     <article key={task.id} className="task-card">
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
@@ -109,6 +121,7 @@ export default async function TasksPage({
                         {formatDate(effective?.inicio ?? task.planned_start)} → {formatDate(effective?.termino ?? task.planned_end)} · Peso {formatPercent(task.weight, 1)}
                         {effective?.derivada ? <span className="badge" title="Data calculada pela rede de dependências">Calculada</span> : null}
                       </p>
+                      {taskAllocations.length ? <p className="muted" style={{ fontSize: 12 }}>Recursos: {taskAllocations.length}</p> : null}
                       {task.blocked_reason ? <div className="validation blocking">{task.blocked_reason}</div> : null}
                       {!task.client_visible ? <span className="badge">Interna</span> : null}
                       <form action={moveTask}>
@@ -134,6 +147,57 @@ export default async function TasksPage({
           })}
         </section>
       ) : null}
+
+      <section className="card card-pad" style={{ marginTop: 24 }}>
+        <h2>Alocação de recursos</h2>
+        <p className="muted">Planeje e acompanhe material, equipamento ou mão de obra por tarefa. Salvar novamente a mesma combinação atualiza a alocação.</p>
+        {resourceLoadFailed ? <div className="validation blocking" role="alert">{DATA_LOAD_ERROR_MESSAGE}</div> : null}
+        {!resourceLoadFailed ? <>
+          <div style={{ margin: "14px 0 20px" }}>
+            {allocations.map(allocation => {
+              const task = taskById.get(allocation.task_id);
+              const resource = resourceById.get(allocation.resource_id);
+              return (
+                <div key={allocation.id} style={{ padding: "11px 0", borderBottom: "1px solid var(--border)" }}>
+                  <strong>{task ? `${task.code} · ${task.title}` : "Tarefa"} — {resource?.name ?? "Recurso"}</strong>
+                  <br />
+                  <span className="muted">
+                    Planejado: {allocation.planned_quantity ?? "—"} {resource?.unit ?? ""} · {allocation.planned_hours ?? "—"} h
+                    {allocation.actual_quantity != null || allocation.actual_hours != null ? ` · Real: ${allocation.actual_quantity ?? "—"} ${resource?.unit ?? ""} · ${allocation.actual_hours ?? "—"} h` : ""}
+                    {allocation.planned_start || allocation.planned_end ? ` · ${formatDate(allocation.planned_start)} → ${formatDate(allocation.planned_end)}` : ""}
+                  </span>
+                </div>
+              );
+            })}
+            {!allocations.length ? <p className="muted">Nenhum recurso alocado às tarefas.</p> : null}
+          </div>
+
+          {resources.length && tasks.length ? <form action={upsertTaskResourceAllocation} className="field-form">
+            <input type="hidden" name="projectId" value={id} />
+            <div className="field-grid">
+              <label>Tarefa
+                <select name="taskId" required defaultValue="">
+                  <option value="" disabled>Selecione</option>
+                  {tasks.filter(task => task.status !== "CANCELED").map(task => <option key={task.id} value={task.id}>{task.code} · {task.title}</option>)}
+                </select>
+              </label>
+              <label>Recurso
+                <select name="resourceId" required defaultValue="">
+                  <option value="" disabled>Selecione</option>
+                  {resources.map(resource => <option key={resource.id} value={resource.id}>{resource.name} · {resource.resource_type}</option>)}
+                </select>
+              </label>
+              <label>Quantidade planejada<input type="number" min="0" step="0.01" name="plannedQuantity" /></label>
+              <label>Quantidade realizada<input type="number" min="0" step="0.01" name="actualQuantity" /></label>
+              <label>Horas planejadas<input type="number" min="0" step="0.01" name="plannedHours" /></label>
+              <label>Horas realizadas<input type="number" min="0" step="0.01" name="actualHours" /></label>
+              <label>Início da alocação<input type="date" name="plannedStart" /></label>
+              <label>Fim da alocação<input type="date" name="plannedEnd" /></label>
+            </div>
+            <button className="button button-secondary" type="submit">Salvar alocação</button>
+          </form> : <p className="muted">Cadastre tarefas e <Link href={`/app/obras/${id}/equipes`}>recursos da obra</Link> antes de criar uma alocação.</p>}
+        </> : null}
+      </section>
 
       {!supportLoadFailed ? (
         <section className="card card-pad" style={{ marginTop: 24 }}>
