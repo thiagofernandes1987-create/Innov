@@ -72,6 +72,10 @@ describe("mapPublicOperationError", () => {
     const procurement = fs.readFileSync("app/actions/procurement.ts", "utf8");
     expect(procurement).toContain("reportDataAccessError");
     expect(procurement).not.toMatch(/\b(?:error|invitationError|rfqError|quoteError|itemsError|submitError|finalizeError|cleanupError|quoteCleanupError|artifactCleanupError)\??\.message\b/);
+
+    const sinapi = fs.readFileSync("app/actions/sinapi.ts", "utf8");
+    expect(sinapi).toContain("reportDataAccessError");
+    expect(sinapi).not.toMatch(/\b(?:error|versionError|updateError)\??\.message\b/);
   });
 
   it("registra o código interno apenas no log estruturado", () => {
