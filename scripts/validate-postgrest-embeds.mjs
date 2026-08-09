@@ -1,263 +1,122 @@
 // Prevenção executável da VACINA-052-EMBED-AMBIGUO-PRECISA-DE-CHAVE-NOMEADA.md.
 //
-// Quando existem **dois caminhos** entre duas tabelas — `projects.contract_id`
-// aponta para `contracts`, e `contracts.project_id` aponta de volta para
-// `projects` — o PostgREST se recusa a adivinhar qual deles o `select` quis, e
-// devolve PGRST201. A consulta inteira falha; não é o embed que vem vazio, é a
-// linha que não vem.
-//
-// O que torna isso caro é o silêncio: `pnpm typecheck` não vê, o teste
-// unitário não vê, e a tela não quebra — ela mostra "nenhuma obra cadastrada"
-// com duas obras no banco, ou 404 numa obra que existe. Foi assim que a lista
-// de obras ficou vazia por semanas sem ninguém reportar defeito.
-//
-// Este validador reconstrói o grafo de chaves estrangeiras a partir das
-// migrations, descobre quais pares de tabelas têm mais de um caminho, e reprova
-// qualquer `select` que faça embed nesse par **sem nomear a chave** com
-// `tabela!nome_da_constraint(...)`.
+// O validador reconstrói o grafo de relacionamentos PostgREST a partir das
+// migrations. Desde o hardening multi-tenant do RH, uma migration final remove
+// FKs simples quando existe uma FK composta equivalente com organization_id.
+// Portanto o grafo estático precisa representar o estado FINAL do schema, e não
+// somar relações históricas que já foram removidas em runtime.
 
 import fs from "node:fs";
 import path from "node:path";
 
-const raiz = process.cwd();
-const MIGRATIONS = path.join(raiz, "supabase", "migrations");
-const PASTAS = ["app", "lib", "components"];
+const raiz=process.cwd();
+const MIGRATIONS=path.join(raiz,"supabase","migrations");
+const PASTAS=["app","lib","components"];
+const RH_DEDUP_MIGRATION=/20260809134500_rh_remove_redundant_single_fks\.sql$/;
 
-/* ------------------------------------------------------------------ */
-/* 1. Grafo de chaves estrangeiras, lido das migrations                 */
-/* ------------------------------------------------------------------ */
-
-/**
- * Arestas `origem -> destino`, uma por chave estrangeira.
- *
- * Duas formas aparecem no repositório e as duas contam:
- * inline, dentro do `create table` (`col uuid references public.x(id)`), e
- * avulsa, no `alter table ... add constraint ... references public.x`.
- */
-function arquivosSql() {
-  if (!fs.existsSync(MIGRATIONS)) return [];
-  return fs
-    .readdirSync(MIGRATIONS)
-    .filter(n => n.endsWith(".sql"))
-    .sort()
-    .map(nome => ({ nome, texto: fs.readFileSync(path.join(MIGRATIONS, nome), "utf8") }));
+function arquivosSql(){
+ if(!fs.existsSync(MIGRATIONS))return[];
+ return fs.readdirSync(MIGRATIONS).filter(n=>n.endsWith(".sql")).sort().map(nome=>({nome,texto:fs.readFileSync(path.join(MIGRATIONS,nome),"utf8")}));
 }
 
-function arestasDasMigrations() {
-  const arestas = [];
-  for (const { nome, texto: sql } of arquivosSql()) {
-    // Comentário de fim de linha carrega `references` em prosa; sem tirar,
-    // a explicação de uma vacina viraria aresta do grafo.
-    const limpo = sql.replace(/--[^\n]*/g, "");
+function blocosDeCriacao(sql){
+ const blocos=[];const inicio=/create\s+table\s+(?:if\s+not\s+exists\s+)?public\.([a-z0-9_]+)\s*\(/gi;let m;
+ while((m=inicio.exec(sql))){let profundidade=1,i=inicio.lastIndex;while(i<sql.length&&profundidade>0){if(sql[i]==="(")profundidade++;else if(sql[i]===")")profundidade--;i++;}blocos.push({tabela:m[1],corpo:sql.slice(inicio.lastIndex,i-1)});}
+ return blocos;
+}
 
-    for (const bloco of blocosDeCriacao(limpo)) {
-      for (const destino of referencias(bloco.corpo)) {
-        arestas.push({ origem: bloco.tabela, destino, arquivo: nome });
-      }
-    }
-    for (const trecho of limpo.split(/;/)) {
-      const alter = /alter\s+table\s+(?:if\s+exists\s+)?(?:only\s+)?public\.([a-z0-9_]+)/i.exec(trecho);
-      if (!alter) continue;
-      // Sem exigir a palavra `foreign key`. Foi esse o ponto cego da primeira
-      // versão deste validador: `projects.contract_id` nasceu de um
-      // `add column ... references public.contracts`, referência inline sem a
-      // palavra-chave — e a aresta que originou o defeito ficou de fora do
-      // grafo, deixando o validador aprovar exatamente o caso que motivou ele.
-      for (const destino of referencias(trecho)) {
-        arestas.push({ origem: alter[1], destino, arquivo: nome });
-      }
-    }
+function splitTopLevel(texto){
+ const partes=[];let inicio=0,profundidade=0,aspas=null;
+ for(let i=0;i<texto.length;i++){
+  const ch=texto[i];
+  if(aspas){if(ch===aspas&&texto[i-1]!=="\\")aspas=null;continue;}
+  if(ch==="'"||ch==='"'){aspas=ch;continue;}
+  if(ch==="(")profundidade++;else if(ch===")")profundidade--;else if(ch===","&&profundidade===0){partes.push(texto.slice(inicio,i));inicio=i+1;}
+ }
+ partes.push(texto.slice(inicio));return partes;
+}
+
+function cols(raw){return raw.split(",").map(v=>v.trim().replace(/^"|"$/g,"").toLowerCase()).filter(Boolean);}
+function defaultFkName(table,column){return `${table}_${column}_fkey`;}
+function edge({origem,destino,sourceCols=[],destCols=[],constraint=null,arquivo}){return{origem,destino,sourceCols,destCols,constraint,arquivo};}
+
+function parseCreateEdges(bloco,arquivo){
+ const edges=[];
+ for(const itemRaw of splitTopLevel(bloco.corpo)){
+  const item=itemRaw.trim();if(!item)continue;
+  const tableFk=/^(?:constraint\s+([a-z0-9_]+)\s+)?foreign\s+key\s*\(([^)]+)\)\s*references\s+public\.([a-z0-9_]+)\s*\(([^)]+)\)/i.exec(item);
+  if(tableFk){edges.push(edge({origem:bloco.tabela,destino:tableFk[3],sourceCols:cols(tableFk[2]),destCols:cols(tableFk[4]),constraint:tableFk[1]??null,arquivo}));continue;}
+  const inline=/^"?([a-z0-9_]+)"?\s+[\s\S]*?references\s+public\.([a-z0-9_]+)\s*\(([^)]+)\)/i.exec(item);
+  if(inline){edges.push(edge({origem:bloco.tabela,destino:inline[2],sourceCols:[inline[1].toLowerCase()],destCols:cols(inline[3]),constraint:defaultFkName(bloco.tabela,inline[1].toLowerCase()),arquivo}));}
+ }
+ return edges;
+}
+
+function parseAlterEdges(sql,arquivo){
+ const edges=[];
+ for(const trechoRaw of sql.split(/;/)){
+  const trecho=trechoRaw.trim();
+  const alter=/alter\s+table\s+(?:if\s+exists\s+)?(?:only\s+)?public\.([a-z0-9_]+)/i.exec(trecho);if(!alter)continue;
+  const origem=alter[1];
+  const named=/add\s+constraint\s+([a-z0-9_]+)\s+foreign\s+key\s*\(([^)]+)\)\s*references\s+public\.([a-z0-9_]+)\s*\(([^)]+)\)/i.exec(trecho);
+  if(named){edges.push(edge({origem,destino:named[3],sourceCols:cols(named[2]),destCols:cols(named[4]),constraint:named[1],arquivo}));continue;}
+  const addColumn=/add\s+(?:column\s+)?(?:if\s+not\s+exists\s+)?"?([a-z0-9_]+)"?\s+[\s\S]*?references\s+public\.([a-z0-9_]+)\s*\(([^)]+)\)/i.exec(trecho);
+  if(addColumn){edges.push(edge({origem,destino:addColumn[2],sourceCols:[addColumn[1].toLowerCase()],destCols:cols(addColumn[3]),constraint:defaultFkName(origem,addColumn[1].toLowerCase()),arquivo}));}
+ }
+ return edges;
+}
+
+function fallbackEdges(sql,arquivo,structured){
+ // Mantém cobertura de sintaxes incomuns. Só adiciona o par quando nenhum edge
+ // estruturado do mesmo trecho/tabela o capturou; não duplica relações conhecidas.
+ const extras=[];
+ for(const bloco of blocosDeCriacao(sql)){
+  for(const m of bloco.corpo.matchAll(/references\s+public\.([a-z0-9_]+)/gi)){
+   if(!structured.some(e=>e.origem===bloco.tabela&&e.destino===m[1]))extras.push(edge({origem:bloco.tabela,destino:m[1],arquivo}));
   }
-  return arestas;
+ }
+ for(const trecho of sql.split(/;/)){
+  const alter=/alter\s+table\s+(?:if\s+exists\s+)?(?:only\s+)?public\.([a-z0-9_]+)/i.exec(trecho);if(!alter)continue;
+  for(const m of trecho.matchAll(/references\s+public\.([a-z0-9_]+)/gi))if(!structured.some(e=>e.origem===alter[1]&&e.destino===m[1]))extras.push(edge({origem:alter[1],destino:m[1],arquivo}));
+ }
+ return extras;
 }
 
-/** Corpo de cada `create table public.x ( ... );`, sem depender de indentação. */
-function blocosDeCriacao(sql) {
-  const blocos = [];
-  const inicio = /create\s+table\s+(?:if\s+not\s+exists\s+)?public\.([a-z0-9_]+)\s*\(/gi;
-  let m;
-  while ((m = inicio.exec(sql))) {
-    let profundidade = 1;
-    let i = inicio.lastIndex;
-    while (i < sql.length && profundidade > 0) {
-      if (sql[i] === "(") profundidade += 1;
-      else if (sql[i] === ")") profundidade -= 1;
-      i += 1;
-    }
-    blocos.push({ tabela: m[1], corpo: sql.slice(inicio.lastIndex, i - 1) });
+function includesAll(haystack,needles){return needles.every(v=>haystack.includes(v));}
+function removeRhTenantRedundancy(edges){
+ const cleanupPresent=arquivosSql().some(({nome})=>RH_DEDUP_MIGRATION.test(nome));if(!cleanupPresent)return edges;
+ return edges.filter(simple=>{
+  if(!simple.origem.startsWith("rh_")||!simple.destino.startsWith("rh_"))return true;
+  if(!simple.sourceCols.length||simple.sourceCols.includes("organization_id"))return true;
+  const stronger=edges.some(composite=>composite!==simple&&composite.origem===simple.origem&&composite.destino===simple.destino&&composite.sourceCols.length>simple.sourceCols.length&&composite.sourceCols.includes("organization_id")&&composite.destCols.includes("organization_id")&&includesAll(composite.sourceCols,simple.sourceCols)&&includesAll(composite.destCols,simple.destCols));
+  return !stronger;
+ });
+}
+
+function arestasDasMigrations(){
+ let edges=[];
+ for(const{nome,texto}of arquivosSql()){
+  const limpo=texto.replace(/--[^\n]*/g,"");const structured=[];
+  for(const bloco of blocosDeCriacao(limpo))structured.push(...parseCreateEdges(bloco,nome));
+  structured.push(...parseAlterEdges(limpo,nome));edges.push(...structured,...fallbackEdges(limpo,nome,structured));
+  // Drops explícitos também atualizam o estado final quando o nome da constraint é conhecido.
+  for(const trecho of limpo.split(/;/)){
+   const alter=/alter\s+table\s+(?:if\s+exists\s+)?(?:only\s+)?public\.([a-z0-9_]+)/i.exec(trecho);if(!alter)continue;
+   for(const drop of trecho.matchAll(/drop\s+constraint\s+(?:if\s+exists\s+)?([a-z0-9_]+)/gi))edges=edges.filter(e=>!(e.origem===alter[1]&&e.constraint===drop[1]));
   }
-  return blocos;
+ }
+ return removeRhTenantRedundancy(edges);
 }
 
-function referencias(trecho) {
-  return [...trecho.matchAll(/references\s+public\.([a-z0-9_]+)/gi)].map(r => r[1]);
-}
+function paresAmbiguos(arestas){const contagem=new Map();for(const{origem,destino}of arestas){if(origem===destino)continue;const chave=[origem,destino].sort().join(" ");contagem.set(chave,(contagem.get(chave)??0)+1);}return new Set([...contagem.entries()].filter(([,n])=>n>1).map(([chave])=>chave));}
 
-/**
- * Pares com mais de um caminho.
- *
- * A direção não importa para o PostgREST: `projects -> contracts` e
- * `contracts -> projects` já são dois caminhos entre o mesmo par, e é
- * exatamente esse o caso que derrubou a lista de obras.
- */
-function paresAmbiguos(arestas) {
-  const contagem = new Map();
-  for (const { origem, destino } of arestas) {
-    if (origem === destino) continue;
-    const chave = [origem, destino].sort().join(" ");
-    contagem.set(chave, (contagem.get(chave) ?? 0) + 1);
-  }
-  return new Set([...contagem.entries()].filter(([, n]) => n > 1).map(([chave]) => chave));
-}
+function arquivosDeCodigo(dir){const saida=[];if(!fs.existsSync(dir))return saida;for(const item of fs.readdirSync(dir,{withFileTypes:true})){if(item.name==="node_modules"||item.name.startsWith("."))continue;const caminho=path.join(dir,item.name);if(item.isDirectory())saida.push(...arquivosDeCodigo(caminho));else if(/\.(ts|tsx)$/.test(item.name))saida.push(caminho);}return saida;}
 
-/* ------------------------------------------------------------------ */
-/* 2. Embeds escritos no código                                         */
-/* ------------------------------------------------------------------ */
+function embedsDoSelect(base,select,linha){const achados=[],pilha=[base];for(let i=0;i<select.length;i++){if(select[i]===")"){if(pilha.length>1)pilha.pop();continue;}if(select[i]!=="(")continue;const antes=/([a-z0-9_]+)(?:!([a-z0-9_]+))?\s*$/i.exec(select.slice(0,i));if(!antes){pilha.push(pilha[pilha.length-1]);continue;}const modificador=antes[2];achados.push({base:pilha[pilha.length-1],relacionada:antes[1],nomeada:Boolean(modificador)&&!["inner","left"].includes(modificador.toLowerCase()),linha});pilha.push(antes[1]);}return achados;}
+function embedsDoArquivo(texto){const achados=[],from=/\.from\(\s*["'`]([a-z0-9_]+)["'`]\s*\)/gi;let m;while((m=from.exec(texto))){const janela=texto.slice(m.index,m.index+3000),select=/\.select\(\s*(["'`])([\s\S]*?)\1/.exec(janela);if(!select)continue;const linha=texto.slice(0,m.index).split("\n").length;achados.push(...embedsDoSelect(m[1],select[2],linha));}return achados;}
 
-function arquivosDeCodigo(dir) {
-  const saida = [];
-  if (!fs.existsSync(dir)) return saida;
-  for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (item.name === "node_modules" || item.name.startsWith(".")) continue;
-    const caminho = path.join(dir, item.name);
-    if (item.isDirectory()) saida.push(...arquivosDeCodigo(caminho));
-    else if (/\.(ts|tsx)$/.test(item.name)) saida.push(caminho);
-  }
-  return saida;
-}
-
-/**
- * Cada embed de um `select`, com o **pai certo**.
- *
- * O `select` do PostgREST é uma árvore: em
- * `from("a").select("b(c(d))")`, `c` é embed de `b`, não de `a`. A primeira
- * versão deste leitor achatava a string e atribuía tudo à tabela do `from` —
- * e acusou 22 embeds perfeitamente válidos como relação inexistente. Foi por
- * pouco que a lista não virou 22 correções desnecessárias em oito módulos.
- *
- * A leitura passa a acompanhar a profundidade, com uma pilha de pais.
- */
-function embedsDoSelect(base, select, linha) {
-  const achados = [];
-  const pilha = [base];
-  for (let i = 0; i < select.length; i += 1) {
-    if (select[i] === ")") {
-      if (pilha.length > 1) pilha.pop();
-      continue;
-    }
-    if (select[i] !== "(") continue;
-    // O que vem imediatamente antes do parêntese é o nome da relação, com o
-    // modificador opcional depois de `!`.
-    const antes = /([a-z0-9_]+)(?:!([a-z0-9_]+))?\s*$/i.exec(select.slice(0, i));
-    if (!antes) { pilha.push(pilha[pilha.length - 1]); continue; }
-    const modificador = antes[2];
-    achados.push({
-      base: pilha[pilha.length - 1],
-      relacionada: antes[1],
-      // `!inner` e `!left` são dicas de junção, não nome de constraint: um
-      // embed ambíguo escrito `tabela!inner(...)` continua ambíguo.
-      nomeada: Boolean(modificador) && !["inner", "left"].includes(modificador.toLowerCase()),
-      linha
-    });
-    pilha.push(antes[1]);
-  }
-  return achados;
-}
-
-/**
- * Cada `.from("x")` seguido de `.select("...")` no mesmo encadeamento.
- *
- * A busca é textual de propósito: o encadeamento pode estar em uma linha ou em
- * dez, e o que interessa é o literal do `select`, que é sempre string crua.
- */
-function embedsDoArquivo(texto) {
-  const achados = [];
-  const from = /\.from\(\s*["'`]([a-z0-9_]+)["'`]\s*\)/gi;
-  let m;
-  while ((m = from.exec(texto))) {
-    const janela = texto.slice(m.index, m.index + 2000);
-    const select = /\.select\(\s*(["'`])([\s\S]*?)\1/.exec(janela);
-    if (!select) continue;
-    const linha = texto.slice(0, m.index).split("\n").length;
-    achados.push(...embedsDoSelect(m[1], select[2], linha));
-  }
-  return achados;
-}
-
-/* ------------------------------------------------------------------ */
-/* 3. Confronto                                                         */
-/* ------------------------------------------------------------------ */
-
-const arestas = arestasDasMigrations();
-const ambiguos = paresAmbiguos(arestas);
-/** Pares com pelo menos um caminho — os que o PostgREST consegue resolver. */
-const existe = new Set(
-  arestas.filter(a => a.origem !== a.destino).map(a => [a.origem, a.destino].sort().join(" "))
-);
-/**
- * O universo de tabelas conhecidas vem dos `create table`, não das arestas.
- *
- * Derivá-lo das chaves estrangeiras deixa de fora toda tabela que não é destino
- * de nenhuma — `public.profiles` é uma delas — e o filtro de "nome conhecido"
- * descartava justamente o embed que motivou o ramo de PGRST200. O validador
- * aprovava por não enxergar, que é a forma mais cara de aprovar.
- */
-const tabelas = new Set([
-  ...arestas.flatMap(a => [a.origem, a.destino]),
-  ...arquivosSql().flatMap(({ texto }) =>
-    [...texto.replace(/--[^\n]*/g, "").matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?public\.([a-z0-9_]+)/gi)].map(m => m[1])
-  )
-]);
-
-const problemas = [];
-let selectsLidos = 0;
-
-for (const pasta of PASTAS) {
-  for (const arquivo of arquivosDeCodigo(path.join(raiz, pasta))) {
-    const texto = fs.readFileSync(arquivo, "utf8");
-    for (const { base, relacionada, nomeada, linha } of embedsDoArquivo(texto)) {
-      // `count(...)`, `sum(...)` e afins não são tabela; o filtro é ter nome
-      // conhecido no grafo.
-      if (!tabelas.has(relacionada) || !tabelas.has(base)) continue;
-      selectsLidos += 1;
-      const chave = [base, relacionada].sort().join(" ");
-
-      // Sem caminho nenhum: PGRST200. É a outra metade da mesma família e custa
-      // igual — `project_memberships` embutia `profiles(full_name)` com a
-      // coluna apontando para `auth.users`, e a lista de membros inteira
-      // falhava. O seletor de responsável mostrava o começo de um uuid no lugar
-      // do nome da pessoa, nas telas de tarefas e de equipes.
-      if (!existe.has(chave)) {
-        problemas.push(
-          `${path.relative(raiz, arquivo)}:${linha} — embed \`${relacionada}(...)\` a partir de ` +
-            `\`${base}\`: não há chave estrangeira entre as duas tabelas. O PostgREST devolve ` +
-            `PGRST200 e a consulta inteira falha — leia em duas consultas.`
-        );
-        continue;
-      }
-
-      if (nomeada) continue;
-      if (!ambiguos.has(chave)) continue;
-      problemas.push(
-        `${path.relative(raiz, arquivo)}:${linha} — embed \`${relacionada}(...)\` a partir de ` +
-          `\`${base}\` é ambíguo: há mais de um caminho entre as duas tabelas. ` +
-          `Nomeie a chave (\`${relacionada}!nome_da_constraint(...)\`), senão o PostgREST devolve PGRST201 ` +
-          `e a consulta inteira falha.`
-      );
-    }
-  }
-}
-
-if (problemas.length) {
-  console.error("Embeds ambíguos no PostgREST:\n");
-  for (const problema of problemas) console.error(`  - ${problema}`);
-  console.error(
-    `\n${problemas.length} embed(s) reprovado(s). Pares com mais de um caminho: ${ambiguos.size}.`
-  );
-  process.exit(1);
-}
-
-console.log(
-  `Embeds do PostgREST conferidos: ${selectsLidos} embed(s) em ${arestas.length} chave(s) estrangeira(s), ` +
-    `${ambiguos.size} par(es) ambíguo(s), nenhum sem chave nomeada.`
-);
+const arestas=arestasDasMigrations();const ambiguos=paresAmbiguos(arestas);const existe=new Set(arestas.filter(a=>a.origem!==a.destino).map(a=>[a.origem,a.destino].sort().join(" ")));const tabelas=new Set([...arestas.flatMap(a=>[a.origem,a.destino]),...arquivosSql().flatMap(({texto})=>[...texto.replace(/--[^\n]*/g,"").matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?public\.([a-z0-9_]+)/gi)].map(m=>m[1]))]);
+const problemas=[];let selectsLidos=0;
+for(const pasta of PASTAS)for(const arquivo of arquivosDeCodigo(path.join(raiz,pasta))){const texto=fs.readFileSync(arquivo,"utf8");for(const{base,relacionada,nomeada,linha}of embedsDoArquivo(texto)){if(!tabelas.has(relacionada)||!tabelas.has(base))continue;selectsLidos++;const chave=[base,relacionada].sort().join(" ");if(!existe.has(chave)){problemas.push(`${path.relative(raiz,arquivo)}:${linha} — embed \`${relacionada}(...)\` a partir de \`${base}\`: não há chave estrangeira entre as duas tabelas. O PostgREST devolve PGRST200 e a consulta inteira falha — leia em duas consultas.`);continue;}if(nomeada||!ambiguos.has(chave))continue;problemas.push(`${path.relative(raiz,arquivo)}:${linha} — embed \`${relacionada}(...)\` a partir de \`${base}\` é ambíguo: há mais de um caminho entre as duas tabelas. Nomeie a chave (\`${relacionada}!nome_da_constraint(...)\`), senão o PostgREST devolve PGRST201 e a consulta inteira falha.`);}}
+if(problemas.length){console.error("Embeds ambíguos no PostgREST:\n");for(const problema of problemas)console.error(`  - ${problema}`);console.error(`\n${problemas.length} embed(s) reprovado(s). Pares com mais de um caminho: ${ambiguos.size}.`);process.exit(1);}
+console.log(`Embeds do PostgREST conferidos: ${selectsLidos} embed(s) em ${arestas.length} chave(s) estrangeira(s) finais, ${ambiguos.size} par(es) ambíguo(s), nenhum sem chave nomeada.`);
