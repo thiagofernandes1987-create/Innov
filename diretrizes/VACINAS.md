@@ -160,6 +160,8 @@ Vocabulário de estado: `vigente` (grafado historicamente como `aplicada`), `par
 | `VACINA-059` | `TRUNCATE` não passa por RLS, e 213 tabelas o concediam a `anon` e `authenticated` — inclusive `emitted_documents`, cuja imutabilidade vinha só da ausência de política | aplicada | `revoke truncate, trigger, references` em todo o esquema e no padrão de privilégios, `revoke update, delete` no documento emitido, e o instantâneo do ledger passou a carregar os privilégios perigosos, conferidos no CI |
 | `VACINA-060` | Leitor que não entende o arquivo responde zero, e zero é um número plausível — o pacote SINAPI mudou de formato, o botão dizia "0 insumos válidos" e 61% dos itens analíticos entravam custando nada | aplicada | leitor do formato publicado com as quatro armadilhas recusadas em vez de adivinhadas, custo da sub-composição vindo da aba que já estava carregada, `pnpm sinapi:layout` cobrando o contrato contra o pacote de hoje, `prebuild` apontado para o leitor em uso, `automatic-update-v2.ts` removido, e ausência de custo representada como ausência — `price_status` de vocabulário fechado, `check` amarrando custo e status, e `items_without_cost` na versão |
 | `VACINA-061` | Guarda que lê o valor **novo** do campo que decide se ela se aplica é guarda opcional para quem sabe qual campo desligar — trocar `source_key` tornava o custo publicado pela CAIXA editável, com a procedência intacta ao lado | aplicada | a regra passou a olhar o que a linha **é**: recusa no `UPDATE` quando era oficial **ou** quando passaria a ser, conferência contra o pai antigo e novo nos filhos, o CUB com gatilho além da RLS, e `revoke` de escrita nas tabelas de sistema |
+| `VACINA-062` | Correção visual era encerrada sem observar o preview publicado no viewport real | vigente | captura antes/depois, comparação no mesmo viewport/tema/persona e teste do protocolo visual |
+| `VACINA-063` | Rede lógica era validada como linhas isoladas e podia chegar à gravação com ciclo, duplicidade ou escopo inválido | parcial | validação do grafo e da hierarquia antes da gravação, com teste negativo; falta serialização transacional concorrente |
 
 ## 4. Arquivos
 
@@ -225,7 +227,9 @@ diretrizes/vacinas/
 ├── VACINA-058-ACAO-INEXISTENTE-EM-HAS-MODULE-PERMISSION-NEGA-TODO-MUNDO.md
 ├── VACINA-059-RLS-NAO-COBRE-TRUNCATE.md
 ├── VACINA-060-LEITOR-QUE-NAO-ENTENDE-O-ARQUIVO-RESPONDE-ZERO.md
-└── VACINA-061-GUARDA-QUE-LE-O-VALOR-NOVO-DO-CAMPO-QUE-DECIDE-A-GUARDA.md
+├── VACINA-061-GUARDA-QUE-LE-O-VALOR-NOVO-DO-CAMPO-QUE-DECIDE-A-GUARDA.md
+├── VACINA-062-CORRECAO-VISUAL-EXIGE-CAPTURA-DO-PREVIEW.md
+└── VACINA-063-REDE-LOGICA-VALIDADA-ANTES-DA-GRAVACAO.md
 ```
 
 ## 5. Critérios para nova vacina
