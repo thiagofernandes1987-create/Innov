@@ -58,8 +58,7 @@ for (const token of [
   'from("markup_models")',
   'rpc("calculate_budget_version"',
   "desiredMarginRate",
-  "investedCapital",
-  "ROI_WITHOUT_CAPITAL"
+  "investedCapital"
 ]) {
   await check(`pricing-atual:${token}`, async () => budgetActions.includes(token));
 }
@@ -69,6 +68,10 @@ await check("versao-atual:create-next", async () => versionActions.includes('rpc
 await check("versao-atual:sem-create-version-legado", async () => !versionActions.includes('rpc("create_budget_version"'));
 
 const migration = await readFile("supabase/migrations/20260719230000_stage9_financial_contracts.sql", "utf8");
+await check("pricing-atual:ROI_WITHOUT_CAPITAL", async () =>
+  migration.includes("function public.calculate_budget_version") && migration.includes("ROI_WITHOUT_CAPITAL")
+);
+
 const tables = [
   "cost_catalog_items",
   "cost_compositions",
@@ -174,7 +177,7 @@ await check("webhook:service-role-server", async () => webhook.includes("createS
 const env = await readFile(".env.example", "utf8");
 await check("segredo:não-preenchido", async () => !/SUPABASE_SERVICE_ROLE_KEY=\S+/.test(env));
 await check("credencial-provider:não-preenchida", async () => !/SIGNATURE_\w+_API_KEY=\S+/.test(env));
-await check("sandbox:identificado", async () => workflows.includes("legal_validity','none"));
+await check("sandbox:identificado", async () => workflows.includes("legal_validity','none'"));
 
 const proxy = await readFile("proxy.ts", "utf8");
 await check("proxy:app", async () => proxy.includes('"/app"'));
