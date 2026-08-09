@@ -536,7 +536,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `createQualityTemplateVersion` | qualidade:update |
 | `publishQualityTemplate` | qualidade:approve |
 | `reviewQualityResponse` | qualidade:approve |
-| `submitClientQualityForm` | qualidade:create |
+| `submitClientQualityForm` | — |
 | `submitInternalQualityForm` | qualidade:create |
 | `submitPublicQualityForm` | — |
 | `uploadQualityDocument` | qualidade:create |
