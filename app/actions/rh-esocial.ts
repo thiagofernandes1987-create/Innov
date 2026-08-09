@@ -4,7 +4,7 @@ import{redirect}from"next/navigation";
 import{requireCapability}from"@/lib/authorization";
 import{
   assertSignedEsocialEvent,buildEsocialBatchXml,extractEsocialProtocol,extractEsocialResponseStatus,
-  queryEsocialBatch,sendEsocialBatch,sha256,type EsocialEnvironment,type EsocialHttpResult
+  sendEsocialBatch,sha256,type EsocialEnvironment,type EsocialHttpResult
 }from"@/lib/rh/integrations/esocial-transport";
 
 const BASE="/app/rh/obrigacoes/esocial";
@@ -82,23 +82,4 @@ export async function sendEsocialBatchAction(data:FormData){
  const eventIds=relations.map(r=>{const e=Array.isArray(r.rh_esocial_events)?r.rh_esocial_events[0]:r.rh_esocial_events;return e?.id??"";}).filter(Boolean);
  if(eventIds.length)await context.supabase.from("rh_esocial_events").update({status:"REJECTED",response_code:status.code,response_description:status.description,updated_at:new Date().toISOString()}).in("id",eventIds);
  fail(path,status.description??`Envio recusado (HTTP ${result.httpStatus}).`);
-}
-
-export async function queryEsocialBatchAction(data:FormData){
- const context=await requireCapability("rh","update");const batchId=text(data,"batchId"),path=`${BASE}/lotes/${batchId}`;
- const{data:batch,error}=await context.supabase.from("rh_esocial_batches").select("id,environment,protocol_number,status").eq("organization_id",context.organizationId).eq("id",batchId).maybeSingle();if(error)fail(path,error.message);if(!batch?.protocol_number)fail(path,"O lote ainda não possui protocolo para consulta.");
- const attemptNumber=await nextAttempt(context,batchId,"QUERY_BATCH");
- const{data:attempt,error:aError}=await context.supabase.from("rh_esocial_attempts").insert({organization_id:context.organizationId,batch_id:batchId,operation:"QUERY_BATCH",attempt_number:attemptNumber,endpoint_url:"OFFICIAL_ESOCIAL_QUERY",soap_action:process.env.ESOCIAL_QUERY_SOAP_ACTION??"default-package-v1.6",request_sha256:sha256(batch.protocol_number),result:"STARTED",created_by:context.userId}).select("id").single();if(aError)fail(path,aError.message);
-
- let result:EsocialHttpResult;
- try{result=await queryEsocialBatch(env(batch.environment),batch.protocol_number);}catch(error){
-  const message=error instanceof Error?error.message:"Erro ao consultar lote eSocial.";const unknown=/timeout|indetermin/i.test(message);
-  await context.supabase.from("rh_esocial_attempts").update({result:unknown?"UNKNOWN":"TECHNICAL_ERROR",error_message:message,completed_at:new Date().toISOString()}).eq("id",attempt.id);
-  fail(path,message);
- }
- const status=extractEsocialResponseStatus(result.responseXml);
- await context.supabase.from("rh_esocial_attempts").update({endpoint_url:result.endpoint,soap_action:result.soapAction,http_status:result.httpStatus,result:result.httpStatus>=200&&result.httpStatus<300?"SUCCESS":"TECHNICAL_ERROR",response_xml:result.responseXml,response_sha256:result.responseSha256,duration_ms:result.durationMs,completed_at:new Date().toISOString()}).eq("id",attempt.id);
- const nextStatus=status.code==="101"?"PROCESSING":status.code==="201"?"COMPLETED":"REJECTED";
- await context.supabase.from("rh_esocial_batches").update({status:nextStatus,response_code:status.code,response_description:status.description,estimated_completion_seconds:status.estimatedSeconds,completed_at:nextStatus==="COMPLETED"?new Date().toISOString():null,updated_at:new Date().toISOString()}).eq("id",batchId);
- success(path,status.description??`Consulta concluída com código ${status.code??"sem código"}.`);
 }
