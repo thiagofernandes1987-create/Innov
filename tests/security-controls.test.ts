@@ -74,7 +74,8 @@ describe("mapPublicOperationError", () => {
       "app/actions/quality.ts",
       "app/actions/listas.ts",
       "app/actions/sugestoes.ts",
-      "app/actions/observability.ts"
+      "app/actions/observability.ts",
+      "app/actions/relationship.ts"
     ];
     for (const path of protectedActions) {
       const source = fs.readFileSync(path, "utf8");
@@ -114,6 +115,10 @@ describe("mapPublicOperationError", () => {
       expect(source, path).not.toMatch(/\berror\??\.message\b/);
       expect(source, path).not.toContain("console.error");
     }
+
+    const relationship = fs.readFileSync("app/actions/relationship.ts", "utf8");
+    expect(relationship).not.toMatch(/\berror\??\.message\b/);
+    expect(relationship).toContain("safeInternalReturnPath");
   });
 
   it("registra o código interno apenas no log estruturado", () => {
