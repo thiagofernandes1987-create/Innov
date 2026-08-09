@@ -30,11 +30,11 @@ a ignorar.
 |---|---|
 | Aplicativos no registro | 24 |
 | Rotas | 163 (144 páginas, 19 de API) |
-| Server actions | 190 em 35 arquivos |
+| Server actions | 191 em 35 arquivos |
 | Módulos de `lib/` | 101 |
 | Funções do banco declaradas | 239 |
-| Funções do banco chamadas do código | 119 |
-| Suítes de teste | 69, com 697 casos |
+| Funções do banco chamadas do código | 120 |
+| Suítes de teste | 70, com 699 casos |
 | Migrations | 173 |
 | Validadores de CI | 29 |
 | Módulos de `lib/` citados por algum teste | 58 de 101 |
@@ -248,6 +248,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 |---|---|
 | `assignProfileToUser` | administracao:manage |
 | `createAccessProfile` | administracao:manage |
+| `revokeProfileFromUser` | administracao:manage |
 | `setApplicationState` | administracao:manage |
 | `setProfileAccessLevel` | administracao:manage |
 | `setUserCapabilityOverride` | administracao:manage |
@@ -915,7 +916,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `return_inventory_asset` | `supabase/migrations/20260720160410_stage17_inventory_assets_stocktakes_02.sql` | `app/actions/inventory.ts` |
 | `reverse_inventory_movement` | `supabase/migrations/20260720160200_stage17_inventory_movement_functions.sql` | `app/actions/inventory.ts` |
 | `review_quality_response` | `supabase/migrations/20260720080100_stage13_quality_forms_security.sql` | `app/actions/quality.ts` |
-| `revoke_user_access_profile` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | — (só por SQL ou trigger) |
+| `revoke_user_access_profile` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
 | `run_observability_health_snapshot` | `supabase/migrations/20260723104500_r3b_observability_security_hardening.sql` | `app/actions/observability.ts` |
 | `sandbox_signature_event` | `supabase/migrations/20260719234500_stage9_security_hardening.sql` | — (só por SQL ou trigger) |
 | `sandbox_signature_event_core` | `supabase/migrations/20260728234000_signature_business_completion.sql` | — (só por SQL ou trigger) |
@@ -965,6 +966,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 
 | Suíte | Casos | O que cobre |
 |---|---|---|
+| `tests/access-control-security.test.ts` | 2 | administração de acesso |
 | `tests/all-app-workflows.test.ts` | 2 | descoberta funcional de todos os aplicativos |
 | `tests/auth-errors.test.ts` | 5 | mensagemPublicaDeErroDeLogin |
 | `tests/busca-cobre-funis.test.ts` | 2 | busca da barra cobre as telas de funil |
