@@ -10,7 +10,8 @@ const CATEGORIES = [
   ["721", "Diretor não empregado, com FGTS"], ["722", "Diretor não empregado, sem FGTS"], ["723", "Empresário, sócio ou conselheiro"],
   ["731", "Cooperado de cooperativa de trabalho"], ["734", "Transportador cooperado"], ["738", "Cooperado de produção"],
   ["741", "Microempreendedor individual"], ["751", "Magistrado classista temporário aposentado"], ["761", "Dirigente eleito de entidade/condomínio"],
-  ["771", "Membro de conselho tutelar"], ["781", "Ministro religioso/membro de ordem religiosa"]
+  ["771", "Membro de conselho tutelar"], ["781", "Ministro religioso/membro de ordem religiosa"],
+  ["901", "Estagiário"], ["906", "Serviço civil voluntário"]
 ] as const;
 
 function one<T>(value: T | T[] | null | undefined) { return Array.isArray(value) ? value[0] ?? null : value ?? null; }
@@ -39,10 +40,11 @@ export default async function TsvDetailPage({ params, searchParams }: { params: 
   const position = condition ? one(condition.rh_positions) : null;
   const employer = condition ? one(condition.rh_employers) : null;
   const category = String(profile?.category_code ?? "721");
-  const localRequired = ["721", "722", "723", "731", "734", "738", "761", "771"].includes(category);
+  const localRequired = ["721", "722", "723", "731", "734", "738", "761", "771", "901", "906"].includes(category);
+  const studentCategory = category === "901" || category === "906";
 
   return <main className="content">
-    <section className="page-heading"><div><span className="badge">TSVE · {employment.registration_number}</span><h1>{person?.preferred_name || person?.full_name || worker?.worker_code}</h1><p>Início {employment.admission_date} · {employment.employment_type}. A vertical atual cobre as categorias 7XX de contribuinte individual compatíveis com o S-2300; grupos próprios de avulso, dirigente sindical, cedido e estágio permanecem separados.</p></div><Link className="button button-secondary" href="/app/rh/tsv">Voltar</Link></section>
+    <section className="page-heading"><div><span className="badge">TSVE · {employment.registration_number}</span><h1>{person?.preferred_name || person?.full_name || worker?.worker_code}</h1><p>Início {employment.admission_date} · {employment.employment_type}. A vertical cobre contribuinte individual 7XX, estagiário 901 e serviço civil voluntário 906; grupos próprios de avulso, dirigente sindical, cedido e mandato eletivo continuam separados.</p></div><Link className="button button-secondary" href="/app/rh/tsv">Voltar</Link></section>
     {query.error ? <div className="validation blocking">{query.error}</div> : null}
     {query.success ? <div className="validation">Perfil S-2300 salvo.</div> : null}
 
@@ -71,10 +73,29 @@ export default async function TsvDetailPage({ params, searchParams }: { params: 
         <label className="span-2"><span>Descrição variável/tarefa</span><input name="variableSalaryDescription" defaultValue={profile?.variable_salary_description ?? ""} /></label>
         <label><span>Data opção FGTS — somente categoria 721</span><input name="fgtsOptionDate" type="date" defaultValue={category === "721" ? profile?.fgts_option_date ?? employment.admission_date : ""} /></label>
         <label><span>Processo judicial de início</span><input name="judicialProcessNumber" defaultValue={profile?.judicial_process_number ?? ""} placeholder="20 dígitos" /></label>
-      </div><p className="validation">Cargo/CBO e remuneração base são lidos da condição vigente: {condition ? ` ${position?.name ?? "cargo ausente"} · ${employer?.legal_name ?? "empresa"}` : " condição ainda não cadastrada"}. O XML inclui local de trabalho somente nas categorias em que o leiaute o exige.</p></section>
+      </div><p className="validation">Cargo/CBO e remuneração base são lidos da condição vigente: {condition ? ` ${position?.name ?? "cargo opcional/ausente"} · ${employer?.legal_name ?? "empresa"}` : " condição ainda não cadastrada"}. Na categoria 906 a remuneração é obrigatória; na 901 pode ser omitida se não houver bolsa/remuneração fixa.</p></section>
+
+      <section className="card card-pad"><span className="eyebrow">ESTÁGIO / SERVIÇO CIVIL · 901/906</span><h2>Grupo infoEstagiario</h2><p>Preencha esta seção somente para categorias 901 e 906. Para 906, a natureza deve ser N e agente/supervisor não são admitidos.</p><div className="form-grid">
+        <label><span>Natureza</span><select name="internshipNature" defaultValue={profile?.internship_nature ?? (category === "906" ? "N" : "O")}><option value="O">O · Obrigatório</option><option value="N">N · Não obrigatório</option></select></label>
+        <label><span>Nível — obrigatório 901</span><select name="internshipLevel" defaultValue={profile?.internship_level ?? ""}><option value="">Não informar</option><option value="1">Fundamental</option><option value="2">Médio</option><option value="3">Formação profissional</option><option value="4">Superior</option><option value="8">Especial</option><option value="9">Mãe social — somente 901</option></select></label>
+        <label className="span-2"><span>Área de atuação / jornada semanal</span><input name="internshipArea" maxLength={100} defaultValue={profile?.internship_area ?? ""} /></label>
+        <label><span>Nº apólice seguro</span><input name="internshipPolicyNumber" maxLength={30} defaultValue={profile?.internship_policy_number ?? ""} /></label>
+        <label><span>Término previsto *</span><input type="date" name="internshipExpectedEnd" defaultValue={profile?.internship_expected_end ?? ""} /></label>
+        <label className="span-2"><span>CNPJ instituição de ensino/formação</span><input name="educationInstitutionCnpj" inputMode="numeric" defaultValue={profile?.education_institution_cnpj ?? ""} placeholder="Se houver CNPJ, não preencha o endereço abaixo" /></label>
+        <label className="span-2"><span>Razão social — se sem CNPJ</span><input name="educationInstitutionName" defaultValue={profile?.education_institution_name ?? ""} /></label>
+        <label className="span-2"><span>Logradouro instituição — se sem CNPJ</span><input name="educationInstitutionStreet" defaultValue={profile?.education_institution_street ?? ""} /></label>
+        <label><span>Número instituição</span><input name="educationInstitutionNumber" defaultValue={profile?.education_institution_number ?? ""} /></label>
+        <label><span>Bairro instituição</span><input name="educationInstitutionNeighborhood" defaultValue={profile?.education_institution_neighborhood ?? ""} /></label>
+        <label><span>CEP instituição</span><input name="educationInstitutionPostalCode" inputMode="numeric" defaultValue={profile?.education_institution_postal_code ?? ""} /></label>
+        <label><span>Município IBGE instituição</span><input name="educationInstitutionCityIbgeCode" inputMode="numeric" defaultValue={profile?.education_institution_city_ibge_code ?? ""} /></label>
+        <label><span>UF instituição</span><input name="educationInstitutionStateCode" maxLength={2} defaultValue={profile?.education_institution_state_code ?? ""} /></label>
+        <label><span>CNPJ agente integração — somente 901</span><input name="integrationAgentCnpj" inputMode="numeric" defaultValue={profile?.integration_agent_cnpj ?? ""} /></label>
+        <label><span>CPF supervisor — somente 901</span><input name="internshipSupervisorCpf" inputMode="numeric" defaultValue={profile?.internship_supervisor_cpf ?? ""} /></label>
+      </div></section>
+
       <div className="form-actions"><button className="button button-primary" type="submit">Salvar perfil S-2300</button></div>
     </form>
 
-    <section className="card card-pad"><span className="eyebrow">PRODUÇÃO RESTRITA</span><h2>Gerar e assinar S-2300</h2><form action={generateS2300}><input type="hidden" name="employmentId" value={employment.id} /><input type="hidden" name="environment" value="RESTRICTED" /><button className="button button-primary" type="submit" disabled={!profile || !condition}>Gerar + assinar S-2300</button></form>{event ? <p>Último evento: <Link className="text-link" href={`/app/rh/obrigacoes/esocial/eventos/${event.id}`}>{event.status}{event.receipt_number ? ` · recibo ${event.receipt_number}` : ""}</Link></p> : null}</section>
+    <section className="card card-pad"><span className="eyebrow">PRODUÇÃO RESTRITA</span><h2>Gerar e assinar S-2300</h2><form action={generateS2300}><input type="hidden" name="employmentId" value={employment.id} /><input type="hidden" name="environment" value="RESTRICTED" /><button className="button button-primary" type="submit" disabled={!profile || !condition}>Gerar + assinar S-2300</button></form>{studentCategory ? <p className="validation">O XML inclui infoEstagiario e local de trabalho conforme a categoria e a data de início.</p> : null}{event ? <p>Último evento: <Link className="text-link" href={`/app/rh/obrigacoes/esocial/eventos/${event.id}`}>{event.status}{event.receipt_number ? ` · recibo ${event.receipt_number}` : ""}</Link></p> : null}</section>
   </main>;
 }
