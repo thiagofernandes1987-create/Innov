@@ -18,6 +18,7 @@ runPostgresFiles({
     "supabase/tests/rh/payroll-v1.test.sql",
     "supabase/tests/rh/structure.test.sql",
     "supabase/tests/rh/admission.test.sql",
+    "supabase/tests/rh/admission-transition.test.sql",
     "supabase/tests/rh/payroll-v2.test.sql",
     "supabase/tests/rh/payroll-regulatory-config.test.sql",
     "supabase/tests/rh/payroll-irrf-2026.test.sql",
@@ -27,6 +28,6 @@ runPostgresFiles({
     "supabase/tests/rh/tsv-esocial.test.sql",
     "supabase/tests/rh/fk-postgrest.test.sql"
   ],
-  expectedApprovals:11,
-  successMessage:"Verticais RH empregado/estrutura/admissão/folha V1/V2/regulatório/IRRF 2026/MIT/folha sombra/benefícios/documentos/TSVE/PostgREST aprovadas."
+  expectedApprovals:12,
+  successMessage:"Verticais RH empregado/estrutura/admissão/transição S-2200/folha V1/V2/regulatório/IRRF 2026/MIT/folha sombra/benefícios/documentos/TSVE/PostgREST aprovadas."
 });
