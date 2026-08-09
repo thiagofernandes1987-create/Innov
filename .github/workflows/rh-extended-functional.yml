@@ -14,6 +14,7 @@ on:
       - "scripts/run-rh-*.mjs"
       - "scripts/seed-rh-browser-e2e.mjs"
       - "scripts/verify-rh-browser-e2e.mjs"
+      - "scripts/cleanup-rh-browser-e2e.mjs"
       - "docs/PROJETO-RH-EXECUCAO-STATUS-IMPLEMENTACAO.md"
       - "docs/PROJETO-RH-EXECUCAO-BLOCOS-CRITICOS-2026-08-07.md"
       - "tsconfig.rh.json"
@@ -35,6 +36,7 @@ on:
       - "scripts/run-rh-*.mjs"
       - "scripts/seed-rh-browser-e2e.mjs"
       - "scripts/verify-rh-browser-e2e.mjs"
+      - "scripts/cleanup-rh-browser-e2e.mjs"
       - "docs/PROJETO-RH-EXECUCAO-STATUS-IMPLEMENTACAO.md"
       - "docs/PROJETO-RH-EXECUCAO-BLOCOS-CRITICOS-2026-08-07.md"
       - "tsconfig.rh.json"
@@ -91,7 +93,7 @@ jobs:
       - name: RH scoped typecheck
         run: pnpm exec tsc --noEmit -p tsconfig.rh.json
       - name: Lint RH actions, pages, APIs, integrations and test harnesses
-        run: pnpm exec eslint 'app/actions/rh-*.ts' app/app/rh app/api/rh lib/rh tests/rh 'tests/e2e/rh-*.spec.ts' scripts/run-rh-backup-restore-drill.mjs scripts/run-rh-cutover-rollback-rehearsal.mjs scripts/seed-rh-browser-e2e.mjs scripts/verify-rh-browser-e2e.mjs --max-warnings=0
+        run: pnpm exec eslint 'app/actions/rh-*.ts' app/app/rh app/api/rh lib/rh tests/rh 'tests/e2e/rh-*.spec.ts' scripts/run-rh-backup-restore-drill.mjs scripts/run-rh-cutover-rollback-rehearsal.mjs scripts/seed-rh-browser-e2e.mjs scripts/verify-rh-browser-e2e.mjs scripts/cleanup-rh-browser-e2e.mjs --max-warnings=0
       # Os contratos XML/XSD/XMLSec do eSocial permanecem obrigatórios, mas são
       # executados exclusivamente no workflow RH eSocial Generation. Duplicar o
       # download do pacote oficial gov.br aqui introduzia falhas de rede sem
