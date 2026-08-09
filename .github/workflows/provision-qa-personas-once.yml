@@ -1,0 +1,38 @@
+name: Provision QA Personas Once
+
+on:
+  push:
+    branches:
+      - audit/regressao-main-20260808
+
+permissions:
+  contents: read
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 10
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      QA_PERSONAS_JSON: ${{ secrets.QA_PERSONAS_JSON }}
+      QA_ORGANIZATION_ID: ${{ vars.QA_ORGANIZATION_ID }}
+      ALLOW_INSECURE_DEMO_USERS: "true"
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@v6
+        with:
+          ref: audit/regressao-main-20260808
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install Supabase runtime
+        run: npm install --no-save --no-package-lock @supabase/supabase-js@2.57.4
+
+      - name: Provision authenticated QA personas
+        run: node scripts/provision-qa-personas.mjs
