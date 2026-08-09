@@ -15,6 +15,80 @@ begin;
 -- uma única fonte configurável: markup_models. Os campos bdi_rate/bdi_amount
 -- permanecem no snapshot da versão por compatibilidade histórica e ficam zero
 -- quando não há cálculo específico de BDI separado.
+--
+-- Guardas de deploy: nenhuma observação destrutiva da auditoria é aceita como
+-- verdade eterna. Antes de retirar colunas/tabelas, revalidamos que a migration
+-- anterior removeu a RPC antiga, que markup_models existe, que os modelos
+-- legados continuam vazios e que nenhuma budget_version passou a usar os FKs
+-- antigos. Qualquer mudança de estado aborta o deploy antes de qualquer DROP.
+do $$
+declare
+  v_table text;
+  v_has_rows boolean := false;
+begin
+  if to_regclass('public.markup_models') is null then
+    raise exception
+      'markup_models ausente; não é seguro convergir o pricing';
+  end if;
+
+  if to_regprocedure(
+    'public.create_budget_version(uuid,text,public.budget_scenario_type)'
+  ) is not null then
+    raise exception
+      'create_budget_version legada ainda existe; aplique a migration anterior antes da convergência de pricing';
+  end if;
+
+  foreach v_table in array array[
+    'bdi_model_versions',
+    'bdi_models',
+    'administrative_fee_models'
+  ]
+  loop
+    if to_regclass('public.' || v_table) is not null then
+      execute format('select exists (select 1 from public.%I)', v_table)
+        into v_has_rows;
+
+      if v_has_rows then
+        raise exception
+          'A superfície legada % ganhou dados após a auditoria; migre/reclassifique antes do DROP',
+          v_table;
+      end if;
+    end if;
+  end loop;
+
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'budget_versions'
+      and column_name = 'bdi_model_version_id'
+  ) then
+    execute 'select exists (select 1 from public.budget_versions where bdi_model_version_id is not null)'
+      into v_has_rows;
+
+    if v_has_rows then
+      raise exception
+        'budget_versions passou a usar bdi_model_version_id; migre os dados antes da convergência';
+    end if;
+  end if;
+
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'budget_versions'
+      and column_name = 'administrative_fee_model_id'
+  ) then
+    execute 'select exists (select 1 from public.budget_versions where administrative_fee_model_id is not null)'
+      into v_has_rows;
+
+    if v_has_rows then
+      raise exception
+        'budget_versions passou a usar administrative_fee_model_id; migre os dados antes da convergência';
+    end if;
+  end if;
+end;
+$$;
 
 create or replace function public.calculate_budget_version_core(p_version_id uuid)
 returns public.budget_versions
