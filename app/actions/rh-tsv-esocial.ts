@@ -8,7 +8,11 @@ import {
   S2300_CONTRIBUTOR_CATEGORIES,
   type S2300ContributorCategory
 } from "@/lib/rh/integrations/esocial-tsv-xml";
-import { buildS2300Student, type S2300StudentCategory } from "@/lib/rh/integrations/esocial-tsv-student-xml";
+import {
+  buildS2300Student,
+  type S2300EducationInstitution,
+  type S2300StudentCategory
+} from "@/lib/rh/integrations/esocial-tsv-student-xml";
 import { signEsocialXml } from "@/lib/rh/integrations/esocial-signature";
 import { xmlSha256, type EsocialEnvironment } from "@/lib/rh/integrations/esocial-xml";
 
@@ -80,63 +84,41 @@ export async function saveTsvEsocialProfile(data: FormData) {
     created_by: context.userId,
     updated_at: new Date().toISOString()
   };
-
-  if (categoryCode === "721" && !payload.fgts_option_date) fail(employmentId, "Categoria 721 exige data de opção pelo FGTS.");
-  if (categoryCode === "901" && !payload.internship_level) fail(employmentId, "Categoria 901 exige nível do estágio.");
-  if (categoryCode === "906" && payload.internship_nature !== "N") fail(employmentId, "Categoria 906 exige natureza N.");
-  if (student && !payload.internship_expected_end) fail(employmentId, "Estágio/serviço civil exige data prevista de término.");
-  if (student && !institutionCnpj && (!payload.education_institution_name || !payload.education_institution_street || !payload.education_institution_number || !payload.education_institution_neighborhood)) {
-    fail(employmentId, "Instituição sem CNPJ exige razão social e endereço.");
-  }
-
-  const { error } = await context.supabase.from("rh_tsv_esocial_profiles").upsert(payload, { onConflict: "organization_id,employment_id" });
+  const { error } = await context.supabase.from("rh_tsv_esocial_profiles").upsert(payload, { onConflict: "employment_id" });
   if (error) fail(employmentId, error.message);
   revalidatePath(path(employmentId));
-  redirect(`${path(employmentId)}?success=1`);
+  redirect(`${path(employmentId)}?success=${encodeURIComponent("Perfil eSocial do TSVE salvo.")}`);
 }
 
-export async function generateS2300(data: FormData) {
+export async function generateTsvS2300(data: FormData) {
   const employmentId = text(data, "employmentId");
   const environment = env(text(data, "environment"));
+  if (environment === "PRODUCTION" && process.env.ESOCIAL_ENABLE_PRODUCTION !== "true") fail(employmentId, "Produção eSocial bloqueada.");
   const context = await requireCapability("rh", "update");
-  if (environment === "PRODUCTION" && process.env.ESOCIAL_ENABLE_PRODUCTION !== "true") fail(employmentId, "Produção bloqueada até homologação formal.");
-  let eventId = "";
-
   try {
-    const { data: employment, error: employmentError } = await context.supabase
-      .from("rh_employments")
-      .select("id,worker_id,registration_number,employment_type,admission_date,base_salary,status")
-      .eq("organization_id", context.organizationId)
-      .eq("id", employmentId)
-      .maybeSingle();
-    if (employmentError || !employment) throw new Error(employmentError?.message ?? "Vínculo TSVE não encontrado.");
-    if (!["TSV", "DIRECTOR", "OTHER"].includes(employment.employment_type)) throw new Error("S-2300 só pode ser gerado para vínculo configurado como TSVE/diretor/outro sem vínculo.");
-
-    const [{ data: profile, error: profileError }, { data: worker, error: workerError }, { data: condition, error: conditionError }] = await Promise.all([
-      context.supabase.from("rh_tsv_esocial_profiles").select("*").eq("organization_id", context.organizationId).eq("employment_id", employmentId).maybeSingle(),
-      context.supabase.from("rh_workers").select("person_id").eq("organization_id", context.organizationId).eq("id", employment.worker_id).maybeSingle(),
-      context.supabase.from("rh_employment_conditions").select("employer_id,establishment_id,position_id,base_salary").eq("organization_id", context.organizationId).eq("employment_id", employmentId).lte("valid_from", employment.admission_date).or(`valid_to.is.null,valid_to.gt.${employment.admission_date}`).order("valid_from", { ascending: false }).limit(1).maybeSingle()
+    const { data: employment, error: empError } = await context.supabase.from("rh_employments").select("id,worker_id,registration_number,admission_date,base_salary,status").eq("organization_id", context.organizationId).eq("id", employmentId).maybeSingle();
+    if (empError || !employment) throw new Error(empError?.message ?? "Vínculo TSVE não encontrado.");
+    const [{ data: worker }, { data: profile, error: profileError }, { data: condition }] = await Promise.all([
+      context.supabase.from("rh_workers").select("person_id").eq("organization_id", context.organizationId).eq("id", employment.worker_id).single(),
+      context.supabase.from("rh_tsv_esocial_profiles").select("*").eq("organization_id", context.organizationId).eq("employment_id", employment.id).maybeSingle(),
+      context.supabase.from("rh_employment_conditions").select("employer_id,establishment_id,position_id,base_salary").eq("organization_id", context.organizationId).eq("employment_id", employment.id).lte("valid_from", employment.admission_date).order("valid_from", { ascending: false }).limit(1).maybeSingle()
     ]);
-    if (profileError || workerError || conditionError) throw new Error(profileError?.message ?? workerError?.message ?? conditionError?.message ?? "Falha ao carregar TSVE.");
-    if (!profile) throw new Error("Preencha o perfil S-2300 do TSVE.");
-    if (!worker || !condition) throw new Error("TSVE exige trabalhador e condição organizacional vigentes no início.");
+    if (!worker?.person_id || profileError || !profile || !condition) throw new Error(profileError?.message ?? "Perfil/condição eSocial do TSVE incompleto.");
+    if (!isContributorCategory(profile.category_code) && !isStudentCategory(profile.category_code)) throw new Error("Categoria S-2300 ainda não suportada pelo gerador.");
     const contributor = isContributorCategory(profile.category_code);
     const student = isStudentCategory(profile.category_code);
-    if (!contributor && !student) throw new Error("Categoria TSVE exige uma vertical específica ainda não implementada.");
-
+    if (!contributor && !student) throw new Error("Categoria TSVE inválida.");
     const [{ data: person }, { data: employer }, { data: establishment }, { data: position }] = await Promise.all([
-      context.supabase.from("rh_people").select("full_name,cpf,birth_date,email,phone").eq("organization_id", context.organizationId).eq("id", worker.person_id).single(),
+      context.supabase.from("rh_people").select("full_name,cpf,birth_date,phone,email").eq("organization_id", context.organizationId).eq("id", worker.person_id).single(),
       context.supabase.from("rh_employers").select("tax_id").eq("organization_id", context.organizationId).eq("id", condition.employer_id).single(),
       context.supabase.from("rh_establishments").select("registration_type,registration_number").eq("organization_id", context.organizationId).eq("id", condition.establishment_id).single(),
-      condition.position_id ? context.supabase.from("rh_positions").select("name,cbo_code").eq("organization_id", context.organizationId).eq("id", condition.position_id).single() : Promise.resolve({ data: null, error: null })
+      condition.position_id ? context.supabase.from("rh_positions").select("name,cbo_code").eq("organization_id", context.organizationId).eq("id", condition.position_id).maybeSingle() : Promise.resolve({ data: null, error: null })
     ]);
-    if (!person?.cpf || !person.birth_date) throw new Error("TSVE exige CPF e data de nascimento.");
-    if (!employer || !establishment) throw new Error("TSVE exige empregador e estabelecimento na condição vigente.");
-    if (contributor && !position?.cbo_code) throw new Error("Contribuinte individual exige cargo/CBO na condição vigente.");
-
+    if (!person?.cpf || !person.birth_date || !employer?.tax_id || !establishment) throw new Error("Cadastro mestre incompleto para S-2300.");
+    if (contributor && (!position?.name || !position.cbo_code)) throw new Error("Contribuinte individual S-2300 exige cargo/CBO no caminho atual.");
     const eType = employerType(employer.tax_id);
     const immigrant = profile.nationality_country_code !== "105"
-      ? { residenceTerm: Number(profile.immigrant_residence_term) as 1 | 2, entryCondition: Number(profile.immigrant_entry_condition) as 1 | 2 | 3 | 4 | 5 | 6 | 7 }
+      ? { residenceTerm: profile.immigrant_residence_term as 1 | 2, entryCondition: profile.immigrant_entry_condition as 1 | 2 | 3 | 4 | 5 | 6 | 7 }
       : null;
     const common = {
       environment,
@@ -175,9 +157,18 @@ export async function generateS2300(data: FormData) {
         fgtsOptionDate: profile.category_code === "721" ? profile.fgts_option_date : null
       });
     } else {
-      const institution = profile.education_institution_cnpj
+      const institution: S2300EducationInstitution = profile.education_institution_cnpj
         ? { cnpj: profile.education_institution_cnpj }
-        : { cnpj: null as const, name: String(profile.education_institution_name ?? ""), street: String(profile.education_institution_street ?? ""), number: String(profile.education_institution_number ?? ""), neighborhood: String(profile.education_institution_neighborhood ?? ""), postalCode: profile.education_institution_postal_code, cityIbgeCode: profile.education_institution_city_ibge_code, state: profile.education_institution_state_code };
+        : {
+            cnpj: null,
+            name: String(profile.education_institution_name ?? ""),
+            street: String(profile.education_institution_street ?? ""),
+            number: String(profile.education_institution_number ?? ""),
+            neighborhood: String(profile.education_institution_neighborhood ?? ""),
+            postalCode: profile.education_institution_postal_code,
+            cityIbgeCode: profile.education_institution_city_ibge_code,
+            state: profile.education_institution_state_code
+          };
       const salary = Number(condition.base_salary ?? employment.base_salary);
       unsigned = buildS2300Student({
         ...common,
@@ -223,9 +214,8 @@ export async function generateS2300(data: FormData) {
       p_signed_sha256: signed.payloadSha256
     });
     if (error) throw new Error(error.message);
-    eventId = String(id);
+    redirect(`/app/rh/obrigacoes/esocial/eventos/${id}`);
   } catch (error) {
     fail(employmentId, error instanceof Error ? error.message : "Falha ao gerar S-2300.");
   }
-  redirect(`/app/rh/obrigacoes/esocial/eventos/${eventId}`);
 }
