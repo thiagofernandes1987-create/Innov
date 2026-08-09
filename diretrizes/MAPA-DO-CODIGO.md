@@ -29,12 +29,12 @@ a ignorar.
 | | |
 |---|---|
 | Aplicativos no registro | 24 |
-| Rotas | 163 (144 páginas, 19 de API) |
-| Server actions | 191 em 35 arquivos |
+| Rotas | 164 (145 páginas, 19 de API) |
+| Server actions | 192 em 35 arquivos |
 | Módulos de `lib/` | 101 |
 | Funções do banco declaradas | 239 |
-| Funções do banco chamadas do código | 120 |
-| Suítes de teste | 70, com 699 casos |
+| Funções do banco chamadas do código | 121 |
+| Suítes de teste | 71, com 703 casos |
 | Migrations | 173 |
 | Validadores de CI | 29 |
 | Módulos de `lib/` citados por algum teste | 58 de 101 |
@@ -160,6 +160,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/estoque/movimentos/novo` | página | estoque:create | `app/app/estoque/movimentos/novo/page.tsx` |
 | `/app/estoque/reservas` | página | estoque:read | `app/app/estoque/reservas/page.tsx` |
 | `/app/estoque/reservas/[id]` | página | estoque:read | `app/app/estoque/reservas/[id]/page.tsx` |
+| `/app/excecoes` | página | sessão da organização | `app/app/excecoes/page.tsx` |
 | `/app/financeiro` | página | financeiro:read | `app/app/financeiro/page.tsx` |
 | `/app/financeiro/configuracoes` | página | financeiro:manage | `app/app/financeiro/configuracoes/page.tsx` |
 | `/app/financeiro/fluxo-de-caixa` | página | financeiro:read | `app/app/financeiro/fluxo-de-caixa/page.tsx` |
@@ -434,6 +435,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | Função | Guarda |
 |---|---|
 | `desativarResponsabilidadeOperacional` | administracao:manage |
+| `registrarExcecaoOperacional` | sessão da organização |
 | `salvarResponsabilidadeOperacional` | administracao:manage |
 
 ### `app/actions/organization-context.ts`
@@ -769,7 +771,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `create_modular_access_profile` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
 | `create_next_budget_version` | `supabase/migrations/20260808135000_converge_budget_pricing_to_markup.sql` | `app/actions/budget-versions.ts` |
 | `create_object_definition` | `supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql` | `app/actions/objetos.ts` |
-| `create_operational_event` | `supabase/migrations/20260728150000_operational_client_event_origin.sql` | — (só por SQL ou trigger) |
+| `create_operational_event` | `supabase/migrations/20260728150000_operational_client_event_origin.sql` | `app/actions/operations.ts` |
 | `create_project_from_contract` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | — (só por SQL ou trigger) |
 | `create_project_from_contract_v2` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | `app/actions/project-creation.ts` |
 | `create_proposal_from_budget_version` | `supabase/migrations/20260728162026_workflow_documental_descobrivel.sql` | — (só por SQL ou trigger) |
@@ -994,6 +996,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/object-runtime-parecidos.test.ts` | 12 | o caso que a tarefa descreve; parecido sem ser igual; o que não atrapalha quem está declarando; distância entre dois nomes |
 | `tests/object-runtime-proposito.test.ts` | 17 | o vocabulário cobre a biblioteca de tipos; o que a informação faz decide o tipo; nasce filtrável quando o tipo permite; o campo que sai da resposta é publicável |
 | `tests/object-runtime-spec.test.ts` | 31 | canonicalSpecJson; specFingerprint; slotFamilyFor; allocateSlots |
+| `tests/operational-exception-flow-integration.test.ts` | 4 | fluxo de exceções operacionais |
 | `tests/operational-notifications.test.ts` | 5 | notificações operacionais por exceção |
 | `tests/operational-routines.test.ts` | 3 | runner das rotinas profissionais |
 | `tests/orcamento-composicao.test.ts` | 11 | por que o custo de um item falta; a soma dos itens fecha com o custo publicado? |
