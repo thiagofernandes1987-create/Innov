@@ -4,7 +4,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: audit-orphans-${{ github.ref }}
@@ -15,25 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout PR branch
+      - name: Checkout
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref }}
-
-      - name: Remove dead hitbox calculation from SchedulePlanner
-        run: |
-          node --input-type=module <<'NODE'
-          import fs from "node:fs";
-          const file = "components/planejamento/schedule-planner.tsx";
-          let source = fs.readFileSync(file, "utf8");
-          for (const line of [
-            "                    const hitWidth = Math.max(44, visualWidth);\n",
-            "                    const hitOffset = (hitWidth - visualWidth) / 2;\n"
-          ]) {
-            if (source.includes(line)) source = source.replace(line, "");
-          }
-          fs.writeFileSync(file, source);
-          NODE
 
       - name: Audit reachable code graph
         run: node scripts/auditar-alcancabilidade.mjs --json > reachability-audit.json
@@ -61,19 +44,6 @@ jobs:
         run: |
           node scripts/gerar-mapa-do-codigo.mjs
           git diff --exit-code -- diretrizes/MAPA-DO-CODIGO.md
-
-      - name: Commit lint cleanup
-        shell: bash
-        run: |
-          if git diff --quiet -- components/planejamento/schedule-planner.tsx; then
-            echo "SchedulePlanner já está sem cálculo morto."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
-          git add components/planejamento/schedule-planner.tsx
-          git commit -m "fix(planning): remove cálculo de hitbox não utilizado"
-          git push origin HEAD:${{ github.head_ref }}
 
       - name: Upload orphan audit reports
         if: always()
