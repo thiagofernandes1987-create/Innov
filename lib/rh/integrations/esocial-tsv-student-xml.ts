@@ -76,6 +76,12 @@ export type S2300StudentInput = {
   eventKey?: string;
 };
 
+type S2300CnpjInstitution = Extract<S2300EducationInstitution, { cnpj: string }>;
+type S2300NamedInstitution = Exclude<S2300EducationInstitution, S2300CnpjInstitution>;
+function hasInstitutionCnpj(institution: S2300EducationInstitution): institution is S2300CnpjInstitution {
+  return typeof institution.cnpj === "string" && institution.cnpj.length > 0;
+}
+
 function immigrantXml(input: S2300StudentInput) {
   if (input.nationalityCountryCode === "105") {
     if (input.immigrant) throw new Error("TSVE brasileiro não deve informar trabImig.");
@@ -88,13 +94,14 @@ function immigrantXml(input: S2300StudentInput) {
 }
 
 function institutionXml(institution: S2300EducationInstitution) {
-  if (institution.cnpj) return `<instEnsino>${tag("cnpjInstEnsino", cnpj(institution.cnpj, "CNPJ da instituição de ensino"))}</instEnsino>`;
-  if (!institution.name.trim() || !institution.street.trim() || !institution.number.trim() || !institution.neighborhood.trim()) throw new Error("Instituição sem CNPJ exige razão social e endereço completos.");
-  const postal = institution.postalCode ? digits(institution.postalCode) : "";
-  const city = institution.cityIbgeCode ? digits(institution.cityIbgeCode) : "";
+  if (hasInstitutionCnpj(institution)) return `<instEnsino>${tag("cnpjInstEnsino", cnpj(institution.cnpj, "CNPJ da instituição de ensino"))}</instEnsino>`;
+  const named: S2300NamedInstitution = institution;
+  if (!named.name.trim() || !named.street.trim() || !named.number.trim() || !named.neighborhood.trim()) throw new Error("Instituição sem CNPJ exige razão social e endereço completos.");
+  const postal = named.postalCode ? digits(named.postalCode) : "";
+  const city = named.cityIbgeCode ? digits(named.cityIbgeCode) : "";
   if (postal && postal.length !== 8) throw new Error("CEP da instituição deve possuir 8 dígitos.");
   if (city && city.length !== 7) throw new Error("Código IBGE da instituição deve possuir 7 dígitos.");
-  return `<instEnsino>${tag("nmRazao", institution.name)}${tag("dscLograd", institution.street)}${tag("nrLograd", institution.number)}${tag("bairro", institution.neighborhood)}${opt("cep", postal || null)}${opt("codMunic", city || null)}${opt("uf", institution.state)}</instEnsino>`;
+  return `<instEnsino>${tag("nmRazao", named.name)}${tag("dscLograd", named.street)}${tag("nrLograd", named.number)}${tag("bairro", named.neighborhood)}${opt("cep", postal || null)}${opt("codMunic", city || null)}${opt("uf", named.state)}</instEnsino>`;
 }
 
 function studentXml(input: S2300StudentInput) {
