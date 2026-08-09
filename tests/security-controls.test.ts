@@ -76,6 +76,10 @@ describe("mapPublicOperationError", () => {
     const sinapi = fs.readFileSync("app/actions/sinapi.ts", "utf8");
     expect(sinapi).toContain("reportDataAccessError");
     expect(sinapi).not.toMatch(/\b(?:error|versionError|updateError)\??\.message\b/);
+
+    const inventory = fs.readFileSync("app/actions/inventory.ts", "utf8");
+    expect(inventory).toContain("reportDataAccessError");
+    expect(inventory).not.toMatch(/\berror\??\.message\b/);
   });
 
   it("registra o código interno apenas no log estruturado", () => {
