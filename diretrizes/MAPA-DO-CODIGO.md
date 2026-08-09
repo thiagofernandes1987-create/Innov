@@ -30,11 +30,11 @@ a ignorar.
 |---|---|
 | Aplicativos no registro | 24 |
 | Rotas | 163 (144 páginas, 19 de API) |
-| Server actions | 188 em 34 arquivos |
+| Server actions | 190 em 35 arquivos |
 | Módulos de `lib/` | 101 |
 | Funções do banco declaradas | 239 |
 | Funções do banco chamadas do código | 119 |
-| Suítes de teste | 65, com 688 casos |
+| Suítes de teste | 66, com 691 casos |
 | Migrations | 173 |
 | Validadores de CI | 29 |
 | Módulos de `lib/` citados por algum teste | 58 de 101 |
@@ -488,6 +488,13 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | Função | Guarda |
 |---|---|
 | `createProjectFromContractSafe` | sessão da organização |
+
+### `app/actions/project-resource-usage.ts`
+
+| Função | Guarda |
+|---|---|
+| `createDailyLogResource` | sessão da organização |
+| `upsertTaskResourceAllocation` | — |
 
 ### `app/actions/projects.ts`
 
@@ -999,6 +1006,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/planning-task-integration.test.ts` | 6 | Planejamento ↔ Tarefas |
 | `tests/project-creation-contract.test.ts` | 6 | criação segura de projetos |
 | `tests/project-membership-resolution.test.ts` | 2 | resolução de responsáveis de projeto |
+| `tests/project-resource-usage-integration.test.ts` | 3 | recursos operacionais da obra |
 | `tests/proposal-direct-upload.test.ts` | 4 | upload de PDF da proposta |
 | `tests/qa-contraste.test.ts` | 19 | aritmética de cor; v4 — notação color(srgb …) lida como preto; opacidade nas três notações; mínimo exigido — 3:1 só para texto grande |
 | `tests/relatorio-perdas.test.ts` | 20 | Pareto ordena por valor, não por contagem; fatia e acumulado; casos que quebrariam a divisão; perda sem motivo entra na conta |
