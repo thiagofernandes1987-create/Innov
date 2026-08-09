@@ -4,6 +4,7 @@
 // constante ficam em `lib/sugestoes`.
 import { revalidatePath } from "next/cache";
 import { requireCapability } from "@/lib/authorization";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { chaveDoEscopo } from "@/lib/sugestoes/catalogo";
 
 const ROTA = "/app/administracao/vocabulario";
@@ -34,6 +35,6 @@ export async function limparValorDoCatalogo(formData: FormData): Promise<void> {
     p_scope: escopo,
     p_normalized: chave
   });
-  if (error) console.error("[sugestoes:limpar]", error.message ?? error);
+  reportDataAccessError("sugestoes.clear-catalog-value", error);
   revalidatePath(ROTA);
 }
