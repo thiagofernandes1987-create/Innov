@@ -99,30 +99,6 @@ export async function createRhEmploymentCondition(data:FormData){
   revalidatePath(path);revalidatePath("/app/rh/pessoas");
 }
 
-export async function createRhRubric(data:FormData){
-  const context=await requireCapability("rh","configure");
-  const path="/app/rh/folha/rubricas/nova";
-  const code=text(data,"code").toUpperCase();
-  const name=text(data,"name");
-  const formulaType=text(data,"formulaType")||"MANUAL";
-  const validFrom=text(data,"validFrom");
-  if(!code||!name||!validFrom)fail(path,"Código, nome e início de vigência são obrigatórios.");
-  const{data:rubric,error:rError}=await context.supabase.from("rh_rubrics").insert({
-    organization_id:context.organizationId,code,name,description:optional(data,"description"),payroll_kind:text(data,"payrollKind")||"EARNING",created_by:context.userId
-  }).select("id").single();
-  if(rError)fail(path,rError.message);
-  const{error:vError}=await context.supabase.from("rh_rubric_versions").insert({
-    organization_id:context.organizationId,rubric_id:rubric.id,version:1,valid_from:validFrom,valid_to:dateOrNull(data,"validTo"),formula_type:formulaType,
-    fixed_value:formulaType==="FIXED"?money(data,"fixedValue"):null,
-    percent_value:formulaType==="PERCENT_OF_AMOUNT"?money(data,"percentValue"):null,
-    calculation_priority:Number(text(data,"priority")||"100"),esocial_nature_code:optional(data,"esocialNatureCode"),
-    cod_inc_cp:optional(data,"codIncCp"),cod_inc_irrf:optional(data,"codIncIrrf"),cod_inc_fgts:optional(data,"codIncFgts"),
-    accounting_debit:optional(data,"accountingDebit"),accounting_credit:optional(data,"accountingCredit"),created_by:context.userId
-  });
-  if(vError)fail(path,vError.message);
-  redirect(`/app/rh/folha/rubricas?created=${encodeURIComponent(code)}`);
-}
-
 export async function createRhPayrollPeriod(data:FormData){
   const context=await requireCapability("rh","create");
   const path="/app/rh/folha/competencias/nova";
