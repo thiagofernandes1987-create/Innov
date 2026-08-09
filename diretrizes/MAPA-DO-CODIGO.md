@@ -34,7 +34,7 @@ a ignorar.
 | Módulos de `lib/` | 101 |
 | Funções do banco declaradas | 239 |
 | Funções do banco chamadas do código | 121 |
-| Suítes de teste | 71, com 703 casos |
+| Suítes de teste | 72, com 706 casos |
 | Migrations | 173 |
 | Validadores de CI | 29 |
 | Módulos de `lib/` citados por algum teste | 58 de 101 |
@@ -993,6 +993,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/modelos-de-eap.test.ts` | 20 | o caso que a tarefa descreve; o que entra no modelo; grafia; achar o modelo do que está sendo digitado |
 | `tests/module-navigation.test.tsx` | 2 | NavegacaoDoModulo |
 | `tests/moeda.test.ts` | 15 | leitura de valor digitado; máscara de digitação, no padrão de caixa; exibição |
+| `tests/object-runtime-error-safety.test.ts` | 3 | segurança do Estúdio de Objetos |
 | `tests/object-runtime-parecidos.test.ts` | 12 | o caso que a tarefa descreve; parecido sem ser igual; o que não atrapalha quem está declarando; distância entre dois nomes |
 | `tests/object-runtime-proposito.test.ts` | 17 | o vocabulário cobre a biblioteca de tipos; o que a informação faz decide o tipo; nasce filtrável quando o tipo permite; o campo que sai da resposta é publicável |
 | `tests/object-runtime-spec.test.ts` | 31 | canonicalSpecJson; specFingerprint; slotFamilyFor; allocateSlots |
