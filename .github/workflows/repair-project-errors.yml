@@ -29,8 +29,8 @@ jobs:
           let source = fs.readFileSync(file, "utf8");
           const pattern = /fail\(([^,\n]+), error\.message\);/g;
           const matches = [...source.matchAll(pattern)];
-          if (matches.length !== 9) {
-            throw new Error(`Esperadas 9 mensagens cruas em projects.ts; encontradas ${matches.length}.`);
+          if (matches.length !== 10) {
+            throw new Error(`Esperadas 10 mensagens cruas no HEAD auditado; encontradas ${matches.length}.`);
           }
           source = source.replace(
             pattern,
