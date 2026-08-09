@@ -1,19 +1,25 @@
 import "server-only";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { requireOrganizationContext } from "@/lib/auth";
-import { WhatsAppDomainError } from "./domain";
-import type { WhatsAppDashboardData } from "./types";
 
-export async function getWhatsAppDashboard(selectedConversationId?: string | null): Promise<WhatsAppDashboardData> {
-  const context = await requireOrganizationContext();
+import { hasCapability, requireCapability } from "@/lib/authorization";
+
+function relationName(value: unknown, fallback: string) {
+  if (Array.isArray(value)) return relationName(value[0], fallback);
+  if (value && typeof value === "object") {
+    const row = value as Record<string, unknown>;
+    return String(row.title ?? row.name ?? row.code ?? fallback);
+  }
+  return fallback;
+}
+
+export async function loadWhatsAppWorkspace(selectedConversationId?: string | null) {
+  const context = await requireCapability("whatsapp", "read");
+  const canManage = await hasCapability("whatsapp", "manage", null, context);
 
   const [
     accountsResult,
     conversationsResult,
-    contactsResult,
-    templatesResult,
-    automationResult,
-    sourcesResult,
+    bindingsResult,
+    clientsResult,
     projectsResult,
     contractTemplatesResult,
     proposalVersionsResult,
@@ -23,36 +29,32 @@ export async function getWhatsAppDashboard(selectedConversationId?: string | nul
   ] = await Promise.all([
     context.supabase
       .from("whatsapp_accounts")
-      .select("id,name,phone_number,status,provider,health_status,last_connected_at")
+      .select("id,waba_id,phone_number_id,display_phone_number,business_name,active,is_default")
       .eq("organization_id", context.organizationId)
-      .order("name"),
+      .order("is_default", { ascending: false }),
     context.supabase
       .from("whatsapp_conversations")
-      .select("id,contact_id,status,assigned_to,last_message_at,unread_count,whatsapp_contacts(id,display_name,phone_number)")
+      .select(
+        "id,status,client_id,project_id,contract_id,sac_ticket_id,assigned_to,last_customer_message_at,last_message_at,unread_count,whatsapp_contacts(display_name,profile_name,phone_e164,wa_id),clients(legal_name,trade_name),projects(code,name)"
+      )
       .eq("organization_id", context.organizationId)
-      .order("last_message_at", { ascending: false })
-      .limit(100),
-    context.supabase
-      .from("whatsapp_contacts")
-      .select("id,display_name,phone_number,client_id,lead_id")
-      .eq("organization_id", context.organizationId)
-      .order("display_name")
-      .limit(300),
-    context.supabase
-      .from("whatsapp_templates")
-      .select("id,name,category,status,language,provider_template_name")
-      .eq("organization_id", context.organizationId)
-      .order("name"),
-    context.supabase
-      .from("whatsapp_automation_rules")
-      .select("id,name,trigger_type,enabled,priority")
-      .eq("organization_id", context.organizationId)
-      .order("priority"),
+      .order("last_message_at", { ascending: false, nullsFirst: false })
+      .limit(200),
     context.supabase
       .from("whatsapp_content_bindings")
-      .select("id,name,source_type,source_id,source_field,active")
+      .select(
+        "id,name,source_type,source_id,source_field,meta_template_name,language_code,parameter_order,active"
+      )
       .eq("organization_id", context.organizationId)
+      .eq("active", true)
       .order("name"),
+    context.supabase
+      .from("clients")
+      .select("id,legal_name,trade_name,phone")
+      .eq("organization_id", context.organizationId)
+      .is("archived_at", null)
+      .order("legal_name")
+      .limit(300),
     context.supabase
       .from("projects")
       .select("id,client_id,code,name,status")
@@ -101,53 +103,99 @@ export async function getWhatsAppDashboard(selectedConversationId?: string | nul
   const messagesResult = selectedId
     ? await context.supabase
         .from("whatsapp_messages")
-        .select("id,conversation_id,direction,type,status,text_body,created_at,sent_at,delivered_at,read_at,failed_at,error_code,error_message,source_snapshot")
-        .eq("organization_id", context.organizationId)
+        .select(
+          "id,direction,message_type,status,body,caption,source_binding_id,source_snapshot,error_code,error_message,occurred_at"
+        )
         .eq("conversation_id", selectedId)
-        .order("created_at", { ascending: true })
-        .limit(300)
+        .eq("organization_id", context.organizationId)
+        .order("occurred_at", { ascending: true })
+        .limit(500)
     : { data: [], error: null };
 
-  const errors = [
-    accountsResult.error,
-    conversationsResult.error,
-    contactsResult.error,
-    templatesResult.error,
-    automationResult.error,
-    sourcesResult.error,
-    projectsResult.error,
-    contractTemplatesResult.error,
-    proposalVersionsResult.error,
-    contractVersionsResult.error,
-    amendmentVersionsResult.error,
-    projectDocumentVersionsResult.error,
-    messagesResult.error
-  ].filter(Boolean);
-
-  if (errors.length) {
-    throw new WhatsAppDomainError("DASHBOARD_LOAD_FAILED", errors[0]?.message ?? "Falha ao carregar WhatsApp.");
-  }
+  const sourceCatalog = [
+    ...(contractTemplatesResult.data ?? []).map(item => ({
+      token: `CONTRACT_TEMPLATE|${item.id}|BODY_TEMPLATE`,
+      label: `${item.name} · modelo contratual V${item.version_number}`
+    })),
+    ...(proposalVersionsResult.data ?? []).flatMap(item => [
+      {
+        token: `PROPOSAL_VERSION|${item.id}|COMMERCIAL_SUMMARY`,
+        label: `${item.title} · resumo comercial V${item.version_number}`
+      },
+      ...(item.document_path
+        ? [
+            {
+              token: `PROPOSAL_VERSION|${item.id}|DOCUMENT`,
+              label: `${item.title} · documento V${item.version_number}`
+            }
+          ]
+        : [])
+    ]),
+    ...(contractVersionsResult.data ?? []).flatMap(item => {
+      const name = relationName(item.contracts, "Contrato");
+      return [
+        {
+          token: `CONTRACT_VERSION|${item.id}|RENDERED_BODY`,
+          label: `${name} · corpo contratual V${item.version_number}`
+        },
+        ...(item.document_path
+          ? [
+              {
+                token: `CONTRACT_VERSION|${item.id}|DOCUMENT`,
+                label: `${name} · documento V${item.version_number}`
+              }
+            ]
+          : [])
+      ];
+    }),
+    ...(amendmentVersionsResult.data ?? []).flatMap(item => {
+      const name = relationName(item.amendments, "Aditivo");
+      return [
+        {
+          token: `AMENDMENT_VERSION|${item.id}|RENDERED_BODY`,
+          label: `${name} · texto V${item.version_number}`
+        },
+        ...(item.document_path
+          ? [
+              {
+                token: `AMENDMENT_VERSION|${item.id}|DOCUMENT`,
+                label: `${name} · documento V${item.version_number}`
+              }
+            ]
+          : [])
+      ];
+    }),
+    ...(projectDocumentVersionsResult.data ?? []).map(item => ({
+      token: `PROJECT_DOCUMENT_VERSION|${item.id}|DOCUMENT`,
+      label: `${relationName(item.project_documents, item.file_name)} · documento V${item.version_number}`
+    }))
+  ];
 
   return {
     context,
+    canManage,
     accounts: accountsResult.data ?? [],
     conversations,
-    contacts: contactsResult.data ?? [],
-    templates: templatesResult.data ?? [],
-    automationRules: automationResult.data ?? [],
-    contentBindings: sourcesResult.data ?? [],
+    bindings: bindingsResult.data ?? [],
+    clients: clientsResult.data ?? [],
     projects: projectsResult.data ?? [],
-    contractTemplates: contractTemplatesResult.data ?? [],
-    proposalVersions: proposalVersionsResult.data ?? [],
-    contractVersions: contractVersionsResult.data ?? [],
-    amendmentVersions: amendmentVersionsResult.data ?? [],
-    projectDocumentVersions: projectDocumentVersionsResult.data ?? [],
+    sourceCatalog,
     selectedConversationId: selectedId,
-    messages: messagesResult.data ?? []
+    messages: messagesResult.data ?? [],
+    errors: [
+      accountsResult.error,
+      conversationsResult.error,
+      bindingsResult.error,
+      clientsResult.error,
+      projectsResult.error,
+      contractTemplatesResult.error,
+      proposalVersionsResult.error,
+      contractVersionsResult.error,
+      amendmentVersionsResult.error,
+      projectDocumentVersionsResult.error,
+      messagesResult.error
+    ]
+      .filter(Boolean)
+      .map(error => String(error?.code ?? "QUERY_FAILED"))
   };
-}
-
-export async function getWhatsAppAdminClient() {
-  const context = await requireOrganizationContext();
-  return { context, supabase: await createSupabaseServerClient() };
 }
