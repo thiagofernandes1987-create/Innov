@@ -11,7 +11,7 @@ describe("fluxo de exceções operacionais", () => {
   it("mantém um produtor runtime ligado à RPC canônica e à responsabilidade da persona", () => {
     expect(actions).toContain('rpc("create_operational_event"');
     expect(actions).toContain('.from("operational_responsibilities")');
-    expect(actions).toContain("persona.scenarios.pessimistic.event");
+    expect(actions).toMatch(/scenarios\.pessimistic\.event\s*===\s*eventCode/);
     expect(actions).toContain("persona.scenarios.pessimistic.notify.includes");
     expect(actions).toContain("item.project_id === projectId");
   });
