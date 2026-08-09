@@ -53,7 +53,7 @@ concurrency:
 jobs:
   rh-extended:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
@@ -109,17 +109,21 @@ jobs:
           node scripts/run-rh-time-db-tests.mjs
       - name: RH isolated backup and restore drill
         run: node scripts/run-rh-backup-restore-drill.mjs
+      - name: RH isolated cutover and rollback rehearsal
+        run: node scripts/run-rh-cutover-rollback-rehearsal.mjs
       - name: RH scoped typecheck
         run: pnpm exec tsc --noEmit -p tsconfig.rh.json
       - name: Lint RH actions, pages, APIs, integrations and test harnesses
-        run: pnpm exec eslint 'app/actions/rh-*.ts' app/app/rh app/api/rh lib/rh tests/rh 'tests/e2e/rh-*.spec.ts' scripts/run-rh-backup-restore-drill.mjs scripts/seed-rh-browser-e2e.mjs scripts/verify-rh-browser-e2e.mjs --max-warnings=0
+        run: pnpm exec eslint 'app/actions/rh-*.ts' app/app/rh app/api/rh lib/rh tests/rh 'tests/e2e/rh-*.spec.ts' scripts/run-rh-backup-restore-drill.mjs scripts/run-rh-cutover-rollback-rehearsal.mjs scripts/seed-rh-browser-e2e.mjs scripts/verify-rh-browser-e2e.mjs --max-warnings=0
       - name: RH unit and contract suites with official eSocial XSD and XMLSec
         run: pnpm exec vitest run tests/rh
-      - name: Upload RH restore evidence
+      - name: Upload RH recovery evidence
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: rh-backup-restore-evidence-${{ github.run_id }}
-          path: .evidence/rh/backup-restore-drill.json
+          name: rh-recovery-evidence-${{ github.run_id }}
+          path: |
+            .evidence/rh/backup-restore-drill.json
+            .evidence/rh/cutover-rollback-rehearsal.json
           if-no-files-found: warn
           retention-days: 30
