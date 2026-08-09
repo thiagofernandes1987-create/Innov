@@ -1,0 +1,58 @@
+name: Fix Schedule Lint Once
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .github/workflows/fix-schedule-lint-once.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fix-schedule-lint-once
+  cancel-in-progress: false
+
+jobs:
+  fix:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/projeto-rh-especificacao-funcional
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Remove only the unused hitOffset declaration and validate
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch=feature/projeto-rh-especificacao-funcional
+          git fetch origin "$branch"
+          git reset --hard "origin/$branch"
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('components/planejamento/schedule-planner.tsx')
+          text=p.read_text()
+          target='                    const hitOffset = (hitWidth - visualWidth) / 2;\n'
+          count=text.count(target)
+          if count != 1:
+              raise SystemExit(f'hitOffset esperado exatamente 1x, encontrado {count}')
+          p.write_text(text.replace(target,'',1))
+          PY
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+          pnpm install --no-frozen-lockfile --reporter=append-only
+          pnpm exec eslint components/planejamento/schedule-planner.tsx --max-warnings=0
+          git rm .github/workflows/fix-schedule-lint-once.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add components/planejamento/schedule-planner.tsx
+          git diff --cached --check
+          git commit -m 'fix(planning): remove variável não usada do Gantt'
+          git push origin "HEAD:$branch"
