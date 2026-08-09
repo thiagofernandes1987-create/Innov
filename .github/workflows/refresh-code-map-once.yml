@@ -24,19 +24,57 @@ jobs:
         with:
           ref: feature/projeto-rh-especificacao-funcional
           fetch-depth: 0
-      - name: Generate, verify and commit canonical map
+      - name: Remove superseded code and regenerate canonical map
         shell: bash
         run: |
           set -euo pipefail
           branch=feature/projeto-rh-especificacao-funcional
           git fetch origin "$branch"
           git reset --hard "origin/$branch"
+
+          # launcher-metrics.ts substituiu integralmente o antigo indicadores.ts.
+          test -f lib/casca/indicadores.ts
+          git rm lib/casca/indicadores.ts
+
+          # projects.ts ainda carregava dois wrappers legados. A criação por
+          # contrato hoje usa project-creation.ts/v2 e o planner importa
+          # createScheduleDependency diretamente de app/actions/schedule.
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path('app/actions/projects.ts')
+          text = path.read_text()
+
+          old_import = 'import { createScheduleDependency } from "@/app/actions/schedule";\n'
+          if text.count(old_import) != 1:
+              raise SystemExit(f'import legado createScheduleDependency esperado 1x, encontrado {text.count(old_import)}')
+          text = text.replace(old_import, '', 1)
+
+          contract_pattern = re.compile(
+              r'export async function createProjectFromContract\(formData: FormData\) \{.*?\n\}\n\n(?=export async function releaseProjectToClient)',
+              re.S,
+          )
+          text, count = contract_pattern.subn('', text, count=1)
+          if count != 1:
+              raise SystemExit(f'createProjectFromContract legado esperado 1x, encontrado {count}')
+
+          dependency = '''export async function createDependency(formData: FormData) {\n  return createScheduleDependency(formData);\n}\n\n'''
+          if text.count(dependency) != 1:
+              raise SystemExit(f'wrapper createDependency esperado 1x, encontrado {text.count(dependency)}')
+          text = text.replace(dependency, '', 1)
+
+          path.write_text(text)
+          PY
+
           node scripts/gerar-mapa-do-codigo.mjs
           node scripts/gerar-mapa-do-codigo.mjs --verificar
+
+          # Workflow de manutenção de uso único: some no mesmo commit verde.
           git rm .github/workflows/refresh-code-map-once.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add diretrizes/MAPA-DO-CODIGO.md
+          git add app/actions/projects.ts diretrizes/MAPA-DO-CODIGO.md
           git diff --cached --check
-          git commit -m 'docs: regenera mapa canônico do código'
+          git commit -m 'refactor: remove legados e regenera mapa canônico'
           git push origin "HEAD:$branch"
