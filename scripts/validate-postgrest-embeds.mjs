@@ -67,8 +67,6 @@ function parseAlterEdges(sql,arquivo){
 }
 
 function fallbackEdges(sql,arquivo,structured){
- // Mantém cobertura de sintaxes incomuns. Só adiciona o par quando nenhum edge
- // estruturado do mesmo trecho/tabela o capturou; não duplica relações conhecidas.
  const extras=[];
  for(const bloco of blocosDeCriacao(sql)){
   for(const m of bloco.corpo.matchAll(/references\s+public\.([a-z0-9_]+)/gi)){
@@ -99,7 +97,6 @@ function arestasDasMigrations(){
   const limpo=texto.replace(/--[^\n]*/g,"");const structured=[];
   for(const bloco of blocosDeCriacao(limpo))structured.push(...parseCreateEdges(bloco,nome));
   structured.push(...parseAlterEdges(limpo,nome));edges.push(...structured,...fallbackEdges(limpo,nome,structured));
-  // Drops explícitos também atualizam o estado final quando o nome da constraint é conhecido.
   for(const trecho of limpo.split(/;/)){
    const alter=/alter\s+table\s+(?:if\s+exists\s+)?(?:only\s+)?public\.([a-z0-9_]+)/i.exec(trecho);if(!alter)continue;
    for(const drop of trecho.matchAll(/drop\s+constraint\s+(?:if\s+exists\s+)?([a-z0-9_]+)/gi))edges=edges.filter(e=>!(e.origem===alter[1]&&e.constraint===drop[1]));
@@ -109,11 +106,33 @@ function arestasDasMigrations(){
 }
 
 function paresAmbiguos(arestas){const contagem=new Map();for(const{origem,destino}of arestas){if(origem===destino)continue;const chave=[origem,destino].sort().join(" ");contagem.set(chave,(contagem.get(chave)??0)+1);}return new Set([...contagem.entries()].filter(([,n])=>n>1).map(([chave])=>chave));}
-
 function arquivosDeCodigo(dir){const saida=[];if(!fs.existsSync(dir))return saida;for(const item of fs.readdirSync(dir,{withFileTypes:true})){if(item.name==="node_modules"||item.name.startsWith("."))continue;const caminho=path.join(dir,item.name);if(item.isDirectory())saida.push(...arquivosDeCodigo(caminho));else if(/\.(ts|tsx)$/.test(item.name))saida.push(caminho);}return saida;}
-
 function embedsDoSelect(base,select,linha){const achados=[],pilha=[base];for(let i=0;i<select.length;i++){if(select[i]===")"){if(pilha.length>1)pilha.pop();continue;}if(select[i]!=="(")continue;const antes=/([a-z0-9_]+)(?:!([a-z0-9_]+))?\s*$/i.exec(select.slice(0,i));if(!antes){pilha.push(pilha[pilha.length-1]);continue;}const modificador=antes[2];achados.push({base:pilha[pilha.length-1],relacionada:antes[1],nomeada:Boolean(modificador)&&!["inner","left"].includes(modificador.toLowerCase()),linha});pilha.push(antes[1]);}return achados;}
-function embedsDoArquivo(texto){const achados=[],from=/\.from\(\s*["'`]([a-z0-9_]+)["'`]\s*\)/gi;let m;while((m=from.exec(texto))){const janela=texto.slice(m.index,m.index+3000),select=/\.select\(\s*(["'`])([\s\S]*?)\1/.exec(janela);if(!select)continue;const linha=texto.slice(0,m.index).split("\n").length;achados.push(...embedsDoSelect(m[1],select[2],linha));}return achados;}
+
+function fimDoStatement(texto,inicio){
+ // Supabase chains no repositório são statements terminados por ';'. Limitar a
+ // busca evita associar um .from() ao .select() da instrução seguinte em código
+ // minificado. Respeita strings/templates para não parar em ';' dentro de literal.
+ let quote=null,escape=false,templateDepth=0;
+ for(let i=inicio;i<texto.length;i++){
+  const ch=texto[i];
+  if(escape){escape=false;continue;}
+  if(quote){if(ch==="\\"){escape=true;continue;}if(ch===quote){quote=null;continue;}if(quote==="`"&&ch==="$"&&texto[i+1]==="{"){templateDepth++;i++;}continue;}
+  if(ch==="'"||ch==='"'||ch==="`"){quote=ch;continue;}
+  if(templateDepth>0){if(ch==="{")templateDepth++;else if(ch==="}")templateDepth--;continue;}
+  if(ch===";")return i+1;
+ }
+ return texto.length;
+}
+
+function embedsDoArquivo(texto){
+ const achados=[],from=/\.from\(\s*["'`]([a-z0-9_]+)["'`]\s*\)/gi;let m;
+ while((m=from.exec(texto))){
+  const end=fimDoStatement(texto,m.index),statement=texto.slice(m.index,end),select=/\.select\(\s*(["'`])([\s\S]*?)\1/.exec(statement);if(!select)continue;
+  const linha=texto.slice(0,m.index).split("\n").length;achados.push(...embedsDoSelect(m[1],select[2],linha));
+ }
+ return achados;
+}
 
 const arestas=arestasDasMigrations();const ambiguos=paresAmbiguos(arestas);const existe=new Set(arestas.filter(a=>a.origem!==a.destino).map(a=>[a.origem,a.destino].sort().join(" ")));const tabelas=new Set([...arestas.flatMap(a=>[a.origem,a.destino]),...arquivosSql().flatMap(({texto})=>[...texto.replace(/--[^\n]*/g,"").matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?public\.([a-z0-9_]+)/gi)].map(m=>m[1]))]);
 const problemas=[];let selectsLidos=0;
