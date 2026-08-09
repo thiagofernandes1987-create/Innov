@@ -1,9 +1,9 @@
 name: Provision QA Personas Once
 
 on:
-  push:
+  pull_request:
     branches:
-      - audit/regressao-main-20260808
+      - main
 
 permissions:
   contents: read
@@ -20,10 +20,8 @@ jobs:
       QA_ORGANIZATION_ID: ${{ vars.QA_ORGANIZATION_ID }}
       ALLOW_INSECURE_DEMO_USERS: "true"
     steps:
-      - name: Checkout audit branch
+      - name: Checkout PR merge ref
         uses: actions/checkout@v6
-        with:
-          ref: audit/regressao-main-20260808
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
