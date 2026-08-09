@@ -44,7 +44,7 @@ concurrency:
 jobs:
   rh-extended:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     env:
       NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
@@ -96,9 +96,11 @@ jobs:
           node scripts/run-rh-esocial-results-db-tests.mjs
           node scripts/run-rh-government-db-tests.mjs
           node scripts/run-rh-time-db-tests.mjs
+      - name: RH isolated backup and restore drill
+        run: node scripts/run-rh-backup-restore-drill.mjs
       - name: RH scoped typecheck
         run: pnpm exec tsc --noEmit -p tsconfig.rh.json
-      - name: Lint RH actions, pages, APIs, integrations and E2E harness
-        run: pnpm exec eslint 'app/actions/rh-*.ts' app/app/rh app/api/rh lib/rh tests/rh 'tests/e2e/rh-*.spec.ts' scripts/seed-rh-browser-e2e.mjs scripts/verify-rh-browser-e2e.mjs --max-warnings=0
+      - name: Lint RH actions, pages, APIs, integrations and test harnesses
+        run: pnpm exec eslint 'app/actions/rh-*.ts' app/app/rh app/api/rh lib/rh tests/rh 'tests/e2e/rh-*.spec.ts' scripts/run-rh-backup-restore-drill.mjs scripts/seed-rh-browser-e2e.mjs scripts/verify-rh-browser-e2e.mjs --max-warnings=0
       - name: RH unit and contract suites with official eSocial XSD and XMLSec
         run: pnpm exec vitest run tests/rh
