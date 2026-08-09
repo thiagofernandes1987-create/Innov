@@ -68,7 +68,9 @@ describe("mapPublicOperationError", () => {
       "app/actions/sinapi.ts",
       "app/actions/inventory.ts",
       "app/actions/inventory-extra.ts",
-      "app/actions/inventory-stocktake.ts"
+      "app/actions/inventory-stocktake.ts",
+      "app/actions/budgets.ts",
+      "app/actions/quality.ts"
     ];
     for (const path of protectedActions) {
       const source = fs.readFileSync(path, "utf8");
@@ -91,6 +93,14 @@ describe("mapPublicOperationError", () => {
       const source = fs.readFileSync(path, "utf8");
       expect(source, path).not.toMatch(/\berror\??\.message\b/);
     }
+
+    const budgets = fs.readFileSync("app/actions/budgets.ts", "utf8");
+    expect(budgets).not.toMatch(/\b(?:snapshotError|insertError|versionError|linkedModelError)\??\.message\b/);
+    expect(budgets).not.toContain("budgetError(budgetId, error.message)");
+
+    const quality = fs.readFileSync("app/actions/quality.ts", "utf8");
+    expect(quality).not.toMatch(/\b(?:lastError|versionError|templateError|linkError|responseError|answersError|submitError|assignmentError)\??\.message\b/);
+    expect(quality).not.toContain("fail(path,error.message)");
   });
 
   it("registra o código interno apenas no log estruturado", () => {
