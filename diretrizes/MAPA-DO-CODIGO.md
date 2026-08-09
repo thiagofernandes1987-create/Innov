@@ -34,7 +34,7 @@ a ignorar.
 | Módulos de `lib/` | 101 |
 | Funções do banco declaradas | 239 |
 | Funções do banco chamadas do código | 119 |
-| Suítes de teste | 66, com 691 casos |
+| Suítes de teste | 68, com 694 casos |
 | Migrations | 173 |
 | Validadores de CI | 29 |
 | Módulos de `lib/` citados por algum teste | 58 de 101 |
@@ -969,6 +969,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/auth-errors.test.ts` | 5 | mensagemPublicaDeErroDeLogin |
 | `tests/busca-cobre-funis.test.ts` | 2 | busca da barra cobre as telas de funil |
 | `tests/cep-busca.test.ts` | 11 | interpretarRespostaViaCEP; buscarCEP |
+| `tests/commercial-documents-security.test.ts` | 2 | segurança das actions comerciais |
 | `tests/crm-opportunity-input-guard.test.ts` | 3 | criação segura de oportunidade |
 | `tests/cronograma.test.ts` | 24 | vocabulário; Término-Início (TI); Início-Início (II); Término-Término (TT) |
 | `tests/cub-fonte.test.ts` | 6 | o link da série histórica é descoberto, não fixado |
@@ -1024,6 +1025,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/stage20-validator.test.ts` | 2 | validador semântico da Etapa 20 |
 | `tests/sugestoes-unidade.test.ts` | 13 | m² e m2 são a mesma unidade; a fusão vale por escopo, não globalmente; o efeito na lista de sugestão |
 | `tests/sugestoes.test.ts` | 30 | chave normalizada — o que faz três grafias serem um valor só; frequência recente; o que entra na lista; situação de um valor — o que a administração precisa distinguir |
+| `tests/supabase-surface-auditor.test.ts` | 1 | auditor de superfícies Supabase |
 | `tests/theme-contrast-contract.test.ts` | 1 | contrato de contraste dos estados |
 | `tests/vaccine-validator.test.ts` | 1 | validador de vacinas |
 | `tests/validacao-br.test.ts` | 33 | somenteDigitos; validarCPF; validarCNPJ; validarDocumento |
