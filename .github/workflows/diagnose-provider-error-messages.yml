@@ -1,0 +1,22 @@
+name: Diagnose provider error messages (temporary)
+
+on:
+  push:
+    branches:
+      - audit/regressao-main-20260808
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Inventory .message occurrences in server actions
+        shell: bash
+        run: |
+          echo '=== app/actions occurrences ==='
+          grep -RInE '\b[A-Za-z_][A-Za-z0-9_]*\??\.message\b' app/actions --include='*.ts' --include='*.tsx' || true
+          echo '=== total ==='
+          grep -RIE '\b[A-Za-z_][A-Za-z0-9_]*\??\.message\b' app/actions --include='*.ts' --include='*.tsx' | wc -l
