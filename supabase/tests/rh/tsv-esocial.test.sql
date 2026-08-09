@@ -32,7 +32,40 @@ begin
   v_failed:=false;
   begin update public.rh_tsv_esocial_profiles set category_code='901' where organization_id=v_org and employment_id=v_emp;
   exception when check_violation then v_failed:=true; end;
-  if not v_failed then raise exception 'Categoria 901 deveria exigir vertical própria e ser bloqueada neste perfil'; end if;
+  if not v_failed then raise exception 'Categoria 901 sem infoEstagiario deveria falhar'; end if;
+
+  update public.rh_tsv_esocial_profiles set
+    category_code='901',
+    fgts_option_date=null,
+    internship_nature='N',
+    internship_level=4,
+    internship_area='Engenharia civil',
+    internship_policy_number='APOLICE-01',
+    internship_expected_end='2027-07-31',
+    education_institution_cnpj='22345678000188',
+    integration_agent_cnpj='33456789000177',
+    internship_supervisor_cpf='98765432100'
+  where organization_id=v_org and employment_id=v_emp;
+  if not exists(select 1 from public.rh_tsv_esocial_profiles where employment_id=v_emp and category_code='901' and internship_level=4) then raise exception 'Categoria 901 válida não persistiu'; end if;
+
+  v_failed:=false;
+  begin update public.rh_tsv_esocial_profiles set internship_level=null where organization_id=v_org and employment_id=v_emp;
+  exception when check_violation then v_failed:=true; end;
+  if not v_failed then raise exception 'Categoria 901 sem nível deveria falhar'; end if;
+
+  update public.rh_tsv_esocial_profiles set
+    category_code='906',
+    internship_nature='N',
+    internship_level=3,
+    integration_agent_cnpj=null,
+    internship_supervisor_cpf=null
+  where organization_id=v_org and employment_id=v_emp;
+  if not exists(select 1 from public.rh_tsv_esocial_profiles where employment_id=v_emp and category_code='906' and internship_nature='N') then raise exception 'Categoria 906 válida não persistiu'; end if;
+
+  v_failed:=false;
+  begin update public.rh_tsv_esocial_profiles set integration_agent_cnpj='33456789000177' where organization_id=v_org and employment_id=v_emp;
+  exception when check_violation then v_failed:=true; end;
+  if not v_failed then raise exception 'Categoria 906 com agente de integração deveria falhar'; end if;
 
   v_failed:=false;
   begin
@@ -41,7 +74,7 @@ begin
   exception when foreign_key_violation then v_failed:=true; end;
   if not v_failed then raise exception 'Perfil TSVE cross-tenant deveria falhar'; end if;
 
-  raise notice 'RH TSVE — categorias 7XX, FGTS condicional e tenant FK aprovados.';
+  raise notice 'RH TSVE — 7XX, 901/906, FGTS condicional e tenant FK aprovados.';
 end$$;
 
 rollback;
