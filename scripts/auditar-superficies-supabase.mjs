@@ -68,15 +68,82 @@ function nomeSql(valor) {
   return valor.replace(/^public\./i, "").replace(/^\"|\"$/g, "");
 }
 
+// DDL escrito dentro de string (por exemplo EXECUTE format('create table ...'))
+// não declara uma relação estática com aquele nome: pode ser template, partição
+// dinâmica ou SQL condicional. Comentários e corpos dollar-quoted também não
+// devem alimentar o extrator de DDL. Mantemos quebras de linha para facilitar
+// depuração sem precisar de um parser PostgreSQL completo.
+function mascararNaoDdl(sql) {
+  let saida = "";
+  let i = 0;
+
+  const mascararTrecho = (trecho) => trecho.replace(/[^\n]/g, " ");
+
+  while (i < sql.length) {
+    if (sql.startsWith("--", i)) {
+      const fim = sql.indexOf("\n", i + 2);
+      const limite = fim === -1 ? sql.length : fim;
+      saida += mascararTrecho(sql.slice(i, limite));
+      i = limite;
+      continue;
+    }
+
+    if (sql.startsWith("/*", i)) {
+      const fim = sql.indexOf("*/", i + 2);
+      const limite = fim === -1 ? sql.length : fim + 2;
+      saida += mascararTrecho(sql.slice(i, limite));
+      i = limite;
+      continue;
+    }
+
+    if (sql[i] === "'") {
+      const inicio = i;
+      i += 1;
+      while (i < sql.length) {
+        if (sql[i] === "'" && sql[i + 1] === "'") {
+          i += 2;
+          continue;
+        }
+        if (sql[i] === "'") {
+          i += 1;
+          break;
+        }
+        i += 1;
+      }
+      saida += mascararTrecho(sql.slice(inicio, i));
+      continue;
+    }
+
+    if (sql[i] === "$") {
+      const tag = sql.slice(i).match(/^\$(?:[a-zA-Z_][a-zA-Z0-9_]*)?\$/)?.[0];
+      if (tag) {
+        const fim = sql.indexOf(tag, i + tag.length);
+        if (fim !== -1) {
+          const limite = fim + tag.length;
+          saida += mascararTrecho(sql.slice(i, limite));
+          i = limite;
+          continue;
+        }
+      }
+    }
+
+    saida += sql[i];
+    i += 1;
+  }
+
+  return saida;
+}
+
 for (const migration of migrations) {
   const sql = ler(migration);
-  for (const m of sql.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?["']?([a-zA-Z0-9_]+)["']?/gi)) {
+  const sqlDdl = mascararNaoDdl(sql);
+  for (const m of sqlDdl.matchAll(/create\s+table\s+(?:if\s+not\s+exists\s+)?(?:public\.)?[\"]?([a-zA-Z0-9_]+)[\"]?/gi)) {
     adicionar(declarados.tables, nomeSql(m[1]), migration);
   }
-  for (const m of sql.matchAll(/create\s+(?:or\s+replace\s+)?(?:materialized\s+)?view\s+(?:public\.)?["']?([a-zA-Z0-9_]+)["']?/gi)) {
+  for (const m of sqlDdl.matchAll(/create\s+(?:or\s+replace\s+)?(?:materialized\s+)?view\s+(?:public\.)?[\"]?([a-zA-Z0-9_]+)[\"]?/gi)) {
     adicionar(declarados.views, nomeSql(m[1]), migration);
   }
-  for (const m of sql.matchAll(/create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?["']?([a-zA-Z0-9_]+)["']?\s*\(/gi)) {
+  for (const m of sqlDdl.matchAll(/create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?[\"]?([a-zA-Z0-9_]+)[\"]?\s*\(/gi)) {
     adicionar(declarados.functions, nomeSql(m[1]), migration);
   }
 
