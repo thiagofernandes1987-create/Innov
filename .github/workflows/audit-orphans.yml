@@ -4,7 +4,7 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: audit-orphans-${{ github.ref }}
@@ -15,52 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout PR branch
+      - name: Checkout
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.head_ref }}
-
-      - name: Remove confirmed orphan server actions
-        shell: bash
-        run: |
-          node --input-type=module <<'NODE'
-          import fs from "node:fs";
-
-          function removeBetween(content, startMarker, endMarker, label) {
-            const start = content.indexOf(startMarker);
-            if (start < 0) {
-              console.log(`${label}: já ausente.`);
-              return content;
-            }
-            const end = content.indexOf(endMarker, start + startMarker.length);
-            if (end <= start) {
-              throw new Error(`${label}: marcador final não encontrado.`);
-            }
-            console.log(`${label}: removido.`);
-            return `${content.slice(0, start)}${content.slice(end)}`;
-          }
-
-          const projectsPath = "app/actions/projects.ts";
-          let projects = fs.readFileSync(projectsPath, "utf8");
-          projects = projects.replace('import { createScheduleDependency } from "./schedule";\n', "");
-          projects = removeBetween(
-            projects,
-            'export async function createDependency(formData: FormData) {',
-            'export async function createMilestone(formData: FormData) {',
-            'projects.ts#createDependency'
-          );
-          fs.writeFileSync(projectsPath, projects);
-
-          const relationshipPath = "app/actions/relationship.ts";
-          let relationship = fs.readFileSync(relationshipPath, "utf8");
-          relationship = removeBetween(
-            relationship,
-            'export async function createCrmOpportunity',
-            'export async function moveCrmOpportunityStage',
-            'relationship.ts#createCrmOpportunity'
-          );
-          fs.writeFileSync(relationshipPath, relationship);
-          NODE
 
       - name: Audit reachable code graph
         run: node scripts/auditar-alcancabilidade.mjs --json > reachability-audit.json
@@ -83,21 +39,11 @@ jobs:
         continue-on-error: true
         run: node scripts/auditar-superficies-supabase.mjs --json > supabase-surface-audit.json
 
-      - name: Generate canonical code map
-        run: node scripts/gerar-mapa-do-codigo.mjs
-
-      - name: Commit confirmed cleanup and generated map
+      - name: Validate canonical code map
         shell: bash
         run: |
-          if git diff --quiet -- app/actions/projects.ts app/actions/relationship.ts diretrizes/MAPA-DO-CODIGO.md; then
-            echo "Actions órfãs já removidas e mapa sincronizado."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/actions/projects.ts app/actions/relationship.ts diretrizes/MAPA-DO-CODIGO.md
-          git commit -m "refactor(dead-code): remove actions órfãs e regenera mapa"
-          git push origin HEAD:${{ github.head_ref }}
+          node scripts/gerar-mapa-do-codigo.mjs
+          git diff --exit-code -- diretrizes/MAPA-DO-CODIGO.md
 
       - name: Upload orphan audit reports
         if: always()
