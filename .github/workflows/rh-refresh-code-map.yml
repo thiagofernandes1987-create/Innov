@@ -1,0 +1,46 @@
+name: RH Refresh Code Map
+
+on:
+  push:
+    branches:
+      - feature/projeto-rh-especificacao-funcional
+    paths:
+      - .github/workflows/rh-refresh-code-map.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: feature/projeto-rh-especificacao-funcional
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Generate canonical code map
+        run: pnpm mapa:codigo
+      - name: Commit generated map only
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- diretrizes/MAPA-DO-CODIGO.md; then
+            echo 'Mapa já estava atualizado.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add diretrizes/MAPA-DO-CODIGO.md
+          git commit -m 'docs: regenera mapa canônico do código'
+          git push origin HEAD:feature/projeto-rh-especificacao-funcional
