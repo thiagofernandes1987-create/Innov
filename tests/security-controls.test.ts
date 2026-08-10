@@ -186,6 +186,35 @@ describe("mapPublicOperationError", () => {
     expect(signatureWebhook).toContain("const replayCurrentStatus = duplicateEvent && envelope.status === nextStatus");
     expect(signatureWebhook).toContain("const applyEffects = applyStatus || replayCurrentStatus");
     expect(signatureWebhook).not.toContain('if (eventError?.code === "23505") {\n    return');
+
+    // VACINA: falhas técnicas persistidas aceitam apenas códigos estáveis.
+    const conversionWorker = fs.readFileSync("scripts/run-signature-conversion-worker.mjs", "utf8");
+    expect(conversionWorker).toContain("p_error:errorCode");
+    expect(conversionWorker).not.toContain("p_error:message");
+    expect(conversionWorker).not.toContain("error:message");
+
+    const deliveryWorker = fs.readFileSync("scripts/run-signature-delivery-worker.mjs", "utf8");
+    expect(deliveryWorker).toContain("errorCode");
+    expect(deliveryWorker).not.toContain("p_error:message");
+    expect(deliveryWorker).not.toContain("error:message");
+    expect(deliveryWorker).not.toContain("response.text()");
+
+    const sinapiAutomatic = fs.readFileSync("lib/sinapi/automatic-update.ts", "utf8");
+    expect(sinapiAutomatic).toContain('p_error_message: "SINAPI_IMPORT_FAILED"');
+    expect(sinapiAutomatic).not.toContain("p_error_message: error instanceof Error");
+
+    const whatsappLoader = fs.readFileSync("lib/whatsapp/server.ts", "utf8");
+    expect(whatsappLoader).not.toContain("error_code,error_message,occurred_at");
+
+    const whatsappWebhook = fs.readFileSync("app/api/webhooks/whatsapp/route.ts", "utf8");
+    expect(whatsappWebhook).toContain("error_message: null");
+    expect(whatsappWebhook).toContain("error_title: null");
+
+    const persistedErrorMigration = fs.readFileSync("supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql", "utf8");
+    expect(persistedErrorMigration.toLowerCase()).not.toContain("sqlerrm");
+    for (const stableCode of ["REPORT_SNAPSHOT_FAILED", "CONVERSION_FAILED", "DELIVERY_FAILED", "SINAPI_IMPORT_FAILED", "WHATSAPP_SEND_FAILED"]) {
+      expect(persistedErrorMigration).toContain(stableCode);
+    }
   });
 
   it("registra o código interno apenas no log estruturado", () => {
