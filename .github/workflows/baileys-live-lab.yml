@@ -22,7 +22,6 @@ concurrency:
 
 jobs:
   official-quickstart:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || !contains(github.event.head_commit.message, '[skip-baileys-lab]') }}
     runs-on: ubuntu-latest
     environment: homologation
     timeout-minutes: 18
@@ -40,7 +39,12 @@ jobs:
       - name: Checkout do laboratório
         uses: actions/checkout@v6
         with:
-          ref: test/etapa-22-baileys-live-lab
+          # Sem `ref` fixo: usa a referência do disparo. O pino em
+          # `test/etapa-22-baileys-live-lab` fazia sentido enquanto o laboratório
+          # só existia naquele ramo; agora ele está na `main`, e o pino faria o
+          # workflow testar um ramo já mesclado — silenciosamente, no dia em que
+          # os dois divergissem. Testar coisa diferente da que se pediu, sem
+          # avisar, é o defeito que este repositório mais persegue.
           fetch-depth: 1
           # Sem token no `.git/config`: nada aqui escreve no repositório, e
           # credencial que sobra no disco de um runner que executa dependência

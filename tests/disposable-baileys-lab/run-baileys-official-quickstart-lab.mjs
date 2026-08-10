@@ -80,8 +80,38 @@ async function main() {
     default: makeWASocket,
     DisconnectReason,
     jidNormalizedUser,
-    useMultiFileAuthState
+    useMultiFileAuthState,
+    fetchLatestWaWebVersion
   } = baileys;
+
+  // A versão do WhatsApp Web precisa ser buscada, não herdada do pacote.
+  //
+  // A primeira execução real deste laboratório reprovou aqui, e o log dizia
+  // tudo: o socket **conectava**, tentava registrar e o WhatsApp fechava com
+  // `statusCode 405` — 31 vezes em dois minutos, sem nunca emitir QR. Medido
+  // depois: o Baileys se anunciava com a constante embutida `2.3000.1035194821`
+  // enquanto o próprio endpoint do WhatsApp Web reportava `2.3000.1044834443`.
+  //
+  // Cliente que se identifica com versão que o servidor já não aceita é
+  // recusado no registro, antes de qualquer QR. E a constante embutida envelhece
+  // sozinha: ela é fixada no dia em que o pacote é publicado e o WhatsApp
+  // continua andando. Buscar em tempo de execução é o que impede o laboratório
+  // de apodrecer sem ninguém mexer nele.
+  //
+  // A falha da busca não derruba a execução — cai na constante embutida e
+  // registra o motivo, porque um laboratório que não sobe por causa de uma
+  // consulta de rede diz menos do que um que sobe e falha com 405 explicando
+  // por quê.
+  let waVersion = null;
+  try {
+    const atual = await fetchLatestWaWebVersion();
+    waVersion = atual?.version ?? null;
+    evidence.waWebVersion = waVersion ? waVersion.join(".") : null;
+    evidence.waWebVersionSource = "fetchLatestWaWebVersion";
+  } catch (erro) {
+    evidence.waWebVersion = null;
+    evidence.waWebVersionSource = `fallback-embutido (${erro?.message ?? "falha na consulta"})`;
+  }
 
   let socket = null;
   let completed = false;
@@ -96,7 +126,7 @@ async function main() {
   async function connectToWhatsApp() {
     if (completed) return;
     const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR);
-    socket = makeWASocket({ auth: state });
+    socket = makeWASocket(waVersion ? { auth: state, version: waVersion } : { auth: state });
 
     socket.ev.on("creds.update", async () => {
       evidence.credentialsUpdated = true;
