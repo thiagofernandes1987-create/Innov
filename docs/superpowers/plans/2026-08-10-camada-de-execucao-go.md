@@ -203,15 +203,15 @@ A §26 exige contrato entre linguagens provado por fixture. O teste em Go e o te
 
 ---
 
-### Task 4: Laço de vida longa, encerramento limpo e observabilidade
+### Task 4: Laço de vida longa, encerramento limpo e observabilidade — CONCLUÍDA
 
 **Files:**
 - Create: `apps/execution-plane/main.go`
 - Create: `apps/execution-plane/main_test.go`
 
-- [ ] **Step 1: Teste — `SIGTERM` termina o lote em curso e não reivindica outro**
-- [ ] **Step 2: Teste — fila vazia espera o intervalo em vez de girar em laço quente**
-- [ ] **Step 3: Implementar, provar por sabotagem que o teste de encerramento pega um `os.Exit` abrupto, commitar**
+- [x] **Step 1: Teste — `SIGTERM` termina o lote em curso e não reivindica outro**
+- [x] **Step 2: Teste — fila vazia espera o intervalo em vez de girar em laço quente**
+- [x] **Step 3: Implementar, provar por sabotagem que o teste de encerramento pega um `os.Exit` abrupto, commitar**
 
 ---
 
