@@ -38,6 +38,7 @@ Diante de qualquer erro: consultar [`VACINAS.md`](./VACINAS.md) **antes** de pro
 | Assunto | Arquivo | Quando abrir |
 |---|---|---|
 | **Como se trabalha** | [`METODO-DE-TRABALHO.md`](./METODO-DE-TRABALHO.md) | sempre, antes de propor |
+| **Como se prova que um portão protege** | [`PROVA-POR-SABOTAGEM.md`](./PROVA-POR-SABOTAGEM.md) | ao criar teste, validador ou verificação de CI |
 | **Quem usa e o que sabe** | [`PERSONAS-E-ROTINAS.md`](./PERSONAS-E-ROTINAS.md) | antes de criar tela ou permissão |
 | **Como provar autoridade, controle e evidência** | [`CONTRATO-AUDITAVEL-DE-PERSONAS.md`](./CONTRATO-AUDITAVEL-DE-PERSONAS.md) | antes de auditar pessoa, rotina, tela, processo ou controle |
 | **O que quebra e a quem se pede socorro** | [`FLUXOS-E-RISCOS.md`](./FLUXOS-E-RISCOS.md) | antes de criar qualquer objeto ou fluxo |
@@ -154,7 +155,7 @@ Não confie neste parágrafo para saber o que fazer agora — confie no inventá
 1. `CLAUDE.md` na raiz;
 2. **este arquivo**;
 3. `diretrizes/INVENTARIO-DE-EXECUCAO.md` — o que fazer agora;
-4. `diretrizes/METODO-DE-TRABALHO.md`;
+4. `diretrizes/METODO-DE-TRABALHO.md`, e `diretrizes/PROVA-POR-SABOTAGEM.md` ao criar portão;
 5. `diretrizes/SPEC.md` e `diretrizes/ESTADO-ATUAL.json`;
 6. `diretrizes/ARQUITETURA.md`;
 7. `diretrizes/OBJECT-RUNTIME.md` quando o assunto for customização;

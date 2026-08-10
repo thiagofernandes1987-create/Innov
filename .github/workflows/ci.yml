@@ -192,6 +192,10 @@ jobs:
           retention-days: 7
       - name: Validate engineering vaccines
         run: pnpm validate:vaccines
+      - name: Validate dead exports
+        run: pnpm validate:exports-mortos
+      - name: Validate assertion policy
+        run: pnpm validate:assercoes
       - name: Validate canonical documentation
         run: pnpm validate:docs
       - name: Validate server actions exports (VACINA-047)

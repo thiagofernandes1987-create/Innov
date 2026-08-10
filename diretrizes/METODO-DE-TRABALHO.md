@@ -148,6 +148,10 @@ Nenhuma afirmação de "pronto", "corrigido" ou "passando" sem a saída do coman
 
 Falha reportada honestamente vale mais do que sucesso presumido. Um relatório que esconde uma falha custa muito mais caro do que a falha.
 
+### 2.1 Portão só existe depois de reprovar
+
+Para **teste, validador ou verificação de CI**, a saída verde não é evidência suficiente — teste que nunca reprovou pode estar medindo nada. Antes de declarar qualquer portão como proteção, quebre de propósito o comportamento protegido e mostre a reprovação, com a diferença medida. O procedimento completo, o que sabotar por tipo de portão e o número que motivou a regra estão em [`PROVA-POR-SABOTAGEM.md`](PROVA-POR-SABOTAGEM.md).
+
 ---
 
 ## 3. Protocolo de vacinas — memória de problemas

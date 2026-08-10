@@ -89,7 +89,9 @@
     "test:e2e:stage20:file-security": "node scripts/run-stage20-file-security-e2e.mjs",
     "test:e2e:stage20:file-security-gateway": "node scripts/run-stage20-file-security-gateway-e2e.mjs",
     "test:health:stage20:file-security": "node scripts/run-stage20-file-security-provider-health.mjs",
-    "sinapi:layout": "SINAPI_LAYOUT_AO_VIVO=1 NODE_OPTIONS=--use-env-proxy vitest run tests/sinapi-layout-publicado.test.ts"
+    "sinapi:layout": "SINAPI_LAYOUT_AO_VIVO=1 NODE_OPTIONS=--use-env-proxy vitest run tests/sinapi-layout-publicado.test.ts",
+    "validate:exports-mortos": "node scripts/validate-exports-mortos.mjs",
+    "validate:assercoes": "node scripts/validate-assercoes.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
