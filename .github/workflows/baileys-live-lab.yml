@@ -1,18 +1,20 @@
 # Fluxo mínimo conforme https://baileys.wiki/authentication/qr-code
 name: Baileys Official Quickstart Lab
 
+# Só disparo manual, e o motivo é o próprio teste: o fluxo exige **uma pessoa
+# com o celular na mão** para ler o QR dentro da janela em que ele é válido.
+# Disparado por `push` ou `pull_request`, não há ninguém para escanear — o job
+# espera 750s, é morto por timeout e sai 124. Era isso que deixava o CI desta
+# PR vermelho a cada evento, com aparência de defeito e sem defeito nenhum.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - test/etapa-22-baileys-live-lab
-  pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - feature/etapa-22-whatsapp-omnichannel
 
+# `contents: read`. A permissão de escrita existia para commitar o QR no
+# repositório — coisa que a documentação deste laboratório proíbe em uma frase
+# ("O QR não é gravado no repositório") e que o workflow fazia mesmo assim.
+# Removido o commit, a escrita não tem mais para que existir.
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: baileys-official-quickstart
@@ -39,7 +41,11 @@ jobs:
         uses: actions/checkout@v6
         with:
           ref: test/etapa-22-baileys-live-lab
-          fetch-depth: 0
+          fetch-depth: 1
+          # Sem token no `.git/config`: nada aqui escreve no repositório, e
+          # credencial que sobra no disco de um runner que executa dependência
+          # não oficial é superfície que não precisa existir.
+          persist-credentials: false
 
       - name: Configurar Node.js 24
         uses: actions/setup-node@v6
@@ -98,30 +104,59 @@ jobs:
           cat /tmp/baileys-official-quickstart.log
           exit 1
 
-      - name: Criptografar QR
+      - name: Criptografar QR com o certificado de quem vai escanear
         shell: bash
+        env:
+          BAILEYS_LAB_QR_CERT: ${{ secrets.BAILEYS_LAB_QR_CERT }}
         run: |
           set -euo pipefail
+          # O certificado deixou de ser arquivo do repositório e passou a vir de
+          # segredo. Dois motivos, e o primeiro já custou caro: o `.pem`
+          # commitado tinha `notAfter` em 08/08/2026 e venceu com o laboratório
+          # ainda sem rodar — validade em arquivo versionado só é renovada por
+          # PR, e ninguém abre PR para um relógio. O segundo é de desenho: quem
+          # decifra o QR é quem tem a chave privada, e essa pessoa é a que vai
+          # escanear. O certificado é dela, não do repositório.
+          if [[ -z "${BAILEYS_LAB_QR_CERT:-}" ]]; then
+            echo "Segredo BAILEYS_LAB_QR_CERT ausente."
+            echo "Gere o par no SEU computador, guarde a chave privada fora daqui e registre só o certificado:"
+            echo "  openssl req -x509 -newkey rsa:3072 -nodes -days 90 \\"
+            echo "    -keyout qr-lab.key -out qr-lab.crt -subj '/CN=Baileys QR Lab'"
+            echo "Publicar o QR sem cifra não é alternativa: quem o lê primeiro pareia a sessão."
+            exit 1
+          fi
+          umask 077
+          printf '%s\n' "$BAILEYS_LAB_QR_CERT" > /tmp/baileys-qr-cert.pem
+
+          # Certificado vencido cifra sem reclamar e só falha na hora de decifrar,
+          # com o QR já expirado. A conferência é aqui, antes de gastar a janela.
+          if ! openssl x509 -in /tmp/baileys-qr-cert.pem -noout -checkend 0; then
+            echo "O certificado em BAILEYS_LAB_QR_CERT está vencido:"
+            openssl x509 -in /tmp/baileys-qr-cert.pem -noout -subject -dates
+            exit 1
+          fi
+
           openssl cms -encrypt \
             -binary \
             -aes-256-cbc \
             -in "$BAILEYS_QUICKSTART_QR_PATH" \
             -out baileys-official-quickstart-qr.p7m \
             -outform DER \
-            scripts/baileys-official-quickstart-qr-cert.pem
-          rm -f "$BAILEYS_QUICKSTART_QR_PATH"
+            /tmp/baileys-qr-cert.pem
+          rm -f "$BAILEYS_QUICKSTART_QR_PATH" /tmp/baileys-qr-cert.pem
 
-      - name: Registrar somente QR criptografado
-        shell: bash
-        run: |
-          set -euo pipefail
-          target="docs/ETAPA-22-WHATSAPP-WEB-NAO-OFICIAL/BAILEYS-OFFICIAL-QUICKSTART-QR-LATEST.p7m"
-          cp baileys-official-quickstart-qr.p7m "$target"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add "$target"
-          git commit -m "test(baileys): registrar QR criptografado efêmero [skip-baileys-lab]"
-          git push origin HEAD:test/etapa-22-baileys-live-lab
+      # O passo anterior commitava o QR cifrado no repositório, contra a própria
+      # documentação deste laboratório, que já dizia — antes desta correção —
+      # "publicado como artifact temporário". Artifact é o certo por três
+      # motivos: expira sozinho, não entra no histórico do git, e não exige que
+      # o workflow escreva no repositório.
+      - name: Publicar QR criptografado como artifact temporário
+        uses: actions/upload-artifact@v7
+        with:
+          name: baileys-official-quickstart-qr-${{ github.run_id }}
+          path: baileys-official-quickstart-qr.p7m
+          if-no-files-found: error
+          retention-days: 1
 
       - name: Aguardar pareamento, reconexão e envio
         shell: bash
