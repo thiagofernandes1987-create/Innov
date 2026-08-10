@@ -1,26 +1,11 @@
 name: SINAPI Atualização Mensal
 
-# **Onde a importação do SINAPI roda.** T-37.2.
+# Onde a importação do SINAPI roda. T-37.2.
 #
-# A decisão de segurança em vigor é que `SUPABASE_SERVICE_ROLE_KEY` não vai para
-# o deploy público, e as quatro RPCs de importação recusam quem não é
-# `service_role`. Sem um lugar com a chave, o botão da tela nunca completa —
-# corrigir o leitor (T-37.1) não bastava.
-#
-# Este é o lugar. O GitHub Actions **já guarda essa chave** e a usa em três
-# workflows (homologação da Etapa 11, concorrência da 18 e do inventário da 20):
-# não é superfície de confiança nova, é a que já existe para a mesma classe de
-# tarefa. O job sobe uma instância própria do app, com a chave no ambiente
-# efêmero do runner, e chama `/api/internal/sinapi-atualizacao`.
-#
-# A alternativa — tirar a importação da tela e aceitar arquivo enviado à mão —
-# custaria afrouxar `start_sinapi_import` para aceitar chamador autenticado
-# comum. Alargar privilégio permanente por causa de uma tarefa mensal é troca
-# ruim.
-#
-# **Cadência.** A CAIXA publica o relatório mensal por volta do dia 10. O
-# agendamento roda no dia 15, com folga para retificação, e `workflow_dispatch`
-# atende republicação fora de época.
+# A chave `service_role` fica apenas no ambiente efêmero do runner. O job sobe
+# uma instância local do app e usa dois segredos aleatórios por execução:
+# `CRON_SECRET` para a rota de atualização e `SINAPI_PROBE_TOKEN` para as sondas
+# de leitura. Nenhum deles é versionado ou persistido no repositório.
 
 on:
   workflow_dispatch:
@@ -74,9 +59,6 @@ jobs:
           },null,2)+"\n");
           NODE
 
-      # O segredo do disparo é gerado **aqui**, vive um job e não é armazenado:
-      # ninguém precisa dele fora deste processo, e segredo guardado sem uso é
-      # segredo vazando devagar.
       - name: Confere os segredos exigidos
         run: |
           missing=()
@@ -112,8 +94,6 @@ jobs:
       - name: Instala dependências
         run: pnpm install --no-frozen-lockfile --reporter=append-only
 
-      # Antes de gravar qualquer coisa: o leitor entende o arquivo publicado
-      # hoje? É a conferência da T-37.3, e ela reprova quando o formato muda.
       - name: Confere o layout publicado
         run: pnpm sinapi:layout
 
@@ -123,12 +103,12 @@ jobs:
       - name: Sobe a instância que tem a chave
         run: |
           CRON_SECRET="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(32).toString("hex"))')"
+          SINAPI_PROBE_TOKEN="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(32).toString("hex"))')"
           echo "::add-mask::$CRON_SECRET"
+          echo "::add-mask::$SINAPI_PROBE_TOKEN"
           echo "CRON_SECRET=$CRON_SECRET" >> "$GITHUB_ENV"
-          CRON_SECRET="$CRON_SECRET" pnpm start > servidor.log 2>&1 &
-          # Não existe rota de saúde pública, e inventar uma só para isto seria
-          # abrir superfície por conveniência. A raiz basta: ela responde 200
-          # com o servidor de pé, medido localmente.
+          echo "SINAPI_PROBE_TOKEN=$SINAPI_PROBE_TOKEN" >> "$GITHUB_ENV"
+          CRON_SECRET="$CRON_SECRET" SINAPI_PROBE_TOKEN="$SINAPI_PROBE_TOKEN" pnpm start > servidor.log 2>&1 &
           for tentativa in $(seq 1 60); do
             if curl -fsS -o /dev/null "http://127.0.0.1:3000/" 2>/dev/null; then break; fi
             if [ "$tentativa" -eq 60 ]; then
