@@ -1,0 +1,10 @@
+app/api/cron/cost-sources/sinduscon/route.ts:201:error_message: message.slice(0, 500)
+app/api/webhooks/whatsapp/route.ts:318:error_message: providerFailure?.title ?? null
+app/app/relatorios/snapshots/page.tsx:16:context.supabase.from("report_snapshots").select("id,project_id,saved_view_id,kind,period_start,period_end,metrics,source_sha256,status,error_message,generated_at,created_at").eq("organization_id", context.organizationId).order("created_at", { ascending: false }).limit(100),
+lib/whatsapp/client.ts:100:"PROVIDER_ERROR",
+lib/whatsapp/client.ts:117:"PROVIDER_ERROR",
+lib/whatsapp/client.ts:133:"PROVIDER_ERROR",
+lib/whatsapp/client.ts:157:"PROVIDER_ERROR",
+lib/whatsapp/client.ts:170:"PROVIDER_ERROR",
+lib/whatsapp/domain.ts:78:| "PROVIDER_ERROR",
+lib/whatsapp/server.ts:107:"id,direction,message_type,status,body,caption,source_binding_id,source_snapshot,error_code,error_message,occurred_at"
