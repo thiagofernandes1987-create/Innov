@@ -22,7 +22,7 @@ function actionSourceFiles() {
     .sort();
 }
 
-function serverPageSourceFiles(root = "app") {
+function recursiveSourceFiles(filePattern: RegExp, root = "app") {
   const files: string[] = [];
 
   function walk(directory: string) {
@@ -32,15 +32,24 @@ function serverPageSourceFiles(root = "app") {
         walk(fullPath);
         continue;
       }
-      if (!entry.isFile() || !/^page\.tsx?$/.test(entry.name)) continue;
-      const source = fs.readFileSync(fullPath, "utf8");
-      if (/^\s*["']use client["'];/.test(source)) continue;
+      if (!entry.isFile() || !filePattern.test(entry.name)) continue;
       files.push(fullPath);
     }
   }
 
   walk(root);
   return files.sort();
+}
+
+function serverPageSourceFiles() {
+  return recursiveSourceFiles(/^page\.tsx?$/).filter(pagePath => {
+    const source = fs.readFileSync(pagePath, "utf8");
+    return !/^\s*["']use client["'];/.test(source);
+  });
+}
+
+function routeHandlerSourceFiles() {
+  return recursiveSourceFiles(/^route\.tsx?$/);
 }
 
 describe("safeInternalReturnPath", () => {
@@ -116,6 +125,13 @@ describe("mapPublicOperationError", () => {
     for (const pagePath of serverPageSourceFiles()) {
       const source = fs.readFileSync(pagePath, "utf8");
       expect(suspiciousMessageAccesses(source), pagePath).toEqual([]);
+    }
+
+    // VACINA: Route Handlers são fronteiras HTTP diretas. Nenhum detalhe de
+    // Supabase, storage ou outro provedor deve atravessar JSON/text/redirect.
+    for (const routePath of routeHandlerSourceFiles()) {
+      const source = fs.readFileSync(routePath, "utf8");
+      expect(suspiciousMessageAccesses(source), routePath).toEqual([]);
     }
 
     const protectedActions = [
