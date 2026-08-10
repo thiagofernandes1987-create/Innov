@@ -110,25 +110,16 @@ describe("mapPublicOperationError", () => {
     });
     expect(JSON.stringify(result)).not.toContain("finance_entries");
 
-    // VACINA: toda server action entra automaticamente nesta varredura. A lista
-    // de exceções é deliberadamente mínima e contém apenas erros que nascem de
-    // validação local já controlada, nunca objetos retornados pelo Supabase.
     for (const actionPath of actionSourceFiles()) {
       const source = fs.readFileSync(actionPath, "utf8");
       expect(suspiciousMessageAccesses(source), actionPath).toEqual([]);
     }
 
-    // VACINA: páginas Server Component também são fronteiras públicas. Páginas
-    // explicitamente client-side ficam fora deste scanner porque nelas Error
-    // pode representar estado local; qualquer mensagem de provider no servidor
-    // deve ser sanitizada antes de chegar ao JSX.
     for (const pagePath of serverPageSourceFiles()) {
       const source = fs.readFileSync(pagePath, "utf8");
       expect(suspiciousMessageAccesses(source), pagePath).toEqual([]);
     }
 
-    // VACINA: Route Handlers são fronteiras HTTP diretas. Nenhum detalhe de
-    // Supabase, storage ou outro provedor deve atravessar JSON/text/redirect.
     for (const routePath of routeHandlerSourceFiles()) {
       const source = fs.readFileSync(routePath, "utf8");
       expect(suspiciousMessageAccesses(source), routePath).toEqual([]);
@@ -165,6 +156,36 @@ describe("mapPublicOperationError", () => {
     }
     const relationshipLoader = fs.readFileSync("lib/relationship/server.ts", "utf8");
     expect(relationshipLoader).not.toContain("map(error=>error?.message)");
+
+    // VACINA: as sondas SINAPI usam segredo efêmero de runtime. Não pode voltar
+    // token literal versionado nem autenticação por query string.
+    for (const probePath of [
+      "app/api/internal/sinapi-leitura-real/route.ts",
+      "app/api/internal/sinapi-source-probe/route.ts",
+      "app/api/internal/sinapi-source-probe-v2/route.ts"
+    ]) {
+      const source = fs.readFileSync(probePath, "utf8");
+      expect(source, probePath).toContain("SINAPI_PROBE_TOKEN");
+      expect(source, probePath).not.toMatch(/const\s+(?:PROBE_)?TOKEN\s*=\s*["']/);
+      expect(source, probePath).not.toContain('searchParams.get("token")');
+    }
+    const sinapiImporter = fs.readFileSync("scripts/importar-sinapi.mjs", "utf8");
+    expect(sinapiImporter).toContain("SINAPI_PROBE_TOKEN");
+    expect(sinapiImporter).toContain('"x-sinapi-probe-token": probeSecret');
+    expect(sinapiImporter).not.toContain('searchParams.set("token"');
+
+    const sinapiWorkflow = fs.readFileSync(".github/workflows/sinapi-atualizacao.yml", "utf8");
+    expect(sinapiWorkflow).toContain("SINAPI_PROBE_TOKEN");
+    expect(sinapiWorkflow).toContain('echo "::add-mask::$SINAPI_PROBE_TOKEN"');
+    expect(sinapiWorkflow).toContain('echo "SINAPI_PROBE_TOKEN=$SINAPI_PROBE_TOKEN" >> "$GITHUB_ENV"');
+
+    // VACINA: evento duplicado de assinatura não pode retornar antes de repetir
+    // efeitos idempotentes de uma tentativa parcialmente concluída.
+    const signatureWebhook = fs.readFileSync("app/api/signatures/webhook/route.ts", "utf8");
+    expect(signatureWebhook).toContain('const duplicateEvent = eventError?.code === "23505"');
+    expect(signatureWebhook).toContain("const replayCurrentStatus = duplicateEvent && envelope.status === nextStatus");
+    expect(signatureWebhook).toContain("const applyEffects = applyStatus || replayCurrentStatus");
+    expect(signatureWebhook).not.toContain('if (eventError?.code === "23505") {\n    return');
   });
 
   it("registra o código interno apenas no log estruturado", () => {
