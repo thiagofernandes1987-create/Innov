@@ -1,5 +1,6 @@
 import { setApplicationState } from "@/app/actions/access-control";
 import { requireAccessAdministration } from "@/lib/authorization";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 
 type ModuleRow={
   id:string;
@@ -22,7 +23,10 @@ export default async function ApplicationsAdminPage({searchParams}:{searchParams
     context.supabase.from("app_module_dependencies").select("module_id,depends_on_module_id,required")
   ]);
   const firstError=modulesResult.error??installedResult.error??dependenciesResult.error;
-  if(firstError)throw new Error(firstError.message);
+  if(firstError){
+    reportDataAccessError("administration.applications.load",firstError);
+    throw new Error("Não foi possível carregar o catálogo de aplicativos.");
+  }
 
   const modules=(modulesResult.data??[]) as ModuleRow[];
   const installedByModule=new Map((installedResult.data??[]).map(row=>[row.module_id,row]));
