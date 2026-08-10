@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireClientContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { formatDate, formatPercent, statusBadge } from "@/lib/stage12";
 
 export default async function ClientProjectsPage() {
@@ -11,12 +12,14 @@ export default async function ClientProjectsPage() {
     .not("client_released_at", "is", null)
     .order("updated_at", { ascending: false });
 
+  if (error) reportDataAccessError("client-projects.page.load", error);
+
   return (
     <main className="content">
       <div className="page-head">
         <div><span className="badge">PORTFÓLIO</span><h1>Minhas obras</h1><p className="muted">Obras liberadas para sua conta.</p></div>
       </div>
-      {error ? <div className="validation blocking">{error.message}</div> : null}
+      {error ? <div className="validation blocking">Não foi possível carregar suas obras.</div> : null}
       <section className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(340px,1fr))" }}>
         {(data ?? []).map((project) => (
           <article className="card card-pad" key={project.id}>
