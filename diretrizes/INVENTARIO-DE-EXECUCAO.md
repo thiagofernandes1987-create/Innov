@@ -1509,6 +1509,54 @@ conforme a R4.
 
 ---
 
+## Sprint S-42 — Mapa tecnológico canônico e fechamento da Fase 1
+
+**Estado:** concluída
+
+Decisão do responsável em 10/08/2026: adotar o mapa tecnológico **completo**,
+na estratégia de fases da própria §36 do documento. Entra no fim conforme a R4.
+
+### O que o documento pede, e onde estamos
+
+A §36 define seis fases. A **Fase 1 — Consolidar** pede *"reforçar strict
+typing; reforçar CI; eliminar duplicações de regras; criar contratos canônicos;
+classificar todos os workers existentes"*. Cinco desses cinco itens foram
+executados nas S-38, S-40 e S-41, antes de o documento ser versionado — a
+convergência foi por necessidade, não por plano. Falta **um**: classificar os
+workers.
+
+A §37 é o portão: **nenhuma linguagem nova entra sem ADR** com doze itens. A
+Fase 2 (introduzir Go) não começa antes dela.
+
+### Tarefas
+
+- [x] T-42.1 — **Mapa versionado como canônico**, em `diretrizes/MAPA-TECNOLOGICO.md`: o documento original íntegro, 1.997 linhas, mais a **medição executada** ao lado de cada afirmação que dependia de medição. Estava só como anexo de conversa, e a regra do repositório é explícita — decisão que vive em conversa se perde quando o contêiner é reciclado. Recuperado do transcrito e depois substituído pelo original enviado pelo responsável
+- [x] T-42.2 — Registradas as **duas inconsistências internas** do documento, com número: a §21 põe Go em **23 das 44 linhas (52,3%)** enquanto a §33 do mesmo texto estabelece **5% a 15%** — não podem valer juntas, e a §33 é a que corresponde à §36; e a Fase 1 da §36 já estava concluída quando o documento foi lido
+- [x] T-42.3 — `README.md` atualizado. Ele anunciava **"Etapa 19", "Etapa 18 incorporada à main", versão `0.19.0`** — três incorporações atrás. Passa a `0.22.0`, com RH, gateway e a seção de portões anti-regressão
+- [x] T-42.4 — `CLAUDE.md` atualizada: a regra de **portão provado por sabotagem**, os dois validadores de população, a exigência de rodar **todos** os 54 validadores, e a seção de linguagens com o portão da §37
+- [x] T-42.5 — **Buraco no `validate:documentation`, encontrado ao registrar o mapa.** A lista de canônicos é escrita à mão, e **três** documentos declaravam `**Documento canônico:** sim` no próprio corpo sem constar dela: `CONTRATO-AUDITAVEL-DE-PERSONAS`, `MAPA-TECNOLOGICO` e `PROVA-POR-SABOTAGEM`. Apagar qualquer um passaria verde. É a mesma falha que a VACINA-014 corrigiu para as vacinas — lista à mão não é atualizada por quem escreve o documento. Conferência agora é bidirecional; de **25 para 28** canônicos, e provado por sabotagem: documento novo que se declara canônico sem registro reprova
+
+O que resta da Fase 1 e toda a Fase 2 seguem na **S-43**, porque a R3 admite uma
+sprint em andamento por vez e a R7 não admite sprint concluída com tarefa aberta.
+
+---
+
+## Sprint S-43 — Fase 2 da §36: classificar workers e a ADR de Go
+
+**Estado:** pendente
+
+Continuação direta da S-42, na ordem que o próprio mapa define. A §37 é o portão
+de entrada e não é negociável: **nenhuma linguagem nova entra sem ADR**.
+
+### Tarefas
+
+- [ ] T-43.1 — **Classificar todos os workers existentes** — último item da Fase 1 da §36. Para cada um: o que faz, se é disparado por evento ou agenda, duração típica, se pode ser reexecutado sem efeito duplicado, e qual camada da §21 o reivindica. Sem esse inventário, "migrar workers apropriados" (Fase 2) não tem sujeito
+- [ ] T-43.2 — **ADR de Go**, com os doze itens da §37, tendo o `apps/messaging-gateway` como candidato inicial: serviço isolado, sem acesso a banco, com carga de cripto e serialização, atendendo aos critérios 2, 3, 4, 5, 6 e 8 da §4. A ADR precisa trazer **benchmark do estado atual**, porque a §39 exige critério de desempenho e a §9.3 exige medição antes da troca — a mesma regra que a §9.3 impõe ao Rust vale aqui por coerência
+- [ ] T-43.3 — Fase 2 da §36 — introduzir Go, migrar os workers que a T-43.1 classificar como apropriados, padronizar queue/retry, instrumentar OpenTelemetry —, **só depois da ADR aprovada**
+- [ ] T-43.4 — Reconciliar §21 e §33 no documento, com a decisão registrada: a matriz põe Go em 52,3% das linhas e a distribuição conceitual pede 5–15%. Enquanto as duas coexistirem, cada módulo novo pode citar a seção que lhe convier
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.

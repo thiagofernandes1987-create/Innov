@@ -2,9 +2,8 @@
 
 Plataforma modular da **Innovar Construções e Reformas** para CRM, clientes, contratos, obras, qualidade, suprimentos, estoque, financeiro, indicadores, SAC e auditoria.
 
-**Versão:** `0.19.0`  
-**Base estável:** Etapa 18 incorporada à `main`  
-**Branch atual:** Etapa 19 implementada e homologada tecnicamente no Supabase  
+**Versão:** `0.22.0`  
+**Base estável:** `main` — Projeto RH/DP, gateway de mensageria e portões anti-regressão incorporados em 10/08/2026  
 **Produção:** ainda não liberada
 
 ## Fonte de verdade
@@ -13,6 +12,7 @@ Toda informação necessária para recuperar e continuar o projeto está version
 
 Leitura obrigatória:
 
+0. [`CLAUDE.md`](./CLAUDE.md) e [`diretrizes/LEIA-PRIMEIRO.md`](./diretrizes/LEIA-PRIMEIRO.md) — método de trabalho e mapa de tudo;
 1. [`diretrizes/SPEC.md`](./diretrizes/SPEC.md);
 2. [`diretrizes/INVENTARIO.md`](./diretrizes/INVENTARIO.md);
 3. [`diretrizes/MODULOS.md`](./diretrizes/MODULOS.md);
@@ -20,7 +20,9 @@ Leitura obrigatória:
 5. [`diretrizes/ROADMAP.md`](./diretrizes/ROADMAP.md);
 6. [`diretrizes/RECUPERACAO.md`](./diretrizes/RECUPERACAO.md);
 7. [`diretrizes/VACINAS.md`](./diretrizes/VACINAS.md);
-8. [`diretrizes/HISTORICO-ETAPAS.md`](./diretrizes/HISTORICO-ETAPAS.md).
+8. [`diretrizes/HISTORICO-ETAPAS.md`](./diretrizes/HISTORICO-ETAPAS.md);
+9. [`diretrizes/MAPA-TECNOLOGICO.md`](./diretrizes/MAPA-TECNOLOGICO.md) — qual linguagem responde por qual camada, com a medição ao lado de cada afirmação. Normativo: nenhuma linguagem nova entra sem ADR (§37);
+10. [`diretrizes/PROVA-POR-SABOTAGEM.md`](./diretrizes/PROVA-POR-SABOTAGEM.md) — portão que nunca foi visto reprovando não foi provado.
 
 Documentos técnicos atuais:
 
@@ -42,7 +44,22 @@ Documentos técnicos atuais:
 - financeiro operacional;
 - relatórios e indicadores;
 - CRM, Cliente 360 multiobra e SAC;
+- WhatsApp e atendimento, com gateway de mensageria isolado;
+- Recursos Humanos e Departamento Pessoal — vínculo, jornada, folha, SST e obrigações digitais;
 - documentação canônica recuperável.
+
+## Portões anti-regressão
+
+O repositório não depende de o agente ser perfeito; ele é construído para descobrir quando não foi. Além de `lint`, `typecheck`, `test` e `test:python`, **54 validadores** rodam no CI. Dois deles medem população e só permitem que o número caia:
+
+| portão | o que mede |
+| --- | --- |
+| `pnpm validate:exports-mortos` | export que ninguém importa — o `U1000` do `staticcheck`, sem trocar de linguagem |
+| `pnpm validate:assercoes` | teto de asserção fraca; `.not.toContain` sobre a serialização inteira **não** conta, porque é a forma exaustiva |
+
+Débito aceito vive datado e com motivo em `diretrizes/EXPORTS-MORTOS-ACEITOS.json` e `diretrizes/ASSERCOES-FRACAS-ACEITAS.json` — nunca em exceção silenciosa.
+
+Regra que antecede os portões: **portão que nunca foi visto reprovando não foi provado**. Ver [`diretrizes/PROVA-POR-SABOTAGEM.md`](./diretrizes/PROVA-POR-SABOTAGEM.md).
 
 ## Etapa 18
 
