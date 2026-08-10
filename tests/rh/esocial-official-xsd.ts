@@ -12,7 +12,21 @@ function xsdFiles(root:string):string[]{const out:string[]=[];for(const entry of
 
 export function validateWithOfficialEsocialXsd(xml:string,label:string){
  const root=process.env.ESOCIAL_XSD_DIR;
- if(!root){if(process.env.CI==="true")throw new Error(`${label}: ESOCIAL_XSD_DIR é obrigatório no CI.`);return;}
+ // A obrigatoriedade deixou de ser "está no CI" e passou a ser "este job se
+ // comprometeu a provisionar". A regra antiga reprovava o `quality` genérico,
+ // que nunca prometeu baixar o pacote XSD oficial nem instalar o `xmllint` —
+ // e reprovar um job por não fazer o que ele não se propôs a fazer não mede
+ // nada: só ensina a ignorar vermelho. Quem provisiona é o
+ // `rh-esocial-generation.yml`, e é ele que declara ESOCIAL_GATES_OBRIGATORIOS.
+ // Assim, apagar o provisionamento de lá continua reprovando, que é a garantia
+ // que a regra antiga queria dar.
+ if(!root){
+  if(process.env.ESOCIAL_GATES_OBRIGATORIOS==="1"){
+   throw new Error(`${label}: ESOCIAL_XSD_DIR é obrigatório neste job — ele declara ESOCIAL_GATES_OBRIGATORIOS=1.`);
+  }
+  console.log(`${label}: XSD oficial ausente (ESOCIAL_XSD_DIR não definida); conferência de esquema não executada.`);
+  return;
+ }
  if(!existsSync(root))throw new Error(`${label}: diretório XSD oficial inexistente: ${root}`);
  const namespace=xml.match(/<eSocial\s+xmlns="([^"]+)"/)?.[1];if(!namespace)throw new Error(`${label}: namespace raiz eSocial ausente.`);
  const schemas=xsdFiles(root).filter(file=>readFileSync(file,"utf8").includes(`targetNamespace="${namespace}"`));
