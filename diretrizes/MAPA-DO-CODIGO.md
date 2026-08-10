@@ -34,7 +34,7 @@ a ignorar.
 | Módulos de `lib/` | 146 |
 | Funções do banco declaradas | 414 |
 | Funções do banco chamadas do código | 200 |
-| Suítes de teste | 107, com 1011 casos |
+| Suítes de teste | 108, com 1014 casos |
 | Migrations | 268 |
 | Validadores de CI | 54 |
 | Módulos de `lib/` citados por algum teste | 94 de 146 |
@@ -1589,6 +1589,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/file-security-gateway-preconditions.test.ts` | 5 | pré-condições do gateway de análise de arquivos |
 | `tests/file-security-health-auth.test.ts` | 4 | file security provider health authentication |
 | `tests/file-security.test.ts` | 10 | file security domain |
+| `tests/gateway-assinatura-compartilhada.test.ts` | 3 | contrato de assinatura do gateway, compartilhado com a camada de execução em Go |
 | `tests/golden-pdf-publicado.test.ts` | 1 | golden do extrator de PDF contra o publicado |
 | `tests/interface-foundation-contract.test.ts` | 11 | S-23 — fundação de interface |
 | `tests/inventory-validator.test.ts` | 1 | validador do inventário de execução |

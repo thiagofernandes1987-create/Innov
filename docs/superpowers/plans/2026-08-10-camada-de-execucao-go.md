@@ -182,7 +182,7 @@ Os limites do banco viram invariantes do tipo: `Falhar` recusa `BackoffSegundos`
 
 ---
 
-### Task 3: Cliente do gateway, com a assinatura provada idêntica à do TypeScript
+### Task 3: Cliente do gateway, com a assinatura provada idêntica à do TypeScript — CONCLUÍDA
 
 **Files:**
 - Create: `apps/execution-plane/gateway.go`
@@ -195,11 +195,11 @@ Os limites do banco viram invariantes do tipo: `Falhar` recusa `BackoffSegundos`
 
 A §26 exige contrato entre linguagens provado por fixture. O teste em Go e o teste em TypeScript leem **o mesmo arquivo** e precisam produzir a **mesma assinatura**, byte a byte — a mesma técnica que validou o benchmark, onde os dois runtimes produziram HMAC idêntico.
 
-- [ ] **Step 1: Gerar a fixture a partir da implementação TypeScript que já existe** (`apps/messaging-gateway/src/security.ts`), com pelo menos um caso de corpo vazio e um de corpo com acento
-- [ ] **Step 2: Teste em Go lendo a fixture**
-- [ ] **Step 3: Teste em TypeScript lendo a mesma fixture**
-- [ ] **Step 4: Sabotar — mudar a ordem da carga canônica no lado Go e confirmar que o teste reprova**
-- [ ] **Step 5: Commitar**
+- [x] **Step 1: Gerar a fixture a partir da implementação TypeScript que já existe** (`apps/messaging-gateway/src/security.ts`), com pelo menos um caso de corpo vazio e um de corpo com acento
+- [x] **Step 2: Teste em Go lendo a fixture**
+- [x] **Step 3: Teste em TypeScript lendo a mesma fixture**
+- [x] **Step 4: Sabotar — mudar a ordem da carga canônica no lado Go e confirmar que o teste reprova**
+- [x] **Step 5: Commitar**
 
 ---
 
