@@ -10,8 +10,27 @@ const requiredCanonical=[
  "diretrizes/PERSONAS-E-ROTINAS.md","diretrizes/SERVICO-DE-CAMPO.md","diretrizes/KPIS.md",
  "diretrizes/FLUXOS-E-RISCOS.md","diretrizes/ACOMPANHAMENTO-A-DISTANCIA.md",
  "diretrizes/QUALIDADE-CAUSA-RAIZ.md","diretrizes/REUSO-DE-INFORMACAO.md",
- "diretrizes/MAPA-DO-CODIGO.md"
+ "diretrizes/MAPA-DO-CODIGO.md","diretrizes/CONTRATO-AUDITAVEL-DE-PERSONAS.md",
+ "diretrizes/MAPA-TECNOLOGICO.md","diretrizes/PROVA-POR-SABOTAGEM.md"
 ];
+// A lista acima é escrita à mão, e isso já falhou uma vez — do mesmo jeito que
+// falhou para as vacinas antes da VACINA-014. Três documentos declaravam
+// `**Documento canônico:** sim` no próprio corpo e **não constavam** aqui:
+// apagar qualquer um deles passaria verde, porque quem escreve o documento não
+// tem motivo para abrir este validador.
+//
+// A conferência abaixo é nos dois sentidos: todo arquivo que se declara
+// canônico precisa estar na lista, e todo item da lista precisa existir. A
+// primeira metade é a que fecha o buraco; a segunda já existia mais abaixo.
+const seDeclaramCanonicos=(fs.existsSync("diretrizes")?fs.readdirSync("diretrizes"):[])
+ .filter(nome=>nome.endsWith(".md"))
+ .map(nome=>`diretrizes/${nome}`)
+ .filter(arquivo=>/^\*\*Documento canônico:\*\*\s*sim/m.test(fs.readFileSync(arquivo,"utf8")));
+for(const arquivo of seDeclaramCanonicos){
+ if(!requiredCanonical.includes(arquivo)){
+  errors.push(`Documento se declara canônico e não está na lista de obrigatórios: ${arquivo}`);
+ }
+}
 // Vacinas por descoberta, não por lista fixa — VACINA-014. A lista escrita à
 // mão que existia aqui passou verde com duas vacinas novas fora do catálogo:
 // quem escreve a vacina não tem motivo para abrir o validador. O que importa é

@@ -33,9 +33,25 @@ Teste de honestidade da lista de imprevistos: calcular `P(nenhum imprevisto)`. S
 
 Procedimento em [`diretrizes/METODO-DE-TRABALHO.md`](diretrizes/METODO-DE-TRABALHO.md) §1.5; resultado por persona em [`diretrizes/FLUXOS-E-RISCOS.md`](diretrizes/FLUXOS-E-RISCOS.md).
 
+## Regra de método — portão só existe depois de reprovar
+
+> **Teste, validador ou verificação de CI que nunca foi visto reprovando não foi provado. Antes de declarar qualquer portão como proteção: quebre de propósito o comportamento protegido, mostre a reprovação com a diferença medida, restaure e mostre a aprovação.**
+
+Verde não é evidência de que o portão mede alguma coisa. O extrator de PDF devolvia **730 pedaços e 24.924 caracteres** para um arquivo de ~1.800 e passava pela bateria inteira, porque a asserção perguntava se o texto *continha* uma âncora — e continha, ao lado de 23.000 caracteres de lixo.
+
+Procedimento, o que sabotar por tipo de portão e os números que motivaram a regra em [`diretrizes/PROVA-POR-SABOTAGEM.md`](diretrizes/PROVA-POR-SABOTAGEM.md).
+
+## Linguagens — nenhuma entra sem ADR
+
+[`diretrizes/MAPA-TECNOLOGICO.md`](diretrizes/MAPA-TECNOLOGICO.md) é canônico e normativo: define qual linguagem responde por qual camada, para que módulo novo não nasça na linguagem que parecer conveniente. A execução segue a **estratégia de fases da §36**, não big bang.
+
+A §37 é inegociável: **nenhuma linguagem nova entra no repositório sem uma ADR** com os doze itens que ela lista — problema, alternativas, por que a stack atual não atende, impacto operacional, de CI/CD, de segurança, de manutenção e de vibecoding, estratégia de testes, de rollback, proprietário arquitetural e critério de remoção.
+
+O documento traz, ao lado do texto original, a **medição executada** contra cada afirmação que dependia de medição, incluindo as duas inconsistências internas dele (§21 contra §33) e o estado de cada fase.
+
 ## Memória entre sessões
 
-Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/FLUXOS-E-RISCOS.md` → `diretrizes/PADRAO-DE-INTERFACE.md`.
+Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/FLUXOS-E-RISCOS.md` → `diretrizes/PADRAO-DE-INTERFACE.md` → `diretrizes/MAPA-TECNOLOGICO.md` → `diretrizes/PROVA-POR-SABOTAGEM.md`.
 
 ## Antes de criar tela
 
@@ -87,5 +103,6 @@ Em caso de divergência, **`diretrizes/UI-UX-PRO-MAX.md` prevalece**. Ele é doc
 
 - `diretrizes/` é fonte canônica. `diretrizes/vacinas/` registra decisões verificadas por CI: contrariar uma vacina reprova o build, mesmo quando a mudança parece tecnicamente correta. Consultar antes de alterar configuração de CI, instalação de dependência ou privilégio de banco.
 - Nenhuma etapa é concluída sem código, migrations, testes, documentação, vacinas, homologação e CI compatíveis.
-- `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:python` e os `pnpm validate:*` devem passar antes de qualquer afirmação de conclusão.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:python` e **todos** os `pnpm validate:*` devem passar antes de qualquer afirmação de conclusão. São 54 validadores; rodar um subconjunto e declarar a bateria verde já custou caro — foi um dos 46 não executados que pegou o defeito.
+- Dois deles medem população, não caso isolado, e por isso o número só pode cair: `pnpm validate:exports-mortos` (export sem nenhum importador — o equivalente ao `U1000` do `staticcheck`, sem trocar de linguagem) e `pnpm validate:assercoes` (teto de asserção fraca). Débito aceito vive datado em `diretrizes/EXPORTS-MORTOS-ACEITOS.json` e `diretrizes/ASSERCOES-FRACAS-ACEITAS.json`, com motivo — nunca em regex silenciosa.
 - `.claude/skills` é conteúdo de terceiros, fora do eslint e do tsc. Não é código da plataforma.
