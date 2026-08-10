@@ -1,7 +1,16 @@
-import { assignProfileToUser, setUserCapabilityOverride } from "@/app/actions/access-control";
+import { assignProfileToUser, revokeProfileFromUser, setUserCapabilityOverride } from "@/app/actions/access-control";
 import { requireAccessAdministration } from "@/lib/authorization";
+import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
 
 const capabilityOptions=["create","read","update","delete","approve","release_to_client","sign","export","manage","view_sensitive_financials","assign_users","configure"];
+
+function AccessPageHeading(){
+  return <section className="page-heading"><div><span className="badge">USUÁRIOS E ESCOPO</span><h1>Atribuição de acessos</h1><p>Um usuário pode possuir vários perfis e exceções específicas por aplicativo ou obra.</p></div></section>;
+}
+
+function AccessDataFailure(){
+  return <main className="content"><AccessPageHeading/><div className="validation blocking" role="alert">{DATA_LOAD_ERROR_MESSAGE}</div></main>;
+}
 
 export default async function UsersAccessPage({searchParams}:{searchParams:Promise<{error?:string}>}){
   const context=await requireAccessAdministration();
@@ -13,19 +22,19 @@ export default async function UsersAccessPage({searchParams}:{searchParams:Promi
     context.supabase.from("app_modules").select("key,name,display_order").eq("active",true).order("display_order")
   ]);
   const firstError=membershipsResult.error??profilesResult.error??assignmentsResult.error??modulesResult.error;
-  if(firstError)throw new Error(firstError.message);
+  if(firstError){reportDataAccessError("access.users.bootstrap",firstError);return <AccessDataFailure/>;}
   const memberships=membershipsResult.data??[];
   const profiles=profilesResult.data??[];
   const assignments=assignmentsResult.data??[];
   const modules=modulesResult.data??[];
   const ids=memberships.map(item=>item.user_id);
   const identityResult=ids.length?await context.supabase.from("profiles").select("id,email,full_name").in("id",ids):{data:[],error:null};
-  if(identityResult.error)throw new Error(identityResult.error.message);
+  if(identityResult.error){reportDataAccessError("access.users.identities",identityResult.error);return <AccessDataFailure/>;}
   const identities=new Map((identityResult.data??[]).map(item=>[item.id,item]));
   const profileById=new Map(profiles.map(item=>[item.id,item]));
 
   return <main className="content">
-    <section className="page-heading"><div><span className="badge">USUÁRIOS E ESCOPO</span><h1>Atribuição de acessos</h1><p>Um usuário pode possuir vários perfis e exceções específicas por aplicativo ou obra.</p></div></section>
+    <AccessPageHeading/>
     {params.error&&<p className="alert alert-danger">{params.error}</p>}
     <div style={{display:"grid",gap:20}}>{memberships.map(member=>{
       const identity=identities.get(member.user_id);
@@ -34,7 +43,7 @@ export default async function UsersAccessPage({searchParams}:{searchParams:Promi
       return <section className="card" key={member.user_id}>
         <div style={{display:"flex",justifyContent:"space-between",gap:20,flexWrap:"wrap"}}>
           <div><span className="badge">{String(member.role)}</span><h2>{identity?.full_name||identity?.email||member.user_id.slice(0,8)}</h2><p>{identity?.email||member.user_id}</p></div>
-          <div><strong>Perfis ativos</strong><p>{[primary?.name,...userAssignments.map(item=>profileById.get(item.profile_id)?.name)].filter(Boolean).filter((name,index,list)=>list.indexOf(name)===index).join(", ")||"Nenhum perfil configurável"}</p>{userAssignments.map(item=><small style={{display:"block"}} key={item.id}>{profileById.get(item.profile_id)?.name}: {item.scope_type}{item.scope_id?` · ${item.scope_id.slice(0,8)}`:""}</small>)}</div>
+          <div style={{minWidth:280}}><strong>Perfis ativos</strong><p>{[primary?.name,...userAssignments.map(item=>profileById.get(item.profile_id)?.name)].filter(Boolean).filter((name,index,list)=>list.indexOf(name)===index).join(", ")||"Nenhum perfil configurável"}</p>{userAssignments.map(item=><div key={item.id} style={{display:"grid",gap:8,marginTop:10}}><small>{profileById.get(item.profile_id)?.name}: {item.scope_type}{item.scope_id?` · ${item.scope_id.slice(0,8)}`:""}</small><form action={revokeProfileFromUser} style={{display:"flex",gap:8,flexWrap:"wrap"}}><input type="hidden" name="assignmentId" value={item.id}/><input name="reason" required placeholder="Justificativa da revogação" aria-label={`Justificativa para revogar ${profileById.get(item.profile_id)?.name||"perfil"}`}/><button className="button button-secondary" type="submit">Revogar perfil</button></form></div>)}</div>
         </div>
         <div className="two-column" style={{marginTop:20}}>
           <form action={assignProfileToUser} className="card" style={{background:"var(--surface-soft)"}}>

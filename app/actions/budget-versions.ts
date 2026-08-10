@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 
 const versionRoles = [
   "SUPER_ADMIN",
@@ -25,7 +26,8 @@ export async function createNextBudgetVersion(formData: FormData) {
   });
 
   if (error) {
-    redirect(`/app/orcamentos/${budgetId}?error=${encodeURIComponent(error.message)}`);
+    reportDataAccessError("budget-versions.create-next", error);
+    redirect(`/app/orcamentos/${budgetId}?error=${encodeURIComponent("Não foi possível criar a nova versão do orçamento.")}`);
   }
 
   revalidatePath("/app/orcamentos");

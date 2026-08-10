@@ -7,6 +7,7 @@ import {
   updateDailyLog,
   uploadDailyLogMedia
 } from "@/app/actions/projects";
+import { createDailyLogResource } from "@/app/actions/project-resource-usage";
 import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
 import { dailyLogStatusLabels, formatDate, formatPercent, statusBadge } from "@/lib/stage12";
@@ -21,12 +22,14 @@ export default async function DailyLogDetailPage({
   const { id, logId } = await params;
   const { error: pageError } = await searchParams;
   const { supabase, organizationId, role } = await requireOrganizationContext();
-  const [projectResult, logResult, activitiesResult, mediaResult, tasksResult] = await Promise.all([
+  const [projectResult, logResult, activitiesResult, mediaResult, tasksResult, resourcesResult, projectResourcesResult] = await Promise.all([
     supabase.from("projects").select("id,code,name").eq("id", id).eq("organization_id", organizationId).maybeSingle(),
     supabase.from("daily_logs").select("*").eq("id", logId).eq("project_id", id).maybeSingle(),
     supabase.from("daily_log_activities").select("id,description,unit,executed_quantity,progress_before,progress_after,project_tasks(code,title)").eq("daily_log_id", logId).order("created_at"),
     supabase.from("daily_log_media").select("id,storage_path,file_name,mime_type,size_bytes,caption,captured_at,client_visible").eq("daily_log_id", logId).order("created_at", { ascending: false }),
-    supabase.from("project_tasks").select("id,code,title,status,progress").eq("project_id", id).neq("status", "CANCELED").order("sequence")
+    supabase.from("project_tasks").select("id,code,title,status,progress").eq("project_id", id).neq("status", "CANCELED").order("sequence"),
+    supabase.from("daily_log_resources").select("id,resource_id,resource_name,unit,quantity,hours,notes,created_at").eq("daily_log_id", logId).eq("project_id", id).eq("organization_id", organizationId).order("created_at"),
+    supabase.from("project_resources").select("id,name,unit,resource_type").eq("project_id", id).eq("organization_id", organizationId).order("name")
   ]);
   if (!projectResult.data || !logResult.data) notFound();
   const project = projectResult.data;
@@ -92,6 +95,44 @@ export default async function DailyLogDetailPage({
             <label>Descrição<input name="description" required /></label>
             <div className="field-grid"><label>Quantidade<input type="number" step="0.01" name="executedQuantity" /></label><label>Unidade<input name="unit" /></label><label>Progresso anterior (%)<input type="number" min="0" max="100" name="progressBefore" /></label><label>Progresso final (%)<input type="number" min="0" max="100" name="progressAfter" /></label></div>
             <button className="button button-secondary" type="submit">Adicionar atividade</button>
+          </form> : null}
+        </article>
+
+        <article className="card card-pad">
+          <h2>Recursos utilizados</h2>
+          <p className="muted">Mão de obra, equipamento ou material consumido neste diário.</p>
+          <div style={{ margin: "14px 0 20px" }}>
+            {(resourcesResult.data ?? []).map((resource) => (
+              <div key={resource.id} style={{ padding: "11px 0", borderBottom: "1px solid var(--border)" }}>
+                <strong>{resource.resource_name}</strong>
+                <br />
+                <span className="muted">
+                  {resource.quantity == null ? "" : `${resource.quantity} ${resource.unit}`}
+                  {resource.quantity != null && resource.hours != null ? " · " : ""}
+                  {resource.hours == null ? "" : `${resource.hours} h`}
+                  {resource.notes ? ` · ${resource.notes}` : ""}
+                </span>
+              </div>
+            ))}
+            {!resourcesResult.data?.length ? <p className="muted">Nenhum recurso registrado.</p> : null}
+          </div>
+          {editable ? <form action={createDailyLogResource} className="field-form">
+            <input type="hidden" name="projectId" value={id} />
+            <input type="hidden" name="dailyLogId" value={logId} />
+            <label>Recurso do catálogo da obra
+              <select name="resourceId" defaultValue="">
+                <option value="">Recurso avulso</option>
+                {(projectResourcesResult.data ?? []).map((resource) => <option key={resource.id} value={resource.id}>{resource.name} · {resource.resource_type}</option>)}
+              </select>
+            </label>
+            <div className="field-grid">
+              <label>Nome avulso<input name="resourceName" placeholder="Preencha se não escolher do catálogo" /></label>
+              <label>Unidade<input name="unit" defaultValue="un" /></label>
+              <label>Quantidade<input type="number" min="0" step="0.01" name="quantity" /></label>
+              <label>Horas<input type="number" min="0" step="0.01" name="hours" /></label>
+              <label className="span-2">Observação<input name="notes" /></label>
+            </div>
+            <button className="button button-secondary" type="submit">Registrar recurso</button>
           </form> : null}
         </article>
 

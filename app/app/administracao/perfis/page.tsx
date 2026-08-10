@@ -1,5 +1,6 @@
 import { createAccessProfile, setProfileAccessLevel } from "@/app/actions/access-control";
 import { requireAccessAdministration } from "@/lib/authorization";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { toUiAccessLevel, type ModuleAccessLevel } from "@/lib/modules/registry";
 
 export default async function ProfilesAdminPage({searchParams}:{searchParams:Promise<{error?:string}>}){
@@ -11,7 +12,7 @@ export default async function ProfilesAdminPage({searchParams}:{searchParams:Pro
     context.supabase.from("profile_module_permissions").select("profile_id,module_id,access_level,can_approve,can_release,can_sign,can_export,can_administer,can_view_sensitive").eq("organization_id",context.organizationId)
   ]);
   const firstError=profilesResult.error??modulesResult.error??permissionsResult.error;
-  if(firstError)throw new Error(firstError.message);
+  if(firstError){reportDataAccessError("administration.profiles.load",firstError);throw new Error("Não foi possível carregar os perfis de acesso.");}
   const profiles=profilesResult.data??[];
   const modules=modulesResult.data??[];
   const permissions=permissionsResult.data??[];

@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { inspectLatestSinapiOfficialPackage } from "@/lib/sinapi/automatic-update";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 
-const PROBE_TOKEN = "sinapi-source-probe-v2-20260729-f19c8";
+function authorizedProbe(request: Request) {
+  const expected = process.env.SINAPI_PROBE_TOKEN?.trim();
+  return Boolean(expected && expected.length >= 32 && request.headers.get("x-sinapi-probe-token") === expected);
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const token = request.headers.get("x-sinapi-probe-token") ?? url.searchParams.get("token");
-  if (token !== PROBE_TOKEN) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!authorizedProbe(request)) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const region = String(url.searchParams.get("region") ?? "SP").toUpperCase();
   const taxRelief = url.searchParams.get("relief") === "true";
@@ -18,12 +21,13 @@ export async function GET(request: Request) {
     const result = await inspectLatestSinapiOfficialPackage({ region, taxRelief });
     return NextResponse.json({ ok: true, checkedAt: new Date().toISOString(), region, taxRelief, result });
   } catch (error) {
+    reportDataAccessError("sinapi-source-probe.v2", error);
     return NextResponse.json({
       ok: false,
       checkedAt: new Date().toISOString(),
       region,
       taxRelief,
-      error: error instanceof Error ? error.message : "Falha desconhecida"
+      error: "PROBE_FAILED"
     }, { status: 502 });
   }
 }

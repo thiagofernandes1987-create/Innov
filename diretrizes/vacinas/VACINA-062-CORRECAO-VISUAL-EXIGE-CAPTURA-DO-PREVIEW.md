@@ -1,4 +1,4 @@
-# VACINA-043 — Correção visual exige captura do preview
+# VACINA-062 — Correção visual exige captura do preview
 
 **Estado:** vigente  
 **Detectada em:** repetição do loop transversal de QA em 29 de julho de 2026

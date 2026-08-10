@@ -7,6 +7,7 @@
 // `object_definition_versions` e não é tocada aqui. Quem edita edita o
 // rascunho, e publicar é que congela a cópia.
 
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import type { ObjectFieldSpec, ObjectSpec } from "./spec";
 
 type Cliente = Awaited<ReturnType<typeof import("@/lib/supabase/server").createSupabaseServerClient>>;
@@ -74,7 +75,7 @@ export async function definicoesDaOrganizacao(
     .order("updated_at", { ascending: false });
 
   if (error) {
-    console.error("[estudio:definicoes]", error.message);
+    reportDataAccessError("object-studio.definitions", error);
     return [];
   }
   return (data ?? []).map(linha => definicaoDe(linha as Record<string, unknown>));
@@ -94,7 +95,7 @@ export async function definicaoPorId(
     .maybeSingle();
 
   if (error) {
-    console.error("[estudio:definicao]", error.message);
+    reportDataAccessError("object-studio.definition", error);
     return null;
   }
   return data ? definicaoDe(data as Record<string, unknown>) : null;

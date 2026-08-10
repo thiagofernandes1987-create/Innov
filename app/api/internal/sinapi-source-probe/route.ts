@@ -1,17 +1,28 @@
 import { NextResponse } from "next/server";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { inspectSinapiArchiveLayout } from "@/lib/sinapi/archive-layout-diagnostic";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 
-const PROBE_TOKEN = "sinapi-source-probe-20260729-7f4a9";
 const SOURCE_URL = "https://www.caixa.gov.br/Downloads/sinapi-relatorios-mensais/SINAPI-2026-06-formato-xlsx.zip";
 const MAX_BYTES = 25 * 1024 * 1024;
 
+class SourceProbeFailure extends Error {
+  constructor(readonly code: string, readonly upstreamStatus: number | null = null) {
+    super(code);
+  }
+}
+
+function authorizedProbe(request: Request) {
+  const expected = process.env.SINAPI_PROBE_TOKEN?.trim();
+  return Boolean(expected && expected.length >= 32 && request.headers.get("x-sinapi-probe-token") === expected);
+}
+
 async function readLimited(response: Response) {
   const reader = response.body?.getReader();
-  if (!reader) throw new Error("Resposta sem corpo");
+  if (!reader) throw new SourceProbeFailure("EMPTY_BODY");
   const chunks: Buffer[] = [];
   let size = 0;
   while (true) {
@@ -19,16 +30,14 @@ async function readLimited(response: Response) {
     if (done) break;
     if (!value) continue;
     size += value.length;
-    if (size > MAX_BYTES) throw new Error("Arquivo excedeu o limite da sonda");
+    if (size > MAX_BYTES) throw new SourceProbeFailure("MAX_BYTES_EXCEEDED");
     chunks.push(Buffer.from(value));
   }
   return Buffer.concat(chunks, size);
 }
 
 export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const token = request.headers.get("x-sinapi-probe-token") ?? url.searchParams.get("token");
-  if (token !== PROBE_TOKEN) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!authorizedProbe(request)) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   try {
     const response = await fetch(SOURCE_URL, {
@@ -41,7 +50,7 @@ export async function GET(request: Request) {
         Referer: "https://www.caixa.gov.br/site/Paginas/downloads.aspx"
       }
     });
-    if (!response.ok) throw new Error(`CAIXA respondeu HTTP ${response.status}`);
+    if (!response.ok) throw new SourceProbeFailure("SOURCE_HTTP_ERROR", response.status);
     const archive = await readLimited(response);
     return NextResponse.json({
       ok: true,
@@ -51,10 +60,13 @@ export async function GET(request: Request) {
       layout: inspectSinapiArchiveLayout(archive)
     });
   } catch (error) {
-    return NextResponse.json({
-      ok: false,
-      checkedAt: new Date().toISOString(),
-      error: error instanceof Error ? error.message : "Falha desconhecida"
-    }, { status: 502 });
+    if (error instanceof SourceProbeFailure) {
+      return NextResponse.json(
+        { ok: false, checkedAt: new Date().toISOString(), error: error.code, upstreamStatus: error.upstreamStatus },
+        { status: 502 }
+      );
+    }
+    reportDataAccessError("sinapi-source-probe.v1", error);
+    return NextResponse.json({ ok: false, checkedAt: new Date().toISOString(), error: "PROBE_FAILED" }, { status: 502 });
   }
 }

@@ -180,7 +180,7 @@ export async function resolveWhatsAppBinding(
   if (binding.source_type === "CONTRACT_VERSION") {
     const { data, error } = await context.supabase
       .from("contract_versions")
-      .select("id,version_number,rendered_body,document_path,document_sha256,contracts(title)")
+      .select("id,version_number,rendered_body,document_path,document_sha256,contracts!contract_versions_contract_id_fkey(title)")
       .eq("id", binding.source_id)
       .eq("organization_id", context.organizationId)
       .maybeSingle();
@@ -228,7 +228,7 @@ export async function resolveWhatsAppBinding(
   if (binding.source_type === "AMENDMENT_VERSION") {
     const { data, error } = await context.supabase
       .from("amendment_versions")
-      .select("id,version_number,rendered_body,document_path,document_sha256,amendments(code)")
+      .select("id,version_number,rendered_body,document_path,document_sha256,amendments!amendment_versions_amendment_id_fkey(code)")
       .eq("id", binding.source_id)
       .eq("organization_id", context.organizationId)
       .maybeSingle();
@@ -280,7 +280,7 @@ export async function resolveWhatsAppBinding(
   const { data, error } = await context.supabase
     .from("project_document_versions")
     .select(
-      "id,version_number,storage_path,file_name,mime_type,sha256,project_documents(title)"
+      "id,version_number,storage_path,file_name,mime_type,sha256,project_documents!project_document_versions_document_id_fkey(title)"
     )
     .eq("id", binding.source_id)
     .eq("organization_id", context.organizationId)

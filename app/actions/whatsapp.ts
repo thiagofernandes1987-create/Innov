@@ -48,8 +48,8 @@ function firstRelation(value: unknown): Record<string, unknown> | null {
   return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
 }
 
-function safeActionMessage(error: unknown) {
-  if (error instanceof WhatsAppDomainError) return error.message;
+function safeActionMessage(domainFailure: unknown) {
+  if (domainFailure instanceof WhatsAppDomainError) return domainFailure.message;
   return "A operação não pôde ser concluída. Tente novamente.";
 }
 

@@ -1,4 +1,4 @@
-// Prevenção executável da VACINA-052-EMBED-AMBIGUO-PRECISA-DE-CHAVE-NOMEADA.md.
+// Prevenção executável da VACINA-052-EMBED-AMBIGUO-DEVOLVE-PGRST201-E-DERRUBA-A-CONSULTA-INTEIRA.md.
 //
 // Quando existem **dois caminhos** entre duas tabelas — `projects.contract_id`
 // aponta para `contracts`, e `contracts.project_id` aponta de volta para
@@ -165,21 +165,28 @@ function embedsDoSelect(base, select, linha) {
 }
 
 /**
- * Cada `.from("x")` seguido de `.select("...")` no mesmo encadeamento.
+ * Cada `.from("x")` seguido de `.select("...")` **no mesmo encadeamento**.
  *
- * A busca é textual de propósito: o encadeamento pode estar em uma linha ou em
- * dez, e o que interessa é o literal do `select`, que é sempre string crua.
+ * A versão anterior abria uma janela fixa de 2.000 caracteres. Se o primeiro
+ * encadeamento fosse `.from("a").insert(...)` sem `.select`, a janela podia
+ * atravessar o próximo `.from("b").select(...)` e atribuir o select de `b` a
+ * `a`, inventando um PGRST200. Agora cada busca termina no próximo `.from()`.
  */
 function embedsDoArquivo(texto) {
   const achados = [];
-  const from = /\.from\(\s*["'`]([a-z0-9_]+)["'`]\s*\)/gi;
-  let m;
-  while ((m = from.exec(texto))) {
-    const janela = texto.slice(m.index, m.index + 2000);
+  const padraoFrom = /\.from\(\s*["'`]([a-z0-9_]+)["'`]\s*\)/gi;
+  const froms = [...texto.matchAll(padraoFrom)];
+
+  for (let indice = 0; indice < froms.length; indice += 1) {
+    const atual = froms[indice];
+    const inicio = atual.index ?? 0;
+    const proximoInicio = froms[indice + 1]?.index ?? texto.length;
+    const fim = Math.min(inicio + 2000, proximoInicio);
+    const janela = texto.slice(inicio, fim);
     const select = /\.select\(\s*(["'`])([\s\S]*?)\1/.exec(janela);
     if (!select) continue;
-    const linha = texto.slice(0, m.index).split("\n").length;
-    achados.push(...embedsDoSelect(m[1], select[2], linha));
+    const linha = texto.slice(0, inicio).split("\n").length;
+    achados.push(...embedsDoSelect(atual[1], select[2], linha));
   }
   return achados;
 }

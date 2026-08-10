@@ -36,15 +36,19 @@ describe("Planejamento ↔ Tarefas", () => {
     expect(actions).not.toContain('fail(path, error.message)');
   });
 
-  it("faz as actions antigas do Planejamento convergirem para regras seguras", () => {
-    const actions = read("app/actions/projects.ts");
+  it("mantém uma única porta canônica e segura para dependências", () => {
+    const projectActions = read("app/actions/projects.ts");
+    const scheduleActions = read("app/actions/schedule.ts");
 
-    expect(actions).toContain("return createScheduleDependency(formData)");
-    expect(actions).toContain('failProjectDatabase(path, "move-task"');
-    expect(actions).toContain('failProjectDatabase(path, "create-milestone"');
-    expect(actions).toContain('failProjectDatabase(path, "create-baseline"');
-    expect(actions).toContain('failProjectDatabase(path, "create-wbs"');
-    expect(actions).not.toContain('fail(`/app/obras/${projectId}/cronograma`, error.message)');
+    expect(projectActions).not.toContain("createScheduleDependency");
+    expect(projectActions).not.toContain("function createDependency");
+    expect(scheduleActions).toContain("export async function createScheduleDependency");
+    expect(scheduleActions).toContain('failDatabase(projectId, "create-dependency"');
+    expect(projectActions).toContain('failProjectDatabase(path, "move-task"');
+    expect(projectActions).toContain('failProjectDatabase(path, "create-milestone"');
+    expect(projectActions).toContain('failProjectDatabase(path, "create-baseline"');
+    expect(projectActions).toContain('failProjectDatabase(path, "create-wbs"');
+    expect(projectActions).not.toContain('fail(`/app/obras/${projectId}/cronograma`, error.message)');
   });
 
   it("confirma tarefa, obra e organização antes de movimentar o registro", () => {

@@ -3,6 +3,7 @@ import { updateInventoryItem } from "@/app/actions/inventory";
 import { createInventoryLot } from "@/app/actions/inventory-extra";
 import { InventoryNavigation } from "@/components/inventory/inventory-navigation";
 import { hasCapability, requireCapability } from "@/lib/authorization";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { formatInventoryCurrency, formatInventoryQuantity, movementLabel } from "@/lib/inventory/domain";
 import { loadInventoryDashboard } from "@/lib/inventory/server";
 
@@ -73,8 +74,9 @@ export default async function InventoryItemDetail({
     loadInventoryDashboard()
   ]);
 
+  if (error) reportDataAccessError("inventory.item-detail.load", error);
   if (error || !data) {
-    return <main className="content inventory-app"><div className="empty-state"><h1>Item não encontrado</h1><p>{error?.message ?? "Registro indisponível."}</p></div></main>;
+    return <main className="content inventory-app"><div className="empty-state"><h1>Item não encontrado</h1><p>Registro indisponível.</p></div></main>;
   }
 
   const detail = data as ItemDetail;

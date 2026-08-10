@@ -7,6 +7,13 @@ if (!process.env.PREVIEW_URL) throw new Error("PREVIEW_URL é obrigatória.");
 const sharedUrl = new URL(process.env.PREVIEW_URL);
 const origin = sharedUrl.origin;
 const route = sharedUrl.pathname;
+const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET ?? "";
+const extraHTTPHeaders = bypassSecret
+  ? {
+      "x-vercel-protection-bypass": bypassSecret,
+      "x-vercel-set-bypass-cookie": "samesitenone"
+    }
+  : {};
 const outputRoot = process.env.QA_OUTPUT_DIR ?? path.join("artifacts", "public-launcher-fixture");
 const viewports = [
   { name: "375px", width: 375, height: 812 },
@@ -14,6 +21,11 @@ const viewports = [
   { name: "1280px", width: 1280, height: 800 }
 ];
 const themes = ["claro", "escuro"];
+
+function isPreviewOnlyVercelNoise(text) {
+  return text.includes("vercel.live/_next-live/feedback/feedback.js")
+    && text.includes("Content Security Policy");
+}
 
 await fs.mkdir(outputRoot, { recursive: true });
 const browser = await chromium.launch({ headless: true });
@@ -34,19 +46,25 @@ try {
         viewport: { width: viewport.width, height: viewport.height },
         colorScheme: theme === "escuro" ? "dark" : "light",
         locale: "pt-BR",
-        timezoneId: "America/Sao_Paulo"
+        timezoneId: "America/Sao_Paulo",
+        extraHTTPHeaders
       });
       await context.addCookies([{ name: "innovar-tema", value: theme, url: origin }]);
       const page = await context.newPage();
       const consoleErrors = [];
+      const ignoredPreviewConsoleErrors = [];
       const consoleWarnings = [];
       const pageErrors = [];
       const failedResponses = [];
       const findings = [];
 
       page.on("console", message => {
-        if (message.type() === "error") consoleErrors.push(message.text());
-        if (message.type() === "warning") consoleWarnings.push(message.text());
+        const text = message.text();
+        if (message.type() === "error") {
+          if (isPreviewOnlyVercelNoise(text)) ignoredPreviewConsoleErrors.push(text);
+          else consoleErrors.push(text);
+        }
+        if (message.type() === "warning") consoleWarnings.push(text);
       });
       page.on("pageerror", error => pageErrors.push(error.message));
       page.on("response", response => {
@@ -107,6 +125,7 @@ try {
           geometry,
           undersizedTargets,
           consoleErrors,
+          ignoredPreviewConsoleErrors,
           consoleWarnings,
           pageErrors,
           failedResponses,

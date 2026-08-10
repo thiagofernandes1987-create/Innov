@@ -2,6 +2,7 @@ import Link from "next/link";
 import { addSinapiBudgetItem, updateSinapiAutomatically } from "@/app/actions/sinapi";
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 
 export const maxDuration = 300;
 
@@ -41,7 +42,6 @@ type SinapiBatch = {
   imported_compositions: number | string;
   rejected_records: number | string;
   source_url: string;
-  error_message: string | null;
   started_at: string;
   finished_at: string | null;
 };
@@ -96,7 +96,7 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
       .order("updated_at", { ascending: false }),
     supabase
       .from("sinapi_import_batches")
-      .select("id, region, base_date, tax_relief, status, imported_inputs, imported_compositions, rejected_records, source_url, error_message, started_at, finished_at")
+      .select("id, region, base_date, tax_relief, status, imported_inputs, imported_compositions, rejected_records, source_url, started_at, finished_at")
       .eq("organization_id", organizationId)
       .order("started_at", { ascending: false })
   ]);
@@ -142,6 +142,7 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
       })
     : { data: [], error: null };
 
+  if (searchError) reportDataAccessError("sinapi.catalog.search", searchError);
   const rows = (references ?? []) as SinapiReference[];
   const currentBatch = availableBatches.find(batch => batch.base_date === selectedBaseDate);
   const latestAttempt = batches.find(batch => batch.region === region && Boolean(batch.tax_relief) === taxRelief);
@@ -168,7 +169,7 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
 
       {query.success ? <div className="validation success" role="status">{query.success}</div> : null}
       {query.error ? <div className="validation blocking" role="alert">{query.error}</div> : null}
-      {searchError ? <div className="validation blocking" role="alert">{searchError.message}</div> : null}
+      {searchError ? <div className="validation blocking" role="alert">Não foi possível consultar o catálogo SINAPI.</div> : null}
 
       <section className="card card-pad">
         <form method="get" className="grid">
@@ -230,8 +231,8 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
               {Number(latestAttempt.imported_inputs).toLocaleString("pt-BR")} insumos · {Number(latestAttempt.imported_compositions).toLocaleString("pt-BR")} composições
             </div>
           </div>
-          {latestAttempt.error_message ? (
-            <div className="validation blocking" style={{ marginTop: 14 }}>{latestAttempt.error_message}</div>
+          {latestAttempt.status === "FAILED" ? (
+            <div className="validation blocking" style={{ marginTop: 14 }}>A última atualização SINAPI falhou. Consulte os registros técnicos para diagnóstico.</div>
           ) : null}
         </section>
       ) : null}

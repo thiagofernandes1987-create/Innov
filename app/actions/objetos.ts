@@ -13,6 +13,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireCapability } from "@/lib/authorization";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { definicaoPorId } from "@/lib/object-runtime/estudio";
 import { camposParecidos } from "@/lib/object-runtime/parecidos";
 import { campoDoProposito, chaveDeCampo, proposito } from "@/lib/object-runtime/proposito";
@@ -24,6 +25,8 @@ import {
 } from "@/lib/object-runtime/spec";
 
 const LISTA = "/app/administracao/objetos";
+const ERRO_DE_PERSISTENCIA =
+  "Não foi possível salvar o objeto. Tente novamente e, se o problema persistir, informe o horário ao administrador.";
 
 function texto(dados: FormData, chave: string): string {
   return String(dados.get(chave) ?? "").trim();
@@ -31,6 +34,14 @@ function texto(dados: FormData, chave: string): string {
 
 function falhar(rota: string, mensagem: string): never {
   redirect(`${rota}${rota.includes("?") ? "&" : "?"}error=${encodeURIComponent(mensagem)}`);
+}
+
+function falharBanco(contexto: string, rota: string, erro: unknown): never {
+  reportDataAccessError(
+    contexto,
+    erro as { code?: string | null; statusCode?: string | number | null; name?: string | null }
+  );
+  falhar(rota, ERRO_DE_PERSISTENCIA);
 }
 
 /**
@@ -59,7 +70,7 @@ export async function criarObjeto(dados: FormData): Promise<void> {
     p_scope: escopo
   });
 
-  if (error) falhar(LISTA, error.message);
+  if (error) falharBanco("object-studio.create", LISTA, error);
   revalidatePath(LISTA);
   redirect(`${LISTA}/${String(data)}`);
 }
@@ -81,7 +92,7 @@ async function guardar(
     p_definition_id: definitionId,
     p_draft_spec: spec as unknown as Record<string, unknown>
   });
-  if (error) falhar(rota, error.message);
+  if (error) falharBanco("object-studio.save-draft", rota, error);
   revalidatePath(rota);
   revalidatePath(LISTA);
 }
@@ -274,7 +285,7 @@ export async function publicarObjeto(dados: FormData): Promise<void> {
     p_definition_id: definitionId,
     p_spec: definicao.rascunho as unknown as Record<string, unknown>
   });
-  if (error) falhar(rota, error.message);
+  if (error) falharBanco("object-studio.publish", rota, error);
 
   revalidatePath(rota);
   revalidatePath(LISTA);

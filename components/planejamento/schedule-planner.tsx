@@ -477,11 +477,6 @@ export function SchedulePlanner({
     scrollToToday();
   }, [scrollToToday]);
 
-  function openTaskEditor(taskId: string): void {
-    setEditorTab("general");
-    setEditorTaskId(taskId);
-  }
-
   function toggleWbs(id: string): void {
     setCollapsed(current => {
       const next = new Set(current);
@@ -697,8 +692,6 @@ export function SchedulePlanner({
                     const end = toDay(bar.termino);
                     const delayed = end < toDay(today) && row.task.progress < 1;
                     const visualWidth = (end - start + 1) * dayWidth;
-                    const hitWidth = Math.max(44, visualWidth);
-                    const hitOffset = (hitWidth - visualWidth) / 2;
                     const progressWidth = Math.round(visualWidth * row.task.progress);
                     return (
                       <div className={styles.timelineRow} key={`timeline-${row.key}`}>

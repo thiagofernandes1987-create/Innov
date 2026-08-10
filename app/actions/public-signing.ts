@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
@@ -105,7 +106,14 @@ export async function completePublicSignatureField(formData:FormData){
     p_value_sha256:valueHash,
     p_metadata:metadata
   });
-  if(error){if(filePath)await admin.storage.from("signature-artifacts").remove([filePath]);fail(token,error.message);}
+  if(error){
+    reportDataAccessError("public-signing.record-field",error);
+    if(filePath){
+      const{error:cleanupError}=await admin.storage.from("signature-artifacts").remove([filePath]);
+      reportDataAccessError("public-signing.cleanup-field-artifact",cleanupError);
+    }
+    fail(token,"Não foi possível salvar este campo da assinatura. Tente novamente.");
+  }
   redirect(`/assinar/${encodeURIComponent(token)}?saved=${encodeURIComponent(fieldId)}`);
 }
 
@@ -125,7 +133,10 @@ export async function finishPublicSignature(formData:FormData){
   const{data:values,error:valuesError}=await admin.from("signature_field_values")
     .select("field_id,value_sha256,file_sha256,completed_at")
     .in("field_id",fields.map(field=>field.field_id));
-  if(valuesError)fail(token,valuesError.message);
+  if(valuesError){
+    reportDataAccessError("public-signing.load-values",valuesError);
+    fail(token,"Não foi possível validar os campos assinados. Tente novamente.");
+  }
   const payloadHash=hashCanonical({
     envelopeId:signing.envelope_id,
     signerId:signing.signer_id,
@@ -136,6 +147,9 @@ export async function finishPublicSignature(formData:FormData){
     p_token_sha256:tokenHash,
     p_payload_sha256:payloadHash
   });
-  if(error)fail(token,error.message);
+  if(error){
+    reportDataAccessError("public-signing.finish",error);
+    fail(token,"Não foi possível concluir a assinatura. Tente novamente.");
+  }
   redirect(`/assinar/${encodeURIComponent(token)}?completed=1`);
 }

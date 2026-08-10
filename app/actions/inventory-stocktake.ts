@@ -3,6 +3,7 @@
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireCapability}from"@/lib/authorization";
+import{reportDataAccessError}from"@/lib/errors/data-access";
 
 function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
@@ -14,5 +15,5 @@ export async function addInventoryStocktakeLine(data:FormData){
   p_stocktake_id:stocktakeId,p_item_id:text(data,"itemId"),p_location_id:optional(data,"locationId"),
   p_lot_id:optional(data,"lotId"),p_notes:text(data,"notes")
  });
- if(error)fail(path,error.message);revalidatePath(path);
+ if(error){reportDataAccessError("inventory-stocktake.add-line",error);fail(path,"Não foi possível adicionar o item ao inventário.");}revalidatePath(path);
 }

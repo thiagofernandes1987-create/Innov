@@ -1,4 +1,5 @@
 import { requireClientContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { statusBadge } from "@/lib/stage12";
 import { singleRelation } from "@/lib/supabase/relations";
 
@@ -12,13 +13,16 @@ export default async function ClientDocumentsPage() {
     .order("client_released_at", { ascending: false });
 
   const paths = (data ?? []).map((version) => version.storage_path);
-  const { data: signed } = paths.length ? await supabase.storage.from("project-documents").createSignedUrls(paths, 900) : { data: [] };
+  const { data: signed, error: signedError } = paths.length ? await supabase.storage.from("project-documents").createSignedUrls(paths, 900) : { data: [], error: null };
+  if (error) reportDataAccessError("client-documents.page.load", error);
+  if (signedError) reportDataAccessError("client-documents.page.sign-urls", signedError);
   const signedByPath = new Map((signed ?? []).map((item) => [item.path, item.signedUrl]));
 
   return (
     <main className="content">
       <div className="page-head"><div><span className="badge">ARQUIVOS AUTORIZADOS</span><h1>Documentos</h1><p className="muted">Versões aprovadas e liberadas pela equipe Innovar.</p></div></div>
-      {error ? <div className="validation blocking">{error.message}</div> : null}
+      {error ? <div className="validation blocking">Não foi possível carregar os documentos.</div> : null}
+      {signedError ? <div className="validation blocking">Alguns arquivos não puderam ser preparados para download.</div> : null}
       <section className="card table-wrap">
         <table><thead><tr><th>Obra</th><th>Documento</th><th>Disciplina</th><th>Versão</th><th>Status</th><th>Arquivo</th></tr></thead><tbody>
           {(data ?? []).map((version) => {

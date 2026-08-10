@@ -16,6 +16,7 @@ concurrency:
 jobs:
   visual:
     runs-on: ubuntu-latest
+    environment: homologation
     timeout-minutes: 25
     container:
       image: mcr.microsoft.com/playwright:v1.55.0-noble
@@ -30,9 +31,9 @@ jobs:
           - module_key: obras
             module_route: /app/pipeline/projeto
             persona: gestor_de_obras
-            heading: Projetos|Pipeline|Obras
+            heading: Trilha do projeto
     env:
-      PREVIEW_URL: https://innov-git-fix-module-validation-loop-20260730-apex-method.vercel.app
+      PREVIEW_URL: ${{ vars.QA_PREVIEW_URL || 'https://innov-git-audit-regressao-main-20260808-apex-method.vercel.app' }}
       MODULE_KEY: ${{ matrix.module_key }}
       MODULE_ROUTE: ${{ matrix.module_route }}
       QA_PERSONA: ${{ matrix.persona }}
@@ -48,6 +49,18 @@ jobs:
 
       - name: Validate QA contracts
         run: node scripts/validate-module-qa.mjs
+
+      - name: Validate preview and credentials
+        shell: bash
+        run: |
+          if [ -z "$PREVIEW_URL" ]; then
+            echo "::error::QA visual bloqueado: preview da branch ausente."
+            exit 1
+          fi
+          if [ -z "$QA_PERSONAS_JSON" ] && { [ -z "$DEMO_ADMIN_EMAIL" ] || [ -z "$DEMO_ADMIN_PASSWORD" ]; }; then
+            echo "::error::QA visual bloqueado: configure QA_PERSONAS_JSON ou as credenciais demo no ambiente homologation."
+            exit 1
+          fi
 
       - name: Install Playwright runtime
         run: npm install --no-save --no-package-lock playwright@1.55.0

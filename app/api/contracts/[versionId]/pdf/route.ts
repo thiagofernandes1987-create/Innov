@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { generateCommercialPdf, sha256Hex } from "@/lib/pdf";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -30,8 +31,12 @@ export async function POST(request: Request, { params }: RouteContext) {
     .eq("id", versionId)
     .maybeSingle();
 
-  if (error || !version) {
-    return NextResponse.json({ error: error?.message ?? "Versão não encontrada." }, { status: 404 });
+  if (error) {
+    reportDataAccessError("contracts.pdf.load-version", error);
+    return NextResponse.json({ error: "Não foi possível carregar a versão do contrato." }, { status: 500 });
+  }
+  if (!version) {
+    return NextResponse.json({ error: "Versão não encontrada." }, { status: 404 });
   }
 
   const contract = version.contracts as unknown as {
@@ -46,7 +51,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     clients: { legal_name: string; trade_name: string | null };
   };
 
-  const { data: membership } = await supabase
+  const { data: membership, error: membershipError } = await supabase
     .from("organization_memberships")
     .select("role")
     .eq("organization_id", contract.organization_id)
@@ -54,6 +59,10 @@ export async function POST(request: Request, { params }: RouteContext) {
     .eq("active", true)
     .maybeSingle();
 
+  if (membershipError) {
+    reportDataAccessError("contracts.pdf.membership", membershipError);
+    return NextResponse.json({ error: "Não foi possível validar a permissão." }, { status: 500 });
+  }
   if (!membership || !allowedRoles.has(membership.role)) {
     return NextResponse.json({ error: "Permissão insuficiente." }, { status: 403 });
   }
@@ -86,7 +95,10 @@ export async function POST(request: Request, { params }: RouteContext) {
     .from("contract-documents")
     .upload(path, Buffer.from(pdf), { contentType: "application/pdf", upsert: false, cacheControl: "3600" });
 
-  if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
+  if (uploadError) {
+    reportDataAccessError("contracts.pdf.upload", uploadError);
+    return NextResponse.json({ error: "Não foi possível armazenar o PDF do contrato." }, { status: 500 });
+  }
 
   const { error: updateError } = await supabase
     .from("contract_versions")
@@ -100,11 +112,13 @@ export async function POST(request: Request, { params }: RouteContext) {
     .is("document_path", null);
 
   if (updateError) {
-    await supabase.storage.from("contract-documents").remove([path]);
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
+    reportDataAccessError("contracts.pdf.freeze-version", updateError);
+    const { error: cleanupError } = await supabase.storage.from("contract-documents").remove([path]);
+    if (cleanupError) reportDataAccessError("contracts.pdf.cleanup", cleanupError);
+    return NextResponse.json({ error: "Não foi possível concluir a geração do PDF do contrato." }, { status: 500 });
   }
 
-  await supabase.from("audit_events").insert({
+  const { error: auditError } = await supabase.from("audit_events").insert({
     organization_id: contract.organization_id,
     actor_user_id: authData.user.id,
     event_type: "contract.pdf.generated",
@@ -118,6 +132,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       idempotency_key_hash: sha256Hex(new TextEncoder().encode(idempotencyKey))
     }
   });
+  if (auditError) reportDataAccessError("contracts.pdf.audit", auditError);
 
   return NextResponse.json({ data: { path, sha256, idempotent: false } }, { status: 201 });
 }

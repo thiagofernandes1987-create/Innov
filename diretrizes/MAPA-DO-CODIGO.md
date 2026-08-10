@@ -28,16 +28,16 @@ a ignorar.
 
 | | |
 |---|---|
-| Aplicativos no registro | 23 |
-| Rotas | 160 (142 páginas, 18 de API) |
-| Server actions | 183 em 32 arquivos |
-| Módulos de `lib/` | 95 |
-| Funções do banco declaradas | 233 |
-| Funções do banco chamadas do código | 117 |
-| Suítes de teste | 57, com 651 casos |
-| Migrations | 164 |
-| Validadores de CI | 28 |
-| Módulos de `lib/` citados por algum teste | 55 de 95 |
+| Aplicativos no registro | 24 |
+| Rotas | 164 (145 páginas, 19 de API) |
+| Server actions | 192 em 35 arquivos |
+| Módulos de `lib/` | 101 |
+| Funções do banco declaradas | 239 |
+| Funções do banco chamadas do código | 121 |
+| Suítes de teste | 72, com 706 casos |
+| Migrations | 175 |
+| Validadores de CI | 29 |
+| Módulos de `lib/` citados por algum teste | 58 de 101 |
 
 ## 1. Aplicativos
 
@@ -63,6 +63,7 @@ a ignorar.
 | `estoque` | Estoque | `/app/estoque` |
 | `financeiro` | Financeiro Operacional | `/app/financeiro` |
 | `sac` | Pós-venda e SAC | `/app/ocorrencias` |
+| `whatsapp` | WhatsApp e Atendimento | `/app/whatsapp` |
 | `relatorios` | Relatórios e Indicadores | `/app/relatorios` |
 | `auditoria` | Auditoria | `/app/auditoria` |
 | `administracao` | Administração | `/app/administracao` |
@@ -75,6 +76,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 |---|---|---|---|
 | `/acesso-negado` | página | — | `app/acesso-negado/page.tsx` |
 | `/amostra-launcher` | página | — | `app/amostra-launcher/page.tsx` |
+| `/amostra-planejamento` | página | — | `app/amostra-planejamento/page.tsx` |
 | `/api/cep/[cep]` | API | — | `app/api/cep/[cep]/route.ts` |
 | `/api/compras/cotacoes/[id]/anexo` | API | — | `app/api/compras/cotacoes/[id]/anexo/route.ts` |
 | `/api/contracts/[versionId]/pdf` | API | — | `app/api/contracts/[versionId]/pdf/route.ts` |
@@ -93,6 +95,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/api/relatorios/exportar` | API | relatorios:export | `app/api/relatorios/exportar/route.ts` |
 | `/api/sac/attachments/[id]` | API | — | `app/api/sac/attachments/[id]/route.ts` |
 | `/api/signatures/webhook` | API | — | `app/api/signatures/webhook/route.ts` |
+| `/api/webhooks/whatsapp` | API | — | `app/api/webhooks/whatsapp/route.ts` |
 | `/app` | página | — | `app/app/page.tsx` |
 | `/app/[module]` | página | sessão da organização | `app/app/[module]/page.tsx` |
 | `/app/aditivos` | página | sessão da organização | `app/app/aditivos/page.tsx` |
@@ -157,6 +160,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/estoque/movimentos/novo` | página | estoque:create | `app/app/estoque/movimentos/novo/page.tsx` |
 | `/app/estoque/reservas` | página | estoque:read | `app/app/estoque/reservas/page.tsx` |
 | `/app/estoque/reservas/[id]` | página | estoque:read | `app/app/estoque/reservas/[id]/page.tsx` |
+| `/app/excecoes` | página | sessão da organização | `app/app/excecoes/page.tsx` |
 | `/app/financeiro` | página | financeiro:read | `app/app/financeiro/page.tsx` |
 | `/app/financeiro/configuracoes` | página | financeiro:manage | `app/app/financeiro/configuracoes/page.tsx` |
 | `/app/financeiro/fluxo-de-caixa` | página | financeiro:read | `app/app/financeiro/fluxo-de-caixa/page.tsx` |
@@ -211,6 +215,7 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/relatorios/salvos` | página | relatorios:read | `app/app/relatorios/salvos/page.tsx` |
 | `/app/relatorios/snapshots` | página | relatorios:read | `app/app/relatorios/snapshots/page.tsx` |
 | `/app/tarefas` | página | sessão da organização | `app/app/tarefas/page.tsx` |
+| `/app/whatsapp` | página | — | `app/app/whatsapp/page.tsx` |
 | `/assinar/[token]` | página | — | `app/assinar/[token]/page.tsx` |
 | `/cliente` | página | — | `app/cliente/page.tsx` |
 | `/cliente/[module]` | página | — | `app/cliente/[module]/page.tsx` |
@@ -244,6 +249,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 |---|---|
 | `assignProfileToUser` | administracao:manage |
 | `createAccessProfile` | administracao:manage |
+| `revokeProfileFromUser` | administracao:manage |
 | `setApplicationState` | administracao:manage |
 | `setProfileAccessLevel` | administracao:manage |
 | `setUserCapabilityOverride` | administracao:manage |
@@ -303,6 +309,12 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 |---|---|
 | `createBudget` | papéis: SUPER_ADMIN, DIRECAO, ADMINISTRADOR, COMERCIAL, ORCAMENTISTA |
 
+### `app/actions/crm-opportunities.ts`
+
+| Função | Guarda |
+|---|---|
+| `createCrmOpportunitySafe` | crm:create |
+
 ### `app/actions/cub.ts`
 
 | Função | Guarda |
@@ -327,6 +339,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `createFlexibleProject` | sessão da organização |
 | `createFlexibleProposal` | propostas:create |
 | `decideFlexibleProposalDiscount` | papéis: SUPER_ADMIN, DIRECAO |
+| `prepareProposalUpload` | propostas:create |
 
 ### `app/actions/inventory-extra.ts`
 
@@ -422,6 +435,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | Função | Guarda |
 |---|---|
 | `desativarResponsabilidadeOperacional` | administracao:manage |
+| `registrarExcecaoOperacional` | sessão da organização |
 | `salvarResponsabilidadeOperacional` | administracao:manage |
 
 ### `app/actions/organization-context.ts`
@@ -478,6 +492,13 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 |---|---|
 | `createProjectFromContractSafe` | sessão da organização |
 
+### `app/actions/project-resource-usage.ts`
+
+| Função | Guarda |
+|---|---|
+| `createDailyLogResource` | sessão da organização |
+| `upsertTaskResourceAllocation` | — |
+
 ### `app/actions/projects.ts`
 
 | Função | Guarda |
@@ -487,7 +508,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `createDailyLog` | sessão da organização |
 | `createMilestone` | sessão da organização |
 | `createProjectResource` | sessão da organização |
-| `createTask` | sessão da organização |
+| `createTask` | — |
 | `createTeam` | sessão da organização |
 | `createWbsItem` | sessão da organização |
 | `decideDailyLog` | sessão da organização |
@@ -515,7 +536,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `createQualityTemplateVersion` | qualidade:update |
 | `publishQualityTemplate` | qualidade:approve |
 | `reviewQualityResponse` | qualidade:approve |
-| `submitClientQualityForm` | qualidade:create |
+| `submitClientQualityForm` | — |
 | `submitInternalQualityForm` | qualidade:create |
 | `submitPublicQualityForm` | — |
 | `uploadQualityDocument` | qualidade:create |
@@ -530,7 +551,6 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `convertCrmLead` | crm:update |
 | `createClientSacTicket` | sac:update |
 | `createCrmLead` | crm:create |
-| `createCrmOpportunity` | crm:create |
 | `createRelationshipClient` | clientes:create |
 | `createSacTicket` | sac:create |
 | `moveCrmLeadStage` | crm:update |
@@ -560,7 +580,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `createScheduleTask` | sessão da organização |
 | `createScheduleWbs` | sessão da organização |
 | `deleteScheduleDependency` | sessão da organização |
-| `updateScheduleTask` | sessão da organização |
+| `updateScheduleTask` | — |
 
 ### `app/actions/sinapi.ts`
 
@@ -581,6 +601,15 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 |---|---|
 | `definirTema` | — |
 
+### `app/actions/whatsapp.ts`
+
+| Função | Guarda |
+|---|---|
+| `createWhatsAppContentBinding` | whatsapp:manage |
+| `saveWhatsAppAccount` | whatsapp:manage |
+| `sendWhatsAppMessage` | whatsapp:update |
+| `startWhatsAppConversation` | whatsapp:create |
+
 ## 4. Módulos de `lib/`
 
 **T** = citado por alguma suíte de teste.
@@ -591,7 +620,8 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/auth` | não | `requireClientContext`, `requireOrganizationContext`, `requireUser` |
 | `@/lib/authorization` | não | `getEffectiveApplications`, `hasCapability`, `requireAccessAdministration`, `requireCapability` |
 | `@/lib/casca/avisos` | não | `COOKIE_VISTO_ATIVIDADES`, `COOKIE_VISTO_MENSAGENS`, `carregarAvisos` |
-| `@/lib/casca/indicadores` | não | `carregarIndicadores` |
+| `@/lib/casca/launcher-domain` | não | `clampProgress`, `formatCompactCurrency`, `formatCompactNumber`, `unavailableSummary` |
+| `@/lib/casca/launcher-metrics` | não | `loadLauncherSummaries` |
 | `@/lib/casca/menus` | sim | `MENUS_DO_MODULO`, `menusDe` |
 | `@/lib/cost-sources/cub-fonte` | sim | `PAGINA_DO_CUB`, `buscarSerieHistoricaDoCub`, `encontrarLinkDaSerie` |
 | `@/lib/cost-sources/cub-serie-historica` | sim | `TIPOLOGIAS_CUB`, `TOLERANCIA_DA_SERIE`, `dataDoSerial`, `familiaDaTipologia`, `lerSerieHistoricaDoCub`, `padraoDeAcabamento` |
@@ -614,9 +644,9 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/file-security/gateway-auth` | sim | `FILE_SECURITY_GATEWAY_MAX_SKEW_SECONDS`, `FILE_SECURITY_GATEWAY_PATH`, `buildFileSecurityGatewayPayload`, `createFileSecurityGatewaySignature`, `verifyFileSecurityGatewaySignature` |
 | `@/lib/file-security/health-auth` | sim | `FILE_SECURITY_HEALTH_MAX_SKEW_SECONDS`, `FILE_SECURITY_HEALTH_PATH`, `createFileSecurityHealthSignature`, `verifyFileSecurityHealthSignature` |
 | `@/lib/file-security/server` | não | `checkFileSecurityProvider`, `secureUpload` |
-| `@/lib/finance` | não | `calculateBdi`, `calculateFinancials`, `calculateMarkupFactor`, `calculatePayback`, `financialInputSchema`, `percentageSchema`, `validateFinancialInput` |
 | `@/lib/financial/cash-flow` | não | `cashFlowRisk`, `formatMoney`, `summarizeCashFlow` |
 | `@/lib/forms/project-creation-state` | não | `INITIAL_PROJECT_CREATION_STATE`, `projectCreationError` |
+| `@/lib/forms/report-action-state` | não | `INITIAL_REPORT_ACTION_STATE`, `reportActionError` |
 | `@/lib/inventory/domain` | não | `formatInventoryCurrency`, `formatInventoryQuantity`, `movementLabel`, `movementRequiresNegative`, `movementRequiresPositive`, `normalizeInventoryDashboard` |
 | `@/lib/inventory/server` | não | `loadInventoryDashboard` |
 | `@/lib/listas/servidor` | sim | `listaDoEscopo`, `pertenceALista` |
@@ -636,18 +666,19 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/orcamentos/naturezas` | sim | `custoDoItem`, `rotuloDaNatureza`, `totaisPorNatureza` |
 | `@/lib/organization-context` | sim | `ACTIVE_ORGANIZATION_COOKIE`, `safeInternalReturnPath` |
 | `@/lib/pdf` | não | `generateCommercialPdf`, `sha256Hex` |
-| `@/lib/personas/catalog` | sim | `PERSONAS_OPERACIONAIS` |
-| `@/lib/pessoas/nomes` | não | `nomesDosUsuarios` |
+| `@/lib/personas/catalog` | não | `PERSONAS_OPERACIONAIS` |
+| `@/lib/personas/runtime` | sim | `PERSONAS_OPERACIONAIS` |
+| `@/lib/pessoas/nomes` | sim | `nomesDosUsuarios` |
 | `@/lib/pipeline/atividades` | não | `ROTULO_ATIVIDADE`, `ROTULO_OBSERVACAO`, `TIPOS_ATIVIDADE`, `TIPOS_OBSERVACAO`, `ehTipoAtividade`, `saiDaCasa` |
 | `@/lib/pipeline/datas` | sim | `CODIGOS_DATA`, `MARCOS`, `NATUREZAS`, `codigoDe`, `decompor`, `descrever`, `situacaoDoPrazo` |
 | `@/lib/pipeline/domain` | sim | `ROTULO_TRILHA`, `TRILHAS`, `formatarData`, `formatarMoeda`, `montarColunas`, `ordenarCodigos`, `ordenarPorUrgencia`, `prazoPrincipal`, `rotuloSituacao` |
 | `@/lib/pipeline/server` | não | `carregarCartao`, `carregarPipeline`, `funisDaTrilha`, `registrosDisponiveis`, `trilhasDisponiveis` |
 | `@/lib/planejamento/calendario` | sim | `DIA_MS`, `REGIMES`, `REGIME_PADRAO`, `avancarDiasUteis`, `contarDias`, `diaUtilAnterior`, `ehDiaUtil`, `feriadosNaFaixa`, `feriadosNacionais`, `paraDia`, `paraIso`, `pascoa`, `proximoDiaUtil`, `regimePorChave`, `terminoPorDiasUteis` |
 | `@/lib/planejamento/cronograma` | sim | `ROTULO_DEPENDENCIA`, `SIGLA_PT`, `TIPOS_DEPENDENCIA`, `cadeiaMaisLonga`, `calcular`, `ordenar` |
-| `@/lib/planejamento/curvas` | não | `curvaDeAvanco`, `desvioDeHoje` |
 | `@/lib/planejamento/eap` | sim | `compararCodigos`, `diferencas`, `partes`, `proximoCodigo`, `renumerar` |
 | `@/lib/planejamento/modelos-de-eap` | sim | `MINIMO_DE_OCORRENCIAS`, `modeloPara`, `modelosDeEtapa` |
 | `@/lib/planejamento/modelos-servidor` | não | `modelosDeEap` |
+| `@/lib/planejamento/schedule-validation` | sim | `SCHEDULE_DEPENDENCY_TYPES`, `isScheduleDependencyType`, `publicScheduleDatabaseMessage`, `wouldCreateScheduleCycle`, `wouldCreateTaskHierarchyCycle` |
 | `@/lib/planilhas/pdf-texto` | sim | `LIMITES_PDF`, `decodificarAscii85`, `lerTextoDoPdf` |
 | `@/lib/planilhas/xlsx` | não | `LIMITES_XLSX`, `extractZipEntry`, `listZipEntries`, `parseWorkbook` |
 | `@/lib/procurement/comparison` | não | `compareProcurementQuotes`, `formatCurrency` |
@@ -662,7 +693,6 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/reports/server` | não | `defaultReportPeriod`, `loadReportDashboard` |
 | `@/lib/signatures/crypto` | não | `createSigningToken`, `hashCanonical`, `sha256` |
 | `@/lib/signatures/format` | sim | `canonicalJson`, `safeFileName` |
-| `@/lib/signatures/index` | não | `getSignatureProvider` |
 | `@/lib/signatures/webhook-state` | sim | `SIGNATURE_STATUS_BY_EVENT`, `shouldApplySignatureStatus` |
 | `@/lib/sinapi/archive-layout-diagnostic` | não | `inspectSinapiArchiveLayout` |
 | `@/lib/sinapi/automatic-update` | sim | `discoverLatestSinapiXlsxSource`, `discoverLatestSinapiXlsxUrl`, `inspectLatestSinapiOfficialPackage`, `runSinapiAutomaticUpdate` |
@@ -675,6 +705,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/sugestoes/escopos` | sim | `ESCOPOS_DESCRITOS`, `PADROES_POR_ESCOPO`, `descreverEscopo`, `padroesDoEscopo` |
 | `@/lib/sugestoes/servidor` | não | `registrarValorUsado`, `sugestoesDoEscopo` |
 | `@/lib/supabase/admin` | não | `createSupabaseAdminClient` |
+| `@/lib/supabase/browser` | não | `createSupabaseBrowserClient` |
 | `@/lib/supabase/relations` | não | `isUnknownRecord`, `relationField`, `relationRecord`, `relationRecords`, `singleRelation` |
 | `@/lib/supabase/server` | não | `createSupabaseServerClient` |
 | `@/lib/tema` | não | `COOKIE_TEMA`, `TEMAS`, `temaValido` |
@@ -682,6 +713,10 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/validacao/cep` | sim | `buscarCEP`, `interpretarRespostaViaCEP` |
 | `@/lib/validacao/formulario` | sim | `checarCamposBR` |
 | `@/lib/validacao/moeda` | sim | `formatarDecimal`, `formatarMoeda`, `lerMoeda`, `mascararMoeda` |
+| `@/lib/whatsapp/client` | não | `registerWhatsAppPhoneNumber`, `sendWhatsAppDocument`, `sendWhatsAppTemplate`, `sendWhatsAppText`, `subscribeWhatsAppBusinessAccount`, `verifyWhatsAppPhoneNumber` |
+| `@/lib/whatsapp/domain` | sim | `SOURCE_FIELDS`, `WHATSAPP_DELIVERY_STATUSES`, `WHATSAPP_SOURCE_TYPES`, `canAdvanceWhatsAppDeliveryStatus`, `hashCanonicalSource`, `isSupportWindowOpen`, `normalizePhone`, `orderedTemplateParameters`, `parseSourceToken`, `parseVariables`, `renderCanonicalText`, `verifyMetaWebhookSignature` |
+| `@/lib/whatsapp/server` | não | `loadWhatsAppWorkspace` |
+| `@/lib/whatsapp/source-resolver` | não | `loadWhatsAppBinding`, `resolveWhatsAppBinding` |
 
 ## 5. Funções do banco
 
@@ -703,13 +738,15 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `assign_sac_ticket` | `supabase/migrations/20260721013654_stage18_sac_functions.sql` | `app/actions/relationship.ts` |
 | `assign_user_access_profile` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
 | `calculate_budget_version` | `supabase/migrations/20260729010000_budget_readiness_and_cost_sources.sql` | `app/actions/budgets.ts` |
+| `calculate_budget_version_core` | `supabase/migrations/20260808135000_converge_budget_pricing_to_markup.sql` | — (só por SQL ou trigger) |
 | `can_access_project` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
 | `can_access_sac_ticket` | `supabase/migrations/20260721012701_stage18_relationship_security.sql` | — (só por SQL ou trigger) |
 | `can_manage_project` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
 | `can_write_daily_log` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
 | `complete_signature_business_state` | `supabase/migrations/20260728234000_signature_business_completion.sql` | `app/api/signatures/webhook/route.ts` |
 | `complete_signature_conversion_job` | `supabase/migrations/20260720054100_stage12_2_tokens_and_conversion_jobs.sql` | — (só por SQL ou trigger) |
-| `complete_signature_copy_delivery` | `supabase/migrations/20260720054341_stage12_2_delivery_worker_lock.sql` | `app/actions/advanced-signatures.ts` |
+| `complete_signature_copy_delivery` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | `app/actions/advanced-signatures.ts` |
+| `complete_whatsapp_outbound_message` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | `app/actions/whatsapp.ts` |
 | `consume_inventory_reservation` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | `app/actions/inventory.ts` |
 | `convert_crm_lead` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/relationship.ts` |
 | `create_advanced_signature_document` | `supabase/migrations/20260720054200_stage12_2_document_layout_workflow.sql` | `app/actions/advanced-signatures.ts` |
@@ -720,7 +757,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `create_commercial_proposal` | `supabase/migrations/20260729163500_flexible_projects_proposals_discounts.sql` | `app/actions/flexible-workflows.ts` |
 | `create_contract_from_proposal` | `supabase/migrations/20260719231500_stage9_workflows.sql` | `app/actions/commercial-documents.ts` |
 | `create_crm_lead` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/relationship.ts` |
-| `create_crm_opportunity` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/relationship.ts` |
+| `create_crm_opportunity` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/crm-opportunities.ts` |
 | `create_finance_entry_from_contract` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | `app/actions/operational-finance.ts` |
 | `create_finance_entry_from_procurement_order` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | `app/actions/operational-finance.ts` |
 | `create_independent_project` | `supabase/migrations/20260729163500_flexible_projects_proposals_discounts.sql` | — (só por SQL ou trigger) |
@@ -732,13 +769,13 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `create_inventory_reservation` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | `app/actions/inventory.ts` |
 | `create_inventory_warehouse` | `supabase/migrations/20260720160650_stage17_inventory_creation_rpcs.sql` | `app/actions/inventory.ts` |
 | `create_modular_access_profile` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
-| `create_next_budget_version` | `supabase/migrations/20260729013000_budget_next_version.sql` | `app/actions/budget-versions.ts` |
+| `create_next_budget_version` | `supabase/migrations/20260808135000_converge_budget_pricing_to_markup.sql` | `app/actions/budget-versions.ts` |
 | `create_object_definition` | `supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql` | `app/actions/objetos.ts` |
-| `create_operational_event` | `supabase/migrations/20260728150000_operational_client_event_origin.sql` | — (só por SQL ou trigger) |
+| `create_operational_event` | `supabase/migrations/20260728150000_operational_client_event_origin.sql` | `app/actions/operations.ts` |
 | `create_project_from_contract` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | — (só por SQL ou trigger) |
 | `create_project_from_contract_v2` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | `app/actions/project-creation.ts` |
 | `create_proposal_from_budget_version` | `supabase/migrations/20260728162026_workflow_documental_descobrivel.sql` | — (só por SQL ou trigger) |
-| `create_report_snapshot` | `supabase/migrations/20260728233000_qualify_pgcrypto_functions.sql` | `app/actions/reports.ts` |
+| `create_report_snapshot` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | `app/actions/reports.ts` |
 | `create_sac_ticket` | `supabase/migrations/20260721015350_stage18_sac_portal_release_guard.sql` | `app/actions/pipeline.ts`, `app/actions/relationship.ts` |
 | `create_sandbox_signature_envelope` | `supabase/migrations/20260719231500_stage9_workflows.sql` | — (só por SQL ou trigger) |
 | `create_schedule_baseline` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | `app/actions/projects.ts` |
@@ -754,12 +791,12 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `ensure_organization_module_defaults` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | — (só por SQL ou trigger) |
 | `ensure_organization_module_defaults_trigger` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | — (só por SQL ou trigger) |
 | `expire_inventory_reservations` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | — (só por SQL ou trigger) |
-| `fail_signature_conversion_job` | `supabase/migrations/20260720054100_stage12_2_tokens_and_conversion_jobs.sql` | — (só por SQL ou trigger) |
+| `fail_signature_conversion_job` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | — (só por SQL ou trigger) |
 | `finalize_advanced_signature_envelope` | `supabase/migrations/20260720054220_stage12_2_finalization_delivery.sql` | `app/actions/advanced-signatures.ts` |
 | `finalize_procurement_quote` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
 | `finalize_procurement_receipt` | `supabase/migrations/20260729000500_typed_enum_state_transitions.sql` | `app/actions/procurement.ts` |
 | `finance_create_installments` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | — (só por SQL ou trigger) |
-| `finish_sinapi_import` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
+| `finish_sinapi_import` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
 | `fonte_de_custo_oficial` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
 | `freeze_advanced_signature_layout` | `supabase/migrations/20260720054200_stage12_2_document_layout_workflow.sql` | `app/actions/advanced-signatures.ts` |
 | `freeze_budget_version` | `supabase/migrations/20260729010000_budget_readiness_and_cost_sources.sql` | `app/actions/budgets.ts` |
@@ -780,6 +817,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `get_sac_dashboard` | `supabase/migrations/20260721013941_stage18_relationship_queries.sql` | `lib/relationship/server.ts` |
 | `get_sac_ticket_detail` | `supabase/migrations/20260722104500_stage20_sac_attachment_security.sql` | `lib/relationship/server.ts` |
 | `guard_official_cost_reference` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
+| `guard_whatsapp_message_delivery_status` | `supabase/migrations/20260803192000_stage22_whatsapp_status_guard.sql` | — (só por SQL ou trigger) |
 | `has_org_role` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |
 | `import_procurement_receipt_to_inventory` | `supabase/migrations/20260729001500_inventory_receipt_line_order.sql` | `app/actions/inventory.ts` |
 | `import_sinapi_compositions_chunk` | `supabase/migrations/20260804040000_composicao_registra_custo_ausente.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
@@ -794,6 +832,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `install_quality_defaults_after_organization` | `supabase/migrations/20260720080210_stage13_quality_default_template_installer.sql` | — (só por SQL ou trigger) |
 | `install_report_defaults` | `supabase/migrations/20260720143500_stage16_reports_installer_fix.sql` | — (só por SQL ou trigger) |
 | `install_stage18_relationship_defaults` | `supabase/migrations/20260721014030_stage18_relationship_module.sql` | — (só por SQL ou trigger) |
+| `install_whatsapp_defaults` | `supabase/migrations/20260803190000_stage22_whatsapp_omnichannel.sql` | — (só por SQL ou trigger) |
+| `install_whatsapp_defaults_after_organization` | `supabase/migrations/20260803190000_stage22_whatsapp_omnichannel.sql` | — (só por SQL ou trigger) |
 | `inventory_stock_lock_key` | `supabase/migrations/20260720233052_stage17_inventory_concurrency_locks.sql` | — (só por SQL ou trigger) |
 | `is_aal2` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |
 | `is_client_owner` | `supabase/migrations/20260721012701_stage18_relationship_security.sql` | — (só por SQL ou trigger) |
@@ -837,7 +877,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `post_inventory_stocktake_adjustment` | `supabase/migrations/20260720160420_stage17_inventory_assets_stocktakes_03.sql` | `app/actions/inventory.ts` |
 | `prevent_frozen_baseline_mutation` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
 | `prevent_frozen_budget_item_mutation` | `supabase/migrations/20260719231500_stage9_workflows.sql` | — (só por SQL ou trigger) |
-| `prevent_frozen_budget_version_mutation` | `supabase/migrations/20260719233500_stage9_frozen_version_rules.sql` | — (só por SQL ou trigger) |
+| `prevent_frozen_budget_version_mutation` | `supabase/migrations/20260808135000_converge_budget_pricing_to_markup.sql` | — (só por SQL ou trigger) |
 | `prevent_released_document_mutation` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
 | `protect_completed_report_snapshot` | `supabase/migrations/20260720143000_stage16_reports_schema.sql` | — (só por SQL ou trigger) |
 | `protect_inventory_asset_custody` | `supabase/migrations/20260720160740_stage17_inventory_state_guards.sql` | — (só por SQL ou trigger) |
@@ -852,6 +892,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `publish_quality_form_version` | `supabase/migrations/20260720080100_stage13_quality_forms_security.sql` | `app/actions/quality.ts` |
 | `quality_client_matches` | `supabase/migrations/20260720080100_stage13_quality_forms_security.sql` | — (só por SQL ou trigger) |
 | `queue_signature_copy_delivery` | `supabase/migrations/20260720054220_stage12_2_finalization_delivery.sql` | `app/actions/advanced-signatures.ts` |
+| `queue_whatsapp_outbound_message` | `supabase/migrations/20260803190000_stage22_whatsapp_omnichannel.sql` | `app/actions/whatsapp.ts` |
 | `rate_sac_ticket` | `supabase/migrations/20260721013654_stage18_sac_functions.sql` | `app/actions/relationship.ts` |
 | `recalculate_inventory_reservation_from_line` | `supabase/migrations/20260720160740_stage17_inventory_state_guards.sql` | — (só por SQL ou trigger) |
 | `recalculate_inventory_reservation_status` | `supabase/migrations/20260720160700_stage17_inventory_hardening.sql` | — (só por SQL ou trigger) |
@@ -877,7 +918,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `return_inventory_asset` | `supabase/migrations/20260720160410_stage17_inventory_assets_stocktakes_02.sql` | `app/actions/inventory.ts` |
 | `reverse_inventory_movement` | `supabase/migrations/20260720160200_stage17_inventory_movement_functions.sql` | `app/actions/inventory.ts` |
 | `review_quality_response` | `supabase/migrations/20260720080100_stage13_quality_forms_security.sql` | `app/actions/quality.ts` |
-| `revoke_user_access_profile` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | — (só por SQL ou trigger) |
+| `revoke_user_access_profile` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
 | `run_observability_health_snapshot` | `supabase/migrations/20260723104500_r3b_observability_security_hardening.sql` | `app/actions/observability.ts` |
 | `sandbox_signature_event` | `supabase/migrations/20260719234500_stage9_security_hardening.sql` | — (só por SQL ou trigger) |
 | `sandbox_signature_event_core` | `supabase/migrations/20260728234000_signature_business_completion.sql` | — (só por SQL ou trigger) |
@@ -927,10 +968,13 @@ Declaradas em migration e chamadas por `.rpc()`.
 
 | Suíte | Casos | O que cobre |
 |---|---|---|
+| `tests/access-control-security.test.ts` | 2 | administração de acesso |
 | `tests/all-app-workflows.test.ts` | 2 | descoberta funcional de todos os aplicativos |
 | `tests/auth-errors.test.ts` | 5 | mensagemPublicaDeErroDeLogin |
 | `tests/busca-cobre-funis.test.ts` | 2 | busca da barra cobre as telas de funil |
 | `tests/cep-busca.test.ts` | 11 | interpretarRespostaViaCEP; buscarCEP |
+| `tests/commercial-documents-security.test.ts` | 2 | segurança das actions comerciais |
+| `tests/crm-opportunity-input-guard.test.ts` | 3 | criação segura de oportunidade |
 | `tests/cronograma.test.ts` | 24 | vocabulário; Término-Início (TI); Início-Início (II); Término-Término (TT) |
 | `tests/cub-fonte.test.ts` | 6 | o link da série histórica é descoberto, não fixado |
 | `tests/cub-serie-historica.test.ts` | 12 | o serial do Excel vira data; as tipologias da NBR 12721; leitura da série histórica |
@@ -949,9 +993,11 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/modelos-de-eap.test.ts` | 20 | o caso que a tarefa descreve; o que entra no modelo; grafia; achar o modelo do que está sendo digitado |
 | `tests/module-navigation.test.tsx` | 2 | NavegacaoDoModulo |
 | `tests/moeda.test.ts` | 15 | leitura de valor digitado; máscara de digitação, no padrão de caixa; exibição |
+| `tests/object-runtime-error-safety.test.ts` | 3 | segurança do Estúdio de Objetos |
 | `tests/object-runtime-parecidos.test.ts` | 12 | o caso que a tarefa descreve; parecido sem ser igual; o que não atrapalha quem está declarando; distância entre dois nomes |
 | `tests/object-runtime-proposito.test.ts` | 17 | o vocabulário cobre a biblioteca de tipos; o que a informação faz decide o tipo; nasce filtrável quando o tipo permite; o campo que sai da resposta é publicável |
 | `tests/object-runtime-spec.test.ts` | 31 | canonicalSpecJson; specFingerprint; slotFamilyFor; allocateSlots |
+| `tests/operational-exception-flow-integration.test.ts` | 4 | fluxo de exceções operacionais |
 | `tests/operational-notifications.test.ts` | 5 | notificações operacionais por exceção |
 | `tests/operational-routines.test.ts` | 3 | runner das rotinas profissionais |
 | `tests/orcamento-composicao.test.ts` | 11 | por que o custo de um item falta; a soma dos itens fecha com o custo publicado? |
@@ -964,9 +1010,16 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/pipeline-datas.test.ts` | 13 | catálogo de códigos; situacaoDoPrazo |
 | `tests/pipeline-domain.test.ts` | 17 | montarColunas; prazoPrincipal; ordenarPorUrgencia; ordenarCodigos |
 | `tests/planilhas-pdf-texto.test.ts` | 17 | ASCII85 do PDF; texto de dentro do PDF; o que o leitor recusa |
+| `tests/planning-task-integration.test.ts` | 6 | Planejamento ↔ Tarefas |
 | `tests/project-creation-contract.test.ts` | 6 | criação segura de projetos |
+| `tests/project-membership-resolution.test.ts` | 2 | resolução de responsáveis de projeto |
+| `tests/project-resource-usage-integration.test.ts` | 3 | recursos operacionais da obra |
+| `tests/proposal-direct-upload.test.ts` | 4 | upload de PDF da proposta |
 | `tests/qa-contraste.test.ts` | 19 | aritmética de cor; v4 — notação color(srgb …) lida como preto; opacidade nas três notações; mínimo exigido — 3:1 só para texto grande |
+| `tests/qa-persona-provisioning.test.ts` | 3 | provisionamento de personas QA |
 | `tests/relatorio-perdas.test.ts` | 20 | Pareto ordena por valor, não por contagem; fatia e acumulado; casos que quebrariam a divisão; perda sem motivo entra na conta |
+| `tests/report-actions-contract.test.ts` | 4 | ações seguras de relatórios |
+| `tests/schedule-validation.test.ts` | 5 | schedule validation |
 | `tests/security-controls.test.ts` | 11 | safeInternalReturnPath; mapPublicOperationError |
 | `tests/signature-format.test.ts` | 9 | safeFileName; canonicalJson |
 | `tests/signature-webhook-state.test.ts` | 7 | shouldApplySignatureStatus |
@@ -979,11 +1032,14 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/stage20-validator.test.ts` | 2 | validador semântico da Etapa 20 |
 | `tests/sugestoes-unidade.test.ts` | 13 | m² e m2 são a mesma unidade; a fusão vale por escopo, não globalmente; o efeito na lista de sugestão |
 | `tests/sugestoes.test.ts` | 30 | chave normalizada — o que faz três grafias serem um valor só; frequência recente; o que entra na lista; situação de um valor — o que a administração precisa distinguir |
+| `tests/supabase-surface-auditor.test.ts` | 1 | auditor de superfícies Supabase |
 | `tests/theme-contrast-contract.test.ts` | 1 | contrato de contraste dos estados |
 | `tests/vaccine-validator.test.ts` | 1 | validador de vacinas |
 | `tests/validacao-br.test.ts` | 33 | somenteDigitos; validarCPF; validarCNPJ; validarDocumento |
 | `tests/validacao-cpf-referencia.test.ts` | 3 | validarCPF conferido contra a implementação de referência |
+| `tests/visual-qa-capture-protocol.test.ts` | 4 | protocolo de QA visual por capturas |
 | `tests/visual-target-contract.test.tsx` | 4 | contrato do alvo visual aprovado |
+| `tests/whatsapp-domain.test.ts` | 9 | WhatsApp domain |
 
 ## 7. Validadores de CI
 
@@ -996,7 +1052,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `scripts/validate-menus.mjs` |
 | `scripts/validate-migrations-applied.mjs` |
 | `scripts/validate-module-keys.mjs` |
-| `scripts/validate-module-qa-status.mjs` |
+| `scripts/validate-module-qa.mjs` |
 | `scripts/validate-object-runtime.mjs` |
 | `scripts/validate-operational-qa-guards.mjs` |
 | `scripts/validate-personas-audit.mjs` |
@@ -1014,6 +1070,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `scripts/validate-stage18.mjs` |
 | `scripts/validate-stage19.mjs` |
 | `scripts/validate-stage20.mjs` |
+| `scripts/validate-stage22.mjs` |
 | `scripts/validate-stage9.mjs` |
 | `scripts/validate-supabase-migrations.mjs` |
 | `scripts/validate-vaccines.mjs` |
@@ -1025,7 +1082,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 40 de 95 |
+| Módulo de `lib/` sem teste que o cite | 43 de 101 |
 
 ### Módulos sem teste que os cite
 
@@ -1034,25 +1091,25 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/auth`
 - `@/lib/authorization`
 - `@/lib/casca/avisos`
-- `@/lib/casca/indicadores`
+- `@/lib/casca/launcher-domain`
+- `@/lib/casca/launcher-metrics`
 - `@/lib/documentos/resolucao`
 - `@/lib/documentos/zip`
 - `@/lib/domain`
 - `@/lib/errors/data-access`
 - `@/lib/file-security/server`
-- `@/lib/finance`
 - `@/lib/financial/cash-flow`
 - `@/lib/forms/project-creation-state`
+- `@/lib/forms/report-action-state`
 - `@/lib/inventory/domain`
 - `@/lib/inventory/server`
 - `@/lib/object-runtime/estudio`
 - `@/lib/observability/domain`
 - `@/lib/observability/server`
 - `@/lib/pdf`
-- `@/lib/pessoas/nomes`
+- `@/lib/personas/catalog`
 - `@/lib/pipeline/atividades`
 - `@/lib/pipeline/server`
-- `@/lib/planejamento/curvas`
 - `@/lib/planejamento/modelos-servidor`
 - `@/lib/planilhas/xlsx`
 - `@/lib/procurement/comparison`
@@ -1063,11 +1120,14 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/reports/metrics`
 - `@/lib/reports/server`
 - `@/lib/signatures/crypto`
-- `@/lib/signatures/index`
 - `@/lib/sinapi/archive-layout-diagnostic`
 - `@/lib/stage12`
 - `@/lib/sugestoes/servidor`
 - `@/lib/supabase/admin`
+- `@/lib/supabase/browser`
 - `@/lib/supabase/relations`
 - `@/lib/supabase/server`
 - `@/lib/tema`
+- `@/lib/whatsapp/client`
+- `@/lib/whatsapp/server`
+- `@/lib/whatsapp/source-resolver`
