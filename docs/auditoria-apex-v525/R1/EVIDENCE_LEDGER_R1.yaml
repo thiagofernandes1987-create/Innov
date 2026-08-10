@@ -1,0 +1,346 @@
+round: R1
+count: 27
+evidence:
+- evidence_id: EVD-0001
+  artifact_id: ART-0292
+  artifact_path: package.json
+  artifact_sha256: bb997f76afda07f0eb4896a922914c7c65034e6574f9844e667b9c967db05db5
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L5
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: HIGH
+  verification_method: STATIC_READ
+  content: packageManager declarado como "pnpm@11.15.0"
+  limitation: null
+- evidence_id: EVD-0002
+  artifact_id: null
+  artifact_path: <repo>
+  artifact_sha256: null
+  locator_kind: EXECUTION_RECORD
+  locator: git ls-files (441 arquivos rastreados)
+  statement_type: OBSERVED_FACT
+  source_type: EXECUTION
+  evidence_strength: CONFIRMED
+  verification_method: COMMAND_EXECUTION
+  content: Nenhum pnpm-lock.yaml versionado; ausência confirmada no índice canônico
+    de 441 artefatos
+  limitation: null
+- evidence_id: EVD-0003
+  artifact_id: ART-0002
+  artifact_path: .github/workflows/ci.yml
+  artifact_sha256: 19be7c6b4e7d6dc3e01a13df10a4986acfaedaa377bed77fb085c137b66261c1
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L109
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: pnpm install --no-frozen-lockfile --reporter=append-only
+  limitation: null
+- evidence_id: EVD-0004
+  artifact_id: null
+  artifact_path: <execution>
+  artifact_sha256: null
+  locator_kind: EXECUTION_RECORD
+  locator: pnpm install --frozen-lockfile
+  statement_type: OBSERVED_FACT
+  source_type: EXECUTION
+  evidence_strength: CONFIRMED
+  verification_method: COMMAND_EXECUTION
+  content: 'ERR_PNPM_NO_LOCKFILE: Cannot install with "frozen-lockfile" because pnpm-lock.yaml
+    is absent'
+  limitation: null
+- evidence_id: EVD-0005
+  artifact_id: ART-0291
+  artifact_path: next.config.ts
+  artifact_sha256: b97415fc22cd2154f3e2a501c20d80fa5090fced78d241e569a28db5c5ecf267
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L17
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: Cabeçalho emitido é "Content-Security-Policy-Report-Only"; nenhuma diretiva
+    report-uri/report-to configurada
+  limitation: null
+- evidence_id: EVD-0006
+  artifact_id: ART-0327
+  artifact_path: services/file-security-gateway/server.mjs
+  artifact_sha256: fcda02a9600ae7bcc4712fb919f3a66ebc2cd240e156a2349919487ec983b7a5
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L136-L139
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: readBody(request) executa antes de verifyRequest(request,sha256); corpo
+    de até MAX_FILE_BYTES é bufferizado sem autenticação
+  limitation: null
+- evidence_id: EVD-0007
+  artifact_id: ART-0327
+  artifact_path: services/file-security-gateway/server.mjs
+  artifact_sha256: fcda02a9600ae7bcc4712fb919f3a66ebc2cd240e156a2349919487ec983b7a5
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L10
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: HIGH
+  verification_method: STATIC_READ
+  content: MAX_FILE_BYTES padrão de 25 MB por requisição
+  limitation: null
+- evidence_id: EVD-0008
+  artifact_id: ART-0270
+  artifact_path: lib/organization-context.ts
+  artifact_sha256: 0bae8ffef8ad289df32fd7662708c5dd1b1985b17da03777be5d9fd1ee65dc4b
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L6-L33
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: safeInternalReturnPath implementa a defesa contra open redirect
+  limitation: null
+- evidence_id: EVD-0009
+  artifact_id: ART-0294
+  artifact_path: proxy.ts
+  artifact_sha256: 2b85f86b17046e6abc3804d5dcb50cac85908e1bf96aaf3f73677c6bb8681748
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L102,L127
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: safeInternalReturnPath é consumido no proxy para montar redirecionamentos
+    de login e seleção de organização
+  limitation: null
+- evidence_id: EVD-0010
+  artifact_id: null
+  artifact_path: <repo>
+  artifact_sha256: null
+  locator_kind: EXECUTION_RECORD
+  locator: vitest include **/*.test.ts — 10 arquivos .test.ts
+  statement_type: OBSERVED_FACT
+  source_type: EXECUTION
+  evidence_strength: CONFIRMED
+  verification_method: COMMAND_EXECUTION
+  content: Nenhum teste cobre lib/organization-context.ts, lib/signatures/crypto.ts
+    ou lib/public-errors.ts
+  limitation: null
+- evidence_id: EVD-0011
+  artifact_id: ART-0248
+  artifact_path: docs/ETAPA-20-PROTECAO-ANEXOS.md
+  artifact_sha256: 365cdad2f5c50cd2b41c3f18da6bfb45017a3a2ee1550d043b2f55eb998088e7
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L59-L66
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: '"Fora do escopo desta fatia: integração dos uploads de documentos, qualidade,
+    compras, financeiro, assinatura e diário"'
+  limitation: null
+- evidence_id: EVD-0012
+  artifact_id: ART-0028
+  artifact_path: app/actions/relationship.ts
+  artifact_sha256: 4a9fc1d6e3771fe88943ff0aeeaee2e02c6edfaa5a172b0e6b7cbca34d1c7a64
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L163
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: secureUpload é invocado somente no fluxo de anexos do SAC
+  limitation: null
+- evidence_id: EVD-0013
+  artifact_id: ART-0026
+  artifact_path: app/actions/public-signing.ts
+  artifact_sha256: 253d4bedeb219498a5a19bdb5837c62028cc844046494075b5998aa12418f711
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L75
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: Upload de evidência do signatário externo (não autenticado) grava direto
+    no bucket signature-artifacts sem análise antimalware
+  limitation: null
+- evidence_id: EVD-0014
+  artifact_id: ART-0024
+  artifact_path: app/actions/procurement.ts
+  artifact_sha256: c9c39389829b1c1af8855bee2e863e354ad3e739525dd85530404b98056a8ce9
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L112
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: Upload do portal de fornecedor (não autenticado) grava direto em procurement-attachments
+    sem análise antimalware
+  limitation: null
+- evidence_id: EVD-0015
+  artifact_id: ART-0202
+  artifact_path: diretrizes/ESTADO-ATUAL.json
+  artifact_sha256: d809ee248956748ca3f0c9dd0f81ae643c354454b999c5265ac0e43be4c686f2
+  locator_kind: EXECUTION_RECORD
+  locator: productionReadiness.attachmentProtection.otherModuleUploads
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: '"otherModuleUploads": "pending" — a lacuna está registrada no estado canônico'
+  limitation: null
+- evidence_id: EVD-0016
+  artifact_id: ART-0001
+  artifact_path: .env.example
+  artifact_sha256: 51d35210fa023265d4ffa3408ebf51c64a2a8d0411a800668970bf6b6c133787
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L8-L10
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: SIGNATURE_CLICK_SIGN_API_KEY, SIGNATURE_ZAPSIGN_API_KEY e SIGNATURE_DOCUSIGN_INTEGRATION_KEY
+    declarados
+  limitation: null
+- evidence_id: EVD-0017
+  artifact_id: null
+  artifact_path: <repo>
+  artifact_sha256: null
+  locator_kind: EXECUTION_RECORD
+  locator: grep por SIGNATURE_*_API_KEY / INTEGRATION_KEY em app, lib, scripts, services
+  statement_type: OBSERVED_FACT
+  source_type: EXECUTION
+  evidence_strength: CONFIRMED
+  verification_method: COMMAND_EXECUTION
+  content: Nenhuma referência de código consome as três variáveis; ocorrem apenas
+    em .env.example
+  limitation: null
+- evidence_id: EVD-0018
+  artifact_id: ART-0027
+  artifact_path: app/actions/quality.ts
+  artifact_sha256: db3b818d501831d27c2b2283658e52b468b30f46903b774ace2ae69fc87844b2
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L~8 do bloco submitPublicQualityForm
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: HIGH
+  verification_method: STATIC_READ
+  content: 'access_count é atualizado por leitura-modificação-escrita: Number(link.access_count??0)+1'
+  limitation: null
+- evidence_id: EVD-0019
+  artifact_id: ART-0024
+  artifact_path: app/actions/procurement.ts
+  artifact_sha256: c9c39389829b1c1af8855bee2e863e354ad3e739525dd85530404b98056a8ce9
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L~19 do bloco submitSupplierProcurementQuote
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: HIGH
+  verification_method: STATIC_READ
+  content: access_count do convite atualizado por leitura-modificação-escrita
+  limitation: null
+- evidence_id: EVD-0020
+  artifact_id: null
+  artifact_path: <repo>
+  artifact_sha256: null
+  locator_kind: EXECUTION_RECORD
+  locator: grep -i rate.?limit|throttle em app, lib, supabase, scripts, services,
+    docs, diretrizes
+  statement_type: OBSERVED_FACT
+  source_type: EXECUTION
+  evidence_strength: CONFIRMED
+  verification_method: COMMAND_EXECUTION
+  content: 'Nenhuma ocorrência: não há controle de vazão nem decisão documentada'
+  limitation: null
+- evidence_id: EVD-0021
+  artifact_id: ART-0040
+  artifact_path: app/api/signatures/webhook/route.ts
+  artifact_sha256: 35ccb19d0fa9ddd0f5df4b4618d83764b54098781452e2ef2d76a8c218b82a67
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L100-L138
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: Atualização de status sem guarda de monotonicidade; COMPLETED sobrescreve
+    contracts.status com 'SIGNED'
+  limitation: null
+- evidence_id: EVD-0022
+  artifact_id: ART-0345
+  artifact_path: supabase/migrations/20260719234000_stage9_apply_amendment.sql
+  artifact_sha256: f2cd3bcb1337d0ee3aed22b7baa76a197bece10fe3af9941a361be4f27a98351
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L26-L28
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: 'apply_signed_amendment retorna cedo quando applied_at não é nulo: aplicação
+    monetária é idempotente'
+  limitation: null
+- evidence_id: EVD-0023
+  artifact_id: ART-0433
+  artifact_path: supabase/migrations/20260723104500_r3b_observability_security_hardening.sql
+  artifact_sha256: aa5703e067605a1945539d7b6bc4b88b271da4a4437d7556329a4c6024d24701
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L13-L32
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_READ
+  content: Nova policy observability_diagnostics_select não referencia stage19_can_read_global_diagnostics();
+    a função permanece criada e revogada
+  limitation: null
+- evidence_id: EVD-0024
+  artifact_id: ART-0002
+  artifact_path: .github/workflows/ci.yml
+  artifact_sha256: 19be7c6b4e7d6dc3e01a13df10a4986acfaedaa377bed77fb085c137b66261c1
+  locator_kind: FILE_AND_LINE_RANGE
+  locator: L94-L104
+  statement_type: OBSERVED_FACT
+  source_type: PRIMARY_SOURCE
+  evidence_strength: HIGH
+  verification_method: STATIC_READ
+  content: Ações de terceiros referenciadas por tag mutável (actions/checkout@v6,
+    actions/setup-node@v6, actions/upload-artifact@v7)
+  limitation: null
+- evidence_id: EVD-0025
+  artifact_id: null
+  artifact_path: <execution>
+  artifact_sha256: null
+  locator_kind: EXECUTION_RECORD
+  locator: R1-03_SQL_RLS_MAP.json
+  statement_type: OBSERVED_FACT
+  source_type: EXECUTION
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_ANALYSIS
+  content: 136/136 tabelas com RLS habilitada; 2 tabelas deliberadamente sem policy
+    (deny-all) com revoke explícito para anon/authenticated
+  limitation: null
+- evidence_id: EVD-0026
+  artifact_id: null
+  artifact_path: <execution>
+  artifact_sha256: null
+  locator_kind: EXECUTION_RECORD
+  locator: R1-03_REPO_CHECKS_BASELINE.json
+  statement_type: OBSERVED_FACT
+  source_type: EXECUTION
+  evidence_strength: CONFIRMED
+  verification_method: COMMAND_EXECUTION
+  content: 19/19 verificações do repositório aprovadas no commit auditado (validadores,
+    lint, typecheck, vitest, unittest)
+  limitation: null
+- evidence_id: EVD-0027
+  artifact_id: null
+  artifact_path: <execution>
+  artifact_sha256: null
+  locator_kind: EXECUTION_RECORD
+  locator: grep por security definer / set search_path nas 106 migrations
+  statement_type: OBSERVED_FACT
+  source_type: EXECUTION
+  evidence_strength: CONFIRMED
+  verification_method: STATIC_ANALYSIS
+  content: 159 funções security definer, todas com set search_path; nenhuma concedida
+    a anon
+  limitation: null

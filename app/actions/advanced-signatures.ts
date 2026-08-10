@@ -6,6 +6,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { requireCapability } from "@/lib/authorization";
+import { reportDataAccessError } from "@/lib/errors/data-access";
+import { fileSecurityMessage } from "@/lib/file-security/domain";
+import { secureUpload } from "@/lib/file-security/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSigningToken, safeFileName, sha256 } from "@/lib/signatures/crypto";
 
@@ -40,8 +43,15 @@ export async function createAdvancedSignatureDocument(formData:FormData){
   const requestId=randomUUID();
   const fileName=safeFileName(file.name);
   const originalPath=`${context.organizationId}/documents/${requestId}/original/${fileName}`;
-  const{error:uploadError}=await context.supabase.storage.from("signature-artifacts").upload(originalPath,bytes,{contentType:file.type,upsert:false});
-  if(uploadError)fail("/app/assinaturas/novo",uploadError.message);
+  try{
+    await secureUpload({
+      targetBucket:"signature-artifacts",targetPath:originalPath,body:bytes,
+      filename:file.name,contentType:file.type,
+      organizationId:context.organizationId,actorUserId:context.userId,
+      correlationId:requestId,
+      policy:{allowedMimeTypes:new Set([PDF_MIME,DOCX_MIME]),maxBytes:MAX_DOCUMENT_SIZE}
+    });
+  }catch(error){fail("/app/assinaturas/novo",fileSecurityMessage(error,{maxBytesLabel:"50 MB",allowedLabel:"PDF ou DOCX"}));}
 
   const{data,error}=await context.supabase.rpc("create_advanced_signature_document",{
     p_organization_id:context.organizationId,
@@ -59,7 +69,12 @@ export async function createAdvancedSignatureDocument(formData:FormData){
     p_rendered_pdf_sha256:sourceFormat==="PDF"?originalSha:null,
     p_page_count:pageCount
   });
-  if(error||!data){await context.supabase.storage.from("signature-artifacts").remove([originalPath]);fail("/app/assinaturas/novo",error?.message??"Não foi possível criar o documento.");}
+  if(error||!data){
+    reportDataAccessError("advanced-signatures.create-document",error);
+    const{error:cleanupError}=await context.supabase.storage.from("signature-artifacts").remove([originalPath]);
+    reportDataAccessError("advanced-signatures.cleanup-original",cleanupError);
+    fail("/app/assinaturas/novo","Não foi possível criar o documento de assinatura.");
+  }
   redirect(`/app/assinaturas/documentos/${data}`);
 }
 
@@ -99,7 +114,10 @@ export async function createAdvancedEnvelope(formData:FormData){
     p_idempotency_key:randomUUID(),
     p_signers:signers
   });
-  if(error||!data)fail(`/app/assinaturas/documentos/${documentId}`,error?.message??"Não foi possível criar o envelope.");
+  if(error||!data){
+    reportDataAccessError("advanced-signatures.create-envelope",error);
+    fail(`/app/assinaturas/documentos/${documentId}`,"Não foi possível criar o envelope de assinatura.");
+  }
 
   const cookieStore=await cookies();
   cookieStore.set(`signature-links-${data}`,JSON.stringify(links),{
@@ -138,7 +156,10 @@ export async function addAdvancedSignatureField(formData:FormData){
     p_signing_order:numberValue(formData,"signingOrder")??1,
     p_config:{}
   });
-  if(error)fail(`/app/assinaturas/documentos/${documentId}`,error.message);
+  if(error){
+    reportDataAccessError("advanced-signatures.add-field",error);
+    fail(`/app/assinaturas/documentos/${documentId}`,"Não foi possível adicionar o campo de assinatura.");
+  }
   revalidatePath(`/app/assinaturas/documentos/${documentId}`);
 }
 
@@ -146,14 +167,20 @@ export async function freezeAdvancedSignatureLayout(formData:FormData){
   const documentId=text(formData,"documentId");
   const context=await requireCapability("assinaturas","sign",optional(formData,"projectId"));
   const{error}=await context.supabase.rpc("freeze_advanced_signature_layout",{p_envelope_id:text(formData,"envelopeId")});
-  if(error)fail(`/app/assinaturas/documentos/${documentId}`,error.message);
+  if(error){
+    reportDataAccessError("advanced-signatures.freeze-layout",error);
+    fail(`/app/assinaturas/documentos/${documentId}`,"Não foi possível congelar o layout de assinatura.");
+  }
   revalidatePath(`/app/assinaturas/documentos/${documentId}`);
 }
 
 async function embedFieldFile(pdf:PDFDocument,pageIndex:number,path:string,mimeType:string,x:number,y:number,width:number,height:number){
   const admin=createSupabaseAdminClient();
   const{data,error}=await admin.storage.from("signature-artifacts").download(path);
-  if(error||!data)return false;
+  if(error||!data){
+    reportDataAccessError("advanced-signatures.download-field-artifact",error);
+    return false;
+  }
   const bytes=new Uint8Array(await data.arrayBuffer());
   const image=mimeType==="image/png"?await pdf.embedPng(bytes):mimeType==="image/jpeg"?await pdf.embedJpg(bytes):null;
   if(!image)return false;
@@ -172,21 +199,44 @@ export async function finalizeAdvancedEnvelope(formData:FormData){
   const envelopeId=text(formData,"envelopeId");
   const context=await requireCapability("assinaturas","sign",optional(formData,"projectId"));
   const admin=createSupabaseAdminClient();
+  const returnPath=`/app/assinaturas/documentos/${documentId}`;
 
   const{data:envelope,error:envelopeError}=await context.supabase.from("signature_envelopes")
     .select("id,organization_id,document_version_id,status,signature_signers(id,name,legal_name,email,status,signed_at)")
     .eq("id",envelopeId).single();
-  if(envelopeError||!envelope?.document_version_id)fail(`/app/assinaturas/documentos/${documentId}`,envelopeError?.message??"Envelope inválido.");
+  if(envelopeError||!envelope?.document_version_id){
+    reportDataAccessError("advanced-signatures.load-envelope",envelopeError);
+    fail(returnPath,"Envelope de assinatura inválido ou indisponível.");
+  }
   const{data:version,error:versionError}=await context.supabase.from("signature_document_versions").select("*").eq("id",envelope.document_version_id).single();
-  if(versionError||!version?.rendered_pdf_path)fail(`/app/assinaturas/documentos/${documentId}`,versionError?.message??"PDF renderizado não encontrado.");
+  if(versionError||!version?.rendered_pdf_path){
+    reportDataAccessError("advanced-signatures.load-document-version",versionError);
+    fail(returnPath,"PDF renderizado não encontrado ou indisponível.");
+  }
+
+  const{data:fieldIds,error:fieldIdsError}=await context.supabase.from("signature_fields")
+    .select("id").eq("document_version_id",version.id);
+  if(fieldIdsError){
+    reportDataAccessError("advanced-signatures.load-field-ids",fieldIdsError);
+    fail(returnPath,"Não foi possível carregar os campos da assinatura.");
+  }
+
   const[{data:fields,error:fieldsError},{data:values,error:valuesError},{data:evidence,error:evidenceError}]=await Promise.all([
     context.supabase.from("signature_fields").select("*").eq("document_version_id",version.id).order("signing_order"),
-    context.supabase.from("signature_field_values").select("*").in("field_id",(await context.supabase.from("signature_fields").select("id").eq("document_version_id",version.id)).data?.map(item=>item.id)??[]),
+    context.supabase.from("signature_field_values").select("*").in("field_id",(fieldIds??[]).map(item=>item.id)),
     context.supabase.from("signature_evidence_records").select("event_type,signer_id,document_sha256,payload_sha256,metadata,occurred_at").eq("envelope_id",envelopeId).order("occurred_at")
   ]);
-  const firstError=fieldsError??valuesError??evidenceError;if(firstError)fail(`/app/assinaturas/documentos/${documentId}`,firstError.message);
+  if(fieldsError||valuesError||evidenceError){
+    reportDataAccessError("advanced-signatures.load-fields",fieldsError);
+    reportDataAccessError("advanced-signatures.load-values",valuesError);
+    reportDataAccessError("advanced-signatures.load-evidence",evidenceError);
+    fail(returnPath,"Não foi possível carregar os dados necessários para finalizar a assinatura.");
+  }
   const{data:source,error:sourceError}=await admin.storage.from("signature-artifacts").download(version.rendered_pdf_path);
-  if(sourceError||!source)fail(`/app/assinaturas/documentos/${documentId}`,sourceError?.message??"Não foi possível baixar o PDF.");
+  if(sourceError||!source){
+    reportDataAccessError("advanced-signatures.download-rendered-pdf",sourceError);
+    fail(returnPath,"Não foi possível carregar o PDF para finalização.");
+  }
 
   const pdf=await PDFDocument.load(await source.arrayBuffer());
   const font=await pdf.embedFont(StandardFonts.Helvetica);
@@ -215,13 +265,27 @@ export async function finalizeAdvancedEnvelope(formData:FormData){
     admin.storage.from("signature-artifacts").upload(finalPath,finalBytes,{contentType:PDF_MIME,upsert:false}),
     admin.storage.from("signature-artifacts").upload(auditPath,auditText,{contentType:"application/json",upsert:false})
   ]);
-  if(finalUpload.error||auditUpload.error)fail(`/app/assinaturas/documentos/${documentId}`,finalUpload.error?.message??auditUpload.error?.message??"Falha ao armazenar artefatos finais.");
+  if(finalUpload.error||auditUpload.error){
+    reportDataAccessError("advanced-signatures.upload-final-pdf",finalUpload.error);
+    reportDataAccessError("advanced-signatures.upload-audit-artifact",auditUpload.error);
+    const partialPaths:string[]=[];
+    if(!finalUpload.error)partialPaths.push(finalPath);
+    if(!auditUpload.error)partialPaths.push(auditPath);
+    if(partialPaths.length){
+      const{error:cleanupError}=await admin.storage.from("signature-artifacts").remove(partialPaths);
+      reportDataAccessError("advanced-signatures.cleanup-partial-finalization",cleanupError);
+    }
+    fail(returnPath,"Não foi possível armazenar os artefatos finais da assinatura.");
+  }
 
   const{error}=await context.supabase.rpc("finalize_advanced_signature_envelope",{
     p_envelope_id:envelopeId,p_final_pdf_path:finalPath,p_final_pdf_sha256:finalSha,p_audit_artifact_path:auditPath,p_audit_artifact_sha256:auditSha
   });
-  if(error)fail(`/app/assinaturas/documentos/${documentId}`,error.message);
-  revalidatePath(`/app/assinaturas/documentos/${documentId}`);revalidatePath("/cliente/assinaturas");
+  if(error){
+    reportDataAccessError("advanced-signatures.finalize-envelope",error);
+    fail(returnPath,"Não foi possível concluir o envelope de assinatura.");
+  }
+  revalidatePath(returnPath);revalidatePath("/cliente/assinaturas");
 }
 
 export async function queueAdvancedSignatureCopy(formData:FormData){
@@ -233,10 +297,14 @@ export async function queueAdvancedSignatureCopy(formData:FormData){
     p_recipient_email:text(formData,"recipientEmail"),
     p_channel:text(formData,"channel")||"PORTAL"
   });
-  if(error||!data)fail(`/app/assinaturas/documentos/${documentId}`,error?.message??"Não foi possível preparar a cópia.");
+  if(error||!data){
+    reportDataAccessError("advanced-signatures.queue-copy",error);
+    fail(`/app/assinaturas/documentos/${documentId}`,"Não foi possível preparar a cópia da assinatura.");
+  }
   if(text(formData,"channel")==="PORTAL"){
     const admin=createSupabaseAdminClient();
-    await admin.rpc("complete_signature_copy_delivery",{p_delivery_id:data,p_status:"DELIVERED",p_error:null});
+    const{error:deliveryError}=await admin.rpc("complete_signature_copy_delivery",{p_delivery_id:data,p_status:"DELIVERED",p_error:null});
+    reportDataAccessError("advanced-signatures.complete-portal-copy",deliveryError);
   }
   revalidatePath(`/app/assinaturas/documentos/${documentId}`);revalidatePath("/cliente/assinaturas");
 }

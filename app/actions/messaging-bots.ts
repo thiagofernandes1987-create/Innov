@@ -1,5 +1,7 @@
 "use server";
 
+import { mensagemDeFalha } from "@/lib/errors/data-access";
+
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -42,8 +44,8 @@ function isRedirectError(error: unknown) {
 }
 
 function safeMessage(error: unknown) {
-  const message = error instanceof Error ? error.message : String(error ?? "");
-  if (error instanceof OpenAiProviderError) return error.message;
+  const message = error instanceof Error ? mensagemDeFalha("messaging-bots.safeMessage", error) : String(error ?? "");
+  if (error instanceof OpenAiProviderError) return mensagemDeFalha("messaging-bots.safeMessage", error);
   if (message.includes("BOT_NAME_INVALID")) return "Informe um nome de bot válido.";
   if (message.includes("BOT_SECRET_DETECTED")) return "As instruções não podem conter credenciais ou segredos.";
   if (message.includes("BOT_TOOL_NOT_ALLOWED")) return "Uma ferramenta selecionada não é permitida.";
@@ -104,7 +106,7 @@ export async function saveMessagingBotProfile(data: FormData) {
       p_project_id: profile.projectId,
       p_profile_id: optional(data, "profileId")
     });
-    if (error) throw new Error(`${error.code ?? "BOT_SAVE_FAILED"}:${error.message}`);
+    if (error) throw new Error(`${error.code ?? "BOT_SAVE_FAILED"}:${mensagemDeFalha("messaging-bots.saveMessagingBotProfile", error)}`);
     revalidatePath(path);
     redirect(`${path}?success=${encodeURIComponent("Perfil de bot salvo. Nenhum envio automático foi habilitado.")}`);
   } catch (error) {
@@ -122,7 +124,7 @@ export async function setMessagingAiBudget(data: FormData) {
       p_organization_id: context.organizationId,
       p_maximum_cost_micros: maximum
     });
-    if (error) throw new Error(`${error.code ?? "AI_BUDGET_FAILED"}:${error.message}`);
+    if (error) throw new Error(`${error.code ?? "AI_BUDGET_FAILED"}:${mensagemDeFalha("messaging-bots.setMessagingAiBudget", error)}`);
     revalidatePath(path);
     redirect(`${path}?success=${encodeURIComponent("Orçamento diário de IA atualizado.")}`);
   } catch (error) {
@@ -131,29 +133,13 @@ export async function setMessagingAiBudget(data: FormData) {
   }
 }
 
-export async function setMessagingPluginPolicy(data: FormData) {
-  const context = await requireCapability("whatsapp", "manage");
-  try {
-    const pluginId = text(data, "pluginId");
-    const enabled = data.get("enabled") !== null;
-    const priority = integer(data, "priority");
-    const { error } = await context.supabase.rpc("set_channel_message_plugin_policy", {
-      p_organization_id: context.organizationId,
-      p_plugin_id: pluginId,
-      p_enabled: enabled,
-      p_priority: priority,
-      p_required_permission: optional(data, "requiredPermission"),
-      p_feature_flag: optional(data, "featureFlag"),
-      p_configuration: {}
-    });
-    if (error) throw new Error(`${error.code ?? "PLUGIN_POLICY_FAILED"}:${error.message}`);
-    revalidatePath(path);
-    redirect(`${path}?success=${encodeURIComponent(`Política ${pluginId} atualizada.`)}`);
-  } catch (error) {
-    if (isRedirectError(error)) throw error;
-    fail(safeMessage(error));
-  }
-}
+// `setMessagingPluginPolicy` foi removida aqui: era o antecessor de
+// `setCanonicalMessagingPluginPolicy` (app/actions/messaging-plugin-policy.ts),
+// que a tela `/app/whatsapp/bots` de fato chama. As duas mandavam para a mesma
+// RPC, mas só a canônica passa pela normalização — a daqui enviava `priority`,
+// `requiredPermission` e `featureFlag` crus do formulário. Ficou viva no arquivo
+// e morta no sistema quando a canônica entrou, e foi o `validate:code-map` que
+// apontou: "server action não é referenciada por nenhuma tela".
 
 export type BotDraftTestState =
   | { ok: false; error: string }
@@ -274,7 +260,7 @@ export async function testMessagingBotDraft(data: FormData): Promise<BotDraftTes
       p_owner_id: lockOwner,
       p_ttl_seconds: 90
     });
-    if (lockError) throw new Error(`${lockError.code ?? "AI_LOCK_FAILED"}:${lockError.message}`);
+    if (lockError) throw new Error(`${lockError.code ?? "AI_LOCK_FAILED"}:${mensagemDeFalha("messaging-bots.testMessagingBotDraft", lockError)}`);
     fencingToken = Number(lock);
     if (!Number.isSafeInteger(fencingToken) || fencingToken < 1) throw new Error("CONVERSATION_BUSY");
 

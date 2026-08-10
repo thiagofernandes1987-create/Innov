@@ -103,7 +103,7 @@ Nenhuma vacina nova foi criada, pois as causas já estavam catalogadas:
 - `VACINA-019` — responsividade e alvos de toque;
 - `VACINA-027` — correção visual exige comparação com referência;
 - `VACINA-031` — primeiro plano e superfície devem usar tokens coerentes;
-- `VACINA-043` — correção visual só fecha com captura do preview.
+- `VACINA-062` — correção visual só fecha com captura do preview.
 
 O limite de builds da Vercel não recebeu vacina porque a causa ainda não foi resolvida; registrar solução antes de existir solução reproduzível seria inventar evidência.
 

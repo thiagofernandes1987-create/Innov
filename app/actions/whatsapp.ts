@@ -1,5 +1,7 @@
 "use server";
 
+import { mensagemDeFalha } from "@/lib/errors/data-access";
+
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -111,13 +113,20 @@ function errorCode(error: unknown, fallback: string) {
     : fallback;
 }
 
+// Convergência com a `main`: os dois lados evoluíram esta função. A da `main`
+// reconhecia só `WhatsAppDomainError`; a do gateway reconhece também
+// `MessagingEngineError` e `UnsupportedCapabilityError`, que são justamente os
+// erros que o provider isolado produz. A do gateway é superset e prevalece —
+// manter a da `main` transformaria "provider não autorizado para envio real"
+// em "a operação não pôde ser concluída", que é o mesmo texto de qualquer
+// falha e não diz a quem lê o que fazer a respeito.
 function safeActionMessage(error: unknown) {
   if (
     error instanceof WhatsAppDomainError ||
     error instanceof MessagingEngineError ||
     error instanceof UnsupportedCapabilityError
   ) {
-    return error.message;
+    return mensagemDeFalha("whatsapp.safeActionMessage", error);
   }
   return "A operação não pôde ser concluída. Tente novamente.";
 }

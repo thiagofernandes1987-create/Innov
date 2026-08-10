@@ -1,0 +1,392 @@
+round: R3A
+detector_count: 14
+failed_detectors_remediated:
+- D01
+- D02
+- D04
+- D08
+- D09
+- D10
+- D11
+- D12
+- D13
+- D14
+failed_detectors_original:
+- D01
+- D02
+- D03
+- D04
+- D08
+- D09
+- D10
+- D11
+- D12
+- D13
+- D14
+resolved_by_r2:
+- D03
+results:
+- id: D01
+  title: Instalação de dependências reprodutível
+  pass: false
+  evidence:
+    lockfile_present: true
+    install_steps:
+    - file: .github/workflows/ci.yml
+      line: 109
+      frozen: false
+    - file: .github/workflows/stage11-homologation.yml
+      line: 50
+      frozen: false
+    - file: .github/workflows/stage18-concurrent-e2e.yml
+      line: 99
+      frozen: false
+    - file: .github/workflows/stage20-inventory-concurrency-e2e.yml
+      line: 89
+      frozen: false
+- id: D02
+  title: CSP aplicada ou com coletor de relatórios
+  pass: false
+  evidence:
+    report_only: true
+    enforcing: false
+    report_sink: false
+- id: D03
+  title: Gateway autentica antes de bufferizar o corpo
+  pass: true
+  evidence:
+    guard_offset: 6550
+    read_body_offset: 6886
+- id: D04
+  title: Uploads passam por análise antimalware
+  pass: false
+  evidence:
+    upload_sites: 10
+    without_secure_upload:
+    - file: app/actions/advanced-signatures.ts
+      line: 43
+      secure_upload_in_file: false
+    - file: app/actions/advanced-signatures.ts
+      line: 215
+      secure_upload_in_file: false
+    - file: app/actions/advanced-signatures.ts
+      line: 216
+      secure_upload_in_file: false
+    - file: app/actions/operational-finance.ts
+      line: 62
+      secure_upload_in_file: false
+    - file: app/actions/procurement.ts
+      line: 112
+      secure_upload_in_file: false
+    - file: app/actions/projects.ts
+      line: 317
+      secure_upload_in_file: false
+    - file: app/actions/projects.ts
+      line: 410
+      secure_upload_in_file: false
+    - file: app/actions/public-signing.ts
+      line: 75
+      secure_upload_in_file: false
+    - file: app/actions/quality.ts
+      line: 40
+      secure_upload_in_file: false
+    - file: app/actions/quality.ts
+      line: 162
+      secure_upload_in_file: false
+- id: D05
+  title: Controle de vazão implementado ou decidido por escrito
+  pass: true
+  evidence:
+    matches:
+    - diretrizes/ROADMAP.md
+- id: D06
+  title: Todas as tabelas com RLS habilitada
+  pass: true
+  evidence:
+    tables: 136
+    without_rls: []
+- id: D07
+  title: Funções security definer com search_path fixo e sem concessão a anon
+  pass: true
+  evidence:
+    missing_search_path: []
+    granted_to_anon: []
+- id: D08
+  title: Variáveis declaradas são consumidas ou marcadas como reservadas
+  pass: false
+  evidence:
+    unused:
+    - SIGNATURE_CLICK_SIGN_API_KEY
+    - SIGNATURE_ZAPSIGN_API_KEY
+    - SIGNATURE_DOCUSIGN_INTEGRATION_KEY
+    annotated_as_reserved: []
+- id: D09
+  title: Contadores incrementados atomicamente
+  pass: false
+  evidence:
+    read_modify_write_sites:
+    - file: app/actions/procurement.ts
+      line: 120
+    - file: app/actions/quality.ts
+      line: 180
+- id: D10
+  title: Ações de CI fixadas por commit
+  pass: false
+  evidence:
+    unpinned:
+    - file: ci.yml
+      line: 27
+      action: actions/checkout
+      ref: v6
+    - file: ci.yml
+      line: 58
+      action: actions/upload-artifact
+      ref: v7
+    - file: ci.yml
+      line: 73
+      action: actions/upload-artifact
+      ref: v7
+    - file: ci.yml
+      line: 94
+      action: actions/checkout
+      ref: v6
+    - file: ci.yml
+      line: 96
+      action: actions/setup-node
+      ref: v6
+    - file: ci.yml
+      line: 101
+      action: actions/setup-python
+      ref: v6
+    - file: ci.yml
+      line: 142
+      action: actions/upload-artifact
+      ref: v7
+    - file: ci.yml
+      line: 154
+      action: actions/upload-artifact
+      ref: v7
+    - file: stage11-homologation.yml
+      line: 23
+      action: actions/checkout
+      ref: v6
+    - file: stage11-homologation.yml
+      line: 39
+      action: actions/setup-node
+      ref: v6
+    - file: stage18-concurrent-e2e.yml
+      line: 48
+      action: actions/checkout
+      ref: v6
+    - file: stage18-concurrent-e2e.yml
+      line: 88
+      action: actions/setup-node
+      ref: v6
+    - file: stage18-concurrent-e2e.yml
+      line: 109
+      action: actions/upload-artifact
+      ref: v7
+    - file: stage20-backup-restore-drill.yml
+      line: 26
+      action: actions/checkout
+      ref: v6
+    - file: stage20-backup-restore-drill.yml
+      line: 69
+      action: actions/setup-node
+      ref: v6
+    - file: stage20-backup-restore-drill.yml
+      line: 102
+      action: actions/upload-artifact
+      ref: v7
+    - file: stage20-file-security-e2e.yml
+      line: 34
+      action: actions/checkout
+      ref: v6
+    - file: stage20-file-security-e2e.yml
+      line: 37
+      action: actions/setup-node
+      ref: v6
+    - file: stage20-file-security-e2e.yml
+      line: 51
+      action: actions/upload-artifact
+      ref: v7
+    - file: stage20-file-security-gateway-e2e.yml
+      line: 35
+      action: actions/checkout
+      ref: v6
+    - file: stage20-file-security-gateway-e2e.yml
+      line: 38
+      action: actions/setup-node
+      ref: v6
+    - file: stage20-file-security-gateway-e2e.yml
+      line: 90
+      action: actions/upload-artifact
+      ref: v7
+    - file: stage20-file-security-provider-health.yml
+      line: 35
+      action: actions/checkout
+      ref: v6
+    - file: stage20-file-security-provider-health.yml
+      line: 72
+      action: actions/setup-node
+      ref: v6
+    - file: stage20-file-security-provider-health.yml
+      line: 82
+      action: actions/upload-artifact
+      ref: v7
+    - file: stage20-inventory-concurrency-e2e.yml
+      line: 38
+      action: actions/checkout
+      ref: v6
+    - file: stage20-inventory-concurrency-e2e.yml
+      line: 78
+      action: actions/setup-node
+      ref: v6
+    - file: stage20-inventory-concurrency-e2e.yml
+      line: 99
+      action: actions/upload-artifact
+      ref: v7
+- id: D11
+  title: Artefatos gerados ignorados pelo versionamento
+  pass: false
+  evidence:
+    missing_entries:
+    - tsconfig.tsbuildinfo
+    - __pycache__
+    entries:
+    - node_modules
+    - .next
+    - out
+    - coverage
+    - .env
+    - .env.local
+    - .env.*.local
+    - '*.log'
+    - .DS_Store
+    - .vercel
+    - supabase/.temp
+- id: D12
+  title: Controles de segurança cobertos por teste
+  pass: false
+  evidence:
+    untested_controls:
+    - safeFileName
+    coverage:
+      safeInternalReturnPath: true
+      mapPublicOperationError: true
+      verifyFileSecurityGatewaySignature: true
+      verifyFileSecurityHealthSignature: true
+      safeFileName: false
+- id: D13
+  title: Webhook protege contra regressão de estado
+  pass: false
+  evidence:
+    guard_marker_found: false
+    handler_present: true
+- id: D14
+  title: Funções SQL sem referência remanescente
+  pass: false
+  evidence:
+    orphan_functions:
+    - accept_proposal
+    - acknowledge_observability_alert
+    - add_advanced_signature_field
+    - add_inventory_stocktake_line
+    - add_sac_ticket_message
+    - apply_signed_amendment
+    - approve_inventory_stocktake
+    - assign_inventory_asset
+    - assign_sac_ticket
+    - assign_user_access_profile
+    - calculate_budget_version
+    - complete_signature_conversion_job
+    - complete_signature_copy_delivery
+    - consume_inventory_reservation
+    - convert_crm_lead
+    - create_advanced_signature_document
+    - create_advanced_signature_envelope
+    - create_amendment
+    - create_budget
+    - create_budget_version
+    - create_contract_from_proposal
+    - create_crm_lead
+    - create_finance_entry_from_contract
+    - create_finance_entry_from_procurement_order
+    - create_inventory_asset
+    - create_inventory_item
+    - create_inventory_movement
+    - create_inventory_reservation
+    - create_inventory_warehouse
+    - create_modular_access_profile
+    - create_project_from_contract
+    - create_report_snapshot
+    - create_sac_ticket
+    - create_sandbox_signature_envelope
+    - create_schedule_baseline
+    - decide_budget_approval
+    - decide_daily_log
+    - decide_finance_approval
+    - decide_finance_measurement
+    - decide_procurement_approval
+    - effective_module_permissions
+    - expire_inventory_reservations
+    - fail_signature_conversion_job
+    - finalize_advanced_signature_envelope
+    - finalize_procurement_quote
+    - finalize_procurement_receipt
+    - freeze_advanced_signature_layout
+    - freeze_budget_version
+    - get_advanced_signing_context
+    - get_client_360
+    - get_client_portal_relationship
+    - get_crm_pipeline
+    - get_inventory_asset_detail
+    - get_inventory_dashboard
+    - get_inventory_item_detail
+    - get_inventory_movement_detail
+    - get_observability_events
+    - get_procurement_invitation_by_token
+    - get_sac_dashboard
+    - get_sac_ticket_detail
+    - import_procurement_receipt_to_inventory
+    - list_advanced_signer_fields
+    - lock_signature_conversion_job
+    - lock_signature_delivery_event
+    - mark_advanced_signer_complete
+    - mark_quality_response_submitted
+    - move_crm_lead_stage
+    - move_crm_opportunity_stage
+    - move_project_task
+    - open_procurement_rfq
+    - post_inventory_stocktake_adjustment
+    - protect_inventory_movement
+    - protect_inventory_stocktake
+    - publish_quality_form_version
+    - queue_signature_copy_delivery
+    - rate_sac_ticket
+    - record_advanced_signature_field_value
+    - record_crm_activity
+    - record_observability_diagnostic
+    - record_report_export
+    - refresh_finance_overdue_statuses
+    - register_finance_settlement
+    - register_finance_settlement_with_attachment
+    - release_inventory_reservation
+    - release_project_document_version
+    - release_proposal_version
+    - return_inventory_asset
+    - reverse_inventory_movement
+    - review_quality_response
+    - revoke_user_access_profile
+    - sandbox_signature_event
+    - select_procurement_quote
+    - set_organization_module_status
+    - set_project_module_capability_override
+    - set_user_module_capability_override
+    - start_inventory_stocktake
+    - submit_daily_log
+    - submit_finance_entry
+    - submit_finance_measurement
+    - submit_inventory_stocktake
+    - submit_procurement_request
+    - transition_sac_ticket

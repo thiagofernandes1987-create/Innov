@@ -3,6 +3,7 @@ import { createNextBudgetVersion } from "@/app/actions/budget-versions";
 import { SmartSearchBar } from "@/components/busca/smart-search-bar";
 import { requireOrganizationContext } from "@/lib/auth";
 import { budgetStatusLabels, formatCurrency, formatPercent, type BudgetStatus } from "@/lib/domain";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { singleRelation, type SupabaseRelation } from "@/lib/supabase/relations";
 
 type BudgetVersionSummary = {
@@ -56,6 +57,8 @@ export default async function BudgetsPage({
     `)
     .eq("organization_id", organizationId)
     .order("updated_at", { ascending: false });
+
+  if (error) reportDataAccessError("budgets.page.load", error);
 
   const normalizedQuery = String(query.q ?? "").trim().toLocaleLowerCase("pt-BR");
   const clientQuery = String(query.client ?? "").trim().toLocaleLowerCase("pt-BR");
@@ -134,7 +137,7 @@ export default async function BudgetsPage({
         ]}
       />
 
-      {error ? <div className="validation blocking" role="alert">{error.message}</div> : null}
+      {error ? <div className="validation blocking" role="alert">Não foi possível carregar os orçamentos.</div> : null}
 
       <section className="grid grid-kpi" aria-label="Indicadores de orçamento" style={{ marginTop: 18 }}>
         <article className="card kpi"><small>CARTEIRA FILTRADA</small><strong>{formatCurrency(total)}</strong></article>

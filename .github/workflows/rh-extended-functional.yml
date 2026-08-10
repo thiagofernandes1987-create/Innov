@@ -1,0 +1,113 @@
+name: RH Extended Functional
+
+on:
+  pull_request:
+    paths:
+      - "app/app/rh/**"
+      - "app/api/rh/**"
+      - "app/actions/rh-*.ts"
+      - "lib/rh/**"
+      - "supabase/migrations/*_rh_*.sql"
+      - "supabase/tests/rh/**"
+      - "tests/rh/**"
+      - "tests/e2e/rh-*.spec.ts"
+      - "scripts/run-rh-*.mjs"
+      - "scripts/seed-rh-browser-e2e.mjs"
+      - "scripts/verify-rh-browser-e2e.mjs"
+      - "scripts/cleanup-rh-browser-e2e.mjs"
+      - "docs/PROJETO-RH-EXECUCAO-STATUS-IMPLEMENTACAO.md"
+      - "docs/PROJETO-RH-EXECUCAO-BLOCOS-CRITICOS-2026-08-07.md"
+      - "tsconfig.rh.json"
+      - ".github/workflows/rh-extended-functional.yml"
+      - ".github/workflows/rh-browser-e2e.yml"
+      - ".github/workflows/rh-esocial-generation.yml"
+      - ".github/workflows/rh-esocial-restricted-homologation.yml"
+  push:
+    branches: ["feature/**"]
+    paths:
+      - "app/app/rh/**"
+      - "app/api/rh/**"
+      - "app/actions/rh-*.ts"
+      - "lib/rh/**"
+      - "supabase/migrations/*_rh_*.sql"
+      - "supabase/tests/rh/**"
+      - "tests/rh/**"
+      - "tests/e2e/rh-*.spec.ts"
+      - "scripts/run-rh-*.mjs"
+      - "scripts/seed-rh-browser-e2e.mjs"
+      - "scripts/verify-rh-browser-e2e.mjs"
+      - "scripts/cleanup-rh-browser-e2e.mjs"
+      - "docs/PROJETO-RH-EXECUCAO-STATUS-IMPLEMENTACAO.md"
+      - "docs/PROJETO-RH-EXECUCAO-BLOCOS-CRITICOS-2026-08-07.md"
+      - "tsconfig.rh.json"
+      - ".github/workflows/rh-extended-functional.yml"
+      - ".github/workflows/rh-browser-e2e.yml"
+      - ".github/workflows/rh-esocial-generation.yml"
+      - ".github/workflows/rh-esocial-restricted-homologation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-extended-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rh-extended:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      SIGNATURE_PROVIDER: sandbox
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Validate menu routes
+        run: pnpm validate:menus
+      - name: Validate migrations
+        run: pnpm validate:migrations
+      - name: Run RH database regression suite
+        run: pnpm test:db:rh
+      - name: Run RH dedicated database suites
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/run-rh-esocial-results-db-tests.mjs
+          node scripts/run-rh-government-db-tests.mjs
+          node scripts/run-rh-time-db-tests.mjs
+      - name: RH isolated backup and restore drill
+        run: node scripts/run-rh-backup-restore-drill.mjs
+      - name: RH isolated cutover and rollback rehearsal
+        run: node scripts/run-rh-cutover-rollback-rehearsal.mjs
+      - name: RH scoped typecheck
+        run: pnpm exec tsc --noEmit -p tsconfig.rh.json
+      - name: Lint RH actions, pages, APIs, integrations and test harnesses
+        run: pnpm exec eslint 'app/actions/rh-*.ts' app/app/rh app/api/rh lib/rh tests/rh 'tests/e2e/rh-*.spec.ts' scripts/run-rh-backup-restore-drill.mjs scripts/run-rh-cutover-rollback-rehearsal.mjs scripts/seed-rh-browser-e2e.mjs scripts/verify-rh-browser-e2e.mjs scripts/cleanup-rh-browser-e2e.mjs --max-warnings=0
+      # Os contratos XML/XSD/XMLSec do eSocial permanecem obrigatórios, mas são
+      # executados exclusivamente no workflow RH eSocial Generation. Duplicar o
+      # download do pacote oficial gov.br aqui introduzia falhas de rede sem
+      # aumentar a cobertura. Este gate fica responsável por banco, recovery,
+      # rehearsal, TypeScript e lint; ambos os workflows devem ficar verdes.
+      - name: Confirm dedicated eSocial gate is versioned
+        run: test -f .github/workflows/rh-esocial-generation.yml
+      - name: Upload RH recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: rh-recovery-evidence-${{ github.run_id }}
+          path: |
+            .evidence/rh/backup-restore-drill.json
+            .evidence/rh/cutover-rollback-rehearsal.json
+          if-no-files-found: warn
+          retention-days: 30

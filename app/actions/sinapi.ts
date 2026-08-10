@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { runSinapiAutomaticUpdate } from "@/lib/sinapi/automatic-update";
 
 const allowedRoles = ["SUPER_ADMIN", "DIRECAO", "ADMINISTRADOR", "ORCAMENTISTA", "FINANCEIRO"] as const;
@@ -30,12 +31,13 @@ export async function updateSinapiAutomatically(formData: FormData) {
   let result;
   try {
     result = await runSinapiAutomaticUpdate({ organizationId, region, taxRelief });
-  } catch (error) {
+  } catch (updateError) {
+    reportDataAccessError("sinapi.automatic-update", updateError instanceof Error ? updateError : undefined);
     automaticRedirect(
       region,
       taxRelief,
       "error",
-      error instanceof Error ? error.message : "Falha desconhecida na atualização automática do SINAPI."
+      "Não foi possível atualizar o SINAPI automaticamente. Tente novamente e, se o problema persistir, informe o horário ao administrador."
     );
   }
 
@@ -73,7 +75,8 @@ export async function addSinapiBudgetItem(formData: FormData) {
     .maybeSingle();
 
   if (versionError || !version) {
-    catalogError(versionError?.message ?? "Versão de orçamento não encontrada.");
+    reportDataAccessError("sinapi.load-budget-version", versionError);
+    catalogError("Versão de orçamento não encontrada ou indisponível.");
   }
   if (version.frozen_at) catalogError("A versão escolhida está congelada. Crie uma nova versão editável.");
 
@@ -85,6 +88,9 @@ export async function addSinapiBudgetItem(formData: FormData) {
     p_section_id: null
   });
 
-  if (error) catalogError(error.message);
+  if (error) {
+    reportDataAccessError("sinapi.add-reference-to-budget", error);
+    catalogError("Não foi possível adicionar a referência SINAPI ao orçamento.");
+  }
   redirect(`/app/orcamentos/${version.budget_id}`);
 }

@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,7 +100,10 @@ export async function POST(request: Request) {
       p_source_sha256: payload.sourceSha256.toLowerCase(),
       p_metadata: payload.metadata ?? {}
     });
-    if (error) return response(422, { status: "failed", code: "START_IMPORT", message: error.message });
+    if (error) {
+      reportDataAccessError("sinapi-import.start", error);
+      return response(422, { status: "failed", code: "START_IMPORT", message: "Não foi possível iniciar a importação SINAPI." });
+    }
     return response(201, { status: "running", batchId: data });
   }
 
@@ -108,7 +112,10 @@ export async function POST(request: Request) {
       p_batch_id: payload.batchId,
       p_rows: payload.rows
     });
-    if (error) return response(422, { status: "failed", code: "IMPORT_SINAPI_INPUTS", message: error.message });
+    if (error) {
+      reportDataAccessError("sinapi-import.inputs", error);
+      return response(422, { status: "failed", code: "IMPORT_SINAPI_INPUTS", message: "Não foi possível importar o lote de insumos SINAPI." });
+    }
     return response(200, { status: "imported", kind: payload.action, records: data });
   }
 
@@ -117,7 +124,10 @@ export async function POST(request: Request) {
       p_batch_id: payload.batchId,
       p_rows: payload.rows
     });
-    if (error) return response(422, { status: "failed", code: "IMPORT_SINAPI_COMPOSITIONS", message: error.message });
+    if (error) {
+      reportDataAccessError("sinapi-import.compositions", error);
+      return response(422, { status: "failed", code: "IMPORT_SINAPI_COMPOSITIONS", message: "Não foi possível importar o lote de composições SINAPI." });
+    }
     return response(200, { status: "imported", kind: payload.action, records: data });
   }
 
@@ -125,7 +135,10 @@ export async function POST(request: Request) {
     p_batch_id: payload.batchId,
     p_error_message: payload.errorMessage ?? null
   });
-  if (error) return response(422, { status: "failed", code: "FINISH_IMPORT", message: error.message });
+  if (error) {
+    reportDataAccessError("sinapi-import.finish", error);
+    return response(422, { status: "failed", code: "FINISH_IMPORT", message: "Não foi possível concluir a importação SINAPI." });
+  }
   return response(200, {
     status: data.status?.toLowerCase() ?? "completed",
     batchId: data.id,

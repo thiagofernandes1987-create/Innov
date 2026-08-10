@@ -16,6 +16,7 @@ import {
 import { moverCartao } from "@/app/actions/pipeline";
 import { BuscaDaBarra, useBusca } from "@/components/casca/busca-da-barra";
 import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
+import type { ValorDoCatalogo } from "@/lib/sugestoes/catalogo";
 import { SeletorDeFunil, type FunilDisponivel } from "./seletor-de-funil";
 import {
   BotaoNovoCartao,
@@ -55,6 +56,8 @@ type Props = {
   funis: FunilDisponivel[];
   funilAtual: FunilDisponivel;
   presets: { chave: string; rotulo: string }[];
+  /** Vocabulário de etapas da organização, para a coluna nova. */
+  sugestoesDeEtapa?: ValorDoCatalogo[];
 };
 
 type Visao = "kanban" | "lista" | "calendario" | "tabela" | "grafico" | "localizacao" | "atividades";
@@ -80,7 +83,8 @@ export function PipelineView({
   rotuloRegistro,
   funis,
   funilAtual,
-  presets
+  presets,
+  sugestoesDeEtapa = []
 }: Props) {
   const [visao, setVisao] = useState<Visao>("kanban");
   // O termo vem da busca da barra superior. Estado local aqui criaria dois
@@ -286,7 +290,7 @@ export function PipelineView({
               </div>
             </div>
           ))}
-          {podeEditar ? <NovaEtapa pipelineId={pipelineId} aoFalhar={setErro} /> : null}
+          {podeEditar ? <NovaEtapa pipelineId={pipelineId} sugestoesDeEtapa={sugestoesDeEtapa} aoFalhar={setErro} /> : null}
         </div>
       ) : visao === "lista" ? (
         <div className="pipeline-lista-envelope">

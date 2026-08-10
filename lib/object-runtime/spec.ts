@@ -88,6 +88,15 @@ export type ObjectFieldSpec = {
   /** Campo filtrável e ordenável: consome uma coluna-slot. */
   indexed?: boolean;
   options?: readonly string[];
+  /**
+   * Fora do formulário, e **não** apagado.
+   *
+   * Excluir o campo tornaria ilegível o que já foi registrado com ele: o
+   * registro guarda a versão com que nasceu, e essa versão declara o campo.
+   * Arquivado sai da tela de preenchimento, continua legível no histórico e
+   * devolve a coluna-slot que ocupava.
+   */
+  archived?: boolean;
 };
 
 export type ObjectSpec = {
@@ -154,7 +163,10 @@ export function allocateSlots(fields: readonly ObjectFieldSpec[]): SlotAllocatio
   const overflow: string[] = [];
 
   for (const field of fields) {
-    if (!field.indexed) continue;
+    // Arquivado devolve o slot: a versão publicada guarda a alocação dela, e
+    // segurar a coluna para sempre gastaria o orçamento com campo que ninguém
+    // preenche mais.
+    if (!field.indexed || field.archived) continue;
     const family = slotFamilyFor(field.type);
     if (!family) continue;
     if (used[family] >= SLOT_BUDGET[family]) {
@@ -166,6 +178,31 @@ export function allocateSlots(fields: readonly ObjectFieldSpec[]): SlotAllocatio
   }
 
   return { slots, overflow };
+}
+
+export type SlotUsage = Readonly<Record<SlotFamily, { used: number; budget: number }>>;
+
+/**
+ * Quanto do orçamento de campos filtráveis já foi gasto, por família.
+ *
+ * Existe para a tela poder dizer "3 de 4 campos de texto filtráveis" **antes**
+ * de o administrador declarar o quarto e o quinto. Descobrir o teto na hora de
+ * publicar, com trinta campos já digitados, é descobrir tarde.
+ */
+export function slotUsage(fields: readonly ObjectFieldSpec[]): SlotUsage {
+  const used: Record<SlotFamily, number> = { num: 0, txt: 0, dt: 0, bool: 0, ref: 0 };
+  for (const [key, slot] of Object.entries(allocateSlots(fields).slots)) {
+    void key;
+    const family = slot.split("_")[0] as SlotFamily;
+    used[family] += 1;
+  }
+  return {
+    num: { used: used.num, budget: SLOT_BUDGET.num },
+    txt: { used: used.txt, budget: SLOT_BUDGET.txt },
+    dt: { used: used.dt, budget: SLOT_BUDGET.dt },
+    bool: { used: used.bool, budget: SLOT_BUDGET.bool },
+    ref: { used: used.ref, budget: SLOT_BUDGET.ref }
+  };
 }
 
 /**
@@ -198,7 +235,11 @@ export function validateSpec(spec: ObjectSpec): string[] {
   }
 
   const fields = spec.fields ?? [];
-  if (fields.length === 0) errors.push("O objeto precisa de ao menos um campo.");
+  // Só os que ainda são preenchidos contam: publicar um formulário em que
+  // todos os campos estão arquivados é publicar nada.
+  if (fields.filter(field => !field?.archived).length === 0) {
+    errors.push("O objeto precisa de ao menos um campo.");
+  }
   if (fields.length > MAX_FIELDS) {
     errors.push(`O objeto declara ${fields.length} campos e o teto é ${MAX_FIELDS}.`);
   }
@@ -216,7 +257,16 @@ export function validateSpec(spec: ObjectSpec): string[] {
       errors.push(`Tipo desconhecido no campo "${field.key}": "${field.type}".`);
       continue;
     }
-    if ((field.type === "selecao" || field.type === "selecao_multipla") && !(field.options?.length)) {
+    if (field.archived && field.required) {
+      errors.push(
+        `O campo "${field.key}" está arquivado e obrigatório ao mesmo tempo: nenhum registro novo poderia ser salvo.`
+      );
+    }
+    if (
+      !field.archived &&
+      (field.type === "selecao" || field.type === "selecao_multipla") &&
+      !field.options?.length
+    ) {
       errors.push(`O campo "${field.key}" é de seleção e precisa declarar as opções.`);
     }
     if (field.indexed && !slotFamilyFor(field.type)) {

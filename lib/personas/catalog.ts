@@ -1,6 +1,6 @@
 export type PersonaId =
   | "P1" | "P2" | "P3" | "P4" | "P5" | "P6" | "P7" | "P8"
-  | "P9" | "P10" | "P11" | "P12" | "P13" | "P14" | "P15" | "P16";
+  | "P9" | "P10" | "P11" | "P12" | "P13" | "P14" | "P15" | "P16" | "P17";
 
 export type CompetenciaOperacional = {
   name: string;
@@ -38,7 +38,7 @@ export const PERSONAS_OPERACIONAIS = [
     role: "Vendedor / SDR",
     profession: "Executivo comercial de obras e móveis planejados",
     mission: "Qualificar demanda, manter próximo passo e transformar oportunidade em contrato defendível.",
-    modules: ["dashboard", "crm", "clientes", "propostas", "tarefas", "documentos", "relatorios"],
+    modules: ["dashboard", "crm", "clientes", "propostas", "tarefas", "documentos", "modelos", "relatorios"],
     competencies: [
       { name: "Qualificação", techniques: ["BANT", "SPIN", "critérios de aderência"], requiredData: ["origem", "necessidade", "orçamento", "autoridade", "prazo"] },
       { name: "Gestão de funil", techniques: ["probabilidade por etapa", "aging", "forecast"], requiredData: ["etapa", "valor", "probabilidade", "dias na etapa", "previsão de fechamento"] },
@@ -154,7 +154,7 @@ export const PERSONAS_OPERACIONAIS = [
     role: "Administrador",
     profession: "Administrador de sistemas e identidades",
     mission: "Manter acesso mínimo, segregação de função e continuidade operacional sem virar superusuário invisível.",
-    modules: ["dashboard", "administracao", "auditoria", "relatorios"],
+    modules: ["dashboard", "administracao", "auditoria", "modelos", "relatorios"],
     competencies: [
       { name: "Identidade e acesso", techniques: ["RBAC", "menor privilégio", "ciclo de vida"], requiredData: ["usuário", "papel", "organização", "vigência"] },
       { name: "Segregação de função", techniques: ["SoD", "matriz de conflito", "dupla aprovação"], requiredData: ["capacidade", "conflito", "alçada", "aprovador"] },
@@ -177,7 +177,7 @@ export const PERSONAS_OPERACIONAIS = [
     role: "Projetista",
     profession: "Projetista de móveis e detalhamento executivo",
     mission: "Entregar documentação fabricável, montável e compatibilizada com a condição real do local.",
-    modules: ["dashboard", "documentos", "obras", "tarefas", "qualidade", "relatorios"],
+    modules: ["dashboard", "documentos", "modelos", "obras", "tarefas", "qualidade", "relatorios"],
     competencies: [
       { name: "Modelagem e detalhamento", techniques: ["CAD/CAM", "cotas funcionais", "lista de peças"], requiredData: ["geometria", "material", "ferragem", "tolerância"] },
       { name: "Compatibilização", techniques: ["clash check", "interface disciplina", "DSM"], requiredData: ["arquitetura", "elétrica", "hidráulica", "dependências"] },
@@ -292,7 +292,7 @@ export const PERSONAS_OPERACIONAIS = [
     role: "Qualidade",
     profession: "Engenheiro ou técnico de qualidade de obras",
     mission: "Prevenir não conformidade, verificar requisitos e fechar causa raiz com eficácia comprovada.",
-    modules: ["dashboard", "qualidade", "diario", "documentos", "obras", "compras", "estoque", "tarefas", "relatorios"],
+    modules: ["dashboard", "qualidade", "diario", "documentos", "modelos", "obras", "compras", "estoque", "tarefas", "relatorios"],
     competencies: [
       { name: "Planejamento da qualidade", techniques: ["plano de inspeção", "FVS/FVM", "ponto de espera"], requiredData: ["requisito", "critério", "amostra", "responsável"] },
       { name: "Inspeção", techniques: ["checklist", "medição", "rastreabilidade"], requiredData: ["resultado", "instrumento", "evidência", "lote", "data"] },
@@ -338,7 +338,7 @@ export const PERSONAS_OPERACIONAIS = [
     role: "Contratos e documentos",
     profession: "Analista de contratos, documentos e assinaturas",
     mission: "Manter obrigação, versão, vigência, aprovação e evidência documental ligadas ao fato que autorizam.",
-    modules: ["dashboard", "propostas", "contratos", "aditivos", "assinaturas", "documentos", "clientes", "obras", "relatorios"],
+    modules: ["dashboard", "propostas", "contratos", "aditivos", "assinaturas", "documentos", "modelos", "clientes", "obras", "relatorios"],
     competencies: [
       { name: "Gestão contratual", techniques: ["obrigações", "marcos", "vigência"], requiredData: ["parte", "objeto", "valor", "prazo", "obrigação"] },
       { name: "Controle de mudanças", techniques: ["change log", "aditivo", "impacto"], requiredData: ["origem", "escopo", "prazo", "custo", "aprovação"] },
@@ -399,6 +399,34 @@ export const PERSONAS_OPERACIONAIS = [
         event: "audit.control_failure",
         notify: ["P6", "P13", "P4"],
         systemResponse: "Preserva evidência, bloqueia conflito de função e abre achado com causa, risco, dono e prazo monitorado."
+      }
+    }
+  },
+  {
+    // Persona do módulo `rh`, exigida pelo catálogo desde que o Projeto RH (PR #42)
+    // entrou no MODULE_REGISTRY. A regra do repositório é anterior à tela: aplicativo
+    // sem profissional declarado não tem quem responda pelo que ele decide — e folha
+    // de pagamento é o pior lugar para descobrir isso depois.
+    id: "P17",
+    role: "Departamento pessoal e folha",
+    profession: "Analista de departamento pessoal e folha de pagamento",
+    mission: "Manter vínculo, jornada e folha corretos na competência, com obrigação legal transmitida no prazo e recibo disponível ao trabalhador.",
+    modules: ["rh", "dashboard", "documentos", "financeiro", "relatorios"],
+    competencies: [
+      { name: "Cadastro e vínculo", techniques: ["admissão transacional", "versionamento de condição contratual", "múltiplos vínculos"], requiredData: ["pessoa", "matrícula", "cargo/CBO", "lotação tributária", "data de admissão"] },
+      { name: "Jornada e apuração", techniques: ["ponto append-only", "tratamento de marcação", "banco de horas"], requiredData: ["marcação", "escala", "afastamento", "feriado", "justificativa"] },
+      { name: "Folha e encargos", techniques: ["IRRF por faixa", "acumulados de múltiplos vínculos", "13º e rescisão", "folha-sombra"], requiredData: ["rubrica", "base de cálculo", "competência", "parâmetro legal vigente"] },
+      { name: "Obrigação digital", techniques: ["eSocial S-1200/S-2200/S-2299", "DCTFWeb", "FGTS Digital"], requiredData: ["evento", "prazo legal", "protocolo", "recibo", "ocorrência devolvida"] },
+      { name: "Evidência ao trabalhador", techniques: ["publicação controlada de holerite", "trilha de acesso"], requiredData: ["competência", "documento", "quem acessou", "quando"] }
+    ],
+    scenarios: {
+      optimistic: "A competência fecha com jornada tratada, folha conferida, eventos transmitidos no prazo e holerites publicados no Meu RH.",
+      normal: "O analista trata marcações pendentes, revisa diferenças da folha-sombra, reprocessa o que mudou e acompanha os retornos do eSocial.",
+      pessimistic: {
+        description: "O eSocial devolve ocorrência em evento já transmitido às vésperas do prazo, e a competência não pode ser fechada com o vínculo inconsistente.",
+        event: "rh.esocial_ocorrencia_bloqueante",
+        notify: ["P13", "P16", "P4"],
+        systemResponse: "Retém o fechamento, preserva o protocolo e a ocorrência devolvida, aponta o vínculo e o campo recusados, e registra prazo legal restante com responsável nomeado."
       }
     }
   }

@@ -100,7 +100,7 @@ declare
   profile_name text := btrim(p_name);
   instructions text := btrim(regexp_replace(p_system_instructions, '[[:cntrl:]]', ' ', 'g'));
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',p_project_id,'manage') then
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',p_project_id,'administer') then
     raise exception 'BOT_FORBIDDEN';
   end if;
   if length(profile_name) < 3 then raise exception 'BOT_NAME_INVALID'; end if;
@@ -162,7 +162,7 @@ set search_path=pg_catalog,public
 as $$
 declare result public.channel_ai_budget_daily;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then
     raise exception 'AI_BUDGET_FORBIDDEN';
   end if;
   if p_maximum_cost_micros < 0 or p_maximum_cost_micros > 100000000000 then

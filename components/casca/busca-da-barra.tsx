@@ -31,7 +31,14 @@ export function useBusca(): string {
 }
 
 /** Telas que sabem consumir a busca. Fora daqui o campo não aparece. */
-const TELAS_COM_BUSCA = ["/app/pipeline"];
+// Onde a busca da barra tem quem a consuma.
+//
+// `/app/crm` entrou porque o funil passou a ser a tela inicial do módulo: com
+// só `/app/pipeline` na lista, mover o funil DESLIGOU a busca da tela mais
+// usada do CRM, e o campo sumiu sem erro nenhum. Lista de rota escrita à mão é
+// exatamente o tipo de acoplamento que a VACINA-014 descreve — ela envelhece
+// em silêncio quando a rota muda.
+const TELAS_COM_BUSCA = ["/app/pipeline", "/app/crm"];
 
 function telaBusca(caminho: string): boolean {
   return TELAS_COM_BUSCA.some(prefixo => caminho.startsWith(prefixo));

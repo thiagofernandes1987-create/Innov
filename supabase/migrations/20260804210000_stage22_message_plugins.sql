@@ -87,7 +87,7 @@ set search_path=pg_catalog,public
 as $$
 declare result public.channel_message_plugin_policies;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then
     raise exception 'PLUGIN_FORBIDDEN';
   end if;
   if p_plugin_id='CONSENT' and not p_enabled then raise exception 'CONSENT_PLUGIN_REQUIRED'; end if;
@@ -127,7 +127,7 @@ set search_path=pg_catalog,public
 as $$
 declare result public.channel_message_plugin_decisions;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then
     raise exception 'PLUGIN_FORBIDDEN';
   end if;
   insert into public.channel_message_plugin_decisions(

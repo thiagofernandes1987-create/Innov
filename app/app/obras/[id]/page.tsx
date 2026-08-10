@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { releaseProjectToClient } from "@/app/actions/projects";
 import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
+import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
 import { formatDate, formatPercent, statusBadge } from "@/lib/stage12";
 import { singleRelation } from "@/lib/supabase/relations";
 
@@ -19,7 +20,10 @@ export default async function ProjectOverviewPage({
   const [projectResult, tasksResult, milestonesResult, logsResult, snapshotsResult, documentsResult] = await Promise.all([
     supabase
       .from("projects")
-      .select("id,code,name,status,description,address_line,city,state,planned_start,planned_end,actual_start,actual_end,progress,client_released_at,clients(legal_name,trade_name),contracts(code,status,consolidated_value)")
+      // Chave nomeada de propósito: há dois caminhos entre obra e contrato
+      // (`projects.contract_id` e `contracts.project_id`) e o PostgREST não
+      // escolhe sozinho — devolve PGRST201 e a obra inteira some.
+      .select("id,code,name,status,description,address_line,city,state,planned_start,planned_end,actual_start,actual_end,progress,client_released_at,clients(legal_name,trade_name),contracts!projects_contract_id_fkey(code,status,consolidated_value)")
       .eq("id", id)
       .eq("organization_id", organizationId)
       .maybeSingle(),
@@ -30,6 +34,19 @@ export default async function ProjectOverviewPage({
     supabase.from("project_documents").select("id,status,client_visible").eq("project_id", id)
   ]);
 
+  // Falha de carga não é obra inexistente. Tratar as duas como 404 foi o que
+  // manteve o PGRST201 acima invisível: a tela dizia "não existe" para uma obra
+  // que estava no banco, e ninguém foi procurar erro de consulta.
+  reportDataAccessError("project-overview.project", projectResult.error);
+  if (projectResult.error) {
+    return (
+      <main className="content">
+        <ProjectNav projectId={id} />
+        <h1>Obra</h1>
+        <div className="validation blocking" role="alert">{DATA_LOAD_ERROR_MESSAGE}</div>
+      </main>
+    );
+  }
   if (!projectResult.data) notFound();
   const project = {
     ...projectResult.data,

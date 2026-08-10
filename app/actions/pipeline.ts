@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { requireOrganizationContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { ehTipoAtividade } from "@/lib/pipeline/atividades";
 import { checarCamposBR } from "@/lib/validacao/formulario";
 import { CODIGOS_DATA, type CodigoData } from "@/lib/pipeline/datas";
 import { TRILHAS, type Trilha } from "@/lib/pipeline/domain";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 
 // Escrita do pipeline.
 //
@@ -188,38 +190,6 @@ export async function definirPrioridade(cardId: string, prioridade: number): Pro
 }
 
 /**
- * Instala uma trilha a partir de um preset.
- *
- * A permissão é conferida dentro da RPC, no banco: a mesma regra vale para
- * qualquer caminho que chegue lá, inclusive um que ainda não existe.
- */
-export async function instalarTrilha(preset: string, nome?: string): Promise<ResultadoAcao> {
-  const { supabase, organizationId } = await requireOrganizationContext();
-
-  const { error } = await supabase.rpc("pipeline_criar_do_preset", {
-    p_organization_id: organizationId,
-    p_preset: preset,
-    p_nome: nome?.trim() || null,
-    p_key: null,
-    p_padrao: true
-  });
-
-  if (error) {
-    if (/permissão/i.test(error.message)) return falha("Sem permissão de administração para criar a trilha.");
-    if (/desconhecido/i.test(error.message)) return falha("Modelo de trilha desconhecido.");
-    if (/duplicate key|unique/i.test(error.message)) return falha("Já existe uma trilha padrão desse tipo.");
-    return falha("Não foi possível criar a trilha.");
-  }
-
-  for (const trilha of TRILHAS) revalidar(trilha);
-  return { ok: true };
-}
-
-export async function trilhaEhValida(valor: string): Promise<boolean> {
-  return trilhaValida(valor);
-}
-
-/**
  * Seguir ou deixar de seguir o cartão.
  *
  * Seguir o que já se pode ler não aumenta acesso nenhum, então qualquer um que
@@ -336,10 +306,15 @@ export async function criarEtapa(pipelineId: string, nome: string): Promise<Resu
   });
 
   if (error) {
-    if (/duplicate key|unique/i.test(error.message)) return falha("Já existe uma etapa com esse nome.");
-    return falha("Não foi possível criar a etapa. Talvez você não tenha permissão de edição nesta trilha.");
+    reportDataAccessError("pipeline.create-stage", error);
+    if (error.code === "23505") return falha("Já existe uma etapa com esse nome.");
+    if (error.code === "42501") return falha("Sem permissão para criar etapa nesta trilha.");
+    return falha("Não foi possível criar a etapa.");
   }
 
+  // Depois de gravar, e só depois: nome que a pessoa digitou e abandonou não é
+  // vocabulário da empresa, e entraria na lista de todo mundo.
+  await registrarValorUsado(supabase, pipeline.organization_id, ESCOPOS.etapaDoFunil, titulo);
   revalidar(pipeline.trilha as Trilha);
   return { ok: true };
 }
@@ -430,7 +405,8 @@ export async function excluirEtapa(stageId: string): Promise<ResultadoAcao> {
 
   const { error } = await supabase.from("pipeline_stages").delete().eq("id", stageId);
   if (error) {
-    if (/foreign key|violates/i.test(error.message)) {
+    reportDataAccessError("pipeline.delete-stage", error);
+    if (error.code === "23503") {
       return falha("Esta etapa ainda tem registros ligados a ela. Mova-os antes de excluir.");
     }
     return falha("Não foi possível excluir a etapa.");
@@ -520,7 +496,8 @@ export async function criarCartao(
   });
 
   if (error) {
-    if (/pipeline_cards_origem_coerente/i.test(error.message)) {
+    reportDataAccessError("pipeline.create-card", error);
+    if (error.code === "23514") {
       return falha("O registro escolhido não serve para esta trilha.");
     }
     return falha("Não foi possível criar o cartão.");
@@ -682,9 +659,9 @@ export async function criarFunil(
       p_padrao: false
     });
     if (error) {
-      if (/permissão/i.test(error.message)) return falha("Sem permissão para criar funil nesta trilha.");
-      if (/desconhecido/i.test(error.message)) return falha("Modelo de funil desconhecido.");
-      if (/duplicate key|unique/i.test(error.message)) return falha("Já existe um funil com esse nome.");
+      reportDataAccessError("pipeline.create-from-preset", error);
+      if (error.code === "42501") return falha("Sem permissão para criar funil nesta trilha.");
+      if (error.code === "23505") return falha("Já existe um funil com esse nome.");
       return falha("Não foi possível criar o funil.");
     }
     revalidar(trilha);
@@ -704,8 +681,9 @@ export async function criarFunil(
   });
 
   if (error) {
-    if (/duplicate key|unique/i.test(error.message)) return falha("Já existe um funil com esse nome.");
-    if (/row-level security|policy/i.test(error.message)) return falha("Sem permissão para criar funil nesta trilha.");
+    reportDataAccessError("pipeline.create-empty", error);
+    if (error.code === "23505") return falha("Já existe um funil com esse nome.");
+    if (error.code === "42501") return falha("Sem permissão para criar funil nesta trilha.");
     return falha("Não foi possível criar o funil.");
   }
 
@@ -823,7 +801,8 @@ export async function excluirFunil(pipelineId: string): Promise<ResultadoAcao> {
 
   const { error } = await supabase.from("pipelines").delete().eq("id", pipelineId);
   if (error) {
-    if (/foreign key|violates/i.test(error.message)) {
+    reportDataAccessError("pipeline.delete", error);
+    if (error.code === "23503") {
       return falha("Este funil ainda tem registros ligados a ele. Arquive em vez de excluir.");
     }
     return falha("Não foi possível excluir o funil.");
@@ -879,7 +858,8 @@ async function criarCartaoNoFunil(
   });
 
   if (error) {
-    if (/pipeline_cards_origem_coerente/i.test(error.message)) {
+    reportDataAccessError("pipeline.link-created-record", error);
+    if (error.code === "23514") {
       return falha("O registro criado não serve para esta trilha.");
     }
     return falha("O registro foi criado, mas o cartão não. Vincule pelo `+` da coluna.");
@@ -941,11 +921,10 @@ export async function criarClienteComCartao(
     .single();
 
   if (error || !cliente) {
-    if (/duplicate key|unique/i.test(error?.message ?? "")) return falha("Já existe um cliente com esse documento.");
-    if (/row-level security|policy/i.test(error?.message ?? "")) return falha("Sem permissão para cadastrar cliente.");
-    // Violação de CHECK chegando como "não foi possível" é o defeito D2 de
-    // novo: o usuário fica sem saber qual campo recusar.
-    if (/check constraint/i.test(error?.message ?? "")) {
+    reportDataAccessError("pipeline.create-client", error);
+    if (error?.code === "23505") return falha("Já existe um cliente com esse documento.");
+    if (error?.code === "42501") return falha("Sem permissão para cadastrar cliente.");
+    if (error?.code === "23514") {
       return falha("Um dos valores não é aceito pelo cadastro de clientes. Revise tipo, documento e canal.");
     }
     return falha("Não foi possível cadastrar o cliente.");
@@ -1003,8 +982,9 @@ export async function criarProjetoComCartao(
     .single();
 
   if (error || !projeto) {
-    if (/duplicate key|unique/i.test(error?.message ?? "")) return falha(`Já existe um projeto com o código ${code}.`);
-    if (/row-level security|policy/i.test(error?.message ?? "")) return falha("Sem permissão para cadastrar projeto.");
+    reportDataAccessError("pipeline.create-project", error);
+    if (error?.code === "23505") return falha(`Já existe um projeto com o código ${code}.`);
+    if (error?.code === "42501") return falha("Sem permissão para cadastrar projeto.");
     return falha("Não foi possível cadastrar o projeto.");
   }
 
@@ -1061,7 +1041,8 @@ export async function criarChamadoComCartao(
   });
 
   if (error) {
-    if (/permissão|permission|policy/i.test(error.message)) return falha("Sem permissão para abrir chamado.");
+    reportDataAccessError("pipeline.create-sac-ticket", error);
+    if (error.code === "42501") return falha("Sem permissão para abrir chamado.");
     return falha("Não foi possível abrir o chamado.");
   }
 

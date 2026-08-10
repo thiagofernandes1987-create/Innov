@@ -1,0 +1,78 @@
+name: RH Browser E2E
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-browser-e2e-homologation
+  cancel-in-progress: false
+
+jobs:
+  browser-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: rh-homologation
+    env:
+      RH_E2E_BASE_URL: ${{ vars.RH_E2E_BASE_URL }}
+      RH_E2E_EMAIL: ${{ secrets.RH_E2E_EMAIL }}
+      RH_E2E_PASSWORD: ${{ secrets.RH_E2E_PASSWORD }}
+      RH_E2E_ORGANIZATION_ID: ${{ vars.RH_E2E_ORGANIZATION_ID }}
+      RH_E2E_ESCALATE_TEST_USER: ${{ vars.RH_E2E_ESCALATE_TEST_USER || 'false' }}
+      RH_E2E_SEED_FILE: test-results/rh-e2e-seed.json
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable pnpm and install browser
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+          pnpm install --no-frozen-lockfile --reporter=append-only
+          pnpm exec playwright install --with-deps chromium
+      - name: Validate homologation contract
+        shell: bash
+        run: |
+          missing=()
+          test -n "$RH_E2E_BASE_URL" || missing+=(RH_E2E_BASE_URL)
+          test -n "$RH_E2E_EMAIL" || missing+=(RH_E2E_EMAIL)
+          test -n "$RH_E2E_PASSWORD" || missing+=(RH_E2E_PASSWORD)
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || missing+=(NEXT_PUBLIC_SUPABASE_URL)
+          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || missing+=(NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || missing+=(SUPABASE_SERVICE_ROLE_KEY)
+          if [ ${#missing[@]} -gt 0 ]; then
+            printf 'Pré-requisitos ausentes no environment rh-homologation: %s\n' "${missing[*]}" >&2
+            exit 1
+          fi
+          case "$RH_E2E_BASE_URL" in
+            https://*) ;;
+            *) echo "Homologação deve usar HTTPS" >&2; exit 1;;
+          esac
+      - name: Seed isolated RH transaction
+        run: node scripts/seed-rh-browser-e2e.mjs
+      - name: Run professional navigation smoke
+        run: pnpm exec playwright test tests/e2e/rh-professional-smoke.spec.ts --reporter=line
+      - name: Run transactional payroll and Meu RH journey
+        run: pnpm exec playwright test tests/e2e/rh-professional-transaction.spec.ts --reporter=line,html
+      - name: Verify persisted transaction
+        run: node scripts/verify-rh-browser-e2e.mjs
+      - name: Cleanup isolated transaction and restore test role
+        if: always()
+        run: node scripts/cleanup-rh-browser-e2e.mjs
+      - name: Upload browser, database and cleanup evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: rh-browser-e2e-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 14

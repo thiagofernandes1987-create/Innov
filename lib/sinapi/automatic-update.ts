@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import {
   selectLatestSinapiXlsxFile,
   parseSinapiBaseDate,
@@ -9,11 +10,19 @@ import {
   type SinapiOfficialSource
 } from "./source-catalog";
 import {
-  parseSinapiZipPackage,
   type ParsedSinapiPackage,
   type SinapiCompositionImportRow,
   type SinapiInputImportRow
 } from "./xlsx-parser";
+// **Um leitor só, e um módulo só.** `parseSinapiZipPackage` procura um arquivo
+// por UF e por regime dentro do pacote, formato que a CAIXA não publica mais —
+// era ele que respondia "somente 0 insumos válidos" ao botão da tela. O leitor
+// do formato atual é `parseSinapiOfficialReferencePackage`.
+//
+// `automatic-update-v2.ts` existia porque a sonda foi corrigida sem o botão;
+// os dois módulos divergiram e falhavam em pontos diferentes pelo mesmo motivo.
+// Ele foi removido: botão e sonda entram por aqui. T-37.1 e T-37.7.
+import { parseSinapiOfficialReferencePackage } from "./official-reference-parser";
 
 const CAIXA_BASE_URL = "https://www.caixa.gov.br";
 const DOWNLOADS_PAGE = `${CAIXA_BASE_URL}/site/Paginas/downloads.aspx`;
@@ -324,7 +333,7 @@ async function loadOfficialPackage(region: string, taxRelief: boolean): Promise<
   const source = await discoverLatestSinapiXlsxSource();
   const { buffer, finalUrl } = await downloadOfficialPackage(source);
   const sourceSha256 = createHash("sha256").update(buffer).digest("hex");
-  const parsed = parseSinapiZipPackage(buffer, { sourceUrl: finalUrl, region, taxRelief });
+  const parsed = parseSinapiOfficialReferencePackage(buffer, { sourceUrl: finalUrl, region, taxRelief });
   validateBaseDate(parsed.baseDate, source.baseDate);
   return { source, finalUrl, buffer, sourceSha256, parsed };
 }
@@ -363,7 +372,7 @@ async function importInputs(
       p_batch_id: batchId,
       p_rows: chunk
     });
-    if (error) throw new Error(`Falha ao importar insumos SINAPI: ${error.message}`);
+    if (error) { reportDataAccessError("sinapi.automatic.inputs", error); throw new Error("SINAPI_INPUT_IMPORT_FAILED"); }
     imported += Number(data ?? 0);
   }
   return imported;
@@ -380,7 +389,7 @@ async function importCompositions(
       p_batch_id: batchId,
       p_rows: chunk
     });
-    if (error) throw new Error(`Falha ao importar composições SINAPI: ${error.message}`);
+    if (error) { reportDataAccessError("sinapi.automatic.compositions", error); throw new Error("SINAPI_COMPOSITION_IMPORT_FAILED"); }
     imported += Number(data ?? 0);
   }
   return imported;
@@ -435,7 +444,7 @@ export async function runSinapiAutomaticUpdate(input: {
     .order("base_date", { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (latestError) throw new Error(`Falha ao consultar o estado atual do SINAPI: ${latestError.message}`);
+  if (latestError) { reportDataAccessError("sinapi.automatic.latest-batch", latestError); throw new Error("SINAPI_LATEST_BATCH_FAILED"); }
 
   const context = {
     finalUrl,
@@ -463,7 +472,7 @@ export async function runSinapiAutomaticUpdate(input: {
       p_source_sha256: sourceSha256,
       p_metadata: {
         automatic: true,
-        parserVersion: "5",
+        parserVersion: "6-official-reference",
         sourceFileName: source.fileName,
         sourceModifiedAt: source.modifiedAt,
         sourceDescription: source.description,
@@ -471,10 +480,15 @@ export async function runSinapiAutomaticUpdate(input: {
         sourceRectification: source.isRectification,
         downloadedBytes: buffer.length,
         xlsxFiles: parsed.xlsxFiles,
-        worksheets: parsed.worksheets
+        worksheets: parsed.worksheets,
+        // Quantos itens analíticos vieram junto. Zero aqui significa composição
+        // sem composição: o custo total entra, o "do que é feito" não — que era
+        // exatamente o furo da T-37.1.
+        analyticalItems: parsed.compositions.reduce((soma, item) => soma + item.items.length, 0)
       }
     });
-    if (startError || !startedBatchId) throw new Error(startError?.message ?? "O lote SINAPI não foi iniciado.");
+    if (startError) { reportDataAccessError("sinapi.automatic.start-batch", startError); throw new Error("SINAPI_START_BATCH_FAILED"); }
+    if (!startedBatchId) throw new Error("SINAPI_START_BATCH_EMPTY");
     batchId = String(startedBatchId);
 
     const { data: claimedBatch, error: claimedError } = await supabase
@@ -482,7 +496,7 @@ export async function runSinapiAutomaticUpdate(input: {
       .select("id, status, imported_inputs, imported_compositions, rejected_records")
       .eq("id", batchId)
       .single();
-    if (claimedError) throw new Error(`Falha ao confirmar o lote SINAPI: ${claimedError.message}`);
+    if (claimedError) { reportDataAccessError("sinapi.automatic.claim-batch", claimedError); throw new Error("SINAPI_CLAIM_BATCH_FAILED"); }
     if (claimedBatch.status === "COMPLETED") {
       return {
         status: "already_current",
@@ -506,7 +520,8 @@ export async function runSinapiAutomaticUpdate(input: {
       p_batch_id: batchId,
       p_error_message: null
     });
-    if (finishError || !finished) throw new Error(finishError?.message ?? "O lote SINAPI não foi finalizado.");
+    if (finishError) { reportDataAccessError("sinapi.automatic.finish-batch", finishError); throw new Error("SINAPI_FINISH_BATCH_FAILED"); }
+    if (!finished) throw new Error("SINAPI_FINISH_BATCH_EMPTY");
 
     return {
       status: "updated",
@@ -525,10 +540,11 @@ export async function runSinapiAutomaticUpdate(input: {
   } catch (error) {
     if (batchId) {
       try {
-        await supabase.rpc("finish_sinapi_import", {
+        const { error: failureFinishError } = await supabase.rpc("finish_sinapi_import", {
           p_batch_id: batchId,
-          p_error_message: error instanceof Error ? error.message : "Falha desconhecida na atualização automática."
+          p_error_message: "SINAPI_IMPORT_FAILED"
         });
+        if (failureFinishError) reportDataAccessError("sinapi.automatic.fail-batch", failureFinishError);
       } catch {
         // O erro original permanece a evidência principal da execução.
       }

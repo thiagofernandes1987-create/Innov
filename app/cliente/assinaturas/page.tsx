@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireClientContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 
 function dateTime(value:string|null){return value?new Intl.DateTimeFormat("pt-BR",{dateStyle:"medium",timeStyle:"short"}).format(new Date(value)):"—";}
 function relation<T>(value:T|T[]|null|undefined){return Array.isArray(value)?value[0]??null:value??null;}
@@ -13,13 +14,14 @@ export default async function ClientSignaturesPage(){
     signature_signers(id,name,legal_name,email,role_label,signing_order,status,viewed_at,signed_at,copy_sent_at),
     signature_document_versions!signature_envelopes_document_version_id_fkey(
       id,version_number,final_pdf_sha256,audit_artifact_sha256,client_released_at,
-      signature_documents(id,title,category,status,projects(code,name))
+      signature_documents!signature_document_versions_document_id_fkey(id,title,category,status,projects(code,name))
     )
   `).order("created_at",{ascending:false});
+  if(error)reportDataAccessError("client-signatures.page.load",error);
 
   return <main className="content">
     <div className="page-head"><div><span className="badge">ASSINATURAS</span><h1>Documentos assinados</h1><p className="muted">Envelopes vinculados aos seus documentos e cópias liberadas pela Innovar.</p></div></div>
-    {error&&<div className="validation blocking" role="alert">{error.message}</div>}
+    {error&&<div className="validation blocking" role="alert">Não foi possível carregar as assinaturas.</div>}
     <section className="grid">
       {(data??[]).map(envelope=>{
         const version=relation(envelope.signature_document_versions);

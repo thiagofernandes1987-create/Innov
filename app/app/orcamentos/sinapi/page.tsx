@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { addSinapiBudgetItem, updateSinapiAutomatically } from "@/app/actions/sinapi";
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 
 export const maxDuration = 300;
 
@@ -40,7 +42,6 @@ type SinapiBatch = {
   imported_compositions: number | string;
   rejected_records: number | string;
   source_url: string;
-  error_message: string | null;
   started_at: string;
   finished_at: string | null;
 };
@@ -95,7 +96,7 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
       .order("updated_at", { ascending: false }),
     supabase
       .from("sinapi_import_batches")
-      .select("id, region, base_date, tax_relief, status, imported_inputs, imported_compositions, rejected_records, source_url, error_message, started_at, finished_at")
+      .select("id, region, base_date, tax_relief, status, imported_inputs, imported_compositions, rejected_records, source_url, started_at, finished_at")
       .eq("organization_id", organizationId)
       .order("started_at", { ascending: false })
   ]);
@@ -141,6 +142,7 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
       })
     : { data: [], error: null };
 
+  if (searchError) reportDataAccessError("sinapi.catalog.search", searchError);
   const rows = (references ?? []) as SinapiReference[];
   const currentBatch = availableBatches.find(batch => batch.base_date === selectedBaseDate);
   const latestAttempt = batches.find(batch => batch.region === region && Boolean(batch.tax_relief) === taxRelief);
@@ -167,11 +169,15 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
 
       {query.success ? <div className="validation success" role="status">{query.success}</div> : null}
       {query.error ? <div className="validation blocking" role="alert">{query.error}</div> : null}
-      {searchError ? <div className="validation blocking" role="alert">{searchError.message}</div> : null}
+      {searchError ? <div className="validation blocking" role="alert">Não foi possível consultar o catálogo SINAPI.</div> : null}
 
       <section className="card card-pad">
         <form method="get" className="grid">
-          <div className="grid" style={{ gridTemplateColumns: "minmax(220px,2fr) repeat(4,minmax(130px,1fr))" }}>
+          {/* Era `minmax(220px,2fr) repeat(4,minmax(130px,1fr))`: 740px de
+              largura mínima, medidos, que faziam a página inteira rolar de
+              lado em 390px. É a VACINA-044 na trilha explícita — pista que não
+              encolhe abaixo do conteúdo. */}
+          <div className="grid sinapi-filtros">
             <label>
               Código ou descrição
               <input name="q" defaultValue={search} placeholder="Ex.: alvenaria, cimento ou 88264" />
@@ -225,8 +231,8 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
               {Number(latestAttempt.imported_inputs).toLocaleString("pt-BR")} insumos · {Number(latestAttempt.imported_compositions).toLocaleString("pt-BR")} composições
             </div>
           </div>
-          {latestAttempt.error_message ? (
-            <div className="validation blocking" style={{ marginTop: 14 }}>{latestAttempt.error_message}</div>
+          {latestAttempt.status === "FAILED" ? (
+            <div className="validation blocking" style={{ marginTop: 14 }}>A última atualização SINAPI falhou. Consulte os registros técnicos para diagnóstico.</div>
           ) : null}
         </section>
       ) : null}
@@ -273,7 +279,18 @@ export default async function SinapiCatalogPage({ searchParams }: SinapiPageProp
                   </td>
                   <td>{reference.unit}</td>
                   <td className="mono">{formatCurrency(Number(reference.unit_cost))}</td>
-                  <td className="mono">{reference.kind === "COMPOSITION" ? Number(reference.component_count).toLocaleString("pt-BR") : "—"}</td>
+                  <td className="mono">
+                    {reference.kind === "COMPOSITION" ? (
+                      // Um clique da lista para a memória de cálculo (T-37.10).
+                      // A contagem já era o número que o orçamentista olhava
+                      // para decidir se valia abrir; só faltava poder abrir.
+                      <Link className="link-de-celula" href={`/app/orcamentos/sinapi/composicao/${reference.reference_id}`}>
+                        {Number(reference.component_count).toLocaleString("pt-BR")} itens
+                      </Link>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                   <td>
                     <form action={addSinapiBudgetItem} className="grid" style={{ minWidth: 260 }}>
                       <input type="hidden" name="kind" value={reference.kind} />

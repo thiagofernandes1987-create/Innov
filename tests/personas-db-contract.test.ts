@@ -12,7 +12,17 @@ const CLIENT_ORIGIN_MIGRATION =
 describe("contrato de personas no banco", () => {
   it("mantém os eventos pessimistas e destinatários no catálogo SQL", () => {
     expect(fs.existsSync(MIGRATION)).toBe(true);
-    const sql = fs.readFileSync(MIGRATION, "utf8");
+
+    // O contrato é "o catálogo SQL declara o evento", não "este arquivo declara".
+    // A distinção passou a importar quando a P17 (departamento pessoal) entrou:
+    // a migration da S-30 já está **aplicada**, e migration aplicada é imutável —
+    // editá-la produziria um "aplicado divergente do arquivo", que é exatamente o
+    // que o `validate:migrations-applied` existe para reprovar. Persona nova entra
+    // por migration nova, e é o conjunto delas que precisa satisfazer o contrato.
+    const sql = fs.readdirSync("supabase/migrations")
+      .filter(nome => nome.endsWith(".sql"))
+      .map(nome => fs.readFileSync(`supabase/migrations/${nome}`, "utf8"))
+      .join("\n");
 
     for (const persona of PERSONAS_OPERACIONAIS) {
       expect(sql, persona.id).toContain(persona.scenarios.pessimistic.event);

@@ -1,5 +1,7 @@
 "use server";
 
+import { mensagemDeFalha } from "@/lib/errors/data-access";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
@@ -22,8 +24,8 @@ function isRedirectError(error: unknown) {
 }
 
 function publicMessage(error: unknown) {
-  if (error instanceof MessagePluginPolicyError) return error.message;
-  const message = error instanceof Error ? error.message : String(error ?? "");
+  if (error instanceof MessagePluginPolicyError) return mensagemDeFalha("messaging-plugin-policy.publicMessage", error);
+  const message = error instanceof Error ? mensagemDeFalha("messaging-plugin-policy.publicMessage", error) : String(error ?? "");
   if (message.includes("MANDATORY_PLUGIN_REQUIRED")) return "Este plugin é obrigatório e não pode ser desabilitado.";
   if (message.includes("PLUGIN_FORBIDDEN")) return "Você não possui permissão para alterar os plugins.";
   if (message.includes("PLUGIN_CONFIGURATION_SECRET_DETECTED")) return "A configuração contém dado sensível não permitido.";
@@ -46,7 +48,7 @@ export async function setCanonicalMessagingPluginPolicy(data: FormData) {
       p_feature_flag: normalized.featureFlag,
       p_configuration: {}
     });
-    if (error) throw new Error(`${error.code ?? "PLUGIN_POLICY_FAILED"}:${error.message}`);
+    if (error) throw new Error(`${error.code ?? "PLUGIN_POLICY_FAILED"}:${mensagemDeFalha("messaging-plugin-policy.setCanonicalMessagingPluginPolicy", error)}`);
     revalidatePath(path);
     redirect(`${path}?success=${encodeURIComponent(`Política ${normalized.pluginId} atualizada.`)}`);
   } catch (error) {

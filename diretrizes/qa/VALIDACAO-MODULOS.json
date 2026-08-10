@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "repository": "thiagofernandes1987-create/Innov",
-  "branch": "fix/module-validation-loop-20260730",
+  "branch": "feature/projeto-rh-especificacao-funcional",
   "issue": 32,
-  "updatedAt": "2026-07-30T11:20:00Z",
+  "updatedAt": "2026-08-09T12:00:00Z",
   "allowedStatuses": ["pendente", "em_correcao", "aguardando_preview", "aguardando_captura", "reprovado", "aprovado"],
   "requiredViewports": ["375px", "768px", "1280px"],
   "requiredThemes": ["claro", "escuro"],
@@ -116,6 +116,14 @@
       "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
     },
     {
+      "modulo": "modelos", "nome": "Modelos e Documentações", "rotaPrincipal": "/app/modelos", "personaPrincipal": "administrador_documental",
+      "fluxoPrincipal": "consultar acervo compartilhado, importar ou editar modelo, publicar versão e disponibilizar por aplicativo",
+      "status": "aguardando_preview", "iteracoes": 1,
+      "problemasAbertos": ["falta captura autenticada nos três viewports e temas exigidos pelo protocolo modular"],
+      "problemasResolvidos": ["aplicativo e acervo compartilhado possuem rota própria e contrato canônico"],
+      "criteriosAtendidos": ["fluxo_funcional"], "capturasAprovadas": [], "logs": null, "vacinas": ["VACINA-050"]
+    },
+    {
       "modulo": "qualidade", "nome": "Qualidade", "rotaPrincipal": "/app/qualidade", "personaPrincipal": "qualidade",
       "fluxoPrincipal": "preencher inspeção, registrar não conformidade, anexar evidência e encerrar ação",
       "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
@@ -139,6 +147,31 @@
       "modulo": "sac", "nome": "Pós-venda e SAC", "rotaPrincipal": "/app/ocorrencias", "personaPrincipal": "atendimento",
       "fluxoPrincipal": "abrir chamado, responder, anexar evidência, atribuir, transicionar e avaliar",
       "status": "pendente", "iteracoes": 0, "problemasAbertos": [], "problemasResolvidos": [], "criteriosAtendidos": [], "capturasAprovadas": [], "logs": null, "vacinas": []
+    },
+    {
+      "modulo": "whatsapp", "nome": "WhatsApp e Atendimento", "rotaPrincipal": "/app/whatsapp", "personaPrincipal": "atendimento",
+      "fluxoPrincipal": "abrir caixa compartilhada, resolver contato e contexto, enviar mensagem permitida e acompanhar estados e webhook",
+      "status": "aguardando_preview", "iteracoes": 1,
+      "problemasAbertos": ["homologação com número de teste Meta e capturas autenticadas ainda pendentes"],
+      "problemasResolvidos": ["módulo registrado, rotas, banco e contratos de Cloud API implementados na branch funcional"],
+      "criteriosAtendidos": ["fluxo_funcional", "integracao_pessimista"], "capturasAprovadas": [], "logs": null, "vacinas": []
+    },
+    {
+      "modulo": "rh", "nome": "Recursos Humanos e Departamento Pessoal", "rotaPrincipal": "/app/rh", "personaPrincipal": "departamento_pessoal",
+      "fluxoPrincipal": "cadastrar trabalhador, operar jornada e folha, processar eventos legais, reconciliar obrigações e publicar recibos no Meu RH",
+      "status": "aguardando_preview", "iteracoes": 1,
+      "problemasAbertos": [
+        "Browser E2E autenticado depende de ambiente HTTPS de homologação isolado",
+        "Produção Restrita eSocial depende de certificado e inscrições reais",
+        "capturas full-page nos três viewports e temas ainda não foram produzidas"
+      ],
+      "problemasResolvidos": [
+        "gates RH internos verdes com replay de migrations, regressões, typecheck e lint",
+        "XML eSocial validado por XSD oficial e XMLDSig verificado externamente com xmlsec1",
+        "backup e restore isolado aprovados"
+      ],
+      "criteriosAtendidos": ["fluxo_funcional", "permissoes_negativas", "integracao_pessimista"], "capturasAprovadas": [], "logs": null,
+      "vacinas": ["VACINA-062"]
     },
     {
       "modulo": "relatorios", "nome": "Relatórios e Indicadores", "rotaPrincipal": "/app/relatorios", "personaPrincipal": "diretoria",

@@ -1,0 +1,19 @@
+{
+  "files": [
+    {
+      "bytes": 1363,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R4/VACCINE_CANDIDATES_R4.yaml",
+      "sha256": "809377bd071bdbf44918380d0785c12dfbd0d5983f29d6b04d2a6e63b8476383"
+    },
+    {
+      "bytes": 1397,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R4/SUCCESS_PATTERN_CANDIDATES_R4.yaml",
+      "sha256": "e06007e0dfcb6296b38b1842e7a5b190bf579051f5b8e119a147e09a9788149d"
+    },
+    {
+      "bytes": 1093,
+      "path": "/tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R4/CAPABILITY_GAP_CANDIDATES_R4.yaml",
+      "sha256": "2efb0c330148dff94a8beeea57734d0f7cea65d185447bcde0412ab4fa5e377b"
+    }
+  ]
+}

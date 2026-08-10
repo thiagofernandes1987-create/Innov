@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   addCubReferenceItem,
@@ -8,12 +9,36 @@ import {
   removeBudgetItem,
   updateBudgetPricing
 } from "@/app/actions/budgets";
+import {
+  TIPOLOGIAS_CUB,
+  familiaDaTipologia,
+  type FamiliaDeCub
+} from "@/lib/cost-sources/cub-serie-historica";
+import { UFS_DO_BRASIL, referenciasDaUf, ufDaReferencia } from "@/lib/orcamentos/cub-por-uf";
+import { singleRelation } from "@/lib/supabase/relations";
 import { requireOrganizationContext } from "@/lib/auth";
+import { CampoComSugestao } from "@/components/comum/campo-com-sugestao";
 import { budgetStatusLabels, formatCurrency, formatPercent, type BudgetStatus } from "@/lib/domain";
+import { padroesDoEscopo } from "@/lib/sugestoes/escopos";
+import { totaisPorNatureza } from "@/lib/orcamentos/naturezas";
+import { ESCOPOS, sugestoesDoEscopo } from "@/lib/sugestoes/servidor";
+
+
+const ORDEM_DE_FAMILIA: readonly FamiliaDeCub[] = ["RESIDENCIAL", "COMERCIAL", "ESPECIAL"];
+const ROTULO_DE_FAMILIA: Record<FamiliaDeCub, string> = {
+  RESIDENCIAL: "Residencial",
+  COMERCIAL: "Comercial",
+  ESPECIAL: "Especiais"
+};
+
+/** O que a sigla quer dizer, para quem não decorou a NBR 12721. */
+function descricaoDaTipologia(codigo: string) {
+  return TIPOLOGIAS_CUB.find(item => item.codigo === codigo)?.descricao ?? "Referência oficial";
+}
 
 type BudgetDetailProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; aviso?: string; uf?: string }>;
 };
 
 type CostReferenceSnapshot = {
@@ -30,7 +55,18 @@ type CostReferenceSnapshot = {
   labor_cost: number | string | null;
   administrative_cost: number | string | null;
   source_url: string;
+  raw_payload: Record<string, unknown> | null;
 };
+
+/**
+ * Uma declaração manual não pode chegar com a mesma cara de uma leitura
+ * conferida (T-37.13b). O servidor baixou e conferiu o arquivo do SindusCon-SP;
+ * no CUB de outro estado, alguém digitou o número de um PDF. As duas entram no
+ * mesmo catálogo oficial, e quem escolhe merece saber qual é qual.
+ */
+function declaradaAMao(snapshot: CostReferenceSnapshot) {
+  return (snapshot.raw_payload as { retrievalMode?: string } | null)?.retrievalMode === "declaracao-manual";
+}
 
 const categoryLabels: Record<string, string> = {
   MATERIAL: "Material",
@@ -66,12 +102,19 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
 
   const { data: budget } = await supabase
     .from("budgets")
-    .select("id, code, title, status, valid_until, client_id, current_version_id, clients(legal_name)")
+    .select("id, code, title, status, valid_until, client_id, project_id, current_version_id, clients(legal_name), projects(state, city)")
     .eq("organization_id", organizationId)
     .eq("id", id)
     .maybeSingle();
 
   if (!budget || !budget.current_version_id) notFound();
+
+  // "m2", "M²" e "m ²" viram três unidades no mesmo orçamento, e o total por
+  // unidade deixa de fechar. É o campo em que a divergência de grafia custa
+  // mais caro, e o que a empresa usa vem antes do padrão da plataforma.
+  const sugestoesDeUnidade = await sugestoesDoEscopo(supabase, organizationId, ESCOPOS.unidade, {
+    padroes: padroesDoEscopo(ESCOPOS.unidade)
+  });
 
   const { data: version } = await supabase
     .from("budget_versions")
@@ -106,10 +149,13 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
       .order("created_at"),
     supabase
       .from("cost_reference_snapshots")
-      .select("id, source_name, region, reference_code, base_date, publication_date, tax_relief, unit, total_cost, materials_cost, labor_cost, administrative_cost, source_url")
-      .eq("source_key", "SINDUSCON_SP_CUB")
+      .select("id, source_name, region, reference_code, base_date, publication_date, tax_relief, unit, total_cost, materials_cost, labor_cost, administrative_cost, source_url, raw_payload")
+      // Sem `.eq("source_key", …)`: esta tabela é só de CUB, e fixar a chave de
+      // São Paulo era o que fazia a obra em Minas receber o preço paulista sem
+      // aviso. O recorte por UF é feito depois, em `referenciasDaUf`.
       .order("base_date", { ascending: false })
-      .order("tax_relief", { ascending: true }),
+      .order("tax_relief", { ascending: true })
+      .order("total_cost", { ascending: false }),
     supabase
       .from("markup_models")
       .select("id, method, tax_rate, commission_rate, variable_expense_rate, desired_margin_rate")
@@ -118,9 +164,39 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
   ]);
 
   const baseCost = Number(version.direct_cost) + Number(version.indirect_cost) + Number(version.fixed_cost) + Number(version.administrative_fee);
+
+  // T-37.6: o corte que decide equipe própria contra empreitada. O resumo ao
+  // lado soma por tipo de custo, que é a conta do BDI; esta soma por natureza,
+  // que é a conta da obra. A fórmula é a mesma do banco — ver
+  // `lib/orcamentos/naturezas.ts`.
+  const naturezas = totaisPorNatureza(items ?? []);
   const client = budget.clients as { legal_name?: string } | null;
   const frozen = Boolean(version.frozen_at);
   const snapshots = (referenceSnapshots ?? []) as CostReferenceSnapshot[];
+
+  // T-37.13a: a UF da obra manda; o que a pessoa escolher na tela ganha dela.
+  const obra = singleRelation(budget.projects as unknown);
+  const ufDoCub = ufDaReferencia({
+    ufDoProjeto: (obra as { state?: string } | null)?.state ?? null,
+    ufPedida: query.uf ?? null
+  });
+  const snapshotsDaUf = referenciasDaUf(snapshots, ufDoCub);
+
+  // T-37.4: as dezenove tipologias agrupadas pela família que a NBR 12721
+  // define. A família sai do **código**, não do `raw_payload`: as duas linhas
+  // semeadas antes desta tarefa não têm o campo, e derivar do código dá a mesma
+  // resposta para todas sem depender de quando a linha entrou.
+  const cubPorFamilia = (() => {
+    const porFamilia = new Map<FamiliaDeCub, typeof snapshotsDaUf>();
+    for (const snapshot of snapshotsDaUf) {
+      const familia = familiaDaTipologia(String(snapshot.reference_code));
+      porFamilia.set(familia, [...(porFamilia.get(familia) ?? []), snapshot]);
+    }
+    return ORDEM_DE_FAMILIA.filter(familia => porFamilia.has(familia)).map(
+      familia => [familia, porFamilia.get(familia)!] as const
+    );
+  })();
+
 
   return (
     <main className="content">
@@ -147,6 +223,9 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
       </div>
 
       {query.error ? <div className="validation blocking" role="alert">{query.error}</div> : null}
+      {query.aviso ? (
+        <div className="validation" role="status">{query.aviso}</div>
+      ) : null}
       {frozen ? (
         <div className="validation" role="status">
           Esta versão está congelada desde {new Date(version.frozen_at).toLocaleString("pt-BR")}. Crie uma nova versão para alterar custos ou margem.
@@ -164,19 +243,47 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
             <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", alignItems: "start" }}>
               <article className="card card-pad">
                 <span className="badge">REFERÊNCIA OFICIAL</span>
-                <h3>CUB SindusCon-SP por m²</h3>
-                <p className="muted">Use como referência global de coerência. Para orçamento executivo, complemente com composições e cotações.</p>
+                <h3>CUB por m² · {ufDoCub}</h3>
+                <p className="muted">
+                  Use como referência global de coerência. Para orçamento executivo, complemente com composições e cotações.
+                </p>
+                {/* T-37.13a: trocar de UF é `GET`, não ação — a pessoa está
+                    consultando, e a URL passa a carregar o estado escolhido. */}
+                <form method="get" className="cub-seletor-uf">
+                  <label>
+                    Estado da referência
+                    <select name="uf" defaultValue={ufDoCub}>
+                      {UFS_DO_BRASIL.map(sigla => (
+                        <option key={sigla} value={sigla}>
+                          {sigla}
+                          {(obra as { state?: string } | null)?.state?.trim().toUpperCase() === sigla
+                            ? " · UF da obra"
+                            : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <button className="button button-secondary" type="submit">Ver CUB deste estado</button>
+                </form>
                 <form action={addCubReferenceItem} className="grid">
                   <input type="hidden" name="budgetId" value={budget.id} />
                   <input type="hidden" name="versionId" value={version.id} />
                   <label>
                     Referência e data-base
+                    {/* Agrupado por família porque são dezenove tipologias da NBR
+                        12721 (T-37.4), e uma lista plana de vinte e uma linhas
+                        obriga a decorar sigla. A descrição vem junto: quem orça
+                        reconhece "R8-N", raramente "CSL-16A". */}
                     <select name="snapshotId" required defaultValue="" disabled={frozen}>
                       <option value="" disabled>Selecione o CUB</option>
-                      {snapshots.map((snapshot) => (
-                        <option key={snapshot.id} value={snapshot.id}>
-                          {snapshot.reference_code} · {snapshot.tax_relief ? "com" : "sem"} desoneração · {formatDate(snapshot.base_date)} · {formatCurrency(Number(snapshot.total_cost))}/{snapshot.unit}
-                        </option>
+                      {cubPorFamilia.map(([familia, itens]) => (
+                        <optgroup key={familia} label={ROTULO_DE_FAMILIA[familia]}>
+                          {itens.map((snapshot) => (
+                            <option key={snapshot.id} value={snapshot.id}>
+                              {snapshot.reference_code} · {descricaoDaTipologia(snapshot.reference_code)} · {snapshot.tax_relief ? "com" : "sem"} desoneração · {formatDate(snapshot.base_date)} · {formatCurrency(Number(snapshot.total_cost))}/{snapshot.unit}{declaradaAMao(snapshot) ? " · declarado à mão" : ""}
+                            </option>
+                          ))}
+                        </optgroup>
                       ))}
                     </select>
                   </label>
@@ -184,16 +291,43 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
                     Metragem da obra
                     <input name="area" type="number" min="0.01" step="0.01" placeholder="100,00" required disabled={frozen} />
                   </label>
-                  <button className="button button-primary" type="submit" disabled={frozen || snapshots.length === 0}>
+                  <button className="button button-primary" type="submit" disabled={frozen || snapshotsDaUf.length === 0}>
                     Aplicar CUB à metragem
                   </button>
                 </form>
-                {snapshots[0] ? (
+                {snapshotsDaUf[0] ? (
                   <p className="muted" style={{ marginTop: 12 }}>
-                    Última publicação carregada: {formatDate(snapshots[0].publication_date)}. Fonte: {snapshots[0].source_name}.
+                    Última publicação carregada: {formatDate(snapshotsDaUf[0].publication_date)}. Fonte: {snapshotsDaUf[0].source_name}
+                    {snapshotsDaUf.some(declaradaAMao) ? ", com referências declaradas à mão nesta lista" : ""}.{" "}
+                    <Link href={`/app/orcamentos/cub/importar?uf=${ufDoCub}&voltar=${budget.id}`}>
+                      Registrar outra publicação
+                    </Link>
                   </p>
                 ) : (
-                  <div className="validation blocking">Nenhuma referência oficial carregada.</div>
+                  // "Este estado não tem" é diferente de "não há nenhum", e a
+                  // diferença decide o que a pessoa faz a seguir: importar o CUB
+                  // daquele Sinduscon, ou conferir a UF que ela escolheu.
+                  <div className="validation" role="status">
+                    <strong>Sem CUB importado para {ufDoCub}.</strong>
+                    <div>
+                      A referência é publicada por cada Sinduscon estadual, e a de {ufDoCub} ainda não foi carregada.
+                      {snapshots.length
+                        ? ` Há referência para ${[...new Set(snapshots.map(item => String(item.region).trim().toUpperCase()))].sort().join(", ")}.`
+                        : " Nenhum estado tem referência carregada ainda."}
+                    </div>
+                    {/* T-37.13b: dizer o que falta sem oferecer o caminho deixa
+                        uma saída só — trocar a UF para SP e usar o número de
+                        outro estado de propósito. Um clique daqui até o
+                        formulário, com a UF já escolhida e o caminho de volta. */}
+                    <div style={{ marginTop: 10 }}>
+                      <Link
+                        className="button button-secondary"
+                        href={`/app/orcamentos/cub/importar?uf=${ufDoCub}&voltar=${budget.id}`}
+                      >
+                        Importar o CUB de {ufDoCub}
+                      </Link>
+                    </div>
+                  </div>
                 )}
               </article>
 
@@ -231,7 +365,9 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
                     <label>Descrição<input name="description" placeholder="Cimento CP II 50 kg" required disabled={frozen} /></label>
                   </div>
                   <div className="grid" style={{ gridTemplateColumns: "repeat(auto-fit,minmax(130px,1fr))" }}>
-                    <label>Unidade<input name="unit" placeholder="m², h, un, mês" required disabled={frozen} /></label>
+                    <label>Unidade
+                      <CampoComSugestao name="unit" sugestoes={sugestoesDeUnidade} placeholder="m², h, un, mês" required />
+                    </label>
                     <label>Quantidade/metragem<input name="quantity" type="number" min="0.000001" step="0.000001" required disabled={frozen} /></label>
                     <label>Custo unitário<input name="unitCost" type="number" min="0.0001" step="0.0001" required disabled={frozen} /></label>
                   </div>
@@ -380,6 +516,20 @@ export default async function BudgetDetailPage({ params, searchParams }: BudgetD
           <div className="financial-row"><span>Custos fixos</span><strong className="mono">{formatCurrency(Number(version.fixed_cost))}</strong></div>
           <div className="financial-row"><span>Taxa administrativa</span><strong className="mono">{formatCurrency(Number(version.administrative_fee))}</strong></div>
           <div className="financial-row"><span>Custo-base</span><strong className="mono">{formatCurrency(baseCost)}</strong></div>
+          {naturezas.length ? (
+            <div className="financial-naturezas">
+              <small>DO QUE É FEITO O CUSTO</small>
+              {naturezas.map(natureza => (
+                <div className="financial-row" key={natureza.natureza}>
+                  <span>
+                    {natureza.rotulo}
+                    <em>{formatPercent(natureza.participacao)}</em>
+                  </span>
+                  <strong className="mono">{formatCurrency(natureza.total)}</strong>
+                </div>
+              ))}
+            </div>
+          ) : null}
           <div className="financial-row"><span>Impostos</span><strong className="mono">{formatPercent(Number(markupModel?.tax_rate ?? 0))}</strong></div>
           <div className="financial-row"><span>Margem desejada</span><strong className="mono">{formatPercent(Number(markupModel?.desired_margin_rate ?? 0))}</strong></div>
           <div className="financial-row"><span>BDI</span><strong className="mono">{formatPercent(Number(version.bdi_rate))}</strong></div>

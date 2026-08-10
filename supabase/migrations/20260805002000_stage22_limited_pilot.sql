@@ -112,7 +112,7 @@ returns public.channel_pilot_plans
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_pilot_plans;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then raise exception 'PILOT_FORBIDDEN'; end if;
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then raise exception 'PILOT_FORBIDDEN'; end if;
   insert into public.channel_pilot_plans(
     organization_id,name,status,maximum_team_members,maximum_conversations,maximum_daily_messages,
     start_hour,end_hour,weekdays,campaigns_enabled,ai_mode,created_by
@@ -141,7 +141,7 @@ returns public.channel_pilot_assessments
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_pilot_assessments;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then raise exception 'PILOT_FORBIDDEN'; end if;
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then raise exception 'PILOT_FORBIDDEN'; end if;
   if p_decision='GO' then raise exception 'REAL_PILOT_REVIEW_REQUIRED'; end if;
   insert into public.channel_pilot_assessments(
     organization_id,pilot_plan_id,decision,blockers,slis_slos,abort_criteria,provider_comparison,
@@ -168,7 +168,7 @@ returns public.channel_pilot_daily_reviews
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_pilot_daily_reviews;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then raise exception 'PILOT_FORBIDDEN'; end if;
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then raise exception 'PILOT_FORBIDDEN'; end if;
   insert into public.channel_pilot_daily_reviews(
     organization_id,pilot_plan_id,review_date,status,incidents,costs,rollback_required,real_activity,reviewed_by
   ) values (

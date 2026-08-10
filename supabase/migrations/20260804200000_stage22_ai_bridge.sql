@@ -130,7 +130,7 @@ begin
   if p_ttl_seconds < 5 or p_ttl_seconds > 120 then
     raise exception 'AI_LOCK_TTL_INVALID';
   end if;
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then
     raise exception 'AI_FORBIDDEN';
   end if;
   perform 1 from public.whatsapp_conversations
@@ -238,7 +238,7 @@ as $$
 declare
   created public.channel_ai_handoffs;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then
     raise exception 'AI_FORBIDDEN';
   end if;
   insert into public.channel_ai_handoffs(
@@ -272,7 +272,7 @@ as $$
 declare
   created public.channel_ai_invocations;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then
     raise exception 'AI_FORBIDDEN';
   end if;
   insert into public.channel_ai_invocations(

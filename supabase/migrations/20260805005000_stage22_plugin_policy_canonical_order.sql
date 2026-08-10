@@ -73,7 +73,7 @@ declare
   canonical_flag text;
   mandatory boolean;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then
     raise exception 'PLUGIN_FORBIDDEN';
   end if;
 

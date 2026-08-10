@@ -1,0 +1,56 @@
+name: RH Government Workspaces
+
+on:
+  pull_request:
+    paths:
+      - "app/app/rh/obrigacoes/dctfweb/**"
+      - "app/app/rh/obrigacoes/fgts-digital/**"
+      - "app/actions/rh-government.ts"
+      - "supabase/migrations/*_rh_*.sql"
+      - "supabase/tests/rh/dctfweb-fgts.test.sql"
+      - "scripts/run-rh-government-db-tests.mjs"
+      - ".github/workflows/rh-government.yml"
+  push:
+    branches:
+      - "feature/**"
+    paths:
+      - "app/app/rh/obrigacoes/dctfweb/**"
+      - "app/app/rh/obrigacoes/fgts-digital/**"
+      - "app/actions/rh-government.ts"
+      - "supabase/migrations/*_rh_*.sql"
+      - "supabase/tests/rh/dctfweb-fgts.test.sql"
+      - "scripts/run-rh-government-db-tests.mjs"
+      - ".github/workflows/rh-government.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  government:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      SIGNATURE_PROVIDER: sandbox
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Validate migrations
+        run: pnpm validate:migrations
+      - name: Government database tests
+        run: node scripts/run-rh-government-db-tests.mjs
+      - name: Scoped typecheck
+        run: pnpm exec tsc --noEmit -p tsconfig.rh.json
+      - name: Scoped lint
+        run: pnpm exec eslint app/app/rh/obrigacoes/dctfweb app/app/rh/obrigacoes/fgts-digital app/actions/rh-government.ts --max-warnings=0

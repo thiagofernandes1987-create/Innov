@@ -1,5 +1,6 @@
 import { requireClientContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { singleRelation } from "@/lib/supabase/relations";
 
 export default async function ClientContractsPage() {
@@ -17,6 +18,8 @@ export default async function ClientContractsPage() {
     .not("client_released_at", "is", null)
     .order("updated_at", { ascending: false });
 
+  if (error) reportDataAccessError("client-contracts.page.load", error);
+
   return (
     <main className="content">
       <div className="page-head">
@@ -27,7 +30,7 @@ export default async function ClientContractsPage() {
         </div>
       </div>
 
-      {error ? <div className="validation blocking" role="alert">{error.message}</div> : null}
+      {error ? <div className="validation blocking" role="alert">Não foi possível carregar os contratos.</div> : null}
 
       <section className="card table-wrap">
         <table>

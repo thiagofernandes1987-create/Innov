@@ -3,6 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
+import { linhasDoCub } from "@/lib/orcamentos/cub";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 
 const internalRoles = ["SUPER_ADMIN", "DIRECAO", "ADMINISTRADOR", "ORCAMENTISTA", "FINANCEIRO"] as const;
 const editableCostTypes = new Set(["DIRECT", "INDIRECT", "FIXED", "ADMINISTRATIVE"]);
@@ -16,9 +19,20 @@ const editableItemCategories = new Set([
   "REFERENCE",
   "OTHER"
 ]);
+type ProviderLikeError = { code?: string | null; statusCode?: string | number | null; name?: string | null };
 
 function budgetError(budgetId: string, message: string): never {
   redirect(`/app/orcamentos/${budgetId}?error=${encodeURIComponent(message)}`);
+}
+
+function budgetDataError(budgetId: string, operation: string, error: ProviderLikeError | null | undefined, message: string): never {
+  reportDataAccessError(`budgets.${operation}`, error);
+  budgetError(budgetId, message);
+}
+
+/** Deu certo, e há algo que quem fez precisa saber. Não é erro, e não some. */
+function budgetNotice(budgetId: string, message: string): never {
+  redirect(`/app/orcamentos/${budgetId}?aviso=${encodeURIComponent(message)}`);
 }
 
 function requiredText(formData: FormData, key: string, label: string) {
@@ -55,8 +69,8 @@ function validationMessage(callback: () => void) {
   try {
     callback();
     return null;
-  } catch (error) {
-    return error instanceof Error ? error.message : "Dados inválidos.";
+  } catch (validationError) {
+    return validationError instanceof Error ? validationError.message : "Dados inválidos.";
   }
 }
 
@@ -74,7 +88,7 @@ async function requireEditableVersion(
     .eq("organization_id", context.organizationId)
     .maybeSingle();
 
-  if (error || !version) budgetError(budgetId, error?.message ?? "Versão de orçamento não encontrada.");
+  if (error || !version) budgetDataError(budgetId, "load-editable-version", error, "Versão de orçamento não encontrada ou indisponível.");
   if (version.frozen_at) budgetError(budgetId, "Versões congeladas não podem receber alterações.");
 
   return { ...context, version };
@@ -84,13 +98,17 @@ async function nextItemSequence(
   supabase: Awaited<ReturnType<typeof requireOrganizationContext>>["supabase"],
   versionId: string
 ) {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("budget_items")
     .select("sequence")
     .eq("budget_version_id", versionId)
     .order("sequence", { ascending: false })
     .limit(1)
     .maybeSingle();
+  if (error) {
+    reportDataAccessError("budgets.next-item-sequence", error);
+    return null;
+  }
   return Number(data?.sequence ?? 0) + 1;
 }
 
@@ -102,7 +120,7 @@ async function recalculate(
   const { error } = await supabase.rpc("calculate_budget_version", {
     p_version_id: versionId
   });
-  if (error) budgetError(budgetId, error.message);
+  if (error) budgetDataError(budgetId, "recalculate", error, "Não foi possível recalcular o orçamento.");
   revalidatePath(`/app/orcamentos/${budgetId}`);
 }
 
@@ -120,38 +138,60 @@ export async function addCubReferenceItem(formData: FormData) {
   const { supabase, organizationId, userId } = await requireEditableVersion(budgetId, versionId);
   const { data: snapshot, error: snapshotError } = await supabase
     .from("cost_reference_snapshots")
-    .select("id, source_key, source_name, region, reference_code, base_date, tax_relief, unit, total_cost")
+    .select(
+      "id, source_key, source_name, region, reference_code, base_date, tax_relief, unit, total_cost, materials_cost, labor_cost, administrative_cost, equipment_cost"
+    )
     .eq("id", snapshotId)
     .maybeSingle();
 
   if (snapshotError || !snapshot) {
-    budgetError(budgetId, snapshotError?.message ?? "Referência oficial não encontrada.");
+    budgetDataError(budgetId, "load-cost-reference", snapshotError, "Referência oficial não encontrada ou indisponível.");
   }
 
+  const { linhas, decomposto, motivo } = linhasDoCub(
+    {
+      sourceName: String(snapshot.source_name),
+      referenceCode: String(snapshot.reference_code),
+      region: String(snapshot.region),
+      baseDate: String(snapshot.base_date),
+      taxRelief: Boolean(snapshot.tax_relief),
+      unit: String(snapshot.unit),
+      totalCost: Number(snapshot.total_cost),
+      materialsCost: snapshot.materials_cost === null ? null : Number(snapshot.materials_cost),
+      laborCost: snapshot.labor_cost === null ? null : Number(snapshot.labor_cost),
+      administrativeCost:
+        snapshot.administrative_cost === null ? null : Number(snapshot.administrative_cost),
+      equipmentCost: snapshot.equipment_cost === null ? null : Number(snapshot.equipment_cost)
+    },
+    area
+  );
+
+  if (linhas.length === 0) budgetError(budgetId, "Informe a metragem da obra.");
+
   const sequence = await nextItemSequence(supabase, versionId);
-  const reliefLabel = snapshot.tax_relief ? "com desoneração" : "sem desoneração";
-  const code = `CUB-${snapshot.reference_code}-${snapshot.region}-${snapshot.base_date}-${snapshot.tax_relief ? "CD" : "SD"}`;
+  if (sequence === null) budgetError(budgetId, "Não foi possível determinar a ordem dos itens do orçamento.");
+  const { error: insertError } = await supabase.from("budget_items").insert(
+    linhas.map((linha, indice) => ({
+      organization_id: organizationId,
+      budget_version_id: versionId,
+      cost_type: linha.costType,
+      item_category: linha.itemCategory,
+      code: linha.code,
+      description: linha.description,
+      unit: linha.unit,
+      quantity: linha.quantity,
+      unit_cost: linha.unitCost,
+      loss_rate: linha.lossRate,
+      freight_rate: linha.freightRate,
+      source: linha.source,
+      region: snapshot.region,
+      base_date: snapshot.base_date,
+      sequence: sequence + indice,
+      created_by: userId
+    }))
+  );
 
-  const { error: insertError } = await supabase.from("budget_items").insert({
-    organization_id: organizationId,
-    budget_version_id: versionId,
-    cost_type: "DIRECT",
-    item_category: "REFERENCE",
-    code,
-    description: `Referência global ${snapshot.source_name} ${snapshot.reference_code} ${reliefLabel}`,
-    unit: snapshot.unit,
-    quantity: area,
-    unit_cost: Number(snapshot.total_cost),
-    loss_rate: 0,
-    freight_rate: 0,
-    source: `${snapshot.source_name} · ${snapshot.reference_code} · ${reliefLabel}`,
-    region: snapshot.region,
-    base_date: snapshot.base_date,
-    sequence,
-    created_by: userId
-  });
-
-  if (insertError) budgetError(budgetId, insertError.message);
+  if (insertError) budgetDataError(budgetId, "insert-cub-items", insertError, "Não foi possível adicionar a referência oficial ao orçamento.");
 
   const { error: versionError } = await supabase
     .from("budget_versions")
@@ -160,8 +200,9 @@ export async function addCubReferenceItem(formData: FormData) {
     .eq("organization_id", organizationId)
     .is("frozen_at", null);
 
-  if (versionError) budgetError(budgetId, versionError.message);
+  if (versionError) budgetDataError(budgetId, "link-cost-reference", versionError, "Não foi possível vincular a referência oficial à versão.");
   await recalculate(supabase, budgetId, versionId);
+  if (!decomposto && motivo) budgetNotice(budgetId, motivo);
 }
 
 export async function addManualBudgetItem(formData: FormData) {
@@ -198,6 +239,7 @@ export async function addManualBudgetItem(formData: FormData) {
 
   const { supabase, organizationId, userId } = await requireEditableVersion(budgetId, versionId);
   const sequence = await nextItemSequence(supabase, versionId);
+  if (sequence === null) budgetError(budgetId, "Não foi possível determinar a ordem dos itens do orçamento.");
   const { error } = await supabase.from("budget_items").insert({
     organization_id: organizationId,
     budget_version_id: versionId,
@@ -217,7 +259,8 @@ export async function addManualBudgetItem(formData: FormData) {
     created_by: userId
   });
 
-  if (error) budgetError(budgetId, error.message);
+  if (error) budgetDataError(budgetId, "insert-manual-item", error, "Não foi possível adicionar o item ao orçamento.");
+  await registrarValorUsado(supabase, organizationId, ESCOPOS.unidade, unit);
   await recalculate(supabase, budgetId, versionId);
 }
 
@@ -247,12 +290,13 @@ export async function updateBudgetPricing(formData: FormData) {
   let markupModelId: string | null = null;
 
   if (version.markup_model_id) {
-    const { data: linkedModel } = await supabase
+    const { data: linkedModel, error: linkedModelError } = await supabase
       .from("markup_models")
       .select("id, name")
       .eq("id", version.markup_model_id)
       .eq("organization_id", organizationId)
       .maybeSingle();
+    if (linkedModelError) reportDataAccessError("budgets.load-linked-markup", linkedModelError);
     if (linkedModel?.name === modelName) markupModelId = linkedModel.id;
   }
 
@@ -275,14 +319,14 @@ export async function updateBudgetPricing(formData: FormData) {
       .update(payload)
       .eq("id", markupModelId)
       .eq("organization_id", organizationId);
-    if (error) budgetError(budgetId, error.message);
+    if (error) budgetDataError(budgetId, "update-markup", error, "Não foi possível atualizar a formação de preço.");
   } else {
     const { data, error } = await supabase
       .from("markup_models")
       .insert(payload)
       .select("id")
       .single();
-    if (error || !data) budgetError(budgetId, error?.message ?? "Não foi possível configurar a formação de preço.");
+    if (error || !data) budgetDataError(budgetId, "create-markup", error, "Não foi possível configurar a formação de preço.");
     markupModelId = data.id;
   }
 
@@ -293,7 +337,7 @@ export async function updateBudgetPricing(formData: FormData) {
     .eq("organization_id", organizationId)
     .is("frozen_at", null);
 
-  if (versionError) budgetError(budgetId, versionError.message);
+  if (versionError) budgetDataError(budgetId, "update-pricing-version", versionError, "Não foi possível atualizar a versão do orçamento.");
   await recalculate(supabase, budgetId, versionId);
 }
 
@@ -310,7 +354,7 @@ export async function removeBudgetItem(formData: FormData) {
     .eq("budget_version_id", versionId)
     .eq("organization_id", organizationId);
 
-  if (error) budgetError(budgetId, error.message);
+  if (error) budgetDataError(budgetId, "remove-item", error, "Não foi possível remover o item do orçamento.");
   await recalculate(supabase, budgetId, versionId);
 }
 
@@ -323,7 +367,7 @@ export async function calculateBudgetVersion(formData: FormData) {
     p_version_id: versionId
   });
 
-  if (error) budgetError(budgetId, error.message);
+  if (error) budgetDataError(budgetId, "calculate-version", error, "Não foi possível calcular a versão do orçamento.");
   revalidatePath(`/app/orcamentos/${budgetId}`);
 }
 
@@ -336,7 +380,7 @@ export async function freezeBudgetVersion(formData: FormData) {
     p_version_id: versionId
   });
 
-  if (error) budgetError(budgetId, error.message);
+  if (error) budgetDataError(budgetId, "freeze-version", error, "Não foi possível congelar a versão do orçamento.");
   revalidatePath(`/app/orcamentos/${budgetId}`);
 }
 
@@ -353,6 +397,6 @@ export async function decideBudgetApproval(formData: FormData) {
     p_reason: reason
   });
 
-  if (error) budgetError(budgetId, error.message);
+  if (error) budgetDataError(budgetId, "decide-approval", error, "Não foi possível registrar a decisão de aprovação.");
   revalidatePath(`/app/orcamentos/${budgetId}`);
 }

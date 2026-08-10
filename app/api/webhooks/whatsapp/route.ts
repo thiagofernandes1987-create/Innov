@@ -7,7 +7,7 @@ type MetaStatus = {
   id?: string;
   status?: string;
   timestamp?: string;
-  errors?: Array<{ code?: number; title?: string; message?: string }>;
+  errors?: Array<{ code?: number; title?: string }>;
 };
 
 type MetaMessage = {
@@ -314,11 +314,11 @@ export async function POST(request: Request) {
           if (messageLookupError || !message) continue;
 
           const timestamp = occurredAt(status.timestamp);
-          const firstError = status.errors?.[0];
+          const providerFailure = status.errors?.[0];
           const patch: Record<string, unknown> = {
             status: nextStatus,
-            error_code: firstError?.code ? String(firstError.code) : null,
-            error_message: firstError?.title ?? firstError?.message ?? null
+            error_code: providerFailure?.code ? String(providerFailure.code) : null,
+            error_message: null
           };
           if (nextStatus === "SENT") patch.sent_at = timestamp;
           if (nextStatus === "DELIVERED") patch.delivered_at = timestamp;
@@ -338,8 +338,8 @@ export async function POST(request: Request) {
               message_id: message.id,
               status: nextStatus,
               provider_timestamp: timestamp,
-              error_code: firstError?.code ? String(firstError.code) : null,
-              error_title: firstError?.title ?? null,
+              error_code: providerFailure?.code ? String(providerFailure.code) : null,
+              error_title: null,
               metadata: { providerStatus: status.status ?? null }
             });
           if (statusEventError?.code !== "23505" && statusEventError) {

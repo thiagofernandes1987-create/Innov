@@ -13,7 +13,7 @@ export default async function ReportSnapshotsPage({ searchParams }: { searchPara
   const { dashboard } = await loadReportDashboard({});
   const defaults = defaultReportPeriod();
   const [{ data: snapshots, error: snapshotsError }, { data: views, error: viewsError }] = await Promise.all([
-    context.supabase.from("report_snapshots").select("id,project_id,saved_view_id,kind,period_start,period_end,metrics,source_sha256,status,error_message,generated_at,created_at").eq("organization_id", context.organizationId).order("created_at", { ascending: false }).limit(100),
+    context.supabase.from("report_snapshots").select("id,project_id,saved_view_id,kind,period_start,period_end,metrics,source_sha256,status,generated_at,created_at").eq("organization_id", context.organizationId).order("created_at", { ascending: false }).limit(100),
     context.supabase.from("report_saved_views").select("id,name,kind,project_id").eq("organization_id", context.organizationId).eq("active", true).order("name")
   ]);
   const projectName = new Map(dashboard.projects.map(project => [project.project_id, `${project.code} · ${project.name}`]));

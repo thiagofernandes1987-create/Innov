@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { generateCommercialPdf, sha256Hex } from "@/lib/pdf";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -24,7 +25,7 @@ export async function POST(request: Request, { params }: RouteContext) {
       exclusions, assumptions, commercial_summary, sale_price, payment_terms,
       deadline_text, warranty_text, notes, document_path, document_sha256,
       client_released_at,
-      proposals!inner(
+      proposals!proposal_versions_proposal_id_fkey!inner(
         id, organization_id, client_id, code, status, valid_until,
         clients!inner(legal_name, trade_name)
       )
@@ -32,8 +33,12 @@ export async function POST(request: Request, { params }: RouteContext) {
     .eq("id", versionId)
     .maybeSingle();
 
-  if (error || !version) {
-    return NextResponse.json({ error: error?.message ?? "Versão não encontrada." }, { status: 404 });
+  if (error) {
+    reportDataAccessError("proposals.pdf.load-version", error);
+    return NextResponse.json({ error: "Não foi possível carregar a versão da proposta." }, { status: 500 });
+  }
+  if (!version) {
+    return NextResponse.json({ error: "Versão não encontrada." }, { status: 404 });
   }
 
   const proposal = version.proposals as unknown as {
@@ -46,7 +51,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     clients: { legal_name: string; trade_name: string | null };
   };
 
-  const { data: membership } = await supabase
+  const { data: membership, error: membershipError } = await supabase
     .from("organization_memberships")
     .select("role")
     .eq("organization_id", proposal.organization_id)
@@ -54,6 +59,10 @@ export async function POST(request: Request, { params }: RouteContext) {
     .eq("active", true)
     .maybeSingle();
 
+  if (membershipError) {
+    reportDataAccessError("proposals.pdf.membership", membershipError);
+    return NextResponse.json({ error: "Não foi possível validar a permissão." }, { status: 500 });
+  }
   if (!membership || !allowedRoles.has(membership.role)) {
     return NextResponse.json({ error: "Permissão insuficiente." }, { status: 403 });
   }
@@ -103,7 +112,8 @@ export async function POST(request: Request, { params }: RouteContext) {
     });
 
   if (uploadError) {
-    return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    reportDataAccessError("proposals.pdf.upload", uploadError);
+    return NextResponse.json({ error: "Não foi possível armazenar o PDF da proposta." }, { status: 500 });
   }
 
   const snapshot = {
@@ -128,11 +138,13 @@ export async function POST(request: Request, { params }: RouteContext) {
     .is("document_path", null);
 
   if (updateError) {
-    await supabase.storage.from("commercial-documents").remove([path]);
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
+    reportDataAccessError("proposals.pdf.freeze-version", updateError);
+    const { error: cleanupError } = await supabase.storage.from("commercial-documents").remove([path]);
+    if (cleanupError) reportDataAccessError("proposals.pdf.cleanup", cleanupError);
+    return NextResponse.json({ error: "Não foi possível concluir a geração do PDF da proposta." }, { status: 500 });
   }
 
-  await supabase.from("audit_events").insert({
+  const { error: auditError } = await supabase.from("audit_events").insert({
     organization_id: proposal.organization_id,
     actor_user_id: authData.user.id,
     event_type: "proposal.pdf.generated",
@@ -142,6 +154,7 @@ export async function POST(request: Request, { params }: RouteContext) {
     after_data: { path, sha256 },
     result: "SUCCESS"
   });
+  if (auditError) reportDataAccessError("proposals.pdf.audit", auditError);
 
   return NextResponse.json({ data: { path, sha256, idempotent: false } }, { status: 201 });
 }

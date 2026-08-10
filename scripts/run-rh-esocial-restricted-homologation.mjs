@@ -1,0 +1,58 @@
+import https from "node:https";
+import { createHash,createPublicKey,X509Certificate } from "node:crypto";
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { signEsocialXmlWithMaterial } from "../lib/rh/integrations/esocial-signature-core.ts";
+
+const SEND_URL="https://webservices.producaorestrita.esocial.gov.br/servicos/empregador/enviarloteeventos/WsEnviarLoteEventos.svc";
+const QUERY_URL="https://webservices.producaorestrita.esocial.gov.br/servicos/empregador/consultarloteeventos/WsConsultarLoteEventos.svc";
+const SEND_ACTION="http://www.esocial.gov.br/servicos/empregador/lote/eventos/envio/v1_1_0/ServicoEnviarLoteEventos/EnviarLoteEventos";
+const QUERY_ACTION="http://www.esocial.gov.br/servicos/empregador/lote/eventos/envio/consulta/retornoProcessamento/v1_1_0/ServicoConsultarLoteEventos/ConsultarLoteEventos";
+
+function required(name){const v=process.env[name]?.trim();if(!v)throw new Error(`Secret obrigatório ausente: ${name}`);return v;}
+function sha(value){return createHash("sha256").update(value).digest("hex");}
+function escapeXml(v){return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&apos;");}
+function normalizePem(v){return v.replaceAll("\\n","\n");}
+function certificateBase64(pem){return pem.replace(/-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----|\s+/g,"");}
+function xsdFiles(root){const out=[];for(const entry of fs.readdirSync(root,{withFileTypes:true})){const full=path.join(root,entry.name);if(entry.isDirectory())out.push(...xsdFiles(full));else if(entry.isFile()&&entry.name.toLowerCase().endsWith(".xsd"))out.push(full);}return out;}
+function signableTag(xml){const tag=xml.match(/<([A-Za-z0-9_:-]+)\b[^>]*\bId=["']ID[^"']+["']/)?.[1];if(!tag)throw new Error("Elemento assinado com Id não localizado após XMLDSig.");return tag;}
+function validateSignedEventWithOfficialXsd(xml){
+ const root=required("ESOCIAL_XSD_DIR");if(!fs.existsSync(root))throw new Error("Diretório XSD oficial eSocial não encontrado.");
+ const namespace=xml.match(/<eSocial\s+xmlns="([^"]+)"/)?.[1];if(!namespace)throw new Error("Evento de homologação sem namespace eSocial.");
+ const schemas=xsdFiles(root).filter(file=>fs.readFileSync(file,"utf8").includes(`targetNamespace="${namespace}"`));if(schemas.length!==1)throw new Error(`Não foi possível identificar unicamente o XSD oficial do evento (${schemas.length}).`);
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),"innov-esocial-homolog-xsd-")),file=path.join(dir,"signed-event.xml");fs.writeFileSync(file,xml,"utf8");
+ const validation=spawnSync("xmllint",["--noout","--schema",schemas[0],file],{encoding:"utf8"});
+ if(validation.error)throw new Error("Validador XSD oficial indisponível no runner.");
+ if(validation.status!==0)throw new Error(`Evento assinado rejeitado pelo XSD oficial; diagnóstico SHA-256 ${sha(validation.stderr||validation.stdout||"xsd-error")}.`);
+}
+function validateSignedEventWithXmlsec(xml,privateKeyPem){
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),"innov-esocial-homolog-xmlsec-")),file=path.join(dir,"signed-event.xml"),publicFile=path.join(dir,"public.pem");
+ fs.writeFileSync(file,xml,"utf8");fs.writeFileSync(publicFile,createPublicKey(privateKeyPem).export({format:"pem",type:"spki"}),"utf8");
+ const verification=spawnSync("xmlsec1",["--verify","--pubkey-pem",publicFile,"--id-attr:Id",signableTag(xml),file],{encoding:"utf8"});
+ if(verification.error)throw new Error("xmlsec1 indisponível no runner de homologação.");
+ if(verification.status!==0)throw new Error(`XMLDSig rejeitado pelo xmlsec1; diagnóstico SHA-256 ${sha(verification.stderr||verification.stdout||"xmlsec-error")}.`);
+}
+function ensureSigningMaterialMatches(privateKeyPem,certificatePem){
+ const cert=new X509Certificate(certificatePem),fromCert=cert.publicKey.export({format:"der",type:"spki"}),fromKey=createPublicKey(privateKeyPem).export({format:"der",type:"spki"});
+ if(!Buffer.from(fromCert).equals(Buffer.from(fromKey)))throw new Error("Certificado e chave privada de assinatura não correspondem.");
+}
+function soapSend(batch){return `<?xml version="1.0" encoding="utf-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="http://www.esocial.gov.br/servicos/empregador/lote/eventos/envio/v1_1_0"><soapenv:Header/><soapenv:Body><v1:EnviarLoteEventos><v1:loteEventos>${batch}</v1:loteEventos></v1:EnviarLoteEventos></soapenv:Body></soapenv:Envelope>`;}
+function soapQuery(protocol){const query=`<eSocial xmlns="http://www.esocial.gov.br/schema/lote/eventos/envio/consulta/retornoProcessamento/v1_0_0"><consultaLoteEventos><protocoloEnvio>${escapeXml(protocol)}</protocoloEnvio></consultaLoteEventos></eSocial>`;return `<?xml version="1.0" encoding="utf-8"?><soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:v1="http://www.esocial.gov.br/servicos/empregador/lote/eventos/envio/consulta/retornoProcessamento/v1_1_0"><soapenv:Header/><soapenv:Body><v1:ConsultarLoteEventos><v1:consulta>${query}</v1:consulta></v1:ConsultarLoteEventos></soapenv:Body></soapenv:Envelope>`;}
+function post(url,action,body,pfx,passphrase){return new Promise((resolve,reject)=>{const u=new URL(url),started=Date.now();const req=https.request({hostname:u.hostname,path:u.pathname,method:"POST",pfx,passphrase,minVersion:"TLSv1.2",rejectUnauthorized:true,headers:{"Content-Type":"text/xml; charset=utf-8","SOAPAction":`"${action}"`,"Content-Length":Buffer.byteLength(body)}},res=>{const chunks=[];res.on("data",c=>chunks.push(Buffer.from(c)));res.on("end",()=>resolve({httpStatus:res.statusCode??0,xml:Buffer.concat(chunks).toString("utf8"),durationMs:Date.now()-started}));});req.setTimeout(30000,()=>req.destroy(new Error("Timeout eSocial; resultado indeterminado.")));req.on("error",reject);req.end(body);});}
+function parse(xml){return{protocol:xml.match(/<protocoloEnvio>([^<]+)<\/protocoloEnvio>/i)?.[1]?.trim()??null,code:xml.match(/<cdResposta>([^<]+)<\/cdResposta>/i)?.[1]?.trim()??null,description:xml.match(/<descResposta>([^<]+)<\/descResposta>/i)?.[1]?.trim()??null,receipt:xml.match(/<nrRecibo>([^<]+)<\/nrRecibo>/i)?.[1]?.trim()??null};}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+if(process.env.ESOCIAL_HOMOLOGATION_PREFLIGHT_ONLY==="true"){
+ if(typeof signEsocialXmlWithMaterial!=="function")throw new Error("Signer compartilhado não carregado.");
+ console.log("Preflight do runner de homologação eSocial aprovado: signer compartilhado carregado.");
+ process.exit(0);
+}
+
+const pfx=Buffer.from(required("ESOCIAL_CERTIFICATE_PFX_BASE64"),"base64");const passphrase=process.env.ESOCIAL_CERTIFICATE_PASSPHRASE??"";const signingCert=normalizePem(required("ESOCIAL_SIGNING_CERTIFICATE_PEM"));const signingKey=normalizePem(required("ESOCIAL_SIGNING_PRIVATE_KEY_PEM"));const unsigned=Buffer.from(required("ESOCIAL_HOMOLOGATION_UNSIGNED_EVENT_BASE64"),"base64").toString("utf8");const employerType=Number(required("ESOCIAL_HOMOLOGATION_EMPLOYER_TYPE"));const employerNumber=required("ESOCIAL_HOMOLOGATION_EMPLOYER_NUMBER").replace(/\D/g,"");const transmitterType=Number(required("ESOCIAL_TRANSMITTER_REGISTRATION_TYPE"));const transmitterNumber=required("ESOCIAL_TRANSMITTER_REGISTRATION_NUMBER").replace(/\D/g,"");const eventGroup=Number(process.env.ESOCIAL_HOMOLOGATION_EVENT_GROUP??1);
+if(![1,2].includes(employerType)||![1,2].includes(transmitterType)||![1,2,3].includes(eventGroup))throw new Error("Identificadores de homologação inválidos.");
+ensureSigningMaterialMatches(signingKey,signingCert);
+const signed=signEsocialXmlWithMaterial(unsigned,signingKey,certificateBase64(signingCert));validateSignedEventWithOfficialXsd(signed.signedXml);validateSignedEventWithXmlsec(signed.signedXml,signingKey);
+const batch=`<eSocial xmlns="http://www.esocial.gov.br/schema/lote/eventos/envio/v1_1_1"><envioLoteEventos grupo="${eventGroup}"><ideEmpregador><tpInsc>${employerType}</tpInsc><nrInsc>${escapeXml(employerType===1?employerNumber.slice(0,8):employerNumber)}</nrInsc></ideEmpregador><ideTransmissor><tpInsc>${transmitterType}</tpInsc><nrInsc>${escapeXml(transmitterType===1?transmitterNumber.slice(0,8):transmitterNumber)}</nrInsc></ideTransmissor><eventos><evento Id="${escapeXml(signed.eventKey)}">${signed.signedXml}</evento></eventos></envioLoteEventos></eSocial>`;const sendBody=soapSend(batch);const evidence={startedAt:new Date().toISOString(),environment:"PRODUCAO_RESTRITA",eventId:signed.eventKey,eventSha256:sha(signed.signedXml),batchSha256:sha(batch),xsdValidated:true,xmlsecValidated:true,sharedSigner:true,send:{},queries:[],terminal:false};
+try{const sent=await post(SEND_URL,SEND_ACTION,sendBody,pfx,passphrase);const p=parse(sent.xml);evidence.send={httpStatus:sent.httpStatus,durationMs:sent.durationMs,responseSha256:sha(sent.xml),code:p.code,description:p.description,protocol:p.protocol};if(!p.protocol)throw new Error(`eSocial não retornou protocolo: ${p.code??"sem código"} ${p.description??""}`);for(let attempt=1;attempt<=6;attempt++){await sleep(attempt===1?1500:5000);const queried=await post(QUERY_URL,QUERY_ACTION,soapQuery(p.protocol),pfx,passphrase);const q=parse(queried.xml);evidence.queries.push({attempt,httpStatus:queried.httpStatus,durationMs:queried.durationMs,responseSha256:sha(queried.xml),code:q.code,description:q.description,receipt:q.receipt??null});if(q.code&&q.code!=="101"){evidence.terminal=true;evidence.finalCode=q.code;evidence.finalDescription=q.description;evidence.receipt=q.receipt??null;break;}}if(!evidence.terminal)throw new Error("Lote permaneceu em processamento após as consultas controladas; reconciliação posterior é necessária.");evidence.completedAt=new Date().toISOString();fs.mkdirSync(".evidence/rh",{recursive:true});fs.writeFileSync(".evidence/rh/esocial-restricted-homologation.json",JSON.stringify(evidence,null,2));console.log(`Homologação eSocial restrita concluída: protocolo ${evidence.send.protocol}, código ${evidence.finalCode}, recibo ${evidence.receipt??"—"}.`);}catch(error){evidence.completedAt=new Date().toISOString();evidence.failure=error instanceof Error?error.message:String(error);fs.mkdirSync(".evidence/rh",{recursive:true});fs.writeFileSync(".evidence/rh/esocial-restricted-homologation.json",JSON.stringify(evidence,null,2));throw error;}

@@ -5,6 +5,12 @@
 **Versão estável:** 0.19.0  
 **Última etapa incorporada:** 19  
 **Próxima etapa oficial:** 20 — Prontidão de Produção  
+**Atualizado em:** 9 de agosto de 2026  
+**Base estável:** `main`  
+**Commit-base da branch:** `ecf80482`  
+**Branch funcional ativa:** `feature/etapa-22-whatsapp-omnichannel`; Projeto RH em `feature/projeto-rh-especificacao-funcional`  
+**PRs funcionais:** `#39` e `#42` — rascunho  
+**Versão:** 0.19.0  
 **Produção:** não liberada
 
 ## 1. Repositório e runtimes
@@ -19,6 +25,9 @@
 - gateway de mensagens em `apps/messaging-gateway`;
 - branch experimental da Etapa 22: `feature/etapa-22-provider-whatsapp-web-baileys`;
 - PR `#40`: draft, aberto, não mesclado e pendente de revisão.
+- Supabase Auth, PostgreSQL, RLS e Storage;
+- projeto Supabase conectado: `wyeojufebtwblsubkunr`;
+- a branch RH não está mesclada nem homologada externamente.
 
 ## 2. Estado dos aplicativos
 
@@ -47,6 +56,33 @@
 | `relatorios` | Relatórios e Indicadores | operacional |
 | `auditoria` | Auditoria e Observabilidade | homologado e incorporado na Etapa 19 |
 | `administracao` | Administração | operacional |
+| Chave | Aplicativo | Estado | Etapa |
+|---|---|---|---|
+| `dashboard` | Início | operacional; fundação visual revisada | 12.1/20 |
+| `crm` | CRM e Vendas | implementado e homologado | 18 |
+| `clientes` | Clientes | Cliente 360 multiobra implementado | 18 |
+| `obras` | Obras | operacional | 12 |
+| `planejamento` | Planejamento | operacional | 12 |
+| `tarefas` | Tarefas | operacional | 12 |
+| `diario` | Diário de Obras | operacional; antimalware pendente | 12/20 |
+| `equipes` | Equipes | operacional | 12 |
+| `orcamentos` | Orçamentos | operacional | 9 |
+| `propostas` | Propostas | operacional | 9 |
+| `contratos` | Contratos | operacional | 9 |
+| `aditivos` | Aditivos | operacional | 9 |
+| `assinaturas` | Assinaturas | sandbox; provider jurídico pendente | 9/12.2/20 |
+| `documentos` | Documentos | operacional; antimalware pendente | 12/13/20 |
+| `modelos` | Modelos e Documentações | biblioteca única de modelos, lida por todos os aplicativos; tipo classifica, Administração libera por aplicativo | 32 |
+| `qualidade` | Qualidade | operacional; antimalware pendente | 13/20 |
+| `compras` | Compras e Suprimentos | operacional; antimalware pendente | 14/20 |
+| `estoque` | Estoque, Inventário e Almoxarifado | homologado; concorrência real aprovada | 17/20 |
+| `financeiro` | Financeiro Operacional | operacional; antimalware pendente | 15/20 |
+| `sac` | Pós-venda e SAC | homologado; quarentena integrada na branch da Etapa 20 | 18/20 |
+| `whatsapp` | WhatsApp e Atendimento | implementação em branch; não homologado; Cloud API oficial | 22 |
+| `rh` | Recursos Humanos e Departamento Pessoal | núcleo funcional e gates internos validados; homologação externa, piloto e produção pendentes | Projeto RH / PR #42 |
+| `relatorios` | Relatórios e Indicadores | operacional | 16 |
+| `auditoria` | Auditoria e Observabilidade | homologado e incorporado | 19 |
+| `administracao` | Administração | operacional | 12.1 |
 
 ## 3. Documentação canônica
 
@@ -74,6 +110,9 @@ docs/ETAPA-22-WHATSAPP-WEB-NAO-OFICIAL/
 ├── DECISAO-PRODUCAO-W22.md
 ├── MATRIZ-LICENCAS-E-REAPROVEITAMENTO.md
 └── runbooks e contratos técnicos
+docs/ANALISE-REFERENCIAS-WHATSAPP-OPEN-SOURCE-2026-08-03.md
+docs/PROJETO-RH-EXECUCAO-STATUS-IMPLEMENTACAO.md
+docs/PROJETO-RH-EXECUCAO-BLOCOS-CRITICOS-2026-08-07.md
 ```
 
 ## 4. Etapas estáveis
@@ -175,6 +214,65 @@ Meta Cloud permanece preservado e é o único runtime WhatsApp implementado no m
 ## 8. Variáveis conhecidas
 
 Somente nomes e defaults não sensíveis são versionados:
+## 9. Projeto RH / DP
+
+**Estado:** implementação funcional validada internamente no PR de rascunho `#42`; homologação externa e produção não liberadas.
+
+### Código e capacidades principais
+
+```text
+app/app/rh/**
+app/actions/rh-*.ts
+app/api/rh/**
+lib/rh/**
+supabase/migrations/*_rh_*.sql
+supabase/tests/rh/**
+tests/rh/**
+.github/workflows/rh-*.yml
+```
+
+### Estado técnico atual
+
+- núcleo pessoa → trabalhador → vínculo → condição vigente;
+- empresas, estabelecimentos, lotações, cargos/CBO, funções, sindicatos e jornadas;
+- admissão, alterações, ponto, férias, afastamentos, benefícios, SST e desligamento;
+- folha parametrizada, IRRF 2026, múltiplos vínculos, 13º, retroativos, provisões, contabilização e pagamentos;
+- documentos privados, recibos PDF e portal Meu RH;
+- eSocial com geração XML, XMLDSig, XSD oficial, mTLS, lote, protocolo, consulta e retorno por evento;
+- DCTFWeb/MIT, Integra Contador por capability e FGTS Digital/arquivo rescisório;
+- folha-sombra e reconciliação;
+- backup/restore isolado com comparação estrutural e de dados;
+- gates RH específicos verdes no checkpoint documentado em `docs/PROJETO-RH-EXECUCAO-STATUS-IMPLEMENTACAO.md`.
+
+### Pendências externas
+
+- Produção Restrita eSocial com certificado/inscrições reais;
+- Browser E2E em homologação HTTPS isolada;
+- Integra Contador com contrato/credenciais reais;
+- folha-sombra contra fonte autorizada real;
+- rehearsal de cutover/rollback;
+- piloto e GO/NO_GO;
+- produção.
+
+## 10. Storage privado
+
+```text
+commercial-documents
+contract-documents
+project-documents
+daily-log-media
+signature-artifacts
+quality-documents
+quality-form-attachments
+procurement-attachments
+finance-attachments
+crm-sac-attachments
+file-quarantine
+```
+
+`file-quarantine` deve permanecer privado. Objetos `PENDING`, `SCANNING`, `BLOCKED` ou `ERROR` nunca recebem URL funcional para o usuário.
+
+## 11. Variáveis conhecidas
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
@@ -191,6 +289,7 @@ GATEWAY_HMAC_SECRET=
 ## 9. CI
 
 Gates mínimos:
+## 12. CI
 
 ```bash
 pnpm validate:docs
@@ -208,6 +307,9 @@ pnpm build
 ```
 
 ## 10. Recuperação e limites
+Os PRs funcionais permanecem em rascunho até todos os gates aplicáveis ficarem verdes.
+
+## 13. Recuperação
 
 Procedimento oficial: `diretrizes/RECUPERACAO.md`.
 

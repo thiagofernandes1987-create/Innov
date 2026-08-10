@@ -4,6 +4,7 @@ import { SmartSearchBar } from "@/components/busca/smart-search-bar";
 import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatCurrency, formatPercent } from "@/lib/domain";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { singleRelation } from "@/lib/supabase/relations";
 
 export default async function ProposalsPage({
@@ -25,6 +26,8 @@ export default async function ProposalsPage({
     `)
     .eq("organization_id", organizationId)
     .order("updated_at", { ascending: false });
+
+  if (error) reportDataAccessError("proposals.page.load", error);
 
   const normalizedQuery = String(query.q ?? "").trim().toLocaleLowerCase("pt-BR");
   const proposals = (data ?? []).filter((proposal) => {
@@ -86,7 +89,7 @@ export default async function ProposalsPage({
       />
       <p className="workspace-intro">Propostas podem nascer de orçamento calculado ou de valor fixo, com desconto e alçada auditável.</p>
       {query.error ? <div className="validation blocking" role="alert">{query.error}</div> : null}
-      {error ? <div className="validation blocking" role="alert">{error.message}</div> : null}
+      {error ? <div className="validation blocking" role="alert">Não foi possível carregar as propostas.</div> : null}
       <section className="card table-wrap" style={{ marginTop: 18 }}>
         <table>
           <thead><tr><th>Código</th><th>Cliente</th><th>Origem</th><th>Status</th><th>Valor base</th><th>Desconto</th><th>Valor final</th><th>Documento</th><th>Ação</th></tr></thead>

@@ -1,0 +1,3041 @@
+{
+  "migration_count": 106,
+  "tables_created": 136,
+  "tables_rls_enabled": 136,
+  "tables_without_rls": [],
+  "tables_rls_without_policy": [
+    "signature_access_tokens",
+    "signature_conversion_jobs"
+  ],
+  "storage_policies": [
+    {
+      "policy": "project_documents_storage_select",
+      "cmd": "select",
+      "file": "20260719223300_stage12_planning_storage.sql"
+    },
+    {
+      "policy": "project_documents_storage_insert",
+      "cmd": "insert",
+      "file": "20260719223300_stage12_planning_storage.sql"
+    },
+    {
+      "policy": "project_documents_storage_update",
+      "cmd": "update",
+      "file": "20260719223300_stage12_planning_storage.sql"
+    },
+    {
+      "policy": "project_documents_storage_delete",
+      "cmd": "delete",
+      "file": "20260719223300_stage12_planning_storage.sql"
+    },
+    {
+      "policy": "daily_log_media_storage_select",
+      "cmd": "select",
+      "file": "20260719223300_stage12_planning_storage.sql"
+    },
+    {
+      "policy": "daily_log_media_storage_insert",
+      "cmd": "insert",
+      "file": "20260719223300_stage12_planning_storage.sql"
+    },
+    {
+      "policy": "daily_log_media_storage_update",
+      "cmd": "update",
+      "file": "20260719223300_stage12_planning_storage.sql"
+    },
+    {
+      "policy": "daily_log_media_storage_delete",
+      "cmd": "delete",
+      "file": "20260719223300_stage12_planning_storage.sql"
+    },
+    {
+      "policy": "commercial_documents_internal",
+      "cmd": "all",
+      "file": "20260719230000_stage9_financial_contracts.sql"
+    },
+    {
+      "policy": "contract_documents_internal",
+      "cmd": "all",
+      "file": "20260719230000_stage9_financial_contracts.sql"
+    },
+    {
+      "policy": "signature_artifacts_internal",
+      "cmd": "all",
+      "file": "20260719230000_stage9_financial_contracts.sql"
+    },
+    {
+      "policy": "commercial_documents_internal",
+      "cmd": "all",
+      "file": "20260719234500_stage9_security_hardening.sql"
+    },
+    {
+      "policy": "contract_documents_internal",
+      "cmd": "all",
+      "file": "20260719234500_stage9_security_hardening.sql"
+    },
+    {
+      "policy": "signature_artifacts_internal",
+      "cmd": "all",
+      "file": "20260719234500_stage9_security_hardening.sql"
+    },
+    {
+      "policy": "signature_artifacts_internal_select",
+      "cmd": "select",
+      "file": "20260720054310_stage12_2_signature_storage.sql"
+    },
+    {
+      "policy": "signature_artifacts_internal_insert",
+      "cmd": "insert",
+      "file": "20260720054310_stage12_2_signature_storage.sql"
+    },
+    {
+      "policy": "signature_artifacts_internal_update",
+      "cmd": "update",
+      "file": "20260720054310_stage12_2_signature_storage.sql"
+    },
+    {
+      "policy": "quality_documents_storage_internal_read",
+      "cmd": "select",
+      "file": "20260720080100_stage13_quality_forms_security.sql"
+    },
+    {
+      "policy": "quality_documents_storage_internal_insert",
+      "cmd": "insert",
+      "file": "20260720080100_stage13_quality_forms_security.sql"
+    },
+    {
+      "policy": "quality_documents_storage_internal_delete",
+      "cmd": "delete",
+      "file": "20260720080100_stage13_quality_forms_security.sql"
+    },
+    {
+      "policy": "quality_attachments_storage_internal_read",
+      "cmd": "select",
+      "file": "20260720080100_stage13_quality_forms_security.sql"
+    },
+    {
+      "policy": "quality_attachments_storage_internal_insert",
+      "cmd": "insert",
+      "file": "20260720080100_stage13_quality_forms_security.sql"
+    },
+    {
+      "policy": "quality_documents_storage_client_read",
+      "cmd": "select",
+      "file": "20260720080150_stage13_quality_forms_hardening.sql"
+    },
+    {
+      "policy": "quality_attachments_storage_client_read",
+      "cmd": "select",
+      "file": "20260720080150_stage13_quality_forms_hardening.sql"
+    },
+    {
+      "policy": "procurement_storage_read",
+      "cmd": "select",
+      "file": "20260720103100_stage14_procurement_security.sql"
+    },
+    {
+      "policy": "procurement_storage_insert",
+      "cmd": "insert",
+      "file": "20260720103100_stage14_procurement_security.sql"
+    },
+    {
+      "policy": "procurement_storage_delete",
+      "cmd": "delete",
+      "file": "20260720103100_stage14_procurement_security.sql"
+    },
+    {
+      "policy": "finance_storage_read",
+      "cmd": "select",
+      "file": "20260720123100_stage15_finance_security.sql"
+    },
+    {
+      "policy": "finance_storage_insert",
+      "cmd": "insert",
+      "file": "20260720123100_stage15_finance_security.sql"
+    },
+    {
+      "policy": "finance_storage_delete",
+      "cmd": "delete",
+      "file": "20260720123100_stage15_finance_security.sql"
+    },
+    {
+      "policy": "crm_sac_storage_select_internal",
+      "cmd": "select",
+      "file": "20260721012701_stage18_relationship_security.sql"
+    },
+    {
+      "policy": "crm_sac_storage_insert_internal",
+      "cmd": "insert",
+      "file": "20260721012701_stage18_relationship_security.sql"
+    },
+    {
+      "policy": "crm_sac_storage_update_internal",
+      "cmd": "update",
+      "file": "20260721012701_stage18_relationship_security.sql"
+    },
+    {
+      "policy": "crm_sac_storage_delete_internal",
+      "cmd": "delete",
+      "file": "20260721012701_stage18_relationship_security.sql"
+    }
+  ],
+  "detail": {
+    "administrative_fee_models": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "amendment_versions": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "amendment_versions_internal_or_client",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "amendment_versions_internal_write",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "amendment_versions_internal_or_client",
+          "cmd": "select",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        },
+        {
+          "policy": "amendment_versions_internal_write",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        }
+      ]
+    },
+    "amendments": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "amendments_internal_or_client",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "amendments_internal_write",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "amendments_internal_or_client",
+          "cmd": "select",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        },
+        {
+          "policy": "amendments_internal_write",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        }
+      ]
+    },
+    "audit_events": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql",
+        "20260721100159_stage19_observability_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "audit_internal_read",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "audit_events_stage19_select",
+          "cmd": "select",
+          "file": "20260721100159_stage19_observability_security.sql"
+        }
+      ]
+    },
+    "bdi_model_versions": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "bdi_models": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "budget_approvals": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "budget_items": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "budget_scenarios": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "budget_sections": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "budget_validation_results": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "budget_versions": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "budgets": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "client_consents": {
+      "created_in": "20260721012434_stage18_relationship_schema.sql",
+      "rls": [
+        "20260721012701_stage18_relationship_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "client_consents_select",
+          "cmd": "select",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        },
+        {
+          "policy": "client_consents_insert",
+          "cmd": "insert",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "client_contacts": {
+      "created_in": "20260721012434_stage18_relationship_schema.sql",
+      "rls": [
+        "20260721012701_stage18_relationship_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "client_contacts_select",
+          "cmd": "select",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        },
+        {
+          "policy": "client_contacts_write",
+          "cmd": "all",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "clients": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql"
+      ],
+      "policies": [
+        {
+          "policy": "clients_internal_or_owner",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "clients_internal_or_owner",
+          "cmd": "select",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        },
+        {
+          "policy": "clients_stage18_select",
+          "cmd": "select",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        },
+        {
+          "policy": "clients_stage18_insert",
+          "cmd": "insert",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        },
+        {
+          "policy": "clients_stage18_update",
+          "cmd": "update",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        },
+        {
+          "policy": "clients_stage18_delete",
+          "cmd": "delete",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "contract_parties": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "contract_templates": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "contract_versions": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "contract_versions_internal_or_client",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "contract_versions_internal_write",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "contract_versions_internal_or_client",
+          "cmd": "select",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        },
+        {
+          "policy": "contract_versions_internal_write",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        }
+      ]
+    },
+    "contracts": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "contracts_internal_or_client",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "contracts_internal_write",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "contracts_internal_or_client",
+          "cmd": "select",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        },
+        {
+          "policy": "contracts_internal_write",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        }
+      ]
+    },
+    "cost_catalog_items": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "cost_composition_items": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "cost_composition_versions": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "cost_compositions": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "crm_activities": {
+      "created_in": "20260721012434_stage18_relationship_schema.sql",
+      "rls": [
+        "20260721012701_stage18_relationship_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "crm_activities_internal",
+          "cmd": "all",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "crm_leads": {
+      "created_in": "20260721012434_stage18_relationship_schema.sql",
+      "rls": [
+        "20260721012701_stage18_relationship_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "crm_leads_internal",
+          "cmd": "all",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "crm_opportunity_stage_history": {
+      "created_in": "20260721012434_stage18_relationship_schema.sql",
+      "rls": [
+        "20260721012701_stage18_relationship_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "crm_stage_history_select",
+          "cmd": "select",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "daily_log_activities": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223275_stage12_rls_field_documents.sql"
+      ],
+      "policies": [
+        {
+          "policy": "daily_activities_internal_or_client",
+          "cmd": "select",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        },
+        {
+          "policy": "daily_activities_internal_write",
+          "cmd": "all",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        }
+      ]
+    },
+    "daily_log_media": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223275_stage12_rls_field_documents.sql"
+      ],
+      "policies": [
+        {
+          "policy": "daily_media_internal_or_client",
+          "cmd": "select",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        },
+        {
+          "policy": "daily_media_internal_write",
+          "cmd": "all",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        }
+      ]
+    },
+    "daily_log_resources": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223275_stage12_rls_field_documents.sql"
+      ],
+      "policies": [
+        {
+          "policy": "daily_resources_internal_or_client",
+          "cmd": "select",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        },
+        {
+          "policy": "daily_resources_internal_write",
+          "cmd": "all",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        }
+      ]
+    },
+    "daily_logs": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223275_stage12_rls_field_documents.sql"
+      ],
+      "policies": [
+        {
+          "policy": "daily_logs_internal_or_client",
+          "cmd": "select",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        },
+        {
+          "policy": "daily_logs_internal_write",
+          "cmd": "all",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        }
+      ]
+    },
+    "document_access_logs": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "finance_approvals": {
+      "created_in": "20260720123000_stage15_finance_schema.sql",
+      "rls": [
+        "20260720123100_stage15_finance_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        }
+      ]
+    },
+    "finance_attachments": {
+      "created_in": "20260720123000_stage15_finance_schema.sql",
+      "rls": [
+        "20260720123100_stage15_finance_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        }
+      ]
+    },
+    "finance_cash_accounts": {
+      "created_in": "20260720123000_stage15_finance_schema.sql",
+      "rls": [
+        "20260720123100_stage15_finance_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        }
+      ]
+    },
+    "finance_categories": {
+      "created_in": "20260720123000_stage15_finance_schema.sql",
+      "rls": [
+        "20260720123100_stage15_finance_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        }
+      ]
+    },
+    "finance_cost_centers": {
+      "created_in": "20260720123000_stage15_finance_schema.sql",
+      "rls": [
+        "20260720123100_stage15_finance_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        }
+      ]
+    },
+    "finance_entries": {
+      "created_in": "20260720123000_stage15_finance_schema.sql",
+      "rls": [
+        "20260720123100_stage15_finance_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        }
+      ]
+    },
+    "finance_events": {
+      "created_in": "20260720123000_stage15_finance_schema.sql",
+      "rls": [
+        "20260720123100_stage15_finance_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        }
+      ]
+    },
+    "finance_installments": {
+      "created_in": "20260720123000_stage15_finance_schema.sql",
+      "rls": [
+        "20260720123100_stage15_finance_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        }
+      ]
+    },
+    "finance_measurement_items": {
+      "created_in": "20260720123000_stage15_finance_schema.sql",
+      "rls": [
+        "20260720123100_stage15_finance_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        }
+      ]
+    },
+    "finance_measurements": {
+      "created_in": "20260720123000_stage15_finance_schema.sql",
+      "rls": [
+        "20260720123100_stage15_finance_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        }
+      ]
+    },
+    "finance_settlements": {
+      "created_in": "20260720123000_stage15_finance_schema.sql",
+      "rls": [
+        "20260720123100_stage15_finance_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720123100_stage15_finance_security.sql#dynamic"
+        }
+      ]
+    },
+    "fixed_costs": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "inventory_asset_custodies": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "inventory_asset_custodies_select",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        }
+      ]
+    },
+    "inventory_asset_maintenance": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "inventory_asset_maintenance_select",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        },
+        {
+          "policy": "inventory_asset_maintenance_insert",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        },
+        {
+          "policy": "inventory_asset_maintenance_update",
+          "cmd": "update",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        }
+      ]
+    },
+    "inventory_assets": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "inventory_assets_select",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        },
+        {
+          "policy": "inventory_assets_insert",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        }
+      ]
+    },
+    "inventory_categories": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        }
+      ]
+    },
+    "inventory_events": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "inventory_events_select",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        }
+      ]
+    },
+    "inventory_items": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        }
+      ]
+    },
+    "inventory_locations": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        }
+      ]
+    },
+    "inventory_lots": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        }
+      ]
+    },
+    "inventory_movement_lines": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "inventory_movement_lines_select",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        },
+        {
+          "policy": "inventory_movement_lines_insert",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        },
+        {
+          "policy": "inventory_movement_lines_update",
+          "cmd": "update",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        },
+        {
+          "policy": "inventory_movement_lines_delete",
+          "cmd": "delete",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        }
+      ]
+    },
+    "inventory_movements": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "inventory_movements_select",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        },
+        {
+          "policy": "inventory_movements_insert",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        },
+        {
+          "policy": "inventory_movements_update",
+          "cmd": "update",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        },
+        {
+          "policy": "inventory_movements_delete",
+          "cmd": "delete",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        }
+      ]
+    },
+    "inventory_procurement_item_mappings": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        }
+      ]
+    },
+    "inventory_receipt_imports": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "inventory_receipt_imports_select",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        }
+      ]
+    },
+    "inventory_reservation_lines": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "inventory_reservation_lines_select",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        }
+      ]
+    },
+    "inventory_reservations": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "inventory_reservations_select",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        }
+      ]
+    },
+    "inventory_stocktake_lines": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "inventory_stocktake_lines_select",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        },
+        {
+          "policy": "inventory_stocktake_lines_insert",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        }
+      ]
+    },
+    "inventory_stocktakes": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "inventory_stocktakes_select",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql"
+        }
+      ]
+    },
+    "inventory_units": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        }
+      ]
+    },
+    "inventory_warehouses": {
+      "created_in": "20260720160000_stage17_inventory_schema.sql",
+      "rls": [
+        "20260720160500_stage17_inventory_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720160500_stage17_inventory_security.sql#dynamic"
+        }
+      ]
+    },
+    "markup_models": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        }
+      ]
+    },
+    "membership_access_profiles": {
+      "created_in": "20260720043000_stage12_1_module_catalog_multi_profiles.sql",
+      "rls": [
+        "20260720043200_stage12_1_module_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "membership_profiles_read",
+          "cmd": "select",
+          "file": "20260720043200_stage12_1_module_security.sql"
+        }
+      ]
+    },
+    "observability_alert_rules": {
+      "created_in": "20260721100108_stage19_observability_schema.sql",
+      "rls": [
+        "20260721100159_stage19_observability_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "observability_alert_rules_select",
+          "cmd": "select",
+          "file": "20260721100159_stage19_observability_security.sql"
+        },
+        {
+          "policy": "observability_alert_rules_insert",
+          "cmd": "insert",
+          "file": "20260721100159_stage19_observability_security.sql"
+        },
+        {
+          "policy": "observability_alert_rules_update",
+          "cmd": "update",
+          "file": "20260721100159_stage19_observability_security.sql"
+        },
+        {
+          "policy": "observability_alert_rules_delete",
+          "cmd": "delete",
+          "file": "20260721100159_stage19_observability_security.sql"
+        }
+      ]
+    },
+    "observability_alerts": {
+      "created_in": "20260721100108_stage19_observability_schema.sql",
+      "rls": [
+        "20260721100159_stage19_observability_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "observability_alerts_select",
+          "cmd": "select",
+          "file": "20260721100159_stage19_observability_security.sql"
+        }
+      ]
+    },
+    "observability_diagnostics": {
+      "created_in": "20260721100108_stage19_observability_schema.sql",
+      "rls": [
+        "20260721100159_stage19_observability_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "observability_diagnostics_select",
+          "cmd": "select",
+          "file": "20260721100159_stage19_observability_security.sql"
+        },
+        {
+          "policy": "observability_diagnostics_select",
+          "cmd": "select",
+          "file": "20260721123305_stage19_observability_hardening.sql"
+        },
+        {
+          "policy": "observability_diagnostics_select",
+          "cmd": "select",
+          "file": "20260723104500_r3b_observability_security_hardening.sql"
+        }
+      ]
+    },
+    "observability_health_checks": {
+      "created_in": "20260721100108_stage19_observability_schema.sql",
+      "rls": [
+        "20260721100159_stage19_observability_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "observability_health_checks_select",
+          "cmd": "select",
+          "file": "20260721100159_stage19_observability_security.sql"
+        }
+      ]
+    },
+    "observability_retention_policies": {
+      "created_in": "20260721100108_stage19_observability_schema.sql",
+      "rls": [
+        "20260721100159_stage19_observability_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "observability_retention_policies_select",
+          "cmd": "select",
+          "file": "20260721100159_stage19_observability_security.sql"
+        },
+        {
+          "policy": "observability_retention_policies_insert",
+          "cmd": "insert",
+          "file": "20260721100159_stage19_observability_security.sql"
+        },
+        {
+          "policy": "observability_retention_policies_update",
+          "cmd": "update",
+          "file": "20260721100159_stage19_observability_security.sql"
+        },
+        {
+          "policy": "observability_retention_policies_delete",
+          "cmd": "delete",
+          "file": "20260721100159_stage19_observability_security.sql"
+        }
+      ]
+    },
+    "opportunities": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql"
+      ],
+      "policies": [
+        {
+          "policy": "opportunities_internal",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "opportunities_internal",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        },
+        {
+          "policy": "opportunities_stage18_select",
+          "cmd": "select",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        },
+        {
+          "policy": "opportunities_stage18_write",
+          "cmd": "all",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "organization_memberships": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql"
+      ],
+      "policies": [
+        {
+          "policy": "memberships_self_or_admin",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        }
+      ]
+    },
+    "organizations": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql"
+      ],
+      "policies": [
+        {
+          "policy": "organizations_member_select",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        }
+      ]
+    },
+    "procurement_approvals": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_events": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_order_items": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_orders": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_quote_items": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_quotes": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_receipt_items": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_receipt_quality": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_receipts": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_request_items": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_requests": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_rfqs": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_supplier_invitations": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "procurement_suppliers": {
+      "created_in": "20260720103000_stage14_procurement_schema.sql",
+      "rls": [
+        "20260720103100_stage14_procurement_security.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "select",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "insert",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "update",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "delete",
+          "file": "20260720103100_stage14_procurement_security.sql#dynamic"
+        }
+      ]
+    },
+    "profiles": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql"
+      ],
+      "policies": [
+        {
+          "policy": "profiles_self",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        }
+      ]
+    },
+    "project_document_versions": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223275_stage12_rls_field_documents.sql"
+      ],
+      "policies": [
+        {
+          "policy": "project_document_versions_internal_or_client",
+          "cmd": "select",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        },
+        {
+          "policy": "project_document_versions_internal_write",
+          "cmd": "all",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        }
+      ]
+    },
+    "project_documents": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223275_stage12_rls_field_documents.sql"
+      ],
+      "policies": [
+        {
+          "policy": "project_documents_internal_or_client",
+          "cmd": "select",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        },
+        {
+          "policy": "project_documents_internal_write",
+          "cmd": "all",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        }
+      ]
+    },
+    "project_memberships": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223200_stage12_rls_core.sql"
+      ],
+      "policies": [
+        {
+          "policy": "project_memberships_internal",
+          "cmd": "all",
+          "file": "20260719223200_stage12_rls_core.sql"
+        }
+      ]
+    },
+    "project_milestones": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223200_stage12_rls_core.sql"
+      ],
+      "policies": [
+        {
+          "policy": "milestones_internal_or_client",
+          "cmd": "select",
+          "file": "20260719223200_stage12_rls_core.sql"
+        },
+        {
+          "policy": "milestones_internal_write",
+          "cmd": "all",
+          "file": "20260719223200_stage12_rls_core.sql"
+        }
+      ]
+    },
+    "project_progress_snapshots": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223275_stage12_rls_field_documents.sql"
+      ],
+      "policies": [
+        {
+          "policy": "progress_internal_or_client",
+          "cmd": "select",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        },
+        {
+          "policy": "progress_internal_write",
+          "cmd": "all",
+          "file": "20260719223275_stage12_rls_field_documents.sql"
+        }
+      ]
+    },
+    "project_resources": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223250_stage12_rls_resources.sql"
+      ],
+      "policies": [
+        {
+          "policy": "resources_internal",
+          "cmd": "all",
+          "file": "20260719223250_stage12_rls_resources.sql"
+        }
+      ]
+    },
+    "project_tasks": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223200_stage12_rls_core.sql"
+      ],
+      "policies": [
+        {
+          "policy": "tasks_internal_or_client",
+          "cmd": "select",
+          "file": "20260719223200_stage12_rls_core.sql"
+        },
+        {
+          "policy": "tasks_internal_write",
+          "cmd": "all",
+          "file": "20260719223200_stage12_rls_core.sql"
+        }
+      ]
+    },
+    "project_team_members": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223250_stage12_rls_resources.sql"
+      ],
+      "policies": [
+        {
+          "policy": "team_members_internal",
+          "cmd": "all",
+          "file": "20260719223250_stage12_rls_resources.sql"
+        }
+      ]
+    },
+    "project_teams": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223250_stage12_rls_resources.sql"
+      ],
+      "policies": [
+        {
+          "policy": "teams_internal",
+          "cmd": "all",
+          "file": "20260719223250_stage12_rls_resources.sql"
+        }
+      ]
+    },
+    "projects": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql"
+      ],
+      "policies": [
+        {
+          "policy": "projects_internal_or_client_stage12",
+          "cmd": "select",
+          "file": "20260719223200_stage12_rls_core.sql"
+        },
+        {
+          "policy": "projects_internal_write_stage12",
+          "cmd": "all",
+          "file": "20260719223200_stage12_rls_core.sql"
+        },
+        {
+          "policy": "projects_internal_or_client",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "projects_internal_or_client",
+          "cmd": "select",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        }
+      ]
+    },
+    "proposal_acceptances": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "proposal_acceptance_client",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        }
+      ]
+    },
+    "proposal_versions": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "proposal_versions_internal_or_client",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "proposal_versions_internal_write",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "proposal_versions_internal_or_client",
+          "cmd": "select",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        },
+        {
+          "policy": "proposal_versions_internal_write",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        }
+      ]
+    },
+    "proposals": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "proposals_internal_or_client",
+          "cmd": "select",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "proposals_internal_write",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql"
+        },
+        {
+          "policy": "proposals_internal_or_client",
+          "cmd": "select",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        },
+        {
+          "policy": "proposals_internal_write",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql"
+        }
+      ]
+    },
+    "quality_documents": {
+      "created_in": "20260720080000_stage13_quality_forms_schema.sql",
+      "rls": [
+        "20260720080100_stage13_quality_forms_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "quality_documents_internal_read",
+          "cmd": "select",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_documents_internal_write",
+          "cmd": "insert",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_documents_internal_update",
+          "cmd": "update",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_documents_internal_delete",
+          "cmd": "delete",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_documents_client_read",
+          "cmd": "select",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        }
+      ]
+    },
+    "quality_form_answers": {
+      "created_in": "20260720080000_stage13_quality_forms_schema.sql",
+      "rls": [
+        "20260720080100_stage13_quality_forms_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "quality_answers_internal_read",
+          "cmd": "select",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_answers_internal_write",
+          "cmd": "all",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_answers_client_read",
+          "cmd": "select",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        }
+      ]
+    },
+    "quality_form_assignments": {
+      "created_in": "20260720080000_stage13_quality_forms_schema.sql",
+      "rls": [
+        "20260720080100_stage13_quality_forms_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "quality_assignments_internal_read",
+          "cmd": "select",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_assignments_internal_write",
+          "cmd": "all",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_assignments_client_read",
+          "cmd": "select",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        }
+      ]
+    },
+    "quality_form_events": {
+      "created_in": "20260720080000_stage13_quality_forms_schema.sql",
+      "rls": [
+        "20260720080100_stage13_quality_forms_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "quality_events_internal_read",
+          "cmd": "select",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        }
+      ]
+    },
+    "quality_form_responses": {
+      "created_in": "20260720080000_stage13_quality_forms_schema.sql",
+      "rls": [
+        "20260720080100_stage13_quality_forms_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "quality_responses_internal_read",
+          "cmd": "select",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_responses_internal_write",
+          "cmd": "all",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_responses_client_read",
+          "cmd": "select",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        }
+      ]
+    },
+    "quality_form_templates": {
+      "created_in": "20260720080000_stage13_quality_forms_schema.sql",
+      "rls": [
+        "20260720080100_stage13_quality_forms_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "quality_templates_internal_read",
+          "cmd": "select",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_templates_internal_write",
+          "cmd": "all",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        }
+      ]
+    },
+    "quality_form_versions": {
+      "created_in": "20260720080000_stage13_quality_forms_schema.sql",
+      "rls": [
+        "20260720080100_stage13_quality_forms_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "quality_versions_internal_read",
+          "cmd": "select",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        },
+        {
+          "policy": "quality_versions_internal_write",
+          "cmd": "insert",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        }
+      ]
+    },
+    "quality_public_links": {
+      "created_in": "20260720080000_stage13_quality_forms_schema.sql",
+      "rls": [
+        "20260720080100_stage13_quality_forms_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "quality_links_internal",
+          "cmd": "all",
+          "file": "20260720080100_stage13_quality_forms_security.sql"
+        }
+      ]
+    },
+    "report_events": {
+      "created_in": "20260720143000_stage16_reports_schema.sql",
+      "rls": [
+        "20260720143100_stage16_reports_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "report_events_select",
+          "cmd": "select",
+          "file": "20260720143100_stage16_reports_security.sql"
+        }
+      ]
+    },
+    "report_exports": {
+      "created_in": "20260720143000_stage16_reports_schema.sql",
+      "rls": [
+        "20260720143100_stage16_reports_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "report_exports_select",
+          "cmd": "select",
+          "file": "20260720143100_stage16_reports_security.sql"
+        }
+      ]
+    },
+    "report_metric_definitions": {
+      "created_in": "20260720143000_stage16_reports_schema.sql",
+      "rls": [
+        "20260720143100_stage16_reports_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "report_metric_definitions_select",
+          "cmd": "select",
+          "file": "20260720143100_stage16_reports_security.sql"
+        },
+        {
+          "policy": "report_metric_definitions_insert",
+          "cmd": "insert",
+          "file": "20260720143100_stage16_reports_security.sql"
+        },
+        {
+          "policy": "report_metric_definitions_update",
+          "cmd": "update",
+          "file": "20260720143100_stage16_reports_security.sql"
+        },
+        {
+          "policy": "report_metric_definitions_delete",
+          "cmd": "delete",
+          "file": "20260720143100_stage16_reports_security.sql"
+        }
+      ]
+    },
+    "report_saved_views": {
+      "created_in": "20260720143000_stage16_reports_schema.sql",
+      "rls": [
+        "20260720143100_stage16_reports_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "report_saved_views_select",
+          "cmd": "select",
+          "file": "20260720143100_stage16_reports_security.sql"
+        },
+        {
+          "policy": "report_saved_views_insert",
+          "cmd": "insert",
+          "file": "20260720143100_stage16_reports_security.sql"
+        },
+        {
+          "policy": "report_saved_views_update",
+          "cmd": "update",
+          "file": "20260720143100_stage16_reports_security.sql"
+        },
+        {
+          "policy": "report_saved_views_delete",
+          "cmd": "delete",
+          "file": "20260720143100_stage16_reports_security.sql"
+        }
+      ]
+    },
+    "report_snapshots": {
+      "created_in": "20260720143000_stage16_reports_schema.sql",
+      "rls": [
+        "20260720143100_stage16_reports_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "report_snapshots_select",
+          "cmd": "select",
+          "file": "20260720143100_stage16_reports_security.sql"
+        },
+        {
+          "policy": "report_snapshots_select",
+          "cmd": "select",
+          "file": "20260720143300_stage16_reports_hardening.sql"
+        }
+      ]
+    },
+    "report_targets": {
+      "created_in": "20260720143000_stage16_reports_schema.sql",
+      "rls": [
+        "20260720143100_stage16_reports_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "report_targets_select",
+          "cmd": "select",
+          "file": "20260720143100_stage16_reports_security.sql"
+        },
+        {
+          "policy": "report_targets_insert",
+          "cmd": "insert",
+          "file": "20260720143100_stage16_reports_security.sql"
+        },
+        {
+          "policy": "report_targets_update",
+          "cmd": "update",
+          "file": "20260720143100_stage16_reports_security.sql"
+        },
+        {
+          "policy": "report_targets_delete",
+          "cmd": "delete",
+          "file": "20260720143100_stage16_reports_security.sql"
+        }
+      ]
+    },
+    "sac_categories": {
+      "created_in": "20260721012434_stage18_relationship_schema.sql",
+      "rls": [
+        "20260721012701_stage18_relationship_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "sac_categories_select",
+          "cmd": "select",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        },
+        {
+          "policy": "sac_categories_write",
+          "cmd": "all",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "sac_ticket_attachments": {
+      "created_in": "20260721012434_stage18_relationship_schema.sql",
+      "rls": [
+        "20260721012701_stage18_relationship_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "sac_ticket_attachments_select",
+          "cmd": "select",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "sac_ticket_events": {
+      "created_in": "20260721012434_stage18_relationship_schema.sql",
+      "rls": [
+        "20260721012701_stage18_relationship_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "sac_ticket_events_internal",
+          "cmd": "select",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "sac_ticket_messages": {
+      "created_in": "20260721012434_stage18_relationship_schema.sql",
+      "rls": [
+        "20260721012701_stage18_relationship_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "sac_ticket_messages_select",
+          "cmd": "select",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "sac_tickets": {
+      "created_in": "20260721012434_stage18_relationship_schema.sql",
+      "rls": [
+        "20260721012701_stage18_relationship_security.sql"
+      ],
+      "policies": [
+        {
+          "policy": "sac_tickets_select",
+          "cmd": "select",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        },
+        {
+          "policy": "sac_tickets_internal_write",
+          "cmd": "all",
+          "file": "20260721012701_stage18_relationship_security.sql"
+        }
+      ]
+    },
+    "schedule_baseline_tasks": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223260_stage12_rls_baselines.sql"
+      ],
+      "policies": [
+        {
+          "policy": "baseline_tasks_internal",
+          "cmd": "all",
+          "file": "20260719223260_stage12_rls_baselines.sql"
+        }
+      ]
+    },
+    "schedule_baselines": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223260_stage12_rls_baselines.sql"
+      ],
+      "policies": [
+        {
+          "policy": "baselines_internal",
+          "cmd": "all",
+          "file": "20260719223260_stage12_rls_baselines.sql"
+        }
+      ]
+    },
+    "signature_access_tokens": {
+      "created_in": "20260720054100_stage12_2_tokens_and_conversion_jobs.sql",
+      "rls": [
+        "20260720054300_stage12_2_signature_rls.sql"
+      ],
+      "policies": []
+    },
+    "signature_attachments": {
+      "created_in": "20260720054000_stage12_2_advanced_signature_schema.sql",
+      "rls": [
+        "20260720054300_stage12_2_signature_rls.sql"
+      ],
+      "policies": [
+        {
+          "policy": "signature_attachments_internal_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_attachments_signer_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        }
+      ]
+    },
+    "signature_conversion_jobs": {
+      "created_in": "20260720054100_stage12_2_tokens_and_conversion_jobs.sql",
+      "rls": [
+        "20260720054300_stage12_2_signature_rls.sql"
+      ],
+      "policies": []
+    },
+    "signature_delivery_events": {
+      "created_in": "20260720054000_stage12_2_advanced_signature_schema.sql",
+      "rls": [
+        "20260720054300_stage12_2_signature_rls.sql"
+      ],
+      "policies": [
+        {
+          "policy": "signature_delivery_events_internal_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_delivery_events_recipient_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        }
+      ]
+    },
+    "signature_document_versions": {
+      "created_in": "20260720054000_stage12_2_advanced_signature_schema.sql",
+      "rls": [
+        "20260720054300_stage12_2_signature_rls.sql"
+      ],
+      "policies": [
+        {
+          "policy": "signature_document_versions_internal_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_document_versions_internal_write",
+          "cmd": "all",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_document_versions_client_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        }
+      ]
+    },
+    "signature_documents": {
+      "created_in": "20260720054000_stage12_2_advanced_signature_schema.sql",
+      "rls": [
+        "20260720054300_stage12_2_signature_rls.sql"
+      ],
+      "policies": [
+        {
+          "policy": "signature_documents_internal_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_documents_internal_create",
+          "cmd": "insert",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_documents_internal_update",
+          "cmd": "update",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_documents_client_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        }
+      ]
+    },
+    "signature_envelopes": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "signature_envelopes_client_select",
+          "cmd": "select",
+          "file": "20260719232500_stage9_client_signature_policies.sql"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        },
+        {
+          "policy": "signature_envelopes_client_advanced_select",
+          "cmd": "select",
+          "file": "20260720054330_stage12_2_client_signature_visibility.sql"
+        }
+      ]
+    },
+    "signature_events": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "signature_events_client_select",
+          "cmd": "select",
+          "file": "20260719232500_stage9_client_signature_policies.sql"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        },
+        {
+          "policy": "signature_events_client_advanced_select",
+          "cmd": "select",
+          "file": "20260720054330_stage12_2_client_signature_visibility.sql"
+        }
+      ]
+    },
+    "signature_evidence_records": {
+      "created_in": "20260720054000_stage12_2_advanced_signature_schema.sql",
+      "rls": [
+        "20260720054300_stage12_2_signature_rls.sql"
+      ],
+      "policies": [
+        {
+          "policy": "signature_evidence_internal_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_evidence_signer_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_evidence_client_advanced_select",
+          "cmd": "select",
+          "file": "20260720054330_stage12_2_client_signature_visibility.sql"
+        }
+      ]
+    },
+    "signature_field_values": {
+      "created_in": "20260720054000_stage12_2_advanced_signature_schema.sql",
+      "rls": [
+        "20260720054300_stage12_2_signature_rls.sql"
+      ],
+      "policies": [
+        {
+          "policy": "signature_field_values_internal_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_field_values_signer_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        }
+      ]
+    },
+    "signature_fields": {
+      "created_in": "20260720054000_stage12_2_advanced_signature_schema.sql",
+      "rls": [
+        "20260720054300_stage12_2_signature_rls.sql"
+      ],
+      "policies": [
+        {
+          "policy": "signature_fields_internal_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_fields_internal_write",
+          "cmd": "all",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        },
+        {
+          "policy": "signature_fields_signer_read",
+          "cmd": "select",
+          "file": "20260720054300_stage12_2_signature_rls.sql"
+        }
+      ]
+    },
+    "signature_signers": {
+      "created_in": "20260719230000_stage9_financial_contracts.sql",
+      "rls": [
+        "20260719230000_stage9_financial_contracts.sql#dynamic"
+      ],
+      "policies": [
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719230000_stage9_financial_contracts.sql#dynamic"
+        },
+        {
+          "policy": "signature_signers_client_select",
+          "cmd": "select",
+          "file": "20260719232500_stage9_client_signature_policies.sql"
+        },
+        {
+          "policy": "dynamic",
+          "cmd": "all",
+          "file": "20260719234500_stage9_security_hardening.sql#dynamic"
+        },
+        {
+          "policy": "signature_signers_client_advanced_select",
+          "cmd": "select",
+          "file": "20260720054330_stage12_2_client_signature_visibility.sql"
+        }
+      ]
+    },
+    "task_dependencies": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223200_stage12_rls_core.sql"
+      ],
+      "policies": [
+        {
+          "policy": "dependencies_internal",
+          "cmd": "all",
+          "file": "20260719223200_stage12_rls_core.sql"
+        }
+      ]
+    },
+    "task_resource_allocations": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223250_stage12_rls_resources.sql"
+      ],
+      "policies": [
+        {
+          "policy": "allocations_internal",
+          "cmd": "all",
+          "file": "20260719223250_stage12_rls_resources.sql"
+        }
+      ]
+    },
+    "work_breakdown_items": {
+      "created_in": "20260719223000_stage12_planning_schema.sql",
+      "rls": [
+        "20260719223200_stage12_rls_core.sql"
+      ],
+      "policies": [
+        {
+          "policy": "wbs_internal_or_client",
+          "cmd": "select",
+          "file": "20260719223200_stage12_rls_core.sql"
+        },
+        {
+          "policy": "wbs_internal_write",
+          "cmd": "all",
+          "file": "20260719223200_stage12_rls_core.sql"
+        }
+      ]
+    }
+  }
+}

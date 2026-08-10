@@ -4,8 +4,11 @@ import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
+import { fileSecurityMessage } from "@/lib/file-security/domain";
+import { secureUpload } from "@/lib/file-security/server";
 import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
-import { createScheduleDependency } from "./schedule";
+import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 
 const managementRoles = [
   "SUPER_ADMIN",
@@ -54,40 +57,8 @@ function failProjectDatabase(
   error: ScheduleDatabaseError,
   fallback: string
 ): never {
-  console.error(`[projects.${operation}]`, {
-    code: error.code ?? null,
-    message: error.message ?? null,
-    details: error.details ?? null,
-    hint: error.hint ?? null
-  });
+  reportDataAccessError(`projects.${operation}`, error);
   fail(path, publicScheduleDatabaseMessage(error, fallback));
-}
-
-export async function createProjectFromContract(formData: FormData) {
-  const { supabase } = await requireOrganizationContext(managementRoles);
-  const contractId = text(formData, "contractId");
-  const code = text(formData, "code");
-  const name = text(formData, "name");
-  const plannedStart = text(formData, "plannedStart");
-  const plannedEnd = text(formData, "plannedEnd");
-
-  if (!contractId || !code || !name || !plannedStart || !plannedEnd) {
-    fail("/app/obras/novo", "Preencha contrato, código, nome e período planejado.");
-  }
-
-  const { data, error } = await supabase.rpc("create_project_from_contract", {
-    p_contract_id: contractId,
-    p_code: code,
-    p_name: name,
-    p_planned_start: plannedStart,
-    p_planned_end: plannedEnd,
-    p_address_line: optionalText(formData, "addressLine"),
-    p_city: optionalText(formData, "city"),
-    p_state: optionalText(formData, "state")
-  });
-
-  if (error || !data) fail("/app/obras/novo", error?.message ?? "Não foi possível criar a obra.");
-  redirect(`/app/obras/${data}`);
 }
 
 export async function releaseProjectToClient(formData: FormData) {
@@ -98,7 +69,7 @@ export async function releaseProjectToClient(formData: FormData) {
     .from("projects")
     .update({ client_released_at: release ? new Date().toISOString() : null })
     .eq("id", projectId);
-  if (error) fail(`/app/obras/${projectId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}`);
   revalidatePath("/cliente/obras");
 }
@@ -265,10 +236,6 @@ export async function moveTask(formData: FormData) {
   revalidatePath("/cliente/obras");
 }
 
-export async function createDependency(formData: FormData) {
-  return createScheduleDependency(formData);
-}
-
 export async function createMilestone(formData: FormData) {
   const projectId = text(formData, "projectId");
   const path = `/app/obras/${projectId}/cronograma`;
@@ -322,7 +289,7 @@ export async function createProjectResource(formData: FormData) {
     daily_cost: optionalNumber(formData, "dailyCost"),
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/equipes`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/equipes`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/equipes`);
 }
 
@@ -337,7 +304,7 @@ export async function createTeam(formData: FormData) {
     leader_user_id: optionalText(formData, "leaderUserId"),
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/equipes`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/equipes`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/equipes`);
 }
 
@@ -361,7 +328,8 @@ export async function createDailyLog(formData: FormData) {
     delay_notes: optionalText(formData, "delayNotes"),
     created_by: userId
   }).select("id").single();
-  if (error || !data) fail(`/app/obras/${projectId}/diario`, error?.message ?? "Não foi possível criar o diário.");
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario`, "create-daily-log", error, "Não foi possível criar o diário.");
+  if (!data) fail(`/app/obras/${projectId}/diario`, "Não foi possível criar o diário.");
   redirect(`/app/obras/${projectId}/diario/${data.id}`);
 }
 
@@ -382,7 +350,7 @@ export async function updateDailyLog(formData: FormData) {
     delay_notes: optionalText(formData, "delayNotes"),
     updated_at: new Date().toISOString()
   }).eq("id", dailyLogId).in("status", ["DRAFT", "REJECTED"]);
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
 }
 
@@ -404,16 +372,17 @@ export async function addDailyLogActivity(formData: FormData) {
     progress_after: progressAfter == null ? null : progressAfter / 100,
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
 }
 
 export async function uploadDailyLogMedia(formData: FormData) {
   const projectId = text(formData, "projectId");
   const dailyLogId = text(formData, "dailyLogId");
+  const path = `/app/obras/${projectId}/diario/${dailyLogId}`;
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, "Selecione um arquivo.");
-  if (file.size > 150 * 1024 * 1024) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, "O arquivo excede 150 MB.");
+  if (!(file instanceof File) || file.size === 0) fail(path, "Selecione um arquivo.");
+  if (file.size > 150 * 1024 * 1024) fail(path, "O arquivo excede 150 MB.");
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(fieldRoles);
   const bytes = Buffer.from(await file.arrayBuffer());
@@ -421,11 +390,25 @@ export async function uploadDailyLogMedia(formData: FormData) {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
   const storagePath = `${organizationId}/${projectId}/${dailyLogId}/${randomUUID()}-${safeName}`;
 
-  const { error: uploadError } = await supabase.storage.from("daily-log-media").upload(storagePath, bytes, {
-    contentType: file.type || "application/octet-stream",
-    upsert: false
-  });
-  if (uploadError) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, uploadError.message);
+  try {
+    await secureUpload({
+      targetBucket: "daily-log-media",
+      targetPath: storagePath,
+      body: bytes,
+      filename: file.name,
+      contentType: file.type || "application/octet-stream",
+      organizationId,
+      actorUserId: userId,
+      correlationId: dailyLogId,
+      policy: {
+        allowedMimeTypes: null,
+        maxBytes: 150 * 1024 * 1024,
+        requireContentSignature: false
+      }
+    });
+  } catch (error) {
+    fail(path, fileSecurityMessage(error, { maxBytesLabel: "150 MB" }));
+  }
 
   const { error } = await supabase.from("daily_log_media").insert({
     organization_id: organizationId,
@@ -443,9 +426,9 @@ export async function uploadDailyLogMedia(formData: FormData) {
   });
   if (error) {
     await supabase.storage.from("daily-log-media").remove([storagePath]);
-    fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+    failProjectDatabase(path, "project-write", error, "Não foi possível concluir a operação.");
   }
-  revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
+  revalidatePath(path);
 }
 
 export async function submitDailyLog(formData: FormData) {
@@ -453,7 +436,7 @@ export async function submitDailyLog(formData: FormData) {
   const dailyLogId = text(formData, "dailyLogId");
   const { supabase } = await requireOrganizationContext(fieldRoles);
   const { error } = await supabase.rpc("submit_daily_log", { p_daily_log_id: dailyLogId });
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
 }
 
@@ -468,7 +451,7 @@ export async function decideDailyLog(formData: FormData) {
     p_reason: optionalText(formData, "reason"),
     p_release_client: bool(formData, "releaseClient")
   });
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
   revalidatePath(`/cliente/obras/${projectId}`);
 }
@@ -484,6 +467,7 @@ export async function uploadProjectDocument(formData: FormData) {
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
   const code = text(formData, "code").toUpperCase();
+  const discipline = text(formData, "discipline");
   const bytes = Buffer.from(await file.arrayBuffer());
   const hash = createHash("sha256").update(bytes).digest("hex");
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
@@ -503,12 +487,14 @@ export async function uploadProjectDocument(formData: FormData) {
       project_id: projectId,
       code,
       title: text(formData, "title"),
-      discipline: text(formData, "discipline"),
+      discipline,
       category: text(formData, "category"),
       created_by: userId
     }).select("id").single();
-    if (error || !data) fail(errorPath, error?.message ?? "Falha ao criar documento.");
+    if (error) failProjectDatabase(errorPath, "create-project-document", error, "Falha ao criar documento.");
+    if (!data) fail(errorPath, "Falha ao criar documento.");
     documentId = data.id;
+    await registrarValorUsado(supabase, organizationId, ESCOPOS.disciplina, discipline);
   }
 
   const { count } = await supabase
@@ -517,11 +503,25 @@ export async function uploadProjectDocument(formData: FormData) {
     .eq("document_id", documentId);
   const versionNumber = (count ?? 0) + 1;
 
-  const { error: uploadError } = await supabase.storage.from("project-documents").upload(storagePath, bytes, {
-    contentType: file.type || "application/octet-stream",
-    upsert: false
-  });
-  if (uploadError) fail(errorPath, uploadError.message);
+  try {
+    await secureUpload({
+      targetBucket: "project-documents",
+      targetPath: storagePath,
+      body: bytes,
+      filename: file.name,
+      contentType: file.type || "application/octet-stream",
+      organizationId,
+      actorUserId: userId,
+      correlationId: documentId,
+      policy: {
+        allowedMimeTypes: null,
+        maxBytes: 50 * 1024 * 1024,
+        requireContentSignature: false
+      }
+    });
+  } catch (error) {
+    fail(errorPath, fileSecurityMessage(error, { maxBytesLabel: "50 MB" }));
+  }
 
   const { error } = await supabase.from("project_document_versions").insert({
     organization_id: organizationId,
@@ -538,7 +538,7 @@ export async function uploadProjectDocument(formData: FormData) {
   });
   if (error) {
     await supabase.storage.from("project-documents").remove([storagePath]);
-    fail(errorPath, error.message);
+    failProjectDatabase(errorPath, "project-write", error, "Não foi possível concluir a operação.");
   }
   revalidatePath(`/app/obras/${projectId}/documentos`);
   revalidatePath("/app/documentos");
@@ -550,7 +550,7 @@ export async function releaseProjectDocument(formData: FormData) {
   const versionId = text(formData, "versionId");
   const { supabase } = await requireOrganizationContext(managementRoles);
   const { error } = await supabase.rpc("release_project_document_version", { p_version_id: versionId });
-  if (error) fail(`/app/obras/${projectId}/documentos`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/documentos`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/documentos`);
   revalidatePath(`/cliente/obras/${projectId}`);
 }
