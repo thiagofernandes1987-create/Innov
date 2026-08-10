@@ -1,7 +1,7 @@
 {
-  "_leia": "Exports sem importador, catalogados como DÍVIDA no dia em que o validador `validate:exports-mortos` entrou. Isto NÃO é permissão: é o inventário do que já estava morto quando o portão foi instalado. A partir daqui, export novo sem importador reprova o CI. Item que sair desta lista não volta — ou ganha consumidor, ou é removido. Conferido por amostra manual no dia do inventário: de 6 sorteados, 4 apareciam somente no próprio arquivo e 2 sobreviviam apenas porque um validador confere que existem, o que é código morto preso por portão.",
+  "_leia": "Exports sem importador, catalogados como DÍVIDA no dia em que o validador `validate:exports-mortos` entrou. Isto NÃO é permissão: é o inventário do que já estava morto quando o portão foi instalado. A partir daqui, export novo sem importador reprova o CI. Item que sair desta lista não volta — ou ganha consumidor, ou é removido. Conferido por amostra manual no dia do inventário: de 6 sorteados, 4 apareciam somente no próprio arquivo e 2 sobreviviam apenas porque um validador confere que existem, o que é código morto preso por portão. **Revisão de 10/08/2026 — PR #42 (Projeto RH), 73 símbolos.** Cinquenta e cinco são **tipo**: a forma de entrada de cada evento eSocial (`S1200Input`, `S2230Cession`, …), que o construtor consome internamente e ninguém importa pelo nome — superfície declarada, não código morto. Quinze são **constante de protocolo**, e existem justamente para ficar visíveis: `ESOCIAL_C14N`, `ESOCIAL_RSA_SHA256`, `FGTS_RESCISORY_LAYOUT_VERSION`, `MIT_LAYOUT_VERSION` documentam o algoritmo e o leiaute fixados. As três restantes são **função sem chamador** e merecem revisão no piloto: `callIntegraContador`, `validateIntegraContadorBase` e `validateIntegraContadorServicePath` — o Integra Contador é pendência externa declarada no próprio PR (falta contrato e Consumer Key), então o ponto de entrada estar sem chamador é coerente com o estado, mas deixa de ser quando o contrato existir.",
   "inventariado_em": "2026-08-10T02:16:49Z",
-  "total": 191,
+  "total": 264,
   "arquivos_com_mais_divida": [
     {
       "arquivo": "lib/object-runtime/spec.ts",
@@ -688,6 +688,298 @@
     {
       "simbolo": "lib/reports/metrics.ts:ReportTarget",
       "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-change-xml.ts:S2205Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-change-xml.ts:S2206Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-leave-xml.ts:S2230Cession",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-leave-xml.ts:S2230ElectiveMandate",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-leave-xml.ts:S2230Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-leave-xml.ts:S2230Rectification",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-leave-xml.ts:S2230UnionMandate",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-periodic-xml.ts:S1200Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-periodic-xml.ts:S1210Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-periodic-xml.ts:S1298Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-periodic-xml.ts:S1299Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-result-parser.ts:EsocialIndividualResult",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-result-parser.ts:EsocialOccurrence",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-s2240-xml.ts:S2240Agent",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-s2240-xml.ts:S2240Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-signature-core.ts:ESOCIAL_C14N",
+      "motivo": "rh-pr42-constante-de-protocolo-versao-de-leiaute-ou-algoritmo-fixado"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-signature-core.ts:ESOCIAL_DSIG_NS",
+      "motivo": "rh-pr42-constante-de-protocolo-versao-de-leiaute-ou-algoritmo-fixado"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-signature-core.ts:ESOCIAL_ENVELOPED",
+      "motivo": "rh-pr42-constante-de-protocolo-versao-de-leiaute-ou-algoritmo-fixado"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-signature-core.ts:ESOCIAL_RSA_SHA256",
+      "motivo": "rh-pr42-constante-de-protocolo-versao-de-leiaute-ou-algoritmo-fixado"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-signature-core.ts:ESOCIAL_SHA256",
+      "motivo": "rh-pr42-constante-de-protocolo-versao-de-leiaute-ou-algoritmo-fixado"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-signature-core.ts:buildSignedInfo",
+      "motivo": "rh-pr42-funcao-sem-chamador-revisar-no-piloto"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-signature-core.ts:extractEsocialSignableElement",
+      "motivo": "rh-pr42-funcao-sem-chamador-revisar-no-piloto"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-sst-xml.ts:S2210Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-sst-xml.ts:S2220Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-sst-xml.ts:S2220Procedure",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-sst-xml.ts:S2240Agent",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-sst-xml.ts:S2240Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-termination-xml.ts:S2299Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-termination-xml.ts:S2299Succession",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-termination-xml.ts:S2399PostTermination",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-transport.ts:EsocialRegistrationType",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-transport.ts:buildQuerySoapEnvelope",
+      "motivo": "rh-pr42-funcao-sem-chamador-revisar-no-piloto"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-transport.ts:buildQueryXml",
+      "motivo": "rh-pr42-funcao-sem-chamador-revisar-no-piloto"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-transport.ts:buildSendSoapEnvelope",
+      "motivo": "rh-pr42-funcao-sem-chamador-revisar-no-piloto"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-special-xml.ts:CededWorkerInfo",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-special-xml.ts:ElectiveMandateInfo",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-special-xml.ts:S2300Position",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-special-xml.ts:S2300Remuneration",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-special-xml.ts:S2300SpecialAddress",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-special-xml.ts:S2300SpecialImmigrant",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-special-xml.ts:S2300SpecialInput",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-special-xml.ts:UnionLeaderInfo",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-student-xml.ts:S2300StudentAddress",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-student-xml.ts:S2300StudentImmigrant",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-student-xml.ts:S2300StudentInfo",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-student-xml.ts:S2300StudentInput",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-xml.ts:S2300BrazilAddress",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-xml.ts:S2300ContributorInput",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-xml.ts:S2300Immigrant",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-tsv-xml.ts:S2300Standard721Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-worker-transition-xml.ts:S2200TransitionInput",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-worker-xml.ts:S2190Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-worker-xml.ts:S2200BrazilAddress",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-xml.ts:S1000Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-xml.ts:S1005Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-xml.ts:S1010Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/esocial-xml.ts:S1020Input",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/fgts-rescisory-file.ts:FGTS_RESCISORY_CUTOFF",
+      "motivo": "rh-pr42-constante-de-protocolo-versao-de-leiaute-ou-algoritmo-fixado"
+    },
+    {
+      "simbolo": "lib/rh/integrations/fgts-rescisory-file.ts:FGTS_RESCISORY_LAYOUT_DATE",
+      "motivo": "rh-pr42-constante-de-protocolo-versao-de-leiaute-ou-algoritmo-fixado"
+    },
+    {
+      "simbolo": "lib/rh/integrations/fgts-rescisory-file.ts:FGTS_RESCISORY_LAYOUT_VERSION",
+      "motivo": "rh-pr42-constante-de-protocolo-versao-de-leiaute-ou-algoritmo-fixado"
+    },
+    {
+      "simbolo": "lib/rh/integrations/fgts-rescisory-file.ts:FgtsRescisoryRemuneration",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/government.ts:GovernmentChannel",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/integra-contador.ts:IntegraContadorEnvironment",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/integra-contador.ts:IntegraContadorResponse",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/integra-contador.ts:IntegraContadorToken",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/integra-contador.ts:callIntegraContador",
+      "motivo": "rh-pr42-funcao-sem-chamador-revisar-no-piloto"
+    },
+    {
+      "simbolo": "lib/rh/integrations/integra-contador.ts:validateIntegraContadorBase",
+      "motivo": "rh-pr42-funcao-sem-chamador-revisar-no-piloto"
+    },
+    {
+      "simbolo": "lib/rh/integrations/integra-contador.ts:validateIntegraContadorServicePath",
+      "motivo": "rh-pr42-funcao-sem-chamador-revisar-no-piloto"
+    },
+    {
+      "simbolo": "lib/rh/integrations/mit-json.ts:MIT_LAYOUT_DATE",
+      "motivo": "rh-pr42-constante-de-protocolo-versao-de-leiaute-ou-algoritmo-fixado"
+    },
+    {
+      "simbolo": "lib/rh/integrations/mit-json.ts:MIT_LAYOUT_VERSION",
+      "motivo": "rh-pr42-constante-de-protocolo-versao-de-leiaute-ou-algoritmo-fixado"
+    },
+    {
+      "simbolo": "lib/rh/integrations/mit-json.ts:MitInitialData",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/mit-json.ts:MitSpecialEvent",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/rh/integrations/mit-json.ts:MitSuspendedDebt",
+      "motivo": "rh-pr42-forma-de-entrada-do-evento-esocial-superficie-declarada"
     },
     {
       "simbolo": "lib/sinapi/automatic-update.ts:SinapiAutomaticUpdateResult",

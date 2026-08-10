@@ -6,177 +6,691 @@
   "tablesOrViews": {
     "administrative_fee_models": {
       "disposition": "pending_destructive_migration",
-      "evidence": { "estimatedRows": 0, "inboundFks": 1, "outboundFks": 2, "triggers": 1, "policies": 1, "functionRefs": 0, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 2,
+        "triggers": 1,
+        "policies": 1,
+        "functionRefs": 0,
+        "dependentViews": 0
+      },
       "rationale": "Legacy administrative-fee model superseded by markup_models; coordinated FK/table removal is already guarded in the destructive pricing convergence migration."
     },
     "bdi_model_versions": {
       "disposition": "pending_destructive_migration",
-      "evidence": { "estimatedRows": 0, "inboundFks": 2, "outboundFks": 3, "triggers": 0, "policies": 1, "functionRefs": 1, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 2,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
       "rationale": "Legacy BDI version layer. Existing SQL dependency is handled by the coordinated pricing migration; active budget versions do not use the legacy FK."
     },
     "bdi_models": {
       "disposition": "pending_destructive_migration",
-      "evidence": { "estimatedRows": 0, "inboundFks": 1, "outboundFks": 3, "triggers": 1, "policies": 1, "functionRefs": 0, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 3,
+        "triggers": 1,
+        "policies": 1,
+        "functionRefs": 0,
+        "dependentViews": 0
+      },
       "rationale": "Legacy BDI model superseded by markup_models; empty and included in the guarded coordinated pricing migration."
     },
     "contract_parties": {
       "disposition": "pending_destructive_migration",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 2, "triggers": 0, "policies": 1, "functionRefs": 0, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 0,
+        "dependentViews": 0
+      },
       "rationale": "Abandoned Stage 9 party schema superseded by the advanced signature signer architecture; guarded DROP aborts if rows appear."
     },
     "cost_catalog_items": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": 0, "inboundFks": 2, "outboundFks": 3, "triggers": 2, "policies": 1, "functionRefs": 5, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 2,
+        "outboundFks": 3,
+        "triggers": 2,
+        "policies": 1,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
       "rationale": "Cost-engine catalog table consumed transitively by SQL functions and protected by relational constraints/triggers."
     },
     "cost_compositions": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": 0, "inboundFks": 1, "outboundFks": 3, "triggers": 2, "policies": 1, "functionRefs": 4, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 3,
+        "triggers": 2,
+        "policies": 1,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
       "rationale": "Cost composition engine surface with SQL function consumers and relational integrity machinery."
     },
     "document_types": {
       "disposition": "preserve_reference_data",
-      "evidence": { "estimatedRows": 35, "inboundFks": 3, "outboundFks": 0, "triggers": 0, "policies": 1, "functionRefs": 0, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 35,
+        "inboundFks": 3,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 0,
+        "dependentViews": 0
+      },
       "rationale": "Populated reference catalog referenced by document_module_types, document_templates and emitted_documents."
     },
     "finance_settlements": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": 0, "inboundFks": 1, "outboundFks": 3, "triggers": 1, "policies": 4, "functionRefs": 3, "dependentViews": 1 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 3,
+        "triggers": 1,
+        "policies": 4,
+        "functionRefs": 3,
+        "dependentViews": 1
+      },
       "rationale": "Operational finance settlement ledger consumed by SQL functions and a dependent view; direct JS access is intentionally unnecessary."
     },
     "fixed_costs": {
       "disposition": "pending_destructive_migration",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 2, "triggers": 1, "policies": 1, "functionRefs": 1, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 1,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
       "rationale": "Empty legacy table; canonical fixed-cost representation is budget_items.cost_type='FIXED'. Guarded DROP verifies no standalone SQL reference or data appears."
     },
     "inventory_asset_current_v": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": -1, "inboundFks": 0, "outboundFks": 0, "triggers": 0, "policies": 0, "functionRefs": 1, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": -1,
+        "inboundFks": 0,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
       "rationale": "Inventory current-custody projection used by inventory SQL API."
     },
     "inventory_asset_custodies": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 7, "triggers": 2, "policies": 1, "functionRefs": 3, "dependentViews": 1 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 7,
+        "triggers": 2,
+        "policies": 1,
+        "functionRefs": 3,
+        "dependentViews": 1
+      },
       "rationale": "Custody history participates in inventory SQL functions, triggers and a dependent view."
     },
     "inventory_assets": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": 0, "inboundFks": 4, "outboundFks": 7, "triggers": 4, "policies": 2, "functionRefs": 7, "dependentViews": 1 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 4,
+        "outboundFks": 7,
+        "triggers": 4,
+        "policies": 2,
+        "functionRefs": 7,
+        "dependentViews": 1
+      },
       "rationale": "Core asset register with extensive SQL, FK, trigger and view dependencies."
     },
     "inventory_events": {
       "disposition": "preserve_operational_history",
-      "evidence": { "estimatedRows": 36, "inboundFks": 0, "outboundFks": 9, "triggers": 1, "policies": 1, "functionRefs": 18, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 36,
+        "inboundFks": 0,
+        "outboundFks": 9,
+        "triggers": 1,
+        "policies": 1,
+        "functionRefs": 18,
+        "dependentViews": 0
+      },
       "rationale": "Populated immutable/operational inventory event history with heavy SQL use."
     },
     "inventory_expiry_alerts_v": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": -1, "inboundFks": 0, "outboundFks": 0, "triggers": 0, "policies": 0, "functionRefs": 1, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": -1,
+        "inboundFks": 0,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
       "rationale": "Inventory expiry projection consumed by SQL dashboard/alert logic."
     },
     "inventory_item_totals_v": {
       "disposition": "pending_destructive_migration",
-      "evidence": { "estimatedRows": -1, "inboundFks": 0, "outboundFks": 0, "triggers": 0, "policies": 0, "functionRefs": 0, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": -1,
+        "inboundFks": 0,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 0,
+        "dependentViews": 0
+      },
       "rationale": "Superseded inventory aggregate view with no JS, function or view consumer; guarded DROP prepared without CASCADE."
     },
     "inventory_reservation_lines": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": 0, "inboundFks": 1, "outboundFks": 5, "triggers": 2, "policies": 1, "functionRefs": 8, "dependentViews": 1 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 5,
+        "triggers": 2,
+        "policies": 1,
+        "functionRefs": 8,
+        "dependentViews": 1
+      },
       "rationale": "Reservation detail surface used by reservation recalculation, stock views and SQL inventory operations."
     },
     "inventory_reserved_stock_v": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": -1, "inboundFks": 0, "outboundFks": 0, "triggers": 0, "policies": 0, "functionRefs": 0, "dependentViews": 1 },
+      "evidence": {
+        "estimatedRows": -1,
+        "inboundFks": 0,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 0,
+        "dependentViews": 1
+      },
       "rationale": "Transitively active: feeds inventory_available_stock_v, which is consumed by reservation/dashboard/movement functions."
     },
     "inventory_stock_v": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": -1, "inboundFks": 0, "outboundFks": 0, "triggers": 0, "policies": 0, "functionRefs": 4, "dependentViews": 2 },
+      "evidence": {
+        "estimatedRows": -1,
+        "inboundFks": 0,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 4,
+        "dependentViews": 2
+      },
       "rationale": "Canonical stock projection with multiple function and downstream-view consumers."
     },
     "inventory_stocktake_lines": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 7, "triggers": 2, "policies": 2, "functionRefs": 5, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 7,
+        "triggers": 2,
+        "policies": 2,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
       "rationale": "Stocktake detail table used by SQL posting/validation functions and protected by triggers/policies."
     },
     "object_definition_versions": {
       "disposition": "preserve_latent_runtime",
-      "evidence": { "estimatedRows": 0, "inboundFks": 1, "outboundFks": 3, "triggers": 2, "policies": 1, "functionRefs": 4, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 3,
+        "triggers": 2,
+        "policies": 1,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
       "rationale": "Object Runtime schema/version infrastructure; deliberately latent while runtime query/write gates are completed."
     },
     "object_field_slots": {
       "disposition": "preserve_latent_runtime",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 3, "triggers": 0, "policies": 1, "functionRefs": 2, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 2,
+        "dependentViews": 0
+      },
       "rationale": "Object Runtime slot allocation metadata used by deterministic SQL helpers."
     },
     "object_record_followers": {
       "disposition": "preserve_latent_runtime",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 67, "triggers": 0, "policies": 1, "functionRefs": 1, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 67,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
       "rationale": "Object Runtime follower relation; intentionally schema-driven and dormant until the runtime surface is fully enabled."
     },
     "object_records": {
       "disposition": "preserve_latent_runtime",
-      "evidence": { "estimatedRows": 0, "inboundFks": 1, "outboundFks": 3, "triggers": 0, "policies": 1, "functionRefs": 1, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
       "rationale": "Partitioned canonical Object Runtime record store; not an orphan. Dynamic partitions are correctly masked by the auditor."
     },
     "operational_event_types": {
       "disposition": "preserve_reference_data",
-      "evidence": { "estimatedRows": 16, "inboundFks": 1, "outboundFks": 0, "triggers": 0, "policies": 1, "functionRefs": 1, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 16,
+        "inboundFks": 1,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
       "rationale": "Populated operational-event type catalog referenced by operational event records and SQL creation flow."
     },
     "procurement_events": {
       "disposition": "preserve_operational_history",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 7, "triggers": 0, "policies": 4, "functionRefs": 8, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 7,
+        "triggers": 0,
+        "policies": 4,
+        "functionRefs": 8,
+        "dependentViews": 0
+      },
       "rationale": "Procurement event/audit surface written and consumed through SQL functions; zero current rows does not make it obsolete."
     },
     "proposal_discount_decisions": {
       "disposition": "preserve_operational_history",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 5, "triggers": 0, "policies": 2, "functionRefs": 2, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 5,
+        "triggers": 0,
+        "policies": 2,
+        "functionRefs": 2,
+        "dependentViews": 0
+      },
       "rationale": "Commercial approval decision history consumed by proposal/budget SQL workflow."
     },
     "quality_form_events": {
       "disposition": "preserve_operational_history",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 4, "triggers": 0, "policies": 1, "functionRefs": 5, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 4,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
       "rationale": "Quality form event history used by version/freeze/submission SQL workflow."
     },
     "report_events": {
       "disposition": "preserve_operational_history",
-      "evidence": { "estimatedRows": 19, "inboundFks": 0, "outboundFks": 5, "triggers": 1, "policies": 1, "functionRefs": 4, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 19,
+        "inboundFks": 0,
+        "outboundFks": 5,
+        "triggers": 1,
+        "policies": 1,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
       "rationale": "Populated reporting event/audit history; snapshot hardening migration now stores only stable failure codes."
     },
     "report_executive_kpis_v": {
       "disposition": "pending_destructive_migration",
-      "evidence": { "estimatedRows": -1, "inboundFks": 0, "outboundFks": 0, "triggers": 0, "policies": 0, "functionRefs": 0, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": -1,
+        "inboundFks": 0,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 0,
+        "dependentViews": 0
+      },
       "rationale": "Superseded executive KPI view with no runtime, SQL-function or downstream-view consumer; guarded DROP prepared without CASCADE."
     },
     "report_exports": {
       "disposition": "preserve_operational_history",
-      "evidence": { "estimatedRows": 19, "inboundFks": 0, "outboundFks": 5, "triggers": 1, "policies": 1, "functionRefs": 1, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 19,
+        "inboundFks": 0,
+        "outboundFks": 5,
+        "triggers": 1,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
       "rationale": "Populated report export/audit ledger used by report export workflow."
     },
     "report_project_kpis_v": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": -1, "inboundFks": 0, "outboundFks": 0, "triggers": 0, "policies": 0, "functionRefs": 1, "dependentViews": 1 },
+      "evidence": {
+        "estimatedRows": -1,
+        "inboundFks": 0,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 1,
+        "dependentViews": 1
+      },
       "rationale": "Project KPI projection has a SQL function consumer and a dependent view."
+    },
+    "rh_benefit_payroll_exports": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 5,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 7,
+        "dependentViews": 0
+      },
+      "rationale": "Lote de exportação de benefícios para a folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 7 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_document_access_log": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha de acesso a documento do Projeto RH (PR #42). Gravada por função SECURITY DEFINER — daí 1 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar a trilha destrói a evidência de quem viu o quê, que é o próprio motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_esocial_batch_events": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Eventos do lote eSocial do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 5 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_esocial_event_drafts": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
+      "rationale": "Rascunho de evento eSocial antes do envio do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 4 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_government_assisted_tasks": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
+      "rationale": "Fila de tarefas assistidas das obrigações governamentais do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 1 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_accounting_batches": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 2,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 8,
+        "dependentViews": 0
+      },
+      "rationale": "Lote de contabilização da folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 8 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_accounting_entries": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Lançamento contábil gerado pela folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 5 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_accounting_rules": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Regra de mapeamento contábil da folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 3 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_bases": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 4,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 13,
+        "dependentViews": 0
+      },
+      "rationale": "Bases de cálculo apuradas por competência do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 13 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_closures": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Fechamento da competência da folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 5 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_parameter_versions": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 9,
+        "dependentViews": 0
+      },
+      "rationale": "Versão vigente dos parâmetros legais da folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 9 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_provision_policies": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Política de provisão de férias e 13º do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 3 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_provisions": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 5,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
+      "rationale": "Provisão calculada por competência do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 4 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_worker_tax_contexts": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 2,
+        "functionRefs": 6,
+        "dependentViews": 0
+      },
+      "rationale": "Contexto tributário do trabalhador (múltiplos vínculos, acumulados) do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 6 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payslip_access_log": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha de acesso a holerite do Projeto RH (PR #42). Gravada por função SECURITY DEFINER — daí 1 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar a trilha destrói a evidência de quem viu o quê, que é o próprio motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payslip_publications": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 5,
+        "triggers": 0,
+        "policies": 2,
+        "functionRefs": 7,
+        "dependentViews": 0
+      },
+      "rationale": "Publicação controlada de holerite no Meu RH do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 7 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_termination_line_rubric_mappings": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 2,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
+      "rationale": "Mapeamento de rubrica das linhas de rescisão do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 1 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_thirteenth_exports": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 4,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 6,
+        "dependentViews": 0
+      },
+      "rationale": "Exportação do 13º do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 6 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
     },
     "sac_ticket_events": {
       "disposition": "preserve_operational_history",
-      "evidence": { "estimatedRows": 3204, "inboundFks": 0, "outboundFks": 4, "triggers": 2, "policies": 1, "functionRefs": 10, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 3204,
+        "inboundFks": 0,
+        "outboundFks": 4,
+        "triggers": 2,
+        "policies": 1,
+        "functionRefs": 10,
+        "dependentViews": 0
+      },
       "rationale": "Heavily populated SAC event history with broad SQL consumption; must be preserved."
     },
     "schedule_baseline_tasks": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 3, "triggers": 1, "policies": 1, "functionRefs": 1, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 1,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
       "rationale": "Baseline task snapshot table used by create_schedule_baseline and protected from mutation; valid feature may legitimately be empty before first baseline."
     },
     "signature_access_tokens": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 3, "triggers": 0, "policies": 0, "functionRefs": 5, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
       "rationale": "Signature token/security infrastructure used by SQL signing flows; direct JS table access is intentionally avoided."
     },
     "signature_attachments": {
       "disposition": "preserve_sql_internal",
-      "evidence": { "estimatedRows": 0, "inboundFks": 0, "outboundFks": 4, "triggers": 0, "policies": 2, "functionRefs": 1, "dependentViews": 0 },
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 4,
+        "triggers": 0,
+        "policies": 2,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
       "rationale": "Advanced signature attachment surface referenced by SQL and protected by RLS; valid empty state before attachments are used."
     }
   }

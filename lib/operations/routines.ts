@@ -30,6 +30,10 @@ const OBJECT_TYPE_BY_MODULE: Record<string, OperationalObjectType> = {
   financeiro: "financial",
   sac: "ticket",
   whatsapp: "ticket",
+  // Folha é dinheiro: a rotina pessimista do DP retém um fechamento de
+  // competência, com efeito em pagamento e em lançamento contábil. O
+  // vocabulário é fechado, e `financial` é o que descreve a consequência.
+  rh: "financial",
   relatorios: "project",
   auditoria: "security",
   administracao: "security"

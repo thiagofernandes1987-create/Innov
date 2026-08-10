@@ -1,7 +1,8 @@
 # VACINA-062 — Correção visual exige captura do preview
 
 **Estado:** vigente  
-**Detectada em:** repetição do loop transversal de QA em 29 de julho de 2026
+**Detectada em:** repetição do loop transversal de QA em 29 de julho de 2026  
+**ID histórico:** registrada originalmente como `VACINA-043`; renumerada em 9 de agosto de 2026 para eliminar colisão no catálogo canônico sem deslocar `VACINA-045` a `VACINA-061`.
 
 ## Qual foi o problema
 

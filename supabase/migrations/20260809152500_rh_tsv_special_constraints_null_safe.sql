@@ -1,0 +1,115 @@
+-- PostgreSQL CHECK aceita NULL como resultado não reprovado. Reescrevemos
+-- as obrigatoriedades 304/305/401/410 com testes explícitos de nulidade.
+
+alter table public.rh_tsv_esocial_profiles
+  drop constraint if exists rh_tsv_esocial_special_shape_check;
+alter table public.rh_tsv_esocial_profiles
+  add constraint rh_tsv_esocial_special_shape_check check (
+    (
+      category_code not in ('304','305','401','410')
+      and special_activity_nature is null
+      and special_function_name is null
+      and special_function_cbo_code is null
+      and union_origin_category is null
+      and union_origin_registration_type is null
+      and union_origin_registration_number is null
+      and union_origin_admission_date is null
+      and union_origin_registration is null
+      and union_origin_work_regime is null
+      and union_origin_social_security_regime is null
+      and ceded_origin_category is null
+      and cedent_cnpj is null
+      and cedent_registration is null
+      and cedent_admission_date is null
+      and ceded_work_regime is null
+      and ceded_social_security_regime is null
+      and mandate_origin_category is null
+      and mandate_origin_cnpj is null
+      and mandate_origin_registration is null
+      and mandate_origin_exercise_date is null
+      and mandate_keep_origin_remuneration is null
+      and mandate_work_regime is null
+      and mandate_social_security_regime is null
+    )
+    or (
+      category_code='401'
+      and special_activity_nature is not null
+      and special_activity_nature in (1,2)
+      and union_origin_category is not null
+      and union_origin_category ~ '^[0-9]{3}$'
+      and union_origin_category<>'401'
+      and union_origin_social_security_regime is not null
+      and union_origin_social_security_regime in (1,2,3)
+      and ceded_origin_category is null
+      and mandate_origin_category is null
+    )
+    or (
+      category_code in ('305','410')
+      and ceded_origin_category is not null
+      and ceded_origin_category ~ '^[0-9]{3}$'
+      and ceded_origin_category not in ('305','410')
+      and cedent_cnpj is not null
+      and cedent_cnpj ~ '^[0-9]{14}$'
+      and cedent_registration is not null
+      and nullif(trim(cedent_registration),'') is not null
+      and cedent_admission_date is not null
+      and ceded_work_regime is not null
+      and ceded_work_regime in (1,2)
+      and ceded_social_security_regime is not null
+      and ceded_social_security_regime in (1,2,3,4)
+      and (category_code<>'305' or ceded_social_security_regime=2)
+      and union_origin_category is null
+      and mandate_origin_category is null
+    )
+    or (
+      category_code='304'
+      and mandate_origin_category is not null
+      and mandate_origin_category ~ '^[0-9]{3}$'
+      and mandate_origin_category<>'304'
+      and mandate_origin_cnpj is not null
+      and mandate_origin_cnpj ~ '^[0-9]{14}$'
+      and mandate_origin_registration is not null
+      and nullif(trim(mandate_origin_registration),'') is not null
+      and mandate_origin_exercise_date is not null
+      and mandate_work_regime is not null
+      and mandate_work_regime in (1,2)
+      and mandate_social_security_regime is not null
+      and mandate_social_security_regime in (1,2,3)
+      and (mandate_keep_origin_remuneration is null or mandate_keep_origin_remuneration in ('S','N'))
+      and union_origin_category is null
+      and ceded_origin_category is null
+    )
+  );
+
+alter table public.rh_tsv_esocial_profiles
+  drop constraint if exists rh_tsv_esocial_special_identifiers_check;
+alter table public.rh_tsv_esocial_profiles
+  add constraint rh_tsv_esocial_special_identifiers_check check (
+    (
+      union_origin_registration_type is null
+      and union_origin_registration_number is null
+    )
+    or (
+      union_origin_registration_type=1
+      and union_origin_registration_number is not null
+      and union_origin_registration_number ~ '^[0-9]{14}$'
+    )
+    or (
+      union_origin_registration_type=2
+      and union_origin_registration_number is not null
+      and union_origin_registration_number ~ '^[0-9]{11}$'
+    )
+  );
+
+alter table public.rh_tsv_esocial_profiles
+  drop constraint if exists rh_tsv_esocial_special_function_check;
+alter table public.rh_tsv_esocial_profiles
+  add constraint rh_tsv_esocial_special_function_check check (
+    (special_function_name is null and special_function_cbo_code is null)
+    or (
+      special_function_name is not null
+      and nullif(trim(special_function_name),'') is not null
+      and special_function_cbo_code is not null
+      and special_function_cbo_code ~ '^[0-9]{6}$'
+    )
+  );

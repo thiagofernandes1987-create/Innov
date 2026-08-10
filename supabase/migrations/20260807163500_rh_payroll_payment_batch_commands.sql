@@ -1,0 +1,18 @@
+create or replace function public.create_rh_payroll_payment_batch(p_period_id uuid,p_provider_code text,p_file_format text)
+returns uuid language plpgsql security definer set search_path=public,pg_temp as $$
+declare v_org uuid;v_batch uuid;v_seq integer:=0;v_payment record;begin
+ select organization_id into v_org from public.rh_payroll_periods where id=p_period_id;if v_org is null then raise exception 'Competência não encontrada';end if;if auth.uid() is null then raise exception 'AUTHENTICATION_REQUIRED';end if;if not public.has_module_permission(v_org,'rh','APPROVE',null,null) then raise exception 'FORBIDDEN';end if;if coalesce(trim(p_provider_code),'')='' or coalesce(trim(p_file_format),'')='' then raise exception 'Provider e formato são obrigatórios';end if;
+ insert into public.rh_payroll_payment_batches(organization_id,period_id,provider_code,file_format,status,created_by) values(v_org,p_period_id,p_provider_code,p_file_format,'DRAFT',auth.uid()) returning id into v_batch;
+ for v_payment in select id from public.rh_payroll_payments where organization_id=v_org and period_id=p_period_id and status='PENDING' order by employment_id,id for update loop v_seq:=v_seq+1;insert into public.rh_payroll_payment_batch_items(organization_id,batch_id,payment_id,sequence_number) values(v_org,v_batch,v_payment.id,v_seq);update public.rh_payroll_payments set status='BATCHED',updated_at=now() where id=v_payment.id;end loop;
+ if v_seq=0 then delete from public.rh_payroll_payment_batches where id=v_batch;raise exception 'Nenhum pagamento pendente para formar lote';end if;return v_batch;
+end$$;
+
+create or replace function public.mark_rh_payroll_payment_batch_generated(p_batch_id uuid,p_file_name text,p_storage_path text,p_sha256 text)
+returns void language plpgsql security definer set search_path=public,pg_temp as $$declare v_org uuid;begin select organization_id into v_org from public.rh_payroll_payment_batches where id=p_batch_id for update;if v_org is null then raise exception 'Lote não encontrado';end if;if auth.uid() is null then raise exception 'AUTHENTICATION_REQUIRED';end if;if not public.has_module_permission(v_org,'rh','APPROVE',null,null) then raise exception 'FORBIDDEN';end if;update public.rh_payroll_payment_batches set status='GENERATED',file_name=p_file_name,storage_path=p_storage_path,file_sha256=p_sha256,generated_at=now(),updated_at=now() where id=p_batch_id and status='DRAFT';if not found then raise exception 'Lote não está em DRAFT';end if;end$$;
+
+create or replace function public.mark_rh_payroll_payment_batch_sent(p_batch_id uuid)
+returns void language plpgsql security definer set search_path=public,pg_temp as $$declare v_org uuid;begin select organization_id into v_org from public.rh_payroll_payment_batches where id=p_batch_id for update;if v_org is null then raise exception 'Lote não encontrado';end if;if not public.has_module_permission(v_org,'rh','APPROVE',null,null) then raise exception 'FORBIDDEN';end if;update public.rh_payroll_payment_batches set status='SENT',sent_at=now(),updated_at=now() where id=p_batch_id and status='GENERATED';if not found then raise exception 'Lote precisa estar GENERATED';end if;update public.rh_payroll_payments p set status='SENT',updated_at=now() from public.rh_payroll_payment_batch_items i where i.batch_id=p_batch_id and i.payment_id=p.id and p.status='BATCHED';end$$;
+
+grant execute on function public.create_rh_payroll_payment_batch(uuid,text,text) to authenticated;
+grant execute on function public.mark_rh_payroll_payment_batch_generated(uuid,text,text,text) to authenticated;
+grant execute on function public.mark_rh_payroll_payment_batch_sent(uuid) to authenticated;

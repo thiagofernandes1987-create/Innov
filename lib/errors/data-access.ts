@@ -38,3 +38,31 @@ export function reportDataAccessError(context: string, error: unknown) {
       "UNKNOWN"
   });
 }
+
+/**
+ * Texto público de uma falha de acesso a dados, com o erro do provedor no log.
+ *
+ * Nasceu da convergência do PR #42: **293 pontos em 72 arquivos do RH** entregavam
+ * `error.message` do PostgREST direto ao usuário — em `throw new Error(...)`, em
+ * `fail(...)` e, pior, em `redirect(...?error=${encodeURIComponent(...)})`, que
+ * põe nome de coluna, detalhe e hint da consulta **na barra de endereço**, onde
+ * ficam em histórico, em log de proxy e em captura de tela.
+ *
+ * A troca é de uma expressão por outra, e é isso que a torna aplicável aos 293
+ * pontos sem reescrever o fluxo de cada um: onde havia `erro.message`, passa a
+ * haver esta chamada. O que o usuário lê deixa de variar com a mensagem interna
+ * do banco; o que o operador precisa para diagnosticar continua indo para o log,
+ * reduzido ao identificador estável por `reportDataAccessError`.
+ *
+ * O terceiro parâmetro preserva a mensagem específica onde ela já existia — os
+ * 63 pontos escritos como `erro?.message ?? "Vínculo não encontrado."` mantêm o
+ * "Vínculo não encontrado.", que é informação de domínio e não vaza nada.
+ */
+export function mensagemDeFalha(
+  contexto: string,
+  error: unknown,
+  publica = "Não foi possível concluir a operação. A falha foi registrada."
+): string {
+  reportDataAccessError(contexto, error);
+  return publica;
+}

@@ -1,0 +1,106 @@
+name: RH eSocial Generation
+
+on:
+  pull_request:
+    paths:
+      - "lib/rh/integrations/esocial-*.ts"
+      - "app/actions/rh-*.ts"
+      - "app/app/rh/obrigacoes/esocial/**"
+      - "app/app/rh/admissoes/**"
+      - "app/app/rh/afastamentos/**"
+      - "app/app/rh/desligamentos/**"
+      - "app/app/rh/tsv/**"
+      - "supabase/migrations/*_rh_esocial_*.sql"
+      - "supabase/migrations/*_rh_admission_esocial_*.sql"
+      - "supabase/migrations/*_rh_leave_esocial_*.sql"
+      - "supabase/migrations/*_rh_termination_esocial_*.sql"
+      - "supabase/migrations/*_rh_tsv_*.sql"
+      - "tests/rh/esocial-*.ts"
+      - "scripts/fetch-rh-esocial-xsd.sh"
+      - "scripts/run-rh-esocial-restricted-homologation.mjs"
+      - "tsconfig.rh.json"
+      - ".github/workflows/rh-esocial-generation.yml"
+      - ".github/workflows/rh-esocial-restricted-homologation.yml"
+  push:
+    branches:
+      - "feature/**"
+    paths:
+      - "lib/rh/integrations/esocial-*.ts"
+      - "app/actions/rh-*.ts"
+      - "app/app/rh/obrigacoes/esocial/**"
+      - "app/app/rh/admissoes/**"
+      - "app/app/rh/afastamentos/**"
+      - "app/app/rh/desligamentos/**"
+      - "app/app/rh/tsv/**"
+      - "supabase/migrations/*_rh_esocial_*.sql"
+      - "supabase/migrations/*_rh_admission_esocial_*.sql"
+      - "supabase/migrations/*_rh_leave_esocial_*.sql"
+      - "supabase/migrations/*_rh_termination_esocial_*.sql"
+      - "supabase/migrations/*_rh_tsv_*.sql"
+      - "tests/rh/esocial-*.ts"
+      - "scripts/fetch-rh-esocial-xsd.sh"
+      - "scripts/run-rh-esocial-restricted-homologation.mjs"
+      - "tsconfig.rh.json"
+      - ".github/workflows/rh-esocial-generation.yml"
+      - ".github/workflows/rh-esocial-restricted-homologation.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rh-esocial-generation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generation-signature-xsd:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: public-anon-key-for-build-only
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      ESOCIAL_XSD_DIR: /tmp/esocial-xsd
+      # Este job instala `xmllint`/`xmlsec1` e baixa o pacote XSD oficial pinado.
+      # A declaração torna a ausência de qualquer um deles uma reprovação AQUI —
+      # e só aqui, para o `quality` genérico não ser reprovado por não fazer o que
+      # nunca se propôs a fazer.
+      ESOCIAL_GATES_OBRIGATORIOS: "1"
+      ESOCIAL_XSD_ZIP: /tmp/esocial-xsd.zip
+      ESOCIAL_XSD_SHA256: 32535dba33d0470cf44afce410840af450028fd32d3ddf9123f601c45cf9af8e
+      ESOCIAL_XSD_URL: https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/2026-07-01_esquemas_xsd_v_s_01_03_00.zip
+      ESOCIAL_XSD_DOWNLOAD_URL: https://www.gov.br/esocial/pt-br/documentacao-tecnica/manuais/2026-07-01_esquemas_xsd_v_s_01_03_00.zip/@@download/file
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
+      - name: Restore pinned official eSocial XSD cache
+        uses: actions/cache@v4
+        with:
+          path: /tmp/esocial-xsd.zip
+          key: esocial-xsd-s1-3-20260701-32535dba33d0470cf44afce410840af450028fd32d3ddf9123f601c45cf9af8e
+      - name: Install XML validators and XMLDSig verifier
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils xmlsec1 openssl unzip
+      - name: Prepare pinned official eSocial S-1.3 XSD package
+        run: |
+          bash scripts/fetch-rh-esocial-xsd.sh
+          xmlsec1 --version
+      - name: Execute preflight of the real Restricted Production runner
+        env:
+          ESOCIAL_HOMOLOGATION_PREFLIGHT_ONLY: "true"
+        run: node --experimental-strip-types scripts/run-rh-esocial-restricted-homologation.mjs
+      - name: Validate migrations
+        run: pnpm validate:migrations
+      - name: Test all eSocial XML generation, XMLDSig, XMLSec and official XSD suites
+        run: pnpm exec vitest run tests/rh/esocial-*.test.ts
+      - name: RH scoped typecheck
+        run: pnpm exec tsc --noEmit -p tsconfig.rh.json
+      - name: RH eSocial lint
+        run: pnpm exec eslint 'lib/rh/integrations/esocial-*.ts' 'app/actions/rh-*.ts' app/app/rh/obrigacoes/esocial app/app/rh/admissoes app/app/rh/afastamentos app/app/rh/desligamentos app/app/rh/tsv 'tests/rh/esocial-*.ts' --max-warnings=0

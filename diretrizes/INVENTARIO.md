@@ -1,10 +1,10 @@
 # Inventário canônico — Innovar Platform
 
-**Atualizado em:** 3 de agosto de 2026  
+**Atualizado em:** 9 de agosto de 2026  
 **Base estável:** `main`  
 **Commit-base da branch:** `ecf80482`  
-**Branch funcional ativa:** `feature/etapa-22-whatsapp-omnichannel`  
-**PR funcional:** `#39` — rascunho  
+**Branch funcional ativa:** `feature/etapa-22-whatsapp-omnichannel`; Projeto RH em `feature/projeto-rh-especificacao-funcional`  
+**PRs funcionais:** `#39` e `#42` — rascunho  
 **Versão:** 0.19.0  
 **Produção:** não liberada
 
@@ -16,8 +16,8 @@
 - Python `3.13` no CI;
 - Next.js 16, React 19 e TypeScript;
 - Supabase Auth, PostgreSQL, RLS e Storage;
-- projeto de homologação: `wyeojufebtwblsubkunr`;
-- branch atual não está mesclada nem homologada.
+- projeto Supabase conectado: `wyeojufebtwblsubkunr`;
+- a branch RH não está mesclada nem homologada externamente.
 
 ## 2. Estado dos aplicativos
 
@@ -44,6 +44,7 @@
 | `financeiro` | Financeiro Operacional | operacional; antimalware pendente | 15/20 |
 | `sac` | Pós-venda e SAC | homologado; quarentena integrada na branch da Etapa 20 | 18/20 |
 | `whatsapp` | WhatsApp e Atendimento | implementação em branch; não homologado; Cloud API oficial | 22 |
+| `rh` | Recursos Humanos e Departamento Pessoal | núcleo funcional e gates internos validados; homologação externa, piloto e produção pendentes | Projeto RH / PR #42 |
 | `relatorios` | Relatórios e Indicadores | operacional | 16 |
 | `auditoria` | Auditoria e Observabilidade | homologado e incorporado | 19 |
 | `administracao` | Administração | operacional | 12.1 |
@@ -82,6 +83,8 @@ docs/ETAPA-20-PROTECAO-ANEXOS.md
 docs/ETAPA-21-WMS-AVANCADO-AUTOMACAO-LOGISTICA.md
 docs/ETAPA-22-WHATSAPP-OMNICHANNEL.md
 docs/ANALISE-REFERENCIAS-WHATSAPP-OPEN-SOURCE-2026-08-03.md
+docs/PROJETO-RH-EXECUCAO-STATUS-IMPLEMENTACAO.md
+docs/PROJETO-RH-EXECUCAO-BLOCOS-CRITICOS-2026-08-07.md
 ```
 
 ## 4. Etapa 17 — Estoque
@@ -267,7 +270,47 @@ supabase/migrations/20260803192000_stage22_whatsapp_status_guard.sql
 - revisão de UX mobile/desktop;
 - política de retenção LGPD.
 
-## 9. Storage privado
+## 9. Projeto RH / DP
+
+**Estado:** implementação funcional validada internamente no PR de rascunho `#42`; homologação externa e produção não liberadas.
+
+### Código e capacidades principais
+
+```text
+app/app/rh/**
+app/actions/rh-*.ts
+app/api/rh/**
+lib/rh/**
+supabase/migrations/*_rh_*.sql
+supabase/tests/rh/**
+tests/rh/**
+.github/workflows/rh-*.yml
+```
+
+### Estado técnico atual
+
+- núcleo pessoa → trabalhador → vínculo → condição vigente;
+- empresas, estabelecimentos, lotações, cargos/CBO, funções, sindicatos e jornadas;
+- admissão, alterações, ponto, férias, afastamentos, benefícios, SST e desligamento;
+- folha parametrizada, IRRF 2026, múltiplos vínculos, 13º, retroativos, provisões, contabilização e pagamentos;
+- documentos privados, recibos PDF e portal Meu RH;
+- eSocial com geração XML, XMLDSig, XSD oficial, mTLS, lote, protocolo, consulta e retorno por evento;
+- DCTFWeb/MIT, Integra Contador por capability e FGTS Digital/arquivo rescisório;
+- folha-sombra e reconciliação;
+- backup/restore isolado com comparação estrutural e de dados;
+- gates RH específicos verdes no checkpoint documentado em `docs/PROJETO-RH-EXECUCAO-STATUS-IMPLEMENTACAO.md`.
+
+### Pendências externas
+
+- Produção Restrita eSocial com certificado/inscrições reais;
+- Browser E2E em homologação HTTPS isolada;
+- Integra Contador com contrato/credenciais reais;
+- folha-sombra contra fonte autorizada real;
+- rehearsal de cutover/rollback;
+- piloto e GO/NO_GO;
+- produção.
+
+## 10. Storage privado
 
 ```text
 commercial-documents
@@ -285,7 +328,7 @@ file-quarantine
 
 `file-quarantine` deve permanecer privado. Objetos `PENDING`, `SCANNING`, `BLOCKED` ou `ERROR` nunca recebem URL funcional para o usuário.
 
-## 10. Variáveis conhecidas
+## 11. Variáveis conhecidas
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
@@ -316,7 +359,7 @@ WHATSAPP_WEBHOOK_VERIFY_TOKEN=
 
 Somente nomes, defaults não sensíveis e finalidades são versionados.
 
-## 11. CI
+## 12. CI
 
 ```bash
 pnpm validate:docs
@@ -334,9 +377,9 @@ pnpm test:python
 pnpm build
 ```
 
-O PR da Etapa 22 permanece em rascunho até todos os gates aplicáveis ficarem verdes.
+Os PRs funcionais permanecem em rascunho até todos os gates aplicáveis ficarem verdes.
 
-## 12. Recuperação
+## 13. Recuperação
 
 Procedimento oficial: `diretrizes/RECUPERACAO.md`.
 

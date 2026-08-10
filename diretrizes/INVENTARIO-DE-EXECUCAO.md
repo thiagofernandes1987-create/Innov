@@ -1446,6 +1446,43 @@ fazer sozinho, e isto depende de uma ação que só o dono do repositório execu
 - [ ] T-39.1 — Em `Settings → Branches`, regra para `main`: *Require a pull request before merging*, *Require status checks to pass* com o check **`quality`**, e ***Require branches to be up to date before merging*** — este último é o que faz a exigência valer sobre o **commit final**, não sobre um verde antigo de antes do último `merge` da base. Sem ele, o portão aprova código que nunca rodou junto, que é precisamente como a `main` chegou aos 31 erros de tipo
 - [ ] T-39.2 — Conferir por sabotagem, conforme `PROVA-POR-SABOTAGEM.md`: abrir um PR com uma violação deliberada de um dos validadores e confirmar que o botão de merge fica bloqueado
 
+## Sprint S-40 — Convergência do Projeto RH com a `main` reparada
+
+**Estado:** concluída
+
+O PR #42 nasceu sobre uma `main` de 6 de agosto e ficou 539 commits à frente
+enquanto a `main` andava 247. Converge aqui, com a bateria inteira executada
+sobre o resultado. Entra **no fim** conforme a R4.
+
+### O que o merge revelou
+
+Onze conflitos, e o mais instrutivo **não foi conflito**: `openTaskEditor`
+estava declarada **duas vezes** em `components/planejamento/schedule-planner.tsx`
+na base comum. Cada lado removeu uma cópia, em posição diferente, e o `git merge`
+removeu **as duas** sem reportar nada. Sobraram duas chamadas órfãs, pegas pelo
+`tsc` como `Cannot find name`. É a classe de defeito que motivou a discussão
+sobre trocar de linguagem, reproduzida ao vivo — e nenhum compilador a teria
+pego mais cedo, porque ela nasce na resolução de merge, não na escrita.
+
+### Tarefas
+
+- [x] T-40.1 — **Onze conflitos resolvidos.** Seis ficaram com o lado da `main` — era ela a versão convergida, e o ramo RH havia refeito por conta própria o mesmo refactor (`indicadores` → `resumos` no launcher, `proximoCodigo` no `schedule.ts`). Três foram união de ledger e estado de QA, um foi mapa regenerado, e um exigiu merge de verdade: no `validate-postgrest-embeds.mjs` os dois lados corrigiram o **mesmo** defeito de janela — associar o `.select()` de um encadeamento ao `.from()` do anterior, inventando PGRST200. A correção do RH (`fimDoStatement`, que respeita literais e para no `;`) é o corte correto e prevaleceu; da `main` veio o nome renomeado do arquivo da vacina
+- [x] T-40.2 — **293 vazamentos de mensagem do provedor fechados, em 72 arquivos — 100% do RH, zero fora.** `redirect(...?error=${error.message})` põe nome de coluna, detalhe e *hint* do PostgREST **na barra de endereço**, onde ficam em histórico, log de proxy e captura de tela. A troca é de uma expressão por outra — `mensagemDeFalha(contexto, erro, publica?)` em `lib/errors/data-access.ts` —, e é isso que a torna aplicável aos 293 pontos sem reescrever o fluxo de cada um: o operador continua recebendo o identificador estável no log, e os 63 pontos que já tinham mensagem de domínio (`"Vínculo não encontrado."`) a preservam no terceiro parâmetro. Provado por sabotagem: reintroduzir **um** `error.message` reprova o `tests/security-controls.test.ts` nomeando o arquivo
+- [x] T-40.2.1 — Erro meu na primeira passada, pego pelo `tsc`: o regex casava `resultado.error.message` e deixava o prefixo `resultado.`, produzindo 34 erros de tipo. A guarda `(?<![.\w$])` separa variável de propriedade, e uma segunda passada trata a forma com objeto. Duas passadas, 276 + 17
+- [x] T-40.3 — **18 superfícies Supabase novas classificadas** em `diretrizes/supabase-surface-classification.json`, com evidência **medida das migrations**, não escrita à mão: FKs de entrada e saída, gatilhos, policies e referências em corpo de função. Todas as 18 têm `functionRefs ≥ 1` — ausência de consumidor JS/TS é o desenho, porque o módulo escreve por RPC. Duas são trilha de acesso (`rh_document_access_log`, `rh_payslip_access_log`) e entraram como `preserve_operational_history`; as demais como `preserve_sql_internal`. `estimatedRows` é 0 em todas, e o motivo está escrito em cada uma: a migration correspondente **ainda não foi aplicada**
+- [x] T-40.4 — **Persona P17 — departamento pessoal e folha.** O módulo `rh` entrou no `MODULE_REGISTRY` sem profissional declarado, e a regra do repositório é anterior à tela: aplicativo sem persona não tem quem responda pelo que ele decide. Cinco competências com técnica e dado exigido, três cenários, e o pessimista que importa — eSocial devolvendo ocorrência bloqueante às vésperas do prazo, com o fechamento retido em vez de concluído com vínculo inconsistente. O módulo mapeia para o tipo operacional `financial`, porque é o que descreve a consequência: pagamento e lançamento contábil
+- [x] T-40.4.1 — **Persona nova é mudança de esquema, e o portão avisou na hora.** O `tests/personas-db-contract.test.ts` reprovou a P17 porque a S-30 gravou o vocabulário **no banco**, em seis restrições `check` que casavam `^P([1-9]|1[0-6])$`. Sem a migration, a P17 existiria no código e seria recusada na primeira gravação. A migration descobre as restrições **pelo texto da definição** — elas são anônimas, e o nome real é o gerado pelo PostgreSQL — e falha de propósito se não encontrar exatamente seis. Faixa ampliada para `^P([1-9]|[1-9][0-9])$`, não para P17: fixar o teto na persona recém-criada garantiria repetir esta migration na próxima. Aplicada e conferida no banco: **6 restrições ampliadas, 0 antigas, evento no catálogo, 17 tipos**; e provada por inserção — `aceitou P17=t | recusou PX=t | recusou P0=t`, com o `raise` desfazendo tudo
+- [x] T-40.4.2 — O teste de contrato passou a ler **o catálogo inteiro de migrations**, não um arquivo. A migration da S-30 já está aplicada, e migration aplicada é imutável — editá-la produziria um "aplicado divergente do arquivo", exatamente o que o `validate:migrations-applied` existe para reprovar. Persona nova entra por migration nova
+- [x] T-40.5 — **O portão de interoperabilidade XMLDSig não estava quebrado: faltava o binário.** `xmlsec1` ausente no contêiner fazia o gate do eSocial falhar com aparência de regressão. Instalado, o teste passa — a mesma C14N do `xmllint` e assinatura verificada externamente. Limitação de ambiente declarada como tal, não contornada com `skip`
+- [x] T-40.6 — Bateria completa sobre o resultado: `tsc` **0 erros**, `eslint --max-warnings=0` limpo, **88 arquivos e 812 testes** passando, e os 17 validadores verdes, incluindo `migrations-applied` (243 arquivos, 208 aplicadas, nenhuma divergência nova) e `code-map` (226 rotas, 314 server actions, 318 funções de banco)
+
+As **67 migrations `rh_*` seguem declaradas não aplicadas** no débito congelado de
+`diretrizes/migrations-aplicadas.json`, com o responsável nomeado. O registro ali
+não equivale a aplicação: a aplicação depende de ambiente isolado de homologação
+com evidência real, e as validações externas do PR #42 — certificado ICP-Brasil,
+Integra Contador contratado, folha-sombra contra fonte autorizada, piloto e
+GO/NO_GO — continuam sendo pré-requisito de produção, não de merge.
+
 ---
 
 ## Registro de reordenação
@@ -1454,6 +1491,7 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
+| 2026-08-10 | A convergência do Projeto RH passa de `S-38` para `S-40` | **Colisão de numeração**, não reordenação de trabalho. As duas sprints foram escritas em paralelo, em ramos diferentes, e as duas se chamavam `S-38`. A da `main` (endurecimento dos portões) chegou primeiro pelo PR #45, junto da `S-39`; a do RH renumera para o fim, conforme a R4. Nenhuma tarefa mudou de ordem nem de conteúdo. |
 | 2026-08-02 | Dentro da S-32, o motor de documento passa à frente da auto-sugestão | **Pré-requisito descoberto**, caso previsto na R5. O responsável nomeou os dependentes: propostas, orçamentos, contratos, aditivos, FVS e FVM da qualidade, layouts de mensagem padrão e resposta do SAC. Construir esses módulos antes do motor significa construir sete editores para desfazer depois. A auto-sugestão continua barata e entrega sozinha, mas não destrava nenhum módulo. |
 | 2026-07-26 | S-23 passa à frente da S-22 e da S-20 | Caso de **base reaproveitável** previsto na R5. Os componentes de campo da S-23 servem aos 20 módulos e resolvem o defeito mais grave já verificado — dado inválido gravado em produção. A S-22 trata de reconstrução do banco e não bloqueia interface; a S-20 troca vocabulário nas mesmas telas que a S-23 vai refazer, então entra junto, tela por tela, para não refazer duas vezes. |
 | 2026-07-25 | Virada S-21 → S-22, sem reordenação | A S-22 nasceu do resultado da própria S-21 e é pré-requisito de tudo: enquanto o repositório não reconstrói o banco, nenhuma sprint que crie migration tem base verificável. A S-06 e a S-20 seguem atrás dela. |
