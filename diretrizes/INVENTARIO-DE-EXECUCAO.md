@@ -1543,7 +1543,15 @@ sprint em andamento por vez e a R7 não admite sprint concluída com tarefa aber
 
 ## Sprint S-43 — Fase 2 da §36: classificar workers e a ADR de Go
 
-**Estado:** pendente
+**Estado:** bloqueada
+
+Três das quatro tarefas concluídas. A **T-43.3 depende da ratificação da
+ADR-0001**, e essa decisão não é desta sessão: a §37 condiciona a Fase 2 a uma
+ADR **aprovada**. Pela R7 a sprint não fecha enquanto a T-43.3 estiver aberta.
+
+O estado é `bloqueada`, e não `em andamento`, de propósito: espera por decisão
+humana não deve ocupar a vaga única da R3 por tempo indeterminado. Volta a
+`em andamento` no momento em que a ADR for ratificada ou recusada.
 
 Continuação direta da S-42, na ordem que o próprio mapa define. A §37 é o portão
 de entrada e não é negociável: **nenhuma linguagem nova entra sem ADR**.
@@ -1553,7 +1561,7 @@ de entrada e não é negociável: **nenhuma linguagem nova entra sem ADR**.
 - [x] T-43.1 — **Classificar todos os workers existentes** — último item da Fase 1 da §36. Para cada um: o que faz, se é disparado por evento ou agenda, duração típica, se pode ser reexecutado sem efeito duplicado, e qual camada da §21 o reivindica. Sem esse inventário, "migrar workers apropriados" (Fase 2) não tem sujeito. Feito em `diretrizes/WORKERS.md`, e o resultado **muda a Fase 2**: existem quatro workers reais (dois agendados, dois webhooks) e **um único** trecho assíncrono, que roda dentro do request. As quatro filas do canal — entrada, saída ordenada, reconciliação — têm esquema, trava e validador, e **nenhum consumidor**: as RPCs de `claim_*` são referenciadas só por validadores, que conferem que o token aparece na migration em vez de chamá-la. É a VACINA-057 em escala maior. Logo a Fase 2 não é migração, é **construção** — o que remove custo de reescrita e risco de paridade, e muda o texto da ADR
 - [x] T-43.2 — **ADR de Go**, com os doze itens da §37 e o benchmark que a §39 exige. Entregue em `diretrizes/ADR-0001-CAMADA-DE-EXECUCAO.md`, com as medições reproduzíveis em `benchmarks/camada-de-execucao/`. **Estado: proposta, aguardando ratificação do proprietário arquitetural** — a §37 condiciona a Fase 2 à ADR aprovada, e aprovar não é tarefa desta sessão. O benchmark **contraria a expectativa**: a CPU é 0,03% de um job de despacho, e trocar Node por Go economiza **0,41 s de CPU por dia** a 100 mil mensagens/dia; o Node satura em 6.549 jobs/s contra 27.884 do Go, mas a necessidade medida é de **1,16 job/s**, o que dá **57× de folga**. Dentro do próprio Go, escrever com `map[string]any` em vez de struct custa **2,14×** — mais que os 1,45× entre as duas linguagens. A ADR por isso separa o que o mapa juntava: **extrair a camada do request é decisão incondicional** (§4, critérios 3, 4, 7 e 8), **a linguagem é decisão condicionada** — TypeScript agora, Go por quatro gatilhos numéricos. Conflito com a leitura literal da §7.4 e da §36 registrado na própria ADR, §16
 - [ ] T-43.3 — Fase 2 da §36 — construir a camada de execução (a T-43.1 mostrou que não há o que migrar), padronizar queue/retry, instrumentar OpenTelemetry —, **só depois da ADR ratificada**. O primeiro portão da construção é o da ADR §11.4: **o validador chama a RPC em vez de procurar o nome dela na migration**, que é a correção direta da causa de quatro filas terem ficado sem consumidor com a bateria verde
-- [ ] T-43.4 — Reconciliar §21 e §33 no documento, com a decisão registrada: a matriz põe Go em 52,3% das linhas e a distribuição conceitual pede 5–15%. Enquanto as duas coexistirem, cada módulo novo pode citar a seção que lhe convier
+- [x] T-43.4 — Reconciliar §21 e §33, registrado no preâmbulo do `MAPA-TECNOLOGICO.md` e mensurável por `node scripts/medir-distribuicao.mjs`. **A premissa desta tarefa estava errada e a medição a corrigiu:** os "52,3% contra 5–15%" comparavam **presença** com **volume** — 100% das linhas da §21 são polyglotas, com 2,30 linguagens por linha, e as presenças somam 101 para 44 linhas, logo não formam fatia. Na mesma unidade (linguagem principal), sobra uma divergência **real, localizada em Go e menor**: 20,5% contra teto de 15%. O problema maior é outro: **a §33 não é mensurável como está** — este repositório fica dos dois lados da faixa conforme se conte o ledger de migrations (TypeScript 84,3% ou 58,0%; SQL 11,1% ou 38,9%), porque migration é append-only e cresce de forma monotônica contra o código de aplicação. Regra proposta: §21 é **autorização**, não orçamento; §33 é **alarme** medido sobre código vivo; §33 **nunca decide caso concreto** (seria o "otimizar por intuição" da §39); onde divergirem, prevalece a ADR da §37. **Requer ratificação**, como a ADR-0001
 
 ---
 

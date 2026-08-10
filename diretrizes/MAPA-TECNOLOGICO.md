@@ -50,8 +50,61 @@ O leitor do pacote SINAPI processa **15 MB em 10.035 ms** — 2.880 insumos, 8.4
 
 ### Duas inconsistências internas do documento
 
-1. **§21 contra §33.** A matriz da §21 põe Go em **23 das 44 linhas (52,3%)**, com 100% das linhas polyglotas e 41% com três linguagens ou mais. A §33 do mesmo documento estabelece Go entre **5% e 15%**. As duas não podem valer ao mesmo tempo; a §33 é a que corresponde à estratégia de fases da §36, e é a que prevalece na execução.
+1. **§21 contra §33.** Reconciliada pela T-43.4, na seção seguinte. **A leitura original registrada aqui estava errada** — ver lá.
 2. **§36 Fase 1 já estava concluída quando o documento foi lido.** Ver abaixo.
+
+## A reconciliação da §21 com a §33 (T-43.4)
+
+**Estado: proposta — requer ratificação**, como a [`ADR-0001`](./ADR-0001-CAMADA-DE-EXECUCAO.md). Medições reproduzíveis por `node scripts/medir-distribuicao.mjs`.
+
+### O que eu havia afirmado, e por que estava errado
+
+A primeira leitura desta seção dizia que a §21 põe Go em **52,3% das linhas** contra os **5–15%** da §33, e que *"as duas não podem valer ao mesmo tempo"*. **Podem.** Elas medem coisas diferentes, e comparar os dois números foi comparar presença com volume:
+
+- a **§21** conta **em quantas linhas da matriz uma linguagem aparece** — e 100% das linhas são polyglotas, com 2,30 linguagens por linha em média. Somando as presenças dá 101 para 44 linhas: os percentuais da §21 **não somam 100 e não deveriam ser lidos como fatia**;
+- a **§33** estima **fatia do código**.
+
+Uma linha que diz *"Secundária: Go"* não reserva volume de código nenhum. Diz que Go é **admissível** ali.
+
+### A contradição que sobra depois de corrigir a unidade
+
+Colocadas na mesma unidade — linguagem **principal** de cada linha, que é a única leitura da §21 que soma 100%:
+
+| | §21, como principal | §33 | |
+| --- | ---: | :---: | --- |
+| TypeScript | 56,8% | 60–70% | pouco abaixo |
+| PostgreSQL | 18,2% | 20–25% | pouco abaixo |
+| **Go** | **20,5%** | **5–15%** | **acima — a inconsistência real** |
+| Python | 11,4% | sem faixa | — |
+| Rust | 2,3% | sem faixa | — |
+
+A contradição é **real, mas localizada em Go e muito menor do que parecia**: 20,5% contra um teto de 15%, e não 52,3% contra 5–15%. As nove linhas em que Go é principal são WMS, RFID, Conciliação, Assinatura, Documentos, WhatsApp, SINAPI, CUB e Backup.
+
+### O problema maior: a §33 não é mensurável como está
+
+A §33 dá faixas sem dizer **de que**. E a unidade inverte o resultado. Este mesmo repositório, medido de duas formas igualmente defensáveis:
+
+| | TypeScript | SQL | Go |
+| --- | ---: | ---: | ---: |
+| **código vivo** (sem o ledger) | **84,3%** — acima | **11,1%** — abaixo | 0,0% |
+| **com o ledger de migrations** | **58,0%** — abaixo | **38,9%** — acima | 0,0% |
+
+TypeScript e SQL trocam de lado da faixa conforme a contagem. **Alvo sem unidade não é alvo**: é um número que confirma a tese de quem o cita, porque a contagem se escolhe depois de saber o que se quer concluir.
+
+A causa é estrutural, não acidental: **migration é append-only.** Uma escrita de 2026 permanece para sempre e nunca é refatorada, enquanto código de aplicação encolhe e se reescreve. Contar o ledger faz o SQL crescer de forma monotônica até que **qualquer** plataforma estoure a faixa por acumulação de história, e não por decisão de arquitetura.
+
+### A regra proposta
+
+1. **A §21 é autorização, não orçamento.** Responde *"esta linguagem é admissível neste módulo?"*. Não se converte em percentual, e citar "Go aparece em N% das linhas" — em qualquer direção — é erro de unidade.
+2. **A §33 é alarme de desvio, medido sobre código vivo**, sem o ledger de migrations, por `scripts/medir-distribuicao.mjs`.
+3. **A §33 nunca decide uma escolha concreta.** Ela própria diz que não deve ser limite rígido. Escolher linguagem para reequilibrar percentual é o *"otimizar por intuição"* que a §39 proíbe: a distribuição provoca a pergunta, a medição do caso responde.
+4. **Onde as duas divergirem sobre Go, prevalece a §37** — a ADR do caso concreto, com número. Foi assim na ADR-0001, cuja conclusão contraria a §7.4 e está registrada como tal.
+
+### O que a medição diz sobre a plataforma de hoje
+
+**Go tem 0 linhas de código de plataforma.** Os três `.go` do repositório são instrumentos de medição em `benchmarks/`, e o script os exclui de propósito — contá-los faria o Go aparecer só porque alguém mediu o Go.
+
+Pela leitura de código vivo, o desvio real é **TypeScript em 84,3% contra um teto de 70%**, com SQL abaixo da faixa. Isso converge com o achado da [`WORKERS.md`](./WORKERS.md): a camada de execução nunca foi construída, então tudo que ela faria está em TypeScript, dentro do request. O alarme da §33, uma vez que se lhe dê uma unidade, aponta para o mesmo lugar que a ADR-0001 — **o que não é, por si, razão para escolher Go**, pela regra 3 acima.
 
 ### O que a camada de validação produziu em um dia
 
@@ -73,11 +126,11 @@ Nenhum desses seria evitado por trocar de linguagem, e todos entraram porque as 
 
 | fase | estado | evidência |
 | --- | --- | --- |
-| **1 — Consolidar** | **quase concluída** | strict typing (`noUnusedLocals`/`noUnusedParameters`), CI reforçado com `validate:exports-mortos` e `validate:assercoes`, duplicações eliminadas, `PROVA-POR-SABOTAGEM.md` canônica. **Falta:** *classificar todos os workers existentes* |
-| **2 — Execution Engine** | **próxima** | exige a ADR da §37, com os 12 itens, antes de Go entrar |
+| **1 — Consolidar** | **concluída** | strict typing (`noUnusedLocals`/`noUnusedParameters`), CI reforçado com `validate:exports-mortos` e `validate:assercoes`, duplicações eliminadas, `PROVA-POR-SABOTAGEM.md` canônica e `WORKERS.md` fechando a classificação dos workers |
+| **2 — Execution Engine** | **bloqueada na ratificação** | a ADR da §37 está escrita — [`ADR-0001`](./ADR-0001-CAMADA-DE-EXECUCAO.md), com os doze itens e o benchmark da §39. Falta a decisão do proprietário arquitetural |
 | 3 a 6 | pendentes | na ordem da §36 |
 
-A §37 é inegociável e está sendo respeitada: **nenhuma linguagem nova entra sem ADR**. A ADR de Go é a próxima tarefa, e o gateway de mensageria é o candidato inicial — serviço isolado, sem acesso a banco, com carga de cripto e serialização, atendendo aos critérios 2, 3, 4, 5, 6 e 8 da lista da §4.
+A §37 é inegociável e está sendo respeitada: **nenhuma linguagem nova entra sem ADR**, e a ADR-0001 não foi tratada como formalidade. O benchmark que ela exige **contraria a expectativa**: a CPU é 0,03% de um job de despacho, e o Node tem 57× de folga no volume medido. Por isso a ADR separa o que esta seção juntava — **extrair a camada do request é decisão incondicional**, a **linguagem** é decisão condicionada a quatro gatilhos numéricos. A conclusão contraria a leitura literal da §7.4, e o conflito está registrado na §16 da própria ADR em vez de omitido.
 
 ---
 
