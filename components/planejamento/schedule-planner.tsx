@@ -487,6 +487,15 @@ export function SchedulePlanner({
   }
 
 
+  // Reposta na convergência do PR #42 com a `main`: a base tinha esta função
+  // DUAS vezes, cada lado do merge removeu uma cópia — em posição diferente —
+  // e o merge removeu as duas. Sem conflito, sem aviso: só duas chamadas
+  // órfãs que o `tsc` pegou como `Cannot find name`.
+  function openTaskEditor(taskId: string): void {
+    setEditorTab("general");
+    setEditorTaskId(taskId);
+  }
+
   function predecessorLabel(taskId: string): string {
     return (incomingByTask.get(taskId) ?? [])
       .map(dependency => {

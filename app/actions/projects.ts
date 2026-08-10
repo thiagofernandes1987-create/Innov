@@ -9,7 +9,6 @@ import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
 import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
 import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
-import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
 
 const managementRoles = [
   "SUPER_ADMIN",

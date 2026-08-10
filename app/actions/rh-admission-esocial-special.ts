@@ -3,6 +3,7 @@
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireCapability}from"@/lib/authorization";
+import{reportDataAccessError}from"@/lib/errors/data-access";
 
 function text(d:FormData,k:string){return String(d.get(k)??"").trim();}
 function num(d:FormData,k:string){const v=text(d,k);return v?Number(v):null;}
@@ -28,9 +29,11 @@ export async function saveAdmissionEsocialSpecialProfile(data:FormData){
   updated_at:new Date().toISOString()
  };
  const{data:profile,error:profileError}=await context.supabase.from("rh_admission_esocial_profiles").select("id").eq("organization_id",context.organizationId).eq("admission_case_id",caseId).maybeSingle();
- if(profileError)redirect(`${path}?error=${encodeURIComponent(profileError.message)}`);
+ // A mensagem do provedor nunca chega à URL: ela carrega nome de coluna,
+ // detalhe e hint do PostgREST. Só o contexto vai para o log.
+ if(profileError){reportDataAccessError("rh-admission-esocial-special.load-profile",profileError);redirect(`${path}?error=${encodeURIComponent("Não foi possível carregar o perfil eSocial da admissão.")}`);}
  if(!profile)redirect(`${path}?error=${encodeURIComponent("Salve primeiro o perfil eSocial principal da admissão.")}`);
  const{error}=await context.supabase.from("rh_admission_esocial_profiles").update(payload).eq("organization_id",context.organizationId).eq("admission_case_id",caseId);
- if(error)redirect(`${path}?error=${encodeURIComponent(error.message)}`);
+ if(error){reportDataAccessError("rh-admission-esocial-special.update-profile",error);redirect(`${path}?error=${encodeURIComponent("Não foi possível gravar o perfil eSocial especial da admissão.")}`);}
  revalidatePath(`/app/rh/admissoes/${caseId}`);revalidatePath(path);redirect(`${path}?success=1`);
 }
