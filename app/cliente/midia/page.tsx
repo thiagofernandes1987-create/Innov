@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { requireClientContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { formatDate } from "@/lib/stage12";
 import { singleRelation } from "@/lib/supabase/relations";
 
@@ -12,14 +13,21 @@ export default async function ClientMediaPage() {
     .order("created_at", { ascending: false })
     .limit(120);
 
+  if (error) reportDataAccessError("client-media.page.load", error);
+
   const paths = (data ?? []).map((media) => media.storage_path);
-  const { data: signed } = paths.length ? await supabase.storage.from("daily-log-media").createSignedUrls(paths, 900) : { data: [] };
-  const signedByPath = new Map((signed ?? []).map((item) => [item.path, item.signedUrl]));
+  const signedResult = paths.length
+    ? await supabase.storage.from("daily-log-media").createSignedUrls(paths, 900)
+    : { data: [], error: null };
+  if (signedResult.error) reportDataAccessError("client-media.page.sign-urls", signedResult.error);
+
+  const signedByPath = new Map((signedResult.data ?? []).map((item) => [item.path, item.signedUrl]));
 
   return (
     <main className="content">
       <div className="page-head"><div><span className="badge">REGISTROS DE CAMPO</span><h1>Fotos e vídeos</h1><p className="muted">Evidências aprovadas e liberadas pela Innovar.</p></div></div>
-      {error ? <div className="validation blocking">{error.message}</div> : null}
+      {error ? <div className="validation blocking">Não foi possível carregar as mídias liberadas.</div> : null}
+      {signedResult.error ? <div className="validation blocking">Alguns arquivos não puderam ser preparados para visualização.</div> : null}
       <section className="media-grid">
         {(data ?? []).map((media) => {
           const project = singleRelation(media.projects);
