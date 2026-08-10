@@ -3,10 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAccessAdministration } from "@/lib/authorization";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { toDatabaseAccessLevel, type ModuleAccessLevel } from "@/lib/modules/registry";
 
 function value(formData:FormData,key:string){return String(formData.get(key)??"").trim();}
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}
+function failDatabase(path:string,message:string,operation:string,error:unknown):never{
+  reportDataAccessError(operation,error as {code?:string|null;statusCode?:string|number|null;name?:string|null});
+  fail(path,message);
+}
 
 export async function setApplicationState(formData:FormData){
   const context=await requireAccessAdministration();
@@ -15,7 +20,7 @@ export async function setApplicationState(formData:FormData){
   const reason=value(formData,"reason")||"Alteração administrativa de aplicativo.";
   if(!moduleKey||!["ENABLED","DISABLED","ARCHIVED"].includes(status))fail("/app/administracao/aplicativos","Aplicativo ou estado inválido.");
   const{error}=await context.supabase.rpc("set_organization_module_status",{p_organization_id:context.organizationId,p_module_key:moduleKey,p_status:status,p_reason:reason});
-  if(error)fail("/app/administracao/aplicativos",error.message);
+  if(error)failDatabase("/app/administracao/aplicativos","Não foi possível alterar o estado do aplicativo.","access.set-application-state",error);
   revalidatePath("/app");revalidatePath("/app/administracao/aplicativos");
 }
 
@@ -24,7 +29,7 @@ export async function createAccessProfile(formData:FormData){
   const code=value(formData,"key");const name=value(formData,"name");const description=value(formData,"description");
   if(!code||!name)fail("/app/administracao/perfis","Informe nome e identificador do perfil.");
   const{error}=await context.supabase.rpc("create_modular_access_profile",{p_organization_id:context.organizationId,p_code:code,p_name:name,p_description:description,p_base_role:null});
-  if(error)fail("/app/administracao/perfis",error.message);
+  if(error)failDatabase("/app/administracao/perfis","Não foi possível criar o perfil de acesso.","access.create-profile",error);
   revalidatePath("/app/administracao/perfis");
 }
 
@@ -46,7 +51,7 @@ export async function setProfileAccessLevel(formData:FormData){
     p_can_view_sensitive:full,
     p_reason:reason
   });
-  if(error)fail("/app/administracao/perfis",error.message);
+  if(error)failDatabase("/app/administracao/perfis","Não foi possível atualizar as permissões do perfil.","access.set-profile-permissions",error);
   revalidatePath("/app");revalidatePath("/app/administracao/perfis");
 }
 
@@ -57,7 +62,17 @@ export async function assignProfileToUser(formData:FormData){
   if(!userId||!profileId||!["ORGANIZATION","CLIENT","PROJECT"].includes(scopeType))fail("/app/administracao/usuarios","Usuário, perfil ou escopo inválido.");
   if(scopeType!=="ORGANIZATION"&&!scopeId)fail("/app/administracao/usuarios","Informe o cliente ou a obra do escopo.");
   const{error}=await context.supabase.rpc("assign_user_access_profile",{p_organization_id:context.organizationId,p_user_id:userId,p_profile_id:profileId,p_scope_type:scopeType,p_scope_id:scopeId,p_reason:reason});
-  if(error)fail("/app/administracao/usuarios",error.message);
+  if(error)failDatabase("/app/administracao/usuarios","Não foi possível atribuir o perfil ao usuário.","access.assign-profile",error);
+  revalidatePath("/app");revalidatePath("/app/administracao/usuarios");
+}
+
+export async function revokeProfileFromUser(formData:FormData){
+  const context=await requireAccessAdministration();
+  const assignmentId=value(formData,"assignmentId");
+  const reason=value(formData,"reason");
+  if(!assignmentId||!reason)fail("/app/administracao/usuarios","Informe a atribuição e a justificativa da revogação.");
+  const{error}=await context.supabase.rpc("revoke_user_access_profile",{p_assignment_id:assignmentId,p_reason:reason});
+  if(error)failDatabase("/app/administracao/usuarios","Não foi possível revogar o perfil do usuário.","access.revoke-profile",error);
   revalidatePath("/app");revalidatePath("/app/administracao/usuarios");
 }
 
@@ -73,6 +88,6 @@ export async function setUserCapabilityOverride(formData:FormData){
     ?context.supabase.rpc("set_project_module_capability_override",{p_project_id:scopeId,p_user_id:userId,p_module_key:moduleKey,p_capability_key:capabilityKey,p_effect:effect,p_expires_at:null,p_reason:reason})
     :context.supabase.rpc("set_user_module_capability_override",{p_organization_id:context.organizationId,p_user_id:userId,p_module_key:moduleKey,p_capability_key:capabilityKey,p_effect:effect,p_expires_at:null,p_reason:reason});
   const{error}=await call;
-  if(error)fail("/app/administracao/usuarios",error.message);
+  if(error)failDatabase("/app/administracao/usuarios","Não foi possível salvar a exceção de acesso.","access.set-user-override",error);
   revalidatePath("/app");revalidatePath("/app/administracao/usuarios");
 }

@@ -2,7 +2,7 @@
 
 **Estado:** parcial  
 **Detectada em:** PR #38 — loop de QA do Planejamento em 30 de julho de 2026  
-**ID histórico:** registrada originalmente como `VACINA-044`; renumerada em 9 de agosto de 2026 para eliminar colisão no catálogo canônico sem deslocar `VACINA-045` a `VACINA-061`.
+**Reserva de numeração:** `VACINA-043` já estava reservada no PR #34; a identificação foi normalizada para 063 na auditoria de regressão de 8 de agosto de 2026.
 
 ## Qual foi o problema
 

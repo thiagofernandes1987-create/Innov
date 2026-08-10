@@ -8,10 +8,11 @@
 // do mesmo importador divergindo em silêncio, que foi o defeito da T-37.7.
 //
 //   SINAPI_APP_URL=http://127.0.0.1:3000 \
-//   CRON_SECRET=... SINAPI_ORGANIZATION_ID=<uuid> \
+//   CRON_SECRET=... SINAPI_PROBE_TOKEN=... SINAPI_ORGANIZATION_ID=<uuid> \
 //   node scripts/importar-sinapi.mjs --uf SP,RJ --regime ambos
 //
-// Sem `--aplicar` ele confere e não grava.
+// Os dois segredos são efêmeros no workflow. Sem `--aplicar` ele confere e não
+// grava.
 
 import fs from "node:fs";
 
@@ -23,6 +24,7 @@ const valorDe = nome => {
 
 const base = (process.env.SINAPI_APP_URL ?? "http://127.0.0.1:3000").replace(/\/+$/, "");
 const segredo = (process.env.CRON_SECRET ?? "").trim();
+const probeSecret = (process.env.SINAPI_PROBE_TOKEN ?? "").trim();
 const organizacao = (process.env.SINAPI_ORGANIZATION_ID ?? "").trim();
 const aplicar = argumentos.includes("--aplicar");
 const relatorioEm = valorDe("relatorio") ?? "sinapi-importacao.json";
@@ -32,8 +34,6 @@ const ufs = (valorDe("uf") ?? "SP")
   .map(item => item.trim().toUpperCase())
   .filter(Boolean);
 
-// Os dois regimes são o padrão de propósito: importar só um deixa metade do
-// catálogo velha, e nada na tela diz qual metade.
 const regimeBruto = (valorDe("regime") ?? "ambos").toLowerCase();
 const regimes =
   regimeBruto === "ambos"
@@ -46,6 +46,7 @@ const regimes =
 
 const faltando = [];
 if (!segredo || segredo.length < 32) faltando.push("CRON_SECRET (mínimo 32 caracteres)");
+if (!probeSecret || probeSecret.length < 32) faltando.push("SINAPI_PROBE_TOKEN (mínimo 32 caracteres)");
 if (aplicar && !/^[0-9a-f-]{36}$/i.test(organizacao)) faltando.push("SINAPI_ORGANIZATION_ID (uuid)");
 if (!regimes) faltando.push("--regime válido: ambos, desonerado ou nao-desonerado");
 if (ufs.some(uf => !/^[A-Z]{2}$/.test(uf))) faltando.push(`--uf com siglas válidas (recebido: ${ufs.join(",")})`);
@@ -58,13 +59,12 @@ if (faltando.length) {
 
 async function conferir(uf, desonerado) {
   const url = new URL(`${base}/api/internal/sinapi-source-probe-v2`);
-  url.searchParams.set("token", "sinapi-source-probe-v2-20260729-f19c8");
   url.searchParams.set("region", uf);
   url.searchParams.set("relief", String(desonerado));
-  const resposta = await fetch(url);
+  const resposta = await fetch(url, { headers: { "x-sinapi-probe-token": probeSecret } });
   const corpo = await resposta.json();
   if (!resposta.ok || corpo.ok === false) {
-    throw new Error(corpo.error ?? `sonda respondeu ${resposta.status}`);
+    throw new Error(String(corpo.error ?? `sonda respondeu ${resposta.status}`));
   }
   return {
     dataBase: corpo.result.baseDate,
@@ -80,7 +80,7 @@ async function importar(uf, desonerado) {
     body: JSON.stringify({ organizationId: organizacao, region: uf, taxRelief: desonerado })
   });
   const corpo = await resposta.json();
-  if (!resposta.ok) throw new Error(corpo.message ?? `a rota respondeu ${resposta.status}`);
+  if (!resposta.ok) throw new Error(String(corpo.message ?? `a rota respondeu ${resposta.status}`));
   return corpo.resultado;
 }
 
@@ -117,6 +117,4 @@ const relatorio = {
 fs.writeFileSync(relatorioEm, `${JSON.stringify(relatorio, null, 2)}\n`, "utf8");
 console.log(`Relatório em ${relatorioEm}: ${linhas.length} combinação(ões), ${falhas.length} falha(s).`);
 
-// Importação parcial que termina em verde é a mesma falha silenciosa da
-// T-37.1: a tela mostra preço velho e ninguém é avisado.
 if (falhas.length) process.exit(1);

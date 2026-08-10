@@ -10,16 +10,6 @@ import { AlternadorTema } from "./alternador-tema";
 import type { AtividadeAviso, MensagemAviso, NotificacaoOperacionalAviso } from "@/lib/casca/avisos";
 import { ROTULO_ATIVIDADE, ROTULO_OBSERVACAO, type TipoAtividade } from "@/lib/pipeline/atividades";
 
-// Canto direito da barra: mensagens, notificações e configuração.
-//
-// Os três abrem painel, não página. O que se faz nesse canto é olhar e
-// decidir se vale interromper o que se está fazendo — mandar isso para outra
-// rota perde o lugar de quem só queria conferir.
-//
-// Um painel por vez, todos fecham com Escape e com clique fora, e o foco
-// volta para o botão que abriu. Painel que rouba o foco e não devolve deixa
-// quem usa teclado no começo da página.
-
 type Painel = "mensagens" | "notificacoes" | "configuracao";
 
 function useForaEEscape(aberto: boolean, fechar: () => void) {
@@ -93,13 +83,8 @@ export function CantoDireito({
   const usuario = nomeExibicao(email);
 
   function alternar(painel: Painel) {
-    // O próximo estado é calculado fora do atualizador de propósito: a função
-    // passada a `setState` roda durante a renderização, e disparar transição
-    // dali é erro de React — o painel não abria e o console acusava
-    // "Cannot call startTransition while rendering".
     const proximo = aberto === painel ? null : painel;
     setAberto(proximo);
-    // Abrir o painel é o ato de ler: é aí que o marco de "visto" avança.
     if (persistirAvisos && proximo === "mensagens" && naoLidas > 0) {
       iniciar(() => marcarVisto("mensagens"));
     }
@@ -141,10 +126,6 @@ export function CantoDireito({
         ) : null}
       </button>
 
-      {/* Avatar, não engrenagem. O nome do usuário por extenso e o botão "Sair"
-          ocupavam a barra o dia inteiro para uma ação que se faz uma vez por
-          dia; as quatro ferramentas do padrão põem tudo isso dentro do avatar,
-          junto com tema e dados da conta. */}
       <div className="canto-tema-topo">
         <AlternadorTema atual={tema} />
       </div>
@@ -201,6 +182,11 @@ export function CantoDireito({
             <strong>Notificações</strong>
             <span>exceções da operação e atividades no seu nome</span>
           </header>
+          <p style={{ margin: "0 16px 12px" }}>
+            <Link className="text-link" href="/app/excecoes" onClick={() => setAberto(null)}>
+              Registrar exceção operacional →
+            </Link>
+          </p>
           {operacionais.length === 0 && atividades.length === 0 ? (
             <p className="canto-vazio">Nenhuma atividade em aberto para você.</p>
           ) : (
@@ -263,6 +249,11 @@ export function CantoDireito({
                 Minhas tarefas
               </Link>
             </li>
+            <li>
+              <Link href="/app/excecoes" onClick={() => setAberto(null)}>
+                Exceções operacionais
+              </Link>
+            </li>
             {podeAdministrar ? (
               <>
                 <li>
@@ -298,7 +289,6 @@ export function CantoDireito({
   );
 }
 
-/** Duas letras do e-mail: `admin@admin.com` vira `AD`. */
 function iniciais(email: string | null): string {
   const local = (email ?? "").split("@")[0].replace(/[^a-zA-ZÀ-ÿ]/g, " ").trim();
   if (!local) return "?";

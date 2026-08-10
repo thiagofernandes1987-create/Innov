@@ -4,30 +4,18 @@ import { BarraSuperior } from "@/components/casca/barra-superior";
 import { ProvedorDeBusca } from "@/components/casca/busca-da-barra";
 import { Launcher, type AplicativoAutorizado } from "@/components/casca/launcher";
 import type { LauncherSummaryMap } from "@/lib/casca/launcher-domain";
+import { MODULE_REGISTRY } from "@/lib/modules/registry";
 
-const TODOS: AplicativoAutorizado[] = [
-  { chave: "crm", nome: "CRM e Vendas", descricao: "Leads, oportunidades e pipeline.", categoria: "Comercial", href: "#crm", nivel: "READ_WRITE" },
-  { chave: "clientes", nome: "Clientes", descricao: "Cadastro e visão multiprojeto.", categoria: "Comercial", href: "#clientes", nivel: "READ_WRITE" },
-  { chave: "propostas", nome: "Propostas", descricao: "Propostas e versões liberadas.", categoria: "Comercial", href: "#propostas", nivel: "READ" },
-  { chave: "obras", nome: "Projetos", descricao: "Carteira e progresso executivo.", categoria: "Operacional", href: "#obras", nivel: "READ_WRITE" },
-  { chave: "planejamento", nome: "Planejamento", descricao: "EAP, cronogramas e marcos.", categoria: "Operacional", href: "#planejamento", nivel: "READ_WRITE" },
-  { chave: "tarefas", nome: "Tarefas", descricao: "Quadros de execução.", categoria: "Operacional", href: "#tarefas", nivel: "READ_WRITE" },
-  { chave: "diario", nome: "Diário de campo", descricao: "Registros e evidências.", categoria: "Operacional", href: "#diario", nivel: "FULL" },
-  { chave: "equipes", nome: "Equipes", descricao: "Integrantes e recursos.", categoria: "Operacional", href: "#equipes", nivel: "READ" },
-  { chave: "documentos", nome: "Documentos", descricao: "Arquivos e versões.", categoria: "Operacional", href: "#documentos", nivel: "READ" },
-  { chave: "qualidade", nome: "Qualidade", descricao: "Vistorias e não conformidades.", categoria: "Qualidade", href: "#qualidade", nivel: "READ_WRITE" },
-  { chave: "orcamentos", nome: "Orçamentos", descricao: "Custos, BDI e cenários.", categoria: "Financeiro", href: "#orcamentos", nivel: "READ_WRITE" },
-  { chave: "financeiro", nome: "Financeiro", descricao: "Contas, parcelas e caixa.", categoria: "Financeiro", href: "#financeiro", nivel: "FULL" },
-  { chave: "compras", nome: "Compras", descricao: "Cotações, pedidos e recebimentos.", categoria: "Suprimentos", href: "#compras", nivel: "READ_WRITE" },
-  { chave: "estoque", nome: "Estoque", descricao: "Entradas, saídas e inventários.", categoria: "Suprimentos", href: "#estoque", nivel: "READ" },
-  { chave: "contratos", nome: "Contratos", descricao: "Partes, versões e vigência.", categoria: "Jurídico", href: "#contratos", nivel: "READ" },
-  { chave: "assinaturas", nome: "Assinaturas", descricao: "Envelopes e evidências.", categoria: "Jurídico", href: "#assinaturas", nivel: "READ" },
-  { chave: "aditivos", nome: "Aditivos", descricao: "Valor, escopo e prazo.", categoria: "Jurídico", href: "#aditivos", nivel: "READ" },
-  { chave: "sac", nome: "Pós-venda e SAC", descricao: "Chamados e assistência.", categoria: "Pós-venda", href: "#sac", nivel: "READ_WRITE" },
-  { chave: "relatorios", nome: "Relatórios", descricao: "Painéis e indicadores.", categoria: "Geral", href: "#relatorios", nivel: "READ" },
-  { chave: "auditoria", nome: "Auditoria", descricao: "Eventos e alterações.", categoria: "Núcleo", href: "#auditoria", nivel: "READ" },
-  { chave: "administracao", nome: "Administração", descricao: "Perfis, usuários e permissões.", categoria: "Núcleo", href: "#administracao", nivel: "FULL" }
-];
+const TODOS: AplicativoAutorizado[] = MODULE_REGISTRY
+  .filter(modulo => modulo.key !== "dashboard")
+  .map(modulo => ({
+    chave: modulo.key,
+    nome: modulo.name,
+    descricao: modulo.description,
+    categoria: modulo.category,
+    href: `#${modulo.key}`,
+    nivel: "READ_WRITE"
+  }));
 
 const RESUMOS_DEMONSTRACAO: LauncherSummaryMap = {
   crm: { label: "Oportunidades ativas", value: "12", support: "R$ 11,4 mi no pipeline", secondaryLabel: "Leads", secondaryValue: "28", progress: 42, available: true, recent: [
@@ -45,7 +33,9 @@ const RESUMOS_DEMONSTRACAO: LauncherSummaryMap = {
   propostas: { label: "Propostas", value: "23", support: "37% de conversão", progress: 37, available: true },
   contratos: { label: "Contratos ativos", value: "31", support: "4 aditivos pendentes", progress: 82, available: true },
   documentos: { label: "Documentos", value: "8.742", support: "64% de 15 GB", progress: 64, available: true },
-  qualidade: { label: "Não conformidades", value: "9", support: "92% conformidade", progress: 92, available: true }
+  modelos: { label: "Modelos publicados", value: "46", support: "Biblioteca corporativa", progress: 74, available: true },
+  qualidade: { label: "Não conformidades", value: "9", support: "92% conformidade", progress: 92, available: true },
+  whatsapp: { label: "Conversas abertas", value: "8", support: "Canal oficial conectado", progress: 84, available: true }
 };
 
 const PERFIS: Record<string, string[]> = {
@@ -53,8 +43,6 @@ const PERFIS: Record<string, string[]> = {
   financeiro: ["financeiro", "orcamentos", "clientes", "tarefas", "contratos", "compras", "relatorios"],
   admin: TODOS.map(a => a.chave)
 };
-
-// Esta é a página de amostra visual; os valores abaixo pertencem somente a RESUMOS_DEMONSTRACAO.
 
 export default async function Amostra({ searchParams }: { searchParams: Promise<{ perfil?: string; cenario?: string }> }) {
   const { perfil = "admin", cenario = "normal" } = await searchParams;

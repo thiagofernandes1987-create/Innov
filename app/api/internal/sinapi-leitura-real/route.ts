@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { discoverLatestSinapiXlsxSource } from "@/lib/sinapi/automatic-update";
 import { parseSinapiOfficialReferencePackage } from "@/lib/sinapi/official-reference-parser";
 
@@ -10,15 +11,18 @@ export const dynamic = "force-dynamic";
 // fronteira da gravação. É o que responde "o leitor entende o arquivo
 // publicado hoje?" sem precisar da credencial de importação.
 //
-// Existe porque a falha que originou a T-37.1 passou quarenta dias invisível:
-// os testes exercitavam exemplos, e ninguém abria o arquivo de verdade.
+// O token não é versionado: o workflow gera `SINAPI_PROBE_TOKEN` aleatório no
+// runner e a rota só aceita o valor pelo header. No deploy público, ausência do
+// segredo fecha a rota como 404.
 
-const TOKEN = "sinapi-leitura-real-20260804-3b1d7";
+function authorizedProbe(request: Request) {
+  const expected = process.env.SINAPI_PROBE_TOKEN?.trim();
+  return Boolean(expected && expected.length >= 32 && request.headers.get("x-sinapi-probe-token") === expected);
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const token = request.headers.get("x-sinapi-probe-token") ?? url.searchParams.get("token");
-  if (token !== TOKEN) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!authorizedProbe(request)) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const region = String(url.searchParams.get("region") ?? "SP").toUpperCase();
   const taxRelief = url.searchParams.get("relief") === "true";
@@ -57,8 +61,9 @@ export async function GET(request: Request) {
         : null
     });
   } catch (error) {
+    reportDataAccessError("sinapi-real-read.probe", error);
     return NextResponse.json(
-      { ok: false, region, taxRelief, error: error instanceof Error ? error.message : "Falha desconhecida" },
+      { ok: false, region, taxRelief, error: "A leitura do pacote SINAPI não pôde ser concluída." },
       { status: 502 }
     );
   }

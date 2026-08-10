@@ -20,8 +20,6 @@ export default async function TeamsPage({
     supabase.from("projects").select("id,code,name").eq("id", id).eq("organization_id", organizationId).maybeSingle(),
     supabase.from("project_teams").select("id,name,specialty,leader_user_id,active,project_team_members(id,display_name,role_label,active)").eq("project_id", id).order("name"),
     supabase.from("project_resources").select("id,resource_type,code,name,unit,hourly_cost,daily_cost,active").eq("project_id", id).order("resource_type").order("name"),
-    // Sem embed de `profiles`: `user_id` aponta para `auth.users`, e o embed
-    // devolvia PGRST200, derrubando a lista de membros inteira.
     supabase.from("project_memberships").select("user_id,role").eq("project_id", id).eq("active", true)
   ]);
 
@@ -29,13 +27,6 @@ export default async function TeamsPage({
   reportDataAccessError("project-teams.collection", teamsResult.error);
   reportDataAccessError("project-teams.resources", resourcesResult.error);
   reportDataAccessError("project-teams.memberships", membershipsResult.error);
-
-  const membershipIds = [...new Set((membershipsResult.data ?? []).map((membership) => membership.user_id))];
-  const profilesResult = membershipIds.length
-    ? await supabase.from("profiles").select("id,full_name,email").in("id", membershipIds)
-    : { data: [], error: null };
-
-  reportDataAccessError("project-teams.profiles", profilesResult.error);
 
   if (projectResult.error) {
     return (
@@ -56,7 +47,7 @@ export default async function TeamsPage({
   const nomePorUsuario = await nomesDosUsuarios(supabase, memberships.map(m => m.user_id));
   const teamsLoadFailed = Boolean(teamsResult.error);
   const resourcesLoadFailed = Boolean(resourcesResult.error);
-  const membershipsLoadFailed = Boolean(membershipsResult.error || profilesResult.error);
+  const membershipsLoadFailed = Boolean(membershipsResult.error);
   const loadFailed = teamsLoadFailed || resourcesLoadFailed || membershipsLoadFailed;
 
   return (

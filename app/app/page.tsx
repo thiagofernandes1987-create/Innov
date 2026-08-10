@@ -6,7 +6,6 @@ export const dynamic = "force-dynamic";
 
 export default async function CentralDeAplicativos() {
   const { context, applications } = await getEffectiveApplications();
-  const resumos = await loadLauncherSummaries(context);
 
   const aplicativos: AplicativoAutorizado[] = applications
     .filter(item => item.applicationKey !== "dashboard" && item.accessLevel !== "NONE")
@@ -19,6 +18,8 @@ export default async function CentralDeAplicativos() {
       href: item.routePrefix,
       nivel: item.accessLevel
     }));
+
+  const resumos = await loadLauncherSummaries(context);
 
   return (
     <main className="content pagina-launcher">

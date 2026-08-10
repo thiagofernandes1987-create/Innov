@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireClientContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { formatDate, formatPercent, statusBadge, taskStatusLabels } from "@/lib/stage12";
 
 export default async function ClientSchedulePage() {
@@ -11,10 +12,12 @@ export default async function ClientSchedulePage() {
     .not("client_released_at", "is", null)
     .order("planned_start");
 
+  if (error) reportDataAccessError("client-schedule.page.load", error);
+
   return (
     <main className="content">
       <div className="page-head"><div><span className="badge">PLANEJAMENTO</span><h1>Cronograma</h1><p className="muted">Atividades e marcos liberados pela Innovar.</p></div></div>
-      {error ? <div className="validation blocking">{error.message}</div> : null}
+      {error ? <div className="validation blocking">Não foi possível carregar o cronograma.</div> : null}
       <section className="grid">
         {(projects ?? []).map((project) => {
           const tasks = (project.project_tasks ?? []).filter((task) => task.client_visible && task.status !== "CANCELED");

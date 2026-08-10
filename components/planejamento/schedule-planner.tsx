@@ -477,11 +477,6 @@ export function SchedulePlanner({
     scrollToToday();
   }, [scrollToToday]);
 
-  function openTaskEditor(taskId: string): void {
-    setEditorTab("general");
-    setEditorTaskId(taskId);
-  }
-
   function toggleWbs(id: string): void {
     setCollapsed(current => {
       const next = new Set(current);

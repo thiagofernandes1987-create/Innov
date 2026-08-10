@@ -1,7 +1,7 @@
 {
   "_leia": "Instantâneo do que está aplicado no banco, para o CI comparar sem alcançar o banco. A comparação é pelo NOME LÓGICO: o ledger carimba a versão no momento da aplicação, então o número do arquivo e o da versão aplicada não coincidem — comparar por número produziria um resultado sem sentido. Atualize com `SUPABASE_DB_URL=... pnpm ledger:atualizar` (scripts/atualizar-ledger-de-migrations.mjs) e commite junto da migration.",
   "projeto": "wyeojufebtwblsubkunr",
-  "atualizado_em": "2026-08-05T02:34:16Z",
+  "atualizado_em": "2026-08-10T01:15:52Z",
   "aplicadas": [
     "accept_proposal_client_audit",
     "aplicativo_modelos_e_documentacoes",
@@ -49,6 +49,7 @@
     "revogar_truncate_de_anon_e_authenticated",
     "revoke_legacy_project_creation_rpcs",
     "safe_project_creation_workflows",
+    "sanitize_persisted_provider_errors",
     "seed_sinduscon_sp_cub_2026_06",
     "semear_modelos_da_empresa",
     "semear_modulo_modelos",
@@ -197,6 +198,10 @@
     "stage19_observability_security",
     "stage19_observability_unified_stream",
     "stage20_atomic_access_counters_and_cleanup",
+    "stage22_whatsapp_fk_indexes",
+    "stage22_whatsapp_hardening",
+    "stage22_whatsapp_omnichannel",
+    "stage22_whatsapp_status_guard",
     "stage9_apply_amendment",
     "stage9_client_signature_policies",
     "stage9_financial_contracts",
@@ -207,7 +212,7 @@
     "unidade_funde_expoente"
   ],
   "debito": {
-    "_responsavel": "Projeto RH / Stage 22 — migrations presentes no branch e ainda NÃO aplicadas. Aplicação bloqueada até ambiente isolado de homologação e evidência real; este registro não equivale a aplicação nem autoriza merge/produção.",
+    "_responsavel": "S-22 + PR #44 — divergências históricas congeladas; migrations destrutivas da auditoria de regressão só saem do débito após deploy de código compatível, aplicação controlada e testes DB. Qualquer divergência NOVA fora destas listas reprova. PR #42 (Projeto RH) — as migrations `rh_*` estão presentes no ramo e NÃO aplicadas: o registro aqui não equivale a aplicação nem autoriza merge ou produção, e a aplicação depende de ambiente isolado de homologação com evidência real.",
     "aplicadas_sem_arquivo": [
       "aplicativo_modelos_e_documentacoes",
       "biblioteca_de_modelos_acervo_unico",
@@ -267,8 +272,14 @@
     ],
     "arquivos_sem_aplicacao": [
       "biblioteca_de_modelos_e_documentacoes",
+      "close_direct_legacy_contract_project_rpc",
+      "converge_budget_pricing_to_markup",
       "documentos_emitidos",
+      "drop_legacy_create_budget_version_rpc",
+      "drop_revoked_legacy_project_creation_rpcs",
+      "drop_superseded_contract_inventory_report_surfaces",
       "r2_stage14_procurement_parent_chain",
+      "remove_unused_fixed_costs_table",
       "rh_admission_activation_esocial_contract_fix",
       "rh_admission_activation_precondition_order_fix",
       "rh_admission_esocial_special_clt",

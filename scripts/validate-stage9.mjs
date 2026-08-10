@@ -1,15 +1,14 @@
 import { access, readFile } from "node:fs/promises";
 
 const requiredFiles = [
-  "lib/finance.ts",
-  "lib/finance.test.ts",
   "lib/pdf.ts",
   "lib/auth.ts",
   "lib/supabase/server.ts",
   "lib/supabase/admin.ts",
-  "lib/signatures/index.ts",
   "proxy.ts",
   "app/login/page.tsx",
+  "app/actions/budgets.ts",
+  "app/actions/budget-versions.ts",
   "app/app/orcamentos/page.tsx",
   "app/app/orcamentos/novo/page.tsx",
   "app/app/orcamentos/[id]/page.tsx",
@@ -28,7 +27,8 @@ const requiredFiles = [
   "supabase/migrations/20260719231500_stage9_workflows.sql",
   "supabase/migrations/20260719232500_stage9_client_signature_policies.sql",
   "supabase/migrations/20260719233500_stage9_frozen_version_rules.sql",
-  "supabase/migrations/20260719234000_stage9_apply_amendment.sql"
+  "supabase/migrations/20260719234000_stage9_apply_amendment.sql",
+  "supabase/migrations/20260729013000_budget_next_version.sql"
 ];
 
 const checks = [];
@@ -49,32 +49,34 @@ for (const file of requiredFiles) {
   });
 }
 
-const finance = await readFile("lib/finance.ts", "utf8");
+// O motor TypeScript de BDI/markup da Etapa 9 deixou de ser runtime e foi
+// removido. A formação de preço canônica vive nas actions + RPCs que o produto
+// realmente chama. Testar arquivo morto seria cobertura falsa.
+const budgetActions = await readFile("app/actions/budgets.ts", "utf8");
 for (const token of [
-  "calculateBdi",
-  "calculateMarkupFactor",
-  "grossMarginRate",
-  "estimatedRoiRate",
-  "paybackMonth",
-  "maximumCashRequirement",
-  "ADMIN_FEE_DUPLICATED",
-  "FIXED_COST_DUPLICATED",
-  "PROFIT_MARGIN_DUPLICATED",
-  "ROI_WITHOUT_CAPITAL"
+  "updateBudgetPricing",
+  'from("markup_models")',
+  'rpc("calculate_budget_version"',
+  "desiredMarginRate",
+  "investedCapital"
 ]) {
-  await check(`finance:${token}`, async () => finance.includes(token));
+  await check(`pricing-atual:${token}`, async () => budgetActions.includes(token));
 }
 
+const versionActions = await readFile("app/actions/budget-versions.ts", "utf8");
+await check("versao-atual:create-next", async () => versionActions.includes('rpc("create_next_budget_version"'));
+await check("versao-atual:sem-create-version-legado", async () => !versionActions.includes('rpc("create_budget_version"'));
+
 const migration = await readFile("supabase/migrations/20260719230000_stage9_financial_contracts.sql", "utf8");
+await check("pricing-atual:ROI_WITHOUT_CAPITAL", async () =>
+  migration.includes("function public.calculate_budget_version") && migration.includes("ROI_WITHOUT_CAPITAL")
+);
+
 const tables = [
   "cost_catalog_items",
   "cost_compositions",
   "cost_composition_versions",
   "cost_composition_items",
-  "fixed_costs",
-  "administrative_fee_models",
-  "bdi_models",
-  "bdi_model_versions",
   "markup_models",
   "budgets",
   "budget_versions",
@@ -122,7 +124,6 @@ for (const fn of [
 const workflows = await readFile("supabase/migrations/20260719231500_stage9_workflows.sql", "utf8");
 for (const fn of [
   "create_budget",
-  "create_budget_version",
   "release_proposal_version",
   "create_contract_from_proposal",
   "create_amendment",
@@ -130,6 +131,10 @@ for (const fn of [
 ]) {
   await check(`workflow:${fn}`, async () => workflows.includes(`function public.${fn}`));
 }
+
+const nextVersion = await readFile("supabase/migrations/20260729013000_budget_next_version.sql", "utf8");
+await check("workflow:create-next-budget-version", async () => nextVersion.includes("function public.create_next_budget_version"));
+await check("workflow:next-version-copia-itens", async () => nextVersion.includes("insert into public.budget_items"));
 
 const frozenRules = await readFile("supabase/migrations/20260719233500_stage9_frozen_version_rules.sql", "utf8");
 await check("imutabilidade:valores", async () => frozenRules.includes("Valores de versão congelada são imutáveis"));
@@ -158,12 +163,10 @@ const contractPdf = await readFile("app/api/contracts/[versionId]/pdf/route.ts",
 await check("contrato:bucket-privado", async () => contractPdf.includes('from("contract-documents")'));
 await check("contrato:idempotencia", async () => contractPdf.includes("idempotency-key"));
 
-const adapters = await readFile("lib/signatures/index.ts", "utf8");
-for (const provider of ["sandbox", "clicksign", "zapsign", "docusign"]) {
-  await check(`adapter:${provider}`, async () => adapters.includes(`"${provider}"`));
-}
-await check("sandbox:sem-validade-externa", async () => adapters.includes("hasExternalLegalValidity = false"));
-
+// A arquitetura de adapters Stage 9 (`lib/signatures/index.ts`) não tinha
+// consumidor e foi substituída pela assinatura avançada da Etapa 12.2. Aqui
+// preservamos apenas as garantias transversais que continuam desta etapa; o
+// contrato atual de assinatura tem gate próprio em validate:stage12.2.
 const webhook = await readFile("app/api/signatures/webhook/route.ts", "utf8");
 await check("webhook:hmac", async () => webhook.includes("createHmac"));
 await check("webhook:timing-safe", async () => webhook.includes("timingSafeEqual"));
@@ -174,7 +177,7 @@ await check("webhook:service-role-server", async () => webhook.includes("createS
 const env = await readFile(".env.example", "utf8");
 await check("segredo:não-preenchido", async () => !/SUPABASE_SERVICE_ROLE_KEY=\S+/.test(env));
 await check("credencial-provider:não-preenchida", async () => !/SIGNATURE_\w+_API_KEY=\S+/.test(env));
-await check("sandbox:identificado", async () => workflows.includes("legal_validity','none"));
+await check("sandbox:identificado", async () => workflows.includes("legal_validity','none'"));
 
 const proxy = await readFile("proxy.ts", "utf8");
 await check("proxy:app", async () => proxy.includes('"/app"'));

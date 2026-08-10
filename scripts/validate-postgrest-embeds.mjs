@@ -1,4 +1,11 @@
-// Prevenção executável da VACINA-052-EMBED-AMBIGUO-PRECISA-DE-CHAVE-NOMEADA.md.
+// Prevenção executável da VACINA-052-EMBED-AMBIGUO-DEVOLVE-PGRST201-E-DERRUBA-A-CONSULTA-INTEIRA.md.
+//
+// Convergência do PR #42 com a `main` reparada: os dois lados corrigiram o mesmo
+// defeito de janela — associar o `.select()` de um encadeamento ao `.from()` do
+// anterior, inventando um PGRST200. A `main` parava no próximo `.from()`; a
+// versão daqui para no fim do statement respeitando literais, que é o corte
+// correto, e por isso ela prevalece. O que veio da `main` foi o nome do arquivo
+// da vacina, renomeado na auditoria de regressão.
 //
 // O validador reconstrói o grafo de relacionamentos PostgREST a partir das
 // migrations. Desde o hardening multi-tenant do RH, uma migration final remove

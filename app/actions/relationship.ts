@@ -6,7 +6,9 @@ import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireClientContext}from"@/lib/auth";
 import{requireCapability}from"@/lib/authorization";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { listaDoEscopo, pertenceALista } from "@/lib/listas/servidor";
+import { safeInternalReturnPath } from "@/lib/organization-context";
 import { ESCOPOS } from "@/lib/sugestoes/servidor";
 import{
  FILE_SECURITY_SAC_MIME_TYPES,
@@ -17,6 +19,7 @@ import{secureUpload}from"@/lib/file-security/server";
 import{createSupabaseAdminClient}from"@/lib/supabase/admin";
 import{checarCamposBR}from"@/lib/validacao/formulario";
 
+type ProviderLikeError={code?:string|null;statusCode?:string|number|null;name?:string|null};
 function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
 // Lê valor monetário tolerando o que gente digita e o que planilha cola:
@@ -25,6 +28,7 @@ function optional(data:FormData,key:string){return text(data,key)||null;}
 function numberOrNull(value:unknown){return lerMoeda(value as string|number|null|undefined);}
 function boolean(data:FormData,key:string){return data.get(key)!==null;}
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}
+function failData(path:string,operation:string,error:ProviderLikeError|null|undefined,message:string):never{reportDataAccessError(`relationship.${operation}`,error);fail(path,message);}
 function resultRow<T extends Record<string,unknown>>(value:T|T[]|null){return Array.isArray(value)?value[0]??null:value;}
 
 export async function createCrmLead(data:FormData){
@@ -43,36 +47,21 @@ export async function createCrmLead(data:FormData){
   p_notes:optional(data,"notes"),p_consent_contact:boolean(data,"consentContact"),p_consent_source:optional(data,"consentSource"),
   p_idempotency_key:text(data,"idempotencyKey")||randomUUID()
  });
- if(error)fail(path,error.message);const row=resultRow(lead as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/app/crm/leads/${row?.id??""}`);
+ if(error)failData(path,"create-crm-lead",error,"Não foi possível criar o lead.");const row=resultRow(lead as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/app/crm/leads/${row?.id??""}`);
 }
 
 export async function moveCrmLeadStage(data:FormData){
- const id=text(data,"leadId");const context=await requireCapability("crm","update");
+ const id=text(data,"leadId");const context=await requireCapability("crm","update");const path=`/app/crm/leads/${id}`;
  const{error}=await context.supabase.rpc("move_crm_lead_stage",{p_lead_id:id,p_to_stage:text(data,"stage"),p_reason:optional(data,"reason")});
- if(error)fail(`/app/crm/leads/${id}`,error.message);revalidatePath(`/app/crm/leads/${id}`);revalidatePath("/app/crm");
+ if(error)failData(path,"move-crm-lead-stage",error,"Não foi possível alterar a etapa do lead.");revalidatePath(path);revalidatePath("/app/crm");
 }
 
 export async function convertCrmLead(data:FormData){
- const id=text(data,"leadId");const context=await requireCapability("crm","update");
+ const id=text(data,"leadId");const context=await requireCapability("crm","update");const path=`/app/crm/leads/${id}`;
  const{data:conversion,error}=await context.supabase.rpc("convert_crm_lead",{p_lead_id:id,p_create_opportunity:boolean(data,"createOpportunity"),p_opportunity_title:optional(data,"opportunityTitle"),p_estimated_value:numberOrNull(text(data,"estimatedValue"))});
- if(error)fail(`/app/crm/leads/${id}`,error.message);const result=conversion&&typeof conversion==="object"?conversion as Record<string,unknown>:{};redirect(`/app/clientes/${result.clientId??""}`);
+ if(error)failData(path,"convert-crm-lead",error,"Não foi possível converter o lead.");const result=conversion&&typeof conversion==="object"?conversion as Record<string,unknown>:{};redirect(`/app/clientes/${result.clientId??""}`);
 }
 
-export async function createCrmOpportunity(data:FormData){
- const context=await requireCapability("crm","create");const path="/app/crm/oportunidades/novo";
- const{data:opportunity,error}=await context.supabase.rpc("create_crm_opportunity",{
-  p_organization_id:context.organizationId,p_client_id:optional(data,"clientId"),p_lead_id:optional(data,"leadId"),p_title:text(data,"title"),
-  p_description:optional(data,"description"),p_estimated_value:numberOrNull(text(data,"estimatedValue")),p_stage:text(data,"stage")||"PROSPECTING",
-  p_probability:numberOrNull(text(data,"probability"))??25,p_expected_close_date:optional(data,"expectedCloseDate"),p_source:optional(data,"source"),p_owner_id:optional(data,"ownerId")
- });
- if(error)fail(path,error.message);const row=resultRow(opportunity as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/app/crm/oportunidades/${row?.id??""}`);
-}
-
-// Motivo e observação são dois campos, não um. Motivo é **escolhido** de uma
-// lista curada, porque alimenta contagem — "quantos perdemos por preço neste
-// trimestre" — e contagem sobre texto que cada pessoa escreve do seu jeito não
-// fecha. Observação é prosa daquele negócio, livre, e não entra em contagem
-// nenhuma.
 export async function moveCrmOpportunityStage(data:FormData){
  const id=text(data,"opportunityId");const context=await requireCapability("crm","update");
  const path=`/app/crm/oportunidades/${id}`;
@@ -92,7 +81,7 @@ export async function moveCrmOpportunityStage(data:FormData){
  const{error}=await context.supabase.rpc("move_crm_opportunity_stage",{
   p_opportunity_id:id,p_to_stage:estagio,p_reason:motivo,p_note:optional(data,"note")
  });
- if(error)fail(path,error.message);
+ if(error)failData(path,"move-crm-opportunity-stage",error,"Não foi possível alterar a etapa da oportunidade.");
  revalidatePath(path);revalidatePath("/app/crm");
 }
 
@@ -112,7 +101,7 @@ export async function createRelationshipClient(data:FormData){
   segment:optional(data,"segment"),preferred_contact_channel:text(data,"preferredContactChannel")||"EMAIL",lifecycle_stage:text(data,"lifecycleStage")||"CUSTOMER",
   assigned_owner_id:optional(data,"ownerId"),next_follow_up_at:optional(data,"nextFollowUpAt"),created_by:context.userId
  }).select("id").single();
- if(error)fail(path,error.message);redirect(`/app/clientes/${client.id}`);
+ if(error)failData(path,"create-client",error,"Não foi possível criar o cliente.");redirect(`/app/clientes/${client.id}`);
 }
 
 export async function updateRelationshipClient(data:FormData){
@@ -130,62 +119,62 @@ export async function updateRelationshipClient(data:FormData){
   segment:optional(data,"segment"),preferred_contact_channel:text(data,"preferredContactChannel"),lifecycle_stage:text(data,"lifecycleStage"),assigned_owner_id:optional(data,"ownerId"),
   next_follow_up_at:optional(data,"nextFollowUpAt"),last_contact_at:optional(data,"lastContactAt"),updated_at:new Date().toISOString()
  }).eq("id",id).eq("organization_id",context.organizationId);
- if(error)fail(path,error.message);revalidatePath(path);revalidatePath("/app/clientes");
+ if(error)failData(path,"update-client",error,"Não foi possível atualizar o cliente.");revalidatePath(path);revalidatePath("/app/clientes");
 }
 
 export async function addClientContact(data:FormData){
  const clientId=text(data,"clientId");const context=await requireCapability("clientes","update");const path=`/app/clientes/${clientId}`;
  const{error}=await context.supabase.from("client_contacts").insert({organization_id:context.organizationId,client_id:clientId,full_name:text(data,"fullName"),role_title:optional(data,"roleTitle"),email:optional(data,"email"),phone:optional(data,"phone"),preferred_channel:text(data,"preferredChannel")||"EMAIL",is_primary:boolean(data,"primary"),notes:optional(data,"notes"),created_by:context.userId});
- if(error)fail(path,error.message);revalidatePath(path);
+ if(error)failData(path,"add-client-contact",error,"Não foi possível adicionar o contato.");revalidatePath(path);
 }
 
 export async function recordClientConsent(data:FormData){
  const clientId=text(data,"clientId");const context=await requireCapability("clientes","update");const path=`/app/clientes/${clientId}`;
  const{error}=await context.supabase.from("client_consents").insert({organization_id:context.organizationId,client_id:clientId,kind:text(data,"kind"),granted:text(data,"granted")==="true",source:text(data,"source"),evidence:optional(data,"evidence"),occurred_at:optional(data,"occurredAt")??new Date().toISOString(),created_by:context.userId});
- if(error)fail(path,error.message);revalidatePath(path);
+ if(error)failData(path,"record-client-consent",error,"Não foi possível registrar o consentimento.");revalidatePath(path);
 }
 
 export async function recordRelationshipActivity(data:FormData){
- const context=await requireCapability(text(data,"moduleKey")||"crm","update");const returnPath=text(data,"returnPath")||"/app/crm";
+ const context=await requireCapability(text(data,"moduleKey")||"crm","update");const returnPath=safeInternalReturnPath(text(data,"returnPath")||"/app/crm","/app/crm");
  const{error}=await context.supabase.rpc("record_crm_activity",{p_organization_id:context.organizationId,p_activity_type:text(data,"activityType"),p_subject:text(data,"subject"),p_description:optional(data,"description"),p_lead_id:optional(data,"leadId"),p_opportunity_id:optional(data,"opportunityId"),p_client_id:optional(data,"clientId"),p_ticket_id:optional(data,"ticketId"),p_occurred_at:optional(data,"occurredAt"),p_due_at:optional(data,"dueAt"),p_owner_id:optional(data,"ownerId")});
- if(error)fail(returnPath,error.message);revalidatePath(returnPath);revalidatePath("/app/crm");
+ if(error)failData(returnPath,"record-activity",error,"Não foi possível registrar a atividade.");revalidatePath(returnPath);revalidatePath("/app/crm");
 }
 
 export async function createSacTicket(data:FormData){
  const projectId=optional(data,"projectId");const context=await requireCapability("sac","create",projectId);const path="/app/ocorrencias/novo";
  const{data:ticket,error}=await context.supabase.rpc("create_sac_ticket",{p_organization_id:context.organizationId,p_client_id:text(data,"clientId"),p_project_id:projectId,p_contract_id:optional(data,"contractId"),p_category_id:optional(data,"categoryId"),p_title:text(data,"title"),p_description:text(data,"description"),p_source:text(data,"source")||"INTERNAL",p_priority:text(data,"priority")||"NORMAL",p_idempotency_key:text(data,"idempotencyKey")||randomUUID()});
- if(error)fail(path,error.message);const row=resultRow(ticket as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/app/ocorrencias/${row?.id??""}`);
+ if(error)failData(path,"create-sac-ticket",error,"Não foi possível abrir a ocorrência.");const row=resultRow(ticket as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/app/ocorrencias/${row?.id??""}`);
 }
 
 export async function createClientSacTicket(data:FormData){
  const{client,supabase}=await requireClientContext();const path="/cliente/ocorrencias/novo";
  const{data:ticket,error}=await supabase.rpc("create_sac_ticket",{p_organization_id:client.organization_id,p_client_id:client.id,p_project_id:optional(data,"projectId"),p_contract_id:optional(data,"contractId"),p_category_id:optional(data,"categoryId"),p_title:text(data,"title"),p_description:text(data,"description"),p_source:"PORTAL",p_priority:"NORMAL",p_idempotency_key:text(data,"idempotencyKey")||randomUUID()});
- if(error)fail(path,error.message);const row=resultRow(ticket as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/cliente/ocorrencias/${row?.id??""}`);
+ if(error)failData(path,"create-client-sac-ticket",error,"Não foi possível abrir a ocorrência.");const row=resultRow(ticket as Record<string,unknown>|Record<string,unknown>[]|null);redirect(`/cliente/ocorrencias/${row?.id??""}`);
 }
 
 export async function addSacTicketMessage(data:FormData){
  const id=text(data,"ticketId");const portal=text(data,"portal")==="true";const path=portal?`/cliente/ocorrencias/${id}`:`/app/ocorrencias/${id}`;
  const supabase=portal?(await requireClientContext()).supabase:(await requireCapability("sac","update",optional(data,"projectId"))).supabase;
  const{error}=await supabase.rpc("add_sac_ticket_message",{p_ticket_id:id,p_visibility:portal?"CLIENT":text(data,"visibility")||"CLIENT",p_body:text(data,"body"),p_idempotency_key:text(data,"idempotencyKey")||randomUUID()});
- if(error)fail(path,error.message);revalidatePath(path);
+ if(error)failData(path,"add-sac-message",error,"Não foi possível enviar a mensagem.");revalidatePath(path);
 }
 
 export async function assignSacTicket(data:FormData){
- const id=text(data,"ticketId");const context=await requireCapability("sac","update",optional(data,"projectId"));
+ const id=text(data,"ticketId");const context=await requireCapability("sac","update",optional(data,"projectId"));const path=`/app/ocorrencias/${id}`;
  const{error}=await context.supabase.rpc("assign_sac_ticket",{p_ticket_id:id,p_assigned_to:optional(data,"assignedTo")});
- if(error)fail(`/app/ocorrencias/${id}`,error.message);revalidatePath(`/app/ocorrencias/${id}`);revalidatePath("/app/ocorrencias");
+ if(error)failData(path,"assign-sac-ticket",error,"Não foi possível atribuir a ocorrência.");revalidatePath(path);revalidatePath("/app/ocorrencias");
 }
 
 export async function transitionSacTicket(data:FormData){
- const id=text(data,"ticketId");const context=await requireCapability("sac","update",optional(data,"projectId"));
+ const id=text(data,"ticketId");const context=await requireCapability("sac","update",optional(data,"projectId"));const path=`/app/ocorrencias/${id}`;
  const{error}=await context.supabase.rpc("transition_sac_ticket",{p_ticket_id:id,p_to_status:text(data,"status"),p_reason:optional(data,"reason")});
- if(error)fail(`/app/ocorrencias/${id}`,error.message);revalidatePath(`/app/ocorrencias/${id}`);revalidatePath("/app/ocorrencias");
+ if(error)failData(path,"transition-sac-ticket",error,"Não foi possível alterar o status da ocorrência.");revalidatePath(path);revalidatePath("/app/ocorrencias");
 }
 
 export async function rateSacTicket(data:FormData){
- const id=text(data,"ticketId");const{supabase}=await requireClientContext();
+ const id=text(data,"ticketId");const{supabase}=await requireClientContext();const path=`/cliente/ocorrencias/${id}`;
  const{error}=await supabase.rpc("rate_sac_ticket",{p_ticket_id:id,p_score:Number(text(data,"score")),p_comment:optional(data,"comment")});
- if(error)fail(`/cliente/ocorrencias/${id}`,error.message);revalidatePath(`/cliente/ocorrencias/${id}`);
+ if(error)failData(path,"rate-sac-ticket",error,"Não foi possível registrar a avaliação.");revalidatePath(path);
 }
 
 async function uploadSacAttachment(data:FormData,portal:boolean){
@@ -204,14 +193,19 @@ async function uploadSacAttachment(data:FormData,portal:boolean){
    targetBucket:"crm-sac-attachments",targetPath:storagePath,body:buffer,filename:safeName,
    contentType:file.type,organizationId,actorUserId
   });
- }catch(error){fail(path,fileSecurityMessage(error));}
+ }catch(uploadError){fail(path,fileSecurityMessage(uploadError));}
  const{error}=await supabase.rpc("register_sac_ticket_attachment",{
   p_ticket_id:ticketId,p_message_id:optional(data,"messageId"),p_storage_path:storagePath,
   p_file_name:safeName,p_mime_type:file.type,p_size_bytes:secured.sizeBytes,p_sha256:secured.sha256,
   p_client_visible:portal?true:boolean(data,"clientVisible"),p_security_scan_id:secured.scanId,
   p_security_provider:secured.provider,p_security_scanned_at:secured.scannedAt
  });
- if(error){await createSupabaseAdminClient().storage.from("crm-sac-attachments").remove([storagePath]);fail(path,"O arquivo foi analisado, mas não pôde ser vinculado ao chamado.");}
+ if(error){
+  reportDataAccessError("relationship.register-sac-attachment",error);
+  const{error:cleanupError}=await createSupabaseAdminClient().storage.from("crm-sac-attachments").remove([storagePath]);
+  reportDataAccessError("relationship.cleanup-sac-attachment",cleanupError);
+  fail(path,"O arquivo foi analisado, mas não pôde ser vinculado ao chamado.");
+ }
  revalidatePath(path);
 }
 

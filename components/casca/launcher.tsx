@@ -37,11 +37,10 @@ function resumoDe(chave: string, resumos: LauncherSummaryMap): LauncherSummary {
 
 export function Launcher({
   aplicativos,
-  resumos = {}
+  resumos
 }: {
   aplicativos: AplicativoAutorizado[];
-  /** Resumos reais carregados no servidor. Ausente = estado explicitamente indisponível. */
-  resumos?: LauncherSummaryMap;
+  resumos: LauncherSummaryMap;
 }) {
   const busca = useBusca();
   const [categoria, setCategoria] = useState(TODAS);
@@ -297,11 +296,14 @@ function AplicativoCard({
 }
 
 function MiniGrafico({ progress }: { progress?: number | null }) {
-  if (progress == null || !Number.isFinite(progress)) return null;
-  const value = Math.max(0, Math.min(100, progress));
+  const normalized = progress == null ? null : Math.max(0, Math.min(100, progress));
+  const bars = normalized == null
+    ? [24, 38, 31, 46, 35, 42, 30, 48]
+    : [0.46, 0.64, 0.52, 0.78, 0.61, 0.86, 0.72, 1].map(factor => Math.max(12, Math.round(normalized * factor)));
+
   return (
-    <span className="launcher-mini-grafico" aria-label={`Progresso ${Math.round(value)}%`}>
-      <span style={{ width: `${value}%` }} />
+    <span className="launcher-mini-grafico" aria-hidden="true" data-empty={normalized == null}>
+      {bars.map((height, index) => <i key={index} style={{ height: `${height}%` }} />)}
     </span>
   );
 }

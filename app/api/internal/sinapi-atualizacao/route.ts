@@ -1,4 +1,5 @@
 import "server-only";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { runSinapiAutomaticUpdate } from "@/lib/sinapi/automatic-update";
 
 export const runtime = "nodejs";
@@ -63,12 +64,13 @@ export async function POST(request: Request) {
     const resultado = await runSinapiAutomaticUpdate({ organizationId, region, taxRelief });
     return Response.json({ status: "ok", resultado }, { headers: { "Cache-Control": "private, no-store" } });
   } catch (error) {
+    reportDataAccessError("sinapi-automatic-update.route", error);
     return Response.json(
       {
         status: "failed",
         region,
         taxRelief,
-        message: error instanceof Error ? error.message : "Falha desconhecida na atualização automática."
+        message: "A atualização automática do SINAPI não pôde ser concluída."
       },
       { status: 502 }
     );

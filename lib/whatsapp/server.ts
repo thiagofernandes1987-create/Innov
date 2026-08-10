@@ -104,7 +104,7 @@ export async function loadWhatsAppWorkspace(selectedConversationId?: string | nu
     ? await context.supabase
         .from("whatsapp_messages")
         .select(
-          "id,direction,message_type,status,body,caption,source_binding_id,source_snapshot,error_code,error_message,occurred_at"
+          "id,direction,message_type,status,body,caption,source_binding_id,source_snapshot,error_code,occurred_at"
         )
         .eq("conversation_id", selectedId)
         .eq("organization_id", context.organizationId)

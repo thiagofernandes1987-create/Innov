@@ -3,6 +3,7 @@ import { assignInventoryAsset, returnInventoryAsset } from "@/app/actions/invent
 import { createInventoryMaintenance } from "@/app/actions/inventory-extra";
 import { InventoryNavigation } from "@/components/inventory/inventory-navigation";
 import { hasCapability, requireCapability } from "@/lib/authorization";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { formatInventoryCurrency } from "@/lib/inventory/domain";
 
 export const dynamic = "force-dynamic";
@@ -79,8 +80,9 @@ export default async function InventoryAssetDetail({
     context.supabase.from("inventory_warehouses").select("id,name,project_id,inventory_locations(id,name)").eq("organization_id", context.organizationId).eq("active", true).order("name")
   ]);
 
+  if (error) reportDataAccessError("inventory.asset-detail.load", error);
   if (error || !data) {
-    return <main className="content inventory-app"><div className="empty-state"><h1>Ativo não encontrado</h1><p>{error?.message ?? "Registro indisponível."}</p></div></main>;
+    return <main className="content inventory-app"><div className="empty-state"><h1>Ativo não encontrado</h1><p>Registro indisponível.</p></div></main>;
   }
 
   const detail = data as AssetDetail;

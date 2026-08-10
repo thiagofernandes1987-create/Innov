@@ -4,8 +4,10 @@ import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
+import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
 import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
 import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
 
@@ -56,12 +58,7 @@ function failProjectDatabase(
   error: ScheduleDatabaseError,
   fallback: string
 ): never {
-  console.error(`[projects.${operation}]`, {
-    code: error.code ?? null,
-    message: error.message ?? null,
-    details: error.details ?? null,
-    hint: error.hint ?? null
-  });
+  reportDataAccessError(`projects.${operation}`, error);
   fail(path, publicScheduleDatabaseMessage(error, fallback));
 }
 
@@ -73,7 +70,7 @@ export async function releaseProjectToClient(formData: FormData) {
     .from("projects")
     .update({ client_released_at: release ? new Date().toISOString() : null })
     .eq("id", projectId);
-  if (error) fail(`/app/obras/${projectId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}`);
   revalidatePath("/cliente/obras");
 }
@@ -293,7 +290,7 @@ export async function createProjectResource(formData: FormData) {
     daily_cost: optionalNumber(formData, "dailyCost"),
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/equipes`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/equipes`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/equipes`);
 }
 
@@ -308,7 +305,7 @@ export async function createTeam(formData: FormData) {
     leader_user_id: optionalText(formData, "leaderUserId"),
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/equipes`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/equipes`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/equipes`);
 }
 
@@ -332,7 +329,8 @@ export async function createDailyLog(formData: FormData) {
     delay_notes: optionalText(formData, "delayNotes"),
     created_by: userId
   }).select("id").single();
-  if (error || !data) fail(`/app/obras/${projectId}/diario`, error?.message ?? "Não foi possível criar o diário.");
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario`, "create-daily-log", error, "Não foi possível criar o diário.");
+  if (!data) fail(`/app/obras/${projectId}/diario`, "Não foi possível criar o diário.");
   redirect(`/app/obras/${projectId}/diario/${data.id}`);
 }
 
@@ -353,7 +351,7 @@ export async function updateDailyLog(formData: FormData) {
     delay_notes: optionalText(formData, "delayNotes"),
     updated_at: new Date().toISOString()
   }).eq("id", dailyLogId).in("status", ["DRAFT", "REJECTED"]);
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
 }
 
@@ -375,16 +373,17 @@ export async function addDailyLogActivity(formData: FormData) {
     progress_after: progressAfter == null ? null : progressAfter / 100,
     created_by: userId
   });
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
 }
 
 export async function uploadDailyLogMedia(formData: FormData) {
   const projectId = text(formData, "projectId");
   const dailyLogId = text(formData, "dailyLogId");
+  const path = `/app/obras/${projectId}/diario/${dailyLogId}`;
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, "Selecione um arquivo.");
-  if (file.size > 150 * 1024 * 1024) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, "O arquivo excede 150 MB.");
+  if (!(file instanceof File) || file.size === 0) fail(path, "Selecione um arquivo.");
+  if (file.size > 150 * 1024 * 1024) fail(path, "O arquivo excede 150 MB.");
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(fieldRoles);
   const bytes = Buffer.from(await file.arrayBuffer());
@@ -402,13 +401,14 @@ export async function uploadDailyLogMedia(formData: FormData) {
       organizationId,
       actorUserId: userId,
       correlationId: dailyLogId,
-      // O diário de obra sempre aceitou qualquer tipo até 150 MB. A política é
-      // preservada; o que muda é que o arquivo passa pela quarentena e só é
-      // promovido depois de liberado pela análise antimalware.
-      policy: { allowedMimeTypes: null, maxBytes: 150 * 1024 * 1024, requireContentSignature: false }
+      policy: {
+        allowedMimeTypes: null,
+        maxBytes: 150 * 1024 * 1024,
+        requireContentSignature: false
+      }
     });
   } catch (error) {
-    fail(`/app/obras/${projectId}/diario/${dailyLogId}`, fileSecurityMessage(error, { maxBytesLabel: "150 MB" }));
+    fail(path, fileSecurityMessage(error, { maxBytesLabel: "150 MB" }));
   }
 
   const { error } = await supabase.from("daily_log_media").insert({
@@ -427,9 +427,9 @@ export async function uploadDailyLogMedia(formData: FormData) {
   });
   if (error) {
     await supabase.storage.from("daily-log-media").remove([storagePath]);
-    fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+    failProjectDatabase(path, "project-write", error, "Não foi possível concluir a operação.");
   }
-  revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
+  revalidatePath(path);
 }
 
 export async function submitDailyLog(formData: FormData) {
@@ -437,7 +437,7 @@ export async function submitDailyLog(formData: FormData) {
   const dailyLogId = text(formData, "dailyLogId");
   const { supabase } = await requireOrganizationContext(fieldRoles);
   const { error } = await supabase.rpc("submit_daily_log", { p_daily_log_id: dailyLogId });
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
 }
 
@@ -452,7 +452,7 @@ export async function decideDailyLog(formData: FormData) {
     p_reason: optionalText(formData, "reason"),
     p_release_client: bool(formData, "releaseClient")
   });
-  if (error) fail(`/app/obras/${projectId}/diario/${dailyLogId}`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario/${dailyLogId}`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/diario/${dailyLogId}`);
   revalidatePath(`/cliente/obras/${projectId}`);
 }
@@ -468,6 +468,7 @@ export async function uploadProjectDocument(formData: FormData) {
 
   const { supabase, organizationId, userId } = await requireOrganizationContext(managementRoles);
   const code = text(formData, "code").toUpperCase();
+  const discipline = text(formData, "discipline");
   const bytes = Buffer.from(await file.arrayBuffer());
   const hash = createHash("sha256").update(bytes).digest("hex");
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
@@ -487,15 +488,14 @@ export async function uploadProjectDocument(formData: FormData) {
       project_id: projectId,
       code,
       title: text(formData, "title"),
-      discipline: text(formData, "discipline"),
+      discipline,
       category: text(formData, "category"),
       created_by: userId
     }).select("id").single();
-    if (error || !data) fail(errorPath, error?.message ?? "Falha ao criar documento.");
+    if (error) failProjectDatabase(errorPath, "create-project-document", error, "Falha ao criar documento.");
+    if (!data) fail(errorPath, "Falha ao criar documento.");
     documentId = data.id;
-    // Só depois de o documento existir: disciplina digitada e abandonada não
-    // vira vocabulário da empresa.
-    await registrarValorUsado(supabase, organizationId, ESCOPOS.disciplina, text(formData, "discipline"));
+    await registrarValorUsado(supabase, organizationId, ESCOPOS.disciplina, discipline);
   }
 
   const { count } = await supabase
@@ -514,13 +514,13 @@ export async function uploadProjectDocument(formData: FormData) {
       organizationId,
       actorUserId: userId,
       correlationId: documentId,
-      // Projeto executivo aceita formatos técnicos além da allowlist transversal;
-      // o limite de 50 MB e os tipos permanecem como estavam.
-      policy: { allowedMimeTypes: null, maxBytes: 50 * 1024 * 1024, requireContentSignature: false }
+      policy: {
+        allowedMimeTypes: null,
+        maxBytes: 50 * 1024 * 1024,
+        requireContentSignature: false
+      }
     });
   } catch (error) {
-    // `errorPath` porque o envio passou a existir também fora da obra; a
-    // varredura antimalware da auditoria continua valendo nos dois caminhos.
     fail(errorPath, fileSecurityMessage(error, { maxBytesLabel: "50 MB" }));
   }
 
@@ -539,7 +539,7 @@ export async function uploadProjectDocument(formData: FormData) {
   });
   if (error) {
     await supabase.storage.from("project-documents").remove([storagePath]);
-    fail(errorPath, error.message);
+    failProjectDatabase(errorPath, "project-write", error, "Não foi possível concluir a operação.");
   }
   revalidatePath(`/app/obras/${projectId}/documentos`);
   revalidatePath("/app/documentos");
@@ -551,7 +551,7 @@ export async function releaseProjectDocument(formData: FormData) {
   const versionId = text(formData, "versionId");
   const { supabase } = await requireOrganizationContext(managementRoles);
   const { error } = await supabase.rpc("release_project_document_version", { p_version_id: versionId });
-  if (error) fail(`/app/obras/${projectId}/documentos`, error.message);
+  if (error) failProjectDatabase(`/app/obras/${projectId}/documentos`, "project-write", error, "Não foi possível concluir a operação.");
   revalidatePath(`/app/obras/${projectId}/documentos`);
   revalidatePath(`/cliente/obras/${projectId}`);
 }

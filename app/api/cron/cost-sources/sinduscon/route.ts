@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@supabase/supabase-js";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { fetchLatestSindusconCub, SINDUSCON_CUB_SOURCE_KEY } from "@/lib/cost-sources/sinduscon";
 import { buscarSerieHistoricaDoCub } from "@/lib/cost-sources/cub-fonte";
 import { familiaDaTipologia, padraoDeAcabamento } from "@/lib/cost-sources/cub-serie-historica";
@@ -7,6 +8,8 @@ import { familiaDaTipologia, padraoDeAcabamento } from "@/lib/cost-sources/cub-s
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
+
+class SindusconSyncDomainError extends Error {}
 
 function requiredEnv(name: string) {
   const value = process.env[name]?.trim();
@@ -50,13 +53,14 @@ export async function GET(request: Request) {
     .select("id")
     .single();
 
+  if (runError) reportDataAccessError("sinduscon.sync-run.create", runError);
   if (runError || !run) {
     return response(500, { status: "failed", code: "SYNC_RUN_CREATE" });
   }
 
   try {
     const publication = await fetchLatestSindusconCub();
-    const { data: latest } = await supabase
+    const { data: latest, error: latestError } = await supabase
       .from("cost_reference_snapshots")
       .select("base_date")
       .eq("source_key", SINDUSCON_CUB_SOURCE_KEY)
@@ -66,8 +70,12 @@ export async function GET(request: Request) {
       .limit(1)
       .maybeSingle();
 
+    if (latestError) {
+      reportDataAccessError("sinduscon.latest-snapshot", latestError);
+      throw new SindusconSyncDomainError("Não foi possível validar o último snapshot armazenado.");
+    }
     if (latest?.base_date && publication.baseDate < latest.base_date) {
-      throw new Error("A fonte retornou data-base anterior ao último snapshot armazenado.");
+      throw new SindusconSyncDomainError("A fonte retornou data-base anterior ao último snapshot armazenado.");
     }
 
     const rows = publication.records.map(record => ({
@@ -97,22 +105,9 @@ export async function GET(request: Request) {
       retrieved_at: new Date().toISOString()
     }));
 
-    // **As dezenove tipologias, não só a representativa.** T-37.14.
-    //
-    // A notícia acima publica o R8-N nos dois regimes; a série histórica
-    // publica as dezenove, sem desoneração. Sincronizar só a notícia deixaria
-    // dezoito paradas no mês anterior enquanto uma avança — e comparar
-    // tipologias de competências diferentes é pior que comparar dado velho,
-    // porque parece atual.
-    //
-    // Falha da série derruba a sincronização inteira, de propósito: gravar só a
-    // notícia produziria exatamente o desalinhamento que este bloco existe para
-    // impedir. Entre a publicação da notícia e a atualização da planilha há
-    // alguns dias, e uma execução reprovada nessa janela é o comportamento
-    // esperado — a mensagem nomeia as duas datas para não parecer defeito.
     const serie = await buscarSerieHistoricaDoCub();
     if (serie.dataBase < publication.baseDate) {
-      throw new Error(
+      throw new SindusconSyncDomainError(
         `A série histórica está em ${serie.dataBase} e a publicação em ${publication.baseDate}.`
       );
     }
@@ -146,20 +141,19 @@ export async function GET(request: Request) {
       retrieved_at: new Date().toISOString()
     }));
 
-    // A notícia por último: ela traz o R8-N **com** desoneração, que a série não
-    // publica, e o sem desoneração do mesmo mês, que a série também traz. Quando
-    // as duas descrevem a mesma linha, vale a série — é ela que carrega a
-    // decomposição conferida.
     const { error: upsertError } = await supabase
       .from("cost_reference_snapshots")
       .upsert([...rows, ...linhasDaSerie], {
         onConflict: "source_key,region,reference_code,base_date,tax_relief",
         ignoreDuplicates: false
       });
-    if (upsertError) throw new Error(`Falha ao persistir snapshots: ${upsertError.message}`);
+    if (upsertError) {
+      reportDataAccessError("sinduscon.snapshots.upsert", upsertError);
+      throw new SindusconSyncDomainError("Falha ao persistir os snapshots do SINDUSCON.");
+    }
 
     const unchanged = latest?.base_date === publication.baseDate && serie.dataBase === publication.baseDate;
-    await supabase
+    const { error: completeRunError } = await supabase
       .from("cost_source_sync_runs")
       .update({
         status: unchanged ? "UNCHANGED" : "COMPLETED",
@@ -178,6 +172,10 @@ export async function GET(request: Request) {
         }
       })
       .eq("id", run.id);
+    if (completeRunError) {
+      reportDataAccessError("sinduscon.sync-run.complete", completeRunError);
+      throw new SindusconSyncDomainError("A sincronização terminou, mas o status da execução não pôde ser concluído.");
+    }
 
     return response(200, {
       status: unchanged ? "unchanged" : "completed",
@@ -186,9 +184,14 @@ export async function GET(request: Request) {
       serieDataBase: serie.dataBase,
       records: rows.length + linhasDaSerie.length
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    await supabase
+  } catch (failure) {
+    const message = failure instanceof SindusconSyncDomainError
+      ? failure.message
+      : "Falha na sincronização da fonte SINDUSCON.";
+    if (!(failure instanceof SindusconSyncDomainError)) {
+      reportDataAccessError("sinduscon.sync", failure);
+    }
+    const { error: failureUpdateError } = await supabase
       .from("cost_source_sync_runs")
       .update({
         status: "FAILED",
@@ -198,6 +201,7 @@ export async function GET(request: Request) {
         error_message: message.slice(0, 500)
       })
       .eq("id", run.id);
+    if (failureUpdateError) reportDataAccessError("sinduscon.sync-run.fail", failureUpdateError);
 
     console.error(JSON.stringify({ event: "cost_source_sync_failed", source: SINDUSCON_CUB_SOURCE_KEY, code: "SOURCE_VALIDATION" }));
     return response(503, { status: "failed", code: "SOURCE_VALIDATION" });

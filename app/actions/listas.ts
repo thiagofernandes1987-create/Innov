@@ -4,6 +4,7 @@
 // constante ficam em `lib/listas`.
 import { revalidatePath } from "next/cache";
 import { requireCapability } from "@/lib/authorization";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { chaveNormalizada } from "@/lib/sugestoes/catalogo";
 
 const ROTA = "/app/administracao/motivos-de-perda";
@@ -25,7 +26,7 @@ export async function criarItemDeLista(dados: FormData): Promise<void> {
   const chave = chaveNormalizada(rotulo);
   if (!escopo || !chave) return;
 
-  const { data: ultimo } = await contexto.supabase
+  const { data: ultimo, error: ultimoError } = await contexto.supabase
     .from("managed_list_values")
     .select("position")
     .eq("organization_id", contexto.organizationId)
@@ -33,6 +34,7 @@ export async function criarItemDeLista(dados: FormData): Promise<void> {
     .order("position", { ascending: false })
     .limit(1)
     .maybeSingle();
+  if (ultimoError) reportDataAccessError("listas.load-last-position", ultimoError);
 
   const { error } = await contexto.supabase.from("managed_list_values").insert({
     organization_id: contexto.organizationId,
@@ -43,9 +45,10 @@ export async function criarItemDeLista(dados: FormData): Promise<void> {
     created_by: contexto.userId
   });
   // Repetido não é erro para quem está cadastrando: o item já existe, que é o
-  // resultado que a pessoa queria. Erro seria dizer que falhou.
-  if (error && !/duplicate key|unique/i.test(error.message)) {
-    console.error("[listas:criar]", error.message);
+  // resultado que a pessoa queria. Erro seria dizer que falhou. Use o código
+  // estável do PostgreSQL em vez de depender do texto/localização da mensagem.
+  if (error && error.code !== "23505") {
+    reportDataAccessError("listas.create", error);
   }
   revalidatePath(ROTA);
 }
@@ -63,7 +66,7 @@ export async function renomearItemDeLista(dados: FormData): Promise<void> {
     .update({ label: rotulo, normalized: chave, updated_at: new Date().toISOString() })
     .eq("id", id)
     .eq("organization_id", contexto.organizationId);
-  if (error) console.error("[listas:renomear]", error.message);
+  reportDataAccessError("listas.rename", error);
   revalidatePath(ROTA);
 }
 
@@ -79,12 +82,16 @@ export async function alternarItemDeLista(dados: FormData): Promise<void> {
   const id = texto(dados, "id");
   if (!id) return;
 
-  const { data: atual } = await contexto.supabase
+  const { data: atual, error: atualError } = await contexto.supabase
     .from("managed_list_values")
     .select("active")
     .eq("id", id)
     .eq("organization_id", contexto.organizationId)
     .maybeSingle();
+  if (atualError) {
+    reportDataAccessError("listas.load-current", atualError);
+    return;
+  }
   if (!atual) return;
 
   const { error } = await contexto.supabase
@@ -92,7 +99,7 @@ export async function alternarItemDeLista(dados: FormData): Promise<void> {
     .update({ active: !atual.active, updated_at: new Date().toISOString() })
     .eq("id", id)
     .eq("organization_id", contexto.organizationId);
-  if (error) console.error("[listas:alternar]", error.message);
+  reportDataAccessError("listas.toggle", error);
   revalidatePath(ROTA);
 }
 
@@ -109,15 +116,19 @@ export async function moverItemDeLista(dados: FormData): Promise<void> {
   const direcao = texto(dados, "direcao");
   if (!id || (direcao !== "cima" && direcao !== "baixo")) return;
 
-  const { data: item } = await contexto.supabase
+  const { data: item, error: itemError } = await contexto.supabase
     .from("managed_list_values")
     .select("id, scope, position")
     .eq("id", id)
     .eq("organization_id", contexto.organizationId)
     .maybeSingle();
+  if (itemError) {
+    reportDataAccessError("listas.load-item", itemError);
+    return;
+  }
   if (!item) return;
 
-  const { data: vizinho } = await contexto.supabase
+  const { data: vizinho, error: vizinhoError } = await contexto.supabase
     .from("managed_list_values")
     .select("id, position")
     .eq("organization_id", contexto.organizationId)
@@ -126,17 +137,26 @@ export async function moverItemDeLista(dados: FormData): Promise<void> {
     .order("position", { ascending: direcao !== "cima" })
     .limit(1)
     .maybeSingle();
+  if (vizinhoError) {
+    reportDataAccessError("listas.load-neighbor", vizinhoError);
+    return;
+  }
   if (!vizinho) return;
 
-  await contexto.supabase
+  const { error: itemUpdateError } = await contexto.supabase
     .from("managed_list_values")
     .update({ position: Number(vizinho.position) })
     .eq("id", item.id)
     .eq("organization_id", contexto.organizationId);
-  await contexto.supabase
+  if (itemUpdateError) {
+    reportDataAccessError("listas.move-item", itemUpdateError);
+    return;
+  }
+  const { error: neighborUpdateError } = await contexto.supabase
     .from("managed_list_values")
     .update({ position: Number(item.position) })
     .eq("id", vizinho.id)
     .eq("organization_id", contexto.organizationId);
+  reportDataAccessError("listas.move-neighbor", neighborUpdateError);
   revalidatePath(ROTA);
 }

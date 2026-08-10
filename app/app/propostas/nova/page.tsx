@@ -46,13 +46,12 @@ export default async function NewProposalPage() {
   const budgetOptions = (budgetVersionsResult.data ?? []).map((version) => {
     const budget = singleRelation(version.budgets);
     const client = singleRelation(budget?.clients);
-    const status = version.status as (typeof proposalBudgetStatuses)[number];
-    const approved = status === "APPROVED";
-    const state = proposalBudgetStatusLabels[status] ?? status;
+    const approved = version.status === "APPROVED";
+    const state = proposalBudgetStatusLabels[version.status as (typeof proposalBudgetStatuses)[number]] ?? version.status;
     return {
       id: version.id,
       price: Number(version.sale_price),
-      status,
+      status: version.status,
       approved,
       label: `${budget?.code ?? "ORÇ"} · V${version.version_number} · ${client?.trade_name || client?.legal_name || "Cliente"} · ${formatCurrency(Number(version.sale_price))} · ${state}${version.frozen_at ? " · congelado" : " · calculado"}`
     };

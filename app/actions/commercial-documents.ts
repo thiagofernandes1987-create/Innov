@@ -22,6 +22,11 @@ function fail(path: string, message: string): never {
   redirect(`${path}?error=${encodeURIComponent(message)}`);
 }
 
+function failDatabase(path: string, publicMessage: string, operation: string, error: unknown): never {
+  console.error(`[commercial-documents] ${operation} failed`, error);
+  fail(path, publicMessage);
+}
+
 export async function createContractFromProposal(formData: FormData) {
   const context = await requireCapability("contratos", "create");
   const { data, error } = await context.supabase.rpc("create_contract_from_proposal", {
@@ -32,7 +37,12 @@ export async function createContractFromProposal(formData: FormData) {
     p_template_id: optional(formData, "templateId")
   });
   if (error || !data) {
-    fail("/app/contratos/novo", error?.message ?? "Não foi possível criar o contrato.");
+    failDatabase(
+      "/app/contratos/novo",
+      "Não foi possível criar o contrato.",
+      "create_contract_from_proposal",
+      error
+    );
   }
   revalidatePath("/app/contratos");
   redirect("/app/contratos");
@@ -51,7 +61,12 @@ export async function createAmendment(formData: FormData) {
     p_budget_version_id: optional(formData, "budgetVersionId")
   });
   if (error || !data) {
-    fail("/app/aditivos/novo", error?.message ?? "Não foi possível criar o aditivo.");
+    failDatabase(
+      "/app/aditivos/novo",
+      "Não foi possível criar o aditivo.",
+      "create_amendment",
+      error
+    );
   }
   revalidatePath("/app/aditivos");
   revalidatePath("/app/contratos");
