@@ -9,6 +9,7 @@ import {
   queueAdvancedSignatureCopy
 } from "@/app/actions/advanced-signatures";
 import { requireCapability } from "@/lib/authorization";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 
 const fieldLabels:Record<string,string>={SIGNATURE:"Assinatura",INITIALS:"Rubrica",DATE:"Data",FULL_NAME:"Nome completo",TEXT:"Texto",CHECKBOX:"Checkbox",PHOTO:"Foto",ATTACHMENT:"Anexo"};
 function relation<T>(value:T|T[]|null|undefined){return Array.isArray(value)?value[0]??null:value??null;}
@@ -25,16 +26,18 @@ export default async function AdvancedSignatureDocumentPage({
   const{data:document,error:documentError}=await context.supabase.from("signature_documents")
     .select("id,title,category,status,client_id,project_id,current_version_id,updated_at,clients(id,user_id,legal_name,trade_name,email),projects(id,code,name)")
     .eq("id",id).eq("organization_id",context.organizationId).maybeSingle();
-  if(documentError)throw new Error(documentError.message);if(!document)notFound();
+  if(documentError){reportDataAccessError("signatures.document.load",documentError);throw new Error("Não foi possível carregar o documento de assinatura.");}if(!document)notFound();
   const client=relation(document.clients);const project=relation(document.projects);
   const{data:version,error:versionError}=await context.supabase.from("signature_document_versions").select("*").eq("id",document.current_version_id).single();
-  if(versionError)throw new Error(versionError.message);
-  const[{data:envelopes,error:envelopesError},{data:job},{data:deliveries}]=await Promise.all([
+  if(versionError){reportDataAccessError("signatures.version.load",versionError);throw new Error("Não foi possível carregar a versão do documento.");}
+  const[{data:envelopes,error:envelopesError},{data:job,error:jobError},{data:deliveries,error:deliveriesError}]=await Promise.all([
     context.supabase.from("signature_envelopes").select("id,provider,status,sent_at,completed_at,final_document_path,final_document_sha256,audit_artifact_path,evidence_sha256,client_copy_sent_at,signature_signers(id,user_id,name,legal_name,email,initials,role_label,signing_order,status,viewed_at,signed_at,copy_sent_at)").eq("document_version_id",version.id).order("created_at",{ascending:false}),
-    context.supabase.from("signature_conversion_jobs").select("id,status,provider,attempts,last_error,next_attempt_at,completed_at").eq("document_version_id",version.id).maybeSingle(),
-    context.supabase.from("signature_delivery_events").select("id,envelope_id,recipient_email,channel,status,attempts,last_error,sent_at,delivered_at,created_at").eq("organization_id",context.organizationId).order("created_at",{ascending:false})
+    context.supabase.from("signature_conversion_jobs").select("id,status,provider,attempts,next_attempt_at,completed_at").eq("document_version_id",version.id).maybeSingle(),
+    context.supabase.from("signature_delivery_events").select("id,envelope_id,recipient_email,channel,status,attempts,sent_at,delivered_at,created_at").eq("organization_id",context.organizationId).order("created_at",{ascending:false})
   ]);
-  if(envelopesError)throw new Error(envelopesError.message);
+  if(envelopesError){reportDataAccessError("signatures.envelopes.load",envelopesError);throw new Error("Não foi possível carregar os envelopes de assinatura.");}
+  if(jobError)reportDataAccessError("signatures.conversion-job.load",jobError);
+  if(deliveriesError)reportDataAccessError("signatures.deliveries.load",deliveriesError);
   const envelope=envelopes?.[0]??null;
   const[{data:fields},{data:values},{data:evidence}]=await Promise.all([
     context.supabase.from("signature_fields").select("id,signer_id,field_type,page_number,x_ratio,y_ratio,width_ratio,height_ratio,label,placeholder,required,signing_order,created_at").eq("document_version_id",version.id).order("signing_order"),
@@ -62,7 +65,7 @@ export default async function AdvancedSignatureDocumentPage({
       <article className="card card-pad"><small>PÁGINAS</small><strong>{version.page_count??"—"}</strong><span>{version.layout_frozen_at?"Layout congelado":"Layout editável"}</span></article>
       <article className="card card-pad"><small>SHA-256 ORIGINAL</small><code>{version.original_sha256}</code></article>
     </section>
-    {job?.last_error&&<div className="validation blocking">Conversão DOCX: {job.last_error}</div>}
+    {job?.status==="FAILED"&&<div className="validation blocking">Conversão DOCX: falha registrada. Tente novamente ou acione o suporte.</div>}
 
     <div className="signature-workspace">
       <section className="card signature-pdf-panel">
@@ -82,7 +85,7 @@ export default async function AdvancedSignatureDocumentPage({
 
     <section className="card card-pad" style={{marginTop:24}}><h2>Campos do layout</h2><div className="table-wrap"><table><thead><tr><th>Ordem</th><th>Signatário</th><th>Tipo</th><th>Página</th><th>Posição</th><th>Obrigatório</th><th>Valor</th></tr></thead><tbody>{(fields??[]).map(field=>{const signer=field.signer_id?signerById.get(field.signer_id):null;const value=valueByField.get(field.id);return <tr key={field.id}><td>{field.signing_order}</td><td>{signer?.legal_name||signer?.name||"—"}</td><td>{fieldLabels[field.field_type]??field.field_type}</td><td>{field.page_number}</td><td className="mono">{(Number(field.x_ratio)*100).toFixed(1)}%, {(Number(field.y_ratio)*100).toFixed(1)}% · {(Number(field.width_ratio)*100).toFixed(1)}×{(Number(field.height_ratio)*100).toFixed(1)}%</td><td>{field.required?"Sim":"Não"}</td><td>{value?<span className="badge badge-success">SHA {value.value_sha256.slice(0,10)}…</span>:"Pendente"}</td></tr>})}{!fields?.length&&<tr><td colSpan={7}>Nenhum campo posicionado.</td></tr>}</tbody></table></div></section>
 
-    {envelope&&<section className="grid" style={{marginTop:24}}><article className="card card-pad"><h2>Evidências</h2><ul className="compact-list">{(evidence??[]).map(event=><li key={event.id}><strong>{event.event_type}</strong><small>{formatDate(event.occurred_at)} · {event.payload_sha256.slice(0,16)}…</small></li>)}{!evidence?.length&&<li>Nenhuma evidência registrada.</li>}</ul></article><article className="card card-pad"><h2>Entregas</h2><ul className="compact-list">{(deliveries??[]).filter(delivery=>delivery.envelope_id===envelope.id).map(delivery=><li key={delivery.id}><strong>{delivery.channel} · {delivery.status}</strong><small>{delivery.recipient_email} · tentativas {delivery.attempts}{delivery.last_error?` · ${delivery.last_error}`:""}</small></li>)}{!(deliveries??[]).some(delivery=>delivery.envelope_id===envelope.id)&&<li>Nenhuma cópia enviada.</li>}</ul></article></section>}
+    {envelope&&<section className="grid" style={{marginTop:24}}><article className="card card-pad"><h2>Evidências</h2><ul className="compact-list">{(evidence??[]).map(event=><li key={event.id}><strong>{event.event_type}</strong><small>{formatDate(event.occurred_at)} · {event.payload_sha256.slice(0,16)}…</small></li>)}{!evidence?.length&&<li>Nenhuma evidência registrada.</li>}</ul></article><article className="card card-pad"><h2>Entregas</h2><ul className="compact-list">{(deliveries??[]).filter(delivery=>delivery.envelope_id===envelope.id).map(delivery=><li key={delivery.id}><strong>{delivery.channel} · {delivery.status}</strong><small>{delivery.recipient_email} · tentativas {delivery.attempts}</small></li>)}{!(deliveries??[]).some(delivery=>delivery.envelope_id===envelope.id)&&<li>Nenhuma cópia enviada.</li>}</ul></article></section>}
     {finalUrl?.signedUrl&&<section className="card card-pad" style={{marginTop:24}}><span className="badge badge-success">DOCUMENTO FINAL</span><h2>PDF assinado e imutável</h2><p><a className="button button-primary" href={finalUrl.signedUrl} target="_blank" rel="noreferrer">Baixar cópia autenticada</a></p><code>{envelope?.final_document_sha256}</code></section>}
   </main>;
 }

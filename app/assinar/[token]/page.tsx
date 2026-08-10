@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { completePublicSignatureField, finishPublicSignature } from "@/app/actions/public-signing";
 import { SignaturePad } from "@/components/signatures/signature-pad";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { sha256 } from "@/lib/signatures/crypto";
 
@@ -24,9 +25,12 @@ export default async function PublicSigningPage({
     admin.rpc("list_advanced_signer_fields",{p_token_sha256:tokenHash})
   ]);
   const signing=Array.isArray(context)?context[0]:null;
+  if(contextError)reportDataAccessError("public-signing.context.load",contextError);
+  if(fieldsError)reportDataAccessError("public-signing.fields.load",fieldsError);
   if(contextError||fieldsError||!signing||!Array.isArray(fields))notFound();
   const{data:signed,error:signedError}=await admin.storage.from("signature-artifacts").createSignedUrl(signing.rendered_pdf_path,900);
-  if(signedError||!signed?.signedUrl)throw new Error(signedError?.message??"Documento indisponível.");
+  if(signedError)reportDataAccessError("public-signing.document-url",signedError);
+  if(signedError||!signed?.signedUrl)throw new Error("Documento indisponível.");
   const pending=fields.filter(field=>!field.completed);
 
   return <main className="public-signing-shell">
