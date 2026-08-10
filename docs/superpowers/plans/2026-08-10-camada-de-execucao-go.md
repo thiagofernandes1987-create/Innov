@@ -155,7 +155,7 @@ Commit: `T-43.3: os seis portões de Go da §24, provados por sabotagem`
 
 ---
 
-### Task 2: O protocolo da fila como domínio tipado, atrás de uma interface
+### Task 2: O protocolo da fila como domínio tipado, atrás de uma interface — CONCLUÍDA
 
 **Files:**
 - Create: `apps/execution-plane/fila.go`
@@ -173,12 +173,12 @@ Commit: `T-43.3: os seis portões de Go da §24, provados por sabotagem`
 
 Os limites do banco viram invariantes do tipo: `Falhar` recusa `BackoffSegundos` fora de 0–3600 antes de chegar ao Postgres; `Reivindicar` recusa limite fora de 1–100; `IniciarTentativa` recusa SHA que não case `^[0-9a-f]{64}$`.
 
-- [ ] **Step 1: Teste — `Drenar` conclui o evento quando o despacho dá certo**
-- [ ] **Step 2: Teste — `Drenar` chama `Falhar` com retentável quando o provedor devolve 5xx**
-- [ ] **Step 3: Teste — `Drenar` chama `Falhar` com não-retentável em 4xx**
-- [ ] **Step 4: Teste — a ordem por `SequenceNumber` dentro de uma conversa é preservada**
-- [ ] **Step 5: Teste — reivindicação com limite 0 ou 101 é recusada antes do banco**
-- [ ] **Step 6: Rodar, confirmar vermelho, implementar, confirmar verde, commitar**
+- [x] **Step 1: Teste — `Drenar` conclui o evento quando o despacho dá certo**
+- [x] **Step 2: Teste — `Drenar` chama `Falhar` com retentável quando o provedor devolve 5xx**
+- [x] **Step 3: Teste — `Drenar` chama `Falhar` com não-retentável em 4xx**
+- [x] **Step 4: Teste — a ordem por `SequenceNumber` dentro de uma conversa é preservada**
+- [x] **Step 5: Teste — reivindicação com limite 0 ou 101 é recusada antes do banco**
+- [x] **Step 6: Rodar, confirmar vermelho, implementar, confirmar verde, commitar**
 
 ---
 
