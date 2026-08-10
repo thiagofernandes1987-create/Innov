@@ -84,7 +84,7 @@ jobs:
           set -euo pipefail
           : > /tmp/baileys-official-quickstart.log
           env RUNNER_TRACKING_ID= \
-            nohup node scripts/run-baileys-official-quickstart-lab.mjs \
+            nohup node tests/disposable-baileys-lab/run-baileys-official-quickstart-lab.mjs \
             > /tmp/baileys-official-quickstart.log 2>&1 &
           echo "$!" > /tmp/baileys-official-quickstart.pid
           for attempt in $(seq 1 120); do

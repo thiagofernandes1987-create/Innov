@@ -17,6 +17,18 @@ Fluxo reproduzido:
 6. envio de uma única mensagem ao próprio JID após `connection === "open"`;
 7. logout, remoção do diretório temporário e evidência sanitizada.
 
+## Onde o laboratório mora, e por quê
+
+O script vive em **`tests/disposable-baileys-lab/`**, não em `scripts/`. A
+fronteira não é organizacional: o `validate-messaging-session-store` proíbe a
+API do Baileys que grava credencial em diretório **em qualquer arquivo** fora
+dessa pasta, e a proibição é **textual** — vale até para um comentário que cite
+o nome. É o que a torna impossível de contornar com um `import` esperto.
+
+A primeira versão desta correção pôs o script em `scripts/` e o portão reprovou,
+como devia. Ele apontou dois arquivos, e o segundo foi o `eslint.config.mjs`,
+onde eu havia escrito o nome dentro de um comentário explicativo.
+
 ## Como se dispara
 
 **Somente `workflow_dispatch`**, e a razão está no fluxo: o pareamento exige uma
