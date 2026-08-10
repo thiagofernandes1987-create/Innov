@@ -69,8 +69,8 @@ function validationMessage(callback: () => void) {
   try {
     callback();
     return null;
-  } catch (error) {
-    return error instanceof Error ? error.message : "Dados inválidos.";
+  } catch (validationError) {
+    return validationError instanceof Error ? validationError.message : "Dados inválidos.";
   }
 }
 

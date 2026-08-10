@@ -4,6 +4,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
 import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
@@ -56,12 +57,7 @@ function failProjectDatabase(
   error: ScheduleDatabaseError,
   fallback: string
 ): never {
-  console.error(`[projects.${operation}]`, {
-    code: error.code ?? null,
-    message: error.message ?? null,
-    details: error.details ?? null,
-    hint: error.hint ?? null
-  });
+  reportDataAccessError(`projects.${operation}`, error);
   fail(path, publicScheduleDatabaseMessage(error, fallback));
 }
 
@@ -332,7 +328,8 @@ export async function createDailyLog(formData: FormData) {
     delay_notes: optionalText(formData, "delayNotes"),
     created_by: userId
   }).select("id").single();
-  if (error || !data) fail(`/app/obras/${projectId}/diario`, error?.message ?? "Não foi possível criar o diário.");
+  if (error) failProjectDatabase(`/app/obras/${projectId}/diario`, "create-daily-log", error, "Não foi possível criar o diário.");
+  if (!data) fail(`/app/obras/${projectId}/diario`, "Não foi possível criar o diário.");
   redirect(`/app/obras/${projectId}/diario/${data.id}`);
 }
 
@@ -494,7 +491,8 @@ export async function uploadProjectDocument(formData: FormData) {
       category: text(formData, "category"),
       created_by: userId
     }).select("id").single();
-    if (error || !data) fail(errorPath, error?.message ?? "Falha ao criar documento.");
+    if (error) failProjectDatabase(errorPath, "create-project-document", error, "Falha ao criar documento.");
+    if (!data) fail(errorPath, "Falha ao criar documento.");
     documentId = data.id;
     await registrarValorUsado(supabase, organizationId, ESCOPOS.disciplina, discipline);
   }

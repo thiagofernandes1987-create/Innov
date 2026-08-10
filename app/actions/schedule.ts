@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { proximoCodigo } from "@/lib/planejamento/eap";
 import {
   isScheduleDependencyType,
@@ -50,12 +51,7 @@ function failDatabase(
   error: ScheduleDatabaseError,
   fallback: string
 ): never {
-  console.error(`[schedule.${operation}]`, {
-    code: error.code ?? null,
-    message: error.message ?? null,
-    details: error.details ?? null,
-    hint: error.hint ?? null
-  });
+  reportDataAccessError(`schedule.${operation}`, error);
   fail(projectId, publicScheduleDatabaseMessage(error, fallback));
 }
 

@@ -3,20 +3,15 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { lerDeclaracaoDeCub } from "@/lib/orcamentos/cub-manual";
 
 // Registro manual do CUB estadual. T-37.13b.
 //
-// A ação não decide nada de domínio: ela lê o formulário, chama
-// `registrar_cub_manual` e devolve à tela a mensagem que o **banco** produziu.
-// A função é `security definer` porque a referência oficial é imutável para
-// `authenticated` desde a T-37.12, e é lá que a alçada, o vocabulário das
-// tipologias, a faixa de valor e a reconciliação das parcelas são conferidos.
-//
-// Por isso o `catch` não traduz nem resume o erro do banco: as mensagens da RPC
-// já são escritas para quem orça ("As parcelas somam 1950,00 e o total
-// informado é 1990,11"). Reescrever aqui produziria um segundo vocabulário,
-// mais pobre, para a mesma recusa.
+// A validação do formulário continua detalhada em `lerDeclaracaoDeCub`.
+// A RPC permanece responsável pelas invariantes transacionais, mas mensagens
+// técnicas do PostgREST não atravessam a fronteira da action: o identificador
+// estável do provedor vai para o log e a interface recebe uma mensagem funcional.
 
 function paginaDeImportacao(
   parametros: { uf: string; voltar?: string | null },
@@ -60,10 +55,11 @@ export async function registrarCubManual(formData: FormData) {
   });
 
   if (error) {
+    reportDataAccessError("cub.register-manual-reference", error);
     paginaDeImportacao(
       { uf: declaracao.uf, voltar },
       "error",
-      error.message || "O CUB não pôde ser registrado."
+      "O CUB não pôde ser registrado."
     );
   }
 

@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 
 export async function createBudget(formData: FormData) {
   const { supabase, organizationId } = await requireOrganizationContext([
@@ -24,7 +25,8 @@ export async function createBudget(formData: FormData) {
   });
 
   if (error || !data) {
-    redirect(`/app/orcamentos/novo?error=${encodeURIComponent(error?.message ?? "Não foi possível criar o orçamento.")}`);
+    reportDataAccessError("create-budget.create", error);
+    redirect(`/app/orcamentos/novo?error=${encodeURIComponent("Não foi possível criar o orçamento.")}`);
   }
 
   redirect(`/app/orcamentos/${data}`);
