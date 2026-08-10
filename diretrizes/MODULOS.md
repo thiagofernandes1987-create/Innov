@@ -2,6 +2,8 @@
 
 **Atualizado em:** 04 de agosto de 2026  
 **Versão estável:** 0.19.0  
+**Atualizado em:** 9 de agosto de 2026  
+**Versão:** 0.19.0  
 **Registro técnico:** `lib/modules/registry.ts`
 
 Cada módulo possui chave estável, rota, estado por organização, dependências, capacidades e escopos. Desabilitar um módulo preserva dados e bloqueia o uso funcional. Perfis personalizados não são sobrescritos. Nenhum módulo experimental é descrito como homologado ou produtivo sem evidência real.
@@ -212,6 +214,85 @@ Definition of Done da branch experimental:
 - PR revisado sem merge automático;
 - produção somente por decisão explícita posterior.
 
+## `rh` — Recursos Humanos e Departamento Pessoal
+
+- rota `/app/rh`;
+- sensível;
+- branch funcional `feature/projeto-rh-especificacao-funcional`;
+- PR de rascunho `#42`;
+- implementação funcional validada internamente; **homologação externa, piloto e produção ainda não concluídos**;
+- integra com `financeiro`, `documentos`, eSocial, DCTFWeb/Integra Contador e FGTS Digital conforme canais oficiais realmente disponíveis.
+
+Escopo:
+
+- pessoas, trabalhadores, vínculos, empresas, estabelecimentos, lotações, cargos/CBO, funções, sindicatos e jornadas;
+- admissão, alterações contratuais/cadastrais, ponto, férias, afastamentos, benefícios, SST, desligamento e offboarding;
+- folha parametrizada com rubricas versionadas, bases declarativas, IRRF 2026, múltiplos vínculos, 13º, férias, rescisão, retroativos/complementares, provisões e contabilização;
+- pagamentos internos com conta/PIX, ordens, lotes, liquidação e evidência;
+- documentos privados, recibos PDF, Meu RH e relatórios;
+- folha-sombra e reconciliação.
+
+eSocial suportado internamente:
+
+- S-1000/S-1005/S-1010/S-1020;
+- S-2190/S-2200 CLT padrão/S-2205/S-2206;
+- S-2230 nos caminhos modelados;
+- S-2210/S-2220/S-2240;
+- S-2299/S-2399 nos caminhos modelados;
+- S-1200/S-1210/S-1298/S-1299;
+- XMLDSig RSA-SHA256/SHA-256, C14N conferida com `xmllint`, assinatura verificada por `xmlsec1` e XML validado contra XSD oficial S-1.3 vigente;
+- mTLS, lote, protocolo, consulta, recibo e ocorrências por evento;
+- Produção bloqueada por padrão.
+
+Segurança e dados:
+
+- RLS por organização e FKs compostas para isolamento multiempresa;
+- dados clínicos/sensíveis segregados;
+- mudanças críticas por RPC/transação;
+- histórico temporal preservado;
+- Storage privado para documentos;
+- Service Role apenas server-side;
+- nenhuma API governamental fictícia: adapters usam Web Service, feed, arquivo ou portal conforme o serviço oficial.
+
+Integrações governamentais:
+
+- DCTFWeb tratada como obrigação sensibilizada por fontes oficiais, com workspace e reconciliação;
+- MIT JSON leiaute 1.0 com regras condicionais;
+- Integra Contador somente por capabilities/paths efetivamente contratados;
+- FGTS Digital com bases, guia/pagamento/conciliação e arquivo rescisório oficial; ações sem API pública permanecem assistidas por portal.
+
+Qualidade interna:
+
+- migrations RH replayadas em PostgreSQL isolado;
+- regressões de banco, typecheck e lint específicos;
+- XMLs eSocial testados contra XSD oficial;
+- XMLDSig verificado por implementação externa;
+- backup/restore isolado com comparação de tabelas, dados, RLS, policies e funções;
+- gates RH específicos verdes no checkpoint registrado em `docs/PROJETO-RH-EXECUCAO-STATUS-IMPLEMENTACAO.md`.
+
+Pendências antes de homologação/piloto:
+
+- Produção Restrita eSocial com certificado/inscrições reais e protocolo oficial;
+- Browser E2E em ambiente HTTPS isolado;
+- Integra Contador com contrato e credenciais reais;
+- folha-sombra contra fonte autorizada real;
+- casos especiais de eSocial ainda não modelados;
+- rehearsal de cutover/rollback;
+- piloto e GO/NO_GO de negócio.
+
+Definition of Done para produção:
+
+- documentação atualizada no mesmo PR;
+- migrations aplicadas e homologadas no ambiente candidato;
+- gates RH internos verdes no mesmo SHA;
+- homologação eSocial real concluída;
+- reconciliação sombra aceita;
+- restore/cutover ensaiados;
+- parâmetros legais aprovados pelo responsável competente;
+- piloto sem divergência crítica;
+- CI global verde;
+- PR revisado sem merge automático.
+
 ## `relatorios` — Relatórios e Indicadores
 
 - rota `/app/relatorios`;
@@ -230,3 +311,19 @@ Definition of Done da branch experimental:
 - rota `/app/administracao`;
 - catálogo de módulos, perfis, usuários, escopos, overrides e permissões;
 - módulo de sistema.
+- níveis: nenhuma, leitura, edição e exclusão;
+- capacidades adicionais: aprovar, liberar, assinar, exportar, administrar e visualizar sensíveis.
+
+## Definition of Done da Etapa 18
+
+- documentação atualizada no mesmo PR;
+- migrations aplicadas, homologadas e alinhadas ao ledger remoto;
+- leads, oportunidades e conversão idempotente;
+- Cliente 360 multiobra;
+- SAC interno e do portal;
+- mensagens, anexos, SLA e eventos;
+- RLS interna e do cliente;
+- nenhuma RPC operacional para `anon`;
+- todas as FKs indexadas;
+- CI verde;
+- PR pronto para revisão, sem merge automático.

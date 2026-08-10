@@ -1,0 +1,10 @@
+import{expect,test}from"playwright/test";
+
+const base=process.env.RH_E2E_BASE_URL?.replace(/\/$/,"")??"";const email=process.env.RH_E2E_EMAIL??"";const password=process.env.RH_E2E_PASSWORD??"";
+if(!base||!email||!password)throw new Error("RH_E2E_BASE_URL, RH_E2E_EMAIL e RH_E2E_PASSWORD são obrigatórios para o E2E profissional.");
+
+async function login(page:import("playwright/test").Page){await page.goto(`${base}/login`,{waitUntil:"domcontentloaded"});const emailInput=page.locator('input[type="email"], input[name="email"]').first();const passwordInput=page.locator('input[type="password"], input[name="password"]').first();await expect(emailInput).toBeVisible();await emailInput.fill(email);await passwordInput.fill(password);await page.locator('button[type="submit"]').first().click();await page.waitForLoadState("networkidle");expect(page.url()).not.toContain("/login");}
+
+test.describe("RH profissional",()=>{test.beforeEach(async({page})=>{await login(page);});const routes=[
+  ["/app/rh","RH"],["/app/rh/pessoas","Pessoas"],["/app/rh/admissoes","Admiss"],["/app/rh/folha","Folha"],["/app/rh/folha/decimo-terceiro","Décimo"],["/app/rh/folha/retroativos","Complementares"],["/app/rh/folha/pagamentos","Pagamentos"],["/app/rh/afastamentos","Afastamentos"],["/app/rh/sst","Saúde"],["/app/rh/desligamentos","Rescis"],["/app/rh/obrigacoes","Obriga"],["/app/rh/relatorios","Painel"]
+ ] as const;for(const[path,heading]of routes){test(`abre ${path}`,async({page})=>{const errors:string[]=[];page.on("pageerror",e=>errors.push(e.message));page.on("console",m=>{if(m.type()==="error")errors.push(m.text());});const response=await page.goto(`${base}${path}`,{waitUntil:"networkidle"});expect(response?.status()).toBeLessThan(400);await expect(page.locator("h1").first()).toContainText(new RegExp(heading,"i"));await expect(page.locator("body")).not.toContainText(/Internal Server Error|Application error|Unhandled Runtime Error/i);expect(errors).toEqual([]);await page.screenshot({path:`test-results/rh-${path.replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"")}.png`,fullPage:true});});}});

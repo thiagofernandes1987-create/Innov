@@ -28,16 +28,16 @@ a ignorar.
 
 | | |
 |---|---|
-| Aplicativos no registro | 24 |
-| Rotas | 167 (148 páginas, 19 de API) |
-| Server actions | 201 em 38 arquivos |
-| Módulos de `lib/` | 126 |
-| Funções do banco declaradas | 335 |
-| Funções do banco chamadas do código | 135 |
-| Suítes de teste | 96, com 937 casos |
-| Migrations | 200 |
+| Aplicativos no registro | 25 |
+| Rotas | 229 (205 páginas, 24 de API) |
+| Server actions | 323 em 72 arquivos |
+| Módulos de `lib/` | 146 |
+| Funções do banco declaradas | 414 |
+| Funções do banco chamadas do código | 200 |
+| Suítes de teste | 107, com 1011 casos |
+| Migrations | 268 |
 | Validadores de CI | 53 |
-| Módulos de `lib/` citados por algum teste | 78 de 126 |
+| Módulos de `lib/` citados por algum teste | 94 de 146 |
 
 ## 1. Aplicativos
 
@@ -62,6 +62,7 @@ a ignorar.
 | `compras` | Compras e Suprimentos | `/app/compras` |
 | `estoque` | Estoque | `/app/estoque` |
 | `financeiro` | Financeiro Operacional | `/app/financeiro` |
+| `rh` | Recursos Humanos e DP | `/app/rh` |
 | `sac` | Pós-venda e SAC | `/app/ocorrencias` |
 | `whatsapp` | WhatsApp e Atendimento | `/app/whatsapp` |
 | `relatorios` | Relatórios e Indicadores | `/app/relatorios` |
@@ -93,6 +94,11 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/api/qualidade/anexos/[id]` | API | — | `app/api/qualidade/anexos/[id]/route.ts` |
 | `/api/qualidade/documentos/[id]` | API | — | `app/api/qualidade/documentos/[id]/route.ts` |
 | `/api/relatorios/exportar` | API | relatorios:export | `app/api/relatorios/exportar/route.ts` |
+| `/api/rh/documents/[versionId]` | API | sessão da organização | `app/api/rh/documents/[versionId]/route.ts` |
+| `/api/rh/fgts-rescisory/[id]` | API | rh:export | `app/api/rh/fgts-rescisory/[id]/route.ts` |
+| `/api/rh/mit/[id]` | API | rh:export | `app/api/rh/mit/[id]/route.ts` |
+| `/api/rh/payments/batches/[id]` | API | rh:approve | `app/api/rh/payments/batches/[id]/route.ts` |
+| `/api/rh/payslips/[publicationId]/pdf` | API | sessão da organização | `app/api/rh/payslips/[publicationId]/pdf/route.ts` |
 | `/api/sac/attachments/[id]` | API | — | `app/api/sac/attachments/[id]/route.ts` |
 | `/api/signatures/webhook` | API | — | `app/api/signatures/webhook/route.ts` |
 | `/api/webhooks/whatsapp` | API | — | `app/api/webhooks/whatsapp/route.ts` |
@@ -214,6 +220,63 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/relatorios/qualidade` | página | — | `app/app/relatorios/qualidade/page.tsx` |
 | `/app/relatorios/salvos` | página | relatorios:read | `app/app/relatorios/salvos/page.tsx` |
 | `/app/relatorios/snapshots` | página | relatorios:read | `app/app/relatorios/snapshots/page.tsx` |
+| `/app/rh` | página | rh:read | `app/app/rh/page.tsx` |
+| `/app/rh/admissoes` | página | rh:read | `app/app/rh/admissoes/page.tsx` |
+| `/app/rh/admissoes/[id]` | página | rh:read | `app/app/rh/admissoes/[id]/page.tsx` |
+| `/app/rh/admissoes/[id]/esocial-especial` | página | rh:read | `app/app/rh/admissoes/[id]/esocial-especial/page.tsx` |
+| `/app/rh/admissoes/[id]/esocial-transicao` | página | rh:read | `app/app/rh/admissoes/[id]/esocial-transicao/page.tsx` |
+| `/app/rh/admissoes/nova` | página | rh:create | `app/app/rh/admissoes/nova/page.tsx` |
+| `/app/rh/afastamentos` | página | rh:read | `app/app/rh/afastamentos/page.tsx` |
+| `/app/rh/afastamentos/[id]/esocial` | página | rh:read | `app/app/rh/afastamentos/[id]/esocial/page.tsx` |
+| `/app/rh/beneficios` | página | rh:read | `app/app/rh/beneficios/page.tsx` |
+| `/app/rh/beneficios/faturas/[id]` | página | rh:read | `app/app/rh/beneficios/faturas/[id]/page.tsx` |
+| `/app/rh/configuracao` | página | rh:configure | `app/app/rh/configuracao/page.tsx` |
+| `/app/rh/configuracao/esocial` | página | rh:configure | `app/app/rh/configuracao/esocial/page.tsx` |
+| `/app/rh/configuracao/estrutura` | página | rh:configure | `app/app/rh/configuracao/estrutura/page.tsx` |
+| `/app/rh/configuracao/portal` | página | rh:manage | `app/app/rh/configuracao/portal/page.tsx` |
+| `/app/rh/desligamentos` | página | rh:read | `app/app/rh/desligamentos/page.tsx` |
+| `/app/rh/desligamentos/[id]` | página | rh:read | `app/app/rh/desligamentos/[id]/page.tsx` |
+| `/app/rh/desligamentos/[id]/esocial-especial` | página | rh:read | `app/app/rh/desligamentos/[id]/esocial-especial/page.tsx` |
+| `/app/rh/documentos` | página | rh:read | `app/app/rh/documentos/page.tsx` |
+| `/app/rh/ferias` | página | rh:read | `app/app/rh/ferias/page.tsx` |
+| `/app/rh/ferias/[id]` | página | rh:read | `app/app/rh/ferias/[id]/page.tsx` |
+| `/app/rh/folha` | página | rh:read | `app/app/rh/folha/page.tsx` |
+| `/app/rh/folha/competencias` | página | rh:read | `app/app/rh/folha/competencias/page.tsx` |
+| `/app/rh/folha/competencias/[id]` | página | rh:read | `app/app/rh/folha/competencias/[id]/page.tsx` |
+| `/app/rh/folha/competencias/nova` | página | rh:create | `app/app/rh/folha/competencias/nova/page.tsx` |
+| `/app/rh/folha/configuracao` | página | rh:configure | `app/app/rh/folha/configuracao/page.tsx` |
+| `/app/rh/folha/decimo-terceiro` | página | rh:read | `app/app/rh/folha/decimo-terceiro/page.tsx` |
+| `/app/rh/folha/pagamentos` | página | rh:read | `app/app/rh/folha/pagamentos/page.tsx` |
+| `/app/rh/folha/retroativos` | página | rh:read | `app/app/rh/folha/retroativos/page.tsx` |
+| `/app/rh/folha/rubricas` | página | rh:read | `app/app/rh/folha/rubricas/page.tsx` |
+| `/app/rh/folha/rubricas/nova` | página | rh:configure | `app/app/rh/folha/rubricas/nova/page.tsx` |
+| `/app/rh/folha/sombra` | página | rh:read | `app/app/rh/folha/sombra/page.tsx` |
+| `/app/rh/folha/sombra/[id]` | página | rh:read | `app/app/rh/folha/sombra/[id]/page.tsx` |
+| `/app/rh/jornada` | página | rh:read | `app/app/rh/jornada/page.tsx` |
+| `/app/rh/jornada/configuracao` | página | rh:configure | `app/app/rh/jornada/configuracao/page.tsx` |
+| `/app/rh/jornada/periodos/[id]` | página | rh:read | `app/app/rh/jornada/periodos/[id]/page.tsx` |
+| `/app/rh/meu-rh` | página | sessão da organização | `app/app/rh/meu-rh/page.tsx` |
+| `/app/rh/obrigacoes` | página | rh:read | `app/app/rh/obrigacoes/page.tsx` |
+| `/app/rh/obrigacoes/dctfweb` | página | rh:read | `app/app/rh/obrigacoes/dctfweb/page.tsx` |
+| `/app/rh/obrigacoes/dctfweb/[id]` | página | rh:read | `app/app/rh/obrigacoes/dctfweb/[id]/page.tsx` |
+| `/app/rh/obrigacoes/dctfweb/mit` | página | rh:read | `app/app/rh/obrigacoes/dctfweb/mit/page.tsx` |
+| `/app/rh/obrigacoes/dctfweb/mit/[id]` | página | rh:read | `app/app/rh/obrigacoes/dctfweb/mit/[id]/page.tsx` |
+| `/app/rh/obrigacoes/esocial` | página | rh:read | `app/app/rh/obrigacoes/esocial/page.tsx` |
+| `/app/rh/obrigacoes/esocial/eventos/[id]` | página | rh:read | `app/app/rh/obrigacoes/esocial/eventos/[id]/page.tsx` |
+| `/app/rh/obrigacoes/esocial/lotes/[id]` | página | rh:read | `app/app/rh/obrigacoes/esocial/lotes/[id]/page.tsx` |
+| `/app/rh/obrigacoes/esocial/novo` | página | rh:update | `app/app/rh/obrigacoes/esocial/novo/page.tsx` |
+| `/app/rh/obrigacoes/fgts-digital` | página | rh:read | `app/app/rh/obrigacoes/fgts-digital/page.tsx` |
+| `/app/rh/obrigacoes/fgts-digital/[id]` | página | rh:read | `app/app/rh/obrigacoes/fgts-digital/[id]/page.tsx` |
+| `/app/rh/obrigacoes/fgts-digital/rescisorio/[id]` | página | rh:read | `app/app/rh/obrigacoes/fgts-digital/rescisorio/[id]/page.tsx` |
+| `/app/rh/pessoas` | página | rh:read | `app/app/rh/pessoas/page.tsx` |
+| `/app/rh/pessoas/[id]` | página | rh:read | `app/app/rh/pessoas/[id]/page.tsx` |
+| `/app/rh/pessoas/[id]/alteracoes` | página | rh:read | `app/app/rh/pessoas/[id]/alteracoes/page.tsx` |
+| `/app/rh/pessoas/novo` | página | rh:create | `app/app/rh/pessoas/novo/page.tsx` |
+| `/app/rh/relatorios` | página | rh:read | `app/app/rh/relatorios/page.tsx` |
+| `/app/rh/sst` | página | rh:read | `app/app/rh/sst/page.tsx` |
+| `/app/rh/tsv` | página | rh:read | `app/app/rh/tsv/page.tsx` |
+| `/app/rh/tsv/[id]` | página | rh:read | `app/app/rh/tsv/[id]/page.tsx` |
+| `/app/rh/tsv/[id]/especial` | página | rh:read | `app/app/rh/tsv/[id]/especial/page.tsx` |
 | `/app/tarefas` | página | sessão da organização | `app/app/tarefas/page.tsx` |
 | `/app/whatsapp` | página | — | `app/app/whatsapp/page.tsx` |
 | `/app/whatsapp/bots` | página | — | `app/app/whatsapp/bots/page.tsx` |
@@ -599,6 +662,298 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `saveReportTarget` | relatorios:manage |
 | `saveReportView` | relatorios:create |
 
+### `app/actions/rh-admission-esocial-special.ts`
+
+| Função | Guarda |
+|---|---|
+| `saveAdmissionEsocialSpecialProfile` | rh:update |
+
+### `app/actions/rh-admission-esocial-transition.ts`
+
+| Função | Guarda |
+|---|---|
+| `generateS2200Transition` | rh:update |
+| `saveAdmissionEsocialTransitionProfile` | rh:update |
+
+### `app/actions/rh-admission-esocial.ts`
+
+| Função | Guarda |
+|---|---|
+| `generateAdmissionEsocialEvent` | rh:update |
+| `saveAdmissionEsocialProfile` | rh:update |
+
+### `app/actions/rh-admission.ts`
+
+| Função | Guarda |
+|---|---|
+| `activateRhAdmission` | rh:approve |
+| `createRhAdmissionCase` | rh:create |
+| `setRhAdmissionChecklist` | rh:update |
+
+### `app/actions/rh-benefits.ts`
+
+| Função | Guarda |
+|---|---|
+| `addBenefitProviderInvoiceItem` | rh:update |
+| `approveBenefitProviderInvoice` | rh:approve |
+| `createBenefitCatalogItem` | rh:configure |
+| `createBenefitProviderInvoice` | rh:create |
+| `enrollWorkerBenefit` | rh:update |
+| `exportBenefitToPayroll` | rh:update |
+| `payBenefitProviderInvoice` | rh:approve |
+| `reconcileBenefitProviderInvoice` | rh:approve |
+| `registerBenefitCharge` | rh:update |
+
+### `app/actions/rh-documents.ts`
+
+| Função | Guarda |
+|---|---|
+| `archiveRhDocument` | rh:update |
+| `publishRhDocument` | rh:approve |
+| `uploadRhDocument` | rh:create |
+
+### `app/actions/rh-esocial-changes.ts`
+
+| Função | Guarda |
+|---|---|
+| `createRhContractEsocialChange` | rh:update |
+| `createRhPersonalEsocialChange` | rh:update |
+| `generateRhEsocialChangeEvent` | rh:update |
+
+### `app/actions/rh-esocial-config.ts`
+
+| Função | Guarda |
+|---|---|
+| `configureEsocialRubricVersion` | rh:configure |
+| `createEsocialEmployerProfile` | rh:configure |
+| `createEsocialEstablishmentProfile` | rh:configure |
+| `createEsocialTaxAllocationProfile` | rh:configure |
+
+### `app/actions/rh-esocial-generation.ts`
+
+| Função | Guarda |
+|---|---|
+| `generateSignedEsocialTableEvent` | rh:update |
+
+### `app/actions/rh-esocial-processing.ts`
+
+| Função | Guarda |
+|---|---|
+| `queryAndApplyEsocialBatch` | rh:update |
+
+### `app/actions/rh-esocial.ts`
+
+| Função | Guarda |
+|---|---|
+| `createEsocialBatch` | rh:update |
+| `saveSignedEsocialEvent` | rh:update |
+| `sendEsocialBatchAction` | rh:approve |
+
+### `app/actions/rh-fgts-rescisory.ts`
+
+| Função | Guarda |
+|---|---|
+| `addFgtsRescisoryHistory` | rh:update |
+
+### `app/actions/rh-government.ts`
+
+| Função | Guarda |
+|---|---|
+| `createDctfwebDeclaration` | rh:update |
+| `createFgtsGuide` | rh:update |
+| `createFgtsPeriodFromPayroll` | rh:update |
+| `recordDctfwebExternalSnapshot` | rh:update |
+| `recordFgtsPayment` | rh:update |
+| `updateFgtsWorkerExternal` | rh:update |
+| `upsertDctfwebReconciliation` | rh:update |
+
+### `app/actions/rh-integracontador.ts`
+
+| Função | Guarda |
+|---|---|
+| `testIntegraContadorCredentials` | rh:configure |
+
+### `app/actions/rh-leave-esocial-special.ts`
+
+| Função | Guarda |
+|---|---|
+| `saveLeaveEsocialSpecial` | rh:update |
+
+### `app/actions/rh-leave-esocial.ts`
+
+| Função | Guarda |
+|---|---|
+| `generateLeaveEsocialEvent` | rh:update |
+
+### `app/actions/rh-mit.ts`
+
+| Função | Guarda |
+|---|---|
+| `addMitDebt` | rh:update |
+| `addMitSpecialEvent` | rh:update |
+| `addMitSuspension` | rh:update |
+| `createMitApuration` | rh:create |
+| `markMitImported` | rh:approve |
+
+### `app/actions/rh-movements.ts`
+
+| Função | Guarda |
+|---|---|
+| `approveVacationCase` | rh:approve |
+| `createLeaveCase` | rh:create |
+| `createVacationCase` | rh:create |
+| `createVacationEntitlement` | rh:create |
+| `exportVacationToPayroll` | rh:update |
+
+### `app/actions/rh-payments.ts`
+
+| Função | Guarda |
+|---|---|
+| `createPaymentBatch` | rh:approve |
+| `markPaymentBatchSent` | rh:approve |
+| `saveWorkerBankAccount` | rh:update |
+
+### `app/actions/rh-payroll-config.ts`
+
+| Função | Guarda |
+|---|---|
+| `addRhPayrollBaseMember` | rh:configure |
+| `createRhDerivedRubric` | rh:configure |
+| `createRhPayrollBase` | rh:configure |
+| `importRhRegulatoryTemplate` | rh:configure |
+
+### `app/actions/rh-payroll-esocial.ts`
+
+| Função | Guarda |
+|---|---|
+| `createPayrollPaymentOrders` | rh:update |
+| `generateS1200` | rh:update |
+| `generateS1210` | rh:update |
+| `generateS1298` | rh:approve |
+| `generateS1299` | rh:approve |
+| `settlePayrollPayment` | rh:approve |
+
+### `app/actions/rh-payroll-special.ts`
+
+| Função | Guarda |
+|---|---|
+| `approvePayrollDifference` | rh:approve |
+| `calculateThirteenth` | rh:update |
+| `createPayrollDifference` | rh:update |
+| `createThirteenthCase` | rh:update |
+| `exportPayrollDifference` | rh:update |
+| `exportThirteenth` | rh:update |
+| `mapPayrollDifferenceLine` | rh:update |
+| `mapThirteenthRubric` | rh:update |
+
+### `app/actions/rh-payroll.ts`
+
+| Função | Guarda |
+|---|---|
+| `createRhRubricTransactional` | rh:configure |
+
+### `app/actions/rh-portal.ts`
+
+| Função | Guarda |
+|---|---|
+| `linkWorkerUser` | rh:manage |
+| `publishPayslips` | rh:approve |
+| `unlinkWorkerUser` | rh:manage |
+
+### `app/actions/rh-shadow-payroll.ts`
+
+| Função | Guarda |
+|---|---|
+| `acceptShadowPayroll` | rh:approve |
+| `createShadowPayroll` | rh:create |
+| `reconcileShadowPayroll` | rh:approve |
+| `setShadowRubricExternal` | rh:update |
+| `setShadowWorkerExternal` | rh:update |
+
+### `app/actions/rh-sst-esocial.ts`
+
+| Função | Guarda |
+|---|---|
+| `generateSstEsocialEvent` | rh:update |
+
+### `app/actions/rh-sst.ts`
+
+| Função | Guarda |
+|---|---|
+| `createSstAso` | rh:update |
+| `createSstCat` | rh:update |
+| `createSstEpi` | rh:update |
+| `createSstExposure` | rh:update |
+| `deliverSstEpi` | rh:update |
+| `markSstReady` | rh:approve |
+
+### `app/actions/rh-termination-esocial-special.ts`
+
+| Função | Guarda |
+|---|---|
+| `saveTerminationEsocialSpecial` | rh:update |
+
+### `app/actions/rh-termination-esocial.ts`
+
+| Função | Guarda |
+|---|---|
+| `generateTerminationEsocialEvent` | — |
+
+### `app/actions/rh-termination.ts`
+
+| Função | Guarda |
+|---|---|
+| `addTerminationAdjustment` | rh:update |
+| `approveTermination` | rh:approve |
+| `calculateTermination` | rh:update |
+| `createTerminationCase` | rh:create |
+| `makeTerminationEffective` | rh:approve |
+| `updateOffboardingTask` | rh:update |
+
+### `app/actions/rh-time.ts`
+
+| Função | Guarda |
+|---|---|
+| `addRhTimeAdjustment` | rh:approve |
+| `addRhTimePunch` | rh:update |
+| `calculateRhTimePeriodAction` | rh:update |
+| `closeRhTimePeriodToPayroll` | rh:approve |
+| `configureRhScheduleDay` | rh:configure |
+| `createRhTimePeriod` | rh:create |
+| `createRhTimePolicy` | rh:configure |
+
+### `app/actions/rh-tsv-esocial.ts`
+
+| Função | Guarda |
+|---|---|
+| `generateTsvS2300` | rh:update |
+| `saveTsvEsocialProfile` | rh:update |
+
+### `app/actions/rh-tsv-special-esocial.ts`
+
+| Função | Guarda |
+|---|---|
+| `generateTsvSpecialS2300` | rh:update |
+| `saveTsvSpecialEsocialProfile` | rh:update |
+
+### `app/actions/rh.ts`
+
+| Função | Guarda |
+|---|---|
+| `addRhPayrollInput` | rh:update |
+| `closeRhPayroll` | rh:approve |
+| `createRhEmployer` | rh:configure |
+| `createRhEmploymentCondition` | rh:update |
+| `createRhEstablishment` | rh:configure |
+| `createRhFunction` | rh:configure |
+| `createRhPayrollPeriod` | rh:create |
+| `createRhPosition` | rh:configure |
+| `createRhTaxAllocation` | rh:configure |
+| `createRhUnion` | rh:configure |
+| `createRhWorker` | rh:create |
+| `createRhWorkSchedule` | rh:configure |
+| `runRhPayroll` | rh:update |
+
 ### `app/actions/schedule.ts`
 
 | Função | Guarda |
@@ -743,6 +1098,26 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/relatorios/perdas` | sim | `MINIMO_PARA_CLASSIFICAR`, `SEM_MOTIVO`, `classificacaoUtil`, `motivosSemUso`, `pareto`, `totalPerdido` |
 | `@/lib/reports/metrics` | não | `buildProjectCsv`, `evaluateMetric`, `formatReportNumber`, `normalizeReportDashboard`, `targetFor` |
 | `@/lib/reports/server` | não | `defaultReportPeriod`, `loadReportDashboard` |
+| `@/lib/rh/integrations/esocial-change-xml` | sim | `buildS2205Brazil`, `buildS2206StandardClt` |
+| `@/lib/rh/integrations/esocial-leave-xml` | sim | `buildS2230` |
+| `@/lib/rh/integrations/esocial-periodic-xml` | sim | `buildS1200`, `buildS1210`, `buildS1298`, `buildS1299` |
+| `@/lib/rh/integrations/esocial-result-parser` | sim | `parseEsocialIndividualResults` |
+| `@/lib/rh/integrations/esocial-s2240-xml` | sim | `buildS2240` |
+| `@/lib/rh/integrations/esocial-signature-core` | sim | `ESOCIAL_C14N`, `ESOCIAL_DSIG_NS`, `ESOCIAL_ENVELOPED`, `ESOCIAL_RSA_SHA256`, `ESOCIAL_SHA256`, `buildSignedInfo`, `canonicalizeEsocialSignableElement`, `extractEsocialSignableElement`, `signEsocialXmlWithMaterial`, `verifyGeneratedEsocialSignature` |
+| `@/lib/rh/integrations/esocial-signature` | não | `signEsocialXml` |
+| `@/lib/rh/integrations/esocial-sst-xml` | sim | `buildS2210`, `buildS2220`, `buildS2240` |
+| `@/lib/rh/integrations/esocial-termination-xml` | sim | `buildS2299`, `buildS2399` |
+| `@/lib/rh/integrations/esocial-transport` | não | `assertSignedEsocialEvent`, `buildEsocialBatchXml`, `buildQuerySoapEnvelope`, `buildQueryXml`, `buildSendSoapEnvelope`, `extractEsocialProtocol`, `extractEsocialResponseStatus`, `queryEsocialBatch`, `sendEsocialBatch`, `sha256` |
+| `@/lib/rh/integrations/esocial-tsv-special-xml` | sim | `buildS2300Special` |
+| `@/lib/rh/integrations/esocial-tsv-student-xml` | sim | `buildS2300Student` |
+| `@/lib/rh/integrations/esocial-tsv-xml` | sim | `S2300_CONTRIBUTOR_CATEGORIES`, `buildS2300Category721`, `buildS2300Contributor` |
+| `@/lib/rh/integrations/esocial-worker-transition-xml` | sim | `buildS2200TransitionClt` |
+| `@/lib/rh/integrations/esocial-worker-xml` | sim | `buildS2190`, `buildS2200StandardClt` |
+| `@/lib/rh/integrations/esocial-xml` | sim | `buildS1000`, `buildS1005`, `buildS1010`, `buildS1020`, `makeEsocialEventId`, `normalizeEmployerRegistrationNumber`, `xmlSha256` |
+| `@/lib/rh/integrations/fgts-rescisory-file` | sim | `FGTS_RESCISORY_CUTOFF`, `FGTS_RESCISORY_LAYOUT_DATE`, `FGTS_RESCISORY_LAYOUT_VERSION`, `renderFgtsRescisoryFile`, `validateFgtsRescisoryWorker` |
+| `@/lib/rh/integrations/government` | não | `ESOCIAL_ENDPOINTS`, `GOVERNMENT_CAPABILITIES`, `esocialConfigurationStatus` |
+| `@/lib/rh/integrations/integra-contador` | não | `callIntegraContador`, `getConfiguredIntegraContadorServices`, `getIntegraContadorToken`, `validateIntegraContadorBase`, `validateIntegraContadorServicePath` |
+| `@/lib/rh/integrations/mit-json` | sim | `MIT_LAYOUT_DATE`, `MIT_LAYOUT_VERSION`, `mitFilename`, `renderMitJson`, `validateMitDocument` |
 | `@/lib/signatures/crypto` | não | `createSigningToken`, `hashCanonical`, `sha256` |
 | `@/lib/signatures/format` | sim | `canonicalJson`, `safeFileName` |
 | `@/lib/signatures/webhook-state` | sim | `SIGNATURE_STATUS_BY_EVENT`, `shouldApplySignatureStatus` |
@@ -777,17 +1152,27 @@ Declaradas em migration e chamadas por `.rpc()`.
 | Função | Declarada em | Chamada de |
 |---|---|---|
 | `accept_proposal` | `supabase/migrations/20260728232000_accept_proposal_client_audit.sql` | — (só por SQL ou trigger) |
+| `accept_rh_payroll_shadow` | `supabase/migrations/20260808110000_rh_payroll_shadow_reconciliation.sql` | `app/actions/rh-shadow-payroll.ts` |
 | `acknowledge_channel_operational_alert` | `supabase/migrations/20260804230000_stage22_messaging_observability.sql` | — (só por SQL ou trigger) |
 | `acknowledge_observability_alert` | `supabase/migrations/20260721122302_stage19_observability_functions.sql` | `app/actions/observability.ts` |
 | `acquire_session_runtime_lease` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
+| `activate_rh_admission` | `supabase/migrations/20260807153200_rh_admission_activation_precondition_order_fix.sql` | `app/actions/rh-admission.ts` |
 | `add_advanced_signature_field` | `supabase/migrations/20260720054200_stage12_2_document_layout_workflow.sql` | `app/actions/advanced-signatures.ts` |
 | `add_channel_conversation_note` | `supabase/migrations/20260804180000_stage22_multiprovider_inbox.sql` | `app/actions/messaging-inbox.ts` |
 | `add_inventory_stocktake_line` | `supabase/migrations/20260720160530_stage17_inventory_stocktake_found_items.sql` | `app/actions/inventory-stocktake.ts` |
+| `add_rh_payroll_base_member` | `supabase/migrations/20260807140000_rh_payroll_regulatory_configuration.sql` | `app/actions/rh-payroll-config.ts` |
 | `add_sac_ticket_message` | `supabase/migrations/20260721013654_stage18_sac_functions.sql` | `app/actions/relationship.ts` |
 | `add_sinapi_reference_to_budget` | `supabase/migrations/20260729185000_sinapi_authenticated_rpcs_invoker_internal_audit.sql` | `app/actions/sinapi.ts` |
+| `apply_rh_esocial_event_result` | `supabase/migrations/20260807142000_rh_esocial_individual_results.sql` | `app/actions/rh-esocial-processing.ts` |
+| `apply_rh_termination_rubric_mappings` | `supabase/migrations/20260807160500_rh_termination_esocial_mapping.sql` | `app/actions/rh-termination-esocial.ts` |
 | `apply_signed_amendment` | `supabase/migrations/20260719234000_stage9_apply_amendment.sql` | — (só por SQL ou trigger) |
 | `approve_channel_critical_write` | `supabase/migrations/20260804220000_stage22_security_hardening.sql` | — (só por SQL ou trigger) |
 | `approve_inventory_stocktake` | `supabase/migrations/20260720160420_stage17_inventory_assets_stocktakes_03.sql` | `app/actions/inventory.ts` |
+| `approve_rh_benefit_provider_invoice` | `supabase/migrations/20260809110000_rh_benefit_invoice_lifecycle.sql` | `app/actions/rh-benefits.ts` |
+| `approve_rh_payroll_accounting_batch` | `supabase/migrations/20260807162500_rh_payroll_provisions_accounting.sql` | — (só por SQL ou trigger) |
+| `approve_rh_payroll_difference_case` | `supabase/migrations/20260807164000_rh_payroll_difference_approval_export.sql` | `app/actions/rh-payroll-special.ts` |
+| `approve_rh_termination_calculation` | `supabase/migrations/20260807160000_rh_termination_offboarding_v1.sql` | `app/actions/rh-termination.ts` |
+| `approve_rh_vacation_case` | `supabase/migrations/20260807150000_rh_vacation_leave_benefits_v1.sql` | `app/actions/rh-movements.ts` |
 | `assert_channel_media_clean` | `supabase/migrations/20260804170000_stage22_secure_media.sql` | — (só por SQL ou trigger) |
 | `assert_procurement_quote_item_parent_chain` | `supabase/migrations/20260723062000_r2_stage14_procurement_parent_chain.sql` | — (só por SQL ou trigger) |
 | `assert_procurement_receipt_item_parent_chain` | `supabase/migrations/20260723062000_r2_stage14_procurement_parent_chain.sql` | — (só por SQL ou trigger) |
@@ -797,11 +1182,15 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `assign_inventory_asset` | `supabase/migrations/20260720160400_stage17_inventory_assets_stocktakes_01.sql` | `app/actions/inventory.ts` |
 | `assign_sac_ticket` | `supabase/migrations/20260721013654_stage18_sac_functions.sql` | `app/actions/relationship.ts` |
 | `assign_user_access_profile` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
+| `authorize_rh_document_download` | `supabase/migrations/20260808104000_rh_document_management_v1.sql` | `app/api/rh/documents/[versionId]/route.ts` |
 | `begin_channel_delivery_attempt` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
 | `begin_channel_media_scan` | `supabase/migrations/20260804170000_stage22_secure_media.sql` | — (só por SQL ou trigger) |
 | `bump_channel_identity_cache` | `supabase/migrations/20260804160000_stage22_identity_reconciliation.sql` | — (só por SQL ou trigger) |
 | `calculate_budget_version` | `supabase/migrations/20260729010000_budget_readiness_and_cost_sources.sql` | `app/actions/budgets.ts` |
 | `calculate_budget_version_core` | `supabase/migrations/20260808135000_converge_budget_pricing_to_markup.sql` | — (só por SQL ou trigger) |
+| `calculate_rh_termination` | `supabase/migrations/20260807160000_rh_termination_offboarding_v1.sql` | `app/actions/rh-termination.ts` |
+| `calculate_rh_thirteenth` | `supabase/migrations/20260807162000_rh_thirteenth_retroactive_payroll.sql` | `app/actions/rh-payroll-special.ts` |
+| `calculate_rh_time_period` | `supabase/migrations/20260807145500_rh_time_hardening.sql` | `app/actions/rh-time.ts` |
 | `can_access_project` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
 | `can_access_sac_ticket` | `supabase/migrations/20260721012701_stage18_relationship_security.sql` | — (só por SQL ou trigger) |
 | `can_manage_project` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
@@ -822,6 +1211,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `claim_channel_outbox_events` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
 | `claim_ordered_channel_outbox_events` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
 | `claim_whatsapp_outbound_dispatch` | `supabase/migrations/20260805004000_stage22_whatsapp_dispatch_claim.sql` | `app/actions/whatsapp.ts` |
+| `close_rh_payroll` | `supabase/migrations/20260807131500_rh_foundation_security_hardening.sql` | `app/actions/rh.ts` |
+| `close_rh_time_period_to_payroll` | `supabase/migrations/20260807150500_rh_time_payroll_export_contract_fix.sql` | `app/actions/rh-time.ts` |
 | `commit_channel_ai_budget` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | `app/actions/messaging-bots.ts` |
 | `compare_and_swap_channel_session_credentials` | `supabase/migrations/20260804123500_stage22_session_credential_store_function_fix.sql` | — (só por SQL ou trigger) |
 | `compare_and_swap_channel_session_credentials_fenced` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
@@ -868,6 +1259,28 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `create_project_from_contract_v2` | `supabase/migrations/20260729211500_safe_project_creation_workflows.sql` | `app/actions/project-creation.ts` |
 | `create_proposal_from_budget_version` | `supabase/migrations/20260728162026_workflow_documental_descobrivel.sql` | — (só por SQL ou trigger) |
 | `create_report_snapshot` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | `app/actions/reports.ts` |
+| `create_rh_admission_case` | `supabase/migrations/20260807134000_rh_admission_v1.sql` | `app/actions/rh-admission.ts` |
+| `create_rh_contract_change` | `supabase/migrations/20260807154000_rh_contract_change_transaction.sql` | `app/actions/rh-esocial-changes.ts` |
+| `create_rh_dctfweb_declaration` | `supabase/migrations/20260807143500_rh_dctfweb_fgts_operations.sql` | `app/actions/rh-government.ts` |
+| `create_rh_derived_rubric` | `supabase/migrations/20260807140500_rh_payroll_regulatory_validation.sql` | `app/actions/rh-payroll-config.ts` |
+| `create_rh_employment_esocial_contract_profile_version` | `supabase/migrations/20260807153600_rh_esocial_profile_versioning_rpcs.sql` | — (só por SQL ou trigger) |
+| `create_rh_esocial_batch` | `supabase/migrations/20260807141000_rh_esocial_transport.sql` | `app/actions/rh-esocial.ts` |
+| `create_rh_fgts_guide` | `supabase/migrations/20260807143500_rh_dctfweb_fgts_operations.sql` | `app/actions/rh-government.ts` |
+| `create_rh_fgts_period_from_payroll` | `supabase/migrations/20260807143500_rh_dctfweb_fgts_operations.sql` | `app/actions/rh-government.ts` |
+| `create_rh_mit_apuration` | `supabase/migrations/20260808101000_rh_mit_json_import_v1.sql` | `app/actions/rh-mit.ts` |
+| `create_rh_payroll_base` | `supabase/migrations/20260807140000_rh_payroll_regulatory_configuration.sql` | `app/actions/rh-payroll-config.ts` |
+| `create_rh_payroll_parameter` | `supabase/migrations/20260807140000_rh_payroll_regulatory_configuration.sql` | — (só por SQL ou trigger) |
+| `create_rh_payroll_parameter_from_template` | `supabase/migrations/20260807140000_rh_payroll_regulatory_configuration.sql` | `app/actions/rh-payroll-config.ts` |
+| `create_rh_payroll_payment_batch` | `supabase/migrations/20260807163600_rh_worker_bank_accounts.sql` | `app/actions/rh-payments.ts` |
+| `create_rh_payroll_payments` | `supabase/migrations/20260807161000_rh_payroll_payments_periodic_esocial.sql` | `app/actions/rh-payroll-esocial.ts` |
+| `create_rh_payroll_shadow_run` | `supabase/migrations/20260808110000_rh_payroll_shadow_reconciliation.sql` | `app/actions/rh-shadow-payroll.ts` |
+| `create_rh_rubric` | `supabase/migrations/20260807133000_rh_payroll_v1_invariants.sql` | `app/actions/rh-payroll.ts` |
+| `create_rh_sst_aso` | `supabase/migrations/20260807155200_rh_sst_transactional_commands.sql` | `app/actions/rh-sst.ts` |
+| `create_rh_sst_cat` | `supabase/migrations/20260807155200_rh_sst_transactional_commands.sql` | `app/actions/rh-sst.ts` |
+| `create_rh_sst_exposure` | `supabase/migrations/20260807155200_rh_sst_transactional_commands.sql` | `app/actions/rh-sst.ts` |
+| `create_rh_termination_case` | `supabase/migrations/20260807160000_rh_termination_offboarding_v1.sql` | `app/actions/rh-termination.ts` |
+| `create_rh_worker` | `supabase/migrations/20260807131000_rh_foundation_and_payroll_v1.sql` | `app/actions/rh.ts` |
+| `create_rh_worker_esocial_profile_version` | `supabase/migrations/20260807153600_rh_esocial_profile_versioning_rpcs.sql` | `app/actions/rh-esocial-changes.ts` |
 | `create_sac_ticket` | `supabase/migrations/20260721015350_stage18_sac_portal_release_guard.sql` | `app/actions/pipeline.ts`, `app/actions/relationship.ts` |
 | `create_sandbox_signature_envelope` | `supabase/migrations/20260719231500_stage9_workflows.sql` | — (só por SQL ou trigger) |
 | `create_schedule_baseline` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | `app/actions/projects.ts` |
@@ -886,17 +1299,24 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `ensure_organization_module_defaults` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | — (só por SQL ou trigger) |
 | `ensure_organization_module_defaults_trigger` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | — (só por SQL ou trigger) |
 | `expire_inventory_reservations` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | — (só por SQL ou trigger) |
+| `export_rh_benefit_charge_to_payroll` | `supabase/migrations/20260807154500_rh_movements_payroll_contract_fix.sql` | `app/actions/rh-benefits.ts` |
+| `export_rh_payroll_difference_case` | `supabase/migrations/20260807164000_rh_payroll_difference_approval_export.sql` | `app/actions/rh-payroll-special.ts` |
+| `export_rh_thirteenth` | `supabase/migrations/20260807162000_rh_thirteenth_retroactive_payroll.sql` | `app/actions/rh-payroll-special.ts` |
+| `export_rh_vacation_to_payroll` | `supabase/migrations/20260807154500_rh_movements_payroll_contract_fix.sql` | `app/actions/rh-movements.ts` |
 | `fail_channel_delivery_attempt` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
 | `fail_signature_conversion_job` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | — (só por SQL ou trigger) |
 | `finalize_advanced_signature_envelope` | `supabase/migrations/20260720054220_stage12_2_finalization_delivery.sql` | `app/actions/advanced-signatures.ts` |
 | `finalize_procurement_quote` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
 | `finalize_procurement_receipt` | `supabase/migrations/20260729000500_typed_enum_state_transitions.sql` | `app/actions/procurement.ts` |
+| `finalize_rh_esocial_batch_from_events` | `supabase/migrations/20260807142000_rh_esocial_individual_results.sql` | `app/actions/rh-esocial-processing.ts` |
 | `finance_create_installments` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | — (só por SQL ou trigger) |
 | `finish_sinapi_import` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | `app/api/cost-sources/sinapi/import/route.ts`, `lib/sinapi/automatic-update.ts` |
 | `fonte_de_custo_oficial` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
 | `freeze_advanced_signature_layout` | `supabase/migrations/20260720054200_stage12_2_document_layout_workflow.sql` | `app/actions/advanced-signatures.ts` |
 | `freeze_budget_version` | `supabase/migrations/20260729010000_budget_readiness_and_cost_sources.sql` | `app/actions/budgets.ts` |
 | `freeze_quality_form_version` | `supabase/migrations/20260720080150_stage13_quality_forms_hardening.sql` | — (só por SQL ou trigger) |
+| `generate_rh_payroll_accounting_batch` | `supabase/migrations/20260807162500_rh_payroll_provisions_accounting.sql` | — (só por SQL ou trigger) |
+| `generate_rh_payroll_provisions` | `supabase/migrations/20260807162500_rh_payroll_provisions_accounting.sql` | — (só por SQL ou trigger) |
 | `get_advanced_signing_context` | `supabase/migrations/20260720054210_stage12_2_external_signing.sql` | `app/actions/public-signing.ts`, `app/assinar/[token]/page.tsx` |
 | `get_client_360` | `supabase/migrations/20260721013941_stage18_relationship_queries.sql` | `lib/relationship/server.ts` |
 | `get_client_portal_relationship` | `supabase/migrations/20260721013941_stage18_relationship_queries.sql` | `lib/relationship/server.ts` |
@@ -905,11 +1325,15 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `get_inventory_dashboard` | `supabase/migrations/20260720160510_stage17_inventory_dashboard.sql` | `lib/inventory/server.ts` |
 | `get_inventory_item_detail` | `supabase/migrations/20260720160525_stage17_inventory_item_asset_detail.sql` | `app/app/estoque/itens/[id]/page.tsx` |
 | `get_inventory_movement_detail` | `supabase/migrations/20260720160520_stage17_inventory_movement_detail.sql` | `app/app/estoque/movimentos/[id]/page.tsx` |
+| `get_my_rh_documents` | `supabase/migrations/20260808104000_rh_document_management_v1.sql` | `app/app/rh/meu-rh/page.tsx` |
+| `get_my_rh_payslip_lines` | `supabase/migrations/20260807163100_rh_worker_portal_payslip_lines.sql` | `app/app/rh/meu-rh/page.tsx` |
+| `get_my_rh_payslips` | `supabase/migrations/20260807163000_rh_worker_portal_payslips.sql` | `app/app/rh/meu-rh/page.tsx` |
 | `get_observability_dashboard` | `supabase/migrations/20260723104500_r3b_observability_security_hardening.sql` | `lib/observability/server.ts` |
 | `get_observability_event_detail` | `supabase/migrations/20260721220509_stage19_1_observability_detail_parity.sql` | `lib/observability/server.ts` |
 | `get_observability_events` | `supabase/migrations/20260721122355_stage19_observability_unified_stream.sql` | `lib/observability/server.ts` |
 | `get_procurement_invitation_by_token` | `supabase/migrations/20260720103300_stage14_procurement_hardening.sql` | `app/fornecedores/cotacoes/[token]/page.tsx` |
 | `get_report_dashboard` | `supabase/migrations/20260720143100_stage16_reports_security.sql` | `app/api/relatorios/exportar/route.ts`, `app/app/relatorios/page.tsx`, `lib/reports/server.ts` |
+| `get_rh_payslip_pdf_data` | `supabase/migrations/20260808105000_rh_payslip_pdf_access.sql` | `app/api/rh/payslips/[publicationId]/pdf/route.ts` |
 | `get_sac_dashboard` | `supabase/migrations/20260721013941_stage18_relationship_queries.sql` | `lib/relationship/server.ts` |
 | `get_sac_ticket_detail` | `supabase/migrations/20260722104500_stage20_sac_attachment_security.sql` | `lib/relationship/server.ts` |
 | `guard_channel_command_scope` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
@@ -951,8 +1375,14 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `list_advanced_signer_fields` | `supabase/migrations/20260720054210_stage12_2_external_signing.sql` | `app/actions/public-signing.ts`, `app/assinar/[token]/page.tsx` |
 | `lock_signature_conversion_job` | `supabase/migrations/20260720054100_stage12_2_tokens_and_conversion_jobs.sql` | — (só por SQL ou trigger) |
 | `lock_signature_delivery_event` | `supabase/migrations/20260720054341_stage12_2_delivery_worker_lock.sql` | — (só por SQL ou trigger) |
+| `make_rh_termination_effective` | `supabase/migrations/20260807160000_rh_termination_offboarding_v1.sql` | `app/actions/rh-termination.ts` |
 | `mark_advanced_signer_complete` | `supabase/migrations/20260720054210_stage12_2_external_signing.sql` | `app/actions/public-signing.ts` |
 | `mark_quality_response_submitted` | `supabase/migrations/20260720080150_stage13_quality_forms_hardening.sql` | `app/actions/quality.ts` |
+| `mark_rh_esocial_batch_protocol` | `supabase/migrations/20260807141000_rh_esocial_transport.sql` | `app/actions/rh-esocial.ts` |
+| `mark_rh_payroll_payment_batch_generated` | `supabase/migrations/20260807163500_rh_payroll_payment_batch_commands.sql` | `app/api/rh/payments/batches/[id]/route.ts` |
+| `mark_rh_payroll_payment_batch_sent` | `supabase/migrations/20260807163500_rh_payroll_payment_batch_commands.sql` | `app/actions/rh-payments.ts` |
+| `mark_rh_sst_ready` | `supabase/migrations/20260807155000_rh_sst_operational_v1.sql` | `app/actions/rh-sst.ts` |
+| `materialize_rh_payroll_difference` | `supabase/migrations/20260807162000_rh_thirteenth_retroactive_payroll.sql` | `app/actions/rh-payroll-special.ts` |
 | `merge_channel_contacts` | `supabase/migrations/20260804160000_stage22_identity_reconciliation.sql` | — (só por SQL ou trigger) |
 | `move_channel_failure_to_dlq` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
 | `move_channel_ingress_to_dlq` | `supabase/migrations/20260804142000_stage22_ingress_normalization.sql` | — (só por SQL ou trigger) |
@@ -977,7 +1407,9 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `organizations_install_observability_defaults` | `supabase/migrations/20260721122436_stage19_observability_module_performance.sql` | — (só por SQL ou trigger) |
 | `organizations_install_report_defaults` | `supabase/migrations/20260720143200_stage16_reports_module.sql` | — (só por SQL ou trigger) |
 | `organizations_install_stage18_relationship_defaults` | `supabase/migrations/20260721014030_stage18_relationship_module.sql` | — (só por SQL ou trigger) |
+| `pay_rh_benefit_provider_invoice` | `supabase/migrations/20260809110000_rh_benefit_invoice_lifecycle.sql` | `app/actions/rh-benefits.ts` |
 | `persist_channel_ingress_event` | `supabase/migrations/20260804142000_stage22_ingress_normalization.sql` | — (só por SQL ou trigger) |
+| `persist_rh_esocial_generated_event` | `supabase/migrations/20260807151500_rh_esocial_generated_event_persistence.sql` | `app/actions/rh-admission-esocial-transition.ts`, `app/actions/rh-admission-esocial.ts`, `app/actions/rh-esocial-changes.ts`, `app/actions/rh-esocial-generation.ts`, `app/actions/rh-leave-esocial.ts`, `app/actions/rh-payroll-esocial.ts`, `app/actions/rh-sst-esocial.ts`, `app/actions/rh-termination-esocial.ts`, `app/actions/rh-tsv-esocial.ts`, `app/actions/rh-tsv-special-esocial.ts` |
 | `pipeline_cards_congelar_origem` | `supabase/migrations/20260726190000_pipeline_endurecimento.sql` | — (só por SQL ou trigger) |
 | `pipeline_cards_registrar_etapa` | `supabase/migrations/20260726120000_pipeline_trilhas.sql` | — (só por SQL ou trigger) |
 | `pipeline_codigo_data` | `supabase/migrations/20260726190000_pipeline_endurecimento.sql` | — (só por SQL ou trigger) |
@@ -992,6 +1424,10 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `prevent_frozen_budget_item_mutation` | `supabase/migrations/20260719231500_stage9_workflows.sql` | — (só por SQL ou trigger) |
 | `prevent_frozen_budget_version_mutation` | `supabase/migrations/20260808135000_converge_budget_pricing_to_markup.sql` | — (só por SQL ou trigger) |
 | `prevent_released_document_mutation` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
+| `prevent_rh_raw_punch_mutation` | `supabase/migrations/20260807145500_rh_time_hardening.sql` | — (só por SQL ou trigger) |
+| `project_rh_esocial_period_status` | `supabase/migrations/20260807161100_rh_esocial_period_status_projection.sql` | — (só por SQL ou trigger) |
+| `project_rh_esocial_status_to_domain` | `supabase/migrations/20260807155300_rh_esocial_domain_status_projection.sql` | — (só por SQL ou trigger) |
+| `project_rh_termination_esocial_status` | `supabase/migrations/20260807160600_rh_termination_esocial_status_projection.sql` | — (só por SQL ou trigger) |
 | `protect_completed_report_snapshot` | `supabase/migrations/20260720143000_stage16_reports_schema.sql` | — (só por SQL ou trigger) |
 | `protect_inventory_asset_custody` | `supabase/migrations/20260720160740_stage17_inventory_state_guards.sql` | — (só por SQL ou trigger) |
 | `protect_inventory_movement` | `supabase/migrations/20260720160200_stage17_inventory_movement_functions.sql` | — (só por SQL ou trigger) |
@@ -1003,6 +1439,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `protect_signature_field_layout` | `supabase/migrations/20260720054220_stage12_2_finalization_delivery.sql` | — (só por SQL ou trigger) |
 | `publish_object_definition` | `supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql` | `app/actions/objetos.ts` |
 | `publish_quality_form_version` | `supabase/migrations/20260720080100_stage13_quality_forms_security.sql` | `app/actions/quality.ts` |
+| `publish_rh_document_version` | `supabase/migrations/20260808104000_rh_document_management_v1.sql` | `app/actions/rh-documents.ts` |
+| `publish_rh_payslips` | `supabase/migrations/20260807163000_rh_worker_portal_payslips.sql` | `app/actions/rh-portal.ts` |
 | `quality_client_matches` | `supabase/migrations/20260720080100_stage13_quality_forms_security.sql` | — (só por SQL ou trigger) |
 | `queue_signature_copy_delivery` | `supabase/migrations/20260720054220_stage12_2_finalization_delivery.sql` | `app/actions/advanced-signatures.ts` |
 | `queue_whatsapp_outbound_message` | `supabase/migrations/20260803190000_stage22_whatsapp_omnichannel.sql` | `app/actions/whatsapp.ts` |
@@ -1010,6 +1448,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `recalculate_inventory_reservation_from_line` | `supabase/migrations/20260720160740_stage17_inventory_state_guards.sql` | — (só por SQL ou trigger) |
 | `recalculate_inventory_reservation_status` | `supabase/migrations/20260720160700_stage17_inventory_hardening.sql` | — (só por SQL ou trigger) |
 | `recalculate_project_progress` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
+| `reconcile_rh_benefit_provider_invoice` | `supabase/migrations/20260808103000_rh_benefits_provider_reconciliation.sql` | `app/actions/rh-benefits.ts` |
+| `reconcile_rh_payroll_shadow` | `supabase/migrations/20260808110000_rh_payroll_shadow_reconciliation.sql` | `app/actions/rh-shadow-payroll.ts` |
 | `reconcile_unconfirmed_channel_commands` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
 | `record_advanced_signature_field_value` | `supabase/migrations/20260720054210_stage12_2_external_signing.sql` | `app/actions/public-signing.ts` |
 | `record_audit_event` | `supabase/migrations/20260721122302_stage19_observability_functions.sql` | — (só por SQL ou trigger) |
@@ -1026,6 +1466,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `record_crm_activity` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/relationship.ts` |
 | `record_observability_diagnostic` | `supabase/migrations/20260721122436_stage19_observability_module_performance.sql` | — (só por SQL ou trigger) |
 | `record_report_export` | `supabase/migrations/20260720143100_stage16_reports_security.sql` | `app/api/relatorios/exportar/route.ts` |
+| `record_rh_dctfweb_external_snapshot` | `supabase/migrations/20260807143500_rh_dctfweb_fgts_operations.sql` | `app/actions/rh-government.ts` |
+| `record_rh_fgts_payment` | `supabase/migrations/20260807143500_rh_dctfweb_fgts_operations.sql` | `app/actions/rh-government.ts` |
 | `refresh_budget_readiness_validations` | `supabase/migrations/20260729010000_budget_readiness_and_cost_sources.sql` | — (só por SQL ou trigger) |
 | `refresh_finance_overdue_statuses` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | `app/app/financeiro/page.tsx` |
 | `register_channel_inbox_event` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
@@ -1057,8 +1499,14 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `reverse_inventory_movement` | `supabase/migrations/20260720160200_stage17_inventory_movement_functions.sql` | `app/actions/inventory.ts` |
 | `review_quality_response` | `supabase/migrations/20260720080100_stage13_quality_forms_security.sql` | `app/actions/quality.ts` |
 | `revoke_user_access_profile` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
+| `rh_calculate_irrf_2026` | `supabase/migrations/20260807152000_rh_payroll_irrf_2026_and_accumulation.sql` | — (só por SQL ou trigger) |
+| `rh_calculate_progressive` | `supabase/migrations/20260807135000_rh_payroll_parameters_and_bases.sql` | — (só por SQL ou trigger) |
+| `rh_calculate_progressive_accumulated` | `supabase/migrations/20260807152000_rh_payroll_irrf_2026_and_accumulation.sql` | — (só por SQL ou trigger) |
+| `rh_irrf_2026_trace` | `supabase/migrations/20260807152000_rh_payroll_irrf_2026_and_accumulation.sql` | — (só por SQL ou trigger) |
+| `rh_seed_esocial_profiles_from_admission` | `supabase/migrations/20260807153500_rh_worker_contract_esocial_versions.sql` | — (só por SQL ou trigger) |
 | `rollback_channel_provider_projection` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
 | `run_observability_health_snapshot` | `supabase/migrations/20260723104500_r3b_observability_security_hardening.sql` | `app/actions/observability.ts` |
+| `run_rh_payroll` | `supabase/migrations/20260807152500_rh_payroll_legal_base_composition_fix.sql` | `app/actions/rh.ts` |
 | `sandbox_signature_event` | `supabase/migrations/20260719234500_stage9_security_hardening.sql` | — (só por SQL ou trigger) |
 | `sandbox_signature_event_core` | `supabase/migrations/20260728234000_signature_business_completion.sql` | — (só por SQL ou trigger) |
 | `sanitize_audit_json` | `supabase/migrations/20260721122302_stage19_observability_functions.sql` | — (só por SQL ou trigger) |
@@ -1075,8 +1523,12 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `set_global_messaging_runtime_kill_switch` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
 | `set_organization_module_status` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
 | `set_project_module_capability_override` | `supabase/migrations/20260720043300_stage12_1_project_capability_override.sql` | `app/actions/access-control.ts` |
+| `set_rh_admission_checklist_item` | `supabase/migrations/20260807134000_rh_admission_v1.sql` | `app/actions/rh-admission.ts` |
+| `set_rh_shadow_rubric_external` | `supabase/migrations/20260808110000_rh_payroll_shadow_reconciliation.sql` | `app/actions/rh-shadow-payroll.ts` |
+| `set_rh_shadow_worker_external` | `supabase/migrations/20260808110000_rh_payroll_shadow_reconciliation.sql` | `app/actions/rh-shadow-payroll.ts` |
 | `set_session_runtime_kill_switch` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
 | `set_user_module_capability_override` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
+| `settle_rh_payroll_payment` | `supabase/migrations/20260807161000_rh_payroll_payments_periodic_esocial.sql` | `app/actions/rh-payroll-esocial.ts` |
 | `stage18_generate_code` | `supabase/migrations/20260721013434_stage18_relationship_invariants.sql` | — (só por SQL ou trigger) |
 | `stage18_normalize_digits` | `supabase/migrations/20260721013434_stage18_relationship_invariants.sql` | — (só por SQL ou trigger) |
 | `stage18_protect_append_only` | `supabase/migrations/20260721013434_stage18_relationship_invariants.sql` | — (só por SQL ou trigger) |
@@ -1100,8 +1552,10 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `touch_updated_at` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |
 | `transition_sac_ticket` | `supabase/migrations/20260721013654_stage18_sac_functions.sql` | `app/actions/relationship.ts` |
 | `ufs_do_brasil` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
+| `update_rh_fgts_worker_external` | `supabase/migrations/20260807143500_rh_dctfweb_fgts_operations.sql` | `app/actions/rh-government.ts` |
 | `upsert_channel_bot_profile` | `supabase/migrations/20260805003000_stage22_governed_bot_profiles.sql` | `app/actions/messaging-bots.ts` |
 | `upsert_channel_operational_alert` | `supabase/migrations/20260804230000_stage22_messaging_observability.sql` | — (só por SQL ou trigger) |
+| `upsert_rh_dctfweb_reconciliation_item` | `supabase/migrations/20260807143500_rh_dctfweb_fgts_operations.sql` | `app/actions/rh-government.ts` |
 | `validate_finance_child_organization` | `supabase/migrations/20260720123300_stage15_finance_hardening.sql` | — (só por SQL ou trigger) |
 | `validate_finance_entry_links` | `supabase/migrations/20260720123300_stage15_finance_hardening.sql` | — (só por SQL ou trigger) |
 | `validate_finance_measurement_links` | `supabase/migrations/20260720123300_stage15_finance_hardening.sql` | — (só por SQL ou trigger) |
@@ -1191,6 +1645,17 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/qa-persona-provisioning.test.ts` | 3 | provisionamento de personas QA |
 | `tests/relatorio-perdas.test.ts` | 20 | Pareto ordena por valor, não por contagem; fatia e acumulado; casos que quebrariam a divisão; perda sem motivo entra na conta |
 | `tests/report-actions-contract.test.ts` | 4 | ações seguras de relatórios |
+| `tests/rh/esocial-generation-signature.test.ts` | 14 | eSocial XML generation |
+| `tests/rh/esocial-leave-special.test.ts` | 6 | S-2230 grupos especiais |
+| `tests/rh/esocial-periodic-termination.test.ts` | 7 | eSocial periódicos e desligamento |
+| `tests/rh/esocial-result-parser.test.ts` | 5 | parseEsocialIndividualResults |
+| `tests/rh/esocial-special-paths.test.ts` | 5 | eSocial special paths |
+| `tests/rh/esocial-termination-special.test.ts` | 6 | eSocial desligamentos especiais |
+| `tests/rh/esocial-tsv-special.test.ts` | 8 | S-2300 grupos especiais do serviço público/sindical |
+| `tests/rh/esocial-tsv.test.ts` | 9 | S-2300 TSVE contribuinte individual; S-2300 estágio e serviço civil |
+| `tests/rh/esocial-xmlsec-interoperability.test.ts` | 1 | eSocial XMLDSig interoperability |
+| `tests/rh/fgts-rescisory-file.test.ts` | 4 | FGTS Digital rescisório 1.2 |
+| `tests/rh/mit-json.test.ts` | 9 | MIT JSON 1.0 |
 | `tests/schedule-validation.test.ts` | 5 | schedule validation |
 | `tests/security-controls.test.ts` | 11 | safeInternalReturnPath; mapPublicOperationError |
 | `tests/signature-format.test.ts` | 9 | safeFileName; canonicalJson |
@@ -1278,7 +1743,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 48 de 126 |
+| Módulo de `lib/` sem teste que o cite | 52 de 146 |
 
 ### Módulos sem teste que os cite
 
@@ -1320,6 +1785,10 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/relationship/server`
 - `@/lib/reports/metrics`
 - `@/lib/reports/server`
+- `@/lib/rh/integrations/esocial-signature`
+- `@/lib/rh/integrations/esocial-transport`
+- `@/lib/rh/integrations/government`
+- `@/lib/rh/integrations/integra-contador`
 - `@/lib/signatures/crypto`
 - `@/lib/sinapi/archive-layout-diagnostic`
 - `@/lib/stage12`

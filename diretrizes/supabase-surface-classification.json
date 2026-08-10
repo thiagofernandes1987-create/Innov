@@ -927,6 +927,240 @@
       },
       "rationale": "Project KPI projection has a SQL function consumer and a dependent view."
     },
+    "rh_benefit_payroll_exports": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 5,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 7,
+        "dependentViews": 0
+      },
+      "rationale": "Lote de exportação de benefícios para a folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 7 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_document_access_log": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha de acesso a documento do Projeto RH (PR #42). Gravada por função SECURITY DEFINER — daí 1 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar a trilha destrói a evidência de quem viu o quê, que é o próprio motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_esocial_batch_events": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Eventos do lote eSocial do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 5 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_esocial_event_drafts": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
+      "rationale": "Rascunho de evento eSocial antes do envio do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 4 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_government_assisted_tasks": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
+      "rationale": "Fila de tarefas assistidas das obrigações governamentais do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 1 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_accounting_batches": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 2,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 8,
+        "dependentViews": 0
+      },
+      "rationale": "Lote de contabilização da folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 8 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_accounting_entries": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Lançamento contábil gerado pela folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 5 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_accounting_rules": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Regra de mapeamento contábil da folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 3 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_bases": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 4,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 13,
+        "dependentViews": 0
+      },
+      "rationale": "Bases de cálculo apuradas por competência do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 13 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_closures": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Fechamento da competência da folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 5 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_parameter_versions": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 9,
+        "dependentViews": 0
+      },
+      "rationale": "Versão vigente dos parâmetros legais da folha do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 9 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_provision_policies": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Política de provisão de férias e 13º do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 3 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_provisions": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 5,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
+      "rationale": "Provisão calculada por competência do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 4 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payroll_worker_tax_contexts": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 0,
+        "policies": 2,
+        "functionRefs": 6,
+        "dependentViews": 0
+      },
+      "rationale": "Contexto tributário do trabalhador (múltiplos vínculos, acumulados) do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 6 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payslip_access_log": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha de acesso a holerite do Projeto RH (PR #42). Gravada por função SECURITY DEFINER — daí 1 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar a trilha destrói a evidência de quem viu o quê, que é o próprio motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_payslip_publications": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 5,
+        "triggers": 0,
+        "policies": 2,
+        "functionRefs": 7,
+        "dependentViews": 0
+      },
+      "rationale": "Publicação controlada de holerite no Meu RH do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 7 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_termination_line_rubric_mappings": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 2,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
+      "rationale": "Mapeamento de rubrica das linhas de rescisão do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 1 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
+    "rh_thirteenth_exports": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 4,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 6,
+        "dependentViews": 0
+      },
+      "rationale": "Exportação do 13º do Projeto RH (PR #42). A ausência de consumidor JS/TS é o desenho, não abandono: o módulo escreve e lê por RPC, e a tabela aparece 6 vez(es) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda NÃO foi aplicada (débito declarado em diretrizes/migrations-aplicadas.json); a contagem real só existe depois da aplicação controlada."
+    },
     "sac_ticket_events": {
       "disposition": "preserve_operational_history",
       "evidence": {

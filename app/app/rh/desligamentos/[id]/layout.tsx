@@ -1,0 +1,2 @@
+import Link from"next/link";
+export default async function TerminationLayout({children,params}:{children:React.ReactNode;params:Promise<{id:string}>}){const{id}=await params;return <><div className="content" style={{paddingBottom:0}}><nav className="page-actions" aria-label="Navegação do desligamento"><Link className="button button-secondary" href={`/app/rh/desligamentos/${id}`}>Resumo do desligamento</Link><Link className="button button-secondary" href={`/app/rh/desligamentos/${id}/esocial-especial`}>Casos especiais eSocial</Link></nav></div>{children}</>}
