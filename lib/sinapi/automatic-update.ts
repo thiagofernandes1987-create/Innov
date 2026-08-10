@@ -2,6 +2,7 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import {
   selectLatestSinapiXlsxFile,
   parseSinapiBaseDate,
@@ -371,7 +372,7 @@ async function importInputs(
       p_batch_id: batchId,
       p_rows: chunk
     });
-    if (error) throw new Error(`Falha ao importar insumos SINAPI: ${error.message}`);
+    if (error) { reportDataAccessError("sinapi.automatic.inputs", error); throw new Error("SINAPI_INPUT_IMPORT_FAILED"); }
     imported += Number(data ?? 0);
   }
   return imported;
@@ -388,7 +389,7 @@ async function importCompositions(
       p_batch_id: batchId,
       p_rows: chunk
     });
-    if (error) throw new Error(`Falha ao importar composições SINAPI: ${error.message}`);
+    if (error) { reportDataAccessError("sinapi.automatic.compositions", error); throw new Error("SINAPI_COMPOSITION_IMPORT_FAILED"); }
     imported += Number(data ?? 0);
   }
   return imported;
@@ -443,7 +444,7 @@ export async function runSinapiAutomaticUpdate(input: {
     .order("base_date", { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (latestError) throw new Error(`Falha ao consultar o estado atual do SINAPI: ${latestError.message}`);
+  if (latestError) { reportDataAccessError("sinapi.automatic.latest-batch", latestError); throw new Error("SINAPI_LATEST_BATCH_FAILED"); }
 
   const context = {
     finalUrl,
@@ -486,7 +487,8 @@ export async function runSinapiAutomaticUpdate(input: {
         analyticalItems: parsed.compositions.reduce((soma, item) => soma + item.items.length, 0)
       }
     });
-    if (startError || !startedBatchId) throw new Error(startError?.message ?? "O lote SINAPI não foi iniciado.");
+    if (startError) { reportDataAccessError("sinapi.automatic.start-batch", startError); throw new Error("SINAPI_START_BATCH_FAILED"); }
+    if (!startedBatchId) throw new Error("SINAPI_START_BATCH_EMPTY");
     batchId = String(startedBatchId);
 
     const { data: claimedBatch, error: claimedError } = await supabase
@@ -494,7 +496,7 @@ export async function runSinapiAutomaticUpdate(input: {
       .select("id, status, imported_inputs, imported_compositions, rejected_records")
       .eq("id", batchId)
       .single();
-    if (claimedError) throw new Error(`Falha ao confirmar o lote SINAPI: ${claimedError.message}`);
+    if (claimedError) { reportDataAccessError("sinapi.automatic.claim-batch", claimedError); throw new Error("SINAPI_CLAIM_BATCH_FAILED"); }
     if (claimedBatch.status === "COMPLETED") {
       return {
         status: "already_current",
@@ -518,7 +520,8 @@ export async function runSinapiAutomaticUpdate(input: {
       p_batch_id: batchId,
       p_error_message: null
     });
-    if (finishError || !finished) throw new Error(finishError?.message ?? "O lote SINAPI não foi finalizado.");
+    if (finishError) { reportDataAccessError("sinapi.automatic.finish-batch", finishError); throw new Error("SINAPI_FINISH_BATCH_FAILED"); }
+    if (!finished) throw new Error("SINAPI_FINISH_BATCH_EMPTY");
 
     return {
       status: "updated",
@@ -537,10 +540,11 @@ export async function runSinapiAutomaticUpdate(input: {
   } catch (error) {
     if (batchId) {
       try {
-        await supabase.rpc("finish_sinapi_import", {
+        const { error: failureFinishError } = await supabase.rpc("finish_sinapi_import", {
           p_batch_id: batchId,
-          p_error_message: error instanceof Error ? error.message : "Falha desconhecida na atualização automática."
+          p_error_message: "SINAPI_IMPORT_FAILED"
         });
+        if (failureFinishError) reportDataAccessError("sinapi.automatic.fail-batch", failureFinishError);
       } catch {
         // O erro original permanece a evidência principal da execução.
       }

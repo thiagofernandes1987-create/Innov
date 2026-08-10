@@ -315,7 +315,7 @@ export async function POST(request: Request) {
           const patch: Record<string, unknown> = {
             status: nextStatus,
             error_code: providerFailure?.code ? String(providerFailure.code) : null,
-            error_message: providerFailure?.title ?? null
+            error_message: null
           };
           if (nextStatus === "SENT") patch.sent_at = timestamp;
           if (nextStatus === "DELIVERED") patch.delivered_at = timestamp;
@@ -336,7 +336,7 @@ export async function POST(request: Request) {
               status: nextStatus,
               provider_timestamp: timestamp,
               error_code: providerFailure?.code ? String(providerFailure.code) : null,
-              error_title: providerFailure?.title ?? null,
+              error_title: null,
               metadata: { providerStatus: status.status ?? null }
             });
           if (statusEventError?.code !== "23505" && statusEventError) {
