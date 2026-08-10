@@ -1,0 +1,58 @@
+name: Sync persisted error hardening (temporary)
+
+on:
+  push:
+    branches:
+      - audit/regressao-main-20260808
+    paths:
+      - ".github/workflows/sync-persisted-error-hardening.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    environment: homologation
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: audit/regressao-main-20260808
+
+      - name: Extend permanent security vaccine
+        shell: bash
+        run: |
+          python <<'PY'
+          from pathlib import Path
+          p=Path('tests/security-controls.test.ts')
+          src=p.read_text()
+          anchor='''    expect(signatureWebhook).not.toContain('if (eventError?.code === "23505") {\\n    return');\n'''
+          addition='''    expect(signatureWebhook).not.toContain('if (eventError?.code === "23505") {\\n    return');\n\n    // VACINA: falhas técnicas persistidas aceitam apenas códigos estáveis.\n    const conversionWorker = fs.readFileSync("scripts/run-signature-conversion-worker.mjs", "utf8");\n    expect(conversionWorker).toContain("p_error:errorCode");\n    expect(conversionWorker).not.toContain("p_error:message");\n    expect(conversionWorker).not.toContain("error:message");\n\n    const deliveryWorker = fs.readFileSync("scripts/run-signature-delivery-worker.mjs", "utf8");\n    expect(deliveryWorker).toContain("errorCode");\n    expect(deliveryWorker).not.toContain("p_error:message");\n    expect(deliveryWorker).not.toContain("error:message");\n    expect(deliveryWorker).not.toContain("response.text()");\n\n    const sinapiAutomatic = fs.readFileSync("lib/sinapi/automatic-update.ts", "utf8");\n    expect(sinapiAutomatic).toContain('p_error_message: "SINAPI_IMPORT_FAILED"');\n    expect(sinapiAutomatic).not.toContain("p_error_message: error instanceof Error");\n\n    const whatsappLoader = fs.readFileSync("lib/whatsapp/server.ts", "utf8");\n    expect(whatsappLoader).not.toContain("error_code,error_message,occurred_at");\n\n    const whatsappWebhook = fs.readFileSync("app/api/webhooks/whatsapp/route.ts", "utf8");\n    expect(whatsappWebhook).toContain("error_message: null");\n    expect(whatsappWebhook).toContain("error_title: null");\n\n    const persistedErrorMigration = fs.readFileSync("supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql", "utf8");\n    expect(persistedErrorMigration.toLowerCase()).not.toContain("sqlerrm");\n    for (const stableCode of ["REPORT_SNAPSHOT_FAILED", "CONVERSION_FAILED", "DELIVERY_FAILED", "SINAPI_IMPORT_FAILED", "WHATSAPP_SEND_FAILED"]) {\n      expect(persistedErrorMigration).toContain(stableCode);\n    }\n'''
+          if src.count(anchor)!=1:
+            raise SystemExit(f'expected vaccine anchor once, found {src.count(anchor)}')
+          p.write_text(src.replace(anchor,addition,1))
+          PY
+
+      - name: Refresh migration ledger from active database
+        shell: bash
+        run: |
+          test -n "$SUPABASE_DB_URL" || { echo "SUPABASE_DB_URL ausente"; exit 1; }
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client
+          fi
+          node scripts/atualizar-ledger-de-migrations.mjs
+
+      - name: Regenerate canonical code map
+        run: node scripts/gerar-mapa-do-codigo.mjs
+
+      - name: Commit synchronized evidence
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "4189828+github-actions[bot]@users.noreply.github.com"
+          git add tests/security-controls.test.ts diretrizes/migrations-aplicadas.json diretrizes/MAPA-DO-CODIGO.md
+          git commit -m "test: guard persisted provider error boundary"
+          git push origin HEAD:audit/regressao-main-20260808
