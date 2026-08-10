@@ -132,8 +132,31 @@ jobs:
           umask 077
           printf '%s\n' "$BAILEYS_LAB_QR_CERT" > /tmp/baileys-qr-cert.pem
 
-          # Certificado vencido cifra sem reclamar e só falha na hora de decifrar,
-          # com o QR já expirado. A conferência é aqui, antes de gastar a janela.
+          # Duas conferências, e elas são separadas de propósito.
+          #
+          # A primeira versão desta guarda usava só `-checkend 0` e dizia "está
+          # vencido" quando ele falhava. Mas `-checkend` falha por DOIS motivos:
+          # certificado vencido e certificado ilegível. Na primeira vez que o
+          # segredo chegou com conteúdo truncado, a mensagem acusou validade —
+          # e mandou procurar no lugar errado. Diagnóstico que atribui a causa
+          # errada custa mais caro que diagnóstico nenhum.
+          if ! openssl x509 -in /tmp/baileys-qr-cert.pem -noout -subject >/dev/null 2>&1; then
+            echo "O conteúdo de BAILEYS_LAB_QR_CERT não é um certificado PEM legível."
+            echo "Primeiras e últimas linhas do que chegou (sem o miolo):"
+            head -n 1 /tmp/baileys-qr-cert.pem
+            echo "  … $(( $(wc -l < /tmp/baileys-qr-cert.pem) )) linha(s) no total …"
+            tail -n 1 /tmp/baileys-qr-cert.pem
+            echo
+            echo "Precisa começar com -----BEGIN CERTIFICATE----- e terminar com"
+            echo "-----END CERTIFICATE-----, incluindo as duas linhas. Cole o arquivo"
+            echo "inteiro: é o .crt, não o .key. Confira antes com:"
+            echo "  openssl x509 -in qr-lab.crt -noout -subject -dates"
+            exit 1
+          fi
+
+          # Só agora a validade. Certificado vencido cifra sem reclamar e só
+          # falha na hora de decifrar, com o QR já expirado — por isso a
+          # conferência é aqui, antes de gastar a janela.
           if ! openssl x509 -in /tmp/baileys-qr-cert.pem -noout -checkend 0; then
             echo "O certificado em BAILEYS_LAB_QR_CERT está vencido:"
             openssl x509 -in /tmp/baileys-qr-cert.pem -noout -subject -dates
