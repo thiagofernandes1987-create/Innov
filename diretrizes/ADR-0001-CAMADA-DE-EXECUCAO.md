@@ -1,7 +1,11 @@
 # ADR-0001 — Em que linguagem construir a camada de execução assíncrona
 
 **Documento canônico:** sim
-**Estado:** **proposta — requer aprovação.** A §37 do [`MAPA-TECNOLOGICO.md`](./MAPA-TECNOLOGICO.md) condiciona a entrada de linguagem nova a uma ADR; a T-43.3 (Fase 2) só começa depois que esta for ratificada.
+**Estado:** **ratificada em 10/08/2026, na opção 4 — serviço em Go.** Por instrução direta do proprietário arquitetural: *"inicie as conversões dos códigos para Go, Typescript, Python e Rust conforme nosso mapa"*. A §37 do [`MAPA-TECNOLOGICO.md`](./MAPA-TECNOLOGICO.md) está satisfeita: a linguagem entra **com** ADR, e a T-43.3 está liberada.
+
+> **A decisão não seguiu a recomendação deste documento, e isso fica registrado em vez de apagado.** A §15 recomendava a **opção 3** — TypeScript agora, Go por gatilho medido —, porque nenhuma medição sustenta Go neste volume: a CPU é 0,03% de um job e o Node tem 57× de folga. O proprietário decidiu pela **opção 4**, que a §4 desta ADR já registra como *"tecnicamente adequada e 4,26× mais folgada"*. A §43 do mapa faz dele a autoridade da decisão de arquitetura, e o papel desta ADR era dar o número, não dar a palavra final.
+>
+> O que **permanece válido e não deve ser esquecido na implementação**: o ganho não virá de velocidade, então otimizar o worker Go por instinto de desempenho é trabalho perdido — o gargalo é rede. E a pergunta da §15 que continua aberta é a de volume multi-tenant; se ela for respondida em ordem de grandeza muito acima do medido, esta decisão fica **mais** justificada, não menos.
 **Cumpre:** T-43.2 da S-43 — os doze itens da §37, com o benchmark que a §39 exige.
 **Depende de:** [`WORKERS.md`](./WORKERS.md) (T-43.1), que estabeleceu que a camada não existe.
 **Reprodução das medições:** [`benchmarks/camada-de-execucao/`](../benchmarks/camada-de-execucao/)

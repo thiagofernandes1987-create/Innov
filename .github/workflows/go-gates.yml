@@ -1,0 +1,90 @@
+# Os seis portões de Go que a §24 do MAPA-TECNOLOGICO.md exige.
+#
+# Existe antes de haver código Go de verdade, e isso é de propósito: a §37 deixa
+# Go entrar só depois da ADR, e este repositório já aprendeu que linguagem sem
+# portão entra e não sai mais. O padrão de falha que ele evita é o registrado na
+# VACINA-057 — o teste confere o artefato e não o efeito.
+#
+# Cada passo reprova por conta própria, e cada um foi visto reprovando antes de
+# ser declarado proteção, conforme diretrizes/PROVA-POR-SABOTAGEM.md.
+#
+# `staticcheck` está aqui por medição, não por gosto: no experimento da S-43 ele
+# pegou um U1000 — função morta — que `go build` e `go vet` aprovaram em
+# silêncio. `golangci-lint` sobrepõe parte do staticcheck; os dois constam
+# porque a §24 lista os dois, e o custo de rodar ambos é de segundos.
+
+name: go-gates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/execution-plane/**"
+      - ".github/workflows/go-gates.yml"
+  pull_request:
+    paths:
+      - "apps/execution-plane/**"
+      - ".github/workflows/go-gates.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/execution-plane
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.24"
+          # Aponta para o go.mod porque não há go.sum: o módulo não tem
+          # dependência de terceiros, conforme a §38. Apontar para um go.sum
+          # inexistente faz o setup-go falhar antes do primeiro portão.
+          cache-dependency-path: apps/execution-plane/go.mod
+
+      # Portão 1 — formatação canônica. `gofmt -l` lista o que está fora do
+      # padrão e não devolve código de erro, então o teste é sobre a saída ser
+      # vazia; sem isso o passo passaria sempre.
+      - name: gofmt
+        run: |
+          fora=$(gofmt -l .)
+          if [ -n "$fora" ]; then
+            echo "Arquivos fora do gofmt:"
+            echo "$fora"
+            exit 1
+          fi
+          echo "gofmt limpo"
+
+      # Portão 2 — o vet da toolchain oficial.
+      - name: go vet
+        run: go vet ./...
+
+      # Portão 3 — staticcheck. Versão fixada: ferramenta que se atualiza
+      # sozinha transforma build reproduzível em build de hoje.
+      - name: staticcheck
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@2025.1.1
+          "$(go env GOPATH)/bin/staticcheck" ./...
+
+      # Portão 4 — golangci-lint.
+      - name: golangci-lint
+        run: |
+          go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.6.2
+          "$(go env GOPATH)/bin/golangci-lint" run ./...
+
+      # Portão 5 — testes.
+      - name: go test
+        run: go test ./... -count=1
+
+      # Portão 6 — detector de corrida. É o portão que justifica escolher Go
+      # para concorrência: sem ele, a vantagem alegada não é verificada.
+      - name: go test -race
+        run: go test -race ./... -count=1

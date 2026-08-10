@@ -12,9 +12,19 @@ Levantado por descoberta no código, não por memória: gatilhos agendados, rota
 
 **A camada de execução assíncrona foi desenhada no banco e nunca construída no runtime.**
 
-Existem no esquema: fila de entrada, fila de saída com número de sequência, circuitos de entrega, baldes de limitação de taxa, registro de tentativas e reconciliação de comandos não confirmados. Existem as funções de reivindicação, com trava. E existe validador conferindo tudo isso.
+Estão **escritas em migration**: fila de entrada, fila de saída com número de sequência, circuitos de entrega, baldes de limitação de taxa, registro de tentativas e reconciliação de comandos não confirmados, mais as funções de reivindicação, com trava. E existe validador conferindo tudo isso.
 
-O que não existe é **quem consome**:
+> **Correção de 10/08/2026 — a redação anterior dizia "existem no esquema", e isso estava impreciso de um jeito que muda a conclusão.** Elas existem no **arquivo de migration**, não no banco. Consultado o projeto `wyeojufebtwblsubkunr`:
+>
+> ```
+> tabelas_de_fila_existentes    0   (de 5)
+> rpcs_de_fila_existentes       0   (de 8)
+> total_de_tabelas_public     256
+> ```
+>
+> `stage22_multiprovider_storage` e `stage22_outbox_delivery` estão no **débito congelado** de `migrations-aplicadas.json`, que condiciona a saída a *"deploy de código compatível, aplicação controlada e testes DB"*. Ou seja: não é só que ninguém consome a fila — **a fila não está lá para ser consumida.** Nenhum consumidor pode ser ligado antes dessa aplicação, e ela é decisão do responsável nomeado, não de uma sessão assistida.
+
+O que não existe é **quem consome** — e, no banco, nem o que seria consumido:
 
 | RPC de fila | quem referencia | consumidor em runtime |
 | --- | --- | --- |

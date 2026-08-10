@@ -434,8 +434,16 @@ Aberto em 26 de julho de 2026, a partir de revisão do responsável sobre telas 
 O diagnóstico foi direto: *"os módulos são rascunhos mal feitos, o pipeline é estático, muito amador"*. A verificação confirmou cada ponto — não é impressão.
 
 ## Sprint S-23 — Fundação de interface: validação, visualizações e pipeline
-**Estado:** em andamento
+**Estado:** bloqueada
 **Marco:** M-5
+
+> **Parada por prioridade em 10/08/2026, com 23 tarefas concluídas e 11 abertas.**
+> A R3 admite uma sprint em andamento por vez, e a migração de linguagens
+> (S-43) passou à frente por instrução do proprietário. O estado `bloqueada`
+> registra o que já era verdade na prática: nenhuma tarefa da S-23 avançou
+> enquanto as S-38 a S-43 foram executadas — a regra só não acusou porque a
+> S-43 ainda constava como `pendente`. Retomar exige devolvê-la a
+> `em andamento`, e então a S-43 é que precisa sair da vaga.
 
 ### Defeitos verificados
 
@@ -1543,15 +1551,25 @@ sprint em andamento por vez e a R7 não admite sprint concluída com tarefa aber
 
 ## Sprint S-43 — Fase 2 da §36: classificar workers e a ADR de Go
 
-**Estado:** bloqueada
+**Estado:** em andamento
 
-Três das quatro tarefas concluídas. A **T-43.3 depende da ratificação da
-ADR-0001**, e essa decisão não é desta sessão: a §37 condiciona a Fase 2 a uma
-ADR **aprovada**. Pela R7 a sprint não fecha enquanto a T-43.3 estiver aberta.
+Três das quatro tarefas concluídas; a T-43.3 em curso.
 
-O estado é `bloqueada`, e não `em andamento`, de propósito: espera por decisão
-humana não deve ocupar a vaga única da R3 por tempo indeterminado. Volta a
-`em andamento` no momento em que a ADR for ratificada ou recusada.
+**A ADR-0001 foi ratificada por instrução direta do proprietário arquitetural em
+10/08/2026** — *"inicie as conversões dos códigos para Go, Typescript, Python e
+Rust conforme nosso mapa"*. A instrução decide pela **opção 4** da ADR (serviço
+em Go), e não pela recomendação da própria ADR, que era a opção 3 (TypeScript
+agora, Go por gatilho medido). A §43 faz dele a autoridade; o registro fica aqui
+para que a divergência entre o recomendado e o decidido não se perca — e para
+que, se o volume medido mudar a conclusão, se saiba exatamente o que foi
+decidido e com base em quê.
+
+Fora do escopo da T-43.3, com o motivo medido: **TypeScript não tem conversão**
+(já é 84,3% do código vivo e principal em 25 das 44 linhas da §21); **Python**
+teria de construir IA, RAG, OCR e Plantas, que não existem — é a **Fase 4**, não
+conversão; **Rust** é vedado agora pela §9.3, que exige cinco pré-requisitos
+incluindo protótipo e benchmark comparativo, e não há código candidato — é a
+**Fase 6**.
 
 Continuação direta da S-42, na ordem que o próprio mapa define. A §37 é o portão
 de entrada e não é negociável: **nenhuma linguagem nova entra sem ADR**.
@@ -1560,7 +1578,12 @@ de entrada e não é negociável: **nenhuma linguagem nova entra sem ADR**.
 
 - [x] T-43.1 — **Classificar todos os workers existentes** — último item da Fase 1 da §36. Para cada um: o que faz, se é disparado por evento ou agenda, duração típica, se pode ser reexecutado sem efeito duplicado, e qual camada da §21 o reivindica. Sem esse inventário, "migrar workers apropriados" (Fase 2) não tem sujeito. Feito em `diretrizes/WORKERS.md`, e o resultado **muda a Fase 2**: existem quatro workers reais (dois agendados, dois webhooks) e **um único** trecho assíncrono, que roda dentro do request. As quatro filas do canal — entrada, saída ordenada, reconciliação — têm esquema, trava e validador, e **nenhum consumidor**: as RPCs de `claim_*` são referenciadas só por validadores, que conferem que o token aparece na migration em vez de chamá-la. É a VACINA-057 em escala maior. Logo a Fase 2 não é migração, é **construção** — o que remove custo de reescrita e risco de paridade, e muda o texto da ADR
 - [x] T-43.2 — **ADR de Go**, com os doze itens da §37 e o benchmark que a §39 exige. Entregue em `diretrizes/ADR-0001-CAMADA-DE-EXECUCAO.md`, com as medições reproduzíveis em `benchmarks/camada-de-execucao/`. **Estado: proposta, aguardando ratificação do proprietário arquitetural** — a §37 condiciona a Fase 2 à ADR aprovada, e aprovar não é tarefa desta sessão. O benchmark **contraria a expectativa**: a CPU é 0,03% de um job de despacho, e trocar Node por Go economiza **0,41 s de CPU por dia** a 100 mil mensagens/dia; o Node satura em 6.549 jobs/s contra 27.884 do Go, mas a necessidade medida é de **1,16 job/s**, o que dá **57× de folga**. Dentro do próprio Go, escrever com `map[string]any` em vez de struct custa **2,14×** — mais que os 1,45× entre as duas linguagens. A ADR por isso separa o que o mapa juntava: **extrair a camada do request é decisão incondicional** (§4, critérios 3, 4, 7 e 8), **a linguagem é decisão condicionada** — TypeScript agora, Go por quatro gatilhos numéricos. Conflito com a leitura literal da §7.4 e da §36 registrado na própria ADR, §16
-- [ ] T-43.3 — Fase 2 da §36 — construir a camada de execução (a T-43.1 mostrou que não há o que migrar), padronizar queue/retry, instrumentar OpenTelemetry —, **só depois da ADR ratificada**. O primeiro portão da construção é o da ADR §11.4: **o validador chama a RPC em vez de procurar o nome dela na migration**, que é a correção direta da causa de quatro filas terem ficado sem consumidor com a bateria verde
+- [ ] T-43.3 — Fase 2 da §36 — construir a camada de execução em Go, padronizar queue/retry, instrumentar OpenTelemetry. Plano em `docs/superpowers/plans/2026-08-10-camada-de-execucao-go.md`
+  - [x] **Tarefa 1 — os seis portões de Go da §24**, em `.github/workflows/go-gates.yml`, cada um **visto reprovando** conforme `PROVA-POR-SABOTAGEM.md`: `gofmt` listou o arquivo; `go vet` pegou `%d` com string; `staticcheck` pegou `U1000` que `build` e `vet` aprovaram; `golangci-lint` pegou `errcheck` com rc=1; `go test` ficou vermelho; `go test -race` acusou `DATA RACE`. Módulo `apps/execution-plane` criado sem dependência de terceiros, conforme a §38
+  - [ ] Tarefa 2 — protocolo da fila como domínio tipado, atrás da interface `Fila`, com os limites do banco virando invariante do tipo
+  - [ ] Tarefa 3 — cliente do gateway com assinatura provada **byte a byte idêntica** à do TypeScript, por fixture compartilhada (§26)
+  - [ ] Tarefa 4 — laço de vida longa, encerramento limpo em `SIGTERM`, observabilidade
+  - [ ] **Tarefa 5 — BLOQUEADA.** Implementação PostgREST e **aplicação das migrations**. Medido em 10/08: as filas **não existem no banco** — 0 de 5 tabelas, 0 de 8 RPCs, contra 256 tabelas no `public`. `stage22_multiprovider_storage` e `stage22_outbox_delivery` estão no débito congelado, que condiciona a saída a *"deploy de código compatível, aplicação controlada e testes DB"*. **Nenhum consumidor pode ser ligado antes disso, e a aplicação é decisão do responsável nomeado**
 - [x] T-43.4 — Reconciliar §21 e §33, registrado no preâmbulo do `MAPA-TECNOLOGICO.md` e mensurável por `node scripts/medir-distribuicao.mjs`. **A premissa desta tarefa estava errada e a medição a corrigiu:** os "52,3% contra 5–15%" comparavam **presença** com **volume** — 100% das linhas da §21 são polyglotas, com 2,30 linguagens por linha, e as presenças somam 101 para 44 linhas, logo não formam fatia. Na mesma unidade (linguagem principal), sobra uma divergência **real, localizada em Go e menor**: 20,5% contra teto de 15%. O problema maior é outro: **a §33 não é mensurável como está** — este repositório fica dos dois lados da faixa conforme se conte o ledger de migrations (TypeScript 84,3% ou 58,0%; SQL 11,1% ou 38,9%), porque migration é append-only e cresce de forma monotônica contra o código de aplicação. Regra proposta: §21 é **autorização**, não orçamento; §33 é **alarme** medido sobre código vivo; §33 **nunca decide caso concreto** (seria o "otimizar por intuição" da §39); onde divergirem, prevalece a ADR da §37. **Requer ratificação**, como a ADR-0001
 
 ---
@@ -1571,6 +1594,7 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
+| 2026-08-10 | A S-43 (migração de linguagens) passa à frente da S-23 (fundação de interface), que vai para `bloqueada` | **Decisão de prioridade do proprietário arquitetural**, caso previsto na R5: *"inicie as conversões dos códigos para Go, Typescript, Python e Rust conforme nosso mapa"*. A reordenação **apenas registra o que já era verdade**: a S-23 tem 23 tarefas concluídas e 11 abertas, e nenhuma avançou durante as S-38 a S-43. A R3 não acusou antes porque a S-43 constava como `pendente`; ao ativá-la, o validador reprovou com duas sprints em andamento e obrigou a explicitar a escolha. Retomar a S-23 exige tirar a S-43 da vaga. |
 | 2026-08-10 | A convergência do Projeto RH passa de `S-38` para `S-40` | **Colisão de numeração**, não reordenação de trabalho. As duas sprints foram escritas em paralelo, em ramos diferentes, e as duas se chamavam `S-38`. A da `main` (endurecimento dos portões) chegou primeiro pelo PR #45, junto da `S-39`; a do RH renumera para o fim, conforme a R4. Nenhuma tarefa mudou de ordem nem de conteúdo. |
 | 2026-08-02 | Dentro da S-32, o motor de documento passa à frente da auto-sugestão | **Pré-requisito descoberto**, caso previsto na R5. O responsável nomeou os dependentes: propostas, orçamentos, contratos, aditivos, FVS e FVM da qualidade, layouts de mensagem padrão e resposta do SAC. Construir esses módulos antes do motor significa construir sete editores para desfazer depois. A auto-sugestão continua barata e entrega sozinha, mas não destrava nenhum módulo. |
 | 2026-07-26 | S-23 passa à frente da S-22 e da S-20 | Caso de **base reaproveitável** previsto na R5. Os componentes de campo da S-23 servem aos 20 módulos e resolvem o defeito mais grave já verificado — dado inválido gravado em produção. A S-22 trata de reconstrução do banco e não bloqueia interface; a S-20 troca vocabulário nas mesmas telas que a S-23 vai refazer, então entra junto, tela por tela, para não refazer duas vezes. |
