@@ -39,6 +39,9 @@ Diante de qualquer erro: consultar [`VACINAS.md`](./VACINAS.md) **antes** de pro
 |---|---|---|
 | **Como se trabalha** | [`METODO-DE-TRABALHO.md`](./METODO-DE-TRABALHO.md) | sempre, antes de propor |
 | **Como se prova que um portão protege** | [`PROVA-POR-SABOTAGEM.md`](./PROVA-POR-SABOTAGEM.md) | ao criar teste, validador ou verificação de CI |
+| **Que linguagem e que banco usar em cada módulo, e quando** | [`DECISAO-TECNOLOGICA-POR-MODULO.md`](./DECISAO-TECNOLOGICA-POR-MODULO.md) | **antes de escrever qualquer código novo em Go, Python ou Rust**, e antes de propor banco que não seja PostgreSQL |
+| **Por que a camada de execução é em Go** | [`ADR-0001-CAMADA-DE-EXECUCAO.md`](./ADR-0001-CAMADA-DE-EXECUCAO.md) + [`WORKERS.md`](./WORKERS.md) | ao mexer em fila, worker, job agendado ou despacho a provedor |
+| **O mapa de linguagens completo** | [`MAPA-TECNOLOGICO.md`](./MAPA-TECNOLOGICO.md) | ao decidir arquitetura; a §21 é autorização, não orçamento |
 | **Quem usa e o que sabe** | [`PERSONAS-E-ROTINAS.md`](./PERSONAS-E-ROTINAS.md) | antes de criar tela ou permissão |
 | **Como provar autoridade, controle e evidência** | [`CONTRATO-AUDITAVEL-DE-PERSONAS.md`](./CONTRATO-AUDITAVEL-DE-PERSONAS.md) | antes de auditar pessoa, rotina, tela, processo ou controle |
 | **O que quebra e a quem se pede socorro** | [`FLUXOS-E-RISCOS.md`](./FLUXOS-E-RISCOS.md) | antes de criar qualquer objeto ou fluxo |
