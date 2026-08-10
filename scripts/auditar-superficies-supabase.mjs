@@ -42,6 +42,30 @@ const fontesRuntime = ["app", "components", "lib"]
   .flatMap(dir => listar(path.join(raiz, dir), arq => EXT.has(path.extname(arq))));
 const fontesOperacionais = listar(path.join(raiz, "scripts"), arq => EXT.has(path.extname(arq)));
 const migrations = listar(path.join(raiz, "supabase", "migrations"), arq => arq.endsWith(".sql"));
+const classificacaoPath = path.join(raiz, "diretrizes", "supabase-surface-classification.json");
+
+function carregarClassificacao() {
+  if (!fs.existsSync(classificacaoPath)) throw new Error(`Classificação obrigatória ausente: ${rel(classificacaoPath)}`);
+  const parsed = JSON.parse(fs.readFileSync(classificacaoPath, "utf8"));
+  if (parsed.schemaVersion !== 1 || !parsed.tablesOrViews || typeof parsed.tablesOrViews !== "object") {
+    throw new Error("diretrizes/supabase-surface-classification.json possui schema inválido.");
+  }
+  const permitidas = new Set([
+    "preserve_sql_internal",
+    "preserve_reference_data",
+    "preserve_operational_history",
+    "preserve_latent_runtime",
+    "pending_destructive_migration"
+  ]);
+  for (const [nome, entrada] of Object.entries(parsed.tablesOrViews)) {
+    if (!entrada || !permitidas.has(entrada.disposition) || !entrada.rationale || !entrada.evidence) {
+      throw new Error(`Classificação inválida para ${nome}.`);
+    }
+  }
+  return parsed;
+}
+
+const classificacao = carregarClassificacao();
 
 const runtime = { tables: new Map(), rpcs: new Map(), buckets: new Map(), channels: new Map() };
 const operational = { tables: new Map(), rpcs: new Map(), buckets: new Map(), channels: new Map() };
@@ -168,6 +192,19 @@ function semConsumidor(declarado, mapaRuntime, mapaOperational) {
 }
 
 const tabelaOuView = new Map([...declarados.tables, ...declarados.views]);
+const candidatosTabelaOuView = semConsumidor(tabelaOuView, runtime.tables, operational.tables);
+const nomesClassificados = Object.keys(classificacao.tablesOrViews).sort((a,b)=>a.localeCompare(b,"pt-BR"));
+const classificadosSet = new Set(nomesClassificados);
+const candidatosSet = new Set(candidatosTabelaOuView);
+const naoClassificados = candidatosTabelaOuView.filter(nome => !classificadosSet.has(nome));
+const classificacoesObsoletas = nomesClassificados.filter(nome => !candidatosSet.has(nome));
+const resumoDisposicoes = Object.fromEntries(
+  Object.values(classificacao.tablesOrViews).reduce((mapa, entrada) => {
+    mapa.set(entrada.disposition, (mapa.get(entrada.disposition) ?? 0) + 1);
+    return mapa;
+  }, new Map())
+);
+
 const relatorio = {
   schemaVersion: 1,
   warning: "Sem consumidor JS/TS nao significa objeto morto: verificar FKs, views, triggers, policies e chamadas SQL antes de remover.",
@@ -181,7 +218,10 @@ const relatorio = {
     declaredBuckets: declarados.buckets.size,
     runtimeTables: runtime.tables.size,
     runtimeRpcs: runtime.rpcs.size,
-    runtimeBuckets: runtime.buckets.size
+    runtimeBuckets: runtime.buckets.size,
+    classifiedTableViewCandidates: candidatosTabelaOuView.length - naoClassificados.length,
+    unclassifiedTableViewCandidates: naoClassificados.length,
+    staleTableViewClassifications: classificacoesObsoletas.length
   },
   consumers: {
     runtime: {
@@ -198,9 +238,17 @@ const relatorio = {
     }
   },
   candidatesWithoutJsConsumer: {
-    tablesOrViews: semConsumidor(tabelaOuView, runtime.tables, operational.tables),
+    tablesOrViews: candidatosTabelaOuView,
     functions: semConsumidor(declarados.functions, runtime.rpcs, operational.rpcs),
     buckets: semConsumidor(declarados.buckets, runtime.buckets, operational.buckets)
+  },
+  tableViewClassification: {
+    file: rel(classificacaoPath),
+    reviewedAt: classificacao.reviewedAt ?? null,
+    dispositions: resumoDisposicoes,
+    entries: classificacao.tablesOrViews,
+    unclassified: naoClassificados,
+    stale: classificacoesObsoletas
   }
 };
 
@@ -214,10 +262,21 @@ if (json) {
   console.log(`- ${relatorio.counts.runtimeTables} tabelas/views chamadas pelo runtime web`);
   console.log(`- ${relatorio.counts.runtimeRpcs} RPCs chamadas pelo runtime web`);
   console.log(`- ${relatorio.counts.runtimeBuckets} buckets chamados pelo runtime web`);
+  console.log(`- ${relatorio.counts.classifiedTableViewCandidates}/${candidatosTabelaOuView.length} candidatos tabela/view classificados`);
 
   for (const [titulo, itens] of Object.entries(relatorio.candidatesWithoutJsConsumer)) {
     console.log(`\n[${titulo}] ${itens.length}`);
     for (const item of itens) console.log(`- ${item}`);
   }
+  console.log("\n[classificacao-tabelas-views]");
+  console.log(`- não classificados: ${naoClassificados.length}`);
+  for (const item of naoClassificados) console.log(`  - NOVO: ${item}`);
+  console.log(`- classificações obsoletas: ${classificacoesObsoletas.length}`);
+  for (const item of classificacoesObsoletas) console.log(`  - OBSOLETA: ${item}`);
   console.log("\nATENÇÃO: candidato sem consumidor JS/TS não deve ser removido sem cruzamento com dependências internas do Postgres.");
+}
+
+if (naoClassificados.length || classificacoesObsoletas.length) {
+  console.error(`Gate de classificação Supabase falhou: ${naoClassificados.length} candidato(s) novo(s), ${classificacoesObsoletas.length} classificação(ões) obsoleta(s).`);
+  process.exitCode = 1;
 }
