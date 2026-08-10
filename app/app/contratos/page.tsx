@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
 import { requireOrganizationContext } from "@/lib/auth";
 import { formatCurrency } from "@/lib/domain";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { singleRelation } from "@/lib/supabase/relations";
 
 export default async function ContractsPage() {
@@ -12,11 +13,13 @@ export default async function ContractsPage() {
     .eq("organization_id", organizationId)
     .order("updated_at", { ascending: false });
 
+  if (error) reportDataAccessError("contracts.page.load", error);
+
   return (
     <main className="content">
       <BarraDeTrabalho title="Contratos" primaryAction={<Link className="button button-primary" href="/app/contratos/novo">Novo contrato</Link>} />
       <p className="workspace-intro">Versões, valores consolidados, aditivos e assinatura eletrônica a partir de propostas aceitas.</p>
-      {error ? <div className="validation blocking">{error.message}</div> : null}
+      {error ? <div className="validation blocking">Não foi possível carregar os contratos.</div> : null}
       <section className="card table-wrap">
         <table>
           <thead><tr><th>Contrato</th><th>Cliente</th><th>Status</th><th>Original</th><th>Aditivos</th><th>Consolidado</th><th>Período</th><th>Portal</th></tr></thead>
