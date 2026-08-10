@@ -100,7 +100,10 @@ export function renderizar(corpo: string, dicionario: Dicionario): Resultado {
     normalizado[normalizarNome(chave)] = valor;
   }
 
-  const texto = String(corpo ?? "").replace(MARCADOR, (bruto, cru: string, posicao: number) => {
+  // `_bruto` é o casamento inteiro do `replace`, posicional: existe só para que
+  // o grupo de captura fique no índice 1. O prefixo `_` é o que `noUnusedParameters`
+  // reconhece como "não usado de propósito", em vez de esquecimento.
+  const texto = String(corpo ?? "").replace(MARCADOR, (_bruto, cru: string, posicao: number) => {
     const nome = normalizarNome(cru);
     if (!(nome in normalizado)) {
       lacunas.push({ variavel: nome, posicao, motivo: "desconhecida" });

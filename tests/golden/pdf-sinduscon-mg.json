@@ -1,0 +1,45 @@
+{
+  "_leia": "Golden do extrator de PDF contra o arquivo publicado pelo Sinduscon-MG. Números exatos, não aproximados: foi a ausência disto que deixou o extrator devolver 730 pedaços e 24.924 caracteres — ruído binário de fluxo de imagem misturado ao texto — passando por todos os testes, porque eles perguntavam se o texto CONTINHA 'R8-N' e ele continha, junto com 23.000 caracteres de lixo. Regenerar este arquivo exige rodar o leitor contra o artefato real; nenhuma escrita plausível de código o satisfaz por acaso.",
+  "gerado_em": "2026-08-10",
+  "artefatos": [
+    {
+      "nome": "composicao_cub_julho_26.pdf",
+      "origem": "https://sinduscon-mg.org.br/wp-content/uploads/2026/08/composicao_cub_julho_26.pdf",
+      "bytes": 97894,
+      "sha256_prefixo": "e28cbe319f94b72a",
+      "esperado": {
+        "fluxosLidos": 2,
+        "pedacos": 218,
+        "caracteres": 1849,
+        "codigosDistintos": 19,
+        "valoresMonetarios": 95,
+        "ocorrenciasDe_2_548_75": 1,
+        "ocorrencias": {
+          "Julho/2026": 1,
+          "Composição": 1,
+          "Despesas Administrativas": 7,
+          "R8-N": 1,
+          "GI": 1
+        }
+      }
+    },
+    {
+      "nome": "tabela_cub_julho_2026.pdf",
+      "origem": "https://sinduscon-mg.org.br/wp-content/uploads/2026/08/tabela_cub_julho_2026.pdf",
+      "bytes": 97679,
+      "sha256_prefixo": "9ae6efe8a662d7db",
+      "esperado": {
+        "fluxosLidos": 2,
+        "pedacos": 90,
+        "caracteres": 2424,
+        "codigosDistintos": 4,
+        "valoresMonetarios": 21,
+        "ocorrenciasDe_2_548_75": 1,
+        "ocorrencias": {
+          "Julho/2026": 3,
+          "2.548,75": 1
+        }
+      }
+    }
+  ]
+}
