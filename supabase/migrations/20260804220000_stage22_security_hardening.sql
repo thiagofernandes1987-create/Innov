@@ -98,7 +98,7 @@ returns public.channel_security_incidents
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_security_incidents;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then raise exception 'SECURITY_FORBIDDEN'; end if;
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then raise exception 'SECURITY_FORBIDDEN'; end if;
   insert into public.channel_security_incidents(
     organization_id,incident_type,severity,evidence,kill_switch_activated
   ) values (
@@ -118,7 +118,7 @@ returns public.channel_critical_write_approvals
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_critical_write_approvals;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','DELETE',null,'manage') then raise exception 'SECURITY_APPROVER_FORBIDDEN'; end if;
+  if not public.has_module_permission(p_organization_id,'whatsapp','DELETE',null,'administer') then raise exception 'SECURITY_APPROVER_FORBIDDEN'; end if;
   if p_ttl_minutes < 1 or p_ttl_minutes > 60 then raise exception 'SECURITY_APPROVAL_TTL_INVALID'; end if;
   insert into public.channel_critical_write_approvals(
     organization_id,action,scope_hash,reason,approved_by,expires_at

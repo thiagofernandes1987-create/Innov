@@ -71,6 +71,11 @@ const technicalPatterns = [
   /ReferenceError:/i
 ];
 
+function isPreviewInjectedConsoleNoise(text) {
+  return text.includes("https://vercel.live/_next-live/feedback/feedback.js")
+    && text.includes("Content Security Policy");
+}
+
 await fs.mkdir(outputRoot, { recursive: true });
 
 let credentials;
@@ -108,6 +113,17 @@ async function unlockPreview(page) {
   });
 }
 
+async function waitForServerActionTransition(page, beforeUrl, timeout = 15_000) {
+  try {
+    await page.waitForURL(url => url.href !== beforeUrl, { timeout });
+  } catch {
+    // Server Actions podem concluir sem um evento clássico de navegação. Damos
+    // uma curta janela final para o router aplicar cookies/redirect antes de
+    // inspecionar o estado; a validação abaixo continua falhando se nada mudou.
+    await page.waitForTimeout(1_000);
+  }
+}
+
 async function login(page) {
   await page.goto(`${previewUrl}/login?redirect=${encodeURIComponent(moduleRoute)}`, {
     waitUntil: "domcontentloaded"
@@ -116,23 +132,27 @@ async function login(page) {
 
   await page.locator('input[name="email"]').fill(credentials.email);
   await page.locator('input[name="password"]').fill(credentials.password);
-  await Promise.all([
-    page.waitForLoadState("domcontentloaded"),
-    page.getByRole("button", { name: "Entrar" }).click()
-  ]);
+
+  const beforeLoginUrl = page.url();
+  await page.getByRole("button", { name: "Entrar" }).click();
+  await waitForServerActionTransition(page, beforeLoginUrl);
 
   if (page.url().includes("/selecionar-organizacao")) {
     const organizationButton = page.locator('form button[type="submit"]').first();
     if (await organizationButton.count()) {
-      await Promise.all([
-        page.waitForLoadState("domcontentloaded"),
-        organizationButton.click()
-      ]);
+      const beforeOrganizationUrl = page.url();
+      await organizationButton.click();
+      await waitForServerActionTransition(page, beforeOrganizationUrl);
     }
   }
 
   if (page.url().includes("/login")) {
-    throw new Error(`Login não concluiu para a persona ${persona}.`);
+    const publicAlert = await page.getByRole("alert").textContent().catch(() => null);
+    throw new Error(
+      publicAlert?.trim()
+        ? `Login não concluiu para a persona ${persona}: ${publicAlert.trim()}`
+        : `Login não concluiu para a persona ${persona}.`
+    );
   }
 }
 
@@ -203,8 +223,9 @@ try {
       await context.addCookies([{ name: "innovar-tema", value: theme, url: previewUrl }]);
       const page = await context.newPage();
       page.on("console", message => {
-        if (message.type() === "error") consoleErrors.push(message.text());
-        if (message.type() === "warning") consoleWarnings.push(message.text());
+        const text = message.text();
+        if (message.type() === "error" && !isPreviewInjectedConsoleNoise(text)) consoleErrors.push(text);
+        if (message.type() === "warning") consoleWarnings.push(text);
       });
       page.on("pageerror", error => pageErrors.push(error.message));
       page.on("response", response => {

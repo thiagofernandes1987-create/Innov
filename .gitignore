@@ -3,6 +3,8 @@ node_modules
 .next
 out
 coverage
+tsconfig.tsbuildinfo
+__pycache__/
 .env
 .env.local
 .env.*.local
@@ -14,3 +16,6 @@ supabase/.temp
 # artefatos de build
 tsconfig.tsbuildinfo
 __pycache__/
+
+# Capturas do arnês de QA visual (scripts/qa)
+.qa/

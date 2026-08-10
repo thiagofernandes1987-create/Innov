@@ -42,6 +42,8 @@ Diante de qualquer erro: consultar [`VACINAS.md`](./VACINAS.md) **antes** de pro
 | **Como provar autoridade, controle e evidência** | [`CONTRATO-AUDITAVEL-DE-PERSONAS.md`](./CONTRATO-AUDITAVEL-DE-PERSONAS.md) | antes de auditar pessoa, rotina, tela, processo ou controle |
 | **O que quebra e a quem se pede socorro** | [`FLUXOS-E-RISCOS.md`](./FLUXOS-E-RISCOS.md) | antes de criar qualquer objeto ou fluxo |
 | **Quem fica sabendo, e como** | [`ACOMPANHAMENTO-A-DISTANCIA.md`](./ACOMPANHAMENTO-A-DISTANCIA.md) | ao mexer em notificação, alerta, foto de campo ou portal do cliente |
+| **Causa raiz, custo invisível e treinamento** | [`QUALIDADE-CAUSA-RAIZ.md`](./QUALIDADE-CAUSA-RAIZ.md) | ao mexer em qualidade, não conformidade, ocorrência ou plano de ação |
+| **Campo próprio, sugestão e documento por modelo** | [`REUSO-DE-INFORMACAO.md`](./REUSO-DE-INFORMACAO.md) | ao criar campo, formulário repetitivo ou geração de documento |
 | **O que fazer agora** | [`INVENTARIO-DE-EXECUCAO.md`](./INVENTARIO-DE-EXECUCAO.md) | no início de toda sessão e ao terminar cada tarefa |
 | **O que o produto é** | [`SPEC.md`](./SPEC.md) | ao mexer em regra de negócio |
 | **Onde o projeto está** | [`ESTADO-ATUAL.json`](./ESTADO-ATUAL.json) | ao precisar de estado verificável |

@@ -1,0 +1,59 @@
+name: Audit Orphan Surfaces
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: audit-orphans-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Audit reachable code graph
+        run: node scripts/auditar-alcancabilidade.mjs --json > reachability-audit.json
+
+      - name: Audit unused server action symbols
+        run: node scripts/auditar-server-actions-sem-chamada.mjs --json > server-actions-audit.json
+
+      - name: Assert no unused server action symbols remain
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const report = JSON.parse(fs.readFileSync("server-actions-audit.json", "utf8"));
+          if (report.unusedCount !== 0) {
+            console.error(JSON.stringify(report.unused, null, 2));
+            process.exit(1);
+          }
+          NODE
+
+      - name: Audit Supabase surfaces without JS consumers
+        continue-on-error: true
+        run: node scripts/auditar-superficies-supabase.mjs --json > supabase-surface-audit.json
+
+      - name: Validate canonical code map
+        shell: bash
+        run: |
+          node scripts/gerar-mapa-do-codigo.mjs
+          git diff --exit-code -- diretrizes/MAPA-DO-CODIGO.md
+
+      - name: Upload orphan audit reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: orphan-surface-audit
+          path: |
+            reachability-audit.json
+            server-actions-audit.json
+            supabase-surface-audit.json
+            diretrizes/MAPA-DO-CODIGO.md
+          if-no-files-found: warn
+          retention-days: 14

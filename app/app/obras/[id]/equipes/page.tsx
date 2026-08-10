@@ -1,7 +1,9 @@
+import { CampoMoeda } from "@/components/campos/campos-br";
 import { notFound } from "next/navigation";
 import { createProjectResource, createTeam } from "@/app/actions/projects";
 import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
+import { nomesDosUsuarios } from "@/lib/pessoas/nomes";
 import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
 
 export default async function TeamsPage({
@@ -26,13 +28,6 @@ export default async function TeamsPage({
   reportDataAccessError("project-teams.resources", resourcesResult.error);
   reportDataAccessError("project-teams.memberships", membershipsResult.error);
 
-  const membershipIds = [...new Set((membershipsResult.data ?? []).map((membership) => membership.user_id))];
-  const profilesResult = membershipIds.length
-    ? await supabase.from("profiles").select("id,full_name,email").in("id", membershipIds)
-    : { data: [], error: null };
-
-  reportDataAccessError("project-teams.profiles", profilesResult.error);
-
   if (projectResult.error) {
     return (
       <main className="content">
@@ -49,12 +44,10 @@ export default async function TeamsPage({
   const teams = teamsResult.data ?? [];
   const resources = resourcesResult.data ?? [];
   const memberships = membershipsResult.data ?? [];
-  const profilesById = new Map(
-    (profilesResult.data ?? []).map((profile) => [profile.id, profile.full_name || profile.email || profile.id.slice(0, 8)])
-  );
+  const nomePorUsuario = await nomesDosUsuarios(supabase, memberships.map(m => m.user_id));
   const teamsLoadFailed = Boolean(teamsResult.error);
   const resourcesLoadFailed = Boolean(resourcesResult.error);
-  const membershipsLoadFailed = Boolean(membershipsResult.error || profilesResult.error);
+  const membershipsLoadFailed = Boolean(membershipsResult.error);
   const loadFailed = teamsLoadFailed || resourcesLoadFailed || membershipsLoadFailed;
 
   return (
@@ -112,7 +105,7 @@ export default async function TeamsPage({
               <label>Líder
                 <select name="leaderUserId"><option value="">Não definido</option>{memberships.map((membership) => (
                   <option key={membership.user_id} value={membership.user_id}>
-                    {profilesById.get(membership.user_id) || membership.user_id.slice(0, 8)} · {membership.role}
+                    {nomePorUsuario.get(membership.user_id) || membership.user_id.slice(0, 8)} · {membership.role}
                   </option>
                 ))}</select>
               </label>
@@ -128,7 +121,7 @@ export default async function TeamsPage({
             <label>Tipo<select name="resourceType" required><option value="LABOR">Mão de obra</option><option value="EQUIPMENT">Equipamento</option><option value="MATERIAL">Material</option><option value="SUBCONTRACTOR">Subcontratado</option></select></label>
             <div className="field-grid"><label>Código<input name="code" /></label><label>Unidade<input name="unit" defaultValue="un" required /></label></div>
             <label>Nome<input name="name" required /></label>
-            <div className="field-grid"><label>Custo/hora<input type="number" step="0.01" name="hourlyCost" /></label><label>Custo/dia<input type="number" step="0.01" name="dailyCost" /></label></div>
+            <div className="field-grid"><CampoMoeda name="hourlyCost" label="Custo/hora" /><CampoMoeda name="dailyCost" label="Custo/dia" /></div>
             <button className="button button-primary" type="submit">Adicionar recurso</button>
           </form>
         </article>

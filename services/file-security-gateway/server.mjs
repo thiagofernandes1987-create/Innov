@@ -36,6 +36,28 @@ function expectedSignature(timestamp,sha256){
   .digest("hex");
 }
 
+// Rejeita a requisição antes de bufferizar o corpo. A assinatura cobre o hash do
+// conteúdo e só pode ser conferida depois da leitura, mas cabeçalho ausente,
+// formato inválido, janela de tempo expirada e tamanho declarado acima do limite
+// são conhecidos antes e não justificam alocar memória para um corpo anônimo.
+export function inspectRequestPreconditions(headers){
+ if(SHARED_SECRET.length<32)return{status:503,code:"SCANNER_NOT_CONFIGURED"};
+ const timestamp=headers["x-innov-timestamp"];
+ const signature=headers["x-innov-signature"];
+ const declaredSha=headers["x-innov-content-sha256"];
+ if(typeof timestamp!=="string"||typeof signature!=="string"||typeof declaredSha!=="string")
+  return{status:401,code:"MISSING_AUTH_HEADERS"};
+ if(!/^[a-f0-9]{64}$/i.test(signature)||!/^[a-f0-9]{64}$/i.test(declaredSha))
+  return{status:401,code:"MALFORMED_AUTH_HEADERS"};
+ const parsedTimestamp=Number(timestamp);
+ if(!Number.isInteger(parsedTimestamp)||Math.abs(Math.floor(Date.now()/1000)-parsedTimestamp)>MAX_SKEW_SECONDS)
+  return{status:401,code:"TIMESTAMP_OUT_OF_WINDOW"};
+ const declaredLength=Number(headers["content-length"]);
+ if(Number.isFinite(declaredLength)&&declaredLength>MAX_FILE_BYTES)
+  return{status:413,code:"FILE_TOO_LARGE"};
+ return null;
+}
+
 function verifyRequest(request,sha256){
  const timestamp=request.headers["x-innov-timestamp"];
  const signature=request.headers["x-innov-signature"];
@@ -133,6 +155,12 @@ const server=http.createServer(async(request,response)=>{
   }
  }
  if(request.method!=="POST"||request.url!==SCAN_PATH)return json(response,404,{status:"not_found",requestId});
+ const precondition=inspectRequestPreconditions(request.headers);
+ if(precondition){
+  console.warn(JSON.stringify({event:"file_security_gateway_rejected",requestId,code:precondition.code}));
+  response.on("finish",()=>request.destroy());
+  return json(response,precondition.status,{status:"ERROR",code:precondition.code,requestId});
+ }
  try{
   const body=await readBody(request);
   const sha256=createHash("sha256").update(body).digest("hex");

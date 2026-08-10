@@ -17,9 +17,12 @@ export type ItemDeMenu = { rotulo: string; href: string };
 
 export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
   crm: [
-    { rotulo: "Pipeline", href: "/app/pipeline/cliente" },
+    // O funil é a primeira entrada porque é a tela inicial do módulo — o mesmo
+    // endereço do aplicativo. A referência abre o CRM no kanban do funil.
+    { rotulo: "Funil", href: "/app/crm" },
     { rotulo: "Leads", href: "/app/crm/leads" },
-    { rotulo: "Oportunidades", href: "/app/crm/oportunidades" }
+    { rotulo: "Oportunidades", href: "/app/crm/oportunidades" },
+    { rotulo: "Visão geral", href: "/app/crm/visao-geral" }
   ],
   clientes: [
     { rotulo: "Clientes", href: "/app/clientes" },
@@ -73,7 +76,8 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
     { rotulo: "Depósitos", href: "/app/estoque/depositos" },
     { rotulo: "Inventários", href: "/app/estoque/inventarios" },
     { rotulo: "Reservas", href: "/app/estoque/reservas" },
-    { rotulo: "Ativos", href: "/app/estoque/ativos" }
+    { rotulo: "Ativos", href: "/app/estoque/ativos" },
+    { rotulo: "Categorias e unidades", href: "/app/estoque/catalogo" }
   ],
   financeiro: [
     { rotulo: "Lançamentos", href: "/app/financeiro/lancamentos" },
@@ -101,13 +105,17 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
     { rotulo: "Compras", href: "/app/relatorios/compras" },
     { rotulo: "Financeiro", href: "/app/relatorios/financeiro" },
     { rotulo: "Qualidade", href: "/app/relatorios/qualidade" },
+    { rotulo: "Perdas", href: "/app/relatorios/perdas" },
     { rotulo: "Metas", href: "/app/relatorios/metas" },
     { rotulo: "Salvos", href: "/app/relatorios/salvos" }
   ],
   administracao: [
     { rotulo: "Usuários", href: "/app/administracao/usuarios" },
     { rotulo: "Perfis", href: "/app/administracao/perfis" },
-    { rotulo: "Aplicativos", href: "/app/administracao/aplicativos" }
+    { rotulo: "Aplicativos", href: "/app/administracao/aplicativos" },
+    { rotulo: "Vocabulário", href: "/app/administracao/vocabulario" },
+    { rotulo: "Motivos de perda", href: "/app/administracao/motivos-de-perda" },
+    { rotulo: "Objetos", href: "/app/administracao/objetos" }
   ],
   orcamentos: [
     { rotulo: "Carteira", href: "/app/orcamentos" },
@@ -143,6 +151,11 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
     { rotulo: "Assinaturas", href: "/app/assinaturas" },
     { rotulo: "Qualidade", href: "/app/qualidade/documentos" },
     { rotulo: "Relatórios", href: "/app/relatorios" }
+  ],
+  modelos: [
+    { rotulo: "Biblioteca", href: "/app/modelos" },
+    { rotulo: "Emitir documento", href: "/app/modelos/emitir" },
+    { rotulo: "Disponibilização", href: "/app/administracao/modelos" }
   ],
   ocorrencias: [
     { rotulo: "Ocorrências", href: "/app/ocorrencias" },

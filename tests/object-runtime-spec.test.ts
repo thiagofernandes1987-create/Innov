@@ -5,6 +5,7 @@ import {
   allocateSlots,
   canonicalSpecJson,
   slotFamilyFor,
+  slotUsage,
   specFingerprint,
   validateSpec,
   type ObjectFieldSpec,
@@ -182,3 +183,75 @@ describe("validateSpec", () => {
     expect(validateSpec(spec({ moduleKey: "" }))).not.toEqual([]);
   });
 });
+
+describe("quanto do orçamento de campos filtráveis já foi gasto", () => {
+  it("conta por família, e só o que é filtrável", () => {
+    const uso = slotUsage([
+      field({ key: "titulo", type: "texto", indexed: true }),
+      field({ key: "apelido", type: "texto" }),
+      field({ key: "valor", type: "moeda", indexed: true }),
+      field({ key: "observacao", type: "texto_longo", indexed: true })
+    ]);
+    expect(uso.txt.used).toBe(1);
+    expect(uso.num.used).toBe(1);
+    // `texto_longo` não tem família de slot: marcar filtrável não gasta nada,
+    // e `validateSpec` já recusa a combinação.
+    expect(uso.dt.used).toBe(0);
+  });
+
+  it("o limite exibido é o mesmo que o motor aplica", () => {
+    const uso = slotUsage([]);
+    expect(uso.txt.budget).toBe(SLOT_BUDGET.txt);
+    expect(uso.ref.budget).toBe(SLOT_BUDGET.ref);
+  });
+
+  it("o que estourou não é contado como gasto", () => {
+    // Cinco textos filtráveis com teto de quatro: o quinto não ocupa slot, e a
+    // tela não pode dizer "5 de 4".
+    const fields = Array.from({ length: SLOT_BUDGET.txt + 1 }, (_, i) =>
+      field({ key: `t${i}`, type: "texto", indexed: true })
+    );
+    expect(slotUsage(fields).txt.used).toBe(SLOT_BUDGET.txt);
+  });
+});
+
+describe("arquivar em vez de excluir", () => {
+  it("campo arquivado devolve o slot que ocupava", () => {
+    // A versão publicada guarda a alocação dela; registro antigo continua
+    // sendo lido pela versão com que nasceu. Segurar o slot para sempre
+    // gastaria o orçamento com campo que ninguém preenche mais.
+    const fields = [
+      field({ key: "antigo", type: "data", indexed: true, archived: true }),
+      field({ key: "atual", type: "data", indexed: true })
+    ];
+    expect(allocateSlots(fields).slots).toEqual({ atual: "dt_1" });
+    expect(slotUsage(fields).dt.used).toBe(1);
+  });
+
+  it("campo arquivado não pode ser obrigatório", () => {
+    // Obrigatório e fora do formulário ao mesmo tempo é registro que nunca
+    // pode ser salvo.
+    const errors = validateSpec(
+      spec({ fields: [field({ key: "antigo", archived: true, required: true })] })
+    );
+    expect(errors.some(e => e.includes("antigo"))).toBe(true);
+  });
+
+  it("seleção arquivada não é cobrada pelas opções", () => {
+    // Ela saiu do formulário: exigir opções de um campo que ninguém mais
+    // preenche travaria a publicação por causa do passado.
+    expect(
+      validateSpec(spec({ fields: [
+        field({ key: "situacao", type: "selecao", archived: true }),
+        field({ key: "titulo" })
+      ] }))
+    ).toEqual([]);
+  });
+
+  it("objeto só com campos arquivados não é publicável", () => {
+    // Publicar um formulário sem nenhum campo para preencher é publicar nada.
+    const errors = validateSpec(spec({ fields: [field({ key: "antigo", archived: true })] }));
+    expect(errors.length).toBeGreaterThan(0);
+  });
+});
+

@@ -1,4 +1,5 @@
 import { CaretDown } from "@phosphor-icons/react/dist/ssr";
+import Image from "next/image";
 import Link from "next/link";
 import type { Avisos } from "@/lib/casca/avisos";
 import type { Tema } from "@/lib/tema";
@@ -29,8 +30,25 @@ export function BarraSuperior({
     <header className="barra-superior">
       <div className="barra-esquerda">
         <Link className="barra-logo" href="/app" title="Tela inicial" aria-label="Ir para a tela inicial de aplicativos">
-          <span className="barra-logo-marca" aria-hidden="true">IN</span>
-          <span className="barra-logo-nome">INNOVAR</span>
+          {/* Só o símbolo, branco, sem o nome ao lado.
+              Decisão do responsável em 3 de agosto: *"quero construir minha
+              identidade, precisam olhar o logo e identificar a marca"*. Símbolo
+              acompanhado do nome escrito nunca é aprendido — quem lê a palavra
+              não precisa reconhecer a forma, e a forma é o que se quer que
+              fique. O nome por extenso fica na tela de login, uma vez, no
+              lockup horizontal.
+
+              O nome sai da tela, **não da acessibilidade**: o `aria-label` do
+              link continua dizendo para onde ele leva, e é isso que o leitor de
+              tela anuncia. Símbolo sozinho sem rótulo seria um botão mudo. */}
+          <Image
+            className="barra-logo-marca"
+            src="/marca/innovar-icone-branco.png"
+            alt=""
+            width={151}
+            height={153}
+            priority
+          />
         </Link>
 
         <Link

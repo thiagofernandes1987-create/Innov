@@ -1,5 +1,7 @@
 "use server";
 
+import { mensagemDeFalha } from "@/lib/errors/data-access";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
@@ -59,7 +61,7 @@ function returnTo(
 }
 
 function publicError(error: unknown) {
-  const raw = error instanceof Error ? error.message : String(error ?? "");
+  const raw = error instanceof Error ? mensagemDeFalha("messaging-inbox.publicError", error) : String(error ?? "");
   if (raw.includes("OWNERSHIP_VERSION_CONFLICT")) {
     return "Este atendimento foi alterado por outro usuário. Recarregue a conversa e tente novamente.";
   }
@@ -98,7 +100,7 @@ export async function assignMessagingConversation(data: FormData) {
       p_expected_version: expectedVersion,
       p_reason: required(data, "reason")
     });
-    if (error) throw new Error(`ASSIGNMENT_FAILED:${error.code ?? "UNKNOWN"}:${error.message}`);
+    if (error) throw new Error(`ASSIGNMENT_FAILED:${error.code ?? "UNKNOWN"}:${mensagemDeFalha("messaging-inbox.assignMessagingConversation", error)}`);
     revalidatePath(path);
     redirect(returnTo(data, conversationId, { success: "Atendimento atualizado." }));
   } catch (error) {
@@ -118,7 +120,7 @@ export async function addMessagingConversationNote(data: FormData) {
       p_conversation_id: conversationId,
       p_body: body
     });
-    if (error) throw new Error(`NOTE_FAILED:${error.code ?? "UNKNOWN"}:${error.message}`);
+    if (error) throw new Error(`NOTE_FAILED:${error.code ?? "UNKNOWN"}:${mensagemDeFalha("messaging-inbox.addMessagingConversationNote", error)}`);
     revalidatePath(path);
     redirect(returnTo(data, conversationId, { success: "Nota interna registrada." }));
   } catch (error) {
@@ -137,7 +139,7 @@ export async function updateMessagingOperatorPresence(data: FormData) {
       p_active_conversation_id: conversationId,
       p_ttl_seconds: 300
     });
-    if (error) throw new Error(`PRESENCE_FAILED:${error.code ?? "UNKNOWN"}:${error.message}`);
+    if (error) throw new Error(`PRESENCE_FAILED:${error.code ?? "UNKNOWN"}:${mensagemDeFalha("messaging-inbox.updateMessagingOperatorPresence", error)}`);
     revalidatePath(path);
     redirect(returnTo(data, conversationId, { success: "Presença atualizada." }));
   } catch (error) {
@@ -156,7 +158,7 @@ export async function refreshMessagingOperatorPresence(data: FormData) {
       p_active_conversation_id: optional(data, "conversationId"),
       p_ttl_seconds: 300
     });
-    if (error) throw new Error(`PRESENCE_FAILED:${error.code ?? "UNKNOWN"}:${error.message}`);
+    if (error) throw new Error(`PRESENCE_FAILED:${error.code ?? "UNKNOWN"}:${mensagemDeFalha("messaging-inbox.refreshMessagingOperatorPresence", error)}`);
     return { ok: true } as const;
   } catch {
     return { ok: false } as const;

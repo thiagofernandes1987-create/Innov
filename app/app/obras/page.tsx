@@ -8,7 +8,12 @@ export default async function ProjectsPage() {
   const { supabase, organizationId } = await requireOrganizationContext();
   const projectsResult = await supabase
     .from("projects")
-    .select("id,code,name,status,planned_start,planned_end,actual_start,progress,city,state,client_released_at,clients(legal_name,trade_name),contracts(code,status)")
+    // `contracts!projects_contract_id_fkey` não é preciosismo de sintaxe.
+    // Existem dois caminhos entre obra e contrato — `projects.contract_id` e
+    // `contracts.project_id` — e o PostgREST se recusa a escolher (PGRST201).
+    // Sem nomear a chave, a tela devolvia erro de carga e listava zero obras
+    // com duas cadastradas no banco.
+    .select("id,code,name,status,planned_start,planned_end,actual_start,progress,city,state,client_released_at,clients(legal_name,trade_name),contracts!projects_contract_id_fkey(code,status)")
     .eq("organization_id", organizationId)
     .is("archived_at", null)
     .order("updated_at", { ascending: false });

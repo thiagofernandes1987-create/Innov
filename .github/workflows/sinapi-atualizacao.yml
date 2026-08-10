@@ -1,0 +1,140 @@
+name: SINAPI Atualização Mensal
+
+# Onde a importação do SINAPI roda. T-37.2.
+#
+# A chave `service_role` fica apenas no ambiente efêmero do runner. O job sobe
+# uma instância local do app e usa dois segredos aleatórios por execução:
+# `CRON_SECRET` para a rota de atualização e `SINAPI_PROBE_TOKEN` para as sondas
+# de leitura. Nenhum deles é versionado ou persistido no repositório.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ufs:
+        description: "UFs separadas por vírgula"
+        required: false
+        default: "SP"
+      aplicar:
+        description: "Gravar no banco (false apenas confere)"
+        type: boolean
+        required: false
+        default: false
+  schedule:
+    - cron: "0 9 15 * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sinapi-atualizacao
+  cancel-in-progress: false
+
+jobs:
+  importar:
+    name: Baixa o pacote publicado e atualiza o catálogo
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 45
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      SINAPI_ORGANIZATION_ID: ${{ secrets.SINAPI_ORGANIZATION_ID }}
+      SINAPI_APP_URL: http://127.0.0.1:3000
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Inicializa o relatório
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          fs.writeFileSync("sinapi-importacao.json",JSON.stringify({
+            status:"prerequisites_pending",
+            workflowRunId:process.env.GITHUB_RUN_ID,
+            event:process.env.GITHUB_EVENT_NAME,
+            startedAt:new Date().toISOString()
+          },null,2)+"\n");
+          NODE
+
+      - name: Confere os segredos exigidos
+        run: |
+          missing=()
+          test -n "$NEXT_PUBLIC_SUPABASE_URL" || missing+=(NEXT_PUBLIC_SUPABASE_URL)
+          test -n "$NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY" || missing+=(NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY)
+          test -n "$SUPABASE_SERVICE_ROLE_KEY" || missing+=(SUPABASE_SERVICE_ROLE_KEY)
+          test -n "$SINAPI_ORGANIZATION_ID" || missing+=(SINAPI_ORGANIZATION_ID)
+          if [ ${#missing[@]} -gt 0 ]; then
+            MISSING_NAMES="$(printf '%s\n' "${missing[@]}")" node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          fs.writeFileSync("sinapi-importacao.json",JSON.stringify({
+            status:"blocked_missing_secrets",
+            workflowRunId:process.env.GITHUB_RUN_ID,
+            missingNames:(process.env.MISSING_NAMES??"").split("\n").filter(Boolean),
+            finishedAt:new Date().toISOString()
+          },null,2)+"\n");
+          NODE
+            printf 'Secrets ausentes no ambiente homologation: %s\n' "${missing[*]}"
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Habilita o pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+
+      - name: Instala dependências
+        run: pnpm install --no-frozen-lockfile --reporter=append-only
+
+      - name: Confere o layout publicado
+        run: pnpm sinapi:layout
+
+      - name: Compila a aplicação
+        run: pnpm build
+
+      - name: Sobe a instância que tem a chave
+        run: |
+          CRON_SECRET="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(32).toString("hex"))')"
+          SINAPI_PROBE_TOKEN="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(32).toString("hex"))')"
+          echo "::add-mask::$CRON_SECRET"
+          echo "::add-mask::$SINAPI_PROBE_TOKEN"
+          echo "CRON_SECRET=$CRON_SECRET" >> "$GITHUB_ENV"
+          echo "SINAPI_PROBE_TOKEN=$SINAPI_PROBE_TOKEN" >> "$GITHUB_ENV"
+          CRON_SECRET="$CRON_SECRET" SINAPI_PROBE_TOKEN="$SINAPI_PROBE_TOKEN" pnpm start > servidor.log 2>&1 &
+          for tentativa in $(seq 1 60); do
+            if curl -fsS -o /dev/null "http://127.0.0.1:3000/" 2>/dev/null; then break; fi
+            if [ "$tentativa" -eq 60 ]; then
+              echo "A instância não respondeu em 60 tentativas."
+              tail -50 servidor.log
+              exit 1
+            fi
+            sleep 2
+          done
+
+      - name: Importa
+        run: |
+          node scripts/importar-sinapi.mjs \
+            --uf "${{ inputs.ufs || 'SP' }}" \
+            --regime ambos \
+            ${{ (github.event_name == 'schedule' || inputs.aplicar) && '--aplicar' || '' }}
+
+      - name: Anexa o log do servidor em caso de falha
+        if: failure()
+        run: tail -200 servidor.log || true
+
+      - name: Publica o relatório
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: sinapi-importacao
+          path: sinapi-importacao.json
+          if-no-files-found: error
+          retention-days: 90

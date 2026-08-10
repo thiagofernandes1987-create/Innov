@@ -1,0 +1,71 @@
+dimensions:
+- dimension_id: DIM-01
+  name: Autenticação e sessão
+  status: APPLICABLE
+  justification: Rotas protegidas, proxy e server actions revisados.
+- dimension_id: DIM-02
+  name: Autorização por módulo e papel
+  status: APPLICABLE
+  justification: requireCapability/has_module_permission revisados em 17 arquivos
+    de actions e 11 route handlers.
+- dimension_id: DIM-03
+  name: Isolamento multiempresa (RLS)
+  status: APPLICABLE
+  justification: 136 tabelas mapeadas em 106 migrations com expansão dos laços dinâmicos.
+- dimension_id: DIM-04
+  name: Superfícies não autenticadas
+  status: APPLICABLE
+  justification: Portais de assinatura, fornecedor, formulário público, webhook e
+    gateway.
+- dimension_id: DIM-05
+  name: Integridade de dados e concorrência
+  status: APPLICABLE
+  justification: Locks advisory de estoque, cadeia pai-filho de compras, idempotência
+    de aditivo.
+- dimension_id: DIM-06
+  name: Segurança de arquivos e antimalware
+  status: APPLICABLE
+  justification: Pipeline de quarentena, gateway HTTP e trilhas de upload.
+- dimension_id: DIM-07
+  name: Segredos e configuração
+  status: APPLICABLE
+  justification: Uso de process.env, .env.example, chaves de serviço.
+- dimension_id: DIM-08
+  name: Cabeçalhos e proteção de borda
+  status: APPLICABLE
+  justification: next.config.ts e Caddyfile.
+- dimension_id: DIM-09
+  name: Observabilidade e trilha de auditoria
+  status: APPLICABLE
+  justification: Migrations stage19/R3B e lib/observability.
+- dimension_id: DIM-10
+  name: Testes e cobertura de controles
+  status: APPLICABLE
+  justification: 11 arquivos de teste mapeados contra os módulos de segurança.
+- dimension_id: DIM-11
+  name: CI e cadeia de suprimentos
+  status: APPLICABLE
+  justification: 8 workflows, instalação de dependências, fixação de ações.
+- dimension_id: DIM-12
+  name: Governança documental
+  status: APPLICABLE
+  justification: diretrizes/, docs/ e validadores estruturais executados.
+- dimension_id: DIM-13
+  name: Injeção de conteúdo no cliente (XSS)
+  status: APPLICABLE
+  justification: 'Varredura por dangerouslySetInnerHTML/eval: nenhuma ocorrência.'
+- dimension_id: DIM-14
+  name: Acessibilidade da interface
+  status: NOT_ASSESSED
+  justification: Exige execução de navegador e leitor de tela; capacidade indisponível
+    localmente (LIMITATION).
+- dimension_id: DIM-15
+  name: Comportamento em produção (RUNTIME)
+  status: BLOCKED_EXTERNAL
+  justification: Sem ambiente Supabase/produção acessível; nenhuma afirmação de runtime
+    é feita.
+- dimension_id: DIM-16
+  name: Desempenho sob carga
+  status: NOT_ASSESSED
+  justification: Fora do alcance local; exige ambiente de carga dedicado (LIMITATION).
+every_applicable_dimension_has_status: true

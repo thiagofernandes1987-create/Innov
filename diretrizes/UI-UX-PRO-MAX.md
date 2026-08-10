@@ -53,6 +53,66 @@ marca. O portão de fidelidade está em `diretrizes/ALVO-VISUAL.md` e na
 
 O cobre é acento, não cor dominante. Rosa, fúcsia, neon e gradientes chamativos não pertencem à identidade canônica.
 
+## 2.1 Marca — manual oficial
+
+O responsável entregou o manual da marca em 3 de agosto. Ele é a fonte, e o que
+estiver escrito aqui cede a ele em caso de divergência.
+
+| Cor | HEX | RGB | Uso |
+|---|---|---|---|
+| Azul-marinho profundo | `#0F1E3A` | 15 30 58 | superfície institucional, barra superior, símbolo |
+| Bronze dourado | `#C59A5B` | 197 154 91 | acento, filete, assinatura — nunca corpo de texto |
+| Off-white | `#F6F4F1` | 246 244 241 | papel, fundo do símbolo sobre a barra escura |
+| Grafite | `#2D3137` | 45 49 55 | texto de apoio e estruturas secundárias |
+
+Assinatura verbal: **"Um novo jeito de construir!"** Essência declarada:
+solidez, sofisticação, inovação e confiança.
+
+### Onde a marca aparece, e como
+
+**Símbolo sozinho, sem o nome ao lado, em toda tela do aplicativo.** Decisão do
+responsável em 3 de agosto: *"quero construir minha identidade, precisam olhar o
+logo e identificar a marca"*.
+
+A regra tem razão de ser e não é estética: **símbolo acompanhado do nome escrito
+nunca é aprendido.** Quem lê a palavra não precisa reconhecer a forma, e é a
+forma que se quer que fique. O nome por extenso aparece uma vez, no login.
+
+**Lockup horizontal — símbolo, nome e assinatura — só na tela de login.** É a
+primeira tela, e é onde o nome tem função: dizer de quem é a plataforma para
+quem ainda não sabe.
+
+O nome sai da tela, **não da acessibilidade**. O link do símbolo continua com
+`aria-label`, e é isso que o leitor de tela anuncia; o lockup do login tem `alt`
+com o nome e a assinatura. Símbolo sozinho sem rótulo é um botão mudo.
+
+Arquivos em `public/marca/`:
+
+```text
+innovar-icone-branco.png        símbolo branco — o da casca, sobre o azul-marinho
+innovar-icone.png               símbolo marinho sobre papel — portal e favicon
+innovar-icone-escuro.png        símbolo em bronze, para fundo escuro sem barra
+innovar-horizontal.png          lockup, nome em marinho — login no tema claro
+innovar-horizontal-escuro.png   lockup, nome em branco — login no tema escuro
+innovar-icone-grande.png        símbolo em resolução maior
+```
+
+O símbolo da casca é **um arquivo só**: branco serve nos dois temas, porque a
+barra é azul-marinho nos dois. Quem troca com o tema é o lockup do login, e a
+troca é por `display: none`, nunca por opacidade — o que está escondido não deve
+ocupar espaço nem ser lido.
+
+Os arquivos foram separados do papel do manual por distância de cor: cada pixel
+vira a tinta mais próxima com alfa proporcional à distância até o fundo. É o que
+preserva a suavização das letras sem deixar halo do off-white.
+
+**O símbolo é imagem, não letra.** Até 3 de agosto a barra desenhava as letras
+"IN" em cobre sobre o azul-marinho: 2,87:1, e era a **única reprovação de
+contraste que restava em todas as telas medidas**. Imagem não tem contraste de
+texto a cumprir, e o nome ao lado continua em texto de verdade — é ele que o
+leitor de tela anuncia e a busca do navegador encontra. Depois da troca, a
+auditoria fecha em **0 reprovação nos dois temas**.
+
 ## 3. Tipografia
 
 - usar pilha local e segura, sem depender de fonte remota para renderizar;

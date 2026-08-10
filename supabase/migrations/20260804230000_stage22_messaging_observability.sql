@@ -70,7 +70,7 @@ returns public.channel_runtime_observations
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_runtime_observations;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then raise exception 'OBSERVABILITY_FORBIDDEN'; end if;
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then raise exception 'OBSERVABILITY_FORBIDDEN'; end if;
   insert into public.channel_runtime_observations(
     organization_id,provider_type,provider_account_id,session_state,reconnects_window,
     ingress_rate,egress_rate,retry_rate,dlq_depth,media_quarantine_depth,
@@ -101,7 +101,7 @@ returns public.channel_operational_alerts
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_operational_alerts;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then raise exception 'OBSERVABILITY_FORBIDDEN'; end if;
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then raise exception 'OBSERVABILITY_FORBIDDEN'; end if;
   insert into public.channel_operational_alerts(
     organization_id,provider_type,provider_account_id,alert_code,severity,summary,
     observed_value,threshold_value,runbook,correlation_id
@@ -126,7 +126,7 @@ returns public.channel_operational_alerts
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_operational_alerts;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then raise exception 'OBSERVABILITY_FORBIDDEN'; end if;
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then raise exception 'OBSERVABILITY_FORBIDDEN'; end if;
   update public.channel_operational_alerts
   set status='ACKNOWLEDGED',acknowledged_by=auth.uid(),acknowledged_at=clock_timestamp()
   where id=p_alert_id and organization_id=p_organization_id and status='OPEN'
@@ -143,7 +143,7 @@ returns public.channel_operational_alerts
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_operational_alerts;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then raise exception 'OBSERVABILITY_FORBIDDEN'; end if;
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then raise exception 'OBSERVABILITY_FORBIDDEN'; end if;
   update public.channel_operational_alerts
   set status='RESOLVED',resolved_at=clock_timestamp()
   where id=p_alert_id and organization_id=p_organization_id and status in ('OPEN','ACKNOWLEDGED')

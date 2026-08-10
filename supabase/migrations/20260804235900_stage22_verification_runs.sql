@@ -37,7 +37,7 @@ returns public.channel_verification_runs
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_verification_runs;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then
     raise exception 'VERIFICATION_FORBIDDEN';
   end if;
   insert into public.channel_verification_runs(

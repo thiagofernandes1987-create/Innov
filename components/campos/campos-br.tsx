@@ -13,6 +13,7 @@ import {
   type Resultado,
   type TipoPessoa
 } from "@/lib/validacao/br";
+import { formatarDecimal, lerMoeda, mascararMoeda } from "@/lib/validacao/moeda";
 
 // Campos brasileiros como componentes, não `<input>` cru.
 //
@@ -233,5 +234,62 @@ export function CampoEmail(props: Base) {
       maxLength={254}
       placeholder={props.placeholder ?? "nome@dominio.com.br"}
     />
+  );
+}
+
+/**
+ * Campo de valor monetário.
+ *
+ * Substitui `<input type="number" step="0.01">`, que no teclado brasileiro é
+ * uma armadilha: quem digita "1.500" querendo mil e quinhentos grava **um e
+ * meio**. Erro de três ordens de grandeza num campo de dinheiro.
+ *
+ * A máscara é a de caixa — o número entra pela direita, em centavos — e o valor
+ * enviado ao servidor vai num `input` oculto já normalizado, com ponto decimal,
+ * para a ação não precisar adivinhar formato. O campo visível fica com
+ * `inputMode="numeric"`, que abre o teclado numérico no telefone.
+ */
+export function CampoMoeda({
+  name,
+  label,
+  defaultValue,
+  required,
+  placeholder,
+  ajuda
+}: {
+  name: string;
+  label: string;
+  defaultValue?: number | string | null;
+  required?: boolean;
+  placeholder?: string;
+  ajuda?: string;
+}) {
+  const id = useId();
+  const inicial = defaultValue === null || defaultValue === undefined || defaultValue === ""
+    ? ""
+    : formatarDecimal(Number(defaultValue));
+  const [texto, setTexto] = useState(inicial);
+  const numero = lerMoeda(texto);
+
+  return (
+    <label className="campo-br" htmlFor={id}>
+      <span>{label}</span>
+      <span className="campo-moeda">
+        <span className="campo-moeda-simbolo" aria-hidden="true">R$</span>
+        <input
+          id={id}
+          value={texto}
+          onChange={evento => setTexto(mascararMoeda(evento.target.value))}
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder={placeholder ?? "0,00"}
+          required={required}
+          aria-describedby={ajuda ? `${id}-ajuda` : undefined}
+        />
+      </span>
+      {/* O servidor recebe o número já normalizado; a máscara é só para os olhos. */}
+      <input type="hidden" name={name} value={numero === null ? "" : String(numero)} />
+      {ajuda ? <small id={`${id}-ajuda`} className="campo-br-aviso">{ajuda}</small> : null}
+    </label>
   );
 }

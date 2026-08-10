@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { CampoComSugestao } from "@/components/comum/campo-com-sugestao";
 import { IconeEngrenagem } from "@/components/casca/icones";
+import type { ValorDoCatalogo } from "@/lib/sugestoes/catalogo";
 import {
   alternarEtapaRecolhida,
   criarCartao,
@@ -325,9 +327,11 @@ export function MenuDaEtapa({
 /** Campo no fim das colunas — a etapa nasce onde ela vai ficar. */
 export function NovaEtapa({
   pipelineId,
+  sugestoesDeEtapa = [],
   aoFalhar
 }: {
   pipelineId: string;
+  sugestoesDeEtapa?: ValorDoCatalogo[];
   aoFalhar: (erro: string) => void;
 }) {
   const [aberto, setAberto] = useState(false);
@@ -348,13 +352,18 @@ export function NovaEtapa({
         >
           <label>
             <span className="sr-only">Nome da nova etapa</span>
-            <input
-              autoFocus
+            {/* Etapa de funil repete entre trilhas: "Qualificação", "Proposta
+                enviada", "Aguardando cliente" são as mesmas em quase todo funil
+                que a empresa cria. Modo controlado porque esta tela chama a ação
+                com o valor na mão, sem passar por formulário. */}
+            <CampoComSugestao
+              sugestoes={sugestoesDeEtapa}
               value={nome}
-              onChange={event => setNome(event.target.value)}
+              onValueChange={setNome}
               placeholder="Nome da etapa"
               maxLength={60}
               disabled={pendente}
+              autoFocus
             />
           </label>
           <div className="coluna-novo-cartao-acoes">

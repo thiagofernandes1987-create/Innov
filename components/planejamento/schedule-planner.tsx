@@ -36,6 +36,9 @@ import {
 } from "@/lib/planejamento/cronograma";
 import { feriadosNaFaixa, regimePorChave } from "@/lib/planejamento/calendario";
 import styles from "./schedule-planner.module.css";
+import { CampoComSugestao } from "@/components/comum/campo-com-sugestao";
+import { modeloPara, type ModeloDeEtapa } from "@/lib/planejamento/modelos-de-eap";
+import type { ValorDoCatalogo } from "@/lib/sugestoes/catalogo";
 
 const DAY = 86_400_000;
 const ROW_HEIGHT = 44;
@@ -243,6 +246,52 @@ function ModalShell({
   );
 }
 
+/**
+ * O conjunto que costuma vir com esta etapa.
+ *
+ * Aparece **só quando o nome digitado tem modelo**, e todas as atividades vêm
+ * marcadas. Vir marcado é a diferença entre a oferta valer e não valer: quem
+ * digitou "Fundação" pela terceira vez quer as cinco, e obrigá-lo a marcar
+ * cinco caixas devolveria o trabalho que o recurso existe para tirar. Desmarcar
+ * uma é um clique; marcar cinco são cinco.
+ *
+ * E é oferta, não imposição: desmarcar todas cria a etapa vazia, como sempre.
+ */
+function ModeloDeEtapaSugerido({ modelo }: { modelo: ModeloDeEtapa }) {
+  const [aberto, setAberto] = useState(true);
+  return (
+    <div className="modelo-de-etapa">
+      <div className="modelo-de-etapa-cabecalho">
+        <strong>
+          Esta etapa já foi montada {modelo.vezes} vezes, sempre com{" "}
+          {modelo.atividades.length === 1 ? "1 atividade" : `${modelo.atividades.length} atividades`}
+        </strong>
+        <button type="button" className="modelo-de-etapa-alternar" onClick={() => setAberto(a => !a)}>
+          {aberto ? "Ocultar" : "Ver"}
+        </button>
+      </div>
+      {aberto ? (
+        <>
+          <ul className="modelo-de-etapa-lista">
+            {modelo.atividades.map(atividade => (
+              <li key={atividade.titulo}>
+                <label className="modelo-de-etapa-item">
+                  <input type="checkbox" name="atividadeDoModelo" value={atividade.titulo} defaultChecked />
+                  <span>{atividade.titulo}</span>
+                  <small>{atividade.ocorrencias} de {modelo.vezes}</small>
+                </label>
+              </li>
+            ))}
+          </ul>
+          <p className="modelo-de-etapa-nota">
+            Desmarque o que não se aplica a esta obra. Nada é criado sem marcação.
+          </p>
+        </>
+      ) : null}
+    </div>
+  );
+}
+
 export function SchedulePlanner({
   projectId,
   projectStart,
@@ -252,7 +301,10 @@ export function SchedulePlanner({
   tasks,
   dependencies,
   today,
-  regime = "seg_sex"
+  regime = "seg_sex",
+  sugestoesDeEtapa = [],
+  modelosDeEap = [],
+  sugestoesDeAtividade = []
 }: {
   projectId: string;
   projectStart: string | null;
@@ -263,6 +315,11 @@ export function SchedulePlanner({
   dependencies: PlannerDependency[];
   today: string;
   regime?: string;
+  /** Vocabulário da organização: o que já foi digitado em outras obras. */
+  sugestoesDeEtapa?: ValorDoCatalogo[];
+  /** Modelos que emergem do histórico de EAP da organização. */
+  modelosDeEap?: ModeloDeEtapa[];
+  sugestoesDeAtividade?: ValorDoCatalogo[];
 }) {
   const [zoom, setZoom] = useState<ZoomMode>("day");
   const [criticalVisible, setCriticalVisible] = useState(true);
@@ -276,6 +333,18 @@ export function SchedulePlanner({
   const taskById = useMemo(() => new Map(tasks.map(task => [task.id, task])), [tasks]);
   const selectedTask = editorTaskId ? taskById.get(editorTaskId) ?? null : null;
 
+  // Volta para a aba "geral" quando o editor troca de tarefa.
+  //
+  // Ajuste **durante a renderização**, não em `useEffect`: o efeito rodava
+  // depois da pintura, então a aba antiga aparecia por um quadro na tarefa
+  // nova, e o lint reprova por renderização em cascata. O padrão do React para
+  // estado derivado de prop é comparar com o valor anterior guardado em estado.
+  const [tarefaDoEditor, setTarefaDoEditor] = useState<string | null>(editorTaskId);
+  if (tarefaDoEditor !== editorTaskId) {
+    setTarefaDoEditor(editorTaskId);
+    setEditorTab("general");
+  }
+
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -286,6 +355,14 @@ export function SchedulePlanner({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  // O nome digitado precisa ser observável para achar o modelo: o campo com
+  // sugestão passa a ser controlado só por isso.
+  const [tituloDaEtapa, setTituloDaEtapa] = useState("");
+  const modeloDaEtapa = useMemo(
+    () => modeloPara(modelosDeEap, tituloDaEtapa),
+    [modelosDeEap, tituloDaEtapa]
+  );
 
   const rows = useMemo(() => buildRows(wbsItems, tasks, collapsed), [wbsItems, tasks, collapsed]);
   const calculationDependencies = useMemo<Dependencia[]>(
@@ -399,11 +476,6 @@ export function SchedulePlanner({
   useEffect(() => {
     scrollToToday();
   }, [scrollToToday]);
-
-  function openTaskEditor(taskId: string): void {
-    setEditorTab("general");
-    setEditorTaskId(taskId);
-  }
 
   function toggleWbs(id: string): void {
     setCollapsed(current => {
@@ -620,8 +692,6 @@ export function SchedulePlanner({
                     const end = toDay(bar.termino);
                     const delayed = end < toDay(today) && row.task.progress < 1;
                     const visualWidth = (end - start + 1) * dayWidth;
-                    const hitWidth = Math.max(44, visualWidth);
-                    const hitOffset = (hitWidth - visualWidth) / 2;
                     const progressWidth = Math.round(visualWidth * row.task.progress);
                     return (
                       <div className={styles.timelineRow} key={`timeline-${row.key}`}>
@@ -693,9 +763,27 @@ export function SchedulePlanner({
           <form action={createScheduleWbs} className={styles.modalBody}>
             <input type="hidden" name="projectId" value={projectId} />
             <div className={styles.formGrid}>
-              <label className={styles.field}>Código EAP<input name="code" placeholder="1.2" required /></label>
+              <label className={styles.field}>Código EAP<input name="code" placeholder="automático" /><small className={styles.dica}>Deixe em branco para numerar sozinho: 1, 1.1, 1.2…</small></label>
               <label className={styles.field}>Etapa superior<select name="parentId" defaultValue=""><option value="">Etapa principal</option>{wbsItems.map(item => <option key={item.id} value={item.id}>{item.code} · {item.title}</option>)}</select></label>
-              <label className={styles.fullField}>Nome da etapa<input name="title" required /></label>
+              <label className={styles.fullField}>
+                Nome da etapa
+                {/* Campo com apoio, não lista fechada: o que a construtora já
+                    chamou de "Fundação" em outras obras aparece, e um nome
+                    inédito continua passando. */}
+                <CampoComSugestao
+                  name="title"
+                  sugestoes={sugestoesDeEtapa}
+                  value={tituloDaEtapa}
+                  onValueChange={setTituloDaEtapa}
+                  required
+                  maxLength={160}
+                />
+              </label>
+              {modeloDaEtapa ? (
+                <div className={styles.fullField}>
+                  <ModeloDeEtapaSugerido modelo={modeloDaEtapa} />
+                </div>
+              ) : null}
               <label className={styles.fullField}>Descrição<textarea name="description" /></label>
               <label className={styles.field}>Início planejado<input type="date" name="plannedStart" defaultValue={projectStart ?? ""} /></label>
               <label className={styles.field}>Término planejado<input type="date" name="plannedEnd" defaultValue={projectEnd ?? ""} /></label>
@@ -714,9 +802,12 @@ export function SchedulePlanner({
           <form action={createScheduleTask} className={styles.modalBody}>
             <input type="hidden" name="projectId" value={projectId} />
             <div className={styles.formGrid}>
-              <label className={styles.field}>Código<input name="code" placeholder="1.2.10" required /></label>
+              <label className={styles.field}>Código<input name="code" placeholder="automático" /><small className={styles.dica}>Em branco, segue a numeração da etapa escolhida.</small></label>
               <label className={styles.field}>Etapa da EAP<select name="wbsId" defaultValue=""><option value="">Sem etapa</option>{wbsItems.map(item => <option key={item.id} value={item.id}>{item.code} · {item.title}</option>)}</select></label>
-              <label className={styles.fullField}>Nome da atividade<input name="title" required /></label>
+              <label className={styles.fullField}>
+                Nome da atividade
+                <CampoComSugestao name="title" sugestoes={sugestoesDeAtividade} required maxLength={160} />
+              </label>
               <label className={styles.fullField}>Descrição<textarea name="description" /></label>
               <label className={styles.field}>Duração (dias úteis)<input type="number" min="1" step="1" name="durationDays" defaultValue="1" required /></label>
               <label className={styles.field}>Atividade superior<select name="parentTaskId" defaultValue=""><option value="">Nenhuma</option>{tasks.map(task => <option key={task.id} value={task.id}>{task.code} · {task.title}</option>)}</select></label>

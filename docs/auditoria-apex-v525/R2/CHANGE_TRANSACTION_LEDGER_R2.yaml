@@ -1,0 +1,256 @@
+round: R2
+count: 5
+changes:
+- change_id: CHG-0001
+  before_path: /tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/.empty-baseline
+  after_path: /tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/working/pnpm-lock.yaml
+  before_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  after_hash: 7071f0b865bd5295e69693a708dafd90795e450c865eb573ab3dbe013cad893c
+  diff_sha256: 490d6cf42138c05426328871568afe638224c739c2c882e8ec1cce16e74b6a8e
+  validation_ids: &id001
+  - VAL-0001
+  - VAL-0002
+  - VAL-0003
+  - VAL-0004
+  - VAL-0005
+  - VAL-0006
+  - VAL-0007
+  - VAL-0008
+  - VAL-0009
+  - VAL-0010
+  - VAL-0011
+  - VAL-0012
+  - VAL-0013
+  - VAL-0014
+  - VAL-0015
+  - VAL-0016
+  - VAL-0017
+  - VAL-0018
+  - VAL-0019
+  validations: &id002
+  - validation_id: VAL-0001
+    id: VAL-0001
+    check: validate:docs
+    command: node scripts/validate-documentation.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.07
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0002
+    id: VAL-0002
+    check: validate:vaccines
+    command: node scripts/validate-vaccines.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.06
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0003
+    id: VAL-0003
+    check: validate:migrations
+    command: node scripts/validate-supabase-migrations.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.06
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0004
+    id: VAL-0004
+    check: validate:stage9
+    command: node scripts/validate-stage9.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.06
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0005
+    id: VAL-0005
+    check: validate:stage12
+    command: node scripts/validate-stage12.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.05
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0006
+    id: VAL-0006
+    check: validate:stage12.1
+    command: node scripts/validate-stage12-1.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.05
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0007
+    id: VAL-0007
+    check: validate:stage12.2
+    command: node scripts/validate-stage12-2.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.05
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0008
+    id: VAL-0008
+    check: validate:stage13
+    command: node scripts/validate-stage13.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.05
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0009
+    id: VAL-0009
+    check: validate:stage14
+    command: node scripts/validate-stage14.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.05
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0010
+    id: VAL-0010
+    check: validate:stage15
+    command: node scripts/validate-stage15.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.05
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0011
+    id: VAL-0011
+    check: validate:stage16
+    command: node scripts/validate-stage16.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.05
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0012
+    id: VAL-0012
+    check: validate:stage17
+    command: node scripts/validate-stage17.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.06
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0013
+    id: VAL-0013
+    check: validate:stage18
+    command: node scripts/validate-stage18.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.05
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0014
+    id: VAL-0014
+    check: validate:stage19
+    command: node scripts/validate-stage19.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.05
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0015
+    id: VAL-0015
+    check: validate:stage20
+    command: node scripts/validate-stage20.mjs
+    exit_code: 0
+    status: PASS
+    duration_s: 0.05
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0016
+    id: VAL-0016
+    check: lint
+    command: pnpm lint
+    exit_code: 0
+    status: PASS
+    duration_s: 18.36
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0017
+    id: VAL-0017
+    check: typecheck
+    command: pnpm typecheck
+    exit_code: 0
+    status: PASS
+    duration_s: 3.73
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0018
+    id: VAL-0018
+    check: test
+    command: pnpm test
+    exit_code: 0
+    status: PASS
+    duration_s: 2.62
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  - validation_id: VAL-0019
+    id: VAL-0019
+    check: test:python
+    command: python3 -m unittest discover -s python/tests -v
+    exit_code: 0
+    status: PASS
+    duration_s: 0.06
+    evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+  created_at: 1784972526.292076
+  remediation_id: REM-0001
+  finding_id: FND-0001
+  path: pnpm-lock.yaml
+  operation: CREATE
+  intent: Lockfile versionado a partir do package.json auditado, sem alterar a política
+    de instalação vigente.
+  before_sha256: null
+  after_sha256: 7071f0b865bd5295e69693a708dafd90795e450c865eb573ab3dbe013cad893c
+- change_id: CHG-0002
+  before_path: /tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/ORIGINALS/snapshot/services/file-security-gateway/server.mjs
+  after_path: /tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/working/services/file-security-gateway/server.mjs
+  before_hash: fcda02a9600ae7bcc4712fb919f3a66ebc2cd240e156a2349919487ec983b7a5
+  after_hash: 581c36f4471e8c61263f1999a6c2b636130a9c02db26315908fa9f8dfd857cdc
+  diff_sha256: cff62502debe209578107e5fd1f0f8ea79df01540435f07ab9dd1ea1174ca0ed
+  validation_ids: *id001
+  validations: *id002
+  created_at: 1784972526.2932644
+  remediation_id: REM-0002
+  finding_id: FND-0003
+  path: services/file-security-gateway/server.mjs
+  operation: MODIFY
+  intent: Pré-condições de autenticação avaliadas antes de bufferizar o corpo da requisição.
+  before_sha256: fcda02a9600ae7bcc4712fb919f3a66ebc2cd240e156a2349919487ec983b7a5
+  after_sha256: 581c36f4471e8c61263f1999a6c2b636130a9c02db26315908fa9f8dfd857cdc
+- change_id: CHG-0003
+  before_path: /tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/.empty-baseline
+  after_path: /tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/working/tests/file-security-gateway-preconditions.test.ts
+  before_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  after_hash: 410125128e6fa61064787a79b5feb61b9e3d8da43eb88dd0d0333232552f41a0
+  diff_sha256: 5482f9312ab043cedd5475370f5a4661df0f039b97a43f4a3d07979361cd59ca
+  validation_ids: *id001
+  validations: *id002
+  created_at: 1784972526.2935984
+  remediation_id: REM-0002
+  finding_id: FND-0003
+  path: tests/file-security-gateway-preconditions.test.ts
+  operation: CREATE
+  intent: Teste de integração que sobe o gateway e prova a rejeição antecipada.
+  before_sha256: null
+  after_sha256: 410125128e6fa61064787a79b5feb61b9e3d8da43eb88dd0d0333232552f41a0
+- change_id: CHG-0004
+  before_path: /tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/.empty-baseline
+  after_path: /tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/working/tests/security-controls.test.ts
+  before_hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  after_hash: e84922a80ba3767509064402999e8e6d79e57983f8db5fe6476dab6a72070a01
+  diff_sha256: 2a78f23a444fc24164c3a2479262ff8a19e1a3e462dca068ed1b2e5697a4e566
+  validation_ids: *id001
+  validations: *id002
+  created_at: 1784972526.2940187
+  remediation_id: REM-0003
+  finding_id: FND-0004
+  path: tests/security-controls.test.ts
+  operation: CREATE
+  intent: Testes unitários para o guarda de redirecionamento interno e para o mapeador
+    de erro público.
+  before_sha256: null
+  after_sha256: e84922a80ba3767509064402999e8e6d79e57983f8db5fe6476dab6a72070a01
+- change_id: CHG-0005
+  before_path: /tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/ORIGINALS/snapshot/.env.example
+  after_path: /tmp/claude-0/-home-user-Innov/a43672f1-a532-5350-8788-11f0bd975e9b/scratchpad/audit/R2/working/.env.example
+  before_hash: 51d35210fa023265d4ffa3408ebf51c64a2a8d0411a800668970bf6b6c133787
+  after_hash: 369725b0c7fcafe736d77bf3ec41b41e71e4d93d4c0b466ee1f5a98151a2da33
+  diff_sha256: 1ea5cf59fe79add1ecbac7c8610556485d4f3a55fe16fa762c6c308320a66d32
+  validation_ids: *id001
+  validations: *id002
+  created_at: 1784972526.2942832
+  remediation_id: REM-0004
+  finding_id: FND-0009
+  path: .env.example
+  operation: MODIFY
+  intent: Variáveis de provedores sem consumidor marcadas explicitamente como reservadas.
+  before_sha256: 51d35210fa023265d4ffa3408ebf51c64a2a8d0411a800668970bf6b6c133787
+  after_sha256: 369725b0c7fcafe736d77bf3ec41b41e71e4d93d4c0b466ee1f5a98151a2da33

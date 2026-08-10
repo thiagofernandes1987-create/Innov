@@ -392,6 +392,13 @@ Descoberto em 25 de julho de 2026, ao executar o replay pedido pela T-21.3.3. En
 
 **O repositório não reconstrói o banco. Replay em base limpa: 0 de 111 migrations.**
 
+> **Medição refeita em 3 de agosto de 2026, com PostgreSQL 16 subido para isso: 0 de 150.**
+> Falha na primeira migration aplicada, em `20260719214500_stage10_homologation_hardening.sql`,
+> por `function public.touch_updated_at() does not exist`. Quarenta dias depois, o que mudou foi
+> o denominador. `has_module_permission` continua sendo chamada por 346 trechos de migration e
+> criada por nenhum; a única definição no repositório é um dublê de teste que sempre concede.
+> Registrado também em `diretrizes/mapa-do-codigo.debito.json` e na VACINA-056.
+
 O achado central é este:
 
 > **`has_module_permission` não existe em nenhum arquivo do repositório.** É a função no centro do modelo de autorização, chamada por **41 dos 111** arquivos de migration, e a definição dela só existe dentro do banco de homologação.
@@ -408,7 +415,7 @@ Dois modos de falha distintos, que pedem soluções distintas:
 - [ ] T-22.3 — `pnpm test:db:replay` verde: 100% das migrations aplicando em base limpa
 - [ ] T-22.4 — Comparar o esquema reconstruído com o da homologação, objeto a objeto — tabelas, colunas, funções, policies, índices e privilégios
 - [ ] T-22.5 — Completar o bootstrap de fronteira conforme o replay for descobrindo lacunas, distinguindo defeito da fixture de defeito do repositório
-- [ ] T-22.6 — Ligar o replay ao CI, para que a promessa de recuperação passe a ser verificada a cada mudança e não uma vez por descoberta
+- [ ] T-22.6 — Ligar o replay ao CI, para que a promessa de recuperação passe a ser verificada a cada mudança e não uma vez por descoberta. **Pré-requisito já feito:** `--exigir` faz o script reprovar quando o banco falta, em vez de sair 0 dizendo que não rodou (VACINA-056) — sem isso, ligar ao CI produziria um passo verde que não verifica nada
 - [ ] T-22.7 — Propor a substituição da prevenção da VACINA-003: comparação viva contra o ledger remoto e replay executável, no lugar da lista fixa de quatro arquivos
   - [ ] T-22.7.1 — Portão 1, eliminatório: cobre a mesma causa raiz com garantia maior — detecta divergência em qualquer direção, e não só nos quatro arquivos congelados
   - [ ] T-22.7.2 — Portão 2: retorno material — a detecção atual é zero para tudo criado depois da vacina, e deixou passar 102 migrations
@@ -975,12 +982,418 @@ comprador, almoxarife, qualidade, contratos, diretoria ou auditoria.
 
 ---
 
+## Sprint S-31 — Qualidade: Ishikawa sobre dado, Pareto sobre custo, e a cobrança do gestor
+**Estado:** pendente
+**Marco:** M-5
+
+Ditada pelo responsável em 27 de julho:
+
+> "daí Pareto e Ishikawa entram na qualidade, entendeu como tudo se conecta? daí
+> você começa mapear e identificar os erros (…) daí você começa a pegar custos
+> invisíveis, identificar pontos de falha, consegue identificar qual área precisa
+> de maior atenção, começa a criar treinamentos para começar a capacitar e
+> corrigir as equipes, consegue cobrar as pessoas que estão em nível gerencial"
+
+Desenho, aritmética e dissecação em
+[`QUALIDADE-CAUSA-RAIZ.md`](QUALIDADE-CAUSA-RAIZ.md). Dono da rotina é a persona
+**P12**, cuja matriz já declara 8D, 5 porquês, PDCA e verificação de eficácia —
+esta sprint dá a **aritmética** que faltava a essas técnicas. Vai para o fim
+conforme R4.
+
+### O achado que ordena a sprint
+
+Pareto sobre 1.584 dias-montagem/ano, com custo por ocorrência = horas paradas ×
+R$ 104,00 + retrabalho:
+
+| Causa | Ocor./ano | R$/ano | Acum. | Espinha 6M |
+|---|---:|---:|---:|---|
+| Medida diferente do projeto | 190 | **387.003** | 48,1% | Medição |
+| Peça faltando ou trocada | 158 | **158.552** | 67,8% | Método |
+| Chuva ou condição | 63 | **52.716** | 74,3% | Meio ambiente |
+| Acesso bloqueado | 95 | 49.421 | 80,5% | Meio ambiente |
+| Cliente muda no local | 79 | 44.986 | 86,1% | Método |
+| Ferragem errada | 111 | 43.021 | 91,4% | Material |
+| Sem energia / andaime | 127 | 39.537 | 96,3% | Meio ambiente |
+| Outra equipe no ambiente | 143 | 29.652 | 100,0% | Método |
+| **Total** | | **804.887** | | |
+
+**3 causas de 8 concentram 80% da perda.** E o achado que justifica a sprint
+inteira: somando por espinha do Ishikawa, **mão de obra responde por 0,0%**.
+Nenhuma das oito causas é do montador — mas sem dado a classificação default é
+"falta de atenção", o treinamento vai para quem não causou o problema, e a
+reunião seguinte conclui que "o pessoal não aprende".
+
+Custo invisível anual: **R$ 986.715**, sendo R$ 804.887 o Pareto acima
+decomposto e **R$ 181.827** de hora de gestão apagando incêndio, retorno de
+assistência evitável e escopo executado e não cobrado. Nenhum tem linha própria
+no DRE — aparecem diluídos em folha, frete e "margem menor que a esperada".
+
+Retorno de atacar a causa 1 (a T-28.2, já registrada): reduzir 30% economiza
+**R$ 116.101/ano**, e uma ação de R$ 25.000 paga em **2,6 meses**. Esta sprint
+não pede trabalho novo — ela **precifica** o que já estava na fila e mostra que
+é o mais rentável de todos.
+
+### Tarefas
+
+- [ ] T-31.0 — **Sintoma e causa como campos separados**, com Pareto rodando sobre **causa**. "Porta desalinhada" 40 vezes vira projeto de melhoria de porta quando a causa era assentamento de piso — sintoma agrupa chamado, causa decide investimento
+- [ ] T-31.1 — **Classificação nos 6M no momento do fato**, por quem estava lá, com exemplos por espinha
+  - [ ] T-31.1.1 — Painel de distribuição por espinha, com alerta de concentração: 100% numa espinha só é classificação preguiçosa, não operação com causa única
+  - [ ] T-31.1.2 — Auditoria por amostragem cruzando causa declarada com evidência anexada; e comparação entre equipes, porque distribuição muito diferente na mesma praça é classificação diferente, não operação diferente
+- [ ] T-31.2 — **Pareto ordenado por custo**, com frequência como segunda leitura. Calculado, a causa mais frequente da lista responde por 3,7% da perda — priorizar por frequência é trabalhar muito para economizar pouco
+- [ ] T-31.3 — **Custo invisível publicado em reais**, por obra e por carteira. Enquanto for adjetivo, não entra em decisão
+- [ ] T-31.4 — **Reincidência 6+6 como prova da ação**, na mesma janela da `KPIS.md`
+  - [ ] T-31.4.1 — **Cobertura de apontamento no mesmo gráfico** (T-28.10): queda de ocorrência com queda de cobertura não é melhoria, é o sistema perdendo visão — e precisa aparecer como alerta, não como conquista
+- [ ] T-31.5 — **Plano de ação amarrado à causa**, com dono nominal, prazo, e eficácia verificada pela reincidência e não pela conclusão da tarefa. Causa de classe A sem ação é decisão de não agir, e fica registrada como tal
+- [ ] T-31.6 — **Cinco porquês apoiados em registro**: cada nível referencia parada, foto, medição ou documento. Nível sem evidência fica marcado como hipótese, e hipótese não vira plano de ação de classe A
+- [ ] T-31.7 — **Da causa ao treinamento**: cada causa aponta competência nomeada da matriz de `PERSONAS-E-ROTINAS.md` e o nível alvo. Transforma "precisamos treinar a equipe" em "três projetistas precisam subir de 3 para 4 em metrologia, e isso vale R$ 193.501/ano". Subida de nível se afirma por reincidência, não por certificado de presença
+- [ ] T-31.8 — **Painel do gestor**, com o que é dele e não do campo: tempo de resposta à solicitação, cobertura de apontamento da equipe, reincidência sob sua alçada, causas classe A com ação aberta, evolução da matriz da equipe e custo invisível da carteira
+  - [ ] T-31.8.1 — Regra registrada: gestor com equipe de `TEP` ruim **e** resposta em três dias tem problema de gestão; com resposta em 40 minutos tem problema de competência ou de recurso. Sem separar os dois, toda reunião de resultado termina cobrando quem estava na obra
+- [ ] T-31.9 — **Registrar problema nunca pode piorar o indicador de quem registrou**: parada com obrigação de terceiro não entra na produtividade de quem a abriu, e taxa de registro é indicador **positivo** do gestor. É a falha que inutiliza o programa inteiro — se registrar dói, ninguém registra, e a operação fica cega com o painel verde
+
+---
+
+## Sprint S-32 — Reúso de informação: sugestão, documento por modelo e campo próprio
+**Estado:** pendente
+**Marco:** M-5
+
+Ditada pelo responsável em 2 de agosto. Desenho e dissecação em
+[`REUSO-DE-INFORMACAO.md`](REUSO-DE-INFORMACAO.md). Vai para o fim conforme R4.
+
+### O levantamento que mudou o escopo
+
+Metade do pedido **já estava no banco**, e conferir antes de desenhar evitou
+reconstruir o que funciona:
+
+| Pedido | Situação |
+|---|---|
+| Vários seguidores por cartão | **Pronto**: `pipeline_card_followers` com RLS, ações e interface. Verificado no cartão — *"SEGUIDORES 1 · Deixar de seguir"* |
+| Modelo com variáveis | **Metade**: `contract_templates.body_template` e `variables_schema` existem desde a etapa 9; falta o motor e falta sair de contrato |
+| Campos próprios | **Desenhado e nunca construído**: `OBJECT-RUNTIME.md` é canônico e não tem uma migration sequer |
+| Auto-sugestão | Não existe |
+
+### Tarefas
+
+- [x] T-32.0 — **Catálogo de valores usados** por `(organização, escopo, valor)`, com contagem e último uso. Uma tabela e um componente de campo servem a EAP, funil, marcador, disciplina, unidade, motivo de perda e motivo de parada. **Dois escopos ficaram de fora por não existir campo onde ligar**, não por falta de trabalho: marcador de cartão e motivo de parada de obra — parada é da S-28, e o marcador voltou como T-34.10.1. **Motivo de perda saiu do catálogo por decisão** e virou lista cadastrada na S-34: cura-se o que alimenta contagem, observa-se o que nomeia
+  - [x] T-32.0.1 — Ordenar por frequência recente e cortar em 8; digitar filtra. Sugestão com 300 valores é ruído — `lib/sugestoes/catalogo.ts` com decaimento de meia-vida 90 dias; 18 testes em `tests/sugestoes.test.ts`; verificado no navegador (`verif28.mjs`, passo 4: digitar filtrou de 2 para 1)
+  - [x] T-32.0.2 — Valor usado uma vez só há mais de 6 meses sai da lista: erro de digitação antigo não vira sugestão para sempre — regra em `ordenarSugestoes`, com teste do caso simétrico (usado várias vezes há muito tempo permanece: é vocabulário sazonal, não erro)
+  - [x] T-32.0.3 — **Sugestão nunca é lista fechada.** É campo de texto com apoio, e valor novo sempre passa — `components/comum/campo-com-sugestao.tsx`, ligado à EAP e às atividades do cronograma; verificado no navegador: valor inédito gravou (passo 2) e voltou como sugestão no uso seguinte (passo 3)
+  - [x] T-32.0.4 — Limpar o catálogo é ação de administrador, porque o catálogo é da organização — `/app/administracao/vocabulario` com `requireCapability("administracao","manage")` na tela e `has_module_permission(…,'administracao','DELETE')` na função do banco. Teste negativo executado contra a API: limpar catálogo de outra organização recusa (`P0001`), gravar em outra organização recusa, sem autenticação recusa no `grant` (`42501`), e na própria organização devolve 204. Verificado no navegador que remover tira da tela **e** da sugestão do cronograma
+  - [x] T-32.0.5 — Ligar o campo com sugestão nos escopos que têm campo real: **etapa do funil** (coluna nova, em modo controlado), **disciplina de documento** (no acervo geral e na obra) e **unidade de medida** (item manual de orçamento). Os três gravam e leem, verificados no navegador
+    - Disciplina na obra era `select` de nove opções fixas — lista fechada, que a diretriz proíbe. As nove viraram sugestão padrão da plataforma e qualquer outra passa: verificado que "Paisagismo" é aceito
+    - `comPadroes` existe para o dia zero: catálogo vazio com campo sem sugestão nenhuma seria pior que a lista fechada substituída. Padrão nunca envelhece como engano e a tela diz "sugestão padrão", não "usado 0 vezes"
+    - **Marcador de cartão** e **motivo de parada** não foram ligados porque os campos não existem no produto — parada de obra é da S-28
+    - **Motivo de perda** não foi ligado por decisão, não por falta: o único campo é a mesma caixa de "Motivo/observação" de toda mudança de estágio, prosa sobre uma negociação. Sugerir ali empurraria a reutilizar um motivo genérico — dado errado com aparência de arrumado. Registrado em T-33.13
+  - [x] T-32.0.6 — Campo curto e próprio de motivo de perda no funil, separado da observação livre da mudança de estágio; só então ligar `negocio.motivo_perda` — a caixa única "Motivo/observação" virou dois campos: **motivo** curto, com sugestão, que só aparece ao escolher "Perdida"; e **observação** livre, em toda mudança. Coluna `note` em `crm_opportunity_stage_history` e quarto parâmetro em `move_crm_opportunity_stage`, com a assinatura antiga de três argumentos removida para não sobrar caminho que grava sem observação em silêncio. Linhas antigas não são reclassificadas: o que está em `reason` foi escrito sob a regra antiga e decidir por elas seria inventar dado. Verificado no navegador — motivo escondido fora de "Perdida", obrigatório dentro, perda sem motivo recusada, e o par gravado separado (`lost_reason` + `note`) com o motivo entrando no vocabulário. **Corrigido na S-34 no mesmo dia**: o responsável pediu lista cadastrada, não campo livre com sugestão, e está certo — motivo de perda alimenta contagem, e contagem não fecha sobre texto que cada pessoa escreve do seu jeito
+- [x] T-32.1 — **Modelo de EAP**: sugerir o conjunto, não só a palavra — `lib/planejamento/modelos-de-eap.ts`, **observado e não cadastrado**, pelo critério da S-34: cura-se o que alimenta contagem, observa-se o que nomeia. Modelo declarado envelheceria separado do modelo praticado; este emerge das obras que a empresa já montou
+  - [x] T-32.1.1 — Duas ocorrências anteriores criam modelo: a terceira criação é a que recebe a oferta. Uma repetição pode ser coincidência de duas obras parecidas
+  - [x] T-32.1.2 — Atividade entra quando aparece na **maioria** das ocorrências. Unanimidade descartaria o modelo por causa de um imprevisto; qualquer uma faria o modelo virar a união de tudo que já foi feito
+  - [x] T-32.1.3 — **A ordem é a sequência do trabalho, não a frequência.** Defeito encontrado na tela: a primeira versão ordenava por contagem e caía no desempate alfabético — o modelo saiu "Armação, Escavação, Forma", que é a ordem errada de construir. Passa a ordenar pela posição típica, com frequência só como desempate; e a leitura do histórico ordena as atividades dentro da etapa, senão a posição não significa nada
+  - [x] T-32.1.4 — Tudo vem marcado, e nada acontece sem marcação. Vir marcado é a diferença entre a oferta valer e não valer — desmarcar uma é um clique, marcar cinco são cinco; e desmarcar todas cria a etapa vazia como sempre
+  - [x] T-32.1.5 — Verificado no navegador com histórico montado pela própria tela: sem histórico o bloco não aparece, na terceira vez ele oferece as três atividades na ordem de construir, nome inédito não oferece nada, e criar traz o conjunto ligado à etapa com numeração sequencial (6.1, 6.2, 6.3)
+- [x] T-32.2 — **Motor de documento por modelo**, um só para proposta, orçamento, contrato, laudo e ordem de serviço — corpo, variáveis e pré-visualização em 2 de agosto; **gravar, publicar, arquivar e importar em 3 de agosto**. A nota de pendência que ficou aqui (T-32.2.5 e T-32.2.7) estava vencida: as duas subtarefas foram entregues no mesmo dia e a linha do pai não acompanhou. **Conferido agora, e uma delas estava descrita errado**: T-32.2.7 dizia "tabela sem UPDATE", e `emitted_documents` tinha `grant update, delete` para `anon` e `authenticated` — a imutabilidade vinha da **ausência de política** sob RLS forçada, que funciona e depende de ninguém acrescentar uma política `for all`. Privilégio revogado; ver T-33.21 e VACINA-059
+  - [x] T-32.2.1 — Corpo em **Markdown**, não editor proprietário: versiona em diff legível, converte para PDF e DOCX e sobrevive à plataforma. O editor é visual, o que grava é Markdown
+  - [x] T-32.2.17 — **Aplicativo próprio: Modelos e Documentações** (`/app/modelos`), com **uma tabela só** para proposta, orçamento, contrato, aditivo, termos, FVS, FVM, procedimento, mensagens de CRM, mensagem por etapa do funil, lembrete, agendamento, e-mail e e-mail marketing — 35 tipos em 7 categorias. **Correção de rota pedida pelo responsável em 3 de agosto**: o desenho anterior prendia cada modelo ao módulo emissor, e ele apontou o caso que derruba isso — enviar a proposta na etapa de projeto, ou o contrato assinado. Registrado em `VACINA-050`
+  - [x] T-32.2.18 — **Todo aplicativo lê o mesmo acervo.** A permissão é a do aplicativo `modelos`; `document_type` classifica. Conferido: proposta aparece em Obras e contrato chega ao pós-venda, os dois casos que o responsável citou, escritos como teste
+  - [x] T-32.2.19 — **Disponibilização por aplicativo, com checks, na Administração** (`/app/administracao/modelos`), gravada por empresa em `document_module_types`. É filtro de lista, **não permissão**, e a tela diz isso. Um aplicativo por vez: 19 × 35 numa grade seriam 665 caixas, e ninguém confere 665 caixas
+  - [x] T-32.2.20 — **Duas origens.** `PLATAFORMA` vale para todas as empresas e muda por migration; `ORGANIZACAO` é da empresa. Quem quer sua versão do padrão **duplica**, com `derived_from` guardando de onde veio — editar por cima mudaria o de todas as outras
+  - [x] T-32.2.2 — **Variável escolhida, não decorada**: nome legível e valor de exemplo do registro atual, agrupada por escopo; clicar insere no cursor. Decorar nome de variável é a razão de esse recurso morrer sem uso. **Fica atrás de um botão "Variáveis ▾" na barra de ferramentas, com busca**, e não em painel fixo na lateral — correção do responsável em 3 de agosto sobre o layout que ele mesmo desenhou: painel fixo cobra largura permanente de quem escreve por uma ação ocasional
+  - [x] T-32.2.3 — Vocabulário `{{escopo.campo}}` — `{{cliente.nome_completo}}`, `{{obra.codigo}}`, `{{orcamento.valor_total}}`, `{{hoje}}`. O editor aceita também a forma com sublinhado na colagem e normaliza
+  - [x] T-32.2.4 — **Substituição, nunca execução**: sem expressão, sem laço, sem chamada, com HTML escapado. Modelo é dado, e dado que executa é o caminho mais curto para extrair o que não se pode ver
+  - [x] T-32.2.9 — **Tabela `document_templates`** com `module_key` e `purpose`, RLS pela permissão do módulo, aplicada e conferida no banco: RLS ligada, forçada e quatro políticas
+  - [x] T-32.2.5 — **O dicionário respeita a RLS** de quem gera. `lib/documentos/resolucao.ts` consulta com o cliente da sessão, nunca com `service_role`: quem não pode ler um cliente recebe lacuna no lugar do nome dele. Se usasse o cliente administrativo "porque é só leitura", bastaria escrever `{{cliente.documento}}` num modelo para extrair o que a permissão nega
+  - [x] T-32.2.12 — **Gravar, abrir, publicar e arquivar pela tela.** Explorador lista o acervo agrupado por categoria e tipo; `File` abre, salva, salva como, publica, arquiva e importa
+  - [x] T-32.2.13 — **Salvar não rebaixa publicado** (`VACINA-049`). O estado seguinte é lido do atual, e alterar publicado exige a mesma alçada de publicar — no aplicativo **e** na política de `UPDATE` do banco, migration `20260803120000`. Arquivar continua exigindo só `EDIT`: tirar de circulação um modelo com defeito tem de ser barato
+  - [x] T-32.2.14 — **Concorrência tratada, não ignorada**: `version_number` viaja no formulário e a gravação só acontece se a versão ainda for aquela. Duas abas editando o mesmo modelo: a segunda grava, a primeira recebe "alguém salvou depois de você (versão 3)" **com o texto preservado** — não o silêncio de sobrescrever o trabalho do outro
+  - [x] T-32.2.15 — **Importar DOCX, XLSX, CSV, TXT e Markdown, sem dependência.** `.docx` e `.xlsx` são ZIP com XML, e o navegador descomprime sozinho com `DecompressionStream`. A conversão acontece **na máquina de quem importa**: modelo de proposta traz preço, cliente e margem, e nada disso precisa sair para virar texto. `.doc`, `.xls`, `.rtf`, `.odt` e `.pdf` são **recusados com o motivo e o que fazer** — PDF é o único que pediria biblioteca de verdade
+  - [x] T-32.2.16 — Verificado com os **dois arquivos reais entregues pelo responsável** em 3 de agosto: um procedimento operacional (535 linhas, 6 títulos, 15 tabelas, 86 itens de lista) e uma proposta de fundações (233 linhas, 1 tabela). Foi neles que apareceram os defeitos que exemplo de manual não mostra — runs vizinhos partidos no meio da palavra e estilo de título no idioma da instalação do Word
+  - [x] T-32.2.6 — **Variável não resolvida aparece**, com contagem de lacunas no envio e bloqueio antes da assinatura. Documento assinado com buraco em branco é pior que documento que não gerou
+  - [x] T-32.2.7 — **Documento emitido guarda o texto resolvido**, nunca a referência ao molde: contrato não pode mudar porque alguém editou o modelo depois. Tabela `emitted_documents` **sem UPDATE e sem DELETE** — corrigir um documento emitido é emitir outro —, com SHA-256 do texto, as lacunas do instante da emissão e `template_id` só como procedência
+  - [x] T-32.2.21 — **Tela de emissão** (`/app/modelos/emitir`): escolher modelo e registros, conferir a prévia, emitir. A prévia e a gravação são **o mesmo caminho no servidor**, com um campo a menos — prévia calculada no navegador mostraria valores que o servidor recusaria a preencher. Só modelo publicado emite
+  - [x] T-32.2.22 — `VACINA-051`: a prévia saía com 7 lacunas e o documento emitido com 11. O `select` controlado perde a seleção **no DOM** quando a resposta da server action re-renderiza a árvore, e é o DOM que o formulário envia; o estado do React ficava intacto o tempo todo. Corrigido, e a verificação passou a comparar as duas contagens
+  - [x] T-32.2.8 — Validação do modelo lista variáveis inexistentes **antes** de publicar
+  - [x] T-32.2.10 — **Interface no layout entregue pelo responsável**: barra do documento, barra de menu (File · Edit · Inserir · View), barra de ferramentas e três regiões — explorador ⟷ editor ⟷ pré-visualização — com explorador e prévia ligando e desligando pelo menu View. Conferido em navegador em 1366, 1440 e 1920: três regiões, sem transbordo, sem erro de console
+  - [x] T-32.2.11 — **Numeração de linha por espelho**: cada linha lógica é repetida invisível com a mesma fonte e a mesma largura de conteúdo do campo, para o número ficar na altura certa quando a linha quebra sozinha. Contar `\n` erra assim que um parágrafo ocupa duas alturas, e na coluna de 474px do editor a 1366 quase todo parágrafo ocupa. Medido: linha que quebra ocupa 69px contra 23px, e o número seguinte cai abaixo dos 69px; a numeração acompanha o tamanho escolhido na barra e a rolagem do campo
+- [x] T-32.3 — **Campos próprios por objeto**, primeiro corte do Object Runtime. **A nota "nunca virou migration" estava errada e o erro era pior do que ela**: as duas migrations existiam desde 26 de julho, o validador de invariantes rodava verde no CI e os catorze testes de banco passavam — e as três tabelas **não existiam no banco**. Ninguém tinha aplicado. Registrado na VACINA-057
+  - [x] T-32.3.0b — **A guarda de permissão citava uma ação que não existe.** As três RPCs pediam a ação `configure`, e `has_module_permission` resolve a ação num `case` fechado com `else false`: negava todo mundo, inclusive SUPER_ADMIN. `publish_object_definition`, de 26 de julho, **nunca foi executável**. Descoberto ao rodar a tela com sessão de administrador de verdade. A fixture dos testes de banco era mais permissiva que a função real e por isso os catorze testes passavam. Corrigido para `administer`, fixture endurecida e `validate:module-keys` passou a conferir o quinto argumento. VACINA-058
+  - [x] T-32.3.0a — **Faltava caminho de escrita para criar a definição**: a fundação tinha a tabela e a publicação, e nenhuma RPC que criasse a linha. `draft_spec`, `create_object_definition` e `save_object_definition_draft`, com 12 testes de comportamento novos
+  - [x] T-32.3.0 — Fundação aplicada e conferida no banco: `object_definitions`, `object_definition_versions` e `object_field_slots` com RLS habilitada e forçada, escrita só por RPC, guarda de imutabilidade da versão publicada, projeção de slots derivada do spec pelo próprio banco e `publish_object_definition` com `security definer` e `search_path` fixo. As autoverificações embutidas nas migrations passaram na aplicação
+  - [x] T-32.3.1 — A tela pergunta **o que a informação faz** — "é uma data?", "é uma pessoa da equipe?", "é dinheiro?" — e o tipo sai daí. O usuário não responde "qual tipo?" na forma técnica. `lib/object-runtime/proposito.ts` traduz quinze propósitos em quinze tipos, com exemplo de obra e o efeito de cada escolha; a chave técnica sai do rótulo (`Responsável pela vistoria` → `responsavel_pela_vistoria`, `2ª medição` → `campo_2a_medicao`). Medido no navegador: as quinze perguntas aparecem, nenhuma usa vocabulário do motor e a palavra "tipo" não aparece no bloco da pergunta. Teste negativo: acrescentar um tipo em `FIELD_TYPES` sem propósito reprova a suíte — tipo sem pergunta é tipo que nenhuma tela alcança
+  - [x] T-32.3.2 — **Nasce filtrável**: campo que não entra na busca vira campo que ninguém lê. Todo tipo com coluna-slot nasce marcado, e o orçamento aparece na tela enquanto ainda dá para escolher — não na publicação, com trinta campos digitados. Medido: o terceiro campo de data foi recusado com "passou do limite de campos filtráveis desse tipo", e o campo de texto longo mostra "não entra na busca — este tipo não tem coluna filtrável"
+  - [x] T-32.3.0c — **A camada de registros não existia**, e sem registro não há "quando preenchido": T-32.3.3 não tinha onde acontecer. `object_records` particionada em 64 por `hash(organization_id)`, catorze índices parciais de slot, uma política de RLS e `object_record_upsert` — itens 2 e 3 da primeira fatia do contrato
+  - [x] T-32.3.3 — Campo do tipo pessoa **inscreve como seguidor** quando preenchido — é o que faz "arquiteto do projeto" valer mais que texto. `object_record_followers` guarda também **qual campo** inscreveu; regravar não duplica; uuid que não é usuário não vira seguidor e não derruba a gravação; e ninguém é desinscrito ao sair do campo — sair da lista é ato de quem segue
+  - [x] T-32.3.4 — Sugestão de campo existente por nome parecido **antes** de criar, para não nascerem "Arquiteto" e "arquiteto". Três motivos: mesmo nome, um nome dentro do outro e quase o mesmo nome (distância de edição ≤ 2, a partir de cinco caracteres — com três letras, duas trocas ligam qualquer palavra a qualquer outra). Medido na tela: "Arquiteto responsável" com "Arquiteto" já declarado abre a pergunta com as duas saídas, o campo **não** é criado enquanto ela está aberta, "usar o que já existe" volta sem criar e "criar assim mesmo" cria e limpa a pergunta
+  - [x] T-32.3.5 — Arquivar em vez de excluir, preservando o preenchido; obrigatoriedade vale para frente e não invalida registro antigo. Antes da primeira publicação o botão é **Remover** (não existe registro); depois, **Arquivar**. Arquivado sai do formulário, continua na lista, **devolve a coluna-slot** — medido: 1 de 2 em "pessoa e registro" volta para 0 de 2 — e perde a obrigatoriedade, porque arquivado e obrigatório ao mesmo tempo é registro que ninguém salva. A obrigatoriedade nova vale para frente porque a RPC valida contra a **versão do registro**, não a de hoje; provado com teste negativo — trocar por `current_version` reprova a suíte
+
+### Ordem, e por que ela mudou
+
+O desenho original era sugestão → documento → campo próprio. **O responsável
+inverteu os dois primeiros em 2 de agosto**, com a justificativa que decide:
+
+> "o editor tem que ser uma prioridade para continuar a desenvolver os outros
+> módulos que utilizam documentações, como propostas, layouts de mensagens
+> padrão, orçamentos, FVS, FVM, um monte de apps dependem desse módulo"
+
+É pré-requisito descoberto, o caso previsto na R5. O motor de documento não é
+uma funcionalidade do módulo de propostas: é **infraestrutura de sete módulos**,
+e construir cada um sem ele significa construir sete editores que depois
+precisam ser desfeitos.
+
+Quem depende, nominalmente:
+
+| Módulo | O que precisa do motor |
+|---|---|
+| Propostas | Corpo da proposta com dados do cliente e do orçamento |
+| Orçamentos | Layout padrão de envio |
+| Contratos | Já tem `contract_templates`, sem motor |
+| Aditivos | Mesmo corpo do contrato, com o que mudou |
+| Qualidade | **FVS e FVM** — ficha de verificação de serviço e de material |
+| Relacionamento | Layouts de mensagem padrão, e-mail e WhatsApp |
+| SAC | Resposta padrão e laudo de atendimento |
+
+Ordem vigente: **motor de documento → sugestão → campo próprio.** Sugestão
+continua barata e entrega sozinha, mas não destrava ninguém; o motor destrava
+sete.
+
+---
+
+## Sprint S-33 — Defeitos silenciosos encontrados na verificação da S-32
+
+**Estado:** pendente
+
+Descobertos ao verificar T-32.0 no navegador, e registrados no fim conforme a
+R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
+
+- [x] T-33.0 — **Embed ambíguo derruba a consulta inteira** (VACINA-052). A tela de obras listava zero com duas obras no banco, e a obra existente respondia 404. Sete telas, quatro pares de tabelas. Corrigido com chave nomeada; falha de carga separada de registro inexistente; `pnpm validate:postgrest-embeds` reconstrói o grafo de chaves estrangeiras e reprova embed ambíguo sem chave — provado com teste negativo
+- [x] T-33.1 — **Chave de módulo inexistente nega todo mundo** (VACINA-053). `'dashboard'` não existe em `app_modules`, e o catálogo de valores nunca gravava. O mesmo validador encontrou `'modelos'`: dez guardas do acervo apoiados numa chave que nenhuma migration cria — o app inteiro nasceria negando todo mundo num ambiente novo. Corrigido com `is_org_member`, migration de semeadura e `pnpm validate:module-keys`
+- [x] T-33.2 — **`Escape` fechava o formulário junto com a lista de sugestão** (VACINA-054), descartando o preenchimento. Camada interna aberta consome a tecla; fechada, deixa passar
+- [x] T-33.3 — **Medidor de contraste não entendia `color(srgb …)`** e lia o fundo como preto, acusando 1,3:1 onde havia 15:1. Quarto ponto cego do instrumento, e o primeiro a errar acusando. Corrigido com conferência unitária dos dois lados
+- [x] T-33.4 — **Cronograma com 14 alvos de toque abaixo de 44px** — barra da obra em 43px, um pixel abaixo, e botões do planejador em 34px. Agora 0 nas três larguras e nos dois temas
+- [x] T-33.5 — **Barra de navegação da obra com fundo branco fixo no tema escuro**: 2,11:1 nos sete links. E `--muted` em 4,49:1, um centésimo abaixo do mínimo. Cronograma, início, obras, modelos, CRM e orçamentos fecham em 0/0 nos dois temas
+- [x] T-33.6 — Herói da obra com título em `--text` sobre fundo escuro (1,12:1) e percentual branco sobre miolo branco, invisível também no portal do cliente — o único dado do cartão. Título em branco, anel com miolo escuro declarado no elemento que carrega o número (pseudo-elemento não é enxergado por auditoria de contraste)
+- [x] T-33.7 — Kanban de tarefas com colunas de fundo claro fixo no tema escuro: 12 reprovações, os seis nomes de coluna ilegíveis. Todo fundo de `app/stage12.css` passou a token de superfície — kanban, cartão, trilha, barra do Gantt, nó da EAP, mídia, alerta e barra de ações
+- [x] T-33.8 — Um erro de console na tela de tarefas, nas seis combinações de largura e tema: `PGRST200` no embed `profiles(full_name)` a partir de `project_memberships`, cuja `user_id` aponta para `auth.users`. O seletor de responsável mostrava um pedaço de UUID no lugar do nome. Corrigido em tarefas e equipes com `lib/pessoas/nomes.ts` (VACINA-055)
+- [x] T-33.9 — Ramo de PGRST200 no validador de embeds, com leitor de `select` sensível à profundidade da árvore e universo de tabelas vindo dos `create table`. A versão achatada acusou 22 embeds válidos e escondeu cinco ambíguos reais — contratos, propostas, orçamentos, qualidade e assinaturas, todos corrigidos
+- [x] T-33.10 — `--muted`, `--warning` e o `--brand` do tema escuro abaixo de 4,5:1 sobre as próprias superfícies; estado vazio e link de voltar com fundo e alvo fixos. Onze rotas fecham em 0/0 de contraste nos dois temas e 0 alvo abaixo de 44px
+- [x] T-33.11 — Duas paletas de tema escuro conviviam em `app/globals.css`. **A nota estava pela metade, e a metade que faltava é o que tornava o problema pior**: a paleta antiga não estava morta. Medido no navegador — `--surface`, `--page`, `--text`, `--muted`, `--brand`, `--border` e `--ring` vinham da nova; `--copper`, `--success`, `--warning`, `--danger`, `--info` e as três sombras continuavam vindo da antiga. Meia paleta morta é pior que uma inteira: quem edita `--surface` no lugar errado não vê efeito nenhum, e quem edita `--danger` no mesmo lugar vê. Unificado em um bloco por caminho de ativação (`@media` e `data-tema`), com os valores que já venciam. **Prova de que nada mudou**: 41 tokens medidos em quatro combinações — claro padrão, escuro por mídia, escuro por atributo e claro por atributo — todos idênticos antes e depois. **Prova de que agora tem efeito**: trocar `--surface` no bloco unificado mudou o fundo do cartão de `rgb(16,34,56)` para `rgb(59,13,13)`, revertido em seguida
+
+- [ ] T-33.12 — Tabela em tela estreita: as 20 telas do produto rolam na horizontal dentro de `.table-wrap`, sem indicar que há coluna fora de vista. Em 390px a coluna de ação some. Decidir um padrão único para o produto — cartão por linha, coluna prioritária ou indicação de rolagem — em vez de resolver tela a tela
+
+- [x] T-33.13 — Página de orçamento transbordava em todas as larguras. **Causa: VACINA-044 outra vez, agora na trilha implícita.** `.grid` sem colunas declaradas cria uma coluna implícita de tamanho `auto`, que é `minmax(auto,auto)` e não encolhe abaixo do `min-content` do filho — medido, a coluna ficou com 1602px dentro de uma faixa de 966px. O piso `minmax(0,1fr)` mais `min-width:0` no filho são a mesma dupla já registrada; o que mudou foi onde ela faltava. **Varredura de 20 rotas em três larguras, antes e depois**: transbordos caíram de 11 para 8, e as três mudanças são exatamente o orçamento — 261px em 1366, 603px em 1024 e 1227px em 390, todas resolvidas. Nenhum transbordo novo, nenhuma contagem de cartão alterada. A tabela de 1601px continua larga e agora rola dentro do próprio contêiner, sem arrastar a página
+- [x] T-33.14 — Cartão do funil com alvo de 19px. **Já estava corrigido, e a nota é que envelheceu**: o commit `bf9e2e8` pôs `.pipeline-cartao-titulo::after { inset: 0 }`, e o alvo efetivo é o cartão inteiro — 248×91. Os 19px que eu media de novo eram do meu script de medição, não da tela: `getBoundingClientRect` devolve o retângulo do `<a>`, e a sobreposição absoluta não entra nele. O arnês do próprio repositório (`scripts/qa/harness.mjs`) já calcula o alvo **efetivo** e não cai nisso. Provado pelo efeito, não pela medida: `elementFromPoint` no rodapé do cartão devolve o link certo, e quatro toques — texto do título, meio e rodapé do cartão, por mouse e por toque — navegam todos para o cartão
+- [x] T-33.15 — `chaveNormalizada` não fundia "m2" e "m²". Resolvido **por escopo**, como a tarefa pedia: `chaveDoEscopo(escopo, valor)` funde expoente e índice só em `medida.unidade`; todo o resto — inclusive escopo desconhecido — continua com a regra de sempre, porque "H²" no nome de uma etapa é o nome da etapa, não uma unidade escrita torto. A fusão usa NFKD, a forma de compatibilidade, que já sabe que `²` é `2` e que `₂` também; tabela escrita à mão acertaria dois casos e erraria o terceiro. **O outro lado é o dado já gravado**: migration agrega sobre a chave nova e reinsere — a tabela tem chave natural `(organization_id, scope, normalized)`, então `update` na coluna de chave esbarraria na própria unicidade no meio do caminho. Exercitada em banco local com duplicata real: `m²` (31 usos, 31/07) e `m2` (4 usos, 01/08) viraram uma linha de **35 usos** com a grafia mais recente, `first_used_at` do mais antigo, outra empresa e outro escopo intocados. **A primeira fixture inventou uma coluna `id` que a tabela real não tem** e a migration passou verde contra um formato que não existe — VACINA-058 outra vez, agora do meu lado. Refeita fiel à tabela real, com os dois `check` e a chave natural. No banco de homologação: `m²` passou a ter a chave `m2`, mantendo o rótulo e os 31 usos, e a tela de vocabulário mostra a unidade uma vez só
+
+- [x] T-33.16 — **Mapa do código gerado**, não escrito à mão: `diretrizes/MAPA-DO-CODIGO.md` com aplicativos, 151 rotas e a guarda de cada uma, 174 server actions por arquivo, 78 módulos de `lib/` com exportados e cobertura, 220 funções do banco com quem as declara e quem as chama, suítes de teste e validadores. `pnpm validate:code-map` reprova no CI quando o arquivo diverge do código
+- [x] T-33.17 — O mapa **confronta** em vez de listar: RPC chamada sem migration, módulo nunca importado e server action que nenhuma tela referencia. O débito conhecido está congelado em `diretrizes/mapa-do-codigo.debito.json` com responsável nomeado, e o validador reprova tanto item novo quanto item já consertado que continue na lista — provado nos três casos
+- [x] T-33.18 — Aritmética de cor do medidor de contraste extraída para `scripts/qa/cor.mjs` e coberta por 19 testes, um por defeito que o instrumento já teve. Antes não tinha nenhum: função serializada para o navegador não é importável, e foi assim que quatro versões erradas entraram
+- [x] T-33.19 — `--exigir` nos dois scripts que saíam 0 quando o banco faltava (VACINA-056). "Não rodou" deixou de ter o mesmo código de saída de "passou"
+- [x] T-33.20 — Sete server actions e um módulo de `lib/` sem nenhum uso. Decididos um a um, e **as sete não eram o mesmo caso**. **Cinco removidas por já existir o equivalente ligado**: `createProposalFromBudget` (vencida por `createFlexibleProposal`, que também recebe o PDF e o torna opcional), `instalarTrilha` (vencida por `criarFunil`, que faz o mesmo preset e ainda o funil vazio), `createDependency` (vencida por `createScheduleDependency`, que ainda valida id vazio e dependência de si mesma), `createProjectFromContract` (vencida por `createProjectFromContractSafe`, que chama a RPC v2 e preserva o formulário no erro) e `trilhaEhValida`, que era um invólucro assíncrono de uma linha sobre uma função pura — um endpoint de rede criado por engano. **Duas ligadas, porque a capacidade faltava de verdade**: `createInventoryCategory` e `createInventoryUnit`. A instalação do módulo semeia oito unidades e seis categorias, e não havia caminho para a nona — empresa que trabalha com "milheiro" não tinha onde dizer isso, num formulário em que Unidade é obrigatória. Tela nova em `/app/estoque/catalogo`, com desativar em vez de excluir, pela regra da S-34: item já cadastrado escolheu aquela unidade. **Módulo removido**: `lib/planejamento/server.ts` era uma segunda leitura do cronograma, mais estreita que a que a página faz em linha, sem importador. Medido no navegador: unidade criada aparece no seletor do item novo; desativada, sai do seletor e continua na lista explicando o que já foi cadastrado. Débito do mapa zerado em `libs` e `acoes`
+- [x] T-33.21 — **`TRUNCATE` não passa por RLS, e 213 tabelas o concediam a `anon` e `authenticated`** — inclusive `emitted_documents`, `contracts`, `finance_entries`, `projects` e as 64 partições de `object_records`. Medido em banco local com a proteção no máximo — RLS habilitada e forçada, única política `for select using (false)`, `grant select, truncate` — o truncate esvaziou a tabela sem erro: 2 linhas antes, 0 depois. Não é porta aberta hoje, porque o PostgREST não emite `TRUNCATE`; é um privilégio que ninguém usa apoiado numa suposição sobre o gateway. Revogado em todo o esquema junto com `TRIGGER` e `REFERENCES`, e no padrão de privilégios para tabela nova não nascer com ele de volta. `emitted_documents` também perdeu `UPDATE` e `DELETE`. Conferido: 0 concessões perigosas, 234 tabelas com `SELECT` intactas, onze telas do produto em 200 sem bloqueio. VACINA-059, com o instantâneo do ledger carregando os privilégios perigosos e o CI reprovando lista não vazia — exercitado com teste negativo
+
+## Sprint S-34 — Listas cadastradas: o que a empresa decide que existe como opção
+
+**Estado:** pendente
+
+> **Nota de estado, para não parecer contradição.** As tarefas marcadas abaixo já estão
+> entregues, e a sprint segue `pendente` porque a R3 admite **uma** sprint em andamento e a
+> vigente é a S-23. O mesmo vale para a S-32 e a S-33: o trabalho vem sendo dirigido pelo
+> responsável tarefa a tarefa, fora da ordem formal do inventário. Regularizar isso — abrir e
+> fechar sprint conforme a R5 — é decisão dele, não da sessão.
+
+Correção de rota do responsável em 3 de agosto de 2026, sobre a T-32.0.6 entregue no
+mesmo dia:
+
+> "quando for para perdido precisa abrir um formulário com os motivos da perca do lead, tipo
+> parou de responder, praça errada, Produto errado, etc… esses itens tem que ser possível
+> cadastrar no menu"
+
+Ele está certo, e a razão é a mesma que fez o campo livre não servir: **motivo de perda
+alimenta contagem.** "Quantos perdemos por preço neste trimestre" não fecha sobre texto que
+cada pessoa escreve do seu jeito — nem com sugestão, porque sugestão não obriga.
+
+Isto **não contraria** a diretriz de reúso, e vale escrever a diferença para não ser confundida
+depois. `value_catalog` é **observado**: nasce do uso, serve para lembrar a grafia que a empresa
+já escolheu, e ali lista fechada seria uma piora. `managed_list_values` é **curado**: alguém
+decidiu quais opções existem, em que ordem e quais saíram de circulação. Etapa de EAP é
+vocabulário; motivo de perda é dimensão de análise. São campos de naturezas diferentes, e tratar
+os dois igual foi o erro de T-32.0.6.
+
+- [x] T-34.1 — Tabela `managed_list_values` **por escopo**, não uma tabela de motivos: marcador de cartão e etapa de funil vão pedir a mesma tela, e três tabelas quase iguais é três vezes a mesma correção
+- [x] T-34.2 — **Desativar em vez de excluir.** Excluir apagaria a opção de negócios que já a escolheram, e a contagem do trimestre passado mudaria sozinha
+- [x] T-34.3 — Cadastro em `/app/administracao/motivos-de-perda`, no menu de Administração: acrescentar, renomear, reordenar e tirar de circulação. Reordenação troca vizinhos, não renumera a lista — duas pessoas mexendo ao mesmo tempo embaralhariam a ordem uma da outra
+- [x] T-34.4 — Nove motivos semeados como ponto de partida, começando pelos três que o responsável nomeou. Empresa nova nasce com a lista por trigger, como a semeadura de modelos
+- [x] T-34.5 — **O funil abre o formulário de perda** ao escolher "Perdida", com os motivos cadastrados em rádio aberto — poucas opções curtas, e a lista visível deixa comparar antes de escolher. Nenhum vem marcado
+- [x] T-34.6 — **Conferência no servidor**, não só no `required` do rádio: o que chega é um POST, e um POST montado à mão gravaria qualquer texto em `lost_reason`, que é justamente a coluna que precisa ser contável
+- [x] T-34.7 — Lista vazia **bloqueia o envio** e diz onde cadastrar, em vez de mostrar um seletor sem opção; a mensagem muda conforme quem está olhando pode ou não administrar
+- [x] T-34.8 — `negocio.motivo_perda` deixa de gravar em `value_catalog`: duas fontes para o mesmo campo fariam o mesmo valor aparecer em duas telas de administração como se fossem coisas diferentes
+- [x] T-34.9 — Contagem de perdas por motivo, que é a razão de a lista ser curada — `/app/relatorios/perdas`, Pareto **ordenado por valor e não por contagem**: doze perdas de R$ 5 mil somam menos que uma de R$ 400 mil, e ordenar por contagem mandaria resolver o problema errado. Classificação A/B/C na convenção de `QUALIDADE-CAUSA-RAIZ.md` §2, com teste que reproduz os oito valores da tabela de lá — se ela mudar, ou a diretriz mudou junto, ou a implementação divergiu
+  - [x] T-34.9.1 — Perda **sem motivo** entra na conta como linha própria. Esconder produziria um relatório bonito e falso: os percentuais fechariam em 100% sobre uma base que não é o total perdido
+  - [x] T-34.9.2 — Seção dos motivos cadastrados que ninguém escolheu no período. É o outro lado da curadoria: motivo que ninguém escolhe em doze meses ou não descreve a realidade da empresa, ou está escrito de um jeito que ninguém reconhece — e o que não aparece não chama atenção
+  - [x] T-34.9.3 — A classificação A/B/C **some abaixo de cinco motivos**. Medido na tela: com dois, "praça errada" com 44% da perda saía como classe C, que é o rótulo de desprezível. ABC pressupõe cauda longa; sem ela, a ordem por valor já é a mensagem inteira
+  - [x] T-34.9.4 — Regra da tabela canônica corrigida num caso que ela não previa: com um motivo só, o acumulado da primeira linha já é 100% e a maior causa sairia como C. A primeira linha é sempre A — ela é, por definição, a prioridade
+- [x] T-34.10 — Avaliada a mesma tela para marcador de cartão e etapa de funil. **Resposta: não, e por motivos diferentes.** Etapa de funil é vocabulário, não dimensão: cada construtora nomeia as próprias etapas, elas mudam por trilha e ninguém soma "quantas etapas 'Qualificação' existem" — curar obrigaria a passar por Administração para criar uma coluna, que é o oposto do que a tela do funil precisa ser. Marcador de cartão não existe no produto; avaliar antes de existir seria decidir sobre o que não se viu. O critério fica escrito: **cura-se o que alimenta contagem; observa-se o que nomeia**
+  - [ ] T-34.10.1 — Reavaliar marcador de cartão quando ele existir, contra esse critério
+
+- [x] T-34.11 — Medidor de alvo de toque passa a aplicar a isenção da WCAG 2.5.5 para link **dentro de frase**: aumentar um link em texto corrido exigiria quebrar a linha do parágrafo, e reprovar a marcação correta ensina a ignorar o vermelho. Só isenta quando há frase em volta — link sozinho num parágrafo é botão mal vestido e continua medido. Provado com teste negativo: encolhendo a barra de relatórios de propósito, a reprovação volta
+- [x] T-34.12 — Barra de navegação dos relatórios em 41px, três abaixo do mínimo. Executivo, obras, financeiro, compras, qualidade, perdas, metas, salvos e snapshots fecham em 0
+- [x] T-34.13 — Relatório executivo: transbordo e alvos corrigidos. O transbordo era a **VACINA-044 outra vez** — `grid-template-columns:1fr` na consulta de mídia não encolhe abaixo do `min-content` do filho, e a tabela de desempenho por obra (621px) arrastava a página. Aplicada a solução já registrada (`minmax(0,1fr)` mais `min-width:0` no item), não uma nova
+- [x] T-34.14 — Tons do módulo de relatórios eram fixos do tema claro: no escuro o cartão de indicador ficava com fundo verde ou vermelho claro e o número em branco por cima — 1,03:1 no "0%". Mesma causa raiz de `stage12.css` e do estado vazio. **As nove telas de relatório fecham em 0/0** de contraste nos dois temas e 0 alvo abaixo de 44px nas três larguras
+
+---
+
+## Sprint S-35 — Object Runtime: o registro visto e lido
+
+**Estado:** pendente
+
+Descoberta ao fechar a T-32.3, e entra **no fim** conforme a R4. A fundação e o
+estúdio existem e foram exercitados; o que não existe é o outro lado do balcão.
+Hoje um objeto publicado só recebe registro por chamada de RPC — nenhuma tela
+cria, lista ou abre um registro, e o contrato (§12.3) ainda tem dois itens em
+aberto.
+
+O que fica de fora é tão importante quanto o que fica dentro: **nenhum número
+desta implementação foi medido sob carga.** Os limiares do contrato — 64
+partições, 14 slots, 64 KB, 200 campos, p95 de 300 ms — continuam sendo
+estimativas fundamentadas, exatamente como a §12.2 declara.
+
+- [ ] T-35.1 — Leitura com **paginação keyset**, nunca `OFFSET`, e recusa de filtro sobre campo não indexado com mensagem que orienta (item 4 da primeira fatia). Degradar em silêncio até a plataforma ficar lenta por causa de um objeto mal declarado é pior, e é invisível até ser tarde
+- [ ] T-35.2 — Tela de registros do objeto: listar, criar e abrir, com o formulário montado a partir da versão do registro — não da versão de hoje
+- [ ] T-35.3 — Campo de anexo passando por `secureUpload`, quarentena e varredura, sem caminho novo de arquivo
+- [ ] T-35.4 — Campo de referência declara o alvo. Hoje `ObjectFieldSpec` guarda o tipo `referencia` e não guarda para onde ele aponta; o §2.1 diz "uuid + alvo"
+- [ ] T-35.5 — POC de carga com **milhões** de registros (item 7). Antes disso, nenhuma promessa de escala pode ser feita a partir deste código
+- [ ] T-35.6 — Onde o seguidor aparece: `object_record_followers` é gravado e ninguém o lê ainda. Encaixar na T-29 (acompanhamento a distância) em vez de criar um segundo mecanismo de notificação
+
+---
+
+## Sprint S-36 — A barra superior em largura de tablet
+
+**Estado:** pendente
+
+Descoberta ao medir a T-33.13, e entra **no fim** conforme a R4. Não é o
+defeito que a T-33.13 tratava: sobrou depois de resolvê-lo, e é de outro lugar.
+
+Medido em 20 rotas e três larguras: **oito telas transbordam em 1024px**, e a
+causa é a mesma em todas — `.barra-superior`. Em 1024 as trilhas ficam
+`434 / 260 / 265` e a `.barra-direita` precisa de 370: a soma dos mínimos passa
+da largura disponível, o navegador encolhe a trilha `auto` abaixo do conteúdo, e
+a barra vaza. Transbordo por tela: modelos 62px, financeiro 31px, estoque 87px,
+catálogo do estoque 87px, qualidade 43px, relatórios 42px, compras 38px,
+auditoria 73px.
+
+Existe uma regra elástica para 1261–1699px, onde a busca cede porque as ações
+da direita são todas alvos de toque. Entre 921 e 1260 não existe equivalente: a
+faixa herda `minmax(260px, auto) minmax(260px, 1fr) auto`, que não fecha.
+
+Fica para uma sprint própria porque **é a casca de todas as telas** e o mapa das
+duas barras é canônico (`PADRAO-DE-INTERFACE.md` §12): decidir o que cede em
+tablet é decisão de produto, não conserto de CSS. Improvisar aqui, dentro de uma
+tarefa sobre a página de orçamento, seria redesenhar a casca de lado.
+
+- [ ] T-36.1 — Decidir o que cede entre 921 e 1260px, com a mesma regra que já vale acima de 1261: a busca é elástica, as ações da direita são alvos de toque e não encolhem. Medir as oito telas antes e depois
+- [ ] T-36.2 — Em 390px o nome do aplicativo trunca colado no rótulo do menu — a barra lê "Orçamen..Menu". É a mesma disputa de espaço, na outra ponta
+- [ ] T-36.3 — Levar as três larguras para o arnês de QA visual como regressão fixa, para transbordo de casca não voltar sem ninguém ver
+
+---
+
+## Sprint S-37 — Orçamento analítico: SINAPI que importa, CUB completo e o corte material × mão de obra
+
+**Estado:** pendente
+
+Nasce de uma auditoria pedida pelo responsável em 04/08/2026 — *"no módulo de
+orçamento eu incluí um modo para sincronizar o Sinapi automaticamente para
+realizar o orçamento analítico, no CUB tem outros tipos de construção, também é
+necessário separar por mão de obra e material, valide para mim"*. Entra **no
+fim** conforme a R4. Os três pontos foram medidos, e os três têm defeito real.
+
+### O que foi medido
+
+**SINAPI nunca importou nada.** No banco: 0 lotes, 0 itens de catálogo, 0
+composições, 0 execuções de sincronização. O mecanismo está inteiro — descoberta
+pela API oficial da CAIXA, verificação de ZIP, trava de concorrência por
+`advisory lock`, SHA-256 obrigatório, domínio `caixa.gov.br` exigido, importação
+só por `service_role` — e falha antes de gravar a primeira linha. Medido com o
+pacote real de 06/2026, pelos dois caminhos que existem no código:
+
+- o botão da tela (`automatic-update.ts`): *"SINAPI_XLSX: somente 0 insumos
+  válidos foram encontrados; mínimo esperado: 500."*
+- a sonda v2 (`automatic-update-v2.ts`): *"relatório de insumos SP não
+  desonerado não encontrado."*
+
+**A causa está no formato da publicação.** `SINAPI-2026-06-formato-xlsx.zip`
+(15.715.816 bytes) traz quatro arquivos, e **nenhum deles tem UF ou regime no
+nome**: `SINAPI_familias_e_coeficientes_2026_06.xlsx`,
+`SINAPI_Manutenções_2026_06.xlsx`, `SINAPI_mao_de_obra_2026_06.xlsx` e
+`SINAPI_Referência_2026_06.xlsx`. O seletor
+(`official-reference-parser.ts#selectTargetFiles`) lê UF, regime e tipo **do
+nome do arquivo**, como era quando cada UF tinha o seu. Hoje a UF é **coluna** —
+o cabeçalho da planilha de coeficientes lista AC, AL, AM … SP, TO. O leitor está
+uma geração de formato atrás.
+
+**Há uma segunda parede atrás dessa.** `runSinapiAutomaticUpdate` exige
+`SUPABASE_SERVICE_ROLE_KEY` e `start_sinapi_import` recusa quem não é
+`service_role`. A decisão de segurança em vigor é que essa chave **não vai para
+o deploy público**; então, mesmo com o leitor corrigido, o caminho automático
+precisa de um lugar para rodar que a tenha — um trabalho agendado, não a
+aplicação web.
+
+**CUB tem um tipo de construção só.** O esquema aceita qualquer
+`reference_code`; o banco tem duas linhas, e as duas são **R8-N** (com e sem
+desoneração), só SP. Faltam R1, PP-4, R8, R16, PIS, RP1Q, GI, CAL e CSL, e os
+padrões de acabamento baixo/normal/alto. A tela lista o que existe na tabela —
+logo, oferece um item.
+
+**Material × mão de obra existe pela metade.** No item manual, sim: a coluna
+`item_category` aceita MATERIAL, LABOR, EQUIPMENT, SERVICE, SUBCONTRACT,
+FIXED_COST, REFERENCE e OTHER, e o campo "Natureza" do formulário grava.
+No CUB, não: `addCubReferenceItem` lê só `total_cost` e insere **uma linha
+`REFERENCE`**. E `cost_reference_snapshots` **já tem** `materials_cost`,
+`labor_cost`, `administrative_cost` e `equipment_cost` — a linha desonerada
+semeada traz 892,29 + 1.192,01 + 61,78, que fecha exatamente os 2.146,08 do
+total (55,5% mão de obra, 41,6% material). Ninguém lê essas colunas.
+E nos totais, não: `calculate_budget_version` soma por `cost_type`
+(direto/indireto/fixo/administrativo) e **não** por natureza — não existe total
+de material nem de mão de obra em tela nenhuma.
+
+### Tarefas
+
+- [x] T-37.1 — Leitor reescrito para o formato publicado. O pacote tem **um** arquivo que importa (`SINAPI_Referência_2026_06.xlsx`, dentro de um ZIP de 15.715.816 bytes), com **UF em coluna** e **regime em aba** — ISD/ICD, CSD/CCD, ISE/CSE e Analítico. `lib/sinapi/relatorio-oficial.ts` é o leitor puro; `official-reference-parser.ts` abre o ZIP e monta. Medido contra o pacote real, SP sem desoneração: **2.880 insumos** (dos 4.876 do arquivo — 1.996 sem preço em SP), **8.403 composições**, **43.923 itens analíticos**. Quatro armadilhas recusadas em vez de adivinhadas, todas registradas na **VACINA-060**
+- [x] T-37.2 — **Decidido: trabalho agendado no GitHub Actions**, dia 15 de cada mês, escrito em `SINAPI-ATUALIZACAO-AUTOMATICA.md` §9.1. Pesou que o Actions **já guarda a mesma chave** e a usa em três workflows — não é superfície de confiança nova. A alternativa (arquivo enviado à mão) custaria afrouxar `start_sinapi_import` para aceitar chamador autenticado comum: privilégio permanente alargado por causa de tarefa mensal. O job confere o layout antes de gravar, compila, sobe instância própria com a chave no ambiente efêmero do runner, gera um `CRON_SECRET` que vive um job, e chama `/api/internal/sinapi-atualizacao` — o script orquestra e **não** reimplementa o importador, que foi o defeito da T-37.7. Falha fechada conferida em instância compilada: 401 sem segredo e com segredo errado, 400 nas três validações, 502 dizendo qual configuração falta. Leitura ponta a ponta contra o pacote publicado: SP nos dois regimes, 2.880 insumos e 8.403 composições. **Falta criar o segredo `SINAPI_ORGANIZATION_ID`**, e a gravação só é exercitada na primeira execução agendada — não há chave de serviço neste ambiente, que é a própria premissa da decisão
+- [x] T-37.3 — `pnpm sinapi:layout` baixa o pacote publicado hoje e cobra o contrato: nove conferências, entre elas a **reconciliação do somatório dos itens contra o custo oficial da composição** — 5.433 de 5.544 fecham dentro de 1%, desvio mediano 0,02%. Provado que morde, quebrando o leitor de propósito: ler o valor em cache em vez da fórmula reprova por código zerado; preço vazio virando zero reprova por preço zerado; **deslocar a UF em uma coluna derruba a reconciliação de 98% para 45,1%**. O `prebuild` deixou de conferir o leitor antigo e passou a conferir o leitor em uso
+- [x] T-37.4 — **As dezenove tipologias da NBR 12721**, e não uma só. O banco tinha duas linhas, ambas R8-N, porque o leitor lia a **notícia** mensal — e a notícia publica só o CUB representativo. Não faltava esquema; faltava fonte. A fonte é a série histórica oficial (`Cub-Serie-Historica-Julho-26.xlsx`, 481.518 bytes, SHA-256 `671aff24…`), com quatro blocos: GLOBAL, MDO, MATERIAL e DESPESAS ADMINISTRATIVAS. `lib/cost-sources/cub-serie-historica.ts` lê, e trata três armadilhas medidas: **o bloco GLOBAL não tem cabeçalho** (a ordem das colunas é conferida pela reconciliação, não suposta); **os blocos não cobrem os mesmos meses** — GLOBAL tem 234 e os outros 222, com 2024 inteiro só no GLOBAL —, então o mês lido é o último que existe nos quatro; e a data é serial do Excel. Semeadas 19 tipologias de 07/2026, SP, sem desoneração, **todas fechando ao centavo** e com o R8-N em R$ 2.231,37, igual ao que a página do SindusCon publica — duas fontes independentes, mesmo número. Isso também destrava a T-37.5 para as linhas sem desoneração, que antes vinham só com o total e caíam em linha única de `REFERENCE`. A tela agrupa por família com a descrição de cada sigla; medido: 0 alvo abaixo de 44px e 0 transbordo nas três larguras
+- [ ] T-37.13 — **Cobrir o país.** Decidido pelo responsável em 4 de agosto: integração por UF sob demanda, porque a empresa faz obra em outros estados. Três medições mudaram o desenho e estão registradas antes de qualquer código:
+  1. **O SINAPI já é nacional.** O leitor lê a UF como **coluna** e cobre as 27; a tela do catálogo já tem seletor de UF; o trabalho agendado aceita `--uf SP,RJ,…`. Para o orçamento **analítico**, cobrir o país é rodar a importação para as UFs em uso — não falta código, falta configuração.
+  2. **O CUB não tem fonte nacional aberta.** A CBIC publica "CUB Médio Brasil", mas os arquivos estão marcados **Restrito** (assinatura). O portal `cub.org.br` está bloqueado pela política de rede deste ambiente e **não foi contornado**. Sobra o que sempre foi: cada Sinduscon estadual publica o seu, em página e formato próprios.
+  3. **`cost_reference_snapshots` é uma tabela só de CUB** — o SINAPI não vive nela — e já tem `region` na chave natural. O que trava é a tela, que filtra por `source_key = 'SINDUSCON_SP_CUB'` fixo. E `projects.state` existe: a obra já sabe em que UF está.
+  Daí o desenho, em três partes, e a razão de **não** escrever 26 raspadores: eles envelhecem em 26 lugares diferentes e quebram um por vez, em silêncio
+- [x] T-37.13a — **O CUB deixa de ser de São Paulo.** A consulta filtrava `source_key = 'SINDUSCON_SP_CUB'` fixo, então uma obra em Minas recebia o preço paulista **sem aviso** — e o CUB varia entre estados na casa das centenas de reais por m². Agora a UF da obra manda (`projects.state`), o que a pessoa escolher na tela ganha dela, e sigla inválida volta ao padrão em vez de virar filtro vazio: "este estado não tem" e "não há nenhum" são respostas diferentes. Estado vazio diz qual UF falta e quais existem. Provado com os três caminhos: SP com as 19 tipologias, `?uf=MG` com o vazio honesto, e **obra em MG** — projeto ligado ao orçamento, para exercitar a relação que a VACINA-001 existe para pegar —, que trouxe MG com o marcador "UF da obra". Dados de teste revertidos. Medido: 0 alvo abaixo de 44px, 0 transbordo e 0 reprovação de contraste (93 elementos por tema), três larguras
+- [ ] T-37.13d — **`cub.org.br` está bloqueado pela política de rede deste ambiente**, nos quatro endereços testados: `Host not in allowlist: www.cub.org.br`. O responsável indicou `cub.org.br/cub-m2-estadual/` como fonte do CUB por estado — se ela publicar as UFs num lugar só, a T-37.13c deixa de ser 26 leitores e vira **um**, e o desenho registrado acima muda a favor. Depende de liberar `cub.org.br` e `www.cub.org.br` na *network egress* do ambiente; não foi contornado
+- [x] T-37.13b — **Importação manual com procedência**, o caminho que vale para os 27 hoje. A T-37.13a trocou um erro silencioso (obra em Minas recebendo o preço paulista) por um beco honesto ("Sem CUB importado para MG"), e beco sem saída tem uma saída só: trocar a UF para SP e usar o número errado **de propósito**, que é pior que o problema original. `registrar_cub_manual` é `SECURITY DEFINER` porque desde a T-37.12 a referência oficial é imutável para `authenticated` — afrouxar aquilo para caber a importação desfaria a VACINA-061 pela porta da frente. Alçada: EDIT em Orçamentos, o orçamentista, que é quem tem o PDF do sindicato na mão; exigir `administer` deixaria a tarefa com quem não a faz. **`source_sha256` guarda o digest da declaração canônica, não um hash digitado**: o servidor não viu arquivo nenhum, e aceitar o hash do chamador deixaria a coluna com cara de evidência conferida — o hash do PDF, quando informado, fica em `arquivoSha256Declarado`, com esse nome. `retrievalMode = 'declaracao-manual'` é o que a tela lê para nunca mostrar declaração com a cara de leitura. A guarda de fonte oficial virou forma (`^SINDUSCON_[A-Z]{2}_CUB$`), senão a linha de Minas nasceria fora da proteção. Provado no banco como orçamentista autenticado: registro aceito, `source_sha256` recalculável da própria linha, auditoria em WARNING, repetição devolvendo a mesma linha, e **15 recusas** — UF fora das 27, tipologia fora da NBR 12721, data-base no meio do mês, data futura, valor uma ordem de grandeza fora nos dois sentidos, meia decomposição, parcelas que não fecham, `http`, `javascript:`, SHA malformado, fonte sem nome, publicação anterior à data-base, troca de valor na mesma competência, e **sem permissão em Orçamentos**. Este último foi refeito: a primeira tentativa trocou o **papel** para `ENGENHEIRO` e o registro passou assim mesmo, porque o perfil de acesso concede por cima do papel — a negativa explícita em `user_module_permission_overrides` é o que leva a `NONE`, e aí a guarda morde; medido `DELETE → NONE → recusa → DELETE → aceita`, com o positivo logo depois para provar que o que recusou foi a permissão. Tela em `/app/orcamentos/cub/importar`, entrando do estado vazio do orçamento em um clique, com a UF já escolhida e o caminho de volta. Medido com o arnês, três larguras × dois temas: **0 alvos abaixo de 44px, 0 transbordo, 0 reprovação de contraste** (26 elementos na tela nova, 95 na do orçamento). Dados de teste revertidos ao baseline de 21 instantâneos
+- [ ] T-37.13c — Fonte automática por UF como encaixe, na moldura que o SP já usa (`cub-fonte.ts` + `cub-serie-historica.ts`). Cada estado entra quando valer a pena, sem tocar nos outros
+  - [x] T-37.13c.1 — **Medição antes do desenho, e ela mudou o desenho.** A premissa registrada na T-37.13 era que não valia escrever raspador por estado. Sondando a rede deste ambiente: `sindusconsp.com.br`, `sinduscon-mg.org.br` e `sinduscon-ba.com.br` respondem 200, `sinduscon-pr.com.br` responde 301 — **três sindicatos além de SP são alcançáveis**, e `sindusconrio.com.br` e `cub.org.br` não. Minas foi medida inteira: o CUB é publicado em **PDF mensal**, com o link descoberto na página `/cub/` (o nome muda — `composicao_cub_junho_2026.pdf` virou `composicao_cub_julho_26.pdf` no mês seguinte, que é a prova de que fixar o endereço buscaria o arquivo do mês passado para sempre, com aparência de funcionar). O arquivo certo é a **composição**, não a tabela: traz `Materiais`, `Mão de Obra`, `Despesas Administrativas`, `Equipamentos` e `Total` por tipologia, em códigos quase canônicos — só um hífen a mais (`PP-4-B` por `PP-4B`, `CAL-8-N` por `CAL-8N`). Conferido por execução nas dezenove: **19 tipologias, 19 fechando ao centavo**, e o R8-N em R$ 2.548,75 batendo nos dois PDFs independentes do mesmo sindicato — mesma disciplina de duas fontes que validou São Paulo
+  - [x] T-37.13c.2 — **`lib/planilhas/pdf-texto.ts`, o extrator que faltava.** O contêiner de desenvolvimento tem `pdftotext`; **a Vercel não tem**, e leitor que só funciona na máquina de quem escreveu falha na primeira execução agendada. Extração em Node puro, com `zlib` da biblioteca padrão e nenhuma dependência nova. O formato ajudou: fontes **Type1** com **WinAnsiEncoding** e **nenhum `/ToUnicode`** — sem CID, sem CMap embutido. O fluxo vem em `ASCII85Decode` encadeado com `FlateDecode`, e as quatro combinações são tentadas em ordem. Três decisões que valem registro: fluxo que não abre é **pulado** e não fatal (um PDF tem fluxos de imagem e metadado que nada têm com o texto, e abortar por causa deles recusaria arquivo legítimo); **nenhum texto em arquivo nenhum é erro**, não string vazia — devolver `""` faria o leitor de cima concluir "a publicação não traz o R8-N" quando a verdade é "não consegui ler a publicação", e só uma dessas respostas manda alguém olhar o arquivo; e o grupo final incompleto do ASCII85 devolve um byte a menos que os dígitos, que é onde implementação apressada corrompe o fim de cada fluxo. 14 testes com PDFs montados byte a byte — fixture binária de 98 KB é coisa que ninguém revisa —, e a conferência contra o publicado feita em execução: **2 fluxos, 24.924 caracteres, 19 códigos distintos e 95 valores monetários**, que são exatamente 19 tipologias × 5 linhas
+  - [x] T-37.13c.2.1 — **Dois defeitos no extrator, achados olhando a saída antes de construir por cima dela.** Nenhum dos dois quebrava teste: os testes procuravam âncoras, e as âncoras continuavam lá. (1) **Literal `(…)` era extraído de qualquer lugar do fluxo, não só como operando de operador de texto.** Um fluxo de **imagem** em ASCII85 contém, por acaso, bytes que formam parênteses e a sequência `Tj` — e o leitor devolvia ruído binário misturado ao texto da publicação: **730 pedaços e 24.924 caracteres**, contra os ~1.800 que o arquivo realmente tem. Corrigido ancorando em `Tj`, `TJ`, `'` e `"`, exigindo `BT` no fluxo, e tentando os candidatos decodificados **antes** do cru. (2) **`endstream` contém `stream`**, então a varredura encontrava cada fluxo duas vezes — uma no início de verdade e outra no fechamento, cujo "conteúdo" varria até o próximo `endstream`. O sintoma é texto duplicado, que numa tabela de custo vira tipologia repetida com o mesmo valor: **parece dado, não parece defeito**. Corrigido com `(?<![A-Za-z])`. Depois das duas: **218 pedaços, 1.849 caracteres, 19 códigos, 95 valores, e `2.548,75` aparecendo exatamente uma vez**. Três testes de regressão novos, entre eles um fluxo que imita a forma sem ser conteúdo
+  - [ ] T-37.13c.3 — O leitor de Minas sobre o extrator: descobrir o link na página, normalizar o hífen a mais, reconciliar as parcelas contra o total e recusar quando não fechar. Depois, o encaixe por UF em `cub-fonte.ts`, com estado sem fonte falhando fechado
+- [x] T-37.14 — **A sincronização agendada passou a trazer as dezenove.** Sem isso, em agosto dezoito ficariam paradas em 07/2026 e uma avançaria — e comparar tipologias de competências diferentes é pior que dado velho, porque parece atual. `lib/cost-sources/cub-fonte.ts` **descobre** o link na página oficial em vez de fixá-lo (o endereço muda todo mês; fixar buscaria o arquivo do mês passado para sempre, com aparência de funcionar), recusa link fora do domínio e arquivo que não seja a série, e limita tamanho e tempo. Série atrasada em relação à notícia **derruba a execução** de propósito: gravar só a notícia produziria exatamente o desalinhamento que o bloco existe para impedir, e a mensagem nomeia as duas datas para não parecer defeito. Provado ponta a ponta contra o publicado: link descoberto, 481.518 bytes, SHA-256 `671aff24…` igual ao do arquivo baixado à mão, 19 tipologias, data-base 07/2026
+- [x] T-37.14.1 — **Um leitor de planilha só.** O ZIP endurecido e a leitura de `.xlsx` estavam privados dentro do leitor do SINAPI, e o CUB precisava do mesmo trabalho. Extraídos para `lib/planilhas/xlsx.ts` em vez de copiados — duas cópias divergindo em silêncio foi o defeito da T-37.7, e o jeito de não repetir é não criar a segunda. O SINAPI foi reconferido depois da extração **contra o pacote publicado**, não só contra fixture: `pnpm sinapi:layout` segue em 10/10. Quatro guardas novas no `validate:vaccines`, provadas uma a uma
+- [x] T-37.5 — CUB entra decomposto. `lib/orcamentos/cub.ts` lê `materials_cost`, `labor_cost`, `equipment_cost` e `administrative_cost` do instantâneo e emite uma linha por natureza (MATERIAL, LABOR, EQUIPMENT como DIRECT; administrativo como ADMINISTRATIVE), com os códigos sufixados `-MAT`, `-MO`, `-EQP` e `-ADM`. **Só decompõe quando as parcelas reconciliam com o total** dentro de um centavo por unidade; fora disso volta a ser uma linha `REFERENCE` e a tela diz por quê — decompor sem fechar seria inventar a diferença
+- [x] T-37.6 — Total por natureza no resumo do orçamento. `lib/orcamentos/naturezas.ts` repete a fórmula do banco (`quantity * unit_cost * (1 + loss_rate + freight_rate)` no direto e no indireto, sem acréscimo no fixo e no administrativo) e arredonda **no total**, como o `numeric(18,2)`. Ordenado por valor, com percentual sobre o custo-base
+- [x] T-37.7 — Um leitor só, e um módulo só. `automatic-update-v2.ts` **removido**: existia porque a sonda foi corrigida sem o botão, e os dois divergiram falhando em pontos diferentes pelo mesmo motivo. Botão e sonda entram por `automatic-update.ts`; o `parserVersion` gravado no lote passou a `6-official-reference` e o metadado carrega quantos itens analíticos vieram junto — zero ali significa composição sem composição
+- [x] T-37.8 — **Sub-composição entrava com custo zero.** Dos 43.923 itens analíticos de SP, **26.773 (61%) não são insumo: são outra composição**, e 26.771 têm custo publicado na aba CSD. O leitor gravava `unitCost: 0` em todas — a composição chegaria à tela com dois terços dos itens custando nada. Corrigido lendo a aba que já estava carregada; a reconciliação passou de 438 composições fechando para 5.433. Descoberto durante a T-37.3, registrado na **VACINA-060**
+- [x] T-37.9 — **Ausência de custo deixou de ser gravada como zero.** O `null` honesto do leitor morria na porta: `greatest(coalesce(nullif(v_item ->> 'unitCost',''), 0), 0)` mais `unit_cost not null`. Agora `unit_cost` e `total_cost` aceitam `null` e um `price_status` de vocabulário fechado diz por quê — `SEM_PRECO_NA_UF` (está no relatório, não houve coleta no estado) ou `FORA_DO_RELATORIO`. Um `check` amarra os dois, para `null` não virar um segundo jeito de dizer zero, e `items_without_cost` na versão é o que permite dizer "incompleta". Medido em SP: **4.679 dos 43.923 itens sem preço, e 2.859 das 8.403 composições (34%) incompletas** — um terço do catálogo mostraria item de graça. A `Situação` da planilha é guardada à parte porque é **nacional**: COM PREÇO significa "coletado em pelo menos uma UF", e é exatamente o que esses 4.679 itens declaram. Provado no banco com round-trip pela RPC e três testes negativos do `check`
+- [x] T-37.10 — **Tela da composição analítica**, em `/app/orcamentos/sinapi/composicao/[id]`. As quatro perguntas: entra **P11**, o orçamentista ("esse preço paga o escopo e o risco?"); vem **da linha do catálogo**, pela contagem de componentes, em **um clique**; resolve **se o custo publicado está inteiro** antes de virar preço de proposta. A tela separa três coisas que se pareciam: *fecha* (soma dos itens bate dentro de 1%), *não fecha* (divergência de dado) e **incompleta** (falta preço de item — a soma é menor porque parte não foi pesquisada, **não porque o serviço seja barato**). Cada item sem custo diz o motivo em texto, não só por cor. Barra 2 conforme §12.2: sem busca, porque é registro e não coleção, e sem seletor de visualização, porque não há segunda visualização que funcione. Medido com o arnês do repositório, três larguras × dois temas: **0 alvos abaixo de 44px, 0 transbordo, 0 reprovação de contraste** (60 elementos por tema)
+- [x] T-37.10.1 — Dois defeitos achados pela própria medição e corrigidos junto: o link novo da lista era um alvo de 67×19px — link sozinho em célula não tem a isenção de "texto corrido" da WCAG 2.5.5 —, e o **filtro do catálogo exigia 740px de largura mínima** (`minmax(220px,2fr) repeat(4,minmax(130px,1fr))`), derrubando a página inteira para o lado em 390px. É a VACINA-044 na trilha explícita. Depois: 0 e 0 nas três larguras
+- [x] T-37.12 — **Referência oficial não muda de dono.** O registro original desta tarefa estava **errado no diagnóstico**: eu havia anotado "gravável por qualquer membro interno" a partir da política (`for all`) e do privilégio, sem executar. Na execução, a escrita direta é negada — existe o gatilho `guard_official_cost_reference`, que eu não tinha procurado. Mas a tentativa por outro caminho achou um buraco de verdade, mais estreito e pior: **no `UPDATE` a guarda lia `new.source_key`**, o valor novo do campo que decide se ela se aplica. Medido: `update cost_compositions set source_key='PROPRIA'` é permitido, e depois disso o custo de 208,33 vira 1,00 — **com `source_url`, `source_sha256` e `base_date` intactos ao lado**, atestando um número que já não é aquele. Corrigido para olhar o que a linha **é**: recusa no `UPDATE` quando era oficial **ou** quando passaria a ser (senão a composição da casa seria promovida a oficial), conferência contra o pai antigo e novo nos filhos, e o CUB entrou na mesma proteção — dependia só da RLS de leitura, com o privilégio de escrita ainda concedido. Provado com a **mesma** prova de antes, sem alterá-la: cinco tentativas, cinco negadas; e os quatro caminhos legítimos conferidos um a um. **VACINA-061**, que registra também o erro de método: inferência de esquema encontra o que se procura, execução encontra o que não se procurava
+- [x] T-37.11 — **Função de diagnóstico global removida, na ordem certa.** O pré-requisito era o hardening R3B, que estava no débito congelado da S-22 — e enquanto ele não entrasse, a função não era órfã: a policy `observability_diagnostics_select` a chamava, e o `drop` teria falhado por dependência ou aberto o diagnóstico global. Alcance do R3B conferido **antes** de aplicar: nenhuma função `SECURITY INVOKER` chama `record_audit_event` ou `write_audit` (as 21 que usam são todas `definer`), e a tabela de diagnóstico está vazia, então restringir a leitura global não esconde nada hoje. Aplicado, e só então a remoção — com policies dependentes, funções dependentes e dependências de catálogo **todas em zero**. O débito congelado do R3B saiu da lista: 18 arquivos sem aplicação viraram 17
+- [x] T-37.11.1 — Erro meu, pego pelo `validate:migrations-applied`: apliquei os dois corpos de função do R3B com **nome lógico diferente** do arquivo, criando um "aplicado sem arquivo". É exatamente o que a VACINA-057 existe para pegar, e pegou na primeira execução. Corrigido no registro — a DDL pertence ao R3B e já constava por lá
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
+| 2026-08-02 | Dentro da S-32, o motor de documento passa à frente da auto-sugestão | **Pré-requisito descoberto**, caso previsto na R5. O responsável nomeou os dependentes: propostas, orçamentos, contratos, aditivos, FVS e FVM da qualidade, layouts de mensagem padrão e resposta do SAC. Construir esses módulos antes do motor significa construir sete editores para desfazer depois. A auto-sugestão continua barata e entrega sozinha, mas não destrava nenhum módulo. |
 | 2026-07-26 | S-23 passa à frente da S-22 e da S-20 | Caso de **base reaproveitável** previsto na R5. Os componentes de campo da S-23 servem aos 20 módulos e resolvem o defeito mais grave já verificado — dado inválido gravado em produção. A S-22 trata de reconstrução do banco e não bloqueia interface; a S-20 troca vocabulário nas mesmas telas que a S-23 vai refazer, então entra junto, tela por tela, para não refazer duas vezes. |
 | 2026-07-25 | Virada S-21 → S-22, sem reordenação | A S-22 nasceu do resultado da própria S-21 e é pré-requisito de tudo: enquanto o repositório não reconstrói o banco, nenhuma sprint que crie migration tem base verificável. A S-06 e a S-20 seguem atrás dela. |
 | 2026-07-25 | S-21 passa à frente da S-06 | Pré-requisito descoberto, caso previsto na R5. A S-06 cria a camada compartilhada sobre o esquema da homologação; enquanto o repositório não reproduz esse esquema, qualquer migration nova é aplicada sobre chão que ninguém consegue recriar. Reconciliar o ledger primeiro é o que torna a S-06 verificável. |

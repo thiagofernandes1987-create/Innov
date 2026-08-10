@@ -1,0 +1,155 @@
+round: R2
+count: 19
+validations:
+- validation_id: VAL-0001
+  id: VAL-0001
+  check: validate:docs
+  command: node scripts/validate-documentation.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.07
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0002
+  id: VAL-0002
+  check: validate:vaccines
+  command: node scripts/validate-vaccines.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.06
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0003
+  id: VAL-0003
+  check: validate:migrations
+  command: node scripts/validate-supabase-migrations.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.06
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0004
+  id: VAL-0004
+  check: validate:stage9
+  command: node scripts/validate-stage9.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.06
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0005
+  id: VAL-0005
+  check: validate:stage12
+  command: node scripts/validate-stage12.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.05
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0006
+  id: VAL-0006
+  check: validate:stage12.1
+  command: node scripts/validate-stage12-1.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.05
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0007
+  id: VAL-0007
+  check: validate:stage12.2
+  command: node scripts/validate-stage12-2.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.05
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0008
+  id: VAL-0008
+  check: validate:stage13
+  command: node scripts/validate-stage13.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.05
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0009
+  id: VAL-0009
+  check: validate:stage14
+  command: node scripts/validate-stage14.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.05
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0010
+  id: VAL-0010
+  check: validate:stage15
+  command: node scripts/validate-stage15.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.05
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0011
+  id: VAL-0011
+  check: validate:stage16
+  command: node scripts/validate-stage16.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.05
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0012
+  id: VAL-0012
+  check: validate:stage17
+  command: node scripts/validate-stage17.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.06
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0013
+  id: VAL-0013
+  check: validate:stage18
+  command: node scripts/validate-stage18.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.05
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0014
+  id: VAL-0014
+  check: validate:stage19
+  command: node scripts/validate-stage19.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.05
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0015
+  id: VAL-0015
+  check: validate:stage20
+  command: node scripts/validate-stage20.mjs
+  exit_code: 0
+  status: PASS
+  duration_s: 0.05
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0016
+  id: VAL-0016
+  check: lint
+  command: pnpm lint
+  exit_code: 0
+  status: PASS
+  duration_s: 18.36
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0017
+  id: VAL-0017
+  check: typecheck
+  command: pnpm typecheck
+  exit_code: 0
+  status: PASS
+  duration_s: 3.73
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0018
+  id: VAL-0018
+  check: test
+  command: pnpm test
+  exit_code: 0
+  status: PASS
+  duration_s: 2.62
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json
+- validation_id: VAL-0019
+  id: VAL-0019
+  check: test:python
+  command: python3 -m unittest discover -s python/tests -v
+  exit_code: 0
+  status: PASS
+  duration_s: 0.06
+  evidence: R2-04_REPO_CHECKS_WORKING_COPY.json

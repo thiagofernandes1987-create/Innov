@@ -47,6 +47,32 @@
 | `relatorios` | Relatórios e Indicadores | operacional |
 | `auditoria` | Auditoria e Observabilidade | homologado e incorporado na Etapa 19 |
 | `administracao` | Administração | operacional |
+| Chave | Aplicativo | Estado | Etapa |
+|---|---|---|---|
+| `dashboard` | Início | operacional; fundação visual revisada | 12.1/20 |
+| `crm` | CRM e Vendas | implementado e homologado | 18 |
+| `clientes` | Clientes | Cliente 360 multiobra implementado | 18 |
+| `obras` | Obras | operacional | 12 |
+| `planejamento` | Planejamento | operacional | 12 |
+| `tarefas` | Tarefas | operacional | 12 |
+| `diario` | Diário de Obras | operacional; antimalware pendente | 12/20 |
+| `equipes` | Equipes | operacional | 12 |
+| `orcamentos` | Orçamentos | operacional | 9 |
+| `propostas` | Propostas | operacional | 9 |
+| `contratos` | Contratos | operacional | 9 |
+| `aditivos` | Aditivos | operacional | 9 |
+| `assinaturas` | Assinaturas | sandbox; provider jurídico pendente | 9/12.2/20 |
+| `documentos` | Documentos | operacional; antimalware pendente | 12/13/20 |
+| `modelos` | Modelos e Documentações | biblioteca única de modelos, lida por todos os aplicativos; tipo classifica, Administração libera por aplicativo | 32 |
+| `qualidade` | Qualidade | operacional; antimalware pendente | 13/20 |
+| `compras` | Compras e Suprimentos | operacional; antimalware pendente | 14/20 |
+| `estoque` | Estoque, Inventário e Almoxarifado | homologado; concorrência real aprovada | 17/20 |
+| `financeiro` | Financeiro Operacional | operacional; antimalware pendente | 15/20 |
+| `sac` | Pós-venda e SAC | homologado; quarentena integrada na branch da Etapa 20 | 18/20 |
+| `whatsapp` | WhatsApp e Atendimento | implementação em branch; não homologado; Cloud API oficial | 22 |
+| `relatorios` | Relatórios e Indicadores | operacional | 16 |
+| `auditoria` | Auditoria e Observabilidade | homologado e incorporado | 19 |
+| `administracao` | Administração | operacional | 12.1 |
 
 ## 3. Documentação canônica
 

@@ -46,7 +46,7 @@ returns public.channel_homologation_assessments
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_homologation_assessments;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then raise exception 'HOMOLOGATION_FORBIDDEN'; end if;
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then raise exception 'HOMOLOGATION_FORBIDDEN'; end if;
   if p_decision='READY_FOR_AUTHORIZED_EXECUTION' then raise exception 'REAL_HOMOLOGATION_EVIDENCE_REQUIRED'; end if;
   insert into public.channel_homologation_assessments(
     organization_id,decision,checks,blockers,commit_sha,assessed_by
@@ -66,7 +66,7 @@ returns public.channel_homologation_rehearsals
 language plpgsql security definer set search_path=pg_catalog,public
 as $$ declare result public.channel_homologation_rehearsals;
 begin
-  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'manage') then raise exception 'HOMOLOGATION_FORBIDDEN'; end if;
+  if not public.has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer') then raise exception 'HOMOLOGATION_FORBIDDEN'; end if;
   insert into public.channel_homologation_rehearsals(
     organization_id,rehearsal_type,status,evidence,real_execution
   ) values (

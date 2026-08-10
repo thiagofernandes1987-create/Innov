@@ -23,6 +23,7 @@ const OBJECT_TYPE_BY_MODULE: Record<string, OperationalObjectType> = {
   aditivos: "document",
   assinaturas: "document",
   documentos: "document",
+  modelos: "document",
   qualidade: "quality",
   compras: "purchase",
   estoque: "inventory",

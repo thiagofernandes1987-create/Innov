@@ -3,6 +3,9 @@
 import { randomUUID } from "node:crypto";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { reportDataAccessError } from "@/lib/errors/data-access";
+import { fileSecurityMessage } from "@/lib/file-security/domain";
+import { secureUpload } from "@/lib/file-security/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { hashCanonical, safeFileName, sha256 } from "@/lib/signatures/crypto";
 
@@ -72,8 +75,21 @@ export async function completePublicSignatureField(formData:FormData){
 
     fileSize=bytes.byteLength;fileSha=sha256(bytes);
     filePath=`${signing.envelope_id}/external/${signing.signer_id}/${fieldId}/${randomUUID()}-${safeFileName(fileName)}`;
-    const{error:uploadError}=await admin.storage.from("signature-artifacts").upload(filePath,bytes,{contentType:fileMime,upsert:false});
-    if(uploadError)fail(token,uploadError.message);
+    // O contexto de assinatura não expõe a organização; a quarentena precisa dela
+    // para isolar o arquivo por organização antes de qualquer promoção.
+    const{data:envelope}=await admin.from("signature_envelopes").select("organization_id").eq("id",signing.envelope_id).maybeSingle();
+    if(!envelope?.organization_id)fail(token,"Envelope indisponível para receber evidência.");
+    try{
+      await secureUpload({
+        targetBucket:"signature-artifacts",targetPath:filePath,body:bytes,
+        filename:fileName,contentType:fileMime,
+        organizationId:envelope.organization_id,actorUserId:signing.signer_id,
+        correlationId:signing.envelope_id,
+        // Signatário externo não autenticado: HEIC é aceito pelo fluxo e não tem
+        // assinatura de conteúdo conhecida, mas a análise antimalware é obrigatória.
+        policy:{allowedMimeTypes:new Set(ALLOWED_EVIDENCE),maxBytes:MAX_EVIDENCE_SIZE,requireContentSignature:false}
+      });
+    }catch(error){fail(token,fileSecurityMessage(error,{maxBytesLabel:"20 MB",allowedLabel:"PDF, DOCX, JPG, PNG, WebP ou HEIC"}));}
   }
 
   const valueHash=hashCanonical({fieldId,type:field.field_type,textValue,booleanValue,fileSha});
@@ -90,7 +106,14 @@ export async function completePublicSignatureField(formData:FormData){
     p_value_sha256:valueHash,
     p_metadata:metadata
   });
-  if(error){if(filePath)await admin.storage.from("signature-artifacts").remove([filePath]);fail(token,error.message);}
+  if(error){
+    reportDataAccessError("public-signing.record-field",error);
+    if(filePath){
+      const{error:cleanupError}=await admin.storage.from("signature-artifacts").remove([filePath]);
+      reportDataAccessError("public-signing.cleanup-field-artifact",cleanupError);
+    }
+    fail(token,"Não foi possível salvar este campo da assinatura. Tente novamente.");
+  }
   redirect(`/assinar/${encodeURIComponent(token)}?saved=${encodeURIComponent(fieldId)}`);
 }
 
@@ -110,7 +133,10 @@ export async function finishPublicSignature(formData:FormData){
   const{data:values,error:valuesError}=await admin.from("signature_field_values")
     .select("field_id,value_sha256,file_sha256,completed_at")
     .in("field_id",fields.map(field=>field.field_id));
-  if(valuesError)fail(token,valuesError.message);
+  if(valuesError){
+    reportDataAccessError("public-signing.load-values",valuesError);
+    fail(token,"Não foi possível validar os campos assinados. Tente novamente.");
+  }
   const payloadHash=hashCanonical({
     envelopeId:signing.envelope_id,
     signerId:signing.signer_id,
@@ -121,6 +147,9 @@ export async function finishPublicSignature(formData:FormData){
     p_token_sha256:tokenHash,
     p_payload_sha256:payloadHash
   });
-  if(error)fail(token,error.message);
+  if(error){
+    reportDataAccessError("public-signing.finish",error);
+    fail(token,"Não foi possível concluir a assinatura. Tente novamente.");
+  }
   redirect(`/assinar/${encodeURIComponent(token)}?completed=1`);
 }

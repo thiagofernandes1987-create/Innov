@@ -5,6 +5,7 @@ import {
 import Link from "next/link";
 import { BarraDeTrabalho } from "@/components/casca/barra-de-trabalho";
 import { requireAccessAdministration } from "@/lib/authorization";
+import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
 import { PERSONAS_OPERACIONAIS } from "@/lib/personas/runtime";
 
 export default async function OperationalResponsibilitiesPage({
@@ -32,9 +33,11 @@ export default async function OperationalResponsibilitiesPage({
       .eq("active", true)
       .order("assigned_at", { ascending: false })
   ]);
-  const firstError =
-    membershipsResult.error ?? projectsResult.error ?? responsibilitiesResult.error;
-  if (firstError) throw new Error(firstError.message);
+  const firstError = membershipsResult.error ?? projectsResult.error ?? responsibilitiesResult.error;
+  if (firstError) {
+    reportDataAccessError("operational-responsibilities.load", firstError);
+    throw new Error(DATA_LOAD_ERROR_MESSAGE);
+  }
 
   const memberships = membershipsResult.data ?? [];
   const projects = projectsResult.data ?? [];
@@ -46,7 +49,10 @@ export default async function OperationalResponsibilitiesPage({
         .select("id,email,full_name")
         .in("id", userIds)
     : { data: [], error: null };
-  if (profilesResult.error) throw new Error(profilesResult.error.message);
+  if (profilesResult.error) {
+    reportDataAccessError("operational-responsibilities.profiles", profilesResult.error);
+    throw new Error(DATA_LOAD_ERROR_MESSAGE);
+  }
 
   const profileById = new Map((profilesResult.data ?? []).map(item => [item.id, item]));
   const projectById = new Map(projects.map(item => [item.id, item]));
@@ -68,7 +74,7 @@ export default async function OperationalResponsibilitiesPage({
         pessimistas usam esta matriz para formar a caixa de cada área.
       </p>
 
-      {params.error ? <p className="alert alert-danger">{params.error}</p> : null}
+      {params.error && <p className="alert alert-danger">{params.error}</p>}
 
       <section className="card card-pad">
         <div className="section-heading">

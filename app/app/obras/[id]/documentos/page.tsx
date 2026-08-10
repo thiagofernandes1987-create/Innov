@@ -3,6 +3,9 @@ import { releaseProjectDocument, uploadProjectDocument } from "@/app/actions/pro
 import { ProjectNav } from "@/components/project-nav";
 import { requireOrganizationContext } from "@/lib/auth";
 import { DATA_LOAD_ERROR_MESSAGE, reportDataAccessError } from "@/lib/errors/data-access";
+import { CampoComSugestao } from "@/components/comum/campo-com-sugestao";
+import { padroesDoEscopo } from "@/lib/sugestoes/escopos";
+import { ESCOPOS, sugestoesDoEscopo } from "@/lib/sugestoes/servidor";
 import { statusBadge } from "@/lib/stage12";
 
 export default async function ProjectDocumentsPage({
@@ -37,6 +40,9 @@ export default async function ProjectDocumentsPage({
   if (!project) notFound();
 
   const documents = documentsResult.data ?? [];
+  const sugestoesDeDisciplina = await sugestoesDoEscopo(supabase, organizationId, ESCOPOS.disciplina, {
+    padroes: padroesDoEscopo(ESCOPOS.disciplina)
+  });
   const documentIds = documents.map((document) => document.id);
   const versionsResult = documentIds.length
     ? await supabase
@@ -132,7 +138,14 @@ export default async function ProjectDocumentsPage({
             <input type="hidden" name="projectId" value={id} />
             <label>Código<input name="code" placeholder="ARQ-PLB-001" required /></label>
             <label>Título<input name="title" placeholder="Planta baixa térreo" required /></label>
-            <label>Disciplina<select name="discipline" required><option value="Arquitetura">Arquitetura</option><option value="Estrutural">Estrutural</option><option value="Elétrica">Elétrica</option><option value="Hidráulica">Hidráulica</option><option value="Climatização">Climatização</option><option value="Interiores">Interiores</option><option value="Planejamento">Planejamento</option><option value="Qualidade">Qualidade</option><option value="Administrativo">Administrativo</option></select></label>
+            {/* Era `select` de nove disciplinas fixas — lista fechada, que a diretriz
+                proíbe pelo motivo que aparece aqui inteiro: quem precisa de
+                "Paisagismo" ou "Impermeabilização" escolhia a mais parecida, e o
+                documento ficava classificado errado com aparência de arrumado.
+                As nove viraram sugestão padrão; qualquer outra disciplina passa. */}
+            <label>Disciplina
+              <CampoComSugestao name="discipline" sugestoes={sugestoesDeDisciplina} required placeholder="Arquitetura" />
+            </label>
             <label>Categoria<select name="category" required><option value="Projeto">Projeto</option><option value="Memorial">Memorial</option><option value="Especificação">Especificação</option><option value="Relatório">Relatório</option><option value="Manual">Manual</option><option value="Checklist">Checklist</option><option value="Outro">Outro</option></select></label>
             <label>Resumo da alteração<textarea name="changeSummary" rows={3} /></label>
             <label>Arquivo<input type="file" name="file" accept="application/pdf,image/jpeg,image/png,image/webp,.docx,.xlsx" required /></label>

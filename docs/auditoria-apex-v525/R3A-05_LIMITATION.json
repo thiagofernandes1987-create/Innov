@@ -1,0 +1,7 @@
+{
+  "limitation_id": "LIM-R3A-01",
+  "status": "BLOCKED_EXTERNAL",
+  "statement": "O contexto do modelo auditor não é fisicamente novo. A cegueira desta rodada é garantida por código determinístico executado em processo isolado e pela ausência comprovada de qualquer ledger de R1/R2 no pacote, não por um segundo modelo sem memória.",
+  "protocol_invariant": "R3A_PHYSICAL_FRESH_CONTEXT_NOT_CLAIMED_LOCALLY",
+  "capability_probe": "FRESH_MODEL_CONTEXT=false em R1-01_DISCOVER_CAPABILITIES.json"
+}

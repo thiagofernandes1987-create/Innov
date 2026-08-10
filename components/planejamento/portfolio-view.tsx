@@ -4,6 +4,29 @@ import Link from "next/link";
 import { CalendarBlank, ListBullets, SquaresFour } from "@phosphor-icons/react";
 import { useMemo, useSyncExternalStore } from "react";
 
+// O estado da tarefa vinha para a tela como enum cru — a coluna mostrava
+// "Sem tarefa abertaACTIVE", com o rótulo colado no título porque `<small>` é
+// inline e não havia separador. Duas coisas erradas numa célula só: o usuário
+// não fala ACTIVE, e não havia como saber onde termina uma informação e começa
+// a outra. O CSS abaixo põe o rótulo em linha própria.
+const ROTULO_SITUACAO: Record<string, string> = {
+  BACKLOG: "Não iniciada",
+  READY: "Pronta para iniciar",
+  IN_PROGRESS: "Em execução",
+  BLOCKED: "Bloqueada",
+  REVIEW: "Em revisão",
+  COMPLETED: "Concluída",
+  CANCELED: "Cancelada",
+  PLANNING: "Em planejamento",
+  ACTIVE: "Em andamento",
+  ON_HOLD: "Suspensa",
+  ARCHIVED: "Arquivada"
+};
+
+function rotuloDeSituacao(valor: string): string {
+  return ROTULO_SITUACAO[valor] ?? valor;
+}
+
 export type PlanningPortfolioRow = {
   id: string;
   code: string;
@@ -152,7 +175,7 @@ function ListView({ rows }: { rows: PlanningPortfolioRow[] }) {
               <td><Link href={`/app/obras/${row.id}/cronograma`}><strong>{row.code}</strong><br /><span className="muted">{row.name}</span></Link></td>
               <td><span className="badge">{row.entryMode}</span><br /><small className="muted">{row.location}</small></td>
               <td>{row.clientName}</td>
-              <td><strong>{row.currentTitle}</strong><small>{row.currentStatus}</small></td>
+              <td><strong>{row.currentTitle}</strong><small>{rotuloDeSituacao(row.currentStatus)}</small></td>
               <td>{row.currentPeriod}</td>
               <td>{row.responsible}</td>
               <td style={{ minWidth: 150 }}><div className="progress-row"><div><span>{row.progressLabel}</span></div><div className="progress-track"><div className="progress-fill" style={{ width: row.progressLabel }} /></div></div></td>

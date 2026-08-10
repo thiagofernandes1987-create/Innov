@@ -207,6 +207,93 @@ else{
   if(!guard.includes(token))errors.push(`Guard sensível incompleto: ${token}`);
 }
 
+// VACINA-060 — leitor que não entende o arquivo responde zero.
+const leitorSinapi="lib/sinapi/relatorio-oficial.ts";
+if(!fs.existsSync(leitorSinapi))errors.push(`Leitor do relatório oficial ausente: ${leitorSinapi}`);
+else{
+ const leitor=read(leitorSinapi);
+ // As três recusas do formato: código vindo do MATCH, preço vazio devolvendo
+ // null, e a contagem de colunas de custo conferida contra as 27 UFs.
+ if(!/MATCH\\\(/.test(leitor))errors.push("Leitor SINAPI não lê mais o código da composição do argumento do MATCH.");
+ if(!leitor.includes('if (cru === "" || cru === "-") return null;'))errors.push("Leitor SINAPI voltou a tratar preço vazio como número.");
+ if(!leitor.includes("colunasDeCusto.length !== UFS.length"))errors.push("Leitor SINAPI deixou de conferir as 27 colunas de custo antes do mapeamento posicional de UF.");
+}
+const montadorSinapi="lib/sinapi/official-reference-parser.ts";
+if(!fs.existsSync(montadorSinapi))errors.push(`Montador do pacote SINAPI ausente: ${montadorSinapi}`);
+else{
+ const montador=read(montadorSinapi);
+ if(!montador.includes("custoPorComposicao.get(filho.codigo)"))errors.push("Montador SINAPI voltou a gravar zero no custo da sub-composição.");
+ // Ausência é ausência: o custo que não existe na UF chega `null`, com motivo.
+ for(const token of["SEM_PRECO_NA_UF","FORA_DO_RELATORIO","itemsWithoutCost"])
+  if(!montador.includes(token))errors.push(`Montador SINAPI sem representação de ausência: ${token}`);
+ if(/unitCost:\s*custoUnitario\s*\?\?\s*0/.test(montador))errors.push("Montador SINAPI voltou a converter ausência de custo em zero.");
+}
+const custoAusente="supabase/migrations/20260804040000_composicao_registra_custo_ausente.sql";
+if(!fs.existsSync(custoAusente))errors.push(`Migration da ausência de custo ausente: ${custoAusente}`);
+else{
+ const migration=read(custoAusente);
+ for(const token of[
+  "cost_composition_items_price_status_check",
+  "cost_composition_items_custo_coerente_com_status",
+  "alter column unit_cost drop not null",
+  "items_without_cost"
+ ])if(!migration.includes(token))errors.push(`Migration da ausência de custo sem ${token}.`);
+ // O comentário do topo cita a expressão antiga como documentação; a busca é
+ // no SQL executável, não no texto que explica por que ela saiu.
+ const sqlExecutavel=migration.split("\n").filter(linha=>!linha.trimStart().startsWith("--")).join("\n");
+ if(/coalesce\(nullif\(v_item ->> 'unitCost'/.test(sqlExecutavel))errors.push("A importação voltou a converter custo ausente em zero.");
+}
+if(fs.existsSync("lib/sinapi/automatic-update-v2.ts"))errors.push("`automatic-update-v2.ts` voltou: o leitor do SINAPI tem um caminho só.");
+// Um leitor de planilha só (T-37.14). Duas cópias do mesmo ZIP endurecido
+// divergindo em silêncio é o defeito da T-37.7 com outro nome.
+const planilhaComum="lib/planilhas/xlsx.ts";
+if(!fs.existsSync(planilhaComum))errors.push(`Leitor comum de planilha ausente: ${planilhaComum}`);
+else{
+ const comum=read(planilhaComum);
+ for(const token of["listZipEntries","extractZipEntry","parseWorkbook","maxCompressionRatio"])
+  if(!comum.includes(token))errors.push(`Leitor comum de planilha sem ${token}.`);
+}
+for(const arquivo of ["lib/sinapi/official-reference-parser.ts","lib/cost-sources/cub-fonte.ts"]){
+ if(!fs.existsSync(arquivo)){errors.push(`Consumidor do leitor de planilha ausente: ${arquivo}`);continue;}
+ const conteudo=read(arquivo);
+ if(!/from "(?:\.\.\/)+planilhas\/xlsx"/.test(conteudo))errors.push(`${arquivo} não usa o leitor comum de planilha.`);
+ if(/function listZipEntries\s*\(/.test(conteudo))errors.push(`${arquivo} reintroduziu uma cópia do leitor de ZIP.`);
+}
+// O CUB agendado tem de sincronizar as dezenove, não só a notícia (T-37.14).
+const cronCub="app/api/cron/cost-sources/sinduscon/route.ts";
+if(!fs.existsSync(cronCub))errors.push(`Rota agendada do CUB ausente: ${cronCub}`);
+else{
+ const rota=read(cronCub);
+ for(const token of["buscarSerieHistoricaDoCub","linhasDaSerie"])
+  if(!rota.includes(token))errors.push(`A sincronização do CUB voltou a gravar só a notícia: falta ${token}.`);
+}
+const conferenciaAoVivo="tests/sinapi-layout-publicado.test.ts";
+if(!fs.existsSync(conferenciaAoVivo))errors.push(`Conferência do layout publicado ausente: ${conferenciaAoVivo}`);
+if(fs.existsSync("package.json")){
+ const pacote=JSON.parse(read("package.json"));
+ if(!pacote.scripts?.["sinapi:layout"])errors.push("`pnpm sinapi:layout` ausente: o layout publicado deixou de ser conferível.");
+ const prebuild=pacote.scripts?.prebuild??"";
+ if(prebuild.includes("sinapi-xlsx-parser"))errors.push("O `prebuild` voltou a conferir o leitor antigo em vez do leitor em uso.");
+ if(!prebuild.includes("sinapi-relatorio-oficial")||!prebuild.includes("sinapi-official-reference-parser"))
+  errors.push("O `prebuild` não confere o leitor SINAPI em uso.");
+}
+
+// VACINA-061 — guarda que lê o valor novo do campo que decide a guarda.
+const guardaOficial="supabase/migrations/20260804060000_referencia_oficial_nao_muda_de_dono.sql";
+if(!fs.existsSync(guardaOficial))errors.push(`Migration da guarda de referência oficial ausente: ${guardaOficial}`);
+else{
+ const guarda=read(guardaOficial);
+ const sql=guarda.split("\n").filter(linha=>!linha.trimStart().startsWith("--")).join("\n");
+ // A regra é sobre o que a linha **é**: recusa quando era oficial ou quando
+ // passaria a ser. Só uma das duas deixa metade do buraco aberto.
+ for(const token of["v_antiga","v_nova","SINDUSCON_SP_CUB","trg_guard_official_reference_snapshots"])
+  if(!sql.includes(token))errors.push(`Guarda de referência oficial sem ${token}.`);
+ if(!/coalesce\(v_antiga[\s\S]{0,120}coalesce\(v_nova/.test(sql))
+  errors.push("A guarda de referência oficial voltou a conferir um sentido só.");
+ if(!/revoke insert, update, delete on public\.cost_reference_snapshots/.test(sql))
+  errors.push("O privilégio de escrita do instantâneo de custo voltou a ser concedido.");
+}
+
 if(errors.length){
  console.error(`Vacinas inválidas (${errors.length} falha(s)):`);
  for(const error of errors)console.error(`- ${error}`);

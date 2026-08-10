@@ -1,0 +1,142 @@
+{
+  "target": "branch após correções",
+  "pass": 19,
+  "fail": 0,
+  "node": "v22.22.2",
+  "commit_base": "f4f9333b2267610fc4ff16e3149abfccb7a72644",
+  "records": [
+    {
+      "id": "validate:docs",
+      "command": "node scripts/validate-documentation.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.07
+    },
+    {
+      "id": "validate:vaccines",
+      "command": "node scripts/validate-vaccines.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.07
+    },
+    {
+      "id": "validate:migrations",
+      "command": "node scripts/validate-supabase-migrations.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.08
+    },
+    {
+      "id": "validate:stage9",
+      "command": "node scripts/validate-stage9.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.07
+    },
+    {
+      "id": "validate:stage12",
+      "command": "node scripts/validate-stage12.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.06
+    },
+    {
+      "id": "validate:stage12.1",
+      "command": "node scripts/validate-stage12-1.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.06
+    },
+    {
+      "id": "validate:stage12.2",
+      "command": "node scripts/validate-stage12-2.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.07
+    },
+    {
+      "id": "validate:stage13",
+      "command": "node scripts/validate-stage13.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.05
+    },
+    {
+      "id": "validate:stage14",
+      "command": "node scripts/validate-stage14.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.05
+    },
+    {
+      "id": "validate:stage15",
+      "command": "node scripts/validate-stage15.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.07
+    },
+    {
+      "id": "validate:stage16",
+      "command": "node scripts/validate-stage16.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.06
+    },
+    {
+      "id": "validate:stage17",
+      "command": "node scripts/validate-stage17.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.06
+    },
+    {
+      "id": "validate:stage18",
+      "command": "node scripts/validate-stage18.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.06
+    },
+    {
+      "id": "validate:stage19",
+      "command": "node scripts/validate-stage19.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.06
+    },
+    {
+      "id": "validate:stage20",
+      "command": "node scripts/validate-stage20.mjs",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.06
+    },
+    {
+      "id": "lint",
+      "command": "pnpm lint",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 17.42
+    },
+    {
+      "id": "typecheck",
+      "command": "pnpm typecheck",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 3.78
+    },
+    {
+      "id": "test",
+      "command": "pnpm test",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 2.7
+    },
+    {
+      "id": "test:python",
+      "command": "python3 -m unittest discover -s python/tests -v",
+      "exit_code": 0,
+      "status": "PASS",
+      "duration_s": 0.07
+    }
+  ]
+}
