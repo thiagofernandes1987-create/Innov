@@ -1485,6 +1485,30 @@ GO/NO_GO — continuam sendo pré-requisito de produção, não de merge.
 
 ---
 
+## Sprint S-41 — Gateway de mensageria converge com a `main`
+
+**Estado:** concluída
+
+O `apps/messaging-gateway/` — 54 arquivos — nunca chegou à `main`: a PR #40
+mesclou em `feature/etapa-22-whatsapp-omnichannel`, e esse ramo ficou **454
+commits à frente e 313 atrás**, sem PR aberta. A PR #43 tem base nele, então
+enquanto ele não converge, nada da etapa 22 chega à `main` — e a #43 não fecha
+verde, porque o que a reprova está na base, não no diff dela. Entra no fim
+conforme a R4.
+
+### Tarefas
+
+- [x] T-41.1 — **Quatro conflitos.** Três de união; o quarto era aparente: os dois lados evoluíram `safeActionMessage`, e a deste ramo é superset — reconhece `MessagingEngineError` e `UnsupportedCapabilityError` além de `WhatsAppDomainError`. Ficar com a da `main` transformaria "provider não autorizado para envio real" no genérico "a operação não pôde ser concluída"
+- [x] T-41.2 — **A ação `'manage'` negava todo mundo, inclusive SUPER_ADMIN.** Vinte chamadas de `has_module_permission` em nove migrations passavam uma ação que **não existe** no vocabulário da função, e o `case` termina em `else false`. Sem erro, sem exceção, sem teste vermelho: a policy simplesmente nega. Medido no banco com **todos** os privilégios ligados — `administer`, `approve`, `export`, `release`, `sensitive` e `sign` devolvem `true`; `manage` devolve `false`. O que fecha o diagnóstico é que o TypeScript **já traduzia certo** (`lib/authorization.ts` mapeia `manage` → `administer`); as migrations pularam a tradução e mandaram a palavra crua. As 20 trocadas, todas dentro de `has_module_permission` e nenhuma fora, provado por sabotagem
+- [x] T-41.3 — **Server action morta removida.** `setMessagingPluginPolicy` era o antecessor de `setCanonicalMessagingPluginPolicy`, que é a que a tela chama. As duas iam para a mesma RPC, mas só a canônica normaliza — a antiga enviava `priority`, `requiredPermission` e `featureFlag` crus do formulário. Apontada pelo `validate:code-map`
+- [x] T-41.4 — **15 vazamentos de mensagem do provedor** fechados com o mesmo `mensagemDeFalha` da S-40, **texto idêntico**, para a convergência entre os dois ramos ser trivial
+- [x] T-41.5 — **43 superfícies Supabase classificadas** com evidência medida das migrations: 21 internas de SQL, 20 de histórico operacional e **2 latentes** — `channel_inbox_unified_contacts` e `communication_playbook_catalog` não têm consumidor **nenhum**, zero `.from()` e zero referência em função. Registradas como latentes em vez de presumidas vivas; se continuarem assim depois da homologação, são remoção
+- [x] T-41.6 — **Defeito no `validate:assercoes`, corrigido: ele contava `.not.toContain` como fraca.** Contava errado, e contra a própria tese. O portão persegue a agulha encontrada com o palheiro ignorado; a **negação** é o caso oposto — `expect(JSON.stringify(evento)).not.toContain(SEGREDO)` só passa se o segredo não estiver em **nenhum** campo do objeto inteiro. Ela varre o palheiro por definição, e é assim que se testa que dado sensível não vazou. Contá-la como dívida inflava o número justamente com as asserções que a diretriz pede que existam, e criava o incentivo errado: apagar uma conferência de vazamento baixaria o "débito". Com a regra corrigida, o teto **desceu de 535 para 523** no mesmo commit em que o gateway acrescentou 93 asserções. Provado nas duas direções: duas negativas não movem a contagem, uma positiva reprova
+- [x] T-41.7 — 87 exports sem importador registrados com motivo **por grupo**: 68 são contrato de tipo do canal, 14 são constante de vocabulário, e 5 são função sem chamador, nomeadas em vez de diluídas. A mais informativa é `legacyWhatsAppStatusToCanonical` — conversor do status legado, sem chamador porque a migração de status já rodou; se continuar assim depois da homologação, é remoção, não dívida
+- [x] T-41.8 — Bateria completa: `tsc` **0 erros**, `eslint` limpo, **112 arquivos e 1.068 testes**, e os validadores verdes. As 25 migrations `stage22_*` entram no débito congelado, declaradas não aplicadas, com responsável nomeado
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.

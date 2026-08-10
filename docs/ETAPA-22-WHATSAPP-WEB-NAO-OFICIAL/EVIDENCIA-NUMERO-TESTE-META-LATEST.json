@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0.0",
+  "executedAt": "2026-08-05T00:59:28.899Z",
+  "mode": "META_TEST_NUMBER",
+  "ok": false,
+  "errorCode": "CONFIG_MISSING",
+  "configurationKey": "WHATSAPP_GRAPH_API_VERSION",
+  "providerDetails": null,
+  "productionNumberUsed": false,
+  "baileysUsed": false
+}

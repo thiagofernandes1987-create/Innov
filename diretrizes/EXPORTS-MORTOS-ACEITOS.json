@@ -1,7 +1,7 @@
 {
-  "_leia": "Exports sem importador, catalogados como DÍVIDA no dia em que o validador `validate:exports-mortos` entrou. Isto NÃO é permissão: é o inventário do que já estava morto quando o portão foi instalado. A partir daqui, export novo sem importador reprova o CI. Item que sair desta lista não volta — ou ganha consumidor, ou é removido. Conferido por amostra manual no dia do inventário: de 6 sorteados, 4 apareciam somente no próprio arquivo e 2 sobreviviam apenas porque um validador confere que existem, o que é código morto preso por portão. **Revisão de 10/08/2026 — PR #42 (Projeto RH), 73 símbolos.** Cinquenta e cinco são **tipo**: a forma de entrada de cada evento eSocial (`S1200Input`, `S2230Cession`, …), que o construtor consome internamente e ninguém importa pelo nome — superfície declarada, não código morto. Quinze são **constante de protocolo**, e existem justamente para ficar visíveis: `ESOCIAL_C14N`, `ESOCIAL_RSA_SHA256`, `FGTS_RESCISORY_LAYOUT_VERSION`, `MIT_LAYOUT_VERSION` documentam o algoritmo e o leiaute fixados. As três restantes são **função sem chamador** e merecem revisão no piloto: `callIntegraContador`, `validateIntegraContadorBase` e `validateIntegraContadorServicePath` — o Integra Contador é pendência externa declarada no próprio PR (falta contrato e Consumer Key), então o ponto de entrada estar sem chamador é coerente com o estado, mas deixa de ser quando o contrato existir.",
+  "_leia": "Exports sem importador, catalogados como DÍVIDA no dia em que o validador `validate:exports-mortos` entrou. Isto NÃO é permissão: é o inventário do que já estava morto quando o portão foi instalado. A partir daqui, export novo sem importador reprova o CI. Item que sair desta lista não volta — ou ganha consumidor, ou é removido. Conferido por amostra manual no dia do inventário: de 6 sorteados, 4 apareciam somente no próprio arquivo e 2 sobreviviam apenas porque um validador confere que existem, o que é código morto preso por portão. **Revisão de 10/08/2026 — PR #42 (Projeto RH), 73 símbolos.** Cinquenta e cinco são **tipo**: a forma de entrada de cada evento eSocial (`S1200Input`, `S2230Cession`, …), que o construtor consome internamente e ninguém importa pelo nome — superfície declarada, não código morto. Quinze são **constante de protocolo**, e existem justamente para ficar visíveis: `ESOCIAL_C14N`, `ESOCIAL_RSA_SHA256`, `FGTS_RESCISORY_LAYOUT_VERSION`, `MIT_LAYOUT_VERSION` documentam o algoritmo e o leiaute fixados. As três restantes são **função sem chamador** e merecem revisão no piloto: `callIntegraContador`, `validateIntegraContadorBase` e `validateIntegraContadorServicePath` — o Integra Contador é pendência externa declarada no próprio PR (falta contrato e Consumer Key), então o ponto de entrada estar sem chamador é coerente com o estado, mas deixa de ser quando o contrato existir. **Revisão de 10/08/2026 — PR #46 (gateway de mensageria), 87 símbolos.** Sessenta e oito são **tipo**: o contrato de cada canal, evento e capacidade, que os adaptadores consomem estruturalmente sem importar pelo nome. Catorze são **constante de vocabulário ou limite** do canal. As cinco restantes são **função sem chamador** e ficam nomeadas aqui em vez de diluídas: `capabilityState`, `isChannelProviderType`, `resolveOrganizationProviderPolicies`, `MessagingSecurityError` e `legacyWhatsAppStatusToCanonical`. A última é a mais informativa — conversor do status legado do WhatsApp para o canônico, sem chamador porque a migração de status já rodou; se continuar sem chamador depois da homologação, é remoção, não dívida.",
   "inventariado_em": "2026-08-10T02:16:49Z",
-  "total": 264,
+  "total": 351,
   "arquivos_com_mais_divida": [
     {
       "arquivo": "lib/object-runtime/spec.ts",
@@ -344,6 +344,354 @@
     {
       "simbolo": "lib/inventory/domain.ts:InventoryMovementStatus",
       "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/messaging/ai.ts:AI_AUTONOMY_MODES",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/ai.ts:AiAutonomyMode",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/ai.ts:AiCitation",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/ai.ts:AiClaimValidation",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/ai.ts:AiContext",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/ai.ts:AiOrchestratorInput",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/ai.ts:AiOrchestratorResult",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/ai.ts:AiSourceTrust",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/bots.ts:BotAllowedTool",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/capabilities.ts:CAPABILITY_SUPPORT_LEVELS",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/capabilities.ts:CapabilitySupportLevel",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/capabilities.ts:capabilityState",
+      "motivo": "gateway-pr46-funcao-sem-chamador-revisar-na-homologacao"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:CANONICAL_CONVERSATION_STATUSES",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:CANONICAL_DELIVERY_STATUSES",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:CANONICAL_IDENTITY_NAMESPACES",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:CANONICAL_MESSAGE_DIRECTIONS",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:CANONICAL_MESSAGE_TYPES",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:CANONICAL_RECEIPT_TYPES",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:CanonicalConversationStatus",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:CanonicalIdentityAlias",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:CanonicalIdentityNamespace",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:CanonicalMedia",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:CanonicalMessageDirection",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:RESERVED_CHANNEL_PROVIDER_TYPES",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/domain.ts:isChannelProviderType",
+      "motivo": "gateway-pr46-funcao-sem-chamador-revisar-na-homologacao"
+    },
+    {
+      "simbolo": "lib/messaging/engine.ts:ENGINE_SESSION_STATES",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/engine.ts:EngineSessionState",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/engine.ts:MessagingEngineBundle",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/engines/meta-cloud.ts:MetaCloudTransport",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/feature-flags.ts:OrganizationProviderOverride",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/feature-flags.ts:OrganizationProviderOverrides",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/feature-flags.ts:ResolvedProviderPolicy",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/feature-flags.ts:resolveOrganizationProviderPolicies",
+      "motivo": "gateway-pr46-funcao-sem-chamador-revisar-na-homologacao"
+    },
+    {
+      "simbolo": "lib/messaging/homologation.ts:DailyHomologationStep",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/homologation.ts:EvidenceLevel",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/homologation.ts:HomologationAssessment",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/homologation.ts:HomologationRequirement",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/inbox.ts:InboxActionAvailability",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/inbox.ts:InboxActorKind",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/inbox.ts:UnifiedInboxConversation",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/observability.ts:DashboardPanel",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/observability.ts:MessagingAlert",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/observability.ts:MessagingAlertCode",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/observability.ts:MessagingAlertThresholds",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/observability.ts:MessagingStructuredLog",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/observability.ts:MessagingTelemetry",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/observability.ts:MessagingTraceSpan",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/observability.ts:MetricLabel",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/observability.ts:MetricLabels",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/pilot.ts:LegalReviewStatus",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/pilot.ts:PilotAbortCriterion",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/pilot.ts:PilotDecision",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/pilot.ts:PilotFeatureFlags",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/pilot.ts:PilotLimits",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/pilot.ts:PilotReadiness",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/pilot.ts:PilotReadinessInput",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/pilot.ts:PilotSli",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/pilot.ts:PilotWindow",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/pilot.ts:ProviderPilotComparison",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/playbooks.ts:CanonicalPlaybookSourceSnapshot",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/playbooks.ts:PLAYBOOK_AUTONOMY_LEVELS",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/playbooks.ts:PLAYBOOK_SENSITIVITY_LEVELS",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/playbooks.ts:PlaybookAutonomy",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/playbooks.ts:PlaybookExecutionSnapshot",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/playbooks.ts:PlaybookSensitivity",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/playbooks.ts:PlaybookVariableRule",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/playbooks.ts:PlaybookVariableSchema",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/plugin-policy.ts:CanonicalMessagePluginId",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/plugins.ts:MessagePluginDecision",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/plugins.ts:MessagePluginPipelineResult",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/plugins.ts:MessagePluginTrace",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/security.ts:CRITICAL_WRITES",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/security.ts:CriticalApproval",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/security.ts:CriticalWrite",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/security.ts:MESSAGING_TOOL_ALLOWLIST",
+      "motivo": "gateway-pr46-constante-de-vocabulario-ou-limite-do-canal"
+    },
+    {
+      "simbolo": "lib/messaging/security.ts:MessagingSecurityError",
+      "motivo": "gateway-pr46-funcao-sem-chamador-revisar-na-homologacao"
+    },
+    {
+      "simbolo": "lib/messaging/security.ts:MessagingThreat",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/security.ts:MessagingTool",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/security.ts:RetentionClass",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/security.ts:SessionCompromiseStep",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/security.ts:StrideCategory",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/verification.ts:BenchmarkResult",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/verification.ts:SyntheticRuntimeState",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/verification.ts:VerificationResult",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/verification.ts:VerificationScenario",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/whatsapp-compatibility.ts:LegacyWhatsAppStatusEvent",
+      "motivo": "gateway-pr46-contrato-de-tipo-do-canal-superficie-declarada"
+    },
+    {
+      "simbolo": "lib/messaging/whatsapp-compatibility.ts:legacyWhatsAppStatusToCanonical",
+      "motivo": "gateway-pr46-funcao-sem-chamador-revisar-na-homologacao"
     },
     {
       "simbolo": "lib/object-runtime/estudio.ts:DefinicaoDeObjeto",

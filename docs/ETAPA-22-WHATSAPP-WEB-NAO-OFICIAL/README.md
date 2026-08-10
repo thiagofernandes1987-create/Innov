@@ -1,8 +1,8 @@
 # Provider WhatsApp Web não oficial — índice de governança
 
-**Status atual:** Sprint W-01 concluída documentalmente; implementação não iniciada  
+**Status atual:** Sprints W-01 a W-08 concluídas; single writer e fencing validados somente com fixtures sintéticas  
 **Produção:** bloqueada  
-**Próxima sprint:** W-02 — Modelo canônico de canal, identidade e mensagem
+**Próxima sprint:** W-09 — ingress e normalização persistente
 
 ---
 
@@ -13,22 +13,58 @@
 3. [`ADR-001-PROVIDER-WHATSAPP-WEB-NAO-OFICIAL.md`](./ADR-001-PROVIDER-WHATSAPP-WEB-NAO-OFICIAL.md) — decisão arquitetural e limites da autorização.
 4. [`MATRIZ-LICENCAS-E-REAPROVEITAMENTO.md`](./MATRIZ-LICENCAS-E-REAPROVEITAMENTO.md) — permissões, bloqueios e técnicas por projeto/arquivo.
 5. [`POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md`](./POLITICA-RISCO-CONSENTIMENTO-E-DESLIGAMENTO.md) — número autorizado, aceite, opt-out, casos proibidos e remoção de sessão.
-6. [`EVIDENCIAS-W01.md`](./EVIDENCIAS-W01.md) — checklist e classificação das evidências da Sprint W-01.
-7. [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) — avisos e estado de dependências/adaptações externas.
+6. [`CONTRATOS-CANONICOS-V1.md`](./CONTRATOS-CANONICOS-V1.md) — modelo provider-neutral concluído na W-02.
+7. [`SCHEMA-W04.md`](./SCHEMA-W04.md) — persistência multiprovider sem domínio paralelo.
+8. [`GATEWAY-W05.md`](./GATEWAY-W05.md) — processo isolado, HMAC, replay, lifecycle e container endurecido.
+9. [`ADAPTER-BAILEYS-W06.md`](./ADAPTER-BAILEYS-W06.md) — adapter, fábrica, identidades, conteúdo, erros e supply chain.
+10. [`SESSION-STORE-W07.md`](./SESSION-STORE-W07.md) — envelope encryption, CAS, rotação, backup, restore e exclusão criptográfica.
+11. [`RUNTIME-LIFECYCLE-W08.md`](./RUNTIME-LIFECYCLE-W08.md) — single writer, lease, fencing, state machine, reconnect e kill switches.
+12. [`EVIDENCIAS-W01.md`](./EVIDENCIAS-W01.md) — evidências de governança.
+13. [`EVIDENCIAS-W02.md`](./EVIDENCIAS-W02.md) — evidências dos contratos canônicos.
+14. [`EVIDENCIAS-W03.md`](./EVIDENCIAS-W03.md) — contratos de engine, capabilities, policy gates e CI.
+15. [`EVIDENCIAS-W04.md`](./EVIDENCIAS-W04.md) — migration, RLS, testes PostgreSQL e rollback lógico.
+16. [`EVIDENCIAS-W05.md`](./EVIDENCIAS-W05.md) — testes HTTP/HMAC, build e smoke test do container.
+17. [`EVIDENCIAS-W06.md`](./EVIDENCIAS-W06.md) — versão exata, contract tests, boundaries, lockfile e CI.
+18. [`EVIDENCIAS-W07.md`](./EVIDENCIAS-W07.md) — store cifrado, oito controles PostgreSQL, treze testes e builds.
+19. [`EVIDENCIAS-W08.md`](./EVIDENCIAS-W08.md) — doze controles PostgreSQL, lifecycle, zombie fencing, kill switches e CI.
+20. [`../../THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md) — licença, dependências transitivas e bloqueios jurídicos.
 
 ---
 
 ## Decisões já fixadas
 
-- o provider não oficial é opcional e revogável;
-- Meta Cloud API permanece o provider oficial e padrão;
+- Meta Cloud API permanece o provider oficial e o único runtime registrado;
 - providers compartilham domínio, mas não runtime;
-- Baileys ficará confinado a um adapter em gateway persistente separado;
-- nenhum tipo nativo do engine poderá vazar para o domínio;
-- nenhum código de projeto sem licença clara será copiado;
+- contratos canônicos, engines e capabilities são provider-neutral;
+- as relações `whatsapp_*` permanecem o domínio operacional único;
+- as relações `channel_*` e `session_runtime_*` são exclusivamente técnicas;
+- o gateway é um processo Node.js separado do Next.js;
+- o cliente ativo do gateway continua sendo `FakeChannelClient`;
+- `@whiskeysockets/baileys@7.0.0-rc13` existe somente no workspace do gateway;
+- tipos nativos Baileys ficam confinados ao adapter autorizado;
+- a fábrica oficial permanece bloqueada por padrão;
+- QR e pairing são efêmeros; o valor não é persistido, logado nem propagado em snapshots seguros;
+- lifecycle scripts de dependências externas permanecem bloqueados;
+- o lockfile regenerado deve possuir o SHA-256 aprovado;
+- o store da W-07 usa AES-256-GCM, AAD e uma DEK aleatória por sessão;
+- a KEK é acessada apenas pela porta `KeyEnvelopeProvider` e não pertence ao banco;
+- escrita de credenciais utiliza CAS por geração e transações;
+- rotação completa da DEK e rewrap da KEK são operações distintas;
+- backup e restore trabalham apenas com envelopes cifrados e manifesto de integridade;
+- exclusão criptográfica remove envelope, registros cifrados e keys;
+- auditoria é sanitizada e não contém material sensível;
+- `useMultiFileAuthState` é bloqueado pelo scanner fora de laboratório descartável;
+- o bridge `AuthenticationState` não está ligado ao bootstrap;
+- cada sessão admite apenas um writer com lease vigente;
+- fencing token é monotônico e impede escrita de processo zumbi;
+- takeover só ocorre após expiração ou release válido;
+- CAS de credenciais possui uma porta fenced que valida o writer na mesma transação;
+- reconnect usa backoff exponencial limitado e jitter;
+- logout, restrição, falha transitória e ação humana são classes distintas;
+- kill switches global e por sessão falham fechado;
+- o supervisor W-08 permanece fora do bootstrap e foi exercitado apenas com doubles;
 - nenhum mecanismo de evasão, spam ou rotação de contas será implementado;
 - nenhuma IA será acoplada diretamente ao Baileys;
-- primeiro modo de IA será `draft_only`;
 - produção exige decisão posterior específica.
 
 ---
@@ -37,19 +73,36 @@
 
 | Item | Estado |
 |---|---|
-| Análise de referências | concluída |
-| SPEC e inventário | concluídos |
-| ADR | concluída |
-| Matriz de licenças | concluída |
-| Política de risco/consentimento | concluída |
-| THIRD_PARTY_NOTICES preventivo | concluído |
-| Contratos canônicos | pendentes — W-02 |
-| Baileys instalado | não |
-| Gateway criado | não |
+| Governança, ADR e licenças | concluídas — W-01 |
+| Contratos canônicos | concluídos — W-02 |
+| Engines, capabilities e policy gates | concluídos — W-03 |
+| Persistência multiprovider aditiva | concluída — W-04 |
+| Gateway isolado | concluído — W-05 |
+| Adapter Baileys confinado | concluído — W-06 |
+| Store cifrado e transacional | concluído com dados sintéticos — W-07 |
+| Single writer, lease e fencing | concluídos com fixtures sintéticas — W-08 |
+| State machine, backoff e kill switches | concluídos com doubles — W-08 |
+| Engine boundary | `v6` esperado no fechamento documental W-08 |
+| Storage boundary | `v4` verde |
+| Session-store boundary | `v1` verde |
+| Runtime-lifecycle boundary | `v1` verde |
+| PostgreSQL W-07 | 8 controles verdes |
+| PostgreSQL W-08 | 12 controles verdes |
+| Testes específicos W-07 | 13 verdes |
+| Testes específicos W-08 | verdes |
+| Lint e typecheck | verdes |
+| Suíte global e testes Python | verdes |
+| Build do gateway | verde |
+| Container não-root e sem rede | verde |
+| Build Next.js | verde |
+| File Security E2E | verde |
+| Runtime Baileys registrado | não |
+| Socket externo aberto | não |
+| Dados reais de sessão | não |
+| QR/pairing operacional | não |
 | Número autorizado | não |
-| Sessão real | não |
-| Aceite operacional assinado | não |
-| Revisão jurídica | não |
+| Deploy do gateway | não |
+| Revisão jurídica transitiva | pendente |
 | Produção | bloqueada |
 
 ---

@@ -43,6 +43,513 @@
       },
       "rationale": "Legacy BDI model superseded by markup_models; empty and included in the guarded coordinated pricing migration."
     },
+    "channel_ai_conversation_locks": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 6,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 6 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_commands": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 3,
+        "outboundFks": 4,
+        "triggers": 2,
+        "policies": 1,
+        "functionRefs": 30,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 30 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_contact_identities": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 3,
+        "outboundFks": 4,
+        "triggers": 1,
+        "policies": 1,
+        "functionRefs": 23,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 23 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_contact_merge_audit": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 2,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 2 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_conversation_assignment_events": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 4,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 1 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_critical_write_approvals": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 4 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_dead_letters": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 6,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 6 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_delivery_attempts": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 1,
+        "policies": 1,
+        "functionRefs": 8,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 8 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_delivery_circuits": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 1,
+        "policies": 0,
+        "functionRefs": 13,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 13 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_delivery_rate_buckets": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 1,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 3 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_homologation_assessments": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 3 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_homologation_rehearsals": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 3 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_identity_alias_links": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 5,
+        "triggers": 1,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 5 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_identity_cache_versions": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 2,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 2 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_inbox_events": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 2,
+        "triggers": 1,
+        "policies": 1,
+        "functionRefs": 20,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 20 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_inbox_unified_contacts": {
+      "disposition": "preserve_latent_runtime",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 0,
+        "dependentViews": 0
+      },
+      "rationale": "Superfície declarada do gateway de mensageria (PR #43 / etapa 22) **ainda sem consumidor**: zero `.from()` no runtime e zero referência em corpo de função. Fica registrada como latente em vez de presumida viva — se continuar assim depois da homologação, é candidata a remoção, e este registro é o que torna essa conversa possível. `estimatedRows` é 0 porque a migration ainda não foi aplicada."
+    },
+    "channel_media_references": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 5,
+        "triggers": 2,
+        "policies": 0,
+        "functionRefs": 9,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 9 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_message_plugin_decisions": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 2,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 3 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_operational_alerts": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 7,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 7 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_outbox_events": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 23,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 23 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_pilot_assessments": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 5 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_pilot_daily_reviews": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 5 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_pilot_plans": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 2,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 5 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_provider_rollbacks": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 2,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 2 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_runtime_observations": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 1,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 3 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_security_incidents": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 4 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_security_retention_policies": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 1 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_sensitive_access_audit": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 4 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_session_credentials": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 5 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_session_keys": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 1,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 1 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_session_secret_audit": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 4 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_session_secret_envelopes": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 2,
+        "outboundFks": 2,
+        "triggers": 1,
+        "policies": 0,
+        "functionRefs": 16,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 16 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_verification_runs": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 1,
+        "triggers": 1,
+        "policies": 1,
+        "functionRefs": 2,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 2 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "channel_workspace_events": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 1,
+        "functionRefs": 5,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 5 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "communication_playbook_catalog": {
+      "disposition": "preserve_latent_runtime",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 0,
+        "dependentViews": 0
+      },
+      "rationale": "Superfície declarada do gateway de mensageria (PR #43 / etapa 22) **ainda sem consumidor**: zero `.from()` no runtime e zero referência em corpo de função. Fica registrada como latente em vez de presumida viva — se continuar assim depois da homologação, é candidata a remoção, e este registro é o que torna essa conversa possível. `estimatedRows` é 0 porque a migration ainda não foi aplicada."
+    },
+    "communication_playbook_executions": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 3,
+        "triggers": 1,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 3 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "communication_playbook_version_approvals": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 4,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 4 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "communication_playbook_versions": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 2,
+        "outboundFks": 3,
+        "triggers": 1,
+        "policies": 0,
+        "functionRefs": 8,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 8 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "communication_playbooks": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 1,
+        "outboundFks": 1,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 3 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
     "contract_parties": {
       "disposition": "pending_destructive_migration",
       "evidence": {
@@ -250,6 +757,19 @@
         "dependentViews": 0
       },
       "rationale": "Stocktake detail table used by SQL posting/validation functions and protected by triggers/policies."
+    },
+    "messaging_runtime_global_control": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 0,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 3 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
     },
     "object_definition_versions": {
       "disposition": "preserve_latent_runtime",
@@ -666,6 +1186,45 @@
         "dependentViews": 0
       },
       "rationale": "Baseline task snapshot table used by create_schedule_baseline and protected from mutation; valid feature may legitimately be empty before first baseline."
+    },
+    "session_runtime_audit": {
+      "disposition": "preserve_operational_history",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 0,
+        "policies": 0,
+        "functionRefs": 7,
+        "dependentViews": 0
+      },
+      "rationale": "Trilha operacional do gateway de mensageria (PR #43 / etapa 22). Escrita por função SECURITY DEFINER — 7 referência(s) em corpo de função e nenhum `.from()` no runtime JS/TS. Apagar destrói a evidência de entrega, decisão e incidente, que é o motivo de a tabela existir. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "session_runtime_controls": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 1,
+        "policies": 0,
+        "functionRefs": 3,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 3 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
+    },
+    "session_runtime_leases": {
+      "disposition": "preserve_sql_internal",
+      "evidence": {
+        "estimatedRows": 0,
+        "inboundFks": 0,
+        "outboundFks": 2,
+        "triggers": 1,
+        "policies": 0,
+        "functionRefs": 14,
+        "dependentViews": 0
+      },
+      "rationale": "Estado interno do runtime de mensageria (PR #43 / etapa 22), consumido por RPC e não por `.from()`: 14 referência(s) em corpo de função. `estimatedRows` é 0 porque a migration correspondente ainda não foi aplicada."
     },
     "signature_access_tokens": {
       "disposition": "preserve_sql_internal",

@@ -1,9 +1,9 @@
 # Roadmap oficial — Innovar Platform
 
-**Versão atual:** 0.19.0  
-**Atualizado em:** 22 de julho de 2026
+**Versão estável:** 0.19.0  
+**Atualizado em:** 04 de agosto de 2026
 
-Planejamento não é tratado como funcionalidade entregue. O estado deve corresponder ao GitHub, Supabase, manifesto e evidências.
+Planejamento não é tratado como funcionalidade entregue. O estado deve corresponder ao GitHub, banco, manifesto e evidências. Teste sintético não substitui homologação real.
 
 ## Etapas consolidadas
 
@@ -24,45 +24,13 @@ Planejamento não é tratado como funcionalidade entregue. O estado deve corresp
 ## Etapa 17 — Estoque, Inventário e Almoxarifado
 
 **Estado:** incorporada à `main` e homologada tecnicamente.  
-**Produção:** depende da conclusão integral da Etapa 20.
+**Produção:** depende da Etapa 20.
 
-### Entregas
+Entregas: catálogo, depósitos, localizações, lotes, movimentos, reversões, saldos derivados, recebimento idempotente, reservas, ativos, manutenção, inventário físico, RLS e isolamento multiempresa/multiobra.
 
-- catálogo, unidades, categorias, depósitos e localizações;
-- lotes, validade, movimentos e reversões;
-- saldos físico, reservado e disponível derivados;
-- recebimento de Compras integrado de forma idempotente;
-- reservas e consumo por obra;
-- ativos, custódias e manutenção;
-- inventário físico e ajustes;
-- RLS, custos protegidos e isolamento multiempresa/multiobra;
-- advisory locks por posição;
-- interface responsiva.
+Evidências: 18 tabelas, seis views `security_invoker`, 14 testes transacionais com `ROLLBACK`, advisory locks e concorrência real com uma postagem, uma rejeição e saldo não negativo.
 
-### Homologação estrutural
-
-- 18 tabelas com RLS;
-- seis views `security_invoker`;
-- migrations alinhadas ao ledger;
-- 14 testes transacionais com `ROLLBACK`;
-- saldo não editável diretamente;
-- movimentos concluídos imutáveis;
-- bloqueio de saldo negativo;
-- dados artificiais revertidos.
-
-### Concorrência real concluída na Etapa 20
-
-- duas sessões Supabase independentes;
-- saldo inicial `10`;
-- duas saídas concorrentes de `6`;
-- exatamente uma postagem;
-- exatamente uma rejeição;
-- saldo após disputa `4`;
-- saldo após cleanup `0`;
-- workflow `29889168656` aprovado;
-- artefato `8517620520` preservado.
-
-### Definition of Done adicional
+Definition of Done:
 
 - [x] documentação atualizada no mesmo PR;
 - [x] migration aplicada e homologada;
@@ -72,227 +40,113 @@ Planejamento não é tratado como funcionalidade entregue. O estado deve corresp
 - [x] testes de concorrência e saldo;
 - [x] isolamento multiempresa e multiobra;
 - [x] CI verde;
-- [ ] carga e volumetria prolongadas;
-- [x] backup e restauração testados.
+- [x] Backup e restauração lógica testados;
+- [ ] carga prolongada e limites produtivos.
 
 ## Etapa 18 — CRM, Clientes e SAC
 
-**Estado:** incorporada à `main`.  
-**PR:** `#18`, mesclado.  
-**E2E concorrente:** aprovado.
+**Estado:** incorporada à `main`.
 
-### Entregas
-
-- lead → oportunidade → cliente → obra → pós-venda;
-- Cliente 360 multiobra;
-- atividades, contatos e consentimentos;
-- SAC interno e portal;
-- mensagens internas e públicas;
-- anexos privados com SHA-256;
-- SLA e eventos append-only;
-- estados críticos por RPC;
-- RLS interna e do cliente.
-
-### Evidência
-
-- workflow `29883182240`;
-- login paralelo;
-- idempotência;
-- mensagem interna invisível ao cliente;
-- transição protegida;
-- RLS confirmada;
-- `cleanup: passed`;
-- relatório sem secrets.
+Entregas: lead → oportunidade → cliente → múltiplas obras → SAC/pós-venda, Cliente 360, consentimentos, atividades, anexos privados, SLAs, eventos append-only, RLS interna/cliente e E2E concorrente autenticado com cleanup aprovado.
 
 ## Etapa 19 — Auditoria e observabilidade
 
-**Estado:** implementada, homologada e incorporada à `main`.  
-**PRs:** `#19` e `#20`, mesclados.  
-**CI:** verde.
+**Estado:** implementada, homologada e incorporada à `main`.
 
-### Entregas
-
-- fluxo unificado de 12 origens;
-- `correlation_id` e request;
-- sanitização recursiva;
-- idempotência;
-- eventos e health checks append-only;
-- alertas, reconhecimento e resolução;
-- seis health checks;
-- diagnósticos de FKs, RLS, policies, privilégios e ledger;
-- retenção configurável;
-- diagnósticos globais protegidos;
-- interface `/app/auditoria`.
-
-### Homologação
-
-- seis tabelas com RLS;
-- 13 políticas e seis gatilhos;
-- 16 FKs e zero sem índice;
-- zero função executável por `anon`;
-- dados artificiais revertidos;
-- advisors revisados.
-
-### Definition of Done
-
-- [x] schema e segurança;
-- [x] fluxo e sanitização;
-- [x] alertas, health checks e diagnósticos;
-- [x] interface;
-- [x] teste com `ROLLBACK`;
-- [x] migrations e ledger;
-- [x] CI;
-- [x] merge na `main`.
+Entregas: fluxo unificado, `correlation_id`, sanitização, idempotência, eventos append-only, alertas, health checks, diagnósticos, retenção configurável e interface protegida.
 
 ## Etapa 20 — Prontidão de produção
 
-**Estado:** em implementação no PR `#23`.  
+**Estado:** em andamento no manifesto estável.  
 **Publicação:** proibida até conclusão e aprovação explícita.
 
-### Fase 20.1 — Governança pós-merge
+### Concluído parcialmente
 
-- [x] `ESTADO-ATUAL.json`;
-- [x] fechamento das Etapas 18 e 19 no PR `#22`;
-- [x] `VACINA-012`;
-- [x] documentação canônica reconciliada.
+- fundação UI/UX Pro Max;
+- concorrência real do estoque;
+- Backup e restauração lógica em ambiente isolado;
+- proteção local de anexos do SAC com quarentena e antimalware;
+- health architecture HMAC.
 
-### Fase 20.2 — UI/UX Pro Max
+### Pendente
 
-- [x] diretriz permanente `UI-UX-PRO-MAX.md`;
-- [x] identidade `Arquitetura em operação`;
-- [x] azul profundo, cobre e materiais naturais;
-- [x] shell e dashboard revisados;
-- [x] classes ausentes implementadas;
-- [x] WCAG 2.2 AA como meta;
-- [x] foco visível e alvos de 44 px;
-- [x] breakpoints, reflow e forced colors;
-- [x] `prefers-reduced-motion`;
-- [x] prevenção contra preset SaaS rosa/fúcsia;
-- [x] CI completo verde.
-
-### Fase 20.3 — Concorrência real do estoque
-
-- [x] duas conexões independentes;
-- [x] mesma posição de estoque;
-- [x] duas saídas cuja soma excede o saldo;
-- [x] uma postagem e uma rejeição;
-- [x] saldo nunca negativo;
-- [x] cleanup com saldo zero;
-- [x] artefato auditável;
-- [x] `VACINA-013` para fixtures sensíveis.
-
-### Fase 20.4 — Backup e restauração
-
-- [x] estratégia e scripts versionados;
-- [x] secrets de conexão dedicados configurados;
-- [x] Session pooler com project refs distintos;
-- [x] cliente PostgreSQL 17 compatível;
-- [x] dump íntegro com SHA-256 e 2.798 objetos;
-- [x] dump efêmero protegido e removido;
-- [x] restauração em ambiente isolado;
-- [x] ledger e smoke tests após restauração;
-- [x] equivalência dos snapshots;
-- [x] RTO observado de 201 segundos;
-- [x] evidência `8526039714` preservada;
-- [ ] retenção durável e PITR definidos;
-- [ ] recuperação de buckets e Auth definida.
-
-### Fase 20.5 — Anexos protegidos
-
-- [x] domínio, servidor e estados semânticos;
-- [x] tipos, limite de 25 MB, sanitização e assinatura dos bytes;
-- [x] quarentena privada e promoção somente após `CLEAN`;
-- [x] integração ClamAV `INSTREAM` com fail-closed;
-- [x] integração dos uploads internos e do portal do SAC na branch;
-- [x] persistência de `scanId`, provider e instante de análise;
-- [x] anexos anteriores classificados como `LEGACY`, sem falsa evidência de scan;
-- [x] download autenticado revisado e portal limitado a arquivos `CLEAN`;
-- [x] interface UI/UX Pro Max com estados textuais e ação `Analisar e enviar`;
-- [x] E2E local com `PING`, fixture limpa e EICAR bloqueado;
-- [x] workflow `29913636268` e artefato `8526935275` aprovados;
-- [x] CI completo `29913636056` aprovado;
-- [ ] provider ClamAV real configurado e health check aprovado;
-- [ ] migration aplicada em homologação em conjunto com a aplicação;
-- [ ] E2E pelo fluxo real do SAC em homologação;
-- [ ] reanálise dos anexos `LEGACY`;
-- [ ] integração dos demais módulos;
-- [ ] remoção programada de órfãos, retenção e incidentes.
-
-### Fase 20.6 — Assinatura jurídica
-
-- [ ] provider real;
-- [ ] webhook autenticado e idempotente;
-- [ ] hashes e evidências;
-- [ ] retry e reconciliação;
-- [ ] revisão jurídica;
-- [ ] fallback.
-
-### Fase 20.7 — Telemetria, retenção e incidentes
-
-- [ ] APM sem dados sensíveis;
-- [ ] alertas externos;
-- [ ] worker de retenção com dry-run;
-- [ ] preservação legal;
-- [ ] plano de incidentes;
-- [ ] post-mortem e vacinas.
-
-### Fase 20.8 — Auth e segurança externa
-
-- [ ] proteção contra senhas comprometidas;
-- [ ] MFA adicional;
-- [ ] rate limiting;
-- [ ] headers e cookies;
-- [ ] pentest;
-- [ ] revisão jurídica, contábil e LGPD.
-
-### Fase 20.9 — Carga e publicação
-
-- [ ] carga e volumetria prolongadas;
-- [ ] limites documentados;
-- [ ] checklist de go-live;
-- [ ] rollback comprovado;
-- [ ] decisão `GO`, `NO_GO` ou `CONDITIONAL_GO`;
-- [ ] publicação controlada;
-- [ ] CI final verde.
+- provider real de antimalware e E2E de homologação;
+- recuperação de Auth, buckets, PITR e retenção durável;
+- provider jurídico;
+- telemetria externa, retenção e incidentes;
+- proteção contra senhas comprometidas e MFA adicional;
+- rate limiting e headers/cookies finais;
+- pentest;
+- revisão jurídica, contábil e LGPD;
+- carga prolongada;
+- checklist de go-live, rollback e decisão formal;
+- publicação controlada.
 
 ## Etapa 21 — WMS avançado e Automação Logística
 
-**Estado:** fila aprovada após a Etapa 20.  
+**Estado:** planejada após a Etapa 20.  
 **Não implementada na versão 0.19.0.**
 
-### Escopo aprovado
+Escopo: WMS avançado, Endereçamento automatizado, RFID em tempo real, Ressuprimento automático sem aprovação fora da política, Roteirização logística, Integração fiscal de entrada e Depreciação contábil oficial.
 
-- WMS avançado;
-- Endereçamento automatizado;
-- RFID em tempo real;
-- Ressuprimento automático sem aprovação;
-- Roteirização logística;
-- Integração fiscal de entrada;
-- Depreciação contábil oficial.
+Dependências: Etapa 17 estabilizada em produção, Etapa 19 incorporada, Etapa 20 concluída, revisão fiscal/contábil e seleção de hardware/provider.
 
-### Dependências
+## Etapa 22 — WhatsApp multiprovider e atendimento
 
-- Etapa 17 estabilizada em produção;
-- Etapa 19 incorporada;
-- Etapa 20 concluída;
-- revisão fiscal e contábil;
-- hardware/provider RFID;
-- níveis de estoque e política de ressuprimento;
-- segregação de funções.
+**Estado do escopo técnico:** fechado na branch experimental.  
+**PR:** `#40`, draft, aberto e não mesclado.  
+**Produção:** `NOT_AUTHORIZED`.
 
-### Definition of Done adicional
+### Fundação W-00 a W-18
 
-- documentação atualizada no mesmo PR;
-- migration aplicada e homologada;
-- integração fiscal validada;
-- rastreabilidade auditável;
-- ressuprimento idempotente e limitado;
-- roteirização reproduzível;
-- depreciação reconciliada;
-- testes de concorrência, falha e recuperação;
-- isolamento multiempresa e multiobra;
-- CI verde.
+- governança, contratos provider-neutral, capability matrix e storage aditivo;
+- gateway isolado e adapter Baileys confinado;
+- session store cifrado, lease, single writer e fencing sintéticos;
+- ingress persist-before-dispatch e outbox durável;
+- identidade PN/LID, mídia segura e inbox multiprovider;
+- playbooks canônicos;
+- IA `DRAFT_ONLY`, handoff e plugins governados;
+- STRIDE, scanner de segredos, SBOM, observabilidade, alertas e runbooks.
+
+### W-19 — testes funcionais, chaos e performance
+
+- [x] unit, contract e integração PostgreSQL;
+- [x] restart, perda de rede, duplicados, receipt fora de ordem, mídia corrompida, banco indisponível, processo zumbi e disputa de réplicas com fixtures;
+- [x] upgrade/downgrade, restore e benchmarks sintéticos;
+- [ ] E2E com número autorizado — `BLOCKED_NOT_EXECUTED`;
+- [ ] QR e pairing reais — `BLOCKED_NOT_EXECUTED`.
+
+### W-20 — homologação interna
+
+- [x] políticas fail-closed, campanhas desabilitadas, IA autônoma desligada, conteúdo permitido, métricas, alertas, purge e handoff ensaiados;
+- [ ] número, organização, usuários, sessão e tráfego reais — `BLOCKED_NOT_EXECUTED`.
+
+### W-21 — piloto restrito
+
+- [x] escopo máximo, SLOs, abort criteria, feature flags, rollback, revisão de incidentes e comparação sintética definidos;
+- [ ] revisão jurídica, autorização formal e piloto real;
+- decisão: `HOLD`.
+
+### W-22 — encerramento
+
+- reconciliação dos documentos canônicos;
+- dependências e licenças registradas;
+- decisão `HOLD / NOT_AUTHORIZED`;
+- CI e E2E finais exigidos no head documental;
+- PR permanece draft até revisão técnica e de segurança;
+- merge ou fechamento não é automático.
+
+### Bloqueadores de promoção
+
+1. revisão jurídica e de privacidade;
+2. revisão da SBOM transitiva;
+3. decisão de KMS/HSM;
+4. número dedicado autorizado;
+5. organização e usuários reais de homologação;
+6. repetição P0 em ambiente autorizado;
+7. piloto restrito real;
+8. revisão técnica e de segurança do PR.
 
 ## Regra de alteração
 
-Nenhuma etapa é concluída sem código, migrations, testes, documentação, vacinas, homologação e CI compatíveis. Nenhum merge ou publicação ocorre automaticamente.
+Nenhuma etapa é concluída sem código, migrations, testes, documentação, vacinas, homologação aplicável e CI compatíveis. Dependência externa permanece aberta. Nenhum merge ou publicação ocorre automaticamente.

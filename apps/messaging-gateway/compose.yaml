@@ -1,0 +1,45 @@
+services:
+  messaging-gateway:
+    build:
+      context: ../..
+      dockerfile: apps/messaging-gateway/Dockerfile
+    environment:
+      GATEWAY_HOST: 0.0.0.0
+      GATEWAY_PORT: 8787
+      GATEWAY_INSTANCE_ID: compose-local
+      GATEWAY_HMAC_SECRET: ${GATEWAY_HMAC_SECRET:?defina GATEWAY_HMAC_SECRET com 32 bytes ou mais}
+    ports:
+      - "127.0.0.1:8787:8787"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,noexec,nosuid,nodev
+    user: "10001:10001"
+    init: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 256m
+    cpus: 0.50
+    ulimits:
+      nofile:
+        soft: 1024
+        hard: 2048
+    networks:
+      - gateway_internal
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:8787/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+networks:
+  gateway_internal:
+    internal: true

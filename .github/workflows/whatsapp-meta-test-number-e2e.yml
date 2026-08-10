@@ -1,0 +1,129 @@
+name: WhatsApp Meta Test Number E2E
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_send:
+        description: "Digite SEND_TO_META_TEST_NUMBER para autorizar uma mensagem ao número de testes"
+        required: true
+        type: string
+  push:
+    branches:
+      - feature/etapa-22-provider-whatsapp-web-baileys
+
+concurrency:
+  group: whatsapp-meta-test-number-e2e
+  cancel-in-progress: false
+
+jobs:
+  meta-test-number:
+    if: >-
+      (github.event_name == 'workflow_dispatch' && inputs.confirm_send == 'SEND_TO_META_TEST_NUMBER') ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[meta-test-number-e2e]'))
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      WHATSAPP_TEST_MODE: "true"
+      WHATSAPP_TEST_SEND_ENABLED: "true"
+      WHATSAPP_GRAPH_API_VERSION: "v25.0"
+      WHATSAPP_ACCESS_TOKEN: ${{ secrets.WHATSAPP_ACCESS_TOKEN }}
+      WHATSAPP_TEST_PHONE_NUMBER_ID: ${{ secrets.WHATSAPP_TEST_PHONE_NUMBER_ID }}
+      WHATSAPP_TEST_RECIPIENT: ${{ secrets.WHATSAPP_TEST_RECIPIENT }}
+      WHATSAPP_TEST_TEMPLATE_NAME: ${{ secrets.WHATSAPP_TEST_TEMPLATE_NAME || vars.WHATSAPP_TEST_TEMPLATE_NAME || 'hello_world' }}
+      WHATSAPP_TEST_TEMPLATE_LANGUAGE: ${{ secrets.WHATSAPP_TEST_TEMPLATE_LANGUAGE || vars.WHATSAPP_TEST_TEMPLATE_LANGUAGE || 'en_US' }}
+      WHATSAPP_TEST_EVIDENCE_PATH: whatsapp-meta-test-evidence.json
+
+    steps:
+      - name: Checkout sem persistir credencial
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      - name: Enviar template ao número de testes da Meta
+        id: smoke
+        run: node scripts/run-whatsapp-meta-test-number-e2e.mjs
+
+      - name: Resumo sanitizado
+        if: always()
+        shell: bash
+        run: |
+          echo "## WhatsApp Meta Test Number E2E" >> "$GITHUB_STEP_SUMMARY"
+          if [[ -f whatsapp-meta-test-evidence.json ]]; then
+            node -e 'const fs=require("fs"); const e=JSON.parse(fs.readFileSync("whatsapp-meta-test-evidence.json","utf8")); console.log(`- Resultado: ${e.message?.providerAccepted || e.ok ? "provider aceitou" : "bloqueado/falhou"}\n- Modo: ${e.mode}\n- Configurações pendentes: ${(e.configurationKeys || []).join(", ") || "nenhuma"}\n- Número comercial usado: ${e.productionNumberUsed ? "sim" : "não"}\n- Baileys usado: ${e.baileysUsed ? "sim" : "não"}\n- Delivery receipt observado: ${e.deliveryReceiptObserved ? "sim" : "não"}\n- Webhook inbound observado: ${e.inboundWebhookObserved ? "sim" : "não"}`)' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- Evidência não foi criada." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Publicar artifact sanitizado
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: whatsapp-meta-test-number-evidence-${{ github.run_id }}
+          path: whatsapp-meta-test-evidence.json
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-sanitized-evidence:
+    if: always() && needs.meta-test-number.result != 'skipped'
+    needs: meta-test-number
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - name: Checkout do branch sem segredos de homologação
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Baixar artifact sanitizado
+        uses: actions/download-artifact@v4
+        with:
+          name: whatsapp-meta-test-number-evidence-${{ github.run_id }}
+          path: .evidence
+
+      - name: Validar minimização da evidência
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = '.evidence/whatsapp-meta-test-evidence.json';
+          const raw = fs.readFileSync(path, 'utf8');
+          const evidence = JSON.parse(raw);
+          if (raw.includes('WHATSAPP_ACCESS_TOKEN') || raw.includes('Bearer ')) {
+            throw new Error('EVIDENCE_CONTAINS_SECRET');
+          }
+          if (evidence.recipient?.phoneMasked && !/^\*+\d{4}$/.test(evidence.recipient.phoneMasked)) {
+            throw new Error('EVIDENCE_RECIPIENT_NOT_MASKED');
+          }
+          if (evidence.sender?.displayPhoneMasked && !/^\*+\d{4}$/.test(evidence.sender.displayPhoneMasked)) {
+            throw new Error('EVIDENCE_SENDER_NOT_MASKED');
+          }
+          for (const key of evidence.configurationKeys || []) {
+            if (!/^WHATSAPP_[A-Z0-9_]+$/.test(key)) throw new Error('EVIDENCE_CONFIGURATION_KEY_INVALID');
+          }
+          NODE
+
+      - name: Registrar evidência no branch
+        shell: bash
+        run: |
+          target="docs/ETAPA-22-WHATSAPP-WEB-NAO-OFICIAL/EVIDENCIA-NUMERO-TESTE-META-LATEST.json"
+          cp .evidence/whatsapp-meta-test-evidence.json "$target"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$target"
+          if git diff --cached --quiet; then
+            echo "Evidência já está atualizada."
+            exit 0
+          fi
+          git commit -m "test(whatsapp): registrar evidência sanitizada do número Meta de testes"
+          git push origin "HEAD:${{ github.ref_name }}"

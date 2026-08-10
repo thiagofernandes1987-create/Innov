@@ -29,15 +29,15 @@ a ignorar.
 | | |
 |---|---|
 | Aplicativos no registro | 25 |
-| Rotas | 226 (202 páginas, 24 de API) |
-| Server actions | 314 em 69 arquivos |
-| Módulos de `lib/` | 121 |
-| Funções do banco declaradas | 318 |
-| Funções do banco chamadas do código | 186 |
-| Suítes de teste | 84, com 781 casos |
-| Migrations | 243 |
-| Validadores de CI | 31 |
-| Módulos de `lib/` citados por algum teste | 74 de 121 |
+| Rotas | 229 (205 páginas, 24 de API) |
+| Server actions | 323 em 72 arquivos |
+| Módulos de `lib/` | 146 |
+| Funções do banco declaradas | 414 |
+| Funções do banco chamadas do código | 200 |
+| Suítes de teste | 107, com 1011 casos |
+| Migrations | 268 |
+| Validadores de CI | 53 |
+| Módulos de `lib/` citados por algum teste | 94 de 146 |
 
 ## 1. Aplicativos
 
@@ -279,6 +279,9 @@ A coluna **guarda** mostra o que a rota exige antes de responder.
 | `/app/rh/tsv/[id]/especial` | página | rh:read | `app/app/rh/tsv/[id]/especial/page.tsx` |
 | `/app/tarefas` | página | sessão da organização | `app/app/tarefas/page.tsx` |
 | `/app/whatsapp` | página | — | `app/app/whatsapp/page.tsx` |
+| `/app/whatsapp/bots` | página | — | `app/app/whatsapp/bots/page.tsx` |
+| `/app/whatsapp/bots/[botId]` | página | — | `app/app/whatsapp/bots/[botId]/page.tsx` |
+| `/app/whatsapp/inbox` | página | — | `app/app/whatsapp/inbox/page.tsx` |
 | `/assinar/[token]` | página | — | `app/assinar/[token]/page.tsx` |
 | `/cliente` | página | — | `app/cliente/page.tsx` |
 | `/cliente/[module]` | página | — | `app/cliente/[module]/page.tsx` |
@@ -453,6 +456,30 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `criarItemDeLista` | administracao:manage |
 | `moverItemDeLista` | administracao:manage |
 | `renomearItemDeLista` | administracao:manage |
+
+### `app/actions/messaging-bots.ts`
+
+| Função | Guarda |
+|---|---|
+| `saveMessagingBotProfile` | whatsapp:manage |
+| `setMessagingAiBudget` | whatsapp:manage |
+| `testMessagingBotDraft` | whatsapp:update |
+
+### `app/actions/messaging-inbox.ts`
+
+| Função | Guarda |
+|---|---|
+| `addMessagingConversationNote` | whatsapp:update |
+| `assignMessagingConversation` | whatsapp:update |
+| `assumeMessagingConversation` | whatsapp:update |
+| `refreshMessagingOperatorPresence` | whatsapp:read |
+| `updateMessagingOperatorPresence` | whatsapp:read |
+
+### `app/actions/messaging-plugin-policy.ts`
+
+| Função | Guarda |
+|---|---|
+| `setCanonicalMessagingPluginPolicy` | whatsapp:manage |
 
 ### `app/actions/objetos.ts`
 
@@ -1005,6 +1032,31 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/inventory/domain` | não | `formatInventoryCurrency`, `formatInventoryQuantity`, `movementLabel`, `movementRequiresNegative`, `movementRequiresPositive`, `normalizeInventoryDashboard` |
 | `@/lib/inventory/server` | não | `loadInventoryDashboard` |
 | `@/lib/listas/servidor` | sim | `listaDoEscopo`, `pertenceALista` |
+| `@/lib/messaging/ai` | sim | `AI_AUTONOMY_MODES`, `validateDraftClaims` |
+| `@/lib/messaging/bots.server` | não | `loadMessagingBotsWorkspace` |
+| `@/lib/messaging/bots` | sim | `BOT_ALLOWED_TOOLS`, `deriveBotReadiness`, `normalizeBotTools`, `validateBotProfile` |
+| `@/lib/messaging/canonical-retrieval.server` | não | — |
+| `@/lib/messaging/canonical-retrieval` | sim | `BOT_TEST_IMPLEMENTED_TOOLS`, `createCanonicalMessageAiSource`, `createProjectStatusAiSource`, `rankCanonicalAiSources` |
+| `@/lib/messaging/capabilities` | sim | `BAILEYS_PLANNED_CAPABILITY_MATRIX`, `CAPABILITY_SUPPORT_LEVELS`, `ENGINE_CAPABILITIES`, `META_CLOUD_CAPABILITY_MATRIX`, `WEB_CHAT_PLANNED_CAPABILITY_MATRIX`, `applyCapabilityOverrides`, `capabilityState`, `deriveMessagingUiCapabilities`, `hasEngineCapability`, `requireEngineCapability` |
+| `@/lib/messaging/domain` | sim | `CANONICAL_CONVERSATION_STATUSES`, `CANONICAL_DELIVERY_STATUSES`, `CANONICAL_IDENTITY_NAMESPACES`, `CANONICAL_MESSAGE_DIRECTIONS`, `CANONICAL_MESSAGE_TYPES`, `CANONICAL_RECEIPT_TYPES`, `CHANNEL_PROVIDER_TYPES`, `IMPLEMENTED_CHANNEL_PROVIDER_TYPES`, `MESSAGING_CONTRACT_VERSION`, `PLANNED_CHANNEL_PROVIDER_TYPES`, `RESERVED_CHANNEL_PROVIDER_TYPES`, `assertCanonicalIdentity`, `assertCanonicalMessage`, `assertCanonicalReceipt`, `canonicalIdentityKey`, `createCanonicalPhoneIdentity`, `isChannelProviderType`, `normalizeCanonicalPhone` |
+| `@/lib/messaging/engine` | sim | `ENGINE_SESSION_STATES`, `assertEngineCommand`, `capabilityForSendCommand` |
+| `@/lib/messaging/engines/meta-cloud.server` | não | `createMetaCloudMessagingEngine` |
+| `@/lib/messaging/engines/meta-cloud` | sim | — |
+| `@/lib/messaging/engines/mock` | sim | — |
+| `@/lib/messaging/feature-flags` | sim | `parseOrganizationProviderOverrides`, `resolveOrganizationProviderPolicies`, `resolveProviderPolicy` |
+| `@/lib/messaging/homologation` | sim | `HOMOLOGATION_DAILY_RUNBOOK`, `HOMOLOGATION_REQUIREMENTS`, `assessHomologation`, `buildCurrentHomologationAssessment` |
+| `@/lib/messaging/inbox.server` | não | `loadMultiproviderInbox` |
+| `@/lib/messaging/inbox` | sim | `buildUnifiedInbox`, `channelStateLabel`, `deriveInboxActionAvailability`, `filterUnifiedInbox`, `messagingProviderLabel`, `resolveEffectiveOperatorPresence` |
+| `@/lib/messaging/observability` | sim | `MESSAGING_METRICS`, `MESSAGING_OPERATIONS_DASHBOARD`, `METRIC_LABEL_ALLOWLIST`, `evaluateMessagingAlerts`, `structuredMessagingLog` |
+| `@/lib/messaging/openai-responses-provider` | sim | `openAiMessagingEnvironmentStatus` |
+| `@/lib/messaging/pilot` | sim | `CURRENT_PILOT_LIMITS`, `DEFAULT_PILOT_SLIS`, `PILOT_ABORT_CRITERIA`, `PILOT_DAILY_INCIDENT_REVIEW`, `PILOT_INSTANT_ROLLBACK`, `SYNTHETIC_PROVIDER_COMPARISON`, `assessPilotReadiness`, `currentPilotAssessment` |
+| `@/lib/messaging/playbooks` | sim | `PLAYBOOK_AUTONOMY_LEVELS`, `PLAYBOOK_SENSITIVITY_LEVELS`, `assertPlaybookPolicy`, `createPlaybookExecutionSnapshot`, `reproducePlaybookExecution`, `validatePlaybookVariables` |
+| `@/lib/messaging/plugin-policy` | sim | `CANONICAL_MESSAGE_PLUGIN_POLICIES`, `canonicalMessagePluginPolicy`, `normalizeMessagePluginPolicyRequest` |
+| `@/lib/messaging/plugins` | sim | `createAiFallbackPlugin`, `createAntiSpamPlugin`, `createConsentPlugin`, `createDefaultMessagePlugins`, `createDocumentPlugin`, `createHandoffPlugin`, `createProjectStatusPlugin`, `createQualificationPlugin`, `createSacPlugin` |
+| `@/lib/messaging/policy.server` | não | `requireMetaCloudCapability`, `resolveMetaCloudRuntimePolicy` |
+| `@/lib/messaging/security` | sim | `CRITICAL_WRITES`, `MESSAGING_SECURITY_ASSETS`, `MESSAGING_STRIDE_THREATS`, `MESSAGING_TOOL_ALLOWLIST`, `MESSAGING_TRUST_BOUNDARIES`, `assertCriticalApproval`, `assertTenantScope`, `assertToolAllowed`, `buildSessionCompromisePlan`, `retentionDeadline`, `sanitizeSecurityLog` |
+| `@/lib/messaging/verification` | sim | `SYNTHETIC_CHAOS_SCENARIOS`, `createSyntheticRuntimeState`, `runSyntheticBenchmark`, `runSyntheticChaosScenario` |
+| `@/lib/messaging/whatsapp-compatibility` | sim | `canonicalStatusToLegacyWhatsApp`, `legacyWhatsAppAccountToCanonical`, `legacyWhatsAppContactToCanonicalIdentity`, `legacyWhatsAppConversationToCanonical`, `legacyWhatsAppMessageToCanonical`, `legacyWhatsAppStatusEventToCanonical`, `legacyWhatsAppStatusToCanonical` |
 | `@/lib/modules/registry` | sim | `MODULE_BY_KEY`, `MODULE_REGISTRY`, `capabilitiesForLevel`, `moduleForPath`, `toDatabaseAccessLevel`, `toUiAccessLevel` |
 | `@/lib/object-runtime/estudio` | não | `definicaoPorId`, `definicoesDaOrganizacao` |
 | `@/lib/object-runtime/parecidos` | sim | `camposParecidos`, `distancia` |
@@ -1101,9 +1153,12 @@ Declaradas em migration e chamadas por `.rpc()`.
 |---|---|---|
 | `accept_proposal` | `supabase/migrations/20260728232000_accept_proposal_client_audit.sql` | — (só por SQL ou trigger) |
 | `accept_rh_payroll_shadow` | `supabase/migrations/20260808110000_rh_payroll_shadow_reconciliation.sql` | `app/actions/rh-shadow-payroll.ts` |
+| `acknowledge_channel_operational_alert` | `supabase/migrations/20260804230000_stage22_messaging_observability.sql` | — (só por SQL ou trigger) |
 | `acknowledge_observability_alert` | `supabase/migrations/20260721122302_stage19_observability_functions.sql` | `app/actions/observability.ts` |
+| `acquire_session_runtime_lease` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
 | `activate_rh_admission` | `supabase/migrations/20260807153200_rh_admission_activation_precondition_order_fix.sql` | `app/actions/rh-admission.ts` |
 | `add_advanced_signature_field` | `supabase/migrations/20260720054200_stage12_2_document_layout_workflow.sql` | `app/actions/advanced-signatures.ts` |
+| `add_channel_conversation_note` | `supabase/migrations/20260804180000_stage22_multiprovider_inbox.sql` | `app/actions/messaging-inbox.ts` |
 | `add_inventory_stocktake_line` | `supabase/migrations/20260720160530_stage17_inventory_stocktake_found_items.sql` | `app/actions/inventory-stocktake.ts` |
 | `add_rh_payroll_base_member` | `supabase/migrations/20260807140000_rh_payroll_regulatory_configuration.sql` | `app/actions/rh-payroll-config.ts` |
 | `add_sac_ticket_message` | `supabase/migrations/20260721013654_stage18_sac_functions.sql` | `app/actions/relationship.ts` |
@@ -1111,18 +1166,26 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `apply_rh_esocial_event_result` | `supabase/migrations/20260807142000_rh_esocial_individual_results.sql` | `app/actions/rh-esocial-processing.ts` |
 | `apply_rh_termination_rubric_mappings` | `supabase/migrations/20260807160500_rh_termination_esocial_mapping.sql` | `app/actions/rh-termination-esocial.ts` |
 | `apply_signed_amendment` | `supabase/migrations/20260719234000_stage9_apply_amendment.sql` | — (só por SQL ou trigger) |
+| `approve_channel_critical_write` | `supabase/migrations/20260804220000_stage22_security_hardening.sql` | — (só por SQL ou trigger) |
 | `approve_inventory_stocktake` | `supabase/migrations/20260720160420_stage17_inventory_assets_stocktakes_03.sql` | `app/actions/inventory.ts` |
 | `approve_rh_benefit_provider_invoice` | `supabase/migrations/20260809110000_rh_benefit_invoice_lifecycle.sql` | `app/actions/rh-benefits.ts` |
 | `approve_rh_payroll_accounting_batch` | `supabase/migrations/20260807162500_rh_payroll_provisions_accounting.sql` | — (só por SQL ou trigger) |
 | `approve_rh_payroll_difference_case` | `supabase/migrations/20260807164000_rh_payroll_difference_approval_export.sql` | `app/actions/rh-payroll-special.ts` |
 | `approve_rh_termination_calculation` | `supabase/migrations/20260807160000_rh_termination_offboarding_v1.sql` | `app/actions/rh-termination.ts` |
 | `approve_rh_vacation_case` | `supabase/migrations/20260807150000_rh_vacation_leave_benefits_v1.sql` | `app/actions/rh-movements.ts` |
+| `assert_channel_media_clean` | `supabase/migrations/20260804170000_stage22_secure_media.sql` | — (só por SQL ou trigger) |
 | `assert_procurement_quote_item_parent_chain` | `supabase/migrations/20260723062000_r2_stage14_procurement_parent_chain.sql` | — (só por SQL ou trigger) |
 | `assert_procurement_receipt_item_parent_chain` | `supabase/migrations/20260723062000_r2_stage14_procurement_parent_chain.sql` | — (só por SQL ou trigger) |
+| `assert_runtime_not_killed` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
+| `assert_session_runtime_fence` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
+| `assign_channel_conversation` | `supabase/migrations/20260804180000_stage22_multiprovider_inbox.sql` | `app/actions/messaging-inbox.ts` |
 | `assign_inventory_asset` | `supabase/migrations/20260720160400_stage17_inventory_assets_stocktakes_01.sql` | `app/actions/inventory.ts` |
 | `assign_sac_ticket` | `supabase/migrations/20260721013654_stage18_sac_functions.sql` | `app/actions/relationship.ts` |
 | `assign_user_access_profile` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
 | `authorize_rh_document_download` | `supabase/migrations/20260808104000_rh_document_management_v1.sql` | `app/api/rh/documents/[versionId]/route.ts` |
+| `begin_channel_delivery_attempt` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
+| `begin_channel_media_scan` | `supabase/migrations/20260804170000_stage22_secure_media.sql` | — (só por SQL ou trigger) |
+| `bump_channel_identity_cache` | `supabase/migrations/20260804160000_stage22_identity_reconciliation.sql` | — (só por SQL ou trigger) |
 | `calculate_budget_version` | `supabase/migrations/20260729010000_budget_readiness_and_cost_sources.sql` | `app/actions/budgets.ts` |
 | `calculate_budget_version_core` | `supabase/migrations/20260808135000_converge_budget_pricing_to_markup.sql` | — (só por SQL ou trigger) |
 | `calculate_rh_termination` | `supabase/migrations/20260807160000_rh_termination_offboarding_v1.sql` | `app/actions/rh-termination.ts` |
@@ -1132,12 +1195,37 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `can_access_sac_ticket` | `supabase/migrations/20260721012701_stage18_relationship_security.sql` | — (só por SQL ou trigger) |
 | `can_manage_project` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
 | `can_write_daily_log` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
+| `channel_ai_immutable_invocation` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | — (só por SQL ou trigger) |
+| `channel_ai_scope_guard` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | — (só por SQL ou trigger) |
+| `channel_bot_profile_scope_guard` | `supabase/migrations/20260805003000_stage22_governed_bot_profiles.sql` | — (só por SQL ou trigger) |
+| `channel_homologation_evidence_immutable` | `supabase/migrations/20260805001000_stage22_homologation_assessments.sql` | — (só por SQL ou trigger) |
+| `channel_message_plugin_decision_immutable` | `supabase/migrations/20260804210000_stage22_message_plugins.sql` | — (só por SQL ou trigger) |
+| `channel_message_plugin_scope_guard` | `supabase/migrations/20260804210000_stage22_message_plugins.sql` | — (só por SQL ou trigger) |
+| `channel_pilot_evidence_immutable` | `supabase/migrations/20260805002000_stage22_limited_pilot.sql` | — (só por SQL ou trigger) |
+| `channel_pilot_scope_guard` | `supabase/migrations/20260805002000_stage22_limited_pilot.sql` | — (só por SQL ou trigger) |
+| `channel_runtime_observation_immutable` | `supabase/migrations/20260804230000_stage22_messaging_observability.sql` | — (só por SQL ou trigger) |
+| `channel_security_immutable_event` | `supabase/migrations/20260804220000_stage22_security_hardening.sql` | — (só por SQL ou trigger) |
+| `channel_verification_run_immutable` | `supabase/migrations/20260804235900_stage22_verification_runs.sql` | — (só por SQL ou trigger) |
+| `claim_channel_ai_conversation` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | `app/actions/messaging-bots.ts` |
+| `claim_channel_ingress_events` | `supabase/migrations/20260804142000_stage22_ingress_normalization.sql` | — (só por SQL ou trigger) |
+| `claim_channel_outbox_events` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
+| `claim_ordered_channel_outbox_events` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
+| `claim_whatsapp_outbound_dispatch` | `supabase/migrations/20260805004000_stage22_whatsapp_dispatch_claim.sql` | `app/actions/whatsapp.ts` |
 | `close_rh_payroll` | `supabase/migrations/20260807131500_rh_foundation_security_hardening.sql` | `app/actions/rh.ts` |
 | `close_rh_time_period_to_payroll` | `supabase/migrations/20260807150500_rh_time_payroll_export_contract_fix.sql` | `app/actions/rh-time.ts` |
+| `commit_channel_ai_budget` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | `app/actions/messaging-bots.ts` |
+| `compare_and_swap_channel_session_credentials` | `supabase/migrations/20260804123500_stage22_session_credential_store_function_fix.sql` | — (só por SQL ou trigger) |
+| `compare_and_swap_channel_session_credentials_fenced` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
+| `complete_channel_delivery_attempt` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
+| `complete_channel_ingress_event` | `supabase/migrations/20260804142000_stage22_ingress_normalization.sql` | — (só por SQL ou trigger) |
+| `complete_channel_media_scan` | `supabase/migrations/20260804170000_stage22_secure_media.sql` | — (só por SQL ou trigger) |
 | `complete_signature_business_state` | `supabase/migrations/20260728234000_signature_business_completion.sql` | `app/api/signatures/webhook/route.ts` |
 | `complete_signature_conversion_job` | `supabase/migrations/20260720054100_stage12_2_tokens_and_conversion_jobs.sql` | — (só por SQL ou trigger) |
 | `complete_signature_copy_delivery` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | `app/actions/advanced-signatures.ts` |
-| `complete_whatsapp_outbound_message` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | `app/actions/whatsapp.ts` |
+| `complete_whatsapp_outbound_dispatch` | `supabase/migrations/20260805004000_stage22_whatsapp_dispatch_claim.sql` | `app/actions/whatsapp.ts` |
+| `complete_whatsapp_outbound_message` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | — (só por SQL ou trigger) |
+| `confirm_channel_identity_alias` | `supabase/migrations/20260804160000_stage22_identity_reconciliation.sql` | — (só por SQL ou trigger) |
+| `consume_channel_critical_write_approval` | `supabase/migrations/20260804220000_stage22_security_hardening.sql` | — (só por SQL ou trigger) |
 | `consume_inventory_reservation` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | `app/actions/inventory.ts` |
 | `convert_crm_lead` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/relationship.ts` |
 | `create_advanced_signature_document` | `supabase/migrations/20260720054200_stage12_2_document_layout_workflow.sql` | `app/actions/advanced-signatures.ts` |
@@ -1145,7 +1233,11 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `create_amendment` | `supabase/migrations/20260719231500_stage9_workflows.sql` | `app/actions/commercial-documents.ts` |
 | `create_budget` | `supabase/migrations/20260719231500_stage9_workflows.sql` | `app/actions/create-budget.ts` |
 | `create_budget_version` | `supabase/migrations/20260719231500_stage9_workflows.sql` | — (só por SQL ou trigger) |
+| `create_channel_outbox_for_command` | `supabase/migrations/20260804151500_stage22_outbox_delivery_compat.sql` | — (só por SQL ou trigger) |
+| `create_channel_pilot_plan` | `supabase/migrations/20260805002000_stage22_limited_pilot.sql` | — (só por SQL ou trigger) |
+| `create_channel_security_incident` | `supabase/migrations/20260804220000_stage22_security_hardening.sql` | — (só por SQL ou trigger) |
 | `create_commercial_proposal` | `supabase/migrations/20260729163500_flexible_projects_proposals_discounts.sql` | `app/actions/flexible-workflows.ts` |
+| `create_communication_playbook_version` | `supabase/migrations/20260804190000_stage22_communication_playbooks.sql` | — (só por SQL ou trigger) |
 | `create_contract_from_proposal` | `supabase/migrations/20260719231500_stage9_workflows.sql` | `app/actions/commercial-documents.ts` |
 | `create_crm_lead` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/relationship.ts` |
 | `create_crm_opportunity` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/crm-opportunities.ts` |
@@ -1193,14 +1285,17 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `create_sandbox_signature_envelope` | `supabase/migrations/20260719231500_stage9_workflows.sql` | — (só por SQL ou trigger) |
 | `create_schedule_baseline` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | `app/actions/projects.ts` |
 | `decide_budget_approval` | `supabase/migrations/20260729010000_budget_readiness_and_cost_sources.sql` | `app/actions/budgets.ts` |
+| `decide_communication_playbook_version` | `supabase/migrations/20260804190000_stage22_communication_playbooks.sql` | — (só por SQL ou trigger) |
 | `decide_daily_log` | `supabase/migrations/20260729000500_typed_enum_state_transitions.sql` | `app/actions/projects.ts` |
 | `decide_finance_approval` | `supabase/migrations/20260720123300_stage15_finance_hardening.sql` | `app/actions/operational-finance.ts` |
 | `decide_finance_measurement` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | `app/actions/operational-finance.ts` |
 | `decide_procurement_approval` | `supabase/migrations/20260728235500_procurement_segregation_of_duties.sql` | `app/actions/procurement.ts` |
 | `decide_proposal_discount` | `supabase/migrations/20260729171500_discount_decision_preserves_proposal_readiness.sql` | `app/actions/flexible-workflows.ts` |
+| `delete_channel_session_secrets` | `supabase/migrations/20260804123000_stage22_session_credential_store.sql` | — (só por SQL ou trigger) |
 | `effective_module_permissions` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | — (só por SQL ou trigger) |
 | `enforce_inventory_direct_write_rules` | `supabase/migrations/20260720160700_stage17_inventory_hardening.sql` | — (só por SQL ou trigger) |
 | `enforce_inventory_sensitive_write` | `supabase/migrations/20260720160730_stage17_inventory_sensitive_write_guard.sql` | — (só por SQL ou trigger) |
+| `enqueue_channel_command` | `supabase/migrations/20260804151500_stage22_outbox_delivery_compat.sql` | — (só por SQL ou trigger) |
 | `ensure_organization_module_defaults` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | — (só por SQL ou trigger) |
 | `ensure_organization_module_defaults_trigger` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | — (só por SQL ou trigger) |
 | `expire_inventory_reservations` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | — (só por SQL ou trigger) |
@@ -1208,6 +1303,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `export_rh_payroll_difference_case` | `supabase/migrations/20260807164000_rh_payroll_difference_approval_export.sql` | `app/actions/rh-payroll-special.ts` |
 | `export_rh_thirteenth` | `supabase/migrations/20260807162000_rh_thirteenth_retroactive_payroll.sql` | `app/actions/rh-payroll-special.ts` |
 | `export_rh_vacation_to_payroll` | `supabase/migrations/20260807154500_rh_movements_payroll_contract_fix.sql` | `app/actions/rh-movements.ts` |
+| `fail_channel_delivery_attempt` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
 | `fail_signature_conversion_job` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | — (só por SQL ou trigger) |
 | `finalize_advanced_signature_envelope` | `supabase/migrations/20260720054220_stage12_2_finalization_delivery.sql` | `app/actions/advanced-signatures.ts` |
 | `finalize_procurement_quote` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
@@ -1240,7 +1336,18 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `get_rh_payslip_pdf_data` | `supabase/migrations/20260808105000_rh_payslip_pdf_access.sql` | `app/api/rh/payslips/[publicationId]/pdf/route.ts` |
 | `get_sac_dashboard` | `supabase/migrations/20260721013941_stage18_relationship_queries.sql` | `lib/relationship/server.ts` |
 | `get_sac_ticket_detail` | `supabase/migrations/20260722104500_stage20_sac_attachment_security.sql` | `lib/relationship/server.ts` |
+| `guard_channel_command_scope` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
+| `guard_channel_contact_identity_scope` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
+| `guard_channel_delivery_account_scope` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
+| `guard_channel_identity_alias_scope` | `supabase/migrations/20260804160000_stage22_identity_reconciliation.sql` | — (só por SQL ou trigger) |
+| `guard_channel_ingress_scope` | `supabase/migrations/20260804142000_stage22_ingress_normalization.sql` | — (só por SQL ou trigger) |
+| `guard_channel_media_scope` | `supabase/migrations/20260804170000_stage22_secure_media.sql` | — (só por SQL ou trigger) |
+| `guard_channel_media_state_transition` | `supabase/migrations/20260804170000_stage22_secure_media.sql` | — (só por SQL ou trigger) |
+| `guard_channel_queue_scope` | `supabase/migrations/20260804180000_stage22_multiprovider_inbox.sql` | — (só por SQL ou trigger) |
+| `guard_channel_session_secret_scope` | `supabase/migrations/20260804123000_stage22_session_credential_store.sql` | — (só por SQL ou trigger) |
+| `guard_communication_playbook_immutable` | `supabase/migrations/20260804190000_stage22_communication_playbooks.sql` | — (só por SQL ou trigger) |
 | `guard_official_cost_reference` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
+| `guard_session_runtime_scope` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
 | `guard_whatsapp_message_delivery_status` | `supabase/migrations/20260803192000_stage22_whatsapp_status_guard.sql` | — (só por SQL ou trigger) |
 | `has_org_role` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |
 | `import_procurement_receipt_to_inventory` | `supabase/migrations/20260729001500_inventory_receipt_line_order.sql` | `app/actions/inventory.ts` |
@@ -1276,6 +1383,9 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `mark_rh_payroll_payment_batch_sent` | `supabase/migrations/20260807163500_rh_payroll_payment_batch_commands.sql` | `app/actions/rh-payments.ts` |
 | `mark_rh_sst_ready` | `supabase/migrations/20260807155000_rh_sst_operational_v1.sql` | `app/actions/rh-sst.ts` |
 | `materialize_rh_payroll_difference` | `supabase/migrations/20260807162000_rh_thirteenth_retroactive_payroll.sql` | `app/actions/rh-payroll-special.ts` |
+| `merge_channel_contacts` | `supabase/migrations/20260804160000_stage22_identity_reconciliation.sql` | — (só por SQL ou trigger) |
+| `move_channel_failure_to_dlq` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
+| `move_channel_ingress_to_dlq` | `supabase/migrations/20260804142000_stage22_ingress_normalization.sql` | — (só por SQL ou trigger) |
 | `move_crm_lead_stage` | `supabase/migrations/20260721020003_stage18_workflow_privilege_hardening.sql` | `app/actions/relationship.ts` |
 | `move_crm_opportunity_stage` | `supabase/migrations/20260803230000_motivo_de_perda_separado_da_observacao.sql` | `app/actions/relationship.ts` |
 | `move_project_task` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | `app/actions/projects.ts` |
@@ -1288,6 +1398,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `object_runtime_slot_budget` | `supabase/migrations/20260726093000_object_runtime_publication.sql` | — (só por SQL ou trigger) |
 | `object_runtime_slot_family` | `supabase/migrations/20260726093000_object_runtime_publication.sql` | — (só por SQL ou trigger) |
 | `object_runtime_spec_checksum` | `supabase/migrations/20260726093000_object_runtime_publication.sql` | — (só por SQL ou trigger) |
+| `observe_channel_contact_identity` | `supabase/migrations/20260804160000_stage22_identity_reconciliation.sql` | — (só por SQL ou trigger) |
+| `open_channel_delivery_circuit_on_terminal_attempt` | `supabase/migrations/20260804152000_stage22_outbox_terminal_circuit.sql` | — (só por SQL ou trigger) |
 | `open_procurement_rfq` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
 | `operational_protect_event` | `supabase/migrations/20260728103000_operational_events_notifications.sql` | — (só por SQL ou trigger) |
 | `operational_validate_responsibility_persona` | `supabase/migrations/20260728150000_operational_client_event_origin.sql` | — (só por SQL ou trigger) |
@@ -1296,6 +1408,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `organizations_install_report_defaults` | `supabase/migrations/20260720143200_stage16_reports_module.sql` | — (só por SQL ou trigger) |
 | `organizations_install_stage18_relationship_defaults` | `supabase/migrations/20260721014030_stage18_relationship_module.sql` | — (só por SQL ou trigger) |
 | `pay_rh_benefit_provider_invoice` | `supabase/migrations/20260809110000_rh_benefit_invoice_lifecycle.sql` | `app/actions/rh-benefits.ts` |
+| `persist_channel_ingress_event` | `supabase/migrations/20260804142000_stage22_ingress_normalization.sql` | — (só por SQL ou trigger) |
 | `persist_rh_esocial_generated_event` | `supabase/migrations/20260807151500_rh_esocial_generated_event_persistence.sql` | `app/actions/rh-admission-esocial-transition.ts`, `app/actions/rh-admission-esocial.ts`, `app/actions/rh-esocial-changes.ts`, `app/actions/rh-esocial-generation.ts`, `app/actions/rh-leave-esocial.ts`, `app/actions/rh-payroll-esocial.ts`, `app/actions/rh-sst-esocial.ts`, `app/actions/rh-termination-esocial.ts`, `app/actions/rh-tsv-esocial.ts`, `app/actions/rh-tsv-special-esocial.ts` |
 | `pipeline_cards_congelar_origem` | `supabase/migrations/20260726190000_pipeline_endurecimento.sql` | — (só por SQL ou trigger) |
 | `pipeline_cards_registrar_etapa` | `supabase/migrations/20260726120000_pipeline_trilhas.sql` | — (só por SQL ou trigger) |
@@ -1337,8 +1450,19 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `recalculate_project_progress` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | — (só por SQL ou trigger) |
 | `reconcile_rh_benefit_provider_invoice` | `supabase/migrations/20260808103000_rh_benefits_provider_reconciliation.sql` | `app/actions/rh-benefits.ts` |
 | `reconcile_rh_payroll_shadow` | `supabase/migrations/20260808110000_rh_payroll_shadow_reconciliation.sql` | `app/actions/rh-shadow-payroll.ts` |
+| `reconcile_unconfirmed_channel_commands` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
 | `record_advanced_signature_field_value` | `supabase/migrations/20260720054210_stage12_2_external_signing.sql` | `app/actions/public-signing.ts` |
 | `record_audit_event` | `supabase/migrations/20260721122302_stage19_observability_functions.sql` | — (só por SQL ou trigger) |
+| `record_channel_ai_invocation` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | `app/actions/messaging-bots.ts` |
+| `record_channel_delivery_attempt` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
+| `record_channel_homologation_assessment` | `supabase/migrations/20260805001000_stage22_homologation_assessments.sql` | — (só por SQL ou trigger) |
+| `record_channel_homologation_rehearsal` | `supabase/migrations/20260805001000_stage22_homologation_assessments.sql` | — (só por SQL ou trigger) |
+| `record_channel_message_plugin_decision` | `supabase/migrations/20260804210000_stage22_message_plugins.sql` | — (só por SQL ou trigger) |
+| `record_channel_pilot_assessment` | `supabase/migrations/20260805002000_stage22_limited_pilot.sql` | — (só por SQL ou trigger) |
+| `record_channel_pilot_daily_review` | `supabase/migrations/20260805002000_stage22_limited_pilot.sql` | — (só por SQL ou trigger) |
+| `record_channel_runtime_observation` | `supabase/migrations/20260804230000_stage22_messaging_observability.sql` | — (só por SQL ou trigger) |
+| `record_channel_sensitive_access` | `supabase/migrations/20260804220000_stage22_security_hardening.sql` | — (só por SQL ou trigger) |
+| `record_channel_verification_run` | `supabase/migrations/20260804235900_stage22_verification_runs.sql` | — (só por SQL ou trigger) |
 | `record_crm_activity` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/relationship.ts` |
 | `record_observability_diagnostic` | `supabase/migrations/20260721122436_stage19_observability_module_performance.sql` | — (só por SQL ou trigger) |
 | `record_report_export` | `supabase/migrations/20260720143100_stage16_reports_security.sql` | `app/api/relatorios/exportar/route.ts` |
@@ -1346,16 +1470,30 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `record_rh_fgts_payment` | `supabase/migrations/20260807143500_rh_dctfweb_fgts_operations.sql` | `app/actions/rh-government.ts` |
 | `refresh_budget_readiness_validations` | `supabase/migrations/20260729010000_budget_readiness_and_cost_sources.sql` | — (só por SQL ou trigger) |
 | `refresh_finance_overdue_statuses` | `supabase/migrations/20260720123100_stage15_finance_security.sql` | `app/app/financeiro/page.tsx` |
+| `register_channel_inbox_event` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
+| `register_channel_media_reference` | `supabase/migrations/20260804170000_stage22_secure_media.sql` | — (só por SQL ou trigger) |
+| `register_communication_playbook_execution` | `supabase/migrations/20260804190000_stage22_communication_playbooks.sql` | — (só por SQL ou trigger) |
 | `register_finance_settlement` | `supabase/migrations/20260720123300_stage15_finance_hardening.sql` | — (só por SQL ou trigger) |
 | `register_finance_settlement_with_attachment` | `supabase/migrations/20260720123500_stage15_finance_atomic_attachments.sql` | `app/actions/operational-finance.ts` |
 | `register_procurement_invitation_access` | `supabase/migrations/20260725120000_stage20_atomic_access_counters_and_cleanup.sql` | `app/actions/procurement.ts` |
 | `register_quality_public_link_access` | `supabase/migrations/20260725120000_stage20_atomic_access_counters_and_cleanup.sql` | `app/actions/quality.ts` |
 | `register_sac_ticket_attachment` | `supabase/migrations/20260722104500_stage20_sac_attachment_security.sql` | `app/actions/relationship.ts` |
 | `registrar_cub_manual` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | `app/actions/cub.ts` |
+| `registrar_mensagem_recebida_whatsapp` | `supabase/migrations/20260805010000_stage22_contador_de_nao_lidas_atomico.sql` | `app/api/webhooks/whatsapp/route.ts` |
 | `registrar_valor_usado` | `supabase/migrations/20260803200000_catalogo_de_valores_usados.sql` | `lib/sugestoes/servidor.ts` |
+| `release_channel_ai_budget` | `supabase/migrations/20260805003000_stage22_governed_bot_profiles.sql` | `app/actions/messaging-bots.ts` |
+| `release_channel_ai_conversation` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | `app/actions/messaging-bots.ts` |
 | `release_inventory_reservation` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | `app/actions/inventory.ts` |
 | `release_project_document_version` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | `app/actions/projects.ts` |
 | `release_proposal_version` | `supabase/migrations/20260719231500_stage9_workflows.sql` | — (só por SQL ou trigger) |
+| `release_session_runtime_lease` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
+| `renew_session_runtime_lease` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
+| `replay_channel_ingress_event` | `supabase/migrations/20260804142000_stage22_ingress_normalization.sql` | — (só por SQL ou trigger) |
+| `replay_channel_outbox_event` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
+| `request_channel_ai_handoff` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | — (só por SQL ou trigger) |
+| `reserve_channel_ai_budget` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | `app/actions/messaging-bots.ts` |
+| `reserve_channel_delivery_capacity` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
+| `resolve_channel_operational_alert` | `supabase/migrations/20260804230000_stage22_messaging_observability.sql` | — (só por SQL ou trigger) |
 | `resolve_observability_alert` | `supabase/migrations/20260721122302_stage19_observability_functions.sql` | `app/actions/observability.ts` |
 | `return_inventory_asset` | `supabase/migrations/20260720160410_stage17_inventory_assets_stocktakes_02.sql` | `app/actions/inventory.ts` |
 | `reverse_inventory_movement` | `supabase/migrations/20260720160200_stage17_inventory_movement_functions.sql` | `app/actions/inventory.ts` |
@@ -1366,6 +1504,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `rh_calculate_progressive_accumulated` | `supabase/migrations/20260807152000_rh_payroll_irrf_2026_and_accumulation.sql` | — (só por SQL ou trigger) |
 | `rh_irrf_2026_trace` | `supabase/migrations/20260807152000_rh_payroll_irrf_2026_and_accumulation.sql` | — (só por SQL ou trigger) |
 | `rh_seed_esocial_profiles_from_admission` | `supabase/migrations/20260807153500_rh_worker_contract_esocial_versions.sql` | — (só por SQL ou trigger) |
+| `rollback_channel_provider_projection` | `supabase/migrations/20260804011500_stage22_multiprovider_storage.sql` | — (só por SQL ou trigger) |
 | `run_observability_health_snapshot` | `supabase/migrations/20260723104500_r3b_observability_security_hardening.sql` | `app/actions/observability.ts` |
 | `run_rh_payroll` | `supabase/migrations/20260807152500_rh_payroll_legal_base_composition_fix.sql` | `app/actions/rh.ts` |
 | `sandbox_signature_event` | `supabase/migrations/20260719234500_stage9_security_hardening.sql` | — (só por SQL ou trigger) |
@@ -1376,11 +1515,18 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `select_procurement_quote` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
 | `semear_modelos_da_empresa` | `supabase/migrations/20260803160000_semear_modelos_da_empresa.sql` | `app/actions/documentos.ts` |
 | `semear_motivos_de_perda` | `supabase/migrations/20260803235000_listas_cadastradas_por_escopo.sql` | — (só por SQL ou trigger) |
+| `set_channel_ai_daily_budget` | `supabase/migrations/20260805003000_stage22_governed_bot_profiles.sql` | `app/actions/messaging-bots.ts` |
+| `set_channel_conversation_actor` | `supabase/migrations/20260804180000_stage22_multiprovider_inbox.sql` | — (só por SQL ou trigger) |
+| `set_channel_conversation_state` | `supabase/migrations/20260804180000_stage22_multiprovider_inbox.sql` | — (só por SQL ou trigger) |
+| `set_channel_message_plugin_policy` | `supabase/migrations/20260805005000_stage22_plugin_policy_canonical_order.sql` | `app/actions/messaging-plugin-policy.ts` |
+| `set_channel_operator_presence` | `supabase/migrations/20260804180000_stage22_multiprovider_inbox.sql` | `app/actions/messaging-inbox.ts` |
+| `set_global_messaging_runtime_kill_switch` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
 | `set_organization_module_status` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
 | `set_project_module_capability_override` | `supabase/migrations/20260720043300_stage12_1_project_capability_override.sql` | `app/actions/access-control.ts` |
 | `set_rh_admission_checklist_item` | `supabase/migrations/20260807134000_rh_admission_v1.sql` | `app/actions/rh-admission.ts` |
 | `set_rh_shadow_rubric_external` | `supabase/migrations/20260808110000_rh_payroll_shadow_reconciliation.sql` | `app/actions/rh-shadow-payroll.ts` |
 | `set_rh_shadow_worker_external` | `supabase/migrations/20260808110000_rh_payroll_shadow_reconciliation.sql` | `app/actions/rh-shadow-payroll.ts` |
+| `set_session_runtime_kill_switch` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
 | `set_user_module_capability_override` | `supabase/migrations/20260720043100_stage12_1_permission_resolution.sql` | `app/actions/access-control.ts` |
 | `settle_rh_payroll_payment` | `supabase/migrations/20260807161000_rh_payroll_payments_periodic_esocial.sql` | `app/actions/rh-payroll-esocial.ts` |
 | `stage18_generate_code` | `supabase/migrations/20260721013434_stage18_relationship_invariants.sql` | — (só por SQL ou trigger) |
@@ -1407,6 +1553,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `transition_sac_ticket` | `supabase/migrations/20260721013654_stage18_sac_functions.sql` | `app/actions/relationship.ts` |
 | `ufs_do_brasil` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
 | `update_rh_fgts_worker_external` | `supabase/migrations/20260807143500_rh_dctfweb_fgts_operations.sql` | `app/actions/rh-government.ts` |
+| `upsert_channel_bot_profile` | `supabase/migrations/20260805003000_stage22_governed_bot_profiles.sql` | `app/actions/messaging-bots.ts` |
+| `upsert_channel_operational_alert` | `supabase/migrations/20260804230000_stage22_messaging_observability.sql` | — (só por SQL ou trigger) |
 | `upsert_rh_dctfweb_reconciliation_item` | `supabase/migrations/20260807143500_rh_dctfweb_fgts_operations.sql` | `app/actions/rh-government.ts` |
 | `validate_finance_child_organization` | `supabase/migrations/20260720123300_stage15_finance_hardening.sql` | — (só por SQL ou trigger) |
 | `validate_finance_entry_links` | `supabase/migrations/20260720123300_stage15_finance_hardening.sql` | — (só por SQL ou trigger) |
@@ -1445,6 +1593,29 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/interface-foundation-contract.test.ts` | 11 | S-23 — fundação de interface |
 | `tests/inventory-validator.test.ts` | 1 | validador do inventário de execução |
 | `tests/listas.test.ts` | 6 | motivo escolhido pertence à lista |
+| `tests/messaging-ai.test.ts` | 12 | ContextBuilder W-15; AiOrchestrator W-15; claim validation W-15 |
+| `tests/messaging-baileys-adapter.test.ts` | 16 | Baileys W-06 dependency boundary; Baileys W-06 identity mapping; BaileysEngineAdapter outbound; BaileysEngineAdapter inbound and lifecycle |
+| `tests/messaging-bots.test.ts` | 8 | perfis de bot governados; OpenAI Responses provider |
+| `tests/messaging-boundary.test.ts` | 1 | Messaging engine boundary |
+| `tests/messaging-canonical-retrieval.test.ts` | 10 | retrieval canônico escopado; readiness do bot |
+| `tests/messaging-domain.test.ts` | 10 | Messaging canonical domain |
+| `tests/messaging-engine.test.ts` | 16 | capability matrix; organization provider flags; MetaCloudMessagingEngine; MockMessagingEngine |
+| `tests/messaging-gateway.test.ts` | 9 | messaging gateway W-05 |
+| `tests/messaging-homologation.test.ts` | 8 | homologação W-20 |
+| `tests/messaging-identities.test.ts` | 8 | Messaging identities W-11 |
+| `tests/messaging-inbox.test.ts` | 9 | Messaging inbox W-13 |
+| `tests/messaging-ingress.test.ts` | 9 | Messaging ingress W-09 |
+| `tests/messaging-media.test.ts` | 10 | Messaging secure media W-12 |
+| `tests/messaging-observability.test.ts` | 9 | observabilidade W-18 |
+| `tests/messaging-outbox.test.ts` | 10 | Messaging outbox W-10 |
+| `tests/messaging-pilot.test.ts` | 12 | piloto limitado W-21 |
+| `tests/messaging-playbooks.test.ts` | 8 | Communication playbooks W-14 |
+| `tests/messaging-plugin-policy.test.ts` | 5 | políticas canônicas de plugins |
+| `tests/messaging-plugins.test.ts` | 13 | MessagePluginPipeline W-16 |
+| `tests/messaging-runtime-lifecycle.test.ts` | 12 | W-08 runtime lease and lifecycle |
+| `tests/messaging-security.test.ts` | 8 | threat model W-17 |
+| `tests/messaging-session-credential-store.test.ts` | 13 | SessionCredentialStore W-07 |
+| `tests/messaging-verification.test.ts` | 14 | W-19 chaos sintético; W-19 benchmark sintético |
 | `tests/modelos-de-eap.test.ts` | 20 | o caso que a tarefa descreve; o que entra no modelo; grafia; achar o modelo do que está sendo digitado |
 | `tests/module-navigation.test.tsx` | 2 | NavegacaoDoModulo |
 | `tests/moeda.test.ts` | 15 | leitura de valor digitado; máscara de digitação, no padrão de caixa; exibição |
@@ -1518,6 +1689,28 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `scripts/validate-flexible-commercial-workflows.mjs` |
 | `scripts/validate-inventory.mjs` |
 | `scripts/validate-menus.mjs` |
+| `scripts/validate-messaging-boundaries.mjs` |
+| `scripts/validate-messaging-gateway.mjs` |
+| `scripts/validate-messaging-ingress.mjs` |
+| `scripts/validate-messaging-outbox.mjs` |
+| `scripts/validate-messaging-runtime-lifecycle.mjs` |
+| `scripts/validate-messaging-session-store.mjs` |
+| `scripts/validate-messaging-storage.mjs` |
+| `scripts/validate-messaging-w11-identities.mjs` |
+| `scripts/validate-messaging-w12-media.mjs` |
+| `scripts/validate-messaging-w13-inbox.mjs` |
+| `scripts/validate-messaging-w14-playbooks.mjs` |
+| `scripts/validate-messaging-w15-ai.mjs` |
+| `scripts/validate-messaging-w16-plugins.mjs` |
+| `scripts/validate-messaging-w17-security.mjs` |
+| `scripts/validate-messaging-w18-observability.mjs` |
+| `scripts/validate-messaging-w19-verification.mjs` |
+| `scripts/validate-messaging-w20-homologation.mjs` |
+| `scripts/validate-messaging-w21-pilot.mjs` |
+| `scripts/validate-messaging-w22-bot-edit.mjs` |
+| `scripts/validate-messaging-w22-bots-ux.mjs` |
+| `scripts/validate-messaging-w22-closure.mjs` |
+| `scripts/validate-messaging-w22-send-boundary.mjs` |
 | `scripts/validate-migrations-applied.mjs` |
 | `scripts/validate-module-keys.mjs` |
 | `scripts/validate-module-qa.mjs` |
@@ -1550,7 +1743,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 47 de 121 |
+| Módulo de `lib/` sem teste que o cite | 52 de 146 |
 
 ### Módulos sem teste que os cite
 
@@ -1571,6 +1764,11 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/forms/report-action-state`
 - `@/lib/inventory/domain`
 - `@/lib/inventory/server`
+- `@/lib/messaging/bots.server`
+- `@/lib/messaging/canonical-retrieval.server`
+- `@/lib/messaging/engines/meta-cloud.server`
+- `@/lib/messaging/inbox.server`
+- `@/lib/messaging/policy.server`
 - `@/lib/object-runtime/estudio`
 - `@/lib/observability/domain`
 - `@/lib/observability/server`

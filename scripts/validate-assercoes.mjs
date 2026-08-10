@@ -52,7 +52,20 @@ for (const arquivo of arquivos(TESTES)) {
   const fonte = fs.readFileSync(arquivo, "utf8");
   let contagem = 0;
   for (const fraca of FRACAS) {
-    contagem += (fonte.match(new RegExp(`\\.${fraca}\\(`, "g")) ?? []).length;
+    // `.not.` antes do matcher NÃO conta, e a distinção é a tese deste portão,
+    // não uma exceção conveniente.
+    //
+    // O defeito que ele persegue é a agulha encontrada com o palheiro ignorado:
+    // `expect(texto).toContain("R8-N")` passava com 23.000 caracteres de lixo ao
+    // lado. A **negação** é o caso oposto — `expect(JSON.stringify(evento))
+    // .not.toContain(SEGREDO)` só passa se o segredo não estiver em **nenhum**
+    // campo do objeto inteiro. Ela varre o palheiro por definição; é a forma
+    // exaustiva, e é como se testa que um dado sensível não vazou.
+    //
+    // Contá-la como fraca inflava o número com exatamente as asserções que a
+    // diretriz pede que existam, e criava o incentivo errado: apagar uma
+    // conferência de vazamento baixaria o "débito".
+    contagem += (fonte.match(new RegExp(`(?<!\\.not)\\.${fraca}\\(`, "g")) ?? []).length;
   }
   if (contagem > 0) {
     porArquivo.set(path.relative(raiz, arquivo), contagem);

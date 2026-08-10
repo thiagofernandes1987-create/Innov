@@ -1,0 +1,56 @@
+name: Messaging W-10 Outbox
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "feature/**"
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: messaging-w10-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  outbox:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Start PostgreSQL
+        run: |
+          sudo systemctl start postgresql
+          sudo -u postgres psql -v ON_ERROR_STOP=1 -c "alter user postgres password 'postgres';"
+          pg_isready -h "$PGHOST" -p "$PGPORT" -U "$PGUSER"
+      - name: Enable pnpm
+        run: |
+          corepack enable
+          corepack prepare pnpm@11.15.0 --activate
+      - name: Install without lifecycle scripts
+        run: pnpm install --no-frozen-lockfile --ignore-scripts --reporter=append-only
+      - name: Verify Baileys lockfile
+        run: pnpm validate:messaging-lockfile
+      - name: Validate W-10 boundary
+        run: pnpm validate:messaging-outbox
+      - name: PostgreSQL W-10 tests
+        run: pnpm test:db:messaging-outbox
+      - name: TypeScript W-10 tests
+        run: pnpm test:messaging-outbox
+      - name: Lint
+        run: pnpm lint
+      - name: Typecheck
+        run: pnpm typecheck
+      - name: Build gateway
+        run: pnpm build:messaging-gateway
