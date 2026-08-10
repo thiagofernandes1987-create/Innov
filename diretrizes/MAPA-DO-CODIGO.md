@@ -34,9 +34,9 @@ a ignorar.
 | Módulos de `lib/` | 101 |
 | Funções do banco declaradas | 239 |
 | Funções do banco chamadas do código | 121 |
-| Suítes de teste | 72, com 706 casos |
+| Suítes de teste | 73, com 707 casos |
 | Migrations | 175 |
-| Validadores de CI | 29 |
+| Validadores de CI | 31 |
 | Módulos de `lib/` citados por algum teste | 58 de 101 |
 
 ## 1. Aplicativos
@@ -987,6 +987,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/file-security-gateway-preconditions.test.ts` | 5 | pré-condições do gateway de análise de arquivos |
 | `tests/file-security-health-auth.test.ts` | 4 | file security provider health authentication |
 | `tests/file-security.test.ts` | 10 | file security domain |
+| `tests/golden-pdf-publicado.test.ts` | 1 | golden do extrator de PDF contra o publicado |
 | `tests/interface-foundation-contract.test.ts` | 11 | S-23 — fundação de interface |
 | `tests/inventory-validator.test.ts` | 1 | validador do inventário de execução |
 | `tests/listas.test.ts` | 6 | motivo escolhido pertence à lista |
@@ -1045,7 +1046,9 @@ Declaradas em migration e chamadas por `.rpc()`.
 
 | Script |
 |---|
+| `scripts/validate-assercoes.mjs` |
 | `scripts/validate-documentation.mjs` |
+| `scripts/validate-exports-mortos.mjs` |
 | `scripts/validate-extension-functions.mjs` |
 | `scripts/validate-flexible-commercial-workflows.mjs` |
 | `scripts/validate-inventory.mjs` |
