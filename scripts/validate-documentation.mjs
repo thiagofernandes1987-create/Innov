@@ -12,7 +12,7 @@ const requiredCanonical=[
  "diretrizes/QUALIDADE-CAUSA-RAIZ.md","diretrizes/REUSO-DE-INFORMACAO.md",
  "diretrizes/MAPA-DO-CODIGO.md","diretrizes/CONTRATO-AUDITAVEL-DE-PERSONAS.md",
  "diretrizes/MAPA-TECNOLOGICO.md","diretrizes/PROVA-POR-SABOTAGEM.md",
- "diretrizes/WORKERS.md"
+ "diretrizes/WORKERS.md","diretrizes/ADR-0001-CAMADA-DE-EXECUCAO.md"
 ];
 // A lista acima é escrita à mão, e isso já falhou uma vez — do mesmo jeito que
 // falhou para as vacinas antes da VACINA-014. Três documentos declaravam
