@@ -1,0 +1,48 @@
+name: Diagnose server page provider messages (temporary)
+
+on:
+  push:
+    branches:
+      - audit/regressao-main-20260808
+    paths:
+      - ".github/workflows/diagnose-server-page-provider-messages.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: audit/regressao-main-20260808
+      - name: List every suspicious Server Component message access
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const safe = new Set(['validationError', 'responseFailure']);
+          const findings = [];
+          function walk(dir) {
+            for (const entry of fs.readdirSync(dir, {withFileTypes:true})) {
+              const full = path.join(dir, entry.name);
+              if (entry.isDirectory()) { walk(full); continue; }
+              if (!entry.isFile() || !/^page\.tsx?$/.test(entry.name)) continue;
+              const src = fs.readFileSync(full, 'utf8');
+              if (/^\s*["']use client["'];/.test(src)) continue;
+              for (const match of src.matchAll(/\b([A-Za-z_$][A-Za-z0-9_$]*)\??\.message\b/g)) {
+                const variable = match[1];
+                if ((variable === 'error' || variable.endsWith('Error')) && !safe.has(variable)) {
+                  const line = src.slice(0, match.index).split('\n').length;
+                  findings.push(`${full}:${line}:${match[0]}`);
+                }
+              }
+            }
+          }
+          walk('app');
+          console.log(`SERVER_PAGE_PROVIDER_FINDINGS=${findings.length}`);
+          for (const item of findings) console.log(item);
+          if (findings.length) process.exitCode = 2;
+          NODE
