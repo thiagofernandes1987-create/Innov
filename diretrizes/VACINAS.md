@@ -143,6 +143,7 @@ Vacina pode ser substituída somente em PR próprio, preservando garantia igual 
 | `VACINA-061` | Guarda que lê o valor **novo** do campo que decide se ela se aplica é guarda opcional para quem sabe qual campo desligar — trocar `source_key` tornava o custo publicado pela CAIXA editável, com a procedência intacta ao lado | aplicada | a regra passou a olhar o que a linha **é**: recusa no `UPDATE` quando era oficial **ou** quando passaria a ser, conferência contra o pai antigo e novo nos filhos, o CUB com gatilho além da RLS, e `revoke` de escrita nas tabelas de sistema |
 | `VACINA-062` | Correção visual considerada concluída sem observar o preview publicado | vigente | captura obrigatória no mesmo viewport, tema e persona, comparação antes/depois e revisão de logs |
 | `VACINA-063` | Rede lógica tratada como linhas independentes permite ciclo, duplicidade ou referência fora do escopo | parcial | validação de escopo, duplicidade, hierarquia e ciclo antes da gravação; RPC transacional concorrente ainda pendente |
+| `VACINA-064` | Aplicativo declarado no registry do código e ausente de `app_modules` some da central sem erro nenhum | vigente | `validate:modulos-semeados` cruza registry, semeadura, menus e roteador nas cinco direções |
 
 ## 4. Arquivos
 
@@ -210,7 +211,8 @@ diretrizes/vacinas/
 ├── VACINA-060-LEITOR-QUE-NAO-ENTENDE-O-ARQUIVO-RESPONDE-ZERO.md
 ├── VACINA-061-GUARDA-QUE-LE-O-VALOR-NOVO-DO-CAMPO-QUE-DECIDE-A-GUARDA.md
 ├── VACINA-062-CORRECAO-VISUAL-EXIGE-CAPTURA-DO-PREVIEW.md
-└── VACINA-063-REDE-LOGICA-VALIDADA-ANTES-DA-GRAVACAO.md
+├── VACINA-063-REDE-LOGICA-VALIDADA-ANTES-DA-GRAVACAO.md
+└── VACINA-064-MODULO-DECLARADO-NO-CODIGO-E-AUSENTE-DO-CATALOGO.md
 ```
 
 ## 5. Aplicação no Encerramento da Etapa 22

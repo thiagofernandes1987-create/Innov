@@ -162,10 +162,11 @@ export const MENUS_DO_MODULO: Record<string, ItemDeMenu[]> = {
     { rotulo: "Emitir documento", href: "/app/modelos/emitir" },
     { rotulo: "Disponibilização", href: "/app/administracao/modelos" }
   ],
-  ocorrencias: [
-    { rotulo: "Ocorrências", href: "/app/ocorrencias" },
-    { rotulo: "Nova ocorrência", href: "/app/ocorrencias/novo" }
-  ],
+  // A chave é a do registry, não a da rota. O aplicativo de pós-venda tem chave
+  // `sac` e rota `/app/ocorrencias`; existia aqui um bloco `ocorrencias` com os
+  // mesmos dois destinos que `sac` já expõe, e ele nunca foi renderizado uma
+  // vez sequer — `navegacao-do-modulo` pede o menu por `moduleForPath()`, que
+  // devolve `sac`. Conferido por `pnpm validate:modulos-semeados`.
   sac: [
     { rotulo: "Chamados", href: "/app/ocorrencias" },
     { rotulo: "Pipeline", href: "/app/pipeline/assistencia" },

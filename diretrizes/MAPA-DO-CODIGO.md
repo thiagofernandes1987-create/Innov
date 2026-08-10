@@ -36,7 +36,7 @@ a ignorar.
 | Funções do banco chamadas do código | 200 |
 | Suítes de teste | 107, com 1011 casos |
 | Migrations | 268 |
-| Validadores de CI | 53 |
+| Validadores de CI | 54 |
 | Módulos de `lib/` citados por algum teste | 94 de 146 |
 
 ## 1. Aplicativos
@@ -1714,6 +1714,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `scripts/validate-migrations-applied.mjs` |
 | `scripts/validate-module-keys.mjs` |
 | `scripts/validate-module-qa.mjs` |
+| `scripts/validate-modulos-semeados.mjs` |
 | `scripts/validate-object-runtime.mjs` |
 | `scripts/validate-operational-qa-guards.mjs` |
 | `scripts/validate-personas-audit.mjs` |

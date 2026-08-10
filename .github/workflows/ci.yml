@@ -204,6 +204,8 @@ jobs:
         run: pnpm validate:postgrest-embeds
       - name: Validate module keys against app_modules (VACINA-053)
         run: pnpm validate:module-keys
+      - name: Validate module catalog across registry, app_modules and menus (VACINA-064)
+        run: pnpm validate:modulos-semeados
       - name: Validate code map against the code
         run: pnpm validate:code-map
       - name: Validate migrations against the applied ledger (VACINA-057)

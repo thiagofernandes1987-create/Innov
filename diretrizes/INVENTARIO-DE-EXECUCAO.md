@@ -1588,6 +1588,47 @@ de entrada e não é negociável: **nenhuma linguagem nova entra sem ADR**.
 
 ---
 
+## Sprint S-44 — Auditoria de superfícies esquecidas e o portão do catálogo de módulos
+
+**Estado:** concluída
+
+Nasceu de um relato de uso — *"o módulo de RH está sem chamada ativa, não se
+esqueça de validar se existem mais funções, módulos, tabelas, variáveis
+esquecidas"* — e de um pedido explícito de corrigir os casos equivalentes que
+aparecessem. Entra no fim conforme a R4. Relatório em
+`diretrizes/AUDITORIA-SUPERFICIES-ESQUECIDAS-2026-08-10.md`.
+
+### Tarefas
+
+- [x] T-44.1 — **Causa do relato isolada: é aplicação, não código.** O RH está inteiro no repositório (registry, menu, rotas, actions), e a central não lê o registry — lê `list_my_modules`, que resolve contra `public.app_modules`. Medido no projeto remoto: **25 módulos no registry contra 23 linhas em `app_modules`**. A semeadura existe em `20260809141000_rh_module_catalog_seed.sql`; as **68 migrations `rh_*` não estão aplicadas**, débito já declarado no ledger. Num ambiente nascido só das migrations, o RH aparece
+- [x] T-44.2 — **Um segundo caso da mesma família, vivo e não percebido: `MENUS_DO_MODULO.ocorrencias`.** A chave do aplicativo de pós-venda é `sac`; `ocorrencias` é a **rota**. Como `navegacao-do-modulo` pede o menu por `moduleForPath()`, que devolve a chave do registry, aquele bloco **nunca foi renderizado uma vez sequer** — e os dois destinos já existiam dentro de `sac`, que é por que nada parecia faltar na tela. Removido: destinos distintos continuam **74**, o total cai de **112 para 110**
+- [x] T-44.3 — **`pnpm validate:modulos-semeados`, o portão que faltava.** O `validate:module-keys` cobre uma direção só — *chave usada em SQL precisa estar semeada* — e parte do SQL; módulo declarado no registry que nenhuma policy cita ainda passa por ele calado. Foi por aí que o RH ficou dois dias com código e sem catálogo. O novo cruza registry × `app_modules` × menus × roteador nas **cinco direções**, com `dashboard` como única exceção declarada e justificada. `VACINA-064`
+- [x] T-44.4 — **Provado por sabotagem, cinco direções, uma por vez.** Base `exit=0`; módulo novo sem semeadura reprova em [A] e [D]; registry renomeado reprova em [A] e [B]; a rechave do `ocorrencias` reprova em [C]; menu renomeado reprova em [C] e [D]; rota sem pasta reprova em [E]; restaurado, `exit=0`
+- [x] T-44.5 — **Funções: 10 RPCs sem chamador em 404 vivas.** Cinco têm teste DB e esperam interface (piloto de mensageria e `create_proposal_from_budget_version`); **cinco são do RH e não têm nem chamador nem teste**. A mais instrutiva é `create_rh_payroll_parameter`: o código chama a irmã `create_rh_payroll_parameter_from_template`, e o nome quase igual é exatamente o que faz auditoria por leitura concluir que existe chamador. Remoção é migration destrutiva — fica para o piloto do módulo
+- [x] T-44.6 — **Tabelas: 1 em 331.** `object_records` é a única sem leitura nem escrita fora do DDL, e é superfície declarada do Object Runtime, com teste DB e documentação. As outras 19 da primeira passagem caíram quando a medição passou a descontar DDL, índice, RLS e `grant` — o número 20 era artefato do heurístico, não achado
+- [x] T-44.7 — **Variáveis: 27 de runtime sem declaração em lugar nenhum, todas corrigidas.** De 136 lidas em código, 85 não apareciam em `README`, `.env.example`, `vercel.json`, `deploy/`, `docs/` ou `diretrizes/`; **27 delas são lidas pelo produto em execução** e 23 são do próprio RH. Três com consequência silenciosa: `ESOCIAL_ENABLE_PRODUCTION` (só o literal `"true"` libera produção), `SINAPI_PROBE_TOKEN` (menos de 32 caracteres fecha a rota) e `BAILEYS_LAB_CONFIRM`. Declaradas em `.env.example` com o default real lido do código. Medido depois: **27 → 0**
+- [x] T-44.8 — Bateria completa: `eslint` limpo, `tsc` 0 erros, **1.068 testes em 112 arquivos**, `pnpm test:python` OK e **41 validadores verdes** — o `validate:code-map` reprovou por mapa desatualizado e foi regenerado
+
+---
+
+## Sprint S-45 — Pendências herdadas da auditoria de superfícies
+
+**Estado:** pendente
+
+O que a S-44 mediu e **não** resolveu, porque depende de ação externa,
+irreversível ou de decisão do responsável. Nomeado aqui para não voltar a ser
+descoberto.
+
+### Tarefas
+
+- [ ] T-45.1 — **Aplicar as 68 migrations `rh_*`**, sem o que o módulo continua invisível no projeto remoto. Ação externa e irreversível; o próprio ledger condiciona a saída do débito a homologação isolada com evidência real. **Decisão do responsável nomeado**
+- [ ] T-45.2 — Decidir sobre as **5 RPCs de RH sem chamador e sem teste** — `approve_rh_payroll_accounting_batch`, `generate_rh_payroll_accounting_batch`, `generate_rh_payroll_provisions`, `create_rh_payroll_parameter` e `create_rh_employment_esocial_contract_profile_version`: ligar a interface ou remover por migration
+- [ ] T-45.3 — Decidir sobre as **5 superfícies testadas sem tela** — as quatro do piloto de mensageria e `create_proposal_from_budget_version`
+- [ ] T-45.4 — Interface do Object Runtime, sem a qual `object_records` segue sendo tabela sem leitor
+- [ ] T-45.5 — Declarar as **58 variáveis de script, teste e CI** ainda sem menção em documento nenhum. Severidade menor: nenhuma é lida pelo produto em execução
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.
