@@ -1,0 +1,813 @@
+{
+  "_leia": "Exports sem importador, catalogados como DÍVIDA no dia em que o validador `validate:exports-mortos` entrou. Isto NÃO é permissão: é o inventário do que já estava morto quando o portão foi instalado. A partir daqui, export novo sem importador reprova o CI. Item que sair desta lista não volta — ou ganha consumidor, ou é removido. Conferido por amostra manual no dia do inventário: de 6 sorteados, 4 apareciam somente no próprio arquivo e 2 sobreviviam apenas porque um validador confere que existem, o que é código morto preso por portão.",
+  "inventariado_em": "2026-08-10T02:16:49Z",
+  "total": 191,
+  "arquivos_com_mais_divida": [
+    {
+      "arquivo": "lib/object-runtime/spec.ts",
+      "quantidade": 9
+    },
+    {
+      "arquivo": "lib/inventory/domain.ts",
+      "quantidade": 8
+    },
+    {
+      "arquivo": "lib/sinapi/relatorio-oficial.ts",
+      "quantidade": 8
+    },
+    {
+      "arquivo": "lib/domain.ts",
+      "quantidade": 7
+    },
+    {
+      "arquivo": "lib/planejamento/calendario.ts",
+      "quantidade": 6
+    },
+    {
+      "arquivo": "lib/observability/domain.ts",
+      "quantidade": 5
+    },
+    {
+      "arquivo": "lib/reports/metrics.ts",
+      "quantidade": 5
+    },
+    {
+      "arquivo": "components/casca/icones.tsx",
+      "quantidade": 4
+    },
+    {
+      "arquivo": "lib/cost-sources/cub-serie-historica.ts",
+      "quantidade": 4
+    },
+    {
+      "arquivo": "lib/orcamentos/composicao.ts",
+      "quantidade": 4
+    }
+  ],
+  "aceitos": [
+    {
+      "simbolo": "app/actions/flexible-workflows.ts:ProposalUploadPreparation",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "app/actions/pipeline.ts:ResultadoAcao",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/busca/smart-search-bar.tsx:SmartFilter",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/casca/busca-da-barra.tsx:IconeFiltroDaBusca",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/casca/icones.tsx:CHAVES_COM_ICONE",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/casca/icones.tsx:COR_DO_MODULO",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/casca/icones.tsx:IconeEditar",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/casca/icones.tsx:temIconeProprio",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/documentos/editor-de-modelo.tsx:ItemDaBiblioteca",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/documentos/editor-de-modelo.tsx:PastaDeModelos",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/documentos/matriz-de-disponibilizacao.tsx:AplicativoDaMatriz",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/documentos/menu-do-editor.tsx:ItemDeMenu",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/obras/contract-project-form.tsx:ContractProjectOption",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/obras/project-entry-form.tsx:ProjectClientOption",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/obras/project-entry-form.tsx:ProjectManagerOption",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/planejamento/portfolio-view.tsx:PlanningMilestone",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/planejamento/portfolio-view.tsx:PlanningPortfolioRow",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/propostas/proposal-form.tsx:ProposalBudgetOption",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/propostas/proposal-form.tsx:ProposalClientOption",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/relationship/opportunity-form.tsx:OpportunityClientOption",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "components/relationship/opportunity-form.tsx:OpportunityLeadOption",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/auth-errors.ts:AuthErrorLike",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/authorization.ts:EffectiveApplication",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/casca/menus.ts:ItemDeMenu",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/cost-sources/cub-fonte.ts:PAGINA_DO_CUB",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/cost-sources/cub-fonte.ts:SerieBaixada",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/cost-sources/cub-serie-historica.ts:PadraoDeAcabamento",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/cost-sources/cub-serie-historica.ts:RegistroDeCub",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/cost-sources/cub-serie-historica.ts:TOLERANCIA_DA_SERIE",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/cost-sources/cub-serie-historica.ts:TipologiaDeCub",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/cost-sources/sinduscon.ts:SINDUSCON_CUB_FEED_URL",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/cost-sources/sinduscon.ts:SindusconCubPublication",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/cost-sources/sinduscon.ts:SindusconCubRecord",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/biblioteca.ts:tiposDoAplicativo",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/dicionario.ts:EscopoVariavel",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/dicionario.ts:VARIAVEIS",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/docx.ts:PacoteDocx",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/docx.ts:destinosDeLink",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/importar.ts:ResultadoDaImportacao",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/modelo.ts:Dicionario",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/modelo.ts:Lacuna",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/modelo.ts:escaparValor",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/modelos.ts:EntradaDeModelo",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/modelos.ts:LIMITE_DO_NOME",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/resolucao.ts:Resolucao",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/tipos.ts:CategoriaDeDocumento",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/tipos.ts:TipoDeDocumento",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/xml.ts:desescapar",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/documentos/zip.ts:ArquivoDoZip",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/domain.ts:ContractStatus",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/domain.ts:ProposalStatus",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/domain.ts:SignatureStatus",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/domain.ts:budgetStatuses",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/domain.ts:contractStatuses",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/domain.ts:proposalStatuses",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/domain.ts:signatureStatuses",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/file-security/domain.ts:FILE_SECURITY_ALLOWED_MIME_TYPES",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/file-security/domain.ts:FileSecurityInput",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/file-security/gateway-auth.ts:FILE_SECURITY_GATEWAY_MAX_SKEW_SECONDS",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/file-security/gateway-auth.ts:buildFileSecurityGatewayPayload",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/file-security/health-auth.ts:FILE_SECURITY_HEALTH_MAX_SKEW_SECONDS",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/file-security/server.ts:FileSecurityProviderHealth",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/file-security/server.ts:SecureUploadResult",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/financial/cash-flow.ts:CashFlowPoint",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/financial/cash-flow.ts:CashFlowSummary",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/forms/project-creation-state.ts:ProjectCreationField",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/forms/report-action-state.ts:ReportActionField",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/inventory/domain.ts:InventoryDashboard",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/inventory/domain.ts:InventoryDashboardAsset",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/inventory/domain.ts:InventoryDashboardItem",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/inventory/domain.ts:InventoryDashboardMovement",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/inventory/domain.ts:InventoryDashboardWarehouse",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/inventory/domain.ts:InventoryExpiryAlert",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/inventory/domain.ts:InventoryItemKind",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/inventory/domain.ts:InventoryMovementStatus",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/estudio.ts:DefinicaoDeObjeto",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/parecidos.ts:CampoParecido",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/parecidos.ts:MotivoDeParecido",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/proposito.ts:Proposito",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/spec.ts:OBJECT_CLASSES",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/spec.ts:OBJECT_SCOPES",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/spec.ts:ObjectClass",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/spec.ts:ObjectScope",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/spec.ts:SlotAllocation",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/spec.ts:SlotFamily",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/spec.ts:SlotUsage",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/spec.ts:TRAITS",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/object-runtime/spec.ts:Trait",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/observability/domain.ts:HealthStatus",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/observability/domain.ts:ObservabilityEvent",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/observability/domain.ts:ObservabilitySeverity",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/observability/domain.ts:nullableText",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/observability/domain.ts:records",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/observability/server.ts:EventFilters",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/operations/notifications.ts:OperationalEvent",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/operations/notifications.ts:OperationalScenario",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/operations/notifications.ts:PlannedOperationalNotification",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/operations/routines.ts:OperationalRoutine",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/composicao.ts:PriceStatus",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/composicao.ts:Reconciliacao",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/composicao.ts:SituacaoDaConta",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/composicao.ts:TOLERANCIA_DA_CONTA",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/cub-manual.ts:CamposDaDeclaracao",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/cub-manual.ts:DeclaracaoDeCub",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/cub-manual.ts:LeituraDaDeclaracao",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/cub-por-uf.ts:UF_PADRAO",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/cub-por-uf.ts:UfDoBrasil",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/cub.ts:LinhaDoCub",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/cub.ts:NaturezaDeItem",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/cub.ts:ResultadoDoCub",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/cub.ts:TipoDeCusto",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/orcamentos/naturezas.ts:TotalPorNatureza",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pdf.ts:CommercialPdfInput",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pdf.ts:CommercialPdfSection",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/atividades.ts:TIPOS_OBSERVACAO",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/atividades.ts:TipoObservacao",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/atividades.ts:saiDaCasa",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/datas.ts:EstadoPrazo",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/datas.ts:MARCOS",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/datas.ts:NATUREZAS",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/domain.ts:CategoriaEtapa",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/domain.ts:PrazoDoCartao",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/domain.ts:ROTULO_TRILHA",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/server.ts:FunilDaTrilha",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/server.ts:PipelineCarregado",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/pipeline/server.ts:trilhasDisponiveis",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planejamento/calendario.ts:ContagemDeDias",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planejamento/calendario.ts:DIA_MS",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planejamento/calendario.ts:Feriado",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planejamento/calendario.ts:REGIMES",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planejamento/calendario.ts:RegimeDeTrabalho",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planejamento/calendario.ts:ehDiaUtil",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planejamento/eap.ts:partes",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planejamento/modelos-de-eap.ts:AtividadeDoModelo",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planejamento/schedule-validation.ts:SCHEDULE_DEPENDENCY_TYPES",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planejamento/schedule-validation.ts:ScheduleDependencyType",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planejamento/schedule-validation.ts:ScheduleEdge",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planilhas/pdf-texto.ts:LimitesDePdf",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planilhas/pdf-texto.ts:TextoDePdf",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planilhas/xlsx.ts:AbaLida",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planilhas/xlsx.ts:LIMITES_XLSX",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/planilhas/xlsx.ts:ZipEntry",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/procurement/comparison.ts:ProcurementComparisonRow",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/procurement/comparison.ts:ProcurementQuoteForComparison",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/projects/project-creation.ts:ContractProjectInput",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/projects/project-creation.ts:FlexibleProjectInput",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/projects/project-creation.ts:PROJECT_ENTRY_MODES",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/public-errors.ts:PublicOperationError",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/quality/forms.ts:QualityChecklistItem",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/quality/forms.ts:QualityEvaluation",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/quality/forms.ts:QualityFormField",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/relationship/domain.ts:Client360",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/relationship/domain.ts:CrmPipeline",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/relationship/domain.ts:SacDashboard",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/relationship/domain.ts:SacTicketDetail",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/relatorios/perdas.ts:PerdaCrua",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/reports/metrics.ts:MetricComparison",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/reports/metrics.ts:ReportDashboard",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/reports/metrics.ts:ReportExecutive",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/reports/metrics.ts:ReportFinanceMonth",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/reports/metrics.ts:ReportTarget",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/automatic-update.ts:SinapiAutomaticUpdateResult",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/automatic-update.ts:SinapiOfficialPackageInspection",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/automatic-update.ts:discoverLatestSinapiXlsxUrl",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/relatorio-oficial.ts:CabecalhoDeComposicoes",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/relatorio-oficial.ts:CabecalhoDeInsumos",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/relatorio-oficial.ts:ComposicaoOficial",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/relatorio-oficial.ts:InsumoOficial",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/relatorio-oficial.ts:ItemAnalitico",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/relatorio-oficial.ts:SituacaoDaPlanilha",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/relatorio-oficial.ts:Uf",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/relatorio-oficial.ts:normalizar",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sinapi/xlsx-parser.ts:parseWorksheetXml",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sugestoes/catalogo.ts:SituacaoDoValor",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sugestoes/escopos.ts:DescricaoDeEscopo",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/sugestoes/escopos.ts:PADROES_POR_ESCOPO",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/supabase/relations.ts:UnknownRecord",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/supabase/relations.ts:isUnknownRecord",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/supabase/relations.ts:relationRecord",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/validacao/br.ts:normalizarEmail",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/validacao/cep.ts:EnderecoCEP",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/validacao/formulario.ts:CampoBR",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/validacao/formulario.ts:TipoCampo",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/whatsapp/client.ts:WhatsAppPhoneInfo",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/whatsapp/client.ts:registerWhatsAppPhoneNumber",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/whatsapp/client.ts:subscribeWhatsAppBusinessAccount",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/whatsapp/client.ts:verifyWhatsAppPhoneNumber",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/whatsapp/domain.ts:SourceSnapshot",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/whatsapp/domain.ts:WHATSAPP_DELIVERY_STATUSES",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/whatsapp/domain.ts:WHATSAPP_SOURCE_TYPES",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    },
+    {
+      "simbolo": "lib/whatsapp/domain.ts:WhatsAppDeliveryStatus",
+      "motivo": "divida-inventariada-na-instalacao-do-portao"
+    }
+  ]
+}
