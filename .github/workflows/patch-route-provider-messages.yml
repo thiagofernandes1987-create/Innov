@@ -18,279 +18,68 @@ jobs:
         with:
           ref: audit/regressao-main-20260808
 
-      - name: Apply exact reviewed replacements
+      - name: Remove raw WhatsApp provider message
         shell: bash
         run: |
           python <<'PY'
           from pathlib import Path
-
-          def replace_once(file, old, new):
-              p = Path(file)
-              src = p.read_text()
-              count = src.count(old)
-              if count != 1:
-                  raise SystemExit(f"{file}: expected exactly 1 occurrence, found {count}: {old[:160]!r}")
-              p.write_text(src.replace(old, new, 1))
-
-          # Contract PDF route
-          f = "app/api/contracts/[versionId]/pdf/route.ts"
-          replace_once(f,
-              'import { generateCommercialPdf, sha256Hex } from "@/lib/pdf";\n',
-              'import { reportDataAccessError } from "@/lib/errors/data-access";\nimport { generateCommercialPdf, sha256Hex } from "@/lib/pdf";\n')
-          replace_once(f,
-              '  if (error || !version) {\n    return NextResponse.json({ error: error?.message ?? "Versão não encontrada." }, { status: 404 });\n  }',
-              '  if (error) {\n    reportDataAccessError("contracts.pdf.load-version", error);\n    return NextResponse.json({ error: "Não foi possível carregar a versão do contrato." }, { status: 500 });\n  }\n  if (!version) {\n    return NextResponse.json({ error: "Versão não encontrada." }, { status: 404 });\n  }')
-          replace_once(f,
-              '  if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });',
-              '  if (uploadError) {\n    reportDataAccessError("contracts.pdf.upload", uploadError);\n    return NextResponse.json({ error: "Não foi possível armazenar o PDF do contrato." }, { status: 500 });\n  }')
-          replace_once(f,
-              '  if (updateError) {\n    await supabase.storage.from("contract-documents").remove([path]);\n    return NextResponse.json({ error: updateError.message }, { status: 500 });\n  }',
-              '  if (updateError) {\n    reportDataAccessError("contracts.pdf.freeze-version", updateError);\n    const { error: cleanupError } = await supabase.storage.from("contract-documents").remove([path]);\n    if (cleanupError) reportDataAccessError("contracts.pdf.cleanup", cleanupError);\n    return NextResponse.json({ error: "Não foi possível concluir a geração do PDF do contrato." }, { status: 500 });\n  }')
-
-          # Proposal PDF route
-          f = "app/api/proposals/[versionId]/pdf/route.ts"
-          replace_once(f,
-              'import { generateCommercialPdf, sha256Hex } from "@/lib/pdf";\n',
-              'import { reportDataAccessError } from "@/lib/errors/data-access";\nimport { generateCommercialPdf, sha256Hex } from "@/lib/pdf";\n')
-          replace_once(f,
-              '  if (error || !version) {\n    return NextResponse.json({ error: error?.message ?? "Versão não encontrada." }, { status: 404 });\n  }',
-              '  if (error) {\n    reportDataAccessError("proposals.pdf.load-version", error);\n    return NextResponse.json({ error: "Não foi possível carregar a versão da proposta." }, { status: 500 });\n  }\n  if (!version) {\n    return NextResponse.json({ error: "Versão não encontrada." }, { status: 404 });\n  }')
-          replace_once(f,
-              '  if (uploadError) {\n    return NextResponse.json({ error: uploadError.message }, { status: 500 });\n  }',
-              '  if (uploadError) {\n    reportDataAccessError("proposals.pdf.upload", uploadError);\n    return NextResponse.json({ error: "Não foi possível armazenar o PDF da proposta." }, { status: 500 });\n  }')
-          replace_once(f,
-              '  if (updateError) {\n    await supabase.storage.from("commercial-documents").remove([path]);\n    return NextResponse.json({ error: updateError.message }, { status: 500 });\n  }',
-              '  if (updateError) {\n    reportDataAccessError("proposals.pdf.freeze-version", updateError);\n    const { error: cleanupError } = await supabase.storage.from("commercial-documents").remove([path]);\n    if (cleanupError) reportDataAccessError("proposals.pdf.cleanup", cleanupError);\n    return NextResponse.json({ error: "Não foi possível concluir a geração do PDF da proposta." }, { status: 500 });\n  }')
-
-          # SINAPI import API
-          f = "app/api/cost-sources/sinapi/import/route.ts"
-          replace_once(f,
-              'import { z } from "zod";\n',
-              'import { z } from "zod";\nimport { reportDataAccessError } from "@/lib/errors/data-access";\n')
-          for old, new in [
-              ('    if (error) return response(422, { status: "failed", code: "START_IMPORT", message: error.message });',
-               '    if (error) { reportDataAccessError("sinapi-import.start", error); return response(422, { status: "failed", code: "START_IMPORT", message: "Não foi possível iniciar a importação SINAPI." }); }'),
-              ('    if (error) return response(422, { status: "failed", code: "IMPORT_SINAPI_INPUTS", message: error.message });',
-               '    if (error) { reportDataAccessError("sinapi-import.inputs", error); return response(422, { status: "failed", code: "IMPORT_SINAPI_INPUTS", message: "Não foi possível importar o lote de insumos SINAPI." }); }'),
-              ('    if (error) return response(422, { status: "failed", code: "IMPORT_SINAPI_COMPOSITIONS", message: error.message });',
-               '    if (error) { reportDataAccessError("sinapi-import.compositions", error); return response(422, { status: "failed", code: "IMPORT_SINAPI_COMPOSITIONS", message: "Não foi possível importar o lote de composições SINAPI." }); }'),
-              ('  if (error) return response(422, { status: "failed", code: "FINISH_IMPORT", message: error.message });',
-               '  if (error) { reportDataAccessError("sinapi-import.finish", error); return response(422, { status: "failed", code: "FINISH_IMPORT", message: "Não foi possível concluir a importação SINAPI." }); }'),
-          ]:
-              replace_once(f, old, new)
-
-          # SINAPI automatic update route
-          f = "app/api/internal/sinapi-atualizacao/route.ts"
-          replace_once(f,
-              'import { runSinapiAutomaticUpdate } from "@/lib/sinapi/automatic-update";\n',
-              'import { reportDataAccessError } from "@/lib/errors/data-access";\nimport { runSinapiAutomaticUpdate } from "@/lib/sinapi/automatic-update";\n')
-          replace_once(f,
-              '  } catch (error) {\n    return Response.json(\n      {\n        status: "failed",\n        region,\n        taxRelief,\n        message: error instanceof Error ? error.message : "Falha desconhecida na atualização automática."\n      },\n      { status: 502 }\n    );\n  }',
-              '  } catch (error) {\n    reportDataAccessError("sinapi-automatic-update.route", error);\n    return Response.json(\n      {\n        status: "failed",\n        region,\n        taxRelief,\n        message: "A atualização automática do SINAPI não pôde ser concluída."\n      },\n      { status: 502 }\n    );\n  }')
-
-          # SINAPI real-read probe: runtime-only random secret, no versioned token.
-          f = "app/api/internal/sinapi-leitura-real/route.ts"
-          replace_once(f,
-              'import { NextResponse } from "next/server";\n',
-              'import { NextResponse } from "next/server";\nimport { reportDataAccessError } from "@/lib/errors/data-access";\n')
-          replace_once(f,
-              'const TOKEN = "sinapi-leitura-real-20260804-3b1d7";\n',
-              'function authorizedProbe(request: Request) {\n  const expected = process.env.SINAPI_PROBE_TOKEN?.trim();\n  return Boolean(expected && expected.length >= 32 && request.headers.get("x-sinapi-probe-token") === expected);\n}\n')
-          replace_once(f,
-              '  const url = new URL(request.url);\n  const token = request.headers.get("x-sinapi-probe-token") ?? url.searchParams.get("token");\n  if (token !== TOKEN) return NextResponse.json({ error: "Not found" }, { status: 404 });\n\n  const region',
-              '  const url = new URL(request.url);\n  if (!authorizedProbe(request)) return NextResponse.json({ error: "Not found" }, { status: 404 });\n\n  const region')
-          replace_once(f,
-              '  } catch (error) {\n    return NextResponse.json(\n      { ok: false, region, taxRelief, error: error instanceof Error ? error.message : "Falha desconhecida" },\n      { status: 502 }\n    );\n  }',
-              '  } catch (error) {\n    reportDataAccessError("sinapi-real-read.probe", error);\n    return NextResponse.json(\n      { ok: false, region, taxRelief, error: "A leitura do pacote SINAPI não pôde ser concluída." },\n      { status: 502 }\n    );\n  }')
-
-          # SINAPI source probe v1: keep stable diagnostic codes, remove secret literal.
-          f = "app/api/internal/sinapi-source-probe/route.ts"
-          replace_once(f,
-              'import { NextResponse } from "next/server";\n',
-              'import { NextResponse } from "next/server";\nimport { reportDataAccessError } from "@/lib/errors/data-access";\n')
-          replace_once(f,
-              'const PROBE_TOKEN = "sinapi-source-probe-20260729-7f4a9";\n',
-              'class SourceProbeFailure extends Error {\n  constructor(readonly code: string, readonly upstreamStatus: number | null = null) { super(code); }\n}\n\nfunction authorizedProbe(request: Request) {\n  const expected = process.env.SINAPI_PROBE_TOKEN?.trim();\n  return Boolean(expected && expected.length >= 32 && request.headers.get("x-sinapi-probe-token") === expected);\n}\n')
-          replace_once(f,
-              '  if (!reader) throw new Error("Resposta sem corpo");',
-              '  if (!reader) throw new SourceProbeFailure("EMPTY_BODY");')
-          replace_once(f,
-              '    if (size > MAX_BYTES) throw new Error("Arquivo excedeu o limite da sonda");',
-              '    if (size > MAX_BYTES) throw new SourceProbeFailure("MAX_BYTES_EXCEEDED");')
-          replace_once(f,
-              '  const url = new URL(request.url);\n  const token = request.headers.get("x-sinapi-probe-token") ?? url.searchParams.get("token");\n  if (token !== PROBE_TOKEN) return NextResponse.json({ error: "Not found" }, { status: 404 });',
-              '  if (!authorizedProbe(request)) return NextResponse.json({ error: "Not found" }, { status: 404 });')
-          replace_once(f,
-              '    if (!response.ok) throw new Error(`CAIXA respondeu HTTP ${response.status}`);',
-              '    if (!response.ok) throw new SourceProbeFailure("SOURCE_HTTP_ERROR", response.status);')
-          replace_once(f,
-              '  } catch (error) {\n    return NextResponse.json({\n      ok: false,\n      checkedAt: new Date().toISOString(),\n      error: error instanceof Error ? error.message : "Falha desconhecida"\n    }, { status: 502 });\n  }',
-              '  } catch (error) {\n    if (error instanceof SourceProbeFailure) {\n      return NextResponse.json({ ok: false, checkedAt: new Date().toISOString(), error: error.code, upstreamStatus: error.upstreamStatus }, { status: 502 });\n    }\n    reportDataAccessError("sinapi-source-probe.v1", error);\n    return NextResponse.json({ ok: false, checkedAt: new Date().toISOString(), error: "PROBE_FAILED" }, { status: 502 });\n  }')
-
-          # SINAPI source probe v2: active probe used by importer.
-          f = "app/api/internal/sinapi-source-probe-v2/route.ts"
-          replace_once(f,
-              'import { NextResponse } from "next/server";\n',
-              'import { NextResponse } from "next/server";\nimport { reportDataAccessError } from "@/lib/errors/data-access";\n')
-          replace_once(f,
-              'const PROBE_TOKEN = "sinapi-source-probe-v2-20260729-f19c8";\n',
-              'function authorizedProbe(request: Request) {\n  const expected = process.env.SINAPI_PROBE_TOKEN?.trim();\n  return Boolean(expected && expected.length >= 32 && request.headers.get("x-sinapi-probe-token") === expected);\n}\n')
-          replace_once(f,
-              '  const url = new URL(request.url);\n  const token = request.headers.get("x-sinapi-probe-token") ?? url.searchParams.get("token");\n  if (token !== PROBE_TOKEN) return NextResponse.json({ error: "Not found" }, { status: 404 });',
-              '  const url = new URL(request.url);\n  if (!authorizedProbe(request)) return NextResponse.json({ error: "Not found" }, { status: 404 });')
-          replace_once(f,
-              '  } catch (error) {\n    return NextResponse.json({\n      ok: false,\n      checkedAt: new Date().toISOString(),\n      region,\n      taxRelief,\n      error: error instanceof Error ? error.message : "Falha desconhecida"\n    }, { status: 502 });\n  }',
-              '  } catch (error) {\n    reportDataAccessError("sinapi-source-probe.v2", error);\n    return NextResponse.json({\n      ok: false,\n      checkedAt: new Date().toISOString(),\n      region,\n      taxRelief,\n      error: "PROBE_FAILED"\n    }, { status: 502 });\n  }')
-
-          # Monthly importer script uses runtime secret via header, never URL/query/source literal.
-          f = "scripts/importar-sinapi.mjs"
-          replace_once(f,
-              'const segredo = (process.env.CRON_SECRET ?? "").trim();\n',
-              'const segredo = (process.env.CRON_SECRET ?? "").trim();\nconst probeSecret = (process.env.SINAPI_PROBE_TOKEN ?? "").trim();\n')
-          replace_once(f,
-              'if (!segredo || segredo.length < 32) faltando.push("CRON_SECRET (mínimo 32 caracteres)");\n',
-              'if (!segredo || segredo.length < 32) faltando.push("CRON_SECRET (mínimo 32 caracteres)");\nif (!probeSecret || probeSecret.length < 32) faltando.push("SINAPI_PROBE_TOKEN (mínimo 32 caracteres)");\n')
-          replace_once(f,
-              '  url.searchParams.set("token", "sinapi-source-probe-v2-20260729-f19c8");\n  url.searchParams.set("region", uf);',
-              '  url.searchParams.set("region", uf);')
-          replace_once(f,
-              '  const resposta = await fetch(url);',
-              '  const resposta = await fetch(url, { headers: { "x-sinapi-probe-token": probeSecret } });')
-
-          # Monthly workflow creates both ephemeral secrets in the runner.
-          f = ".github/workflows/sinapi-atualizacao.yml"
-          replace_once(f,
-              '          CRON_SECRET="$(node -e \'process.stdout.write(require("node:crypto").randomBytes(32).toString("hex"))\')"\n          echo "::add-mask::$CRON_SECRET"\n          echo "CRON_SECRET=$CRON_SECRET" >> "$GITHUB_ENV"\n          CRON_SECRET="$CRON_SECRET" pnpm start > servidor.log 2>&1 &',
-              '          CRON_SECRET="$(node -e \'process.stdout.write(require("node:crypto").randomBytes(32).toString("hex"))\')"\n          SINAPI_PROBE_TOKEN="$(node -e \'process.stdout.write(require("node:crypto").randomBytes(32).toString("hex"))\')"\n          echo "::add-mask::$CRON_SECRET"\n          echo "::add-mask::$SINAPI_PROBE_TOKEN"\n          echo "CRON_SECRET=$CRON_SECRET" >> "$GITHUB_ENV"\n          echo "SINAPI_PROBE_TOKEN=$SINAPI_PROBE_TOKEN" >> "$GITHUB_ENV"\n          CRON_SECRET="$CRON_SECRET" SINAPI_PROBE_TOKEN="$SINAPI_PROBE_TOKEN" pnpm start > servidor.log 2>&1 &')
-
-          # SINDUSCON cron: local domain messages remain controlled; provider details do not persist.
-          f = "app/api/cron/cost-sources/sinduscon/route.ts"
-          replace_once(f,
-              'import { createClient } from "@supabase/supabase-js";\n',
-              'import { createClient } from "@supabase/supabase-js";\nimport { reportDataAccessError } from "@/lib/errors/data-access";\n')
-          replace_once(f,
-              'export const maxDuration = 60;\n',
-              'export const maxDuration = 60;\n\nclass SindusconSyncDomainError extends Error {}\n')
-          replace_once(f,
-              '  if (runError || !run) {\n    return response(500, { status: "failed", code: "SYNC_RUN_CREATE" });\n  }',
-              '  if (runError) reportDataAccessError("sinduscon.sync-run.create", runError);\n  if (runError || !run) {\n    return response(500, { status: "failed", code: "SYNC_RUN_CREATE" });\n  }')
-          replace_once(f,
-              '    const { data: latest } = await supabase\n      .from("cost_reference_snapshots")',
-              '    const { data: latest, error: latestError } = await supabase\n      .from("cost_reference_snapshots")')
-          replace_once(f,
-              '      .limit(1)\n      .maybeSingle();\n\n    if (latest?.base_date && publication.baseDate < latest.base_date) {\n      throw new Error("A fonte retornou data-base anterior ao último snapshot armazenado.");\n    }',
-              '      .limit(1)\n      .maybeSingle();\n    if (latestError) {\n      reportDataAccessError("sinduscon.latest-snapshot", latestError);\n      throw new SindusconSyncDomainError("Não foi possível validar o último snapshot armazenado.");\n    }\n\n    if (latest?.base_date && publication.baseDate < latest.base_date) {\n      throw new SindusconSyncDomainError("A fonte retornou data-base anterior ao último snapshot armazenado.");\n    }')
-          replace_once(f,
-              '      throw new Error(\n        `A série histórica está em ${serie.dataBase} e a publicação em ${publication.baseDate}.`\n      );',
-              '      throw new SindusconSyncDomainError(\n        `A série histórica está em ${serie.dataBase} e a publicação em ${publication.baseDate}.`\n      );')
-          replace_once(f,
-              '    if (upsertError) throw new Error(`Falha ao persistir snapshots: ${upsertError.message}`);',
-              '    if (upsertError) {\n      reportDataAccessError("sinduscon.snapshots.upsert", upsertError);\n      throw new SindusconSyncDomainError("Falha ao persistir os snapshots do SINDUSCON.");\n    }')
-          replace_once(f,
-              '  } catch (error) {\n    const message = error instanceof Error ? error.message : String(error);\n    await supabase\n      .from("cost_source_sync_runs")\n      .update({\n        status: "FAILED",\n        finished_at: new Date().toISOString(),\n        rejected_records: 2,\n        error_code: "SOURCE_VALIDATION",\n        error_message: message.slice(0, 500)\n      })\n      .eq("id", run.id);\n\n    console.error(JSON.stringify({ event: "cost_source_sync_failed", source: SINDUSCON_CUB_SOURCE_KEY, code: "SOURCE_VALIDATION" }));\n    return response(503, { status: "failed", code: "SOURCE_VALIDATION" });\n  }',
-              '  } catch (failure) {\n    const message = failure instanceof SindusconSyncDomainError\n      ? failure.message\n      : "Falha na sincronização da fonte SINDUSCON.";\n    if (!(failure instanceof SindusconSyncDomainError)) reportDataAccessError("sinduscon.sync", failure);\n    const { error: failureUpdateError } = await supabase\n      .from("cost_source_sync_runs")\n      .update({\n        status: "FAILED",\n        finished_at: new Date().toISOString(),\n        rejected_records: 2,\n        error_code: "SOURCE_VALIDATION",\n        error_message: message.slice(0, 500)\n      })\n      .eq("id", run.id);\n    if (failureUpdateError) reportDataAccessError("sinduscon.sync-run.fail", failureUpdateError);\n\n    console.error(JSON.stringify({ event: "cost_source_sync_failed", source: SINDUSCON_CUB_SOURCE_KEY, code: "SOURCE_VALIDATION" }));\n    return response(503, { status: "failed", code: "SOURCE_VALIDATION" });\n  }')
-
-          # Signature webhook: no provider text in HTTP and duplicate event can replay incomplete effects.
-          f = "app/api/signatures/webhook/route.ts"
-          replace_once(f,
-              'import { NextResponse } from "next/server";\n',
-              'import { NextResponse } from "next/server";\nimport { reportDataAccessError } from "@/lib/errors/data-access";\n')
-          replace_once(f,
-              '  if (envelopeError || !envelope) {\n    return NextResponse.json({ error: "Envelope não encontrado." }, { status: 404 });\n  }',
-              '  if (envelopeError) {\n    reportDataAccessError("signature-webhook.load-envelope", envelopeError);\n    return NextResponse.json({ error: "Não foi possível carregar o envelope." }, { status: 500 });\n  }\n  if (!envelope) {\n    return NextResponse.json({ error: "Envelope não encontrado." }, { status: 404 });\n  }')
-          replace_once(f,
-              '  if (eventError?.code === "23505") {\n    return NextResponse.json({ data: { idempotent: true } });\n  }\n  if (eventError) {\n    return NextResponse.json({ error: eventError.message }, { status: 500 });\n  }\n\n  const applyStatus = shouldApplySignatureStatus(envelope.status, nextStatus);',
-              '  const duplicateEvent = eventError?.code === "23505";\n  if (eventError && !duplicateEvent) {\n    reportDataAccessError("signature-webhook.record-event", eventError);\n    return NextResponse.json({ error: "O evento de assinatura não pôde ser registrado." }, { status: 500 });\n  }\n\n  const applyStatus = shouldApplySignatureStatus(envelope.status, nextStatus);\n  const replayCurrentStatus = duplicateEvent && envelope.status === nextStatus;\n  const applyEffects = applyStatus || replayCurrentStatus;')
-          replace_once(f,
-              '  if (updateError) {\n    return NextResponse.json({ error: updateError.message }, { status: 500 });\n  }',
-              '  if (updateError) {\n    reportDataAccessError("signature-webhook.update-envelope", updateError);\n    return NextResponse.json({ error: "O envelope não pôde ser atualizado." }, { status: 500 });\n  }')
-          replace_once(f,
-              '  if (applyStatus && payload.signerEmail) {',
-              '  if (applyEffects && payload.signerEmail) {')
-          replace_once(f,
-              '    if (signerError) {\n      return NextResponse.json({ error: signerError.message }, { status: 500 });\n    }',
-              '    if (signerError) {\n      reportDataAccessError("signature-webhook.update-signer", signerError);\n      return NextResponse.json({ error: "O signatário não pôde ser atualizado." }, { status: 500 });\n    }')
-          replace_once(f,
-              '  if (applyStatus && nextStatus === "COMPLETED") {',
-              '  if (applyEffects && nextStatus === "COMPLETED") {')
-          replace_once(f,
-              '    if (completionError) {\n      return NextResponse.json(\n        { error: "A assinatura foi recebida, mas o estado do contrato não pôde ser concluído." },\n        { status: 500 }\n      );\n    }',
-              '    if (completionError) {\n      reportDataAccessError("signature-webhook.complete-business-state", completionError);\n      return NextResponse.json(\n        { error: "A assinatura foi recebida, mas o estado do contrato não pôde ser concluído." },\n        { status: 500 }\n      );\n    }')
-          replace_once(f,
-              '  if (auditError) {\n    return NextResponse.json({ error: auditError.message }, { status: 500 });\n  }\n\n  return NextResponse.json({\n    data: { idempotent: false, applied: applyStatus, status: applyStatus ? nextStatus : envelope.status }\n  });',
-              '  if (auditError) {\n    reportDataAccessError("signature-webhook.audit", auditError);\n    return NextResponse.json({ error: "O processamento foi concluído, mas a auditoria não pôde ser registrada." }, { status: 500 });\n  }\n\n  return NextResponse.json({\n    data: {\n      idempotent: duplicateEvent,\n      replayed: replayCurrentStatus,\n      applied: applyStatus,\n      status: applyStatus ? nextStatus : envelope.status\n    }\n  });')
-
-          # WhatsApp webhook: persist stable provider code/title, never raw provider message.
-          f = "app/api/webhooks/whatsapp/route.ts"
-          replace_once(f,
-              '  errors?: Array<{ code?: number; title?: string; message?: string }>;\n',
-              '  errors?: Array<{ code?: number; title?: string }>;\n')
-          replace_once(f,
-              '          const firstError = status.errors?.[0];\n          const patch: Record<string, unknown> = {\n            status: nextStatus,\n            error_code: firstError?.code ? String(firstError.code) : null,\n            error_message: firstError?.title ?? firstError?.message ?? null\n          };',
-              '          const providerFailure = status.errors?.[0];\n          const patch: Record<string, unknown> = {\n            status: nextStatus,\n            error_code: providerFailure?.code ? String(providerFailure.code) : null,\n            error_message: providerFailure?.title ?? null\n          };')
-          replace_once(f,
-              '              error_code: firstError?.code ? String(firstError.code) : null,\n              error_title: firstError?.title ?? null,',
-              '              error_code: providerFailure?.code ? String(providerFailure.code) : null,\n              error_title: providerFailure?.title ?? null,')
-
-          print("Reviewed Route Handler hardening applied.")
+          p=Path('app/api/webhooks/whatsapp/route.ts')
+          src=p.read_text()
+          replacements=[
+            (
+              '  errors?: Array<{ code?: number; title?: string; message?: string }>;',
+              '  errors?: Array<{ code?: number; title?: string }>;'
+            ),
+            (
+              '''          const firstError = status.errors?.[0];\n          const patch: Record<string, unknown> = {\n            status: nextStatus,\n            error_code: firstError?.code ? String(firstError.code) : null,\n            error_message: firstError?.title ?? firstError?.message ?? null\n          };''',
+              '''          const providerFailure = status.errors?.[0];\n          const patch: Record<string, unknown> = {\n            status: nextStatus,\n            error_code: providerFailure?.code ? String(providerFailure.code) : null,\n            error_message: providerFailure?.title ?? null\n          };'''
+            ),
+            (
+              '''              error_code: firstError?.code ? String(firstError.code) : null,\n              error_title: firstError?.title ?? null,''',
+              '''              error_code: providerFailure?.code ? String(providerFailure.code) : null,\n              error_title: providerFailure?.title ?? null,'''
+            )
+          ]
+          for old,new in replacements:
+            count=src.count(old)
+            if count!=1:
+              raise SystemExit(f'expected exactly one match, found {count}: {old[:100]!r}')
+            src=src.replace(old,new,1)
+          p.write_text(src)
           PY
 
-      - name: Verify route boundary and probe secrets
+      - name: Verify every Route Handler provider boundary
         shell: bash
         run: |
           node <<'NODE'
-          const fs = require('node:fs');
-          const path = require('node:path');
-          const safe = new Set(['validationError', 'responseFailure']);
-          const findings = [];
-          function walk(dir) {
-            for (const entry of fs.readdirSync(dir, {withFileTypes:true})) {
-              const full = path.join(dir, entry.name);
-              if (entry.isDirectory()) { walk(full); continue; }
-              if (!entry.isFile() || !/^route\.tsx?$/.test(entry.name)) continue;
-              const src = fs.readFileSync(full, 'utf8');
-              for (const match of src.matchAll(/\b([A-Za-z_$][A-Za-z0-9_$]*)\??\.message\b/g)) {
-                const variable = match[1];
-                if ((variable === 'error' || variable.endsWith('Error')) && !safe.has(variable)) {
-                  const line = src.slice(0, match.index).split('\n').length;
+          const fs=require('node:fs');
+          const path=require('node:path');
+          const safe=new Set(['validationError','responseFailure']);
+          const findings=[];
+          function walk(dir){
+            for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
+              const full=path.join(dir,entry.name);
+              if(entry.isDirectory()){walk(full);continue;}
+              if(!entry.isFile()||!/^route\.tsx?$/.test(entry.name))continue;
+              const src=fs.readFileSync(full,'utf8');
+              for(const match of src.matchAll(/\b([A-Za-z_$][A-Za-z0-9_$]*)\??\.message\b/g)){
+                const variable=match[1];
+                if((variable==='error'||variable.endsWith('Error'))&&!safe.has(variable)){
+                  const line=src.slice(0,match.index).split('\n').length;
                   findings.push(`${full}:${line}:${match[0]}`);
                 }
               }
             }
           }
           walk('app');
-          if (findings.length) {
-            console.error(findings.join('\n'));
-            process.exit(1);
-          }
-          const combined = [
-            'app/api/internal/sinapi-leitura-real/route.ts',
-            'app/api/internal/sinapi-source-probe/route.ts',
-            'app/api/internal/sinapi-source-probe-v2/route.ts',
-            'scripts/importar-sinapi.mjs'
-          ].map(file => fs.readFileSync(file, 'utf8')).join('\n');
-          for (const leaked of [
-            'sinapi-leitura-real-20260804-3b1d7',
-            'sinapi-source-probe-20260729-7f4a9',
-            'sinapi-source-probe-v2-20260729-f19c8'
-          ]) {
-            if (combined.includes(leaked)) {
-              console.error(`Versioned probe token remains: ${leaked}`);
-              process.exit(1);
-            }
-          }
-          if (!combined.includes('SINAPI_PROBE_TOKEN')) {
-            console.error('SINAPI_PROBE_TOKEN contract missing');
-            process.exit(1);
-          }
-          console.log('Route provider boundary and probe secret contract: PASS');
+          if(findings.length){console.error(findings.join('\n'));process.exit(1);}
+          console.log('Route Handler provider boundary: PASS');
           NODE
 
-      - name: Commit hardened routes
+      - name: Commit WhatsApp webhook hardening
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app scripts/importar-sinapi.mjs .github/workflows/sinapi-atualizacao.yml
-          git commit -m "security: harden route handlers and probe secrets"
+          git add app/api/webhooks/whatsapp/route.ts
+          git commit -m "security: stop persisting raw whatsapp provider messages"
           git push origin HEAD:audit/regressao-main-20260808
