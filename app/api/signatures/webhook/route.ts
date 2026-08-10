@@ -1,5 +1,6 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
+import { reportDataAccessError } from "@/lib/errors/data-access";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { SIGNATURE_STATUS_BY_EVENT, shouldApplySignatureStatus } from "@/lib/signatures/webhook-state";
 
@@ -62,7 +63,11 @@ export async function POST(request: Request) {
     .eq("id", envelopeId)
     .maybeSingle();
 
-  if (envelopeError || !envelope) {
+  if (envelopeError) {
+    reportDataAccessError("signature-webhook.load-envelope", envelopeError);
+    return NextResponse.json({ error: "Não foi possível carregar o envelope." }, { status: 500 });
+  }
+  if (!envelope) {
     return NextResponse.json({ error: "Envelope não encontrado." }, { status: 404 });
   }
 
@@ -80,14 +85,18 @@ export async function POST(request: Request) {
     }
   });
 
-  if (eventError?.code === "23505") {
-    return NextResponse.json({ data: { idempotent: true } });
-  }
-  if (eventError) {
-    return NextResponse.json({ error: eventError.message }, { status: 500 });
+  const duplicateEvent = eventError?.code === "23505";
+  if (eventError && !duplicateEvent) {
+    reportDataAccessError("signature-webhook.record-event", eventError);
+    return NextResponse.json({ error: "O evento de assinatura não pôde ser registrado." }, { status: 500 });
   }
 
   const applyStatus = shouldApplySignatureStatus(envelope.status, nextStatus);
+  // Uma retentativa do mesmo evento pode ter sido causada por falha após o
+  // INSERT de signature_events. Quando o envelope já chegou ao mesmo status,
+  // repetimos apenas os efeitos idempotentes pendentes em vez de retornar cedo.
+  const replayCurrentStatus = duplicateEvent && envelope.status === nextStatus;
+  const applyEffects = applyStatus || replayCurrentStatus;
 
   const envelopeUpdate: Record<string, unknown> = {
     external_id: payload.externalId ?? undefined
@@ -104,13 +113,11 @@ export async function POST(request: Request) {
     .eq("id", envelope.id);
 
   if (updateError) {
-    return NextResponse.json({ error: updateError.message }, { status: 500 });
+    reportDataAccessError("signature-webhook.update-envelope", updateError);
+    return NextResponse.json({ error: "O envelope não pôde ser atualizado." }, { status: 500 });
   }
 
-  // A guarda de monotonicidade decide **se** o evento vale: webhook atrasado ou
-  // fora de ordem não regride o envelope. O que muda de estado — signatário e
-  // negócio — fica todo dentro dela.
-  if (applyStatus && payload.signerEmail) {
+  if (applyEffects && payload.signerEmail) {
     const { error: signerError } = await admin
       .from("signature_signers")
       .update({
@@ -122,20 +129,20 @@ export async function POST(request: Request) {
       .eq("email", payload.signerEmail);
 
     if (signerError) {
-      return NextResponse.json({ error: signerError.message }, { status: 500 });
+      reportDataAccessError("signature-webhook.update-signer", signerError);
+      return NextResponse.json({ error: "O signatário não pôde ser atualizado." }, { status: 500 });
     }
   }
 
-  if (applyStatus && nextStatus === "COMPLETED") {
-    // Contrato, versão, aditivo e o reflexo financeiro do aditivo mudam juntos
-    // ou não mudam: a RPC faz os quatro numa transação só. Antes eram quatro
-    // updates soltos, e uma falha no meio deixava contrato assinado com aditivo
-    // pendente.
+  if (applyEffects && nextStatus === "COMPLETED") {
+    // A RPC é idempotente: contrato/versão podem ser reafirmados e
+    // `apply_signed_amendment` não reaplica aditivo cujo `applied_at` já existe.
     const { error: completionError } = await admin.rpc("complete_signature_business_state", {
       p_envelope_id: envelope.id
     });
 
     if (completionError) {
+      reportDataAccessError("signature-webhook.complete-business-state", completionError);
       return NextResponse.json(
         { error: "A assinatura foi recebida, mas o estado do contrato não pôde ser concluído." },
         { status: 500 }
@@ -154,16 +161,23 @@ export async function POST(request: Request) {
       status: applyStatus ? nextStatus : envelope.status,
       event_status: nextStatus,
       applied: applyStatus,
+      replayed: replayCurrentStatus,
       provider_event_id: providerEventId,
       payload_hash: payloadHash
     }
   });
 
   if (auditError) {
-    return NextResponse.json({ error: auditError.message }, { status: 500 });
+    reportDataAccessError("signature-webhook.audit", auditError);
+    return NextResponse.json({ error: "O processamento foi concluído, mas a auditoria não pôde ser registrada." }, { status: 500 });
   }
 
   return NextResponse.json({
-    data: { idempotent: false, applied: applyStatus, status: applyStatus ? nextStatus : envelope.status }
+    data: {
+      idempotent: duplicateEvent,
+      replayed: replayCurrentStatus,
+      applied: applyStatus,
+      status: applyStatus ? nextStatus : envelope.status
+    }
   });
 }
