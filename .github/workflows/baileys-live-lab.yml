@@ -1,0 +1,193 @@
+# Fluxo mínimo conforme https://baileys.wiki/authentication/qr-code
+name: Baileys Official Quickstart Lab
+
+# Só disparo manual, e o motivo é o próprio teste: o fluxo exige **uma pessoa
+# com o celular na mão** para ler o QR dentro da janela em que ele é válido.
+# Disparado por `push` ou `pull_request`, não há ninguém para escanear — o job
+# espera 750s, é morto por timeout e sai 124. Era isso que deixava o CI desta
+# PR vermelho a cada evento, com aparência de defeito e sem defeito nenhum.
+on:
+  workflow_dispatch:
+
+# `contents: read`. A permissão de escrita existia para commitar o QR no
+# repositório — coisa que a documentação deste laboratório proíbe em uma frase
+# ("O QR não é gravado no repositório") e que o workflow fazia mesmo assim.
+# Removido o commit, a escrita não tem mais para que existir.
+permissions:
+  contents: read
+
+concurrency:
+  group: baileys-official-quickstart
+  cancel-in-progress: false
+
+jobs:
+  official-quickstart:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || !contains(github.event.head_commit.message, '[skip-baileys-lab]') }}
+    runs-on: ubuntu-latest
+    environment: homologation
+    timeout-minutes: 18
+    env:
+      BAILEYS_QUICKSTART_CONFIRM: I_ACCEPT_UNOFFICIAL_TEST_RISK
+      BAILEYS_QUICKSTART_ROOT: /tmp/baileys-official-quickstart
+      BAILEYS_QUICKSTART_AUTH_DIR: /tmp/baileys-official-quickstart/auth_info_baileys
+      BAILEYS_QUICKSTART_QR_PATH: /tmp/baileys-official-quickstart/qr.png
+      BAILEYS_QUICKSTART_STATUS_PATH: /tmp/baileys-official-quickstart/status.json
+      BAILEYS_QUICKSTART_EVIDENCE_PATH: /tmp/baileys-official-quickstart/evidence.json
+      BAILEYS_QUICKSTART_TIMEOUT_MS: '720000'
+      BAILEYS_QUICKSTART_MODULE_PATH: /tmp/baileys-official-quickstart/node_modules/@whiskeysockets/baileys/lib/index.js
+
+    steps:
+      - name: Checkout do laboratório
+        uses: actions/checkout@v6
+        with:
+          ref: test/etapa-22-baileys-live-lab
+          fetch-depth: 1
+          # Sem token no `.git/config`: nada aqui escreve no repositório, e
+          # credencial que sobra no disco de um runner que executa dependência
+          # não oficial é superfície que não precisa existir.
+          persist-credentials: false
+
+      - name: Configurar Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Instalar quickstart oficial isolado
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$BAILEYS_QUICKSTART_ROOT"
+          cat > "$BAILEYS_QUICKSTART_ROOT/package.json" <<'JSON'
+          {
+            "name": "baileys-official-quickstart-lab",
+            "private": true,
+            "type": "module",
+            "dependencies": {
+              "@whiskeysockets/baileys": "7.0.0-rc13",
+              "qrcode": "1.5.4"
+            }
+          }
+          JSON
+          npm install \
+            --prefix "$BAILEYS_QUICKSTART_ROOT" \
+            --ignore-scripts \
+            --no-audit \
+            --no-fund \
+            --save-exact
+          actual="$(node -p "require('$BAILEYS_QUICKSTART_ROOT/node_modules/@whiskeysockets/baileys/package.json').version")"
+          test "$actual" = "7.0.0-rc13"
+
+      - name: Iniciar quickstart em segundo plano
+        shell: bash
+        run: |
+          set -euo pipefail
+          : > /tmp/baileys-official-quickstart.log
+          env RUNNER_TRACKING_ID= \
+            nohup node tests/disposable-baileys-lab/run-baileys-official-quickstart-lab.mjs \
+            > /tmp/baileys-official-quickstart.log 2>&1 &
+          echo "$!" > /tmp/baileys-official-quickstart.pid
+          for attempt in $(seq 1 120); do
+            if [[ -s "$BAILEYS_QUICKSTART_QR_PATH" ]]; then
+              echo "QR oficial capturado."
+              exit 0
+            fi
+            pid="$(cat /tmp/baileys-official-quickstart.pid)"
+            if ! kill -0 "$pid" 2>/dev/null; then
+              echo "O quickstart encerrou antes de gerar QR."
+              cat /tmp/baileys-official-quickstart.log
+              exit 1
+            fi
+            sleep 1
+          done
+          echo "Timeout aguardando QR oficial."
+          cat /tmp/baileys-official-quickstart.log
+          exit 1
+
+      - name: Criptografar QR com o certificado de quem vai escanear
+        shell: bash
+        env:
+          BAILEYS_LAB_QR_CERT: ${{ secrets.BAILEYS_LAB_QR_CERT }}
+        run: |
+          set -euo pipefail
+          # O certificado deixou de ser arquivo do repositório e passou a vir de
+          # segredo. Dois motivos, e o primeiro já custou caro: o `.pem`
+          # commitado tinha `notAfter` em 08/08/2026 e venceu com o laboratório
+          # ainda sem rodar — validade em arquivo versionado só é renovada por
+          # PR, e ninguém abre PR para um relógio. O segundo é de desenho: quem
+          # decifra o QR é quem tem a chave privada, e essa pessoa é a que vai
+          # escanear. O certificado é dela, não do repositório.
+          if [[ -z "${BAILEYS_LAB_QR_CERT:-}" ]]; then
+            echo "Segredo BAILEYS_LAB_QR_CERT ausente."
+            echo "Gere o par no SEU computador, guarde a chave privada fora daqui e registre só o certificado:"
+            echo "  openssl req -x509 -newkey rsa:3072 -nodes -days 90 \\"
+            echo "    -keyout qr-lab.key -out qr-lab.crt -subj '/CN=Baileys QR Lab'"
+            echo "Publicar o QR sem cifra não é alternativa: quem o lê primeiro pareia a sessão."
+            exit 1
+          fi
+          umask 077
+          printf '%s\n' "$BAILEYS_LAB_QR_CERT" > /tmp/baileys-qr-cert.pem
+
+          # Certificado vencido cifra sem reclamar e só falha na hora de decifrar,
+          # com o QR já expirado. A conferência é aqui, antes de gastar a janela.
+          if ! openssl x509 -in /tmp/baileys-qr-cert.pem -noout -checkend 0; then
+            echo "O certificado em BAILEYS_LAB_QR_CERT está vencido:"
+            openssl x509 -in /tmp/baileys-qr-cert.pem -noout -subject -dates
+            exit 1
+          fi
+
+          openssl cms -encrypt \
+            -binary \
+            -aes-256-cbc \
+            -in "$BAILEYS_QUICKSTART_QR_PATH" \
+            -out baileys-official-quickstart-qr.p7m \
+            -outform DER \
+            /tmp/baileys-qr-cert.pem
+          rm -f "$BAILEYS_QUICKSTART_QR_PATH" /tmp/baileys-qr-cert.pem
+
+      # O passo anterior commitava o QR cifrado no repositório, contra a própria
+      # documentação deste laboratório, que já dizia — antes desta correção —
+      # "publicado como artifact temporário". Artifact é o certo por três
+      # motivos: expira sozinho, não entra no histórico do git, e não exige que
+      # o workflow escreva no repositório.
+      - name: Publicar QR criptografado como artifact temporário
+        uses: actions/upload-artifact@v7
+        with:
+          name: baileys-official-quickstart-qr-${{ github.run_id }}
+          path: baileys-official-quickstart-qr.p7m
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Aguardar pareamento, reconexão e envio
+        shell: bash
+        run: |
+          set -euo pipefail
+          pid="$(cat /tmp/baileys-official-quickstart.pid)"
+          exit_code=0
+          for attempt in $(seq 1 150); do
+            if ! kill -0 "$pid" 2>/dev/null; then
+              wait "$pid" || exit_code=$?
+              break
+            fi
+            sleep 5
+          done
+          if kill -0 "$pid" 2>/dev/null; then
+            kill -TERM "$pid" || true
+            sleep 3
+            kill -KILL "$pid" 2>/dev/null || true
+            exit_code=124
+          fi
+          cat /tmp/baileys-official-quickstart.log
+          if [[ -f "$BAILEYS_QUICKSTART_EVIDENCE_PATH" ]]; then
+            cp "$BAILEYS_QUICKSTART_EVIDENCE_PATH" baileys-official-quickstart-evidence.json
+          fi
+          exit "$exit_code"
+
+      - name: Publicar evidência sanitizada
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: baileys-official-quickstart-evidence-${{ github.run_id }}
+          path: baileys-official-quickstart-evidence.json
+          if-no-files-found: warn
+          retention-days: 3
