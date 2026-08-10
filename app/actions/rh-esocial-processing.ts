@@ -1,5 +1,7 @@
 "use server";
 
+import{mensagemDeFalha}from"@/lib/errors/data-access";
+
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
 import { parseEsocialIndividualResults } from "@/lib/rh/integrations/esocial-result-parser";
@@ -38,7 +40,7 @@ export async function queryAndApplyEsocialBatch(data: FormData) {
     .eq("id", batchId)
     .maybeSingle();
 
-  if (batchError) fail(path, batchError.message);
+  if (batchError) fail(path, mensagemDeFalha("rh-esocial-processing.queryAndApplyEsocialBatch", batchError));
   if (!batch?.protocol_number) fail(path, "O lote ainda não possui protocolo para consulta.");
   if (!["PROTOCOL_RECEIVED", "PROCESSING", "UNKNOWN"].includes(batch.status)) {
     fail(path, `O lote em estado ${batch.status} não permite nova consulta.`);
@@ -60,13 +62,13 @@ export async function queryAndApplyEsocialBatch(data: FormData) {
     })
     .select("id")
     .single();
-  if (attemptError) fail(path, attemptError.message);
+  if (attemptError) fail(path, mensagemDeFalha("rh-esocial-processing.queryAndApplyEsocialBatch", attemptError));
 
   let result: EsocialHttpResult;
   try {
     result = await queryEsocialBatch(environment(batch.environment), batch.protocol_number);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Erro técnico ao consultar lote eSocial.";
+    const message = error instanceof Error ? mensagemDeFalha("rh-esocial-processing.queryAndApplyEsocialBatch", error) : "Erro técnico ao consultar lote eSocial.";
     const unknown = /timeout|indetermin/i.test(message);
     await context.supabase.from("rh_esocial_attempts").update({
       result: unknown ? "UNKNOWN" : "TECHNICAL_ERROR",
@@ -114,7 +116,7 @@ export async function queryAndApplyEsocialBatch(data: FormData) {
       p_response_description: item.responseDescription,
       p_occurrences: item.occurrences
     });
-    if (error) fail(path, `Falha ao persistir retorno de ${item.eventId}: ${error.message}`);
+    if (error) fail(path, `Falha ao persistir retorno de ${item.eventId}: ${mensagemDeFalha("rh-esocial-processing.queryAndApplyEsocialBatch", error)}`);
     applied += 1;
   }
 
@@ -132,7 +134,7 @@ export async function queryAndApplyEsocialBatch(data: FormData) {
     "finalize_rh_esocial_batch_from_events",
     { p_batch_id: batchId }
   );
-  if (finalizeError) fail(path, finalizeError.message);
+  if (finalizeError) fail(path, mensagemDeFalha("rh-esocial-processing.queryAndApplyEsocialBatch", finalizeError));
 
   const accepted = individual.filter(item => knownKeys.has(item.eventId) && item.status === "ACCEPTED").length;
   const rejected = individual.filter(item => knownKeys.has(item.eventId) && item.status === "REJECTED").length;

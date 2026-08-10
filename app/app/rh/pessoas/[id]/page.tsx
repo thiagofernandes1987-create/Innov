@@ -1,3 +1,4 @@
+import{mensagemDeFalha}from"@/lib/errors/data-access";
 import Link from"next/link";
 import{notFound}from"next/navigation";
 import{createRhEmploymentCondition}from"@/app/actions/rh";
@@ -11,7 +12,7 @@ function one<T>(value:T|T[]|null|undefined):T|null{return Array.isArray(value)?v
 export default async function RhWorkerDetailPage({params,searchParams}:{params:Promise<{id:string}>;searchParams:Promise<{error?:string}>}){
  const{id}=await params;const query=await searchParams;const context=await requireCapability("rh","read");
  const workerResult=await context.supabase.from("rh_workers").select("id,worker_code,status,created_at,rh_people(id,full_name,preferred_name,cpf,birth_date,email,phone),rh_employments(id,registration_number,employment_type,admission_date,termination_date,status,base_salary)").eq("organization_id",context.organizationId).eq("id",id).maybeSingle();
- if(workerResult.error)throw new Error(workerResult.error.message);if(!workerResult.data)notFound();const worker=workerResult.data;
+ if(workerResult.error)throw new Error(mensagemDeFalha("app.rh.pessoas.[id].RhWorkerDetailPage", workerResult.error));if(!workerResult.data)notFound();const worker=workerResult.data;
  const person=one(worker.rh_people);const employments=Array.isArray(worker.rh_employments)?worker.rh_employments:worker.rh_employments?[worker.rh_employments]:[];const employmentIds=employments.map(item=>item.id);
  const[conditionsResult,employersResult,establishmentsResult,allocationsResult,positionsResult,functionsResult,unionsResult,schedulesResult]=await Promise.all([
   employmentIds.length?context.supabase.from("rh_employment_conditions").select("id,employment_id,valid_from,valid_to,base_salary,change_reason,rh_employers(code,legal_name),rh_establishments(code,name),rh_tax_allocations(code,name,esocial_lotacao_code),rh_positions(code,name,cbo_code),rh_functions(code,name),rh_unions(code,name,category_name),rh_work_schedules(code,name,weekly_hours)").eq("organization_id",context.organizationId).in("employment_id",employmentIds).order("valid_from",{ascending:false}):Promise.resolve({data:[],error:null}),
@@ -23,7 +24,7 @@ export default async function RhWorkerDetailPage({params,searchParams}:{params:P
   context.supabase.from("rh_unions").select("id,code,name,category_name").eq("organization_id",context.organizationId).eq("active",true).order("code"),
   context.supabase.from("rh_work_schedules").select("id,code,name,weekly_hours").eq("organization_id",context.organizationId).eq("active",true).order("code")
  ]);
- const firstError=conditionsResult.error??employersResult.error??establishmentsResult.error??allocationsResult.error??positionsResult.error??functionsResult.error??unionsResult.error??schedulesResult.error;if(firstError)throw new Error(firstError.message);
+ const firstError=conditionsResult.error??employersResult.error??establishmentsResult.error??allocationsResult.error??positionsResult.error??functionsResult.error??unionsResult.error??schedulesResult.error;if(firstError)throw new Error(mensagemDeFalha("app.rh.pessoas.[id].RhWorkerDetailPage", firstError));
  const conditions=conditionsResult.data??[];const employers=employersResult.data??[];const establishments=establishmentsResult.data??[];const allocations=allocationsResult.data??[];
  return <main className="content"><section className="page-heading"><div><span className="badge">RH · DOSSIÊ</span><h1>{person?.preferred_name||person?.full_name||worker.worker_code}</h1><p>{person?.full_name} · código {worker.worker_code}</p></div><div className="page-actions"><Link className="button button-secondary" href="/app/rh/pessoas">Voltar à lista</Link></div></section>{query.error?<div className="validation blocking">{query.error}</div>:null}
  <div className="finance-two-column"><section className="card card-pad"><span className="eyebrow">DADOS PESSOAIS</span><dl className="detail-list"><div><dt>Nome completo</dt><dd>{person?.full_name||"—"}</dd></div><div><dt>CPF</dt><dd>{person?.cpf?`***.***.${person.cpf.slice(6,9)}-${person.cpf.slice(9)}`:"—"}</dd></div><div><dt>Nascimento</dt><dd>{person?.birth_date||"—"}</dd></div><div><dt>E-mail</dt><dd>{person?.email||"—"}</dd></div><div><dt>Telefone</dt><dd>{person?.phone||"—"}</dd></div></dl></section><aside className="card card-pad"><span className="eyebrow">ESTADO</span><h2><span className="badge">{worker.status}</span></h2><p>Cadastro criado em {String(worker.created_at).slice(0,10)}.</p></aside></div>

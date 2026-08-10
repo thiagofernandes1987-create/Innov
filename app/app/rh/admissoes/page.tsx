@@ -1,3 +1,4 @@
+import{mensagemDeFalha}from"@/lib/errors/data-access";
 import Link from "next/link";
 import { requireCapability } from "@/lib/authorization";
 import { formatMoney } from "@/lib/financial/cash-flow";
@@ -11,7 +12,7 @@ export default async function RhAdmissionsPage() {
     .select("id,case_number,status,full_name,preferred_name,worker_code,registration_number,employment_type,admission_date,base_salary,esocial_strategy,rh_employers(code,legal_name),rh_establishments(code,name)")
     .eq("organization_id", context.organizationId)
     .order("created_at", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(mensagemDeFalha("app.rh.admissoes.RhAdmissionsPage", error));
 
   return (
     <main className="content">

@@ -1,3 +1,4 @@
+import{mensagemDeFalha}from"@/lib/errors/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { generateTsvS2300, saveTsvEsocialProfile } from "@/app/actions/rh-tsv-esocial";
@@ -30,7 +31,7 @@ export default async function TsvDetailPage({ params, searchParams }: { params: 
     context.supabase.from("rh_esocial_events").select("id,status,receipt_number,created_at").eq("organization_id", context.organizationId).eq("event_type", "S-2300").eq("source_type", "TSV_EMPLOYMENT").eq("source_id", id).order("created_at", { ascending: false }).limit(1).maybeSingle()
   ]);
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(mensagemDeFalha("app.rh.tsv.[id].TsvDetailPage", error));
   if (!employment) notFound();
   const worker = one(employment.rh_workers);
   const person = worker ? one(worker.rh_people) : null;

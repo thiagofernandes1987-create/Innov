@@ -1,3 +1,4 @@
+import{mensagemDeFalha}from"@/lib/errors/data-access";
 import Link from"next/link";
 import{notFound}from"next/navigation";
 import{requireCapability}from"@/lib/authorization";
@@ -6,7 +7,7 @@ export const dynamic="force-dynamic";
 export default async function EsocialEventDetailPage({params}:{params:Promise<{id:string}>}){
  const{id}=await params;const context=await requireCapability("rh","read");
  const{data:event,error}=await context.supabase.from("rh_esocial_events").select("id,event_type,event_key,event_group,operation,environment,employer_registration_type,employer_registration_number,transmitter_registration_type,transmitter_registration_number,layout_version,source_type,source_id,payload_sha256,status,receipt_number,response_code,response_description,occurrences,created_at,updated_at,rh_esocial_batch_events(batch_id,position,rh_esocial_batches(status,protocol_number,created_at))").eq("organization_id",context.organizationId).eq("id",id).maybeSingle();
- if(error)throw new Error(error.message);if(!event)notFound();
+ if(error)throw new Error(mensagemDeFalha("app.rh.obrigacoes.esocial.eventos.[id].EsocialEventDetailPage", error));if(!event)notFound();
  const batchLinks=Array.isArray(event.rh_esocial_batch_events)?event.rh_esocial_batch_events:[];
  return <main className="content"><section className="page-heading"><div><span className="badge">ESOCIAL · EVENTO</span><h1>{event.event_type}</h1><p>{event.event_key}</p></div><div className="page-actions"><Link className="button button-secondary" href="/app/rh/obrigacoes/esocial">Voltar à fila</Link><span className="badge">{event.status}</span></div></section>
  <div className="finance-two-column"><section className="card card-pad"><span className="eyebrow">IDENTIDADE</span><dl className="detail-list"><div><dt>Operação</dt><dd>{event.operation}</dd></div><div><dt>Grupo</dt><dd>{event.event_group}</dd></div><div><dt>Ambiente</dt><dd>{event.environment}</dd></div><div><dt>Leiaute</dt><dd>{event.layout_version}</dd></div><div><dt>Origem</dt><dd>{event.source_type}{event.source_id?` · ${event.source_id}`:""}</dd></div></dl></section><section className="card card-pad"><span className="eyebrow">INTEGRIDADE</span><dl className="detail-list"><div><dt>SHA-256</dt><dd><code>{event.payload_sha256}</code></dd></div><div><dt>Criado</dt><dd>{String(event.created_at).replace("T"," ").slice(0,19)}</dd></div><div><dt>Atualizado</dt><dd>{String(event.updated_at).replace("T"," ").slice(0,19)}</dd></div><div><dt>Recibo</dt><dd>{event.receipt_number??"—"}</dd></div></dl></section></div>

@@ -1,5 +1,7 @@
 "use server";
 
+import{mensagemDeFalha}from"@/lib/errors/data-access";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
@@ -23,7 +25,7 @@ function specialCategory(value: string): value is S2300SpecialCategory { return 
 
 async function ensureNotAccepted(context: Awaited<ReturnType<typeof requireCapability>>, employmentId: string) {
   const { data, error } = await context.supabase.from("rh_esocial_events").select("id").eq("organization_id", context.organizationId).eq("event_type", "S-2300").eq("source_type", "TSV_EMPLOYMENT").eq("source_id", employmentId).eq("status", "ACCEPTED").limit(1).maybeSingle();
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(mensagemDeFalha("rh-tsv-special-esocial.ensureNotAccepted", error));
   if (data) throw new Error("O TSVE já possui S-2300 aceito. Alterações posteriores devem usar o evento apropriado, não um novo início.");
 }
 
@@ -32,7 +34,7 @@ export async function saveTsvSpecialEsocialProfile(data: FormData) {
   const categoryCode = text(data, "categoryCode");
   const context = await requireCapability("rh", "update");
   if (!specialCategory(categoryCode)) fail(employmentId, "Selecione 304, 305, 401 ou 410.");
-  try { await ensureNotAccepted(context, employmentId); } catch (error) { fail(employmentId, error instanceof Error ? error.message : "Falha ao validar RET."); }
+  try { await ensureNotAccepted(context, employmentId); } catch (error) { fail(employmentId, error instanceof Error ? mensagemDeFalha("rh-tsv-special-esocial.saveTsvSpecialEsocialProfile", error) : "Falha ao validar RET."); }
 
   const commonClear = {
     fgts_option_date: null,
@@ -83,10 +85,10 @@ export async function saveTsvSpecialEsocialProfile(data: FormData) {
   };
 
   const { data: profile, error: findError } = await context.supabase.from("rh_tsv_esocial_profiles").select("id").eq("organization_id", context.organizationId).eq("employment_id", employmentId).maybeSingle();
-  if (findError) fail(employmentId, findError.message);
+  if (findError) fail(employmentId, mensagemDeFalha("rh-tsv-special-esocial.saveTsvSpecialEsocialProfile", findError));
   if (!profile) fail(employmentId, "Salve primeiro o perfil básico do TSVE.");
   const { error } = await context.supabase.from("rh_tsv_esocial_profiles").update(payload).eq("organization_id", context.organizationId).eq("employment_id", employmentId);
-  if (error) fail(employmentId, error.message);
+  if (error) fail(employmentId, mensagemDeFalha("rh-tsv-special-esocial.saveTsvSpecialEsocialProfile", error));
   revalidatePath(route(employmentId));
   revalidatePath(`/app/rh/tsv/${employmentId}`);
   redirect(`${route(employmentId)}?success=1`);
@@ -101,13 +103,13 @@ export async function generateTsvSpecialS2300(data: FormData) {
   try {
     await ensureNotAccepted(context, employmentId);
     const { data: employment, error: employmentError } = await context.supabase.from("rh_employments").select("id,worker_id,registration_number,employment_type,admission_date,base_salary").eq("organization_id", context.organizationId).eq("id", employmentId).maybeSingle();
-    if (employmentError || !employment) throw new Error(employmentError?.message ?? "TSVE não encontrado.");
+    if (employmentError || !employment) throw new Error(mensagemDeFalha("rh-tsv-special-esocial.generateTsvSpecialS2300", employmentError, "TSVE não encontrado."));
     const [{ data: profile, error: profileError }, { data: worker }, { data: condition }] = await Promise.all([
       context.supabase.from("rh_tsv_esocial_profiles").select("*").eq("organization_id", context.organizationId).eq("employment_id", employmentId).maybeSingle(),
       context.supabase.from("rh_workers").select("person_id").eq("organization_id", context.organizationId).eq("id", employment.worker_id).maybeSingle(),
       context.supabase.from("rh_employment_conditions").select("employer_id,establishment_id,position_id,base_salary").eq("organization_id", context.organizationId).eq("employment_id", employmentId).lte("valid_from", employment.admission_date).or(`valid_to.is.null,valid_to.gt.${employment.admission_date}`).order("valid_from", { ascending: false }).limit(1).maybeSingle()
     ]);
-    if (profileError) throw new Error(profileError.message);
+    if (profileError) throw new Error(mensagemDeFalha("rh-tsv-special-esocial.generateTsvSpecialS2300", profileError));
     if (!profile || !worker || !condition) throw new Error("Perfil, trabalhador ou condição vigente ausente.");
     if (!specialCategory(profile.category_code)) throw new Error("Perfil não está em categoria especial 304/305/401/410.");
 
@@ -147,8 +149,8 @@ export async function generateTsvSpecialS2300(data: FormData) {
       p_employer_registration_type: eType, p_employer_registration_number: digits(employer.tax_id), p_transmitter_registration_type: tx.type, p_transmitter_registration_number: tx.number,
       p_unsigned_xml: unsigned, p_unsigned_sha256: xmlSha256(unsigned), p_signed_xml: signed.signedXml, p_signed_sha256: signed.payloadSha256
     });
-    if (error) throw new Error(error.message);
+    if (error) throw new Error(mensagemDeFalha("rh-tsv-special-esocial.generateTsvSpecialS2300", error));
     eventId = String(id);
-  } catch (error) { fail(employmentId, error instanceof Error ? error.message : "Falha ao gerar S-2300 especial."); }
+  } catch (error) { fail(employmentId, error instanceof Error ? mensagemDeFalha("rh-tsv-special-esocial.generateTsvSpecialS2300", error) : "Falha ao gerar S-2300 especial."); }
   redirect(`/app/rh/obrigacoes/esocial/eventos/${eventId}`);
 }

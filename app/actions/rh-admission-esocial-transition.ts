@@ -1,5 +1,7 @@
 "use server";
 
+import{mensagemDeFalha}from"@/lib/errors/data-access";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
@@ -59,7 +61,7 @@ export async function saveAdmissionEsocialTransitionProfile(data: FormData) {
     .eq("organization_id", context.organizationId)
     .eq("admission_case_id", caseId)
     .maybeSingle();
-  if (profileError) fail(caseId, profileError.message);
+  if (profileError) fail(caseId, mensagemDeFalha("rh-admission-esocial-transition.saveAdmissionEsocialTransitionProfile", profileError));
   if (!profile) fail(caseId, "Salve primeiro o perfil eSocial principal.");
 
   const { error } = await context.supabase
@@ -67,7 +69,7 @@ export async function saveAdmissionEsocialTransitionProfile(data: FormData) {
     .update(payload)
     .eq("organization_id", context.organizationId)
     .eq("admission_case_id", caseId);
-  if (error) fail(caseId, error.message);
+  if (error) fail(caseId, mensagemDeFalha("rh-admission-esocial-transition.saveAdmissionEsocialTransitionProfile", error));
   revalidatePath(path(caseId));
   revalidatePath(`/app/rh/admissoes/${caseId}`);
   redirect(`${path(caseId)}?success=1`);
@@ -96,19 +98,19 @@ async function requireAcceptedCpfChangeTermination(context: RhContext, profile: 
 
   const { data: previousPerson, error: personError } = await context.supabase
     .from("rh_people").select("id").eq("organization_id", context.organizationId).eq("cpf", previousCpf).maybeSingle();
-  if (personError) throw new Error(personError.message);
+  if (personError) throw new Error(mensagemDeFalha("rh-admission-esocial-transition.requireAcceptedCpfChangeTermination", personError));
   if (!previousPerson) throw new Error("CPF anterior não localizado no histórico do RH.");
 
   const { data: workers, error: workerError } = await context.supabase
     .from("rh_workers").select("id").eq("organization_id", context.organizationId).eq("person_id", previousPerson.id);
-  if (workerError) throw new Error(workerError.message);
+  if (workerError) throw new Error(mensagemDeFalha("rh-admission-esocial-transition.requireAcceptedCpfChangeTermination", workerError));
   const workerIds = (workers ?? []).map((item) => item.id);
   if (!workerIds.length) throw new Error("Trabalhador anterior não localizado.");
 
   const { data: previousEmployment, error: employmentError } = await context.supabase
     .from("rh_employments").select("id,admission_date").eq("organization_id", context.organizationId)
     .in("worker_id", workerIds).eq("registration_number", previousRegistration).maybeSingle();
-  if (employmentError) throw new Error(employmentError.message);
+  if (employmentError) throw new Error(mensagemDeFalha("rh-admission-esocial-transition.requireAcceptedCpfChangeTermination", employmentError));
   if (!previousEmployment) throw new Error("Matrícula anterior não localizada.");
 
   const expectedTermination = dayBefore(changeDate);
@@ -116,7 +118,7 @@ async function requireAcceptedCpfChangeTermination(context: RhContext, profile: 
     .from("rh_termination_cases").select("id,new_cpf,termination_date,esocial_reason_code")
     .eq("organization_id", context.organizationId).eq("employment_id", previousEmployment.id)
     .eq("esocial_reason_code", "36").eq("termination_date", expectedTermination).maybeSingle();
-  if (terminationError) throw new Error(terminationError.message);
+  if (terminationError) throw new Error(mensagemDeFalha("rh-admission-esocial-transition.requireAcceptedCpfChangeTermination", terminationError));
   if (!termination) throw new Error(`Mudança de CPF exige desligamento motivo 36 em ${expectedTermination}.`);
   if (digits(String(termination.new_cpf ?? "")) !== digits(newCpf)) throw new Error("Novo CPF do S-2299/36 difere do CPF da nova admissão.");
 
@@ -124,7 +126,7 @@ async function requireAcceptedCpfChangeTermination(context: RhContext, profile: 
     .from("rh_esocial_events").select("id").eq("organization_id", context.organizationId)
     .eq("event_type", "S-2299").eq("source_type", "TERMINATION_CASE").eq("source_id", termination.id)
     .eq("status", "ACCEPTED").limit(1).maybeSingle();
-  if (eventError) throw new Error(eventError.message);
+  if (eventError) throw new Error(mensagemDeFalha("rh-admission-esocial-transition.requireAcceptedCpfChangeTermination", eventError));
   if (!accepted) throw new Error("Mudança de CPF exige S-2299 motivo 36 ACCEPTED no RET.");
 }
 
@@ -140,7 +142,7 @@ export async function generateS2200Transition(data: FormData) {
       .from("rh_admission_cases")
       .select("id,full_name,cpf,birth_date,email,phone,registration_number,base_salary,employer_id,establishment_id,position_id,union_id,work_schedule_id")
       .eq("organization_id", context.organizationId).eq("id", caseId).maybeSingle();
-    if (admissionError || !admission) throw new Error(admissionError?.message ?? "Caso de admissão não encontrado.");
+    if (admissionError || !admission) throw new Error(mensagemDeFalha("rh-admission-esocial-transition.generateS2200Transition", admissionError, "Caso de admissão não encontrado."));
 
     const [{ data: profile, error: profileError }, { data: employer }, { data: establishment }, { data: position }, { data: union }, { data: schedule }] = await Promise.all([
       context.supabase.from("rh_admission_esocial_profiles").select("*").eq("organization_id", context.organizationId).eq("admission_case_id", caseId).maybeSingle(),
@@ -150,7 +152,7 @@ export async function generateS2200Transition(data: FormData) {
       admission.union_id ? context.supabase.from("rh_unions").select("tax_id").eq("organization_id", context.organizationId).eq("id", admission.union_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
       admission.work_schedule_id ? context.supabase.from("rh_work_schedules").select("weekly_hours,description").eq("organization_id", context.organizationId).eq("id", admission.work_schedule_id).maybeSingle() : Promise.resolve({ data: null, error: null })
     ]);
-    if (profileError) throw new Error(profileError.message);
+    if (profileError) throw new Error(mensagemDeFalha("rh-admission-esocial-transition.generateS2200Transition", profileError));
     if (!profile || !employer || !establishment || !position?.cbo_code || !union?.tax_id || !schedule?.description) throw new Error("Perfil/estrutura eSocial incompletos para S-2200.");
     if (![2, 3, 4, 6, 7].includes(Number(profile.admission_type))) throw new Error("Este comando é exclusivo de transferência/sucessão/mudança de CPF.");
     if (!profile.original_admission_date) throw new Error("Data de admissão original obrigatória.");
@@ -195,10 +197,10 @@ export async function generateS2200Transition(data: FormData) {
       p_transmitter_registration_type: tx.type, p_transmitter_registration_number: tx.number,
       p_unsigned_xml: unsigned, p_unsigned_sha256: xmlSha256(unsigned), p_signed_xml: signed.signedXml, p_signed_sha256: signed.payloadSha256
     });
-    if (persistError) throw new Error(persistError.message);
+    if (persistError) throw new Error(mensagemDeFalha("rh-admission-esocial-transition.generateS2200Transition", persistError));
     eventId = String(persisted);
   } catch (error) {
-    fail(caseId, error instanceof Error ? error.message : "Falha ao gerar S-2200 de transição.");
+    fail(caseId, error instanceof Error ? mensagemDeFalha("rh-admission-esocial-transition.generateS2200Transition", error) : "Falha ao gerar S-2200 de transição.");
   }
 
   redirect(`/app/rh/obrigacoes/esocial/eventos/${eventId}`);

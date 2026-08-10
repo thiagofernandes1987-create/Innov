@@ -1,3 +1,4 @@
+import{mensagemDeFalha}from"@/lib/errors/data-access";
 import Link from"next/link";
 import{notFound}from"next/navigation";
 import{sendEsocialBatchAction}from"@/app/actions/rh-esocial";
@@ -12,7 +13,7 @@ export default async function EsocialBatchDetailPage({params,searchParams}:{para
   context.supabase.from("rh_esocial_batches").select("id,environment,event_group,employer_registration_type,employer_registration_number,transmitter_registration_type,transmitter_registration_number,communication_namespace_version,status,protocol_number,response_code,response_description,estimated_completion_seconds,created_at,sent_at,completed_at,rh_esocial_batch_events(position,rh_esocial_events(id,event_type,event_key,status,payload_sha256,receipt_number))").eq("organization_id",context.organizationId).eq("id",id).maybeSingle(),
   context.supabase.from("rh_esocial_attempts").select("id,operation,attempt_number,endpoint_url,soap_action,http_status,result,request_sha256,response_sha256,error_code,error_message,duration_ms,started_at,completed_at").eq("organization_id",context.organizationId).eq("batch_id",id).order("started_at",{ascending:false})
  ]);
- if(bError||aError)throw new Error(bError?.message??aError?.message??"Falha ao carregar lote.");if(!batch)notFound();const links=Array.isArray(batch.rh_esocial_batch_events)?batch.rh_esocial_batch_events:[];
+ if(bError||aError)throw new Error(mensagemDeFalha("app.rh.obrigacoes.esocial.lotes.[id].EsocialBatchDetailPage", bError)??mensagemDeFalha("app.rh.obrigacoes.esocial.lotes.[id].EsocialBatchDetailPage", aError, "Falha ao carregar lote."));if(!batch)notFound();const links=Array.isArray(batch.rh_esocial_batch_events)?batch.rh_esocial_batch_events:[];
  const canSend=["READY","UNKNOWN"].includes(batch.status)&&config.certificateConfigured&&config.privateKeyConfigured&&(batch.environment!=="PRODUCTION"||config.productionEnabled);
  const canQuery=Boolean(batch.protocol_number)&&["PROTOCOL_RECEIVED","PROCESSING","UNKNOWN"].includes(batch.status);
  return <main className="content"><section className="page-heading"><div><span className="badge">ESOCIAL · LOTE</span><h1>{batch.protocol_number??`Lote ${batch.id.slice(0,8)}`}</h1><p>{batch.environment} · grupo {batch.event_group} · {links.length} evento(s)</p></div><div className="page-actions"><Link className="button button-secondary" href="/app/rh/obrigacoes/esocial">Voltar</Link><span className="badge">{batch.status}</span></div></section>{query.error?<div className="validation blocking">{query.error}</div>:null}{query.success?<div className="alert alert-success">{query.success}</div>:null}

@@ -1,3 +1,4 @@
+import{mensagemDeFalha}from"@/lib/errors/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createFgtsGuide, recordFgtsPayment, updateFgtsWorkerExternal } from "@/app/actions/rh-government";
@@ -17,7 +18,7 @@ export default async function FgtsDigitalDetailPage({ params, searchParams }: { 
     context.supabase.from("rh_fgts_guides").select("id,external_guide_id,guide_type,channel_type,due_date,principal_amount,additions_amount,total_amount,status,evidence_reference,created_at").eq("organization_id", context.organizationId).eq("fgts_period_id", id).order("created_at", { ascending: false }),
     context.supabase.from("rh_fgts_payments").select("id,guide_id,amount,paid_at,payment_channel,external_payment_id,evidence_reference,status").eq("organization_id", context.organizationId).order("paid_at", { ascending: false })
   ]);
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(mensagemDeFalha("app.rh.obrigacoes.fgts-digital.[id].FgtsDigitalDetailPage", error));
   if (!period) notFound();
   const periodGuideIds = new Set((guides ?? []).map(guide => guide.id));
   const periodPayments = (payments ?? []).filter(payment => periodGuideIds.has(payment.guide_id));

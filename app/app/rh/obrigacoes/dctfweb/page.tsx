@@ -1,3 +1,4 @@
+import{mensagemDeFalha}from"@/lib/errors/data-access";
 import Link from "next/link";
 import { createDctfwebDeclaration } from "@/app/actions/rh-government";
 import { testIntegraContadorCredentials } from "@/app/actions/rh-integracontador";
@@ -10,7 +11,7 @@ export default async function DctfwebPage({ searchParams }: { searchParams: Prom
   const context = await requireCapability("rh", "read");
   const query = await searchParams;
   const { data, error } = await context.supabase.from("rh_dctfweb_declarations").select("id,reference_month,category,declaration_type,status,esocial_period_closed,reinf_period_closed,mit_required,mit_status,external_declaration_id,receipt_number,total_debt,total_paid,last_external_update_at").eq("organization_id", context.organizationId).order("reference_month", { ascending: false });
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(mensagemDeFalha("app.rh.obrigacoes.dctfweb.DctfwebPage", error));
   return <main className="content">
     <section className="page-heading"><div><span className="badge">OBRIGAÇÕES · DCTFWEB</span><h1>DCTFWeb</h1><p>Reconciliação da declaração sensibilizada pelas escriturações e canais oficiais disponíveis à organização.</p></div><div className="page-actions"><Link className="button button-secondary" href="/app/rh/obrigacoes/dctfweb/mit">MIT JSON</Link></div></section>
     {query.error ? <div className="validation blocking">{query.error}</div> : null}{query.success ? <div className="alert alert-success">{query.success}</div> : null}

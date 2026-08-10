@@ -1,3 +1,4 @@
+import{mensagemDeFalha}from"@/lib/errors/data-access";
 import{addRhPayrollInput,closeRhPayroll,runRhPayroll}from"@/app/actions/rh";
 import{createPayrollPaymentOrders,generateS1200,generateS1210,generateS1298,generateS1299,settlePayrollPayment}from"@/app/actions/rh-payroll-esocial";
 import{publishPayslips}from"@/app/actions/rh-portal";
@@ -19,7 +20,7 @@ export default async function RhPayrollPeriodDetailPage({params,searchParams}:{p
   context.supabase.from("rh_payroll_inputs").select("id,employment_id,rubric_version_id,quantity,unit_rate,amount,source_type,notes,created_at,rh_employments(registration_number,rh_workers(worker_code,rh_people(full_name,preferred_name))),rh_rubric_versions(formula_type,rh_rubrics(code,name,payroll_kind))").eq("organization_id",context.organizationId).eq("period_id",id).order("created_at"),
   context.supabase.from("rh_payroll_runs").select("id,run_number,status,input_count,gross_total,deduction_total,net_total,started_at,completed_at").eq("organization_id",context.organizationId).eq("period_id",id).order("run_number",{ascending:false})
  ]);
- if(pError)throw new Error(pError.message);if(!period)notFound();
+ if(pError)throw new Error(mensagemDeFalha("app.rh.folha.competencias.[id].RhPayrollPeriodDetailPage", pError));if(!period)notFound();
  const latestRun=runs?.find(r=>r.status==="COMPLETED")??runs?.[0]??null;
  let results:WorkerResult[]=[];let lines:Record<string,unknown>[]=[];let payments:PayrollPayment[]=[];
  if(latestRun){
@@ -27,10 +28,10 @@ export default async function RhPayrollPeriodDetailPage({params,searchParams}:{p
    context.supabase.from("rh_payroll_worker_results").select("id,employment_id,gross_amount,deduction_amount,net_amount,rh_employments(registration_number,rh_workers(worker_code,rh_people(full_name,preferred_name)))").eq("organization_id",context.organizationId).eq("run_id",latestRun.id).order("net_amount",{ascending:false}),
    context.supabase.from("rh_payroll_payments").select("id,worker_result_id,employment_id,amount,paid_at,status,rh_employments(registration_number,rh_workers(worker_code,rh_people(full_name,preferred_name)))").eq("organization_id",context.organizationId).eq("run_id",latestRun.id).order("created_at")
   ]);
-  if(resultQuery.error||paymentQuery.error)throw new Error(resultQuery.error?.message??paymentQuery.error?.message??"Falha ao carregar resultado da folha.");
+  if(resultQuery.error||paymentQuery.error)throw new Error(mensagemDeFalha("app.rh.folha.competencias.[id].RhPayrollPeriodDetailPage", resultQuery.error ?? paymentQuery.error, "Falha ao carregar resultado da folha."));
   results=(resultQuery.data??[]) as WorkerResult[];payments=(paymentQuery.data??[]) as PayrollPayment[];
   const resultIds=results.map(r=>r.id);
-  if(resultIds.length){const lineQuery=await context.supabase.from("rh_payroll_result_lines").select("id,worker_result_id,calculation_order,base_amount,quantity,unit_rate,amount,trace,rh_rubric_versions(formula_type,rh_rubrics(code,name,payroll_kind))").eq("organization_id",context.organizationId).in("worker_result_id",resultIds).order("calculation_order");if(lineQuery.error)throw new Error(lineQuery.error.message);lines=(lineQuery.data??[]) as Record<string,unknown>[];}
+  if(resultIds.length){const lineQuery=await context.supabase.from("rh_payroll_result_lines").select("id,worker_result_id,calculation_order,base_amount,quantity,unit_rate,amount,trace,rh_rubric_versions(formula_type,rh_rubrics(code,name,payroll_kind))").eq("organization_id",context.organizationId).in("worker_result_id",resultIds).order("calculation_order");if(lineQuery.error)throw new Error(mensagemDeFalha("app.rh.folha.competencias.[id].RhPayrollPeriodDetailPage", lineQuery.error));lines=(lineQuery.data??[]) as Record<string,unknown>[];}
  }
  const allowedVersions=(versions??[]).filter(v=>v.valid_from<=period.reference_month&&(!v.valid_to||v.valid_to>=period.reference_month)&&((Array.isArray(v.rh_rubrics)?v.rh_rubrics[0]:v.rh_rubrics)?.active??false));
  const editable=["OPEN","CALCULATED","REVIEW","REOPENED"].includes(period.status);

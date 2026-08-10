@@ -1,3 +1,4 @@
+import{mensagemDeFalha}from"@/lib/errors/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { generateS2200Transition, saveAdmissionEsocialTransitionProfile } from "@/app/actions/rh-admission-esocial-transition";
@@ -41,7 +42,7 @@ export default async function AdmissionTransitionPage({
       .order("created_at", { ascending: false })
   ]);
 
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(mensagemDeFalha("app.rh.admissoes.[id].esocial-transicao.AdmissionTransitionPage", error));
   if (!admission) notFound();
   const type = Number(profile?.admission_type ?? 1);
   const isTransition = [2, 3, 4, 6, 7].includes(type);

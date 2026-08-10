@@ -1,5 +1,7 @@
 "use server";
 
+import{mensagemDeFalha}from"@/lib/errors/data-access";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
@@ -22,7 +24,7 @@ export async function configureRhScheduleDay(data: FormData) {
   if (!scheduleId || isoWeekday < 1 || isoWeekday > 7) fail(path, "Jornada e dia da semana são obrigatórios.");
   if (monthlyDivisor != null) {
     const { error } = await context.supabase.from("rh_work_schedules").update({ monthly_divisor: monthlyDivisor }).eq("id", scheduleId).eq("organization_id", context.organizationId);
-    if (error) fail(path, error.message);
+    if (error) fail(path, mensagemDeFalha("rh-time.configureRhScheduleDay", error));
   }
   const { error } = await context.supabase.from("rh_work_schedule_days").upsert({
     organization_id: context.organizationId,
@@ -34,7 +36,7 @@ export async function configureRhScheduleDay(data: FormData) {
     break_minutes: Number(text(data, "breakMinutes") || "0"),
     created_by: context.userId
   }, { onConflict: "work_schedule_id,iso_weekday" });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-time.configureRhScheduleDay", error));
   revalidatePath(path);
   done(path, "Dia da jornada configurado.");
 }
@@ -53,7 +55,7 @@ export async function createRhTimePolicy(data: FormData) {
     valid_to: optional(data, "validTo"),
     created_by: context.userId
   });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-time.createRhTimePolicy", error));
   done(path, "Política de jornada criada.");
 }
 
@@ -68,7 +70,7 @@ export async function createRhTimePeriod(data: FormData) {
     policy_id: text(data, "policyId"),
     created_by: context.userId
   }).select("id").single();
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-time.createRhTimePeriod", error));
   redirect(`${BASE}/periodos/${period.id}`);
 }
 
@@ -77,7 +79,7 @@ export async function addRhTimePunch(data: FormData) {
   const periodId = text(data, "periodId");
   const path = `${BASE}/periodos/${periodId}`;
   const { data: period, error: periodError } = await context.supabase.from("rh_time_periods").select("employment_id,status").eq("organization_id", context.organizationId).eq("id", periodId).maybeSingle();
-  if (periodError || !period) fail(path, periodError?.message ?? "Período não encontrado.");
+  if (periodError || !period) fail(path, mensagemDeFalha("rh-time.addRhTimePunch", periodError, "Período não encontrado."));
   if (!["OPEN", "CALCULATED", "PENDING", "REOPENED"].includes(period.status)) fail(path, "Período fechado não aceita marcação.");
   const punchedAt = text(data, "punchedAt");
   if (!punchedAt) fail(path, "Data/hora obrigatória.");
@@ -91,7 +93,7 @@ export async function addRhTimePunch(data: FormData) {
     note: optional(data, "note"),
     created_by: context.userId
   });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-time.addRhTimePunch", error));
   await context.supabase.from("rh_time_periods").update({ status: "OPEN", updated_at: new Date().toISOString() }).eq("id", periodId).eq("organization_id", context.organizationId);
   revalidatePath(path);
   done(path, "Marcação registrada. A original permanece imutável.");
@@ -102,7 +104,7 @@ export async function calculateRhTimePeriodAction(data: FormData) {
   const periodId = text(data, "periodId");
   const path = `${BASE}/periodos/${periodId}`;
   const { error } = await context.supabase.rpc("calculate_rh_time_period", { p_period_id: periodId });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-time.calculateRhTimePeriodAction", error));
   revalidatePath(path);
   done(path, "Apuração recalculada.");
 }
@@ -124,9 +126,9 @@ export async function addRhTimeAdjustment(data: FormData) {
     approved_by: context.userId,
     created_by: context.userId
   });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-time.addRhTimeAdjustment", error));
   const { error: calcError } = await context.supabase.rpc("calculate_rh_time_period", { p_period_id: periodId });
-  if (calcError) fail(path, calcError.message);
+  if (calcError) fail(path, mensagemDeFalha("rh-time.addRhTimeAdjustment", calcError));
   revalidatePath(path);
   done(path, "Tratamento registrado e apuração recalculada.");
 }
@@ -141,6 +143,6 @@ export async function closeRhTimePeriodToPayroll(data: FormData) {
     p_overtime_rubric_version_id: text(data, "overtimeRubricVersionId"),
     p_absence_rubric_version_id: text(data, "absenceRubricVersionId")
   });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-time.closeRhTimePeriodToPayroll", error));
   done(path, "Ponto fechado e fatos exportados para a folha.");
 }

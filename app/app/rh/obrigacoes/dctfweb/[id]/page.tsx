@@ -1,3 +1,4 @@
+import{mensagemDeFalha}from"@/lib/errors/data-access";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { recordDctfwebExternalSnapshot, upsertDctfwebReconciliation } from "@/app/actions/rh-government";
@@ -15,7 +16,7 @@ export default async function DctfwebDetailPage({ params, searchParams }: { para
     context.supabase.from("rh_dctfweb_reconciliation_items").select("id,dimension,reference_key,internal_amount,external_amount,difference,status,cause,action_required,evidence_reference,updated_at").eq("organization_id", context.organizationId).eq("declaration_id", id).order("dimension"),
     context.supabase.from("rh_dctfweb_documents").select("id,document_type,external_id,amount,due_date,status,evidence_reference,created_at").eq("organization_id", context.organizationId).eq("declaration_id", id).order("created_at", { ascending: false })
   ]);
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(mensagemDeFalha("app.rh.obrigacoes.dctfweb.[id].DctfwebDetailPage", error));
   if (!declaration) notFound();
   const divergent = (items ?? []).filter(item => item.status === "DIVERGENT").length;
 

@@ -1,3 +1,4 @@
+import{mensagemDeFalha}from"@/lib/errors/data-access";
 import Link from "next/link";
 import { createFgtsPeriodFromPayroll } from "@/app/actions/rh-government";
 import { requireCapability } from "@/lib/authorization";
@@ -13,7 +14,7 @@ export default async function FgtsDigitalPage({ searchParams }: { searchParams: 
     context.supabase.from("rh_payroll_base_definitions").select("code,name").eq("organization_id", context.organizationId).order("code"),
     context.supabase.from("rh_rubrics").select("code,name,payroll_kind").eq("organization_id", context.organizationId).eq("active", true).order("code")
   ]);
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(mensagemDeFalha("app.rh.obrigacoes.fgts-digital.FgtsDigitalPage", error));
 
   return <main className="content">
     <section className="page-heading"><div><span className="badge">OBRIGAÇÕES · FGTS DIGITAL</span><h1>FGTS Digital</h1><p>Conferência por trabalhador, guia, pagamento e conciliação sem presumir API geral inexistente.</p></div></section>

@@ -1,5 +1,7 @@
 "use server";
 
+import{mensagemDeFalha}from"@/lib/errors/data-access";
+
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireCapability}from"@/lib/authorization";
@@ -22,25 +24,25 @@ export async function createTerminationCase(data:FormData){
   p_outstanding_vacation_days:n(data,"outstandingVacationDays")??0,p_salary_average_base:n(data,"salaryAverageBase")??0,p_fgts_termination_base:n(data,"fgtsTerminationBase")??0,
   p_fgts_penalty_rate:n(data,"fgtsPenaltyRate")??0,p_pension_percentage:n(data,"pensionPercentage"),p_pension_amount:n(data,"pensionAmount"),p_death_certificate_number:o(data,"deathCertificateNumber")
  });
- if(error)fail(path,error.message);redirect(`/app/rh/desligamentos/${id}`);
+ if(error)fail(path,mensagemDeFalha("rh-termination.createTerminationCase", error));redirect(`/app/rh/desligamentos/${id}`);
 }
 
-export async function calculateTermination(data:FormData){const id=t(data,"caseId"),path=`/app/rh/desligamentos/${id}`,context=await requireCapability("rh","update");const{error}=await context.supabase.rpc("calculate_rh_termination",{p_case_id:id});if(error)fail(path,error.message);revalidatePath(path);}
+export async function calculateTermination(data:FormData){const id=t(data,"caseId"),path=`/app/rh/desligamentos/${id}`,context=await requireCapability("rh","update");const{error}=await context.supabase.rpc("calculate_rh_termination",{p_case_id:id});if(error)fail(path,mensagemDeFalha("rh-termination.calculateTermination", error));revalidatePath(path);}
 
-export async function approveTermination(data:FormData){const id=t(data,"caseId"),calc=t(data,"calculationId"),path=`/app/rh/desligamentos/${id}`,context=await requireCapability("rh","approve");const{error}=await context.supabase.rpc("approve_rh_termination_calculation",{p_calculation_id:calc});if(error)fail(path,error.message);revalidatePath(path);}
+export async function approveTermination(data:FormData){const id=t(data,"caseId"),calc=t(data,"calculationId"),path=`/app/rh/desligamentos/${id}`,context=await requireCapability("rh","approve");const{error}=await context.supabase.rpc("approve_rh_termination_calculation",{p_calculation_id:calc});if(error)fail(path,mensagemDeFalha("rh-termination.approveTermination", error));revalidatePath(path);}
 
-export async function makeTerminationEffective(data:FormData){const id=t(data,"caseId"),path=`/app/rh/desligamentos/${id}`,context=await requireCapability("rh","approve");const{error}=await context.supabase.rpc("make_rh_termination_effective",{p_case_id:id});if(error)fail(path,error.message);revalidatePath(path);revalidatePath("/app/rh/desligamentos");revalidatePath("/app/rh/pessoas");}
+export async function makeTerminationEffective(data:FormData){const id=t(data,"caseId"),path=`/app/rh/desligamentos/${id}`,context=await requireCapability("rh","approve");const{error}=await context.supabase.rpc("make_rh_termination_effective",{p_case_id:id});if(error)fail(path,mensagemDeFalha("rh-termination.makeTerminationEffective", error));revalidatePath(path);revalidatePath("/app/rh/desligamentos");revalidatePath("/app/rh/pessoas");}
 
 export async function addTerminationAdjustment(data:FormData){
  const id=t(data,"caseId"),path=`/app/rh/desligamentos/${id}`,context=await requireCapability("rh","update"),amount=n(data,"amount");
  if(!t(data,"code")||!t(data,"description")||amount==null)fail(path,"Código, descrição e valor são obrigatórios.");
  const{error}=await context.supabase.from("rh_termination_adjustments").insert({organization_id:context.organizationId,termination_case_id:id,code:t(data,"code").toUpperCase(),description:t(data,"description"),kind:t(data,"kind")||"EARNING",amount,payroll_rubric_version_id:o(data,"payrollRubricVersionId"),evidence_reference:o(data,"evidenceReference"),created_by:context.userId});
- if(error)fail(path,error.message);revalidatePath(path);
+ if(error)fail(path,mensagemDeFalha("rh-termination.addTerminationAdjustment", error));revalidatePath(path);
 }
 
 export async function updateOffboardingTask(data:FormData){
  const caseId=t(data,"caseId"),taskId=t(data,"taskId"),path=`/app/rh/desligamentos/${caseId}`,context=await requireCapability("rh","update"),status=t(data,"status");
  if(!["PENDING","IN_PROGRESS","DONE","WAIVED","BLOCKED"].includes(status))fail(path,"Status de offboarding inválido.");
  const done=status==="DONE"||status==="WAIVED";const{error}=await context.supabase.from("rh_offboarding_tasks").update({status,evidence_reference:o(data,"evidenceReference"),completed_by:done?context.userId:null,completed_at:done?new Date().toISOString():null}).eq("organization_id",context.organizationId).eq("termination_case_id",caseId).eq("id",taskId);
- if(error)fail(path,error.message);revalidatePath(path);
+ if(error)fail(path,mensagemDeFalha("rh-termination.updateOffboardingTask", error));revalidatePath(path);
 }

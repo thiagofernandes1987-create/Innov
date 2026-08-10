@@ -1,5 +1,7 @@
 "use server";
 
+import{mensagemDeFalha}from"@/lib/errors/data-access";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
@@ -85,7 +87,7 @@ export async function saveTsvEsocialProfile(data: FormData) {
     updated_at: new Date().toISOString()
   };
   const { error } = await context.supabase.from("rh_tsv_esocial_profiles").upsert(payload, { onConflict: "employment_id" });
-  if (error) fail(employmentId, error.message);
+  if (error) fail(employmentId, mensagemDeFalha("rh-tsv-esocial.saveTsvEsocialProfile", error));
   revalidatePath(path(employmentId));
   redirect(`${path(employmentId)}?success=${encodeURIComponent("Perfil eSocial do TSVE salvo.")}`);
 }
@@ -97,13 +99,13 @@ export async function generateTsvS2300(data: FormData) {
   const context = await requireCapability("rh", "update");
   try {
     const { data: employment, error: empError } = await context.supabase.from("rh_employments").select("id,worker_id,registration_number,admission_date,base_salary,status").eq("organization_id", context.organizationId).eq("id", employmentId).maybeSingle();
-    if (empError || !employment) throw new Error(empError?.message ?? "Vínculo TSVE não encontrado.");
+    if (empError || !employment) throw new Error(mensagemDeFalha("rh-tsv-esocial.generateTsvS2300", empError, "Vínculo TSVE não encontrado."));
     const [{ data: worker }, { data: profile, error: profileError }, { data: condition }] = await Promise.all([
       context.supabase.from("rh_workers").select("person_id").eq("organization_id", context.organizationId).eq("id", employment.worker_id).single(),
       context.supabase.from("rh_tsv_esocial_profiles").select("*").eq("organization_id", context.organizationId).eq("employment_id", employment.id).maybeSingle(),
       context.supabase.from("rh_employment_conditions").select("employer_id,establishment_id,position_id,base_salary").eq("organization_id", context.organizationId).eq("employment_id", employment.id).lte("valid_from", employment.admission_date).order("valid_from", { ascending: false }).limit(1).maybeSingle()
     ]);
-    if (!worker?.person_id || profileError || !profile || !condition) throw new Error(profileError?.message ?? "Perfil/condição eSocial do TSVE incompleto.");
+    if (!worker?.person_id || profileError || !profile || !condition) throw new Error(mensagemDeFalha("rh-tsv-esocial.generateTsvS2300", profileError, "Perfil/condição eSocial do TSVE incompleto."));
     if (!isContributorCategory(profile.category_code) && !isStudentCategory(profile.category_code)) throw new Error("Categoria S-2300 ainda não suportada pelo gerador.");
     const contributor = isContributorCategory(profile.category_code);
     const student = isStudentCategory(profile.category_code);
@@ -213,9 +215,9 @@ export async function generateTsvS2300(data: FormData) {
       p_signed_xml: signed.signedXml,
       p_signed_sha256: signed.payloadSha256
     });
-    if (error) throw new Error(error.message);
+    if (error) throw new Error(mensagemDeFalha("rh-tsv-esocial.generateTsvS2300", error));
     redirect(`/app/rh/obrigacoes/esocial/eventos/${id}`);
   } catch (error) {
-    fail(employmentId, error instanceof Error ? error.message : "Falha ao gerar S-2300.");
+    fail(employmentId, error instanceof Error ? mensagemDeFalha("rh-tsv-esocial.generateTsvS2300", error) : "Falha ao gerar S-2300.");
   }
 }

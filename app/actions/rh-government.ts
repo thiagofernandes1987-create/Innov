@@ -1,5 +1,7 @@
 "use server";
 
+import{mensagemDeFalha}from"@/lib/errors/data-access";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
@@ -36,7 +38,7 @@ export async function createDctfwebDeclaration(data: FormData) {
     p_source_snapshot: sourceSnapshot,
     p_source_reference: optional(data, "sourceReference")
   });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-government.createDctfwebDeclaration", error));
   redirect(`${path}/${id}`);
 }
 
@@ -55,7 +57,7 @@ export async function recordDctfwebExternalSnapshot(data: FormData) {
     p_status: text(data, "status") || "RECONCILING",
     p_source_reference: optional(data, "sourceReference")
   });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-government.recordDctfwebExternalSnapshot", error));
   revalidatePath(path);
   done(path, "Snapshot externo da DCTFWeb registrado.");
 }
@@ -75,7 +77,7 @@ export async function upsertDctfwebReconciliation(data: FormData) {
     p_action_required: optional(data, "actionRequired"),
     p_evidence_reference: optional(data, "evidenceReference")
   });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-government.upsertDctfwebReconciliation", error));
   revalidatePath(path);
   done(path, "Item de reconciliação atualizado.");
 }
@@ -90,7 +92,7 @@ export async function createFgtsPeriodFromPayroll(data: FormData) {
     p_base_code: text(data, "baseCode").toUpperCase(),
     p_amount_rubric_code: text(data, "amountRubricCode").toUpperCase()
   });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-government.createFgtsPeriodFromPayroll", error));
   redirect(`${path}/${id}`);
 }
 
@@ -107,7 +109,7 @@ export async function updateFgtsWorkerExternal(data: FormData) {
     p_action_required: optional(data, "actionRequired"),
     p_evidence_reference: optional(data, "evidenceReference")
   });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-government.updateFgtsWorkerExternal", error));
   revalidatePath(path);
   done(path, "Valores externos do trabalhador atualizados.");
 }
@@ -125,7 +127,7 @@ export async function createFgtsGuide(data: FormData) {
     p_additions_amount: money(data, "additionsAmount") ?? 0,
     p_evidence_reference: optional(data, "evidenceReference")
   });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-government.createFgtsGuide", error));
   revalidatePath(path);
   done(path, "Guia FGTS registrada.");
 }
@@ -145,7 +147,7 @@ export async function recordFgtsPayment(data: FormData) {
     p_external_payment_id: optional(data, "externalPaymentId"),
     p_evidence_reference: evidence
   });
-  if (error) fail(path, error.message);
+  if (error) fail(path, mensagemDeFalha("rh-government.recordFgtsPayment", error));
   revalidatePath(path);
   done(path, "Pagamento FGTS registrado e conciliado com a guia.");
 }

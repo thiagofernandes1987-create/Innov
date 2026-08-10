@@ -1,5 +1,7 @@
 "use server";
 
+import{mensagemDeFalha}from"@/lib/errors/data-access";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
@@ -39,7 +41,7 @@ export async function createRhWorker(data:FormData){
     p_admission_date:admissionDate,
     p_base_salary:money(data,"baseSalary")??0
   });
-  if(error)fail(path,error.message);
+  if(error)fail(path,mensagemDeFalha("rh.createRhWorker", error));
   const{data:employment}=await context.supabase.from("rh_employments").select("worker_id").eq("id",String(employmentId)).single();
   redirect(`/app/rh/pessoas/${employment?.worker_id??""}`);
 }
@@ -49,44 +51,44 @@ export async function createRhEmployer(data:FormData){
   const code=text(data,"code").toUpperCase();const legalName=text(data,"legalName");const taxId=digits(text(data,"taxId"));
   if(!code||!legalName||!taxId)fail(path,"Código, razão social e CNPJ/CPF são obrigatórios.");
   const{error}=await context.supabase.from("rh_employers").insert({organization_id:context.organizationId,code,legal_name:legalName,trade_name:optional(data,"tradeName"),tax_id:taxId,created_by:context.userId});
-  if(error)fail(path,error.message);revalidatePath(path);
+  if(error)fail(path,mensagemDeFalha("rh.createRhEmployer", error));revalidatePath(path);
 }
 
 export async function createRhEstablishment(data:FormData){
   const context=await requireCapability("rh","configure");const path="/app/rh/configuracao/estrutura";
   const{error}=await context.supabase.from("rh_establishments").insert({organization_id:context.organizationId,employer_id:text(data,"employerId"),code:text(data,"code").toUpperCase(),name:text(data,"name"),registration_type:text(data,"registrationType")||"CNPJ",registration_number:digits(text(data,"registrationNumber")),created_by:context.userId});
-  if(error)fail(path,error.message);revalidatePath(path);
+  if(error)fail(path,mensagemDeFalha("rh.createRhEstablishment", error));revalidatePath(path);
 }
 
 export async function createRhTaxAllocation(data:FormData){
   const context=await requireCapability("rh","configure");const path="/app/rh/configuracao/estrutura";
   const{error}=await context.supabase.from("rh_tax_allocations").insert({organization_id:context.organizationId,employer_id:text(data,"employerId"),establishment_id:optional(data,"establishmentId"),code:text(data,"code").toUpperCase(),name:text(data,"name"),esocial_lotacao_code:optional(data,"esocialLotacaoCode"),valid_from:text(data,"validFrom"),valid_to:dateOrNull(data,"validTo"),created_by:context.userId});
-  if(error)fail(path,error.message);revalidatePath(path);
+  if(error)fail(path,mensagemDeFalha("rh.createRhTaxAllocation", error));revalidatePath(path);
 }
 
 export async function createRhPosition(data:FormData){
   const context=await requireCapability("rh","configure");const path="/app/rh/configuracao/estrutura";
   const{error}=await context.supabase.from("rh_positions").insert({organization_id:context.organizationId,code:text(data,"code").toUpperCase(),name:text(data,"name"),cbo_code:optional(data,"cboCode"),created_by:context.userId});
-  if(error)fail(path,error.message);revalidatePath(path);
+  if(error)fail(path,mensagemDeFalha("rh.createRhPosition", error));revalidatePath(path);
 }
 
 export async function createRhFunction(data:FormData){
   const context=await requireCapability("rh","configure");const path="/app/rh/configuracao/estrutura";
   const{error}=await context.supabase.from("rh_functions").insert({organization_id:context.organizationId,code:text(data,"code").toUpperCase(),name:text(data,"name"),description:optional(data,"description"),created_by:context.userId});
-  if(error)fail(path,error.message);revalidatePath(path);
+  if(error)fail(path,mensagemDeFalha("rh.createRhFunction", error));revalidatePath(path);
 }
 
 export async function createRhUnion(data:FormData){
   const context=await requireCapability("rh","configure");const path="/app/rh/configuracao/estrutura";
   const{error}=await context.supabase.from("rh_unions").insert({organization_id:context.organizationId,code:text(data,"code").toUpperCase(),name:text(data,"name"),tax_id:digits(text(data,"taxId"))||null,category_name:optional(data,"categoryName"),valid_from:dateOrNull(data,"validFrom"),valid_to:dateOrNull(data,"validTo"),created_by:context.userId});
-  if(error)fail(path,error.message);revalidatePath(path);
+  if(error)fail(path,mensagemDeFalha("rh.createRhUnion", error));revalidatePath(path);
 }
 
 export async function createRhWorkSchedule(data:FormData){
   const context=await requireCapability("rh","configure");const path="/app/rh/configuracao/estrutura";
   const weekly=money(data,"weeklyHours");if(weekly==null||weekly<0||weekly>168)fail(path,"Carga horária semanal inválida.");
   const{error}=await context.supabase.from("rh_work_schedules").insert({organization_id:context.organizationId,code:text(data,"code").toUpperCase(),name:text(data,"name"),weekly_hours:weekly,description:optional(data,"description"),created_by:context.userId});
-  if(error)fail(path,error.message);revalidatePath(path);
+  if(error)fail(path,mensagemDeFalha("rh.createRhWorkSchedule", error));revalidatePath(path);
 }
 
 export async function createRhEmploymentCondition(data:FormData){
@@ -94,7 +96,7 @@ export async function createRhEmploymentCondition(data:FormData){
   const context=await requireCapability("rh","update");const salary=money(data,"baseSalary");
   if(!employmentId||!text(data,"employerId")||!text(data,"establishmentId")||!text(data,"validFrom")||salary==null)fail(path,"Preencha vínculo, empresa, estabelecimento, vigência e salário.");
   const{error}=await context.supabase.from("rh_employment_conditions").insert({organization_id:context.organizationId,employment_id:employmentId,valid_from:text(data,"validFrom"),valid_to:dateOrNull(data,"validTo"),employer_id:text(data,"employerId"),establishment_id:text(data,"establishmentId"),tax_allocation_id:optional(data,"taxAllocationId"),position_id:optional(data,"positionId"),function_id:optional(data,"functionId"),union_id:optional(data,"unionId"),work_schedule_id:optional(data,"workScheduleId"),base_salary:salary,change_reason:optional(data,"changeReason"),created_by:context.userId});
-  if(error)fail(path,error.message);
+  if(error)fail(path,mensagemDeFalha("rh.createRhEmploymentCondition", error));
   if(!dateOrNull(data,"validTo")&&text(data,"validFrom")<=new Date().toISOString().slice(0,10))await context.supabase.from("rh_employments").update({base_salary:salary,updated_at:new Date().toISOString()}).eq("id",employmentId).eq("organization_id",context.organizationId);
   revalidatePath(path);revalidatePath("/app/rh/pessoas");
 }
@@ -107,7 +109,7 @@ export async function createRhPayrollPeriod(data:FormData){
   const{data:period,error}=await context.supabase.from("rh_payroll_periods").insert({
     organization_id:context.organizationId,reference_month:`${month}-01`,processing_type:text(data,"processingType")||"MONTHLY",pay_date:dateOrNull(data,"payDate"),created_by:context.userId
   }).select("id").single();
-  if(error)fail(path,error.message);
+  if(error)fail(path,mensagemDeFalha("rh.createRhPayrollPeriod", error));
   redirect(`/app/rh/folha/competencias/${period.id}`);
 }
 
@@ -124,7 +126,7 @@ export async function addRhPayrollInput(data:FormData){
     organization_id:context.organizationId,period_id:periodId,employment_id:employmentId,rubric_version_id:rubricVersionId,
     quantity:money(data,"quantity"),unit_rate:money(data,"unitRate"),amount:money(data,"amount"),source_type:text(data,"sourceType")||"MANUAL",notes:optional(data,"notes"),created_by:context.userId
   });
-  if(error)fail(path,error.message);
+  if(error)fail(path,mensagemDeFalha("rh.addRhPayrollInput", error));
   revalidatePath(path);
 }
 
@@ -132,7 +134,7 @@ export async function runRhPayroll(data:FormData){
   const periodId=text(data,"periodId");
   const context=await requireCapability("rh","update");
   const{error}=await context.supabase.rpc("run_rh_payroll",{p_period_id:periodId});
-  if(error)fail(`/app/rh/folha/competencias/${periodId}`,error.message);
+  if(error)fail(`/app/rh/folha/competencias/${periodId}`,mensagemDeFalha("rh.runRhPayroll", error));
   revalidatePath(`/app/rh/folha/competencias/${periodId}`);
   revalidatePath("/app/rh/folha");
 }
@@ -141,7 +143,7 @@ export async function closeRhPayroll(data:FormData){
   const periodId=text(data,"periodId");
   const context=await requireCapability("rh","approve");
   const{error}=await context.supabase.rpc("close_rh_payroll",{p_period_id:periodId,p_reason:optional(data,"reason")});
-  if(error)fail(`/app/rh/folha/competencias/${periodId}`,error.message);
+  if(error)fail(`/app/rh/folha/competencias/${periodId}`,mensagemDeFalha("rh.closeRhPayroll", error));
   revalidatePath(`/app/rh/folha/competencias/${periodId}`);
   revalidatePath("/app/rh/folha");
 }

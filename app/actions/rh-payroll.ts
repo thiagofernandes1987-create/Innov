@@ -1,5 +1,7 @@
 "use server";
 
+import{mensagemDeFalha}from"@/lib/errors/data-access";
+
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
 import { lerMoeda } from "@/lib/validacao/moeda";
@@ -37,6 +39,6 @@ export async function createRhRubricTransactional(data:FormData){
     p_accounting_debit:optional(data,"accountingDebit"),
     p_accounting_credit:optional(data,"accountingCredit")
   });
-  if(error)fail(path,error.message);
+  if(error)fail(path,mensagemDeFalha("rh-payroll.createRhRubricTransactional", error));
   redirect(`/app/rh/folha/rubricas?created=${encodeURIComponent(code)}`);
 }
