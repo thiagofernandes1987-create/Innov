@@ -22,6 +22,27 @@ function actionSourceFiles() {
     .sort();
 }
 
+function serverPageSourceFiles(root = "app") {
+  const files: string[] = [];
+
+  function walk(directory: string) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const fullPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) {
+        walk(fullPath);
+        continue;
+      }
+      if (!entry.isFile() || !/^page\.tsx?$/.test(entry.name)) continue;
+      const source = fs.readFileSync(fullPath, "utf8");
+      if (/^\s*["']use client["'];/.test(source)) continue;
+      files.push(fullPath);
+    }
+  }
+
+  walk(root);
+  return files.sort();
+}
+
 describe("safeInternalReturnPath", () => {
   it("preserva caminho interno com query e fragmento", () => {
     expect(safeInternalReturnPath("/app/obras?status=ativa#topo")).toBe("/app/obras?status=ativa#topo");
@@ -86,6 +107,15 @@ describe("mapPublicOperationError", () => {
     for (const actionPath of actionSourceFiles()) {
       const source = fs.readFileSync(actionPath, "utf8");
       expect(suspiciousMessageAccesses(source), actionPath).toEqual([]);
+    }
+
+    // VACINA: páginas Server Component também são fronteiras públicas. Páginas
+    // explicitamente client-side ficam fora deste scanner porque nelas Error
+    // pode representar estado local; qualquer mensagem de provider no servidor
+    // deve ser sanitizada antes de chegar ao JSX.
+    for (const pagePath of serverPageSourceFiles()) {
+      const source = fs.readFileSync(pagePath, "utf8");
+      expect(suspiciousMessageAccesses(source), pagePath).toEqual([]);
     }
 
     const protectedActions = [
