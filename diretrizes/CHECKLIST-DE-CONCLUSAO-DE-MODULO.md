@@ -129,6 +129,9 @@ originou.
 | ⚙ | **Contraste medido nos dois temas**, não amostrado de referência | `qa:contraste` | **VACINA-043**: cor tirada da referência escura virou texto invisível no claro |
 | ⚙ | **Alvo de toque** medido no elemento que responde ao toque, não na caixa | `validate:module-qa` | **VACINA-046**: o medidor reprovava a caixa de marcar em vez do rótulo |
 | 👤 | **Nenhum objeto sobreposto ou cortado** nos três breakpoints, conferido na captura | captura publicada | VACINA-062 |
+| 👤 | **Conteúdo interno não corta** — o pior caso é o que **não** produz rolagem lateral, e por isso nenhuma ferramenta acusa | captura publicada | **VACINA-024**: conteúdo cortava sem causar overflow global |
+| 👤 | **Navegação não some** em nenhuma largura sem oferecer modo equivalente | captura publicada | **VACINA-019** e **VACINA-030**: menu escondido e recortado na largura intermediária |
+| ⚙ | Estado (foco, erro, selecionado) usa **token de fundo e de primeiro plano juntos**, nunca um fixo com o outro variável | `qa:contraste` | **VACINA-031** |
 | 👤 | **Tema claro e escuro** conferidos na captura, no mesmo viewport e persona | VACINA-062 | tom fixo do tema claro deixava número branco sobre fundo claro |
 | 👤 | Estados de **vazio, erro e carregamento** existem em toda tela | revisão | tela que só foi desenhada com dado bom |
 
@@ -143,6 +146,38 @@ por isso é o que mais passa despercebido.
 | ⚙ | Privilégio perigoso revogado — `truncate`, `trigger`, `references` | `validate:migrations-applied` | **VACINA-059**: 213 tabelas concediam `TRUNCATE` a `anon` e `authenticated`, e `TRUNCATE` **não passa por RLS** |
 | ⚙ | `security definer` que recebe organização confere participação | `validate:definer-com-guarda` | **VACINA-065**: sete funções escreviam em empresa alheia |
 | 👤 | Guarda de imutabilidade olha o que a linha **é**, não só o valor novo | revisão | **VACINA-061**: trocar `source_key` tornava editável o custo oficial da CAIXA |
+
+### 3.6.2 Formulário — o que a pessoa digitou sobrevive?
+
+**Este bloco não existia até 11/08/2026, e a ausência dele era o maior buraco do
+checklist.** Todo módulo tem formulário, e três causas-raiz distintas já foram
+catalogadas sobre exatamente a mesma coisa: o formulário perdendo o que alguém
+acabou de digitar. Nenhuma tem portão.
+
+| | Item | Quem responde | Nasceu de |
+| --- | --- | --- | --- |
+| 👤 | **Texto longo volta igual ao que foi digitado** — sem CRLF, sem diferença invisível | teste de ida e volta | **VACINA-048**: `textarea` chega com CRLF e nunca bate com o que está na tela |
+| 👤 | **Seleção sobrevive à volta da server action** — é o DOM que o formulário envia, não o estado do React | teste E2E | **VACINA-051**: `select` controlado perde a seleção na volta |
+| 👤 | **`Escape` fecha o menor contexto aberto**, nunca o formulário inteiro | teste E2E | **VACINA-054**: `Escape` com sugestão aberta descartava o preenchimento todo |
+| 👤 | **Falha de gravação preserva o que foi preenchido** e diz o que corrigir | revisão | **VACINA-042**: falha de formulário apagava o contexto |
+| 👤 | Campo obrigatório é conferido **no servidor**, não só no `required` | revisão | POST montado à mão grava qualquer coisa |
+
+### 3.6.3 Schema e tipo — a consulta bate com o banco?
+
+| | Item | Quem responde | Nasceu de |
+| --- | --- | --- | --- |
+| ⚙ | Nenhuma consulta pede coluna que não existe no schema real | tipos gerados do Supabase | **VACINA-036**: consulta presumia coluna convencional ausente |
+| 👤 | Valor textual não alimenta coluna `enum` sem tipo explícito | revisão | **VACINA-035**: `CASE` textual em coluna enum |
+| ⚙ | Nenhuma função herda `EXECUTE` de `PUBLIC`/`anon` | `validate:stage9` | **VACINA-004** |
+
+### 3.6.4 Alçada e procedência — quem pode, e de onde veio o número?
+
+| | Item | Quem responde | Nasceu de |
+| --- | --- | --- | --- |
+| 👤 | **Quem aprova não é quem executou** — permissão de aprovar não é independência | revisão | **VACINA-034** |
+| ⚙ | Alçada existe no **servidor**, não só na interface | `validate:operational-qa` | **VACINA-041** |
+| 👤 | Todo dado de fonte externa carrega **origem, data-base e coerência conferida** | revisão | **VACINA-038** |
+| 👤 | Atualização de referência externa **não altera o histórico** já apurado | revisão | **VACINA-039** |
 
 ### 3.7 Persona — o teste de uso apontou algo?
 
@@ -184,7 +219,57 @@ por isso é o que mais passa despercebido.
 
 ---
 
-## 5. O que este documento ainda não faz
+## 5. De onde vieram os itens — a varredura das 66 vacinas
+
+Este checklist não foi inventado. Ele saiu de uma pergunta do proprietário —
+*"o que das vacinas ou erros que cometemos são comuns em todos os Marcos e
+poderiam virar testes ou checklist?"* — respondida por varredura executada sobre
+o catálogo inteiro em 11/08/2026.
+
+**A medição:**
+
+| | Quantidade |
+| --- | ---: |
+| Vacinas catalogadas | **66** |
+| Já com portão citado (validador, CI ou `qa:*`) | **33** |
+| **Sem portão nenhum** | **33** |
+
+**A classificação das 33 sem portão** — e esta parte é juízo, não medição:
+
+| | Quantidade | O que são |
+| --- | ---: | --- |
+| **Universais** | **20** | reaparecem em qualquer módulo, porque a causa é um padrão de raciocínio e não uma funcionalidade |
+| Específicas | 12 | presas a um contexto — SINAPI, login, bootstrap, runner Python, assinatura |
+
+As 20 universais, por família, e onde cada uma entrou:
+
+| Família | Vacinas | Onde entrou |
+| --- | --- | --- |
+| **Formulário** | V048, V051, V054 | **§3.6.2 — bloco que não existia** |
+| Interface | V019, V024, V030, V031, V043, V044, V046, V062 | §3.6 |
+| Banco e schema | V004, V035, V036, V061 | §3.6.1 e §3.6.3 |
+| Regra de negócio | V034, V038, V063 | §3.6.4 |
+| Processo | V022, V027 | §3.7 e §3.9 |
+
+**O maior buraco era o formulário.** Todo módulo tem formulário, e **três
+causas-raiz distintas** já haviam sido catalogadas sobre exatamente a mesma
+coisa — o formulário perdendo o que a pessoa acabou de digitar — sem que
+nenhuma virasse item de conferência de módulo. Era o único grupo com três
+ocorrências e zero cobertura.
+
+**Quais dessas dariam teste automatizado**, e não só item de conferência:
+
+| Vacina | Teste que a fixaria |
+| --- | --- |
+| V048 | enviar `textarea` com `\r\n` e afirmar que volta normalizado |
+| V051 | E2E: escolher opção, disparar server action, afirmar a seleção no DOM |
+| V054 | E2E: `Escape` com sugestão aberta fecha só a sugestão |
+| V036 | tipos gerados do Supabase conferidos contra as consultas |
+| V004 | validador SQL de `EXECUTE` herdado, irmão do `validate:definer-com-guarda` |
+
+Os quatro primeiros valem por módulo; o último é global e vale uma vez.
+
+## 6. O que este documento ainda não faz
 
 - **Não reprova.** É relatório e disciplina, não portão. Transformar os itens `⚙`
   em reprovação por módulo exige a declaração de tabelas de todos os módulos, e

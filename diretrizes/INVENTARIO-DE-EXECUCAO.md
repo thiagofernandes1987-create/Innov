@@ -2348,3 +2348,28 @@ não tem profundidade que justifique menu.
 - [ ] T-72.5 — Declarar as tabelas do módulo em `diretrizes/tabelas-por-modulo.json` — já feito para `equipes` em 11/08/2026, e é pré-requisito dos itens de dado do checklist
 - [ ] T-72.6 — Percorrer o [`CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`](CHECKLIST-DE-CONCLUSAO-DE-MODULO.md) inteiro, registrando evidência de cada item de verificação humana; item sem evidência conta como não feito
 - [ ] T-72.7 — Conferir o Marco pela **R9** com o checklist e a definição de pronto na mão, e só então decidir o fechamento
+
+## Sprint S-73 — Transformar em teste as vacinas universais que só têm conferência humana
+
+**Estado:** pendente
+**Marco:** M-0
+
+Aberta em 11/08/2026 pela pergunta do proprietário: *"o que das vacinas ou erros
+que cometemos são comuns em todos os Marcos e poderiam virar testes ou
+checklist?"*
+
+Varredura executada sobre as 66 vacinas: **33 já têm portão, 33 não**. Das 33 sem
+portão, **20 são universais** — reaparecem em qualquer módulo, porque a causa é
+padrão de raciocínio e não funcionalidade. Todas entraram no
+[`CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`](CHECKLIST-DE-CONCLUSAO-DE-MODULO.md) §5,
+e cinco delas dariam **teste**, não só conferência.
+
+O maior buraco era o **formulário**: três causas-raiz distintas sobre a mesma
+coisa — o formulário perdendo o que a pessoa digitou — e zero cobertura.
+
+- [ ] T-73.1 — **V004**, e é o único global: validador de `EXECUTE` herdado de `PUBLIC`/`anon`, irmão do `validate:definer-com-guarda`. Provar por sabotagem com o caso legítimo passando
+- [ ] T-73.2 — **V048**: teste de ida e volta de texto longo — enviar `\r\n` e afirmar que volta normalizado
+- [ ] T-73.3 — **V051**: E2E de seleção que sobrevive à volta da server action, porque é o DOM que o formulário envia
+- [ ] T-73.4 — **V054**: E2E de `Escape` fechando o menor contexto aberto, nunca o formulário
+- [ ] T-73.5 — **V036**: conferir as consultas contra os tipos gerados do Supabase
+- [ ] T-73.6 — Os quatro do meio valem **por módulo**: entram no checklist como teste exigido, não como revisão
