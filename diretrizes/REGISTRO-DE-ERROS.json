@@ -352,6 +352,16 @@
       "tinha_portao": false,
       "detectado_por": "advisor do Supabase, ao abrir a S-69",
       "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Primeira medição da VACINA-048 pareou campo e ação pelo nome: acusou `decideBudgetApproval` e `createNextBudgetVersion` de ler <textarea> sem normalizar. As duas são <input>. Duas acusações falsas em três",
+      "familia": "medicao",
+      "onde": "medição da T-73.2",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria, ao trocar o pareamento por <form action={…}>",
+      "custo": "baixo"
     }
   ]
 }

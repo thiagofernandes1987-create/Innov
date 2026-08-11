@@ -8,6 +8,7 @@ import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { hashCanonical, safeFileName, sha256 } from "@/lib/signatures/crypto";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const MAX_EVIDENCE_SIZE=20*1024*1024;
 const ALLOWED_EVIDENCE=[
@@ -16,7 +17,7 @@ const ALLOWED_EVIDENCE=[
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ];
 
-function text(formData:FormData,key:string){return String(formData.get(key)??"").trim();}
+function text(formData:FormData,key:string){return campoDeTexto(formData, key).trim();}
 function fail(token:string,message:string):never{redirect(`/assinar/${encodeURIComponent(token)}?error=${encodeURIComponent(message)}`);}
 
 function decodeSignatureData(dataUrl:string){

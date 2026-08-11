@@ -41,7 +41,7 @@ trabalhar não é praticada — e foi exatamente o que aconteceu.
 
 ## 2. A segunda razão, que é pior
 
-Metade destas perguntas **já tem portão pronto** no repositório. São 44
+Metade destas perguntas **já tem portão pronto** no repositório. São 45
 validadores. E nenhum deles responde a pergunta que decide um Marco:
 
 > *este módulo está pronto?*
@@ -156,7 +156,7 @@ acabou de digitar. Nenhuma tem portão.
 
 | | Item | Quem responde | Nasceu de |
 | --- | --- | --- | --- |
-| 👤 | **Texto longo volta igual ao que foi digitado** — sem CRLF, sem diferença invisível | teste de ida e volta | **VACINA-048**: `textarea` chega com CRLF e nunca bate com o que está na tela |
+| 🤖 | **Texto longo volta igual ao que foi digitado** — sem CRLF, sem diferença invisível | `pnpm validate:crlf-normalizado` + `tests/formulario-campos.test.ts` | **VACINA-048**: `textarea` chega com CRLF e nunca bate com o que está na tela |
 | 👤 | **Seleção sobrevive à volta da server action** — é o DOM que o formulário envia, não o estado do React | teste E2E | **VACINA-051**: `select` controlado perde a seleção na volta |
 | 👤 | **`Escape` fecha o menor contexto aberto**, nunca o formulário inteiro | teste E2E | **VACINA-054**: `Escape` com sugestão aberta descartava o preenchimento todo |
 | 👤 | **Falha de gravação preserva o que foi preenchido** e diz o que corrigir | revisão | **VACINA-042**: falha de formulário apagava o contexto |
@@ -261,11 +261,11 @@ ocorrências e zero cobertura.
 
 | Vacina | Teste que a fixaria |
 | --- | --- |
-| V048 | enviar `textarea` com `\r\n` e afirmar que volta normalizado |
+| V048 | enviar `textarea` com `\r\n` e afirmar que volta normalizado — **feito na T-73.2**, com portão em `validate:crlf-normalizado` |
 | V051 | E2E: escolher opção, disparar server action, afirmar a seleção no DOM |
 | V054 | E2E: `Escape` com sugestão aberta fecha só a sugestão |
 | V036 | tipos gerados do Supabase conferidos contra as consultas |
-| V004 | validador SQL de `EXECUTE` herdado, irmão do `validate:definer-com-guarda` |
+| V004 | validador SQL de `EXECUTE` herdado, irmão do `validate:definer-com-guarda` — **feito na T-73.1**, em `validate:execute-revogado` |
 
 Os quatro primeiros valem por módulo; o último é global e vale uma vez.
 

@@ -6,6 +6,7 @@ import { requireOrganizationContext } from "@/lib/auth";
 import { reportDataAccessError } from "@/lib/errors/data-access";
 import { linhasDoCub } from "@/lib/orcamentos/cub";
 import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const internalRoles = ["SUPER_ADMIN", "DIRECAO", "ADMINISTRADOR", "ORCAMENTISTA", "FINANCEIRO"] as const;
 const editableCostTypes = new Set(["DIRECT", "INDIRECT", "FIXED", "ADMINISTRATIVE"]);
@@ -36,7 +37,7 @@ function budgetNotice(budgetId: string, message: string): never {
 }
 
 function requiredText(formData: FormData, key: string, label: string) {
-  const value = String(formData.get(key) ?? "").trim();
+  const value = campoDeTexto(formData, key).trim();
   if (!value) throw new Error(`${label} é obrigatório.`);
   return value;
 }
@@ -48,7 +49,7 @@ function positiveNumber(formData: FormData, key: string, label: string) {
 }
 
 function nonNegativeNumber(formData: FormData, key: string, label: string) {
-  const raw = String(formData.get(key) ?? "").trim();
+  const raw = campoDeTexto(formData, key).trim();
   if (!raw) return 0;
   const value = Number(raw);
   if (!Number.isFinite(value) || value < 0) throw new Error(`${label} não pode ser negativo.`);
@@ -56,7 +57,7 @@ function nonNegativeNumber(formData: FormData, key: string, label: string) {
 }
 
 function nonNegativeRate(formData: FormData, key: string, label: string) {
-  const raw = String(formData.get(key) ?? "").trim();
+  const raw = campoDeTexto(formData, key).trim();
   if (!raw) return 0;
   const percent = Number(raw);
   if (!Number.isFinite(percent) || percent < 0 || percent > 100) {

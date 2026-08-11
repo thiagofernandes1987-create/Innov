@@ -10,6 +10,7 @@ import { reportDataAccessError } from "@/lib/errors/data-access";
 import { listaDoEscopo, pertenceALista } from "@/lib/listas/servidor";
 import { safeInternalReturnPath } from "@/lib/organization-context";
 import { ESCOPOS } from "@/lib/sugestoes/servidor";
+import { campoDeTexto } from "@/lib/forms/campos";
 import{
  FILE_SECURITY_SAC_MIME_TYPES,
  fileSecurityMessage,
@@ -20,7 +21,7 @@ import{createSupabaseAdminClient}from"@/lib/supabase/admin";
 import{checarCamposBR}from"@/lib/validacao/formulario";
 
 type ProviderLikeError={code?:string|null;statusCode?:string|number|null;name?:string|null};
-function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
+function text(data:FormData,key:string){return campoDeTexto(data, key).trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
 // Lê valor monetário tolerando o que gente digita e o que planilha cola:
 // "1.500,25", "1500.25" e "R$ 1.500,00" chegam ao mesmo número. `Number()` cru

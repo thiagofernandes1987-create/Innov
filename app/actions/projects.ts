@@ -9,6 +9,7 @@ import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
 import { publicScheduleDatabaseMessage, type ScheduleDatabaseError } from "@/lib/planejamento/schedule-validation";
 import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const managementRoles = [
   "SUPER_ADMIN",
@@ -28,7 +29,7 @@ const fieldRoles = [
 ] as const;
 
 function text(formData: FormData, name: string) {
-  return String(formData.get(name) ?? "").trim();
+  return campoDeTexto(formData, name).trim();
 }
 
 function optionalText(formData: FormData, name: string) {

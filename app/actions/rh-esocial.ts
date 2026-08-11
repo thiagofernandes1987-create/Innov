@@ -1,5 +1,6 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 
 import{redirect}from"next/navigation";
@@ -10,7 +11,7 @@ import{
 }from"@/lib/rh/integrations/esocial-transport";
 
 const BASE="/app/rh/obrigacoes/esocial";
-function text(d:FormData,k:string){return String(d.get(k)??"").trim();}
+function text(d:FormData,k:string){return campoDeTexto(d, k).trim();}
 function fail(path:string,msg:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(msg)}`);}
 function success(path:string,msg:string):never{redirect(`${path}${path.includes("?")?"&":"?"}success=${encodeURIComponent(msg)}`);}
 function env(value:string):EsocialEnvironment{return value==="PRODUCTION"?"PRODUCTION":"RESTRICTED";}

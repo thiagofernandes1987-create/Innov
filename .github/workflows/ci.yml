@@ -212,6 +212,8 @@ jobs:
         run: pnpm validate:execute-revogado
       - name: Validate asserted numbers in canonical docs (VACINA-067)
         run: pnpm validate:numeros-afirmados
+      - name: Validate multiline form input is newline-normalized (VACINA-048)
+        run: pnpm validate:crlf-normalizado
       - name: Validate code map against the code
         run: pnpm validate:code-map
       - name: Validate migrations against the applied ledger (VACINA-057)

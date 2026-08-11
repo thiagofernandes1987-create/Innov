@@ -13,6 +13,7 @@ import {
   type ScheduleDatabaseError
 } from "@/lib/planejamento/schedule-validation";
 import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const scheduleRoles = [
   "SUPER_ADMIN",
@@ -29,7 +30,7 @@ type ScheduleContext = Awaited<ReturnType<typeof requireOrganizationContext>>;
 type ScheduleSupabase = ScheduleContext["supabase"];
 
 function text(formData: FormData, name: string): string {
-  return String(formData.get(name) ?? "").trim();
+  return campoDeTexto(formData, name).trim();
 }
 
 function optionalText(formData: FormData, name: string): string | null {

@@ -31,13 +31,13 @@ a ignorar.
 | Aplicativos no registro | 25 |
 | Rotas | 229 (205 páginas, 24 de API) |
 | Server actions | 323 em 72 arquivos |
-| Módulos de `lib/` | 146 |
+| Módulos de `lib/` | 147 |
 | Funções do banco declaradas | 414 |
 | Funções do banco chamadas do código | 200 |
-| Suítes de teste | 108, com 1014 casos |
+| Suítes de teste | 109, com 1023 casos |
 | Migrations | 273 |
-| Validadores de CI | 57 |
-| Módulos de `lib/` citados por algum teste | 94 de 146 |
+| Validadores de CI | 58 |
+| Módulos de `lib/` citados por algum teste | 95 de 147 |
 
 ## 1. Aplicativos
 
@@ -1027,6 +1027,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/file-security/health-auth` | sim | `FILE_SECURITY_HEALTH_MAX_SKEW_SECONDS`, `FILE_SECURITY_HEALTH_PATH`, `createFileSecurityHealthSignature`, `verifyFileSecurityHealthSignature` |
 | `@/lib/file-security/server` | não | `checkFileSecurityProvider`, `secureUpload` |
 | `@/lib/financial/cash-flow` | não | `cashFlowRisk`, `formatMoney`, `summarizeCashFlow` |
+| `@/lib/forms/campos` | sim | `campoDeTexto` |
 | `@/lib/forms/project-creation-state` | não | `INITIAL_PROJECT_CREATION_STATE`, `projectCreationError` |
 | `@/lib/forms/report-action-state` | não | `INITIAL_REPORT_ACTION_STATE`, `reportActionError` |
 | `@/lib/inventory/domain` | não | `formatInventoryCurrency`, `formatInventoryQuantity`, `movementLabel`, `movementRequiresNegative`, `movementRequiresPositive`, `normalizeInventoryDashboard` |
@@ -1589,6 +1590,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `tests/file-security-gateway-preconditions.test.ts` | 5 | pré-condições do gateway de análise de arquivos |
 | `tests/file-security-health-auth.test.ts` | 4 | file security provider health authentication |
 | `tests/file-security.test.ts` | 10 | file security domain |
+| `tests/formulario-campos.test.ts` | 9 | campoDeTexto — a normalização de entrada; ida e volta pelo transporte, que é onde a suspeita costuma cair |
 | `tests/gateway-assinatura-compartilhada.test.ts` | 3 | contrato de assinatura do gateway, compartilhado com a camada de execução em Go |
 | `tests/golden-pdf-publicado.test.ts` | 1 | golden do extrator de PDF contra o publicado |
 | `tests/interface-foundation-contract.test.ts` | 11 | S-23 — fundação de interface |
@@ -1684,6 +1686,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | Script |
 |---|
 | `scripts/validate-assercoes.mjs` |
+| `scripts/validate-crlf-normalizado.mjs` |
 | `scripts/validate-definer-com-guarda.mjs` |
 | `scripts/validate-documentation.mjs` |
 | `scripts/validate-execute-revogado.mjs` |
@@ -1748,7 +1751,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 52 de 146 |
+| Módulo de `lib/` sem teste que o cite | 52 de 147 |
 
 ### Módulos sem teste que os cite
 

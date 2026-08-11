@@ -6,11 +6,12 @@ import { revalidatePath } from "next/cache";
 import { requireCapability } from "@/lib/authorization";
 import { reportDataAccessError } from "@/lib/errors/data-access";
 import { chaveNormalizada } from "@/lib/sugestoes/catalogo";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const ROTA = "/app/administracao/motivos-de-perda";
 
 function texto(dados: FormData, chave: string): string {
-  return String(dados.get(chave) ?? "").trim();
+  return campoDeTexto(dados, chave).trim();
 }
 
 /**

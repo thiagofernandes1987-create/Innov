@@ -6,8 +6,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
 import { lerMoeda } from "@/lib/validacao/moeda";
+import { campoDeTexto } from "@/lib/forms/campos";
 
-function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
+function text(data:FormData,key:string){return campoDeTexto(data, key).trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
 function money(data:FormData,key:string){return lerMoeda(text(data,key));}
 function dateOrNull(data:FormData,key:string){const value=text(data,key);return value||null;}

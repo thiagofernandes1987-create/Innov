@@ -10,9 +10,10 @@ import {
 } from "@/lib/forms/report-action-state";
 import { reportDataAccessError } from "@/lib/errors/data-access";
 import { defaultReportPeriod } from "@/lib/reports/server";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 function text(data: FormData, key: string) {
-  return String(data.get(key) ?? "").trim();
+  return campoDeTexto(data, key).trim();
 }
 
 function optional(data: FormData, key: string) {

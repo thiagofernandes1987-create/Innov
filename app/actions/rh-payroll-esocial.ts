@@ -1,5 +1,6 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 
 import{redirect}from"next/navigation";
@@ -9,7 +10,7 @@ import{buildS1200,buildS1210,buildS1298,buildS1299,type S1200RubricLine}from"@/l
 import{xmlSha256,type EsocialEnvironment}from"@/lib/rh/integrations/esocial-xml";
 
 const BASE="/app/rh/folha";
-function text(d:FormData,k:string){return String(d.get(k)??"").trim();}
+function text(d:FormData,k:string){return campoDeTexto(d, k).trim();}
 function digits(v:string){return v.replace(/\D/g,"");}
 function env(v:string):EsocialEnvironment{return v==="PRODUCTION"?"PRODUCTION":"RESTRICTED";}
 function employerType(v:string):1|2{return digits(v).length===11?2:1;}

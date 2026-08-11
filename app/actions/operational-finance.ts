@@ -9,13 +9,14 @@ import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { safeFileName, sha256 } from "@/lib/signatures/crypto";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const MAX_FILE = 25 * 1024 * 1024;
 const MIMES = new Set(["application/pdf", "image/png", "image/jpeg", "image/webp", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]);
 type Installment = { dueDate: string; amount: number; notes?: string };
 type MeasurementItem = { description: string; unit: string; previousQuantity: number; currentQuantity: number; unitPrice: number; notes?: string };
 type ProviderLikeError = { code?: string | null; statusCode?: string | number | null; name?: string | null };
-function text(data: FormData, key: string) { return String(data.get(key) ?? "").trim(); }
+function text(data: FormData, key: string) { return campoDeTexto(data, key).trim(); }
 function optional(data: FormData, key: string) { return text(data, key) || null; }
 function numberValue(value: unknown) { const parsed = Number(value); return Number.isFinite(parsed) ? parsed : 0; }
 function fail(path: string, message: string): never { redirect(`${path}${path.includes("?") ? "&" : "?"}error=${encodeURIComponent(message)}`); }

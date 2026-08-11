@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
 import { reportDataAccessError } from "@/lib/errors/data-access";
 import { lerDeclaracaoDeCub } from "@/lib/orcamentos/cub-manual";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 // Registro manual do CUB estadual. T-37.13b.
 //
@@ -27,7 +28,7 @@ export async function registrarCubManual(formData: FormData) {
   const campos = Object.fromEntries(
     ["uf", "tipologia", "mes", "desonerado", "total", "material", "maoDeObra",
      "administrativo", "fonte", "endereco", "publicacao", "arquivoSha256"]
-      .map(chave => [chave, String(formData.get(chave) ?? "")])
+      .map(chave => [chave, campoDeTexto(formData, chave)])
   );
   const voltar = String(formData.get("voltar") ?? "").trim() || null;
   const ufDoFormulario = campos.uf.trim().toUpperCase() || "SP";

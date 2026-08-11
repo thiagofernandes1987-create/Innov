@@ -1,5 +1,6 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 
 import{redirect}from"next/navigation";
@@ -9,7 +10,7 @@ import{signEsocialXml}from"@/lib/rh/integrations/esocial-signature";
 import{buildS2190,buildS2200StandardClt,type S2200ApprenticeInfo,type S2200ImmigrantInfo,type S2200TemporaryInfo}from"@/lib/rh/integrations/esocial-worker-xml";
 import{xmlSha256,type EsocialEnvironment}from"@/lib/rh/integrations/esocial-xml";
 
-function text(d:FormData,k:string){return String(d.get(k)??"").trim();}
+function text(d:FormData,k:string){return campoDeTexto(d, k).trim();}
 function opt(d:FormData,k:string){return text(d,k)||null;}
 function num(d:FormData,k:string){const v=text(d,k);return v===""?null:Number(v);}
 function digits(v:string){return v.replace(/\D/g,"");}

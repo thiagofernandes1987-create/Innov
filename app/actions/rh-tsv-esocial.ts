@@ -17,8 +17,9 @@ import {
 } from "@/lib/rh/integrations/esocial-tsv-student-xml";
 import { signEsocialXml } from "@/lib/rh/integrations/esocial-signature";
 import { xmlSha256, type EsocialEnvironment } from "@/lib/rh/integrations/esocial-xml";
+import { campoDeTexto } from "@/lib/forms/campos";
 
-function text(data: FormData, key: string) { return String(data.get(key) ?? "").trim(); }
+function text(data: FormData, key: string) { return campoDeTexto(data, key).trim(); }
 function num(data: FormData, key: string) { const value = text(data, key); return value ? Number(value) : null; }
 function digits(value: string) { return value.replace(/\D/g, ""); }
 function env(value: string): EsocialEnvironment { return value === "PRODUCTION" ? "PRODUCTION" : "RESTRICTED"; }

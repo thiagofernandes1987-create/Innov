@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
 import { reportDataAccessError } from "@/lib/errors/data-access";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 export type OpportunityCreationState = {
   status: "idle" | "error";
@@ -13,7 +14,7 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3
 const ALLOWED_STAGES = new Set(["PROSPECTING", "QUALIFIED", "PROPOSAL", "NEGOTIATION"]);
 
 function text(data: FormData, key: string) {
-  return String(data.get(key) ?? "").trim();
+  return campoDeTexto(data, key).trim();
 }
 
 function optional(data: FormData, key: string) {

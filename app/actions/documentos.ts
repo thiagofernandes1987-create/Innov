@@ -16,6 +16,7 @@ import {
 import { resolverDicionario, type AlvoDaEmissao } from "@/lib/documentos/resolucao";
 import { tipo as tipoDoCatalogo } from "@/lib/documentos/tipos";
 import { sha256 } from "@/lib/signatures/crypto";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 // Gravação na biblioteca de Modelos e Documentações.
 //
@@ -34,7 +35,7 @@ const MODULO = "modelos";
 const ROTA = "/app/modelos";
 
 function texto(formData: FormData, chave: string) {
-  return String(formData.get(chave) ?? "").trim();
+  return campoDeTexto(formData, chave).trim();
 }
 
 function falha(base: EstadoDoModelo, mensagem: string, erros: ErroDeCampo[] = []): EstadoDoModelo {
@@ -57,8 +58,10 @@ export async function salvarModelo(
   const nome = texto(formData, "nome");
   // O envio de formulário normaliza a quebra de linha do `textarea` para CRLF —
   // é o que a especificação manda, e sem desfazer isso o corpo gravado nunca é
-  // igual ao da tela (VACINA-048).
-  const corpo = String(formData.get("corpo") ?? "").replace(/\r\n/g, "\n");
+  // igual ao da tela (VACINA-048). Aqui está o caso que originou a vacina; a
+  // normalização mora em `campoDeTexto` porque a regra vale para os outros 61
+  // arquivos de `app/actions`, não só para este.
+  const corpo = campoDeTexto(formData, "corpo");
   const modeloId = texto(formData, "modeloId") || null;
   const versao = Number(formData.get("versao") ?? 0);
   const visivelAoCliente = formData.get("clienteVe") !== null;

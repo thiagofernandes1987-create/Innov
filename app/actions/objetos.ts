@@ -17,6 +17,7 @@ import { reportDataAccessError } from "@/lib/errors/data-access";
 import { definicaoPorId } from "@/lib/object-runtime/estudio";
 import { camposParecidos } from "@/lib/object-runtime/parecidos";
 import { campoDoProposito, chaveDeCampo, proposito } from "@/lib/object-runtime/proposito";
+import { campoDeTexto } from "@/lib/forms/campos";
 import {
   allocateSlots,
   validateSpec,
@@ -29,7 +30,7 @@ const ERRO_DE_PERSISTENCIA =
   "Não foi possível salvar o objeto. Tente novamente e, se o problema persistir, informe o horário ao administrador.";
 
 function texto(dados: FormData, chave: string): string {
-  return String(dados.get(chave) ?? "").trim();
+  return campoDeTexto(dados, chave).trim();
 }
 
 function falhar(rota: string, mensagem: string): never {
@@ -193,7 +194,12 @@ export async function definirOpcoesDoCampo(dados: FormData): Promise<void> {
   const { contexto, definicao } = await rascunhoEditavel(definitionId, rota);
   const chave = texto(dados, "campo");
 
-  const opcoes = String(dados.get("opcoes") ?? "")
+  // O `<textarea>` chega com CRLF (VACINA-048). Aqui o `.trim()` por linha
+  // escondia o defeito — ele comia o `\r` que sobrava no fim de cada pedaço —,
+  // e escondia mal: bastaria alguém trocar o `trim` por `trimEnd` ou remover o
+  // `filter(Boolean)` para cada opção passar a carregar um caractere invisível
+  // que ninguém vê no banco e que nenhuma comparação por igualdade perdoa.
+  const opcoes = campoDeTexto(dados, "opcoes")
     .split("\n")
     .map(linha => linha.trim())
     .filter(Boolean);

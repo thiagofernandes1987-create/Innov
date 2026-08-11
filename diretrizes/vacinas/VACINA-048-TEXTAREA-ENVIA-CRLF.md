@@ -64,7 +64,36 @@ sumiria e o do diff ficaria.
 
 ## Prevenção automática
 
-Verificado em navegador na tela do editor: salvar e conferir que o selo passa a
-`Salvo · v1`, e que digitar uma tecla o tira de novo. É o teste que reprova a
-regressão, porque o selo só fica verde se os dois textos forem idênticos byte a
-byte.
+**Até 11/08/2026 era humana**, e a medição desse dia mostrou o preço: a regra
+acima valia em **um** lugar do repositório. `app/actions` tinha **62 arquivos**
+com a sua própria cópia de `String(dados.get(chave) ?? "").trim()`, nenhuma
+delas normalizando — e o `.trim()` não resolve, porque tira espaço das pontas e
+o `\r\n` está no meio.
+
+Hoje são duas peças, e a segunda é a que faltava:
+
+- **`lib/forms/campos.ts`** — a leitura normalizada, num lugar só. As 65
+  leituras genéricas de `app/actions` passaram a delegar para ela;
+- **`tests/formulario-campos.test.ts`** — a conferência do editor virou teste,
+  incluindo a ida e volta pelo transporte, que prova que o multipart devolve o
+  CRLF byte a byte e que quem tem de normalizar é o servidor;
+- **`pnpm validate:crlf-normalizado`** — o portão que prova que *todo mundo*
+  passa pela função. Confere duas coisas: nenhum leitor genérico lendo cru (a
+  63ª cópia do helper reprova), e todo campo que alguma tela manda como
+  `<textarea>` normalizado na leitura por chave literal.
+
+O par tela→ação é medido pelo `<form action={…}>`, resolvendo o apelido do
+`useActionState`, **e não pelo nome do campo**. Medir por nome erra: `reason` é
+`<input>` numa tela e `<textarea>` noutra, e a primeira versão desta medição
+acusou duas ações por causa disso — as duas falsas.
+
+Provado por sabotagem, com o caso legítimo passando: o editor de modelo lendo
+cru reprova, a leitura literal de `objetos.ts` reprova, e uma cópia nova do
+helper genérico reprova. Três sabotagens no teste, também vistas reprovando:
+sem normalizar, normalizando só `\r\n` e aparando espaço por conta própria.
+
+## Limitações da prevenção
+
+O portão cobre `app/actions`. Rota de API que leia `FormData` por conta própria
+fica de fora, e um campo multilinha montado por JavaScript sem `<textarea>` no
+JSX também. Está declarado aqui e não resolvido às escondidas.

@@ -20,6 +20,7 @@ import {
 } from "@/lib/messaging/engine";
 import { createMetaCloudMessagingEngine } from "@/lib/messaging/engines/meta-cloud.server";
 import { requireMetaCloudCapability } from "@/lib/messaging/policy.server";
+import { campoDeTexto } from "@/lib/forms/campos";
 import {
   isSupportWindowOpen,
   normalizePhone,
@@ -42,7 +43,7 @@ const SUPPORTED_PROVIDER_TYPES = new Set<ChannelProviderType>([
 ]);
 
 function text(data: FormData, key: string) {
-  return String(data.get(key) ?? "").trim();
+  return campoDeTexto(data, key).trim();
 }
 
 function optional(data: FormData, key: string) {

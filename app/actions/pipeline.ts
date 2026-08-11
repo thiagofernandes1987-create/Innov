@@ -8,6 +8,7 @@ import { checarCamposBR } from "@/lib/validacao/formulario";
 import { CODIGOS_DATA, type CodigoData } from "@/lib/pipeline/datas";
 import { TRILHAS, type Trilha } from "@/lib/pipeline/domain";
 import { ESCOPOS, registrarValorUsado } from "@/lib/sugestoes/servidor";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 // Escrita do pipeline.
 //
@@ -896,7 +897,7 @@ export async function criarClienteComCartao(
   if (!pipeline) return falha("Funil não encontrado.");
   if (pipeline.trilha !== "cliente") return falha("Esta trilha não acompanha clientes.");
 
-  const opcional = (campo: string) => String(dados.get(campo) ?? "").trim() || null;
+  const opcional = (campo: string) => campoDeTexto(dados, campo).trim() || null;
 
   const { data: cliente, error } = await supabase
     .from("clients")

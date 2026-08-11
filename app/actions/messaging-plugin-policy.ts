@@ -5,6 +5,7 @@ import { mensagemDeFalha } from "@/lib/errors/data-access";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
+import { campoDeTexto } from "@/lib/forms/campos";
 import {
   MessagePluginPolicyError,
   normalizeMessagePluginPolicyRequest
@@ -13,7 +14,7 @@ import {
 const path = "/app/whatsapp/bots";
 
 function text(data: FormData, key: string) {
-  return String(data.get(key) ?? "").trim();
+  return campoDeTexto(data, key).trim();
 }
 
 function isRedirectError(error: unknown) {
