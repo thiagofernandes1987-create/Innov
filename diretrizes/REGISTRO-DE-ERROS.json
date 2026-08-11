@@ -362,6 +362,36 @@
       "tinha_portao": false,
       "detectado_por": "revisão própria, ao trocar o pareamento por <form action={…}>",
       "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Primeira versão do portão de colunas cortava a consulta só no `;`: num `Promise.all([...])` cada tabela respondia pelos filtros das vizinhas. ~70 acusações, a maioria falsa",
+      "familia": "portao",
+      "onde": "scripts/validate-colunas-existentes.mjs",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria na primeira execução",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "O varredor de literais contava `${` sem casar o `}`: perdia o fim do template e engolia a consulta seguinte. `pipeline_card_activities` foi acusada das colunas de `operational_notifications`",
+      "familia": "portao",
+      "onde": "scripts/validate-colunas-existentes.mjs",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria, ao abrir o arquivo acusado",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Reconstruí o schema aplicando ALTER só sobre tabela já vista. `stage12_planning` altera `projects` antes de `stage9` criá-la, e onze colunas sumiram — acusações falsas em `city`, `progress`, `planned_start`",
+      "familia": "portao",
+      "onde": "scripts/validate-colunas-existentes.mjs",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria, ao conferir uma acusação contra a migration",
+      "custo": "baixo"
     }
   ]
 }

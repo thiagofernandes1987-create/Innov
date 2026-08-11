@@ -55,8 +55,42 @@ recebimento aceito
 → saldo visível pelo dashboard seguro
 ```
 
+## Portão automático — desde 11/08/2026
+
+O teste acima cobre **o caminho que ele percorre**, e só ele. Medido por
+sabotagem no dia em que o portão nasceu: acrescentar `coluna_que_nao_existe` a
+um `.select()` de `daily_logs` **não reprovava nada** — nem `pnpm lint`, nem
+`pnpm typecheck`, nem os 45 validadores de então, nem os 1.086 testes.
+
+`pnpm validate:colunas-existentes` reconstrói as colunas de cada tabela a partir
+das migrations e confere o que o código pede: cada nome de primeiro nível do
+`.select()`, e a coluna de `.eq`, `.neq`, `.gt`, `.gte`, `.lt`, `.lte`, `.like`,
+`.ilike`, `.is`, `.in`, `.contains` e `.order`. Na primeira execução: **869
+`.select()` com 3.335 colunas e 2.003 filtros sobre 330 tabelas**.
+
+Achou dois casos idênticos ao original — coluna assumida por convenção:
+
+    rh_payroll_runs.created_at      a tabela tem `started_at`
+    rh_esocial_events.processed_at  nunca existiu
+
+Quatro sabotagens vistas reprovando, com o caso legítimo passando: coluna
+inventada no `.select()`, ordenação por `created_at` inexistente, dívida apagada
+por engano e dívida órfã declarada.
+
 ## Limitações da prevenção
 
-A execução cobre o caminho com uma linha e sem lote. Múltiplas linhas, conversão
-de unidade, lotes, validade, rejeição parcial e concorrência permanecem cenários
-dedicados.
+A execução do teste cobre o caminho com uma linha e sem lote. Múltiplas linhas,
+conversão de unidade, lotes, validade, rejeição parcial e concorrência
+permanecem cenários dedicados.
+
+O portão, por sua vez, **não confere** o que não sabe: relação que não nasce de
+`create table` (view, view materializada, resultado de RPC), string de consulta
+montada em tempo de execução, e coluna dentro de embed — esta última é trabalho
+do `validate:postgrest-embeds`.
+
+E há uma limitação maior, que ele mediu ao nascer e não resolve: **o repositório
+não declara o próprio schema**. 77 tabelas existem no banco de produção e
+nenhuma migration as cria; 7 colunas usadas pelo código estão no banco e não nas
+migrations, datadas em `diretrizes/COLUNAS-SEM-MIGRATION.json`. Conferir contra
+as migrations é conferir contra um contrato incompleto — a reconciliação é a
+S-77.

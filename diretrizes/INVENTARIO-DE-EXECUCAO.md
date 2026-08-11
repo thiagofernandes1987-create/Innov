@@ -2418,7 +2418,7 @@ coisa — o formulário perdendo o que a pessoa digitou — e zero cobertura.
 - [x] T-73.2 — **V048**: teste de ida e volta de texto longo — enviar `\r\n` e afirmar que volta normalizado. **A medição mudou o tamanho da tarefa.** A regra da vacina é universal — *todo texto multilinha vindo de `FormData` é normalizado na entrada* — e valia em **um** lugar: `app/actions` tinha **62 arquivos** com a sua própria cópia de `String(dados.get(chave) ?? "").trim()`, nenhuma normalizando. O `.trim()` não resolve, e é por isso que ninguém viu: ele tira espaço das pontas e o `\r\n` está no meio. Entregue em três peças — `lib/forms/campos.ts` (a leitura normalizada num lugar só, com as 65 leituras genéricas delegando), `tests/formulario-campos.test.ts` (9 casos, incluindo a ida e volta pelo transporte, que prova que o multipart devolve o CRLF byte a byte e que quem normaliza é o servidor) e `pnpm validate:crlf-normalizado` (o portão que prova que todo mundo passa pela função). **O par tela→ação é medido pelo `<form action={…}>`, resolvendo o apelido do `useActionState`, e não pelo nome do campo** — medir por nome acusou duas ações, as duas falsas, porque `reason` é `<input>` numa tela e `<textarea>` noutra. Seis sabotagens vistas reprovando pelo portão certo, com o caso legítimo passando
 - [ ] T-73.3 — **V051**: E2E de seleção que sobrevive à volta da server action, porque é o DOM que o formulário envia
 - [ ] T-73.4 — **V054**: E2E de `Escape` fechando o menor contexto aberto, nunca o formulário
-- [ ] T-73.5 — **V036**: conferir as consultas contra os tipos gerados do Supabase
+- [x] T-73.5 — **V036**: conferir as consultas contra o contrato real da tabela. **O enunciado mudou na execução, e a mudança é o achado.** "Tipos gerados do Supabase" pressupõe que existam: não existem neste repositório, e gerá-los do banco vivo mediria o banco, não o contrato que o repositório promete. O portão passou a reconstruir as colunas a partir das migrations — `pnpm validate:colunas-existentes` —, o que conferiu **869 `.select()` com 3.335 colunas e 2.003 filtros/ordenações sobre 330 tabelas**. Antes dele, acrescentar `coluna_que_nao_existe` a um `.select()` **não reprovava nada**: nem lint, nem `tsc`, nem os 45 validadores de então, nem os 1.086 testes — medido por sabotagem em 11/08/2026. Dois defeitos reais corrigidos, os dois a VACINA-036 repetindo-se literalmente: `rh_payroll_runs.created_at` (a tabela tem `started_at`) e `rh_esocial_events.processed_at`, que nunca existiu. Sete acusações restantes **não eram defeito do código**: a coluna existe no banco e nenhuma migration a declara — dívida datada em `diretrizes/COLUNAS-SEM-MIGRATION.json`, com o tipo medido, e o portão reprova tanto coluna nova fora da lista quanto entrada que ninguém usa mais. O que a mesma medição encontrou por baixo abriu a **S-77**: 77 tabelas existem no banco e nenhuma migration as cria. Quatro sabotagens vistas reprovando, com o caso legítimo passando
 - [ ] T-73.6 — Os quatro do meio valem **por módulo**: entram no checklist como teste exigido, não como revisão
 
 ## Sprint S-74 — Queimar o débito da VACINA-004: 120 funções herdando `EXECUTE` de `PUBLIC`
@@ -2491,3 +2491,55 @@ observar o comportamento, não só a ausência de erro na aplicação.
 - [ ] T-76.2 — `has_function_privilege('anon', ..., 'EXECUTE')` falso para as 120, conferido em consulta e não em suposição
 - [ ] T-76.3 — **Observar a recusa**: chamar como `anon` uma das 5 concedidas a `authenticated` e ver negar; chamar como `authenticated` e ver passar
 - [ ] T-76.4 — **Conferir a suposição do gatilho**: disparar um `insert`/`update` que aciona um dos 42 gatilhos revogados e confirmar que ele ainda dispara
+
+## Sprint S-77 — O repositório não sabe recriar o próprio banco
+
+**Estado:** pendente
+**Marco:** M-PLATAFORMA
+
+Aberta em 11/08/2026 pela T-73.5, e é achado novo: entra no **fim** do
+documento, conforme a **R4**, com o Marco declarado.
+
+**Como apareceu.** A T-73.5 criou `pnpm validate:colunas-existentes`, que confere
+cada `.select()`, `.eq()` e `.order()` contra as colunas reconstruídas das
+migrations. Ele acusou 25 usos sobre 9 pares (tabela, coluna). A conferência
+contra o banco vivo separou duas coisas que pareciam a mesma:
+
+| | O que era | Desfecho |
+| --- | --- | --- |
+| 2 pares | coluna não existe **em lugar nenhum** | corrigidos na T-73.5 |
+| 7 pares | coluna existe **no banco** e nenhuma migration a declara | dívida datada |
+
+Os dois corrigidos são a VACINA-036 repetindo-se literalmente:
+`rh_payroll_runs.created_at` — ordenar por `created_at` assumido por convenção,
+quando a tabela tem `started_at` — e `rh_esocial_events.processed_at`, que nunca
+existiu.
+
+**O que a mesma medição encontrou por baixo, e que é o motivo desta sprint:**
+
+| Divergência | Quantidade |
+| --- | ---: |
+| Tabelas no banco e **ausentes das migrations** | **77** |
+| Colunas no banco e ausentes das migrations | 10 |
+| Colunas nas migrations e ausentes do banco | 23 |
+
+`access_profiles`, `app_modules`, `bdi_models` e outras 74 existem em produção e
+**nenhuma migration as cria** — são só referenciadas. Recriar o banco a partir
+deste repositório produziria um schema que o código não consegue usar.
+
+Isso muda o significado de duas coisas que hoje se lêem como garantia: o débito
+de `migrations-aplicadas.json` mede o que falta **aplicar**, e não mede o que
+falta **declarar**; e a S-69, que aplica o que o repositório tem, não fecha esta
+diferença, porque o que falta aqui não está escrito em lugar nenhum.
+
+A dívida das 7 colunas está datada em
+`diretrizes/COLUNAS-SEM-MIGRATION.json`, com o tipo medido no
+banco ao lado de cada uma, e o portão reprova qualquer coluna nova fora dessa
+lista — e também reprova entrada que ninguém usa mais, para que a lista só possa
+encolher.
+
+- [ ] T-77.1 — Inventariar as 77 tabelas: quais têm dado em produção, quais são de etapa abandonada e quais foram criadas fora de migration. Sem esse corte, "escrever as migrations que faltam" não tem sujeito
+- [ ] T-77.2 — Gerar a migration de linha de base a partir do schema medido, **sem inventar tipo**: cada coluna com o tipo, nulidade e padrão lidos de `information_schema`
+- [ ] T-77.3 — Retirar de `diretrizes/COLUNAS-SEM-MIGRATION.json` cada coluna que a linha de base passar a declarar. O portão reprova entrada órfã, então a lista se fecha sozinha
+- [ ] T-77.4 — Conferir as 23 colunas que estão na migration e não no banco: quais são etapa 22 não aplicada (esperam a S-69) e quais são resíduo de migration que nunca rodou
+- [ ] T-77.5 — **Prova**: subir um banco vazio só com as migrations e rodar `pnpm validate:colunas-existentes` contra ele. Enquanto essa prova não existir, "o repositório recria o banco" é suposição

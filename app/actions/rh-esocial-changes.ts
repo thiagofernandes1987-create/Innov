@@ -25,7 +25,7 @@ function transmitter(fallbackType:1|2,fallbackNumber:string){const raw=Number(pr
 async function requireAcceptedS2200(context:Awaited<ReturnType<typeof requireCapability>>,workerId:string){
  const{data:cases,error}=await context.supabase.from("rh_admission_cases").select("id").eq("organization_id",context.organizationId).eq("activated_worker_id",workerId);if(error)throw new Error(mensagemDeFalha("rh-esocial-changes.requireAcceptedS2200", error));
  const ids=(cases??[]).map(c=>c.id);if(!ids.length)throw new Error("Vínculo sem caso de admissão correlacionado ao eSocial.");
- const{data:event,error:eError}=await context.supabase.from("rh_esocial_events").select("id,receipt_number").eq("organization_id",context.organizationId).eq("event_type","S-2200").eq("status","ACCEPTED").in("source_id",ids).order("processed_at",{ascending:false}).limit(1).maybeSingle();
+ const{data:event,error:eError}=await context.supabase.from("rh_esocial_events").select("id,receipt_number").eq("organization_id",context.organizationId).eq("event_type","S-2200").eq("status","ACCEPTED").in("source_id",ids).order("updated_at",{ascending:false}).limit(1).maybeSingle();
  if(eError)throw new Error(mensagemDeFalha("rh-esocial-changes.requireAcceptedS2200", eError));if(!event)throw new Error("S-2200 ainda não está ACCEPTED no RET; S-2205/S-2206 permanecem bloqueados.");return event;
 }
 

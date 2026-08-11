@@ -41,7 +41,7 @@ trabalhar não é praticada — e foi exatamente o que aconteceu.
 
 ## 2. A segunda razão, que é pior
 
-Metade destas perguntas **já tem portão pronto** no repositório. São 45
+Metade destas perguntas **já tem portão pronto** no repositório. São 46
 validadores. E nenhum deles responde a pergunta que decide um Marco:
 
 > *este módulo está pronto?*
@@ -264,7 +264,7 @@ ocorrências e zero cobertura.
 | V048 | enviar `textarea` com `\r\n` e afirmar que volta normalizado — **feito na T-73.2**, com portão em `validate:crlf-normalizado` |
 | V051 | E2E: escolher opção, disparar server action, afirmar a seleção no DOM |
 | V054 | E2E: `Escape` com sugestão aberta fecha só a sugestão |
-| V036 | tipos gerados do Supabase conferidos contra as consultas |
+| V036 | consultas conferidas contra as colunas reais — **feito na T-73.5**, em `validate:colunas-existentes` |
 | V004 | validador SQL de `EXECUTE` herdado, irmão do `validate:definer-com-guarda` — **feito na T-73.1**, em `validate:execute-revogado` |
 
 Os quatro primeiros valem por módulo; o último é global e vale uma vez.

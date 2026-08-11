@@ -177,7 +177,7 @@ A diferença de artefato e de partida é grande em proporção e pequena em cons
 
 O ponto mais caro do Go, e o mais fácil de subestimar.
 
-- **TypeScript:** nenhum portão novo. `pnpm lint`, `typecheck`, `test` e os 45 validadores já cobrem o diretório;
+- **TypeScript:** nenhum portão novo. `pnpm lint`, `typecheck`, `test` e os 46 validadores já cobrem o diretório;
 - **Go:** a §24 exige seis portões próprios — `gofmt`, `go vet`, `staticcheck`, `golangci-lint`, `go test ./...`, `go test -race ./...` — mais toolchain no runner, cache de módulos e uma política de dependências separada (§38).
 
 Um dado medido a favor do Go, registrado por honestidade: no experimento anterior desta sprint, `go build` e `go vet` passaram sobre código com defeito e **`staticcheck` pegou** (`U1000`). O compilador como parte da supervisão do LLM (§7.3) é real.
@@ -198,7 +198,7 @@ O saldo favorece adiar o Go: a redução de superfície é ganho permanente e di
 
 ## 9. Impacto em contratação e manutenção (§37.7)
 
-Segunda linguagem custa em três lugares — quem escreve, quem revisa e quem é acordado às 3 h. Hoje a plataforma é mantida por sessões assistidas sobre um repositório em TypeScript, com as diretrizes, as vacinas e os 45 validadores todos escritos para ele.
+Segunda linguagem custa em três lugares — quem escreve, quem revisa e quem é acordado às 3 h. Hoje a plataforma é mantida por sessões assistidas sobre um repositório em TypeScript, com as diretrizes, as vacinas e os 46 validadores todos escritos para ele.
 
 A §40 manda considerar desempenho **junto** de manutenção, testabilidade, segurança, observabilidade, facilidade para LLM, ecossistema e custo operacional, e diz: *"a melhor tecnologia não é a mais rápida isoladamente"*. Das oito dimensões, Go ganha em desempenho e custo operacional, empata em testabilidade e segurança, e perde em manutenção e ecossistema **neste repositório específico** — porque tudo que existe está do outro lado.
 
