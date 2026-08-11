@@ -232,6 +232,16 @@
       "tinha_portao": false,
       "detectado_por": "portão próprio",
       "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Sabotei apagando uma linha de migration ainda não versionada e tentei restaurar com `git checkout`, que não a conhecia — a linha ficou faltando até eu conferir a contagem",
+      "familia": "processo",
+      "onde": "prova por sabotagem",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "baixo"
     }
   ]
 }
