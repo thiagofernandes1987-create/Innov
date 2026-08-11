@@ -37,6 +37,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { encerrar, noEscopo, opcoes } from "./escopo-de-validador.mjs";
 
 const raiz = process.cwd();
 const PASTAS = ["app", "components"];
@@ -85,11 +86,12 @@ function fimDoRamo(texto, abre) {
   return texto.length;
 }
 
+const { escopo, json } = opcoes();
 const problemas = [];
 let noElemento = 0, noDocumento = 0;
 
 for (const pasta of PASTAS) {
-  for (const arquivo of varrer(path.join(raiz, pasta))) {
+  for (const arquivo of noEscopo(varrer(path.join(raiz, pasta)), escopo, c => path.relative(raiz, c))) {
     const texto = fs.readFileSync(arquivo, "utf8");
     const relativo = path.relative(raiz, arquivo);
 
@@ -111,27 +113,24 @@ for (const pasta of PASTAS) {
       if (/stopPropagation\(\)/.test(ramo)) continue;
 
       problemas.push({
-        arquivo: relativo,
-        linha: texto.slice(0, achado.index).split("\n").length,
-        ramo: ramo.replace(/\s+/g, " ").slice(0, 90)
+        onde: `${relativo}:${texto.slice(0, achado.index).split("\n").length}`,
+        o_que: `o ramo age e não barra a propagação: ${ramo.replace(/\s+/g, " ").slice(0, 90)}`
       });
     }
   }
 }
 
-if (problemas.length) {
-  console.error("Tratador de `Escape` no elemento que age e deixa a tecla subir (VACINA-054):\n");
-  for (const p of problemas) {
-    console.error(`  ${p.arquivo}:${p.linha} — o ramo age e não barra a propagação: ${p.ramo}`);
-  }
-  console.error(
-    "\nSe o ramo agiu, ele consumiu a tecla. Deixá-la subir entrega o mesmo gesto a quem está por\n" +
-      "fora — e por fora costuma estar o formulário inteiro, que fecha levando junto o que a pessoa\n" +
-      "acabou de digitar. Acrescente `evento.preventDefault(); evento.stopPropagation();` no ramo,\n" +
-      "guardado pela condição que diz que esta camada estava aberta."
-  );
-  process.exit(1);
-}
+encerrar({
+  json,
+  problemas,
+  conferidos: noElemento,
+  resumo: "Tratador de `Escape` no elemento que age e deixa a tecla subir (VACINA-054):",
+  explicacao:
+    "Se o ramo agiu, ele consumiu a tecla. Deixá-la subir entrega o mesmo gesto a quem está por\n" +
+    "fora — e por fora costuma estar o formulário inteiro, que fecha levando junto o que a pessoa\n" +
+    "acabou de digitar. Acrescente `evento.preventDefault(); evento.stopPropagation();` no ramo,\n" +
+    "guardado pela condição que diz que esta camada estava aberta."
+});
 
 console.log(
   `Camadas de \`Escape\` conferidas: ${noElemento} tratador(es) no elemento, todos barrando a propagação ` +

@@ -442,6 +442,26 @@
       "tinha_portao": false,
       "detectado_por": "sabotagem",
       "custo": "medio"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Escopo do módulo pela pasta da rota fazia o CRM — três telas com `<textarea>` — responder 'nada a conferir', porque a ação que recebe o texto mora em `app/actions/relationship.ts`. Aprovação por ausência de medição",
+      "familia": "medicao",
+      "onde": "scripts/checklist-de-modulo.mjs",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria, ao ler o relatório de um módulo que eu sabia ter formulário",
+      "custo": "medio"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "O regex que deriva o escopo por import exigia espaço depois de `from`; metade das páginas é minificada e escreve `from\"@/app/actions/...\"`. O escopo derivado ficava vazio e o relatório dizia 'nada a conferir'",
+      "familia": "medicao",
+      "onde": "scripts/checklist-de-modulo.mjs",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria, ao conferir o import na página",
+      "custo": "baixo"
     }
   ]
 }

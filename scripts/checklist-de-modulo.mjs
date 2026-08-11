@@ -14,6 +14,7 @@
 // Uso: node scripts/checklist-de-modulo.mjs <chave>   (ou sem chave: todos)
 
 import fs from "node:fs";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 
 const raiz = process.cwd();
@@ -125,6 +126,83 @@ function colunasSoExibidas(tabelas) {
   return soExibidas;
 }
 
+
+/**
+ * Os quatro portões de formulário e consulta, **rodados por módulo**.
+ *
+ * Eles já rodam globais no CI, e é assim que reprovam. O que falta ao Marco é
+ * outra pergunta: *quantos desses construtos este módulo tem, e estão
+ * cobertos?* Zero campos controlados e três campos controlados cobertos são
+ * respostas diferentes — a segunda prova que alguém olhou; a primeira só diz
+ * que não havia o que olhar.
+ *
+ * A detecção **não é reimplementada aqui**. Cada portão ganhou `--escopo` e
+ * `--json`, e este relatório chama o mesmo arquivo que o CI chama. Um relatório
+ * por módulo que reescrevesse a regra divergiria do portão em silêncio, que é o
+ * defeito que esta sprint inteira passou corrigindo.
+ */
+const PORTOES = [
+  ["V048 CRLF na entrada", "validate-crlf-normalizado.mjs"],
+  ["V051 campo reencostado", "validate-campo-controlado-reencostado.mjs"],
+  ["V054 Escape uma camada", "validate-escape-uma-camada.mjs"],
+  ["V036 coluna existe", "validate-colunas-existentes.mjs"]
+];
+
+/**
+ * O escopo de um módulo é a pasta da rota **mais o que as páginas dela
+ * importam**, um salto: server actions e componentes.
+ *
+ * É aresta de import, não palpite. Sem isso o CRM — que tem `<textarea>` em
+ * três telas — respondia "nada a conferir" nos portões de formulário, porque a
+ * ação que recebe o texto mora em `app/actions/relationship.ts`, fora da pasta
+ * da rota. Responder "nada" sobre um módulo cheio do construto é pior que não
+ * responder: aprova por ausência de medição.
+ */
+function escopoDoModulo(rota) {
+  const pastaDaRota = path.join("app", rota.replace(/^\//, ""));
+  const alvos = new Set([pastaDaRota]);
+  const dir = path.join(raiz, pastaDaRota);
+  if (!fs.existsSync(dir)) return [...alvos].join(",");
+
+  const pilha = [dir];
+  while (pilha.length) {
+    const atual = pilha.pop();
+    for (const entrada of fs.readdirSync(atual, { withFileTypes: true })) {
+      const caminho = path.join(atual, entrada.name);
+      if (entrada.isDirectory()) { pilha.push(caminho); continue; }
+      if (!/\.tsx?$/.test(entrada.name)) continue;
+      const texto = fs.readFileSync(caminho, "utf8");
+      // `\s*`, não `\s+`: metade das páginas do repositório está minificada e
+      // escreve `from"@/app/actions/relationship"` sem espaço. Exigir o espaço
+      // fazia o CRM inteiro sair do escopo e responder "nada a conferir".
+      for (const imp of texto.matchAll(/from\s*"@\/((?:app\/actions|components|lib)\/[^"]+)"/g)) {
+        const base = imp[1];
+        for (const ext of [".ts", ".tsx", "/index.ts", "/index.tsx"]) {
+          if (fs.existsSync(path.join(raiz, base + ext))) { alvos.add(base + ext); break; }
+        }
+      }
+    }
+  }
+  return [...alvos].join(",");
+}
+
+function portoesDoModulo(rota) {
+  const escopo = escopoDoModulo(rota);
+  return PORTOES.map(([rotulo, script]) => {
+    try {
+      const saida = execFileSync(
+        process.execPath,
+        [path.join("scripts", script), "--escopo", escopo, "--json"],
+        { encoding: "utf8", cwd: raiz }
+      );
+      const { conferidos, problemas } = JSON.parse(saida);
+      return { rotulo, conferidos, problemas };
+    } catch (erro) {
+      return { rotulo, conferidos: null, problemas: [{ o_que: `não deu para medir: ${erro.message.split("\n")[0]}` }] };
+    }
+  });
+}
+
 function analisar(m) {
   const semeado = new RegExp(`'${m.chave}'`).test(sql) && /insert into public\.app_modules/i.test(sql);
   const bloco = new RegExp(`\\b${m.chave}\\s*:\\s*\\[([\\s\\S]*?)\\n\\s{0,4}\\]`, "m").exec(menus);
@@ -147,7 +225,9 @@ function analisar(m) {
     rotaExiste,
     tabelas,
     mortas: colunasMortas(tabelas),
-    soExibidas: colunasSoExibidas(tabelas)
+    soExibidas: colunasSoExibidas(tabelas),
+    escopo: escopoDoModulo(m.rota),
+    portoes: portoesDoModulo(m.rota)
   };
 }
 
@@ -176,7 +256,19 @@ for (const m of lista.map(analisar)) {
     console.log(`  [6] colunas mortas ................ ${m.mortas.length ? m.mortas.join(", ") : "nenhuma"}`);
     console.log(`  [7] números só exibidos ........... ${m.soExibidas.length ? m.soExibidas.join(", ") : "nenhum"}`);
   }
-  console.log("  [8..] os demais itens do checklist exigem verificação humana —");
+  console.log(`  [8] portões de formulário e consulta, sobre ${m.escopo.split(",").length} caminho(s) do módulo:`);
+  for (const p of m.portoes) {
+    const veredito = p.conferidos === null
+      ? "não medido"
+      : p.problemas.length
+        ? `${p.problemas.length} PENDÊNCIA(S)`
+        : p.conferidos === 0
+          ? "nada a conferir neste módulo"
+          : `${p.conferidos} conferido(s), sem pendência`;
+    console.log(`      ${p.rotulo.padEnd(24)} ${veredito}`);
+    for (const problema of p.problemas) console.log(`        ${problema.onde ?? ""} ${problema.o_que}`);
+  }
+  console.log("  [9..] os demais itens do checklist exigem verificação humana —");
   console.log("        persona, QA visual, KPI e relatório de ausência.");
   console.log("        Ver diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md");
 }

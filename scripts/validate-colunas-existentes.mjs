@@ -41,6 +41,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { encerrar, noEscopo, opcoes } from "./escopo-de-validador.mjs";
 
 const raiz = process.cwd();
 const MIGRATIONS = path.join(raiz, "supabase", "migrations");
@@ -324,6 +325,7 @@ const divida = new Set(
 );
 const dividaUsada = new Set();
 
+const { escopo, json } = opcoes();
 const problemas = [];
 let selectsConferidos = 0, colunasConferidas = 0, filtrosConferidos = 0;
 let pulados = 0;
@@ -336,7 +338,7 @@ function aceita(tabela, coluna) {
 }
 
 for (const pasta of PASTAS) {
-  for (const arquivo of arquivosDeCodigo(path.join(raiz, pasta))) {
+  for (const arquivo of noEscopo(arquivosDeCodigo(path.join(raiz, pasta)), escopo, c => path.relative(raiz, c))) {
     const texto = fs.readFileSync(arquivo, "utf8");
     const relativo = path.relative(raiz, arquivo);
 
@@ -358,8 +360,7 @@ for (const pasta of PASTAS) {
           colunasConferidas += 1;
           if (conhecidas.has(coluna) || aceita(tabela, coluna)) continue;
           problemas.push({
-            arquivo: relativo,
-            linha: linhaBase + statement.slice(0, select.index).split("\n").length - 1,
+            onde: `${relativo}:${linhaBase + statement.slice(0, select.index).split("\n").length - 1}`,
             o_que: `\`${tabela}\` não tem a coluna \`${coluna}\` — pedida em .select("… ${trecho} …")`
           });
         }
@@ -372,8 +373,7 @@ for (const pasta of PASTAS) {
         filtrosConferidos += 1;
         if (conhecidas.has(coluna) || aceita(tabela, coluna)) continue;
         problemas.push({
-          arquivo: relativo,
-          linha: linhaBase + statement.slice(0, filtro.index).split("\n").length - 1,
+          onde: `${relativo}:${linhaBase + statement.slice(0, filtro.index).split("\n").length - 1}`,
           o_que: `\`${tabela}\` não tem a coluna \`${coluna}\` — usada em .${filtro[1]}("${filtro[2]}", …)`
         });
       }
@@ -384,25 +384,24 @@ for (const pasta of PASTAS) {
 // Dívida que não é mais usada tem de sair da lista. Sem esta conferência a
 // lista só cresce: alguém escreve a migration, o portão para de precisar da
 // linha, e ela fica lá dando a impressão de que a divergência continua.
-const orfas = [...divida].filter(chave => !dividaUsada.has(chave));
+const orfas = escopo ? [] : [...divida].filter(chave => !dividaUsada.has(chave));
 for (const chave of orfas) {
   problemas.push({
-    arquivo: "diretrizes/COLUNAS-SEM-MIGRATION.json",
-    linha: 1,
+    onde: "diretrizes/COLUNAS-SEM-MIGRATION.json:1",
     o_que: `\`${chave}\` está declarada como dívida e nenhuma consulta precisa dela — retire a linha`
   });
 }
 
-if (problemas.length) {
-  console.error("Consulta pedindo coluna que a tabela não tem (VACINA-036):\n");
-  for (const p of problemas) console.error(`  ${p.arquivo}:${p.linha} — ${p.o_que}`);
-  console.error(
-    "\nA coluna foi escrita por expectativa de convenção, não a partir do schema. O PostgreSQL só\n" +
-      "reclama quando o fluxo finalmente atravessa aquele trecho — e aí aborta a transação inteira.\n" +
-      "Confira o `create table` da migration antes de nomear a coluna."
-  );
-  process.exit(1);
-}
+encerrar({
+  json,
+  problemas,
+  conferidos: colunasConferidas + filtrosConferidos,
+  resumo: "Consulta pedindo coluna que a tabela não tem (VACINA-036):",
+  explicacao:
+    "A coluna foi escrita por expectativa de convenção, não a partir do schema. O PostgreSQL só\n" +
+    "reclama quando o fluxo finalmente atravessa aquele trecho — e aí aborta a transação inteira.\n" +
+    "Confira o `create table` da migration antes de nomear a coluna."
+});
 
 console.log(
   `Consultas conferidas contra as migrations: ${selectsConferidos} \`.select()\` com ${colunasConferidas} ` +

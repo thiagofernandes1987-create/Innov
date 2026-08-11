@@ -37,6 +37,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { encerrar, noEscopo, opcoes } from "./escopo-de-validador.mjs";
 
 const raiz = process.cwd();
 
@@ -52,6 +53,7 @@ function varrer(dir, acc = []) {
 }
 
 const NORMALIZA = /campoDeTexto\(|replace\(\s*\/\\r\\n\??\/g/;
+const { escopo, json } = opcoes();
 const problemas = [];
 
 // ---------------------------------------------------------------------------
@@ -59,17 +61,15 @@ const problemas = [];
 // ---------------------------------------------------------------------------
 
 const CRU_GENERICO = /String\(\s*(\w+)\.get\(\s*(\w+)\s*\)\s*\?\?\s*""\s*\)/g;
-const acoes = varrer(path.join(raiz, "app", "actions"));
+const acoes = noEscopo(varrer(path.join(raiz, "app", "actions")), escopo, c => path.relative(raiz, c));
 let helpersConferidos = 0;
 
 for (const arquivo of acoes) {
   const texto = fs.readFileSync(arquivo, "utf8");
   for (const achado of texto.matchAll(CRU_GENERICO)) {
     problemas.push({
-      arquivo: path.relative(raiz, arquivo),
-      linha: texto.slice(0, achado.index).split("\n").length,
-      o_que: `leitor genérico de FormData lê cru: \`${achado[0]}\``,
-      como: "troque por `campoDeTexto(dados, chave)` de `@/lib/forms/campos`"
+      onde: `${path.relative(raiz, arquivo)}:${texto.slice(0, achado.index).split("\n").length}`,
+      o_que: `leitor genérico de FormData lê cru: \`${achado[0]}\` — troque por \`campoDeTexto(dados, chave)\``
     });
   }
 }
@@ -83,7 +83,7 @@ const multilinhaPorAcao = new Map();
 /** ação -> Set("arquivo:linha" da tela) */
 const telasPorAcao = new Map();
 
-for (const arquivo of [...varrer(path.join(raiz, "app")), ...varrer(path.join(raiz, "components"))]) {
+for (const arquivo of noEscopo([...varrer(path.join(raiz, "app")), ...varrer(path.join(raiz, "components"))], escopo, c => path.relative(raiz, c))) {
   const texto = fs.readFileSync(arquivo, "utf8");
   const relativo = path.relative(raiz, arquivo);
 
@@ -141,10 +141,8 @@ for (const [acao, campos] of multilinhaPorAcao) {
       const janela = corpo.slice(Math.max(0, leitura.index - 160), leitura.index + 240);
       if (NORMALIZA.test(janela)) continue;
       problemas.push({
-        arquivo: path.relative(raiz, arquivo),
-        linha: texto.slice(0, declaracao.index).split("\n").length + corpo.slice(0, leitura.index).split("\n").length - 1,
-        o_que: `\`${acao}\` lê "${campo}" com chave literal e sem normalizar, e a tela manda como <textarea>`,
-        como: `troque por \`campoDeTexto(dados, "${campo}")\`; tela em ${[...telasPorAcao.get(acao)].join(", ")}`
+        onde: `${path.relative(raiz, arquivo)}:${texto.slice(0, declaracao.index).split("\n").length + corpo.slice(0, leitura.index).split("\n").length - 1}`,
+        o_que: `\`${acao}\` lê "${campo}" com chave literal e sem normalizar, e a tela manda como <textarea> — troque por \`campoDeTexto(dados, "${campo}")\``
       });
     }
     break;
@@ -153,20 +151,17 @@ for (const [acao, campos] of multilinhaPorAcao) {
 
 helpersConferidos = acoes.length;
 
-if (problemas.length) {
-  console.error("Texto de formulário lido sem normalizar a quebra de linha (VACINA-048):\n");
-  for (const p of problemas) {
-    console.error(`  ${p.arquivo}:${p.linha} — ${p.o_que}`);
-    console.error(`      ${p.como}`);
-  }
-  console.error(
-    "\nO envio de formulário normaliza a quebra de linha do `<textarea>` para CRLF: o valor da tela\n" +
-      "usa `\\n` e o que chega ao servidor usa `\\r\\n`. Gravar assim guarda um caractere que nenhum\n" +
-      "`diff` mostra, faz toda comparação por igualdade falhar e marca todas as linhas como alteradas\n" +
-      "na próxima versão. `.trim()` não resolve — o `\\r\\n` está no meio, não nas pontas."
-  );
-  process.exit(1);
-}
+encerrar({
+  json,
+  problemas,
+  conferidos: literaisConferidos + helpersConferidos,
+  resumo: "Texto de formulário lido sem normalizar a quebra de linha (VACINA-048):",
+  explicacao:
+    "O envio de formulário normaliza a quebra de linha do `<textarea>` para CRLF: o valor da tela\n" +
+    "usa `\\n` e o que chega ao servidor usa `\\r\\n`. Gravar assim guarda um caractere que nenhum\n" +
+    "`diff` mostra, faz toda comparação por igualdade falhar e marca todas as linhas como alteradas\n" +
+    "na próxima versão. `.trim()` não resolve — o `\\r\\n` está no meio, não nas pontas."
+});
 
 console.log(
   `Entrada de formulário conferida: ${helpersConferidos} arquivo(s) em \`app/actions\`, nenhum leitor genérico ` +

@@ -40,6 +40,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { encerrar, noEscopo, opcoes } from "./escopo-de-validador.mjs";
 
 const raiz = process.cwd();
 const PASTAS = ["app", "components"];
@@ -56,11 +57,12 @@ function varrer(dir, acc = []) {
   return acc;
 }
 
+const { escopo, json } = opcoes();
 const problemas = [];
 let componentes = 0, controlados = 0, naoControlados = 0;
 
 for (const pasta of PASTAS) {
-  for (const arquivo of varrer(path.join(raiz, pasta))) {
+  for (const arquivo of noEscopo(varrer(path.join(raiz, pasta)), escopo, c => path.relative(raiz, c))) {
     const texto = fs.readFileSync(arquivo, "utf8");
     if (!texto.includes("useActionState")) continue;
     componentes += 1;
@@ -95,24 +97,25 @@ for (const pasta of PASTAS) {
         arquivo: relativo,
         linha: texto.slice(0, achado.index).split("\n").length,
         campo: `<${achado[1].toLowerCase()} name="${nome}">`,
-        motivo: fabrica ? `sem \`ref={${fabrica}("${nome}")}\`` : "a tela não usa o gancho"
+        onde: `${relativo}:${texto.slice(0, achado.index).split("\n").length}`,
+        o_que: `${`<${achado[1].toLowerCase()} name="${nome}">`} ${fabrica ? `sem \`ref={${fabrica}("${nome}")}\`` : "e a tela não usa o gancho"}`
       });
     }
   }
 }
 
-if (problemas.length) {
-  console.error("Campo controlado que atravessa server action sem reencostar no DOM (VACINA-051):\n");
-  for (const p of problemas) console.error(`  ${p.arquivo}:${p.linha} — ${p.campo} ${p.motivo}`);
-  console.error(
-    "\nA resposta da server action re-renderiza a árvore do servidor e o navegador larga o valor do\n" +
-      "campo. O React não repõe, porque para ele nada mudou — o estado continua o mesmo. Estado e DOM\n" +
-      "divergem, e **é o DOM que o formulário envia**: não há erro, não há aviso, e o que sai é o que\n" +
-      "estava na tela naquele instante. Use `useReencostarNoDom` de `@/lib/forms/reencostar-no-dom`,\n" +
-      "ou troque `value={…}` por `defaultValue={…}` se o campo não precisa ser controlado."
-  );
-  process.exit(1);
-}
+encerrar({
+  json,
+  problemas,
+  conferidos: controlados,
+  resumo: "Campo controlado que atravessa server action sem reencostar no DOM (VACINA-051):",
+  explicacao:
+    "A resposta da server action re-renderiza a árvore do servidor e o navegador larga o valor do\n" +
+    "campo. O React não repõe, porque para ele nada mudou — o estado continua o mesmo. Estado e DOM\n" +
+    "divergem, e **é o DOM que o formulário envia**: não há erro, não há aviso, e o que sai é o que\n" +
+    "estava na tela naquele instante. Use `useReencostarNoDom` de `@/lib/forms/reencostar-no-dom`,\n" +
+    "ou troque `value={…}` por `defaultValue={…}` se o campo não precisa ser controlado."
+});
 
 console.log(
   `Campos de formulário conferidos: ${componentes} componente(s) com \`useActionState\`, ` +

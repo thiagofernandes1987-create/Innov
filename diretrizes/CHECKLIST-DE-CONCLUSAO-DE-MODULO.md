@@ -269,6 +269,30 @@ ocorrências e zero cobertura.
 
 Os quatro primeiros valem por módulo; o último é global e vale uma vez.
 
+**Feitos na S-73, e os quatro respondem por módulo.** Cada portão ganhou
+`--escopo <caminhos>` e `--json`, e `pnpm checklist:modulo <chave>` chama **o
+mesmo arquivo que o CI chama** — a detecção não é reimplementada em lugar
+nenhum, porque regra escrita em dois lugares diverge em silêncio.
+
+O escopo de um módulo é a pasta da rota **mais o que as páginas dela importam**,
+um salto: server action, componente e `lib`. É aresta de import, não palpite.
+Sem isso o CRM — que tem `<textarea>` em três telas — respondia *"nada a
+conferir"* nos portões de formulário, porque a ação que recebe o texto mora em
+`app/actions/relationship.ts`. Responder "nada" sobre um módulo cheio do
+construto é pior que não responder: aprova por ausência de medição.
+
+A saída distingue três estados, e a distinção é o ponto:
+
+| O que aparece | O que significa |
+| --- | --- |
+| `N conferido(s), sem pendência` | o módulo tem o construto e ele está coberto |
+| `nada a conferir neste módulo` | o módulo não tem o construto — não é aprovação, é ausência |
+| `N PENDÊNCIA(S)` | com arquivo e linha, e o portão global reprova junto |
+
+Provado por sabotagem: tirar a âncora de um campo do formulário de proposta
+aparece em `propostas`, **não** aparece em `crm`, e reprova o portão global no
+mesmo commit.
+
 ## 6. O que este documento ainda não faz
 
 - **Não reprova.** É relatório e disciplina, não portão. Transformar os itens `⚙`
