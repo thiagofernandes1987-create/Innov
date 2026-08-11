@@ -52,9 +52,9 @@ Três coisas mudam, e só a terceira é cosmética:
 
 **R3 — Uma sprint por vez.** Não se inicia sprint nova antes de concluir a atual. **No máximo uma sprint em `em andamento`**, e o validador reprova o contrário.
 
-**R4 — O que é novo entra na posição do módulo, não no fim.** *(reescrita em 11/08/2026)* Descoberta, lacuna ou oportunidade sobre um módulo que já tem trabalho previsto entra **junto do trabalho daquele módulo**, e a seção do módulo no confronto é atualizada. Só vai para o fim do arquivo o que **não pertence a nenhum módulo existente**.
+**R4 — O que é novo vai para o fim do arquivo e declara o seu Marco.** Sprint nova, oportunidade ou lacuna descoberta entra **no final do inventário**, nunca no meio, nunca empurrando a sprint atual — é o que permite terminar o que está em curso em vez de parar pela metade. E declara `**Marco:**`, que é quem a puxa de volta para a coerência.
 
-> A versão anterior — *"o que é novo vai para o fim"* — foi a causa medida da dispersão. Ela protegia a ordem de execução e destruía a coerência por módulo. A ordem passa a ser protegida pela R3 e pela R5, que já bastavam para isso.
+> Posição física e dono lógico são coisas diferentes. Em 11/08/2026 eu havia trocado esta regra por "o novo entra na posição do módulo", tentando resolver a dispersão por posição. Estava errado: isso reintroduz exatamente a interrupção que a R4 existe para evitar. A dispersão se resolve pelo **rótulo de Marco** e pela **R9**, não movendo texto.
 
 **R5 — A ordem pode mudar, mas só na virada.** Ao **iniciar** uma sprint nova — nunca no meio de uma — a ordem de execução das sprints pendentes pode ser reordenada. Dois casos legítimos:
 
@@ -64,6 +64,10 @@ Três coisas mudam, e só a terceira é cosmética:
 **R6 — Reordenar exige registro.** Toda reordenação vira linha na tabela da seção "Registro de reordenação", com data, o que mudou e **por quê**. Reordenação sem justificativa registrada é a forma de o plano virar improviso.
 
 **R7 — Sprint concluída não tem tarefa em aberto.** Marcar sprint como `concluída` com tarefa `[ ]` reprova no validador. Se sobrou tarefa, ou a sprint não está concluída, ou a tarefa vira sprint própria.
+
+**R9 — O Marco só fecha quando nenhuma sprint aberta o referencia.** *(nova em 11/08/2026)* Ao concluir uma sprint, **antes de começar a próxima**, confira o Marco dela: se existir qualquer sprint aberta declarando aquele Marco — inclusive uma que acabou de chegar no fim do arquivo — o Marco **continua aberto**. Nesse momento se decide a ordem: qual sprint vem agora, e se o achado novo precisa de um passo anterior que o destrave. Marco sem nenhuma sprint não pode ser declarado `concluído`; ele está `sem sprint`.
+
+> É esta regra que faz o modelo funcionar. A R4 deixa o achado novo esperar no fim sem interromper; a R9 garante que ele não seja esquecido, porque o Marco não fecha por cima dele. Um passo de cada vez, módulo por módulo. Verificada por `pnpm validate:inventory`.
 
 **R8 — Tarefa aponta, não descreve.** *(nova em 11/08/2026)* Tarefa não reescreve a lógica do módulo: ela **aponta** para a seção dele no confronto e diz o que fazer, em que ordem e com que evidência. Regra de negócio ou número repetido em dois documentos diverge em silêncio — é a mesma razão pela qual o Notion é índice e o repositório é fonte.
 
@@ -77,6 +81,75 @@ Três coisas mudam, e só a terceira é cosmética:
 | `em andamento` | em execução — no máximo uma por vez |
 | `concluída` | todas as tarefas marcadas e evidência registrada |
 | `bloqueada` | não pode avançar; o bloqueio está descrito na sprint |
+
+---
+
+## Registro de Marcos — o objetivo global de cada frente
+
+O **Marco é a unidade de conclusão**: um objetivo global, quase sempre da forma
+*"finalizar o módulo X"*. A **sprint é o conjunto de tarefas para concluí-lo**, e
+um Marco costuma precisar de várias.
+
+**O Marco é rótulo, não seção.** Isto é deliberado e é o que faz o modelo
+funcionar: achado novo vai fisicamente para o **fim do arquivo** — para você
+terminar a sprint em curso sem parar no meio — mas declara o Marco a que
+pertence. Posição física protege o foco; o rótulo protege a coerência. As duas
+coisas eram tratadas como uma só, e foi por isso que a lógica de cada módulo se
+espalhou.
+
+**Estados do Marco:** `aberto` (tem sprint aberta), `sem sprint` (nenhuma sprint
+planejada ainda), `concluído` (tem sprint e nenhuma delas está aberta).
+
+| Marco | Objetivo global | Estado |
+| --- | --- | --- |
+| `M-CRM` | Finalizar o módulo CRM e Vendas | aberto |
+| `M-CLIENTES` | Finalizar o módulo Clientes | sem sprint |
+| `M-OBRAS` | Finalizar o módulo Obras | aberto |
+| `M-PLANEJAMENTO` | Finalizar o módulo Planejamento | sem sprint |
+| `M-TAREFAS` | Finalizar o módulo Tarefas | sem sprint |
+| `M-DIARIO` | Finalizar o módulo Diário de Obras | aberto |
+| `M-EQUIPES` | Finalizar o módulo Equipes | aberto |
+| `M-ORCAMENTOS` | Finalizar o módulo Orçamentos | aberto |
+| `M-PROPOSTAS` | Finalizar o módulo Propostas | sem sprint |
+| `M-CONTRATOS` | Finalizar o módulo Contratos | sem sprint |
+| `M-ADITIVOS` | Finalizar o módulo Aditivos | sem sprint |
+| `M-ASSINATURAS` | Finalizar o módulo Assinaturas | sem sprint |
+| `M-DOCUMENTOS` | Finalizar o módulo Documentos | aberto |
+| `M-MODELOS` | Finalizar o módulo Modelos e Documentações | sem sprint |
+| `M-QUALIDADE` | Finalizar o módulo Qualidade | sem sprint |
+| `M-COMPRAS` | Finalizar o módulo Compras e Suprimentos | aberto |
+| `M-ESTOQUE` | Finalizar o módulo Estoque | aberto |
+| `M-FINANCEIRO` | Finalizar o módulo Financeiro Operacional | sem sprint |
+| `M-RH` | Finalizar o módulo RH | **candidato a fechamento** |
+| `M-SAC` | Finalizar o módulo Pós-venda | aberto |
+| `M-WHATSAPP` | Finalizar o módulo WhatsApp | **candidato a fechamento** |
+| `M-RELATORIOS` | Finalizar o módulo Relatórios | aberto |
+| `M-AUDITORIA` | Finalizar o módulo Auditoria | aberto |
+| `M-ADMINISTRACAO` | Finalizar o módulo Administração | aberto |
+| `M-DASHBOARD` | Finalizar a central de aplicativos | sem sprint |
+| `M-SEGURANCA` | Correções de segurança aplicadas no banco, não só no repositório | aberto |
+| `M-PLATAFORMA` | Mapa tecnológico: as fases de migração de linguagem da §36 | aberto |
+| `M-TRAVESSIAS` | Travessias ponta a ponta como suíte de teste | aberto |
+| `M-LEGADO` | Decompor as sprints que ainda misturam módulos | aberto |
+| `M-0` | Governança e memória de sessão | aberto |
+| `M-1` | Fundação do Object Runtime | aberto |
+| `M-2` | Customização completa | aberto |
+| `M-3` | Escala e produto público | aberto |
+| `M-4` | Generalização do produto: vocabulário e presets de segmento | aberto |
+| `M-5` | Padrão de interface de mercado | aberto |
+
+**Onze módulos estão em `sem sprint`.** Não é omissão do registro: é o retrato
+honesto de que ninguém planejou trabalho para eles. Entre eles estão
+`planejamento` e `tarefas`, que têm **1 página cada** e menu de 17% a 20%
+próprio — o núcleo operacional da obra sem nenhuma sprint prevista. É a mesma
+conclusão que o índice por módulo mostra por outro caminho.
+
+**`M-RH` e `M-WHATSAPP` são candidatos a fechamento** — têm sprint e nenhuma
+aberta. Fechar é decisão do proprietário na virada, conforme a R9, não do
+validador. No caso do RH há um impedimento conhecido: as 68 migrations `rh_*`
+não estão aplicadas, então o módulo está pronto no repositório e ausente do
+banco. Fechar o Marco antes disso seria declarar concluído o que nenhum usuário
+alcança.
 
 ---
 
@@ -126,7 +199,7 @@ das 180 são do RH.
 
 ---
 
-# Marco M-4 — Espinha derivada do confronto com o manual do Odoo 19
+## Espinha derivada do confronto com o manual do Odoo 19
 
 Objetivo: fechar as lacunas que o confronto mediu, **na ordem em que uma destrava
 a outra** — não na ordem em que foram descobertas.
@@ -141,7 +214,7 @@ nada e entrega sozinho.
 
 ## Sprint S-52 — E1: custo/hora por integrante
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-EQUIPES
 **Módulos atingidos:** `equipes`, `rh`, `diario`, `planejamento`, `obras`, `financeiro`, `orcamentos`
 
 O campo que trava sete módulos. Todas as fórmulas de custo de mão de obra do
@@ -156,7 +229,7 @@ Justificativa e origem: confronto §4.1.
 
 ## Sprint S-53 — E2: apontamento de hora no diário
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-DIARIO
 **Módulos atingidos:** `diario`, `obras`, `financeiro`
 
 Transforma o diário de registro em **fonte de custo**. Hoje o diário é a única
@@ -170,7 +243,7 @@ nenhum. Confronto §3.2 (`diario`).
 
 ## Sprint S-54 — E3: rentabilidade da obra em três colunas
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-OBRAS
 **Módulos atingidos:** `obras`, `financeiro`, `orcamentos`, `compras`
 
 A peça mais valiosa da matriz. Separa **prometido** (`Expected`), **direito**
@@ -185,7 +258,7 @@ persegue em planilha todo mês. Confronto §4.2.
 
 ## Sprint S-55 — E4: comprometido do orçamento
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-ORCAMENTOS
 **Módulos atingidos:** `orcamentos`, `compras`, `financeiro`
 
 `Comprometido = realizado + pedido de compra confirmado ainda não faturado`. É o
@@ -197,7 +270,7 @@ que impede a obra de gastar duas vezes o mesmo dinheiro. Confronto §3.3, §3.4.
 
 ## Sprint S-56 — E5: prazo de fornecedor e atraso previsto
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-COMPRAS
 **Módulos atingidos:** `compras`, `estoque`, `planejamento`
 
 `Chegada prevista = prazo do pedido + lead time do fornecedor`. Uma fórmula de
@@ -210,7 +283,7 @@ atrasar a obra**. Confronto §3.3.
 
 ## Sprint S-57 — E6: quantidade prevista de estoque
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-ESTOQUE
 **Módulos atingidos:** `estoque`, `compras`
 
 `Prevista = em mãos + entradas previstas − saídas previstas`. Nosso estoque
@@ -222,7 +295,7 @@ conhece o presente e não conhece o futuro. Confronto §3.3.
 
 ## Sprint S-58 — E7: relatórios de ausência
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-RELATORIOS
 **Módulos atingidos:** `crm`, `compras`, `sac`, `financeiro`, `documentos`
 
 A crítica mais dura do confronto: dos 146 relatórios do manual, uma família
@@ -238,7 +311,7 @@ classificação de falha — segunda carga do plano que já existe, não camada 
 
 ## Sprint S-59 — E8: SLA no pós-venda
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-SAC
 **Módulos atingidos:** `sac`, `whatsapp`
 
 Assistência técnica sem SLA não tem como prometer prazo. Confronto §3.5.
@@ -249,7 +322,7 @@ Assistência técnica sem SLA não tem como prometer prazo. Confronto §3.5.
 
 ## Sprint S-60 — E9: solicitação de documento com cobrança
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-DOCUMENTOS
 **Módulos atingidos:** `documentos`, `contratos`, `qualidade`, `rh`
 
 Nossa gestão documental é **passiva**: guarda o que chega. A solicitação de
@@ -262,7 +335,7 @@ e acompanha. Confronto §3.5.
 
 ## Sprint S-61 — E10: filtro global e snapshot de indicador
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-RELATORIOS
 **Módulos atingidos:** `relatorios`, `dashboard`
 
 Período escolhido uma vez vale para o painel inteiro; e o indicador vira foto
@@ -274,7 +347,7 @@ datada, que é o que permite comparar. Confronto §3.5.
 
 ## Sprint S-62 — E11: probabilidade e previsão no funil
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-CRM
 **Módulos atingidos:** `crm`, `propostas`
 
 `Receita rateada = receita esperada × probabilidade`. Temos valor e etapa, então
@@ -286,7 +359,7 @@ temos lista; sem probabilidade não temos previsão. Confronto §3.1.
 
 ## Sprint S-63 — E12: antes-e-depois na trilha de auditoria
 **Estado:** pendente
-**Marco:** M-4
+**Marco:** M-AUDITORIA
 **Módulos atingidos:** `auditoria`, todos
 
 `write_audit` grava o evento, não o antes-e-depois. A Trilha de Auditoria do
@@ -1426,6 +1499,7 @@ sete.
 ## Sprint S-33 — Defeitos silenciosos encontrados na verificação da S-32
 
 **Estado:** pendente
+**Marco:** M-LEGADO
 
 Descobertos ao verificar T-32.0 no navegador, e registrados no fim conforme a
 R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
@@ -1459,6 +1533,7 @@ R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
 ## Sprint S-34 — Listas cadastradas: o que a empresa decide que existe como opção
 
 **Estado:** pendente
+**Marco:** M-ADMINISTRACAO
 
 > **Nota de estado, para não parecer contradição.** As tarefas marcadas abaixo já estão
 > entregues, e a sprint segue `pendente` porque a R3 admite **uma** sprint em andamento e a
@@ -1510,6 +1585,7 @@ os dois igual foi o erro de T-32.0.6.
 ## Sprint S-35 — Object Runtime: o registro visto e lido
 
 **Estado:** pendente
+**Marco:** M-1
 
 Descoberta ao fechar a T-32.3, e entra **no fim** conforme a R4. A fundação e o
 estúdio existem e foram exercitados; o que não existe é o outro lado do balcão.
@@ -1534,6 +1610,7 @@ estimativas fundamentadas, exatamente como a §12.2 declara.
 ## Sprint S-36 — A barra superior em largura de tablet
 
 **Estado:** pendente
+**Marco:** M-5
 
 Descoberta ao medir a T-33.13, e entra **no fim** conforme a R4. Não é o
 defeito que a T-33.13 tratava: sobrou depois de resolvê-lo, e é de outro lugar.
@@ -1564,6 +1641,7 @@ tarefa sobre a página de orçamento, seria redesenhar a casca de lado.
 ## Sprint S-37 — Orçamento analítico: SINAPI que importa, CUB completo e o corte material × mão de obra
 
 **Estado:** pendente
+**Marco:** M-ORCAMENTOS
 
 Nasce de uma auditoria pedida pelo responsável em 04/08/2026 — *"no módulo de
 orçamento eu incluí um modo para sincronizar o Sinapi automaticamente para
@@ -1657,6 +1735,7 @@ de material nem de mão de obra em tela nenhuma.
 ## Sprint S-38 — Endurecer o que o compilador não pega, sem trocar de linguagem
 
 **Estado:** concluída
+**Marco:** M-DOCUMENTOS
 
 Nasce da decisão do responsável em 10/08/2026, depois da avaliação executada do
 mapa tecnológico polyglota: *"vamos mudar a partir de agora que não temos
@@ -1706,6 +1785,7 @@ fica pendurada numa sprint que já entregou.
 ## Sprint S-39 — Proteção de ramo na `main`
 
 **Estado:** bloqueada
+**Marco:** M-0
 
 Separada da S-38 pela R7: a S-38 entregou tudo o que o repositório consegue
 fazer sozinho, e isto depende de uma ação que só o dono do repositório executa.
@@ -1716,6 +1796,7 @@ fazer sozinho, e isto depende de uma ação que só o dono do repositório execu
 ## Sprint S-40 — Convergência do Projeto RH com a `main` reparada
 
 **Estado:** concluída
+**Marco:** M-RH
 
 O PR #42 nasceu sobre uma `main` de 6 de agosto e ficou 539 commits à frente
 enquanto a `main` andava 247. Converge aqui, com a bateria inteira executada
@@ -1755,6 +1836,7 @@ GO/NO_GO — continuam sendo pré-requisito de produção, não de merge.
 ## Sprint S-41 — Gateway de mensageria converge com a `main`
 
 **Estado:** concluída
+**Marco:** M-WHATSAPP
 
 O `apps/messaging-gateway/` — 54 arquivos — nunca chegou à `main`: a PR #40
 mesclou em `feature/etapa-22-whatsapp-omnichannel`, e esse ramo ficou **454
@@ -1779,6 +1861,7 @@ conforme a R4.
 ## Sprint S-42 — Mapa tecnológico canônico e fechamento da Fase 1
 
 **Estado:** concluída
+**Marco:** M-RH
 
 Decisão do responsável em 10/08/2026: adotar o mapa tecnológico **completo**,
 na estratégia de fases da própria §36 do documento. Entra no fim conforme a R4.
@@ -1811,6 +1894,7 @@ sprint em andamento por vez e a R7 não admite sprint concluída com tarefa aber
 ## Sprint S-43 — Fase 2 da §36: classificar workers e a ADR de Go
 
 **Estado:** em andamento
+**Marco:** M-PLATAFORMA
 
 Três das quatro tarefas concluídas; a T-43.3 em curso.
 
@@ -1850,6 +1934,7 @@ de entrada e não é negociável: **nenhuma linguagem nova entra sem ADR**.
 ## Sprint S-44 — Auditoria de superfícies esquecidas e o portão do catálogo de módulos
 
 **Estado:** concluída
+**Marco:** M-LEGADO
 
 Nasceu de um relato de uso — *"o módulo de RH está sem chamada ativa, não se
 esqueça de validar se existem mais funções, módulos, tabelas, variáveis
@@ -1873,6 +1958,7 @@ aparecessem. Entra no fim conforme a R4. Relatório em
 ## Sprint S-45 — Pendências herdadas da auditoria de superfícies
 
 **Estado:** pendente
+**Marco:** M-LEGADO
 
 O que a S-44 mediu e **não** resolveu, porque depende de ação externa,
 irreversível ou de decisão do responsável. Nomeado aqui para não voltar a ser
@@ -1891,6 +1977,7 @@ descoberto.
 ## Sprint S-46 — Camada transversal única, a mobília que hoje cada módulo refaz
 
 **Estado:** pendente
+**Marco:** M-5
 
 Nasce da leitura do material do Odoo 19 em 11/08/2026, analisada em
 `diretrizes/APROVEITAMENTO-ODOO-19-2026-08-11.md`. O Odoo tem uma camada
@@ -1924,6 +2011,7 @@ conforme a R4.
 ## Sprint S-47 — Rentabilidade por obra, com as maturidades separadas
 
 **Estado:** pendente
+**Marco:** M-OBRAS
 
 O deep dive XI.9 do material descreve a armadilha: **Expected**, **To Invoice**
 e **Invoiced** são estágios do mesmo fluxo, e somar os três *"duplica
@@ -1946,6 +2034,7 @@ plataforma de construção, é a tela que o dono da empresa abre primeiro.
 ## Sprint S-48 — Ficha de definição de relatório e matriz de integração
 
 **Estado:** pendente
+**Marco:** M-RELATORIOS
 
 Duas peças de documentação executável do material do Odoo, ambas baratas e de
 alto retorno de manutenção.
@@ -1962,6 +2051,7 @@ alto retorno de manutenção.
 ## Sprint S-49 — Travessias ponta a ponta como suíte de teste
 
 **Estado:** pendente
+**Marco:** M-TRAVESSIAS
 
 O material define seis reconciliações com walkthrough e testes de exceção
 nomeados. Hoje o INNOV testa por módulo; testar por travessia é o que pega o
@@ -1980,6 +2070,7 @@ defeito que mora **entre** dois módulos, que é onde ele costuma morar.
 ## Sprint S-50 — Escrita cross-tenant em funções definidoras, e o portão que faltava
 
 **Estado:** concluída
+**Marco:** M-SEGURANCA
 
 Nasceu da leitura do mergulho **XI.11 do manual do Odoo** (ACL, record rules e
 `sudo()`), que descreve no vocabulário de lá o mesmo risco que o INNOV tem aqui:
@@ -2003,6 +2094,7 @@ em `diretrizes/vacinas/VACINA-065-DEFINIDORA-QUE-RECEBE-A-ORGANIZACAO-E-NAO-CONF
 ## Sprint S-51 — Aplicar no banco a correção da escrita cross-tenant
 
 **Estado:** pendente
+**Marco:** M-SEGURANCA
 
 Separada da S-50 pela **R7**: a correção está escrita, provada e no repositório,
 mas aplicar migration no banco remoto é decisão do proprietário, não do

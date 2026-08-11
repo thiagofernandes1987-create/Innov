@@ -428,9 +428,40 @@ seu estado medido, seus cálculos, seus relatórios, seus menus e sua lacuna
 contra o manual. O inventário deixa de ser o dono da lógica e passa a ser a fila:
 cada tarefa **aponta** para a seção do módulo, em vez de reescrevê-la.
 
-Com isso, a R4 deixa de causar dano. Descoberta nova sobre `diario` atualiza a
-página do `diario` — onde está tudo sobre o diário — e entra na fila como tarefa
-que aponta para lá. A fila cresce; a lógica não se espalha.
+### 6.1 O Marco é a unidade de conclusão, e é rótulo — não seção
+
+*(corrigido em 11/08/2026, depois de eu ter errado o desenho)*
+
+A primeira versão desta seção dizia que a correção era mover o achado novo para
+junto do módulo a que pertence. **Estava errado**, e o erro é instrutivo: isso
+resolve a coerência quebrando o foco — você para a sprint em curso para atender o
+que acabou de chegar, que é exatamente o que a R4 original existia para impedir.
+
+Posição física e dono lógico são coisas **diferentes**, e o desenho certo separa
+as duas:
+
+| Preocupação | Mecanismo | Protege |
+| --- | --- | --- |
+| Não interromper o que está em curso | achado novo vai para o **fim do arquivo** (R4) | o foco |
+| Não perder de vista a que módulo pertence | a sprint declara **`Marco:`** | a coerência |
+| Não dar por concluído o que ficou pendurado | o Marco **não fecha** com sprint aberta apontando para ele (R9) | a conclusão |
+
+O **Marco é o objetivo global** — quase sempre *"finalizar o módulo X"*. A
+**sprint é o conjunto de tarefas** para chegar lá, e um Marco costuma precisar de
+várias. Ao terminar uma sprint, **antes de começar a próxima**, confere-se o
+Marco: se sobrou sprint aberta ligada a ele — inclusive uma que acabou de chegar
+no fim do arquivo —, o Marco continua aberto, e é nesse momento que se decide a
+ordem e se o achado novo precisa de um passo anterior que o destrave.
+
+Um passo de cada vez, módulo por módulo.
+
+**A R9 tem portão, e ele foi provado por sabotagem.** `pnpm validate:inventory`
+reprova Marco `concluído` com sprint aberta, sprint sem `Marco:` declarado, e
+`Marco:` que não existe no registro. O cenário exato — fechar um Marco legítimo e
+depois receber um achado novo no fim ligado a ele — foi executado: fecha com
+`exit=0`, e a sprint nova derruba para `exit=1`. O validador também **avisa**
+quais Marcos podem ser fechados na virada, sem fechá-los: isso é decisão de quem
+conduz.
 
 **Regra nova (R8), que faltava:**
 

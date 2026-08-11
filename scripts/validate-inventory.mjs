@@ -17,10 +17,24 @@ const lines = fs.readFileSync(file, "utf8").split(/\r?\n/);
 const sprints = [];
 let current = null;
 
+/**
+ * Marcos declarados no registro do topo, com o estado de cada um.
+ *
+ * O Marco é a unidade de conclusão — "finalizar o módulo X" — e a sprint é o
+ * conjunto de tarefas para chegar lá. Ele é **rótulo**, não seção: achado novo
+ * vai fisicamente para o fim do arquivo (R4, para não interromper a sprint em
+ * curso) e declara a que Marco pertence. É o rótulo que devolve a coerência.
+ */
+const marcos = new Map();
+for (const line of lines) {
+  const linha = line.match(/^\|\s*`(M-[A-Z0-9-]+)`\s*\|([^|]*)\|\s*(.+?)\s*\|\s*$/);
+  if (linha) marcos.set(linha[1], { objetivo: linha[2].trim(), estado: linha[3].replace(/\*\*/g, "").trim() });
+}
+
 for (const line of lines) {
   const heading = line.match(/^## Sprint (S-\d+)\s+—\s+(.+)$/);
   if (heading) {
-    current = { id: heading[1], name: heading[2].trim(), state: null, open: 0, done: 0 };
+    current = { id: heading[1], name: heading[2].trim(), state: null, marco: null, open: 0, done: 0 };
     sprints.push(current);
     continue;
   }
@@ -33,6 +47,9 @@ for (const line of lines) {
 
   const state = line.match(/^\*\*Estado:\*\*\s*(.+?)\s*$/);
   if (state) { current.state = state[1]; continue; }
+
+  const marco = line.match(/^\*\*Marco:\*\*\s*(\S+)\s*$/);
+  if (marco) { current.marco = marco[1]; continue; }
 
   if (/^\s*-\s\[\s\]\s/.test(line)) current.open += 1;
   else if (/^\s*-\s\[x\]\s/i.test(line)) current.done += 1;
@@ -61,6 +78,38 @@ const running = sprints.filter(sprint => sprint.state === "em andamento");
 if (running.length > 1)
   errors.push(`Regra R3 violada: ${running.length} sprints "em andamento" (${running.map(sprint => sprint.id).join(", ")}). Só uma por vez.`);
 
+// R4 — toda sprint declara o Marco a que pertence, e o Marco existe no registro.
+for (const sprint of sprints) {
+  if (!sprint.marco) {
+    errors.push(`${sprint.id} não declara **Marco:**. Regra R4: o novo vai para o fim do arquivo, mas declara a que Marco pertence.`);
+  } else if (marcos.size > 0 && !marcos.has(sprint.marco)) {
+    errors.push(`${sprint.id} declara o Marco "${sprint.marco}", que não existe no "Registro de Marcos".`);
+  }
+}
+
+// R9 — Marco só fecha quando nenhuma sprint aberta o referencia.
+const abertasPorMarco = new Map();
+const totalPorMarco = new Map();
+for (const sprint of sprints) {
+  if (!sprint.marco) continue;
+  totalPorMarco.set(sprint.marco, (totalPorMarco.get(sprint.marco) ?? 0) + 1);
+  if (sprint.state !== "concluída") {
+    if (!abertasPorMarco.has(sprint.marco)) abertasPorMarco.set(sprint.marco, []);
+    abertasPorMarco.get(sprint.marco).push(sprint.id);
+  }
+}
+for (const [id, marco] of marcos) {
+  if (marco.estado !== "concluído") continue;
+  const abertas = abertasPorMarco.get(id) ?? [];
+  if (abertas.length > 0)
+    errors.push(
+      `Regra R9 violada: o Marco ${id} está "concluído" e ainda tem ${abertas.length} sprint(s) aberta(s) (${abertas.join(", ")}). ` +
+        `Achado novo entra no fim do arquivo, mas o Marco não fecha por cima dele.`
+    );
+  if ((totalPorMarco.get(id) ?? 0) === 0)
+    errors.push(`Regra R9 violada: o Marco ${id} está "concluído" sem nenhuma sprint. Marco sem sprint está "sem sprint", não concluído.`);
+}
+
 if (errors.length > 0) {
   for (const error of errors) console.error(`- ${error}`);
   console.error(`\nInventário de execução reprovado: ${errors.length} problema(s).`);
@@ -70,3 +119,13 @@ if (errors.length > 0) {
 const totals = sprints.reduce((acc, sprint) => ({ open: acc.open + sprint.open, done: acc.done + sprint.done }), { open: 0, done: 0 });
 const byState = [...validStates].map(state => `${sprints.filter(sprint => sprint.state === state).length} ${state}`).join(", ");
 console.log(`Inventário de execução validado: ${sprints.length} sprints (${byState}); ${totals.done} tarefas concluídas e ${totals.open} em aberto.`);
+
+// R9, lado informativo: qual Marco pode ser fechado na próxima virada.
+// Fechar é decisão de quem conduz, não do validador — ele só avisa que dá.
+const fechaveis = [...marcos.keys()].filter(
+  id => marcos.get(id).estado !== "concluído" && (totalPorMarco.get(id) ?? 0) > 0 && (abertasPorMarco.get(id) ?? []).length === 0
+);
+console.log(
+  `Marcos: ${marcos.size} declarados, ${[...marcos.values()].filter(m => m.estado === "concluído").length} concluído(s).` +
+    (fechaveis.length ? ` Candidatos a fechamento na próxima virada (R9): ${fechaveis.join(", ")}.` : "")
+);
