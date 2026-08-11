@@ -2380,7 +2380,7 @@ coisa — o formulário perdendo o que a pessoa digitou — e zero cobertura.
 
 ## Sprint S-74 — Queimar o débito da VACINA-004: 120 funções herdando `EXECUTE` de `PUBLIC`
 
-**Estado:** pendente
+**Estado:** concluída
 **Marco:** M-SEGURANCA
 
 Aberta em 11/08/2026 pela T-73.1, que criou o portão e mediu o estoque. Detalhe
@@ -2391,10 +2391,10 @@ O portão impede **crescer**; esta sprint faz **cair**. A ordem é por risco, n�
 por facilidade.
 
 - [x] T-74.1 — **As 73 com `grant` explícito primeiro**: revogar de `public, anon` é seguro porque o grant nominal sobrevive ao revoke. Feito em `20260811170000_revogar_execute_de_public_lote_1.sql`, com a assinatura de cada linha **copiada do próprio `grant`** e não reconstruída da declaração — assinatura reconstruída erra em `default`, tipo com espaço e sobrecarga, e o erro só aparece na aplicação. Conferido antes: **nenhuma das 73 concede a `anon`**. Débito **120 → 47**, e a queda é sustentada pela migration: removê-la faz as 73 voltarem a reprovar
-- [ ] T-74.2 — **As 47 sem `grant` nenhum**: cada uma precisa decidir o papel — `authenticated` se o produto a chama do navegador, `service_role` se é auxiliar. Revogar sem conceder as torna inalcançáveis
-- [ ] T-74.3 — Priorizar dentro das duas as **77 definidoras não-gatilho**, que somam ignorar RLS com herdar `EXECUTE` de `PUBLIC`
-- [ ] T-74.4 — Conferir no banco com `has_function_privilege`, e **observar a recusa** para `anon` antes de declarar corrigido
-- [ ] T-74.5 — Atualizar `EXECUTE-PUBLIC-ACEITOS.json` a cada lote; o número só pode cair
+- [x] T-74.2 — **Decisão de papel medida, não presumida.** O primeiro sinal que usei — menção do nome no código — dizia que **todas as 47** eram chamadas pelo navegador. Por **chamada real `.rpc("nome")`** em `app/` ou `lib/`, são **5**. As outras 42 são gatilho ou auxiliar interno e recebem só `revoke`. Feito em `20260811180000_revogar_execute_de_public_lote_2.sql`; assinatura extraída contando parênteses, para não truncar em `default auth.uid()` e `default now()-interval '30 days'`. **Débito 47 → 0**
+- [x] T-74.3 — **Prioridade respeitada nos dois lotes**: das 77 definidoras não-gatilho, 71 saíram na T-74.1 e as 6 restantes na T-74.2. Conferido ao fim: 0 na lista de prioridade e 0 em `demais`
+
+- [x] T-74.5 — Atualizado nos dois lotes, com histórico datado de cada queda: **120 → 47 → 0**. E a queda é sustentada pelas migrations, não pela edição do JSON: removendo o lote 2, as 47 voltam a reprovar
 
 ## Sprint S-75 — Varrer o que está obsoleto no inventário e nos canônicos
 
@@ -2426,3 +2426,25 @@ sprint.
 - [x] T-75.3 — **Varredura executada.** De 71 arquivos citados no inventário, **3 não existem**, e só **1 estava em tarefa aberta**: a T-28.11 mandava ler de um módulo "curvas.ts" que foi removido. Corrigida — a leitura de `project_progress_snapshots` já acontece hoje nas páginas de obra, e o que falta da tarefa é só a **gravação**. Os outros 2 estão em tarefas fechadas e são registro histórico. `ocorrencias` aparece citada, e é legítimo: é o registro da própria remoção, na S-44. Virou portão no `validate:inventory`
 - [x] T-75.4 — **Uma achada: a S-32**, com **46 tarefas feitas e zero abertas**, parada em `pendente`. Fechada. Sprint entregue e não fechada segura o Marco dela aberto pela R9, sem motivo. Virou portão no `validate:inventory`, provado por sabotagem — reabrir a S-32 reprova
 - [x] T-75.5 — **Registrado, e o denominador mudou a leitura.** O registro foi de 20 para 31 ocorrências ao longo da sprint, e `governanca` consolidou-se como **40% do peso com 9 das 10 sem portão** — a família mais cara e a menos protegida. Os quatro portões desta leva (Marco, R9, números afirmados e inventário obsoleto) atacam exatamente ela
+
+## Sprint S-76 — Conferir no banco a revogação de `EXECUTE`, e a suposição que ela carrega
+
+**Estado:** pendente
+**Marco:** M-SEGURANCA
+
+Separada da S-74 pela **R7**: os dois lotes estão escritos e provados no
+repositório, mas conferir no banco depende de aplicá-los — o que é a S-69,
+decisão do proprietário.
+
+**Há uma suposição a conferir, e ela está declarada em vez de escondida.** As 42
+funções internas do lote 2 são gatilhos e auxiliares, e a migration afirma que
+**revogar `EXECUTE` de gatilho não quebra o gatilho**, porque o PostgreSQL
+confere o privilégio na criação e não a cada disparo. Isso está afirmado por
+conhecimento do motor, **não por teste**. Se estiver errado, o efeito aparece
+como gatilho que para de disparar — e é por isso que a conferência exige
+observar o comportamento, não só a ausência de erro na aplicação.
+
+- [ ] T-76.1 — **Bloqueado por S-69.** Aplicar os dois lotes
+- [ ] T-76.2 — `has_function_privilege('anon', ..., 'EXECUTE')` falso para as 120, conferido em consulta e não em suposição
+- [ ] T-76.3 — **Observar a recusa**: chamar como `anon` uma das 5 concedidas a `authenticated` e ver negar; chamar como `authenticated` e ver passar
+- [ ] T-76.4 — **Conferir a suposição do gatilho**: disparar um `insert`/`update` que aciona um dos 42 gatilhos revogados e confirmar que ele ainda dispara

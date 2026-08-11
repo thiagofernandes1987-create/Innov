@@ -322,6 +322,26 @@
       "tinha_portao": false,
       "detectado_por": "virada de sprint",
       "custo": "medio"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Classifiquei as 47 funções restantes como 'todas chamadas pelo navegador' usando menção do nome no código; por chamada real `.rpc(` são 5 — teria concedido `authenticated` a 42 gatilhos e auxiliares internos",
+      "familia": "analise",
+      "onde": "T-74.2",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Deixei a S-74 com as quatro tarefas feitas e estado `pendente`; o portão criado na S-75 acusou na mesma sessão",
+      "familia": "governanca",
+      "onde": "INVENTARIO-DE-EXECUCAO.md",
+      "vacina": "não é causa nova",
+      "tinha_portao": true,
+      "detectado_por": "portão próprio",
+      "custo": "baixo"
     }
   ]
 }
