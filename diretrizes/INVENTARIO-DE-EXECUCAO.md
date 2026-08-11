@@ -2111,23 +2111,26 @@ em `diretrizes/vacinas/VACINA-065-DEFINIDORA-QUE-RECEBE-A-ORGANIZACAO-E-NAO-CONF
 
 ## Sprint S-51 — Aplicar no banco a correção da escrita cross-tenant
 
-**Estado:** pendente
+**Estado:** bloqueada
 **Marco:** M-SEGURANCA
 
-Separada da S-50 pela **R7**: a correção está escrita, provada e no repositório,
-mas aplicar migration no banco remoto é decisão do proprietário, não do
-desenvolvedor. Sai da S-50 e entra no fim conforme a R4.
+**Absorvida pela S-69 em 11/08/2026, e o registro fica aqui em vez de a sprint
+sumir.** A S-69 consolidou o mesmo bloqueio para quatro Marcos ao mesmo tempo, e
+as três tarefas desta sprint são, palavra por palavra, as T-69.2, T-69.3 e
+T-69.5. Duas sprints apontando para o mesmo trabalho é a desordem que o
+governo do inventário existe para impedir — e esta escapou da varredura da S-75
+porque nenhum portão pergunta se duas sprints fazem a mesma coisa.
 
-Enquanto esta sprint não fechar, **o defeito continua vivo no banco**. Vale
-dizer com todas as letras o que o portão faz e o que ele não faz:
-`validate:definer-com-guarda` impede que uma função nova chegue sem guarda ao
-repositório; ele não altera nenhuma função que já está aplicada.
+**Havia mais que duplicação: havia número errado.** O texto original dizia
+*"conferir que as **sete** funções passaram a recusar organização de que o
+chamador não participa"*. A consulta ao banco vivo, na abertura da S-69, mediu
+**duas**: as outras cinco são da etapa 22, que não está aplicada, e corrigir no
+repositório uma função que não existe no servidor não corrige nada hoje.
 
-### Tarefas
+A sprint fica com uma tarefa só, que é o redirecionamento — sprint sem tarefa
+nenhuma reprova na R7, e com razão: quem lê precisa saber para onde ir.
 
-- [ ] T-51.1 — Aplicar `20260811060000_semeadura_de_lista_confere_participacao.sql` e `20260811061000_definidoras_conferem_participacao.sql`, com evidência da execução
-- [ ] T-51.2 — Conferir no banco que as sete funções passaram a recusar organização de que o chamador não participa, com chamada real de sessão de outra empresa — reprovação observada antes de declarar corrigido
-- [ ] T-51.3 — Rodar `SUPABASE_DB_URL=... pnpm ledger:atualizar` e tirar as duas do débito em `diretrizes/migrations-aplicadas.json`
+- [ ] T-51.1 — **Nada a executar aqui.** O trabalho, o alcance medido no banco vivo e o aval do proprietário estão na S-69. Esta tarefa fecha quando a S-69 fechar
 
 ---
 
@@ -2139,6 +2142,7 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
+| 2026-08-11 | A **S-51 é absorvida pela S-69** e passa a `bloqueada`, sem tarefas próprias | As três tarefas dela eram, palavra por palavra, as T-69.2, T-69.3 e T-69.5 — a S-69 consolidou o mesmo bloqueio para quatro Marcos. Duas sprints apontando para o mesmo trabalho é a desordem que o governo do inventário existe para impedir, e esta escapou da varredura da S-75: **nenhum portão pergunta se duas sprints fazem a mesma coisa.** Havia também número errado — o texto dizia "sete funções", e a consulta ao banco vivo mediu duas. O registro fica no lugar da sprint em vez de a sprint sumir. |
 | 2026-08-11 | Conferência da R9 ao fechar a S-75: **`M-0` continua aberto** | Quatro sprints penduradas nele — S-19 (riscos residuais da Etapa 20), S-22 (recuperação do repositório), S-39 (proteção de ramo, bloqueada) e S-73 (vacinas universais que viram teste). Fechar a S-75 não fecha o Marco, e é exatamente o que a R9 existe para impedir. Nenhuma reordenação: a próxima sprint é decisão da virada seguinte. |
 | 2026-08-11 | A S-43 passa de `em andamento` a `bloqueada`; a S-75 assume a vaga da R3 | **Bloqueio declarado, não reordenação de prioridade.** A T-43.3 tarefa 5 precisa das filas do canal no banco, e isso depende da S-69 — decisão do proprietário sobre aplicar migrations. Manter a S-43 como `em andamento` ocupava a vaga única da R3 e fazia o inventário parecer ter trabalho em curso onde havia espera. A S-75 estava em execução de fato, com 2 de 5 tarefas entregues, e passa a declarar isso. |
 | 2026-08-10 | A S-43 (migração de linguagens) passa à frente da S-23 (fundação de interface), que vai para `bloqueada` | **Decisão de prioridade do proprietário arquitetural**, caso previsto na R5: *"inicie as conversões dos códigos para Go, Typescript, Python e Rust conforme nosso mapa"*. A reordenação **apenas registra o que já era verdade**: a S-23 tem 23 tarefas concluídas e 11 abertas, e nenhuma avançou durante as S-38 a S-43. A R3 não acusou antes porque a S-43 constava como `pendente`; ao ativá-la, o validador reprovou com duas sprints em andamento e obrigou a explicitar a escolha. Retomar a S-23 exige tirar a S-43 da vaga. |
