@@ -124,6 +124,91 @@ for (const afirmacao of AFIRMACOES) {
 }
 
 /**
+ * Referência citada que não existe mais.
+ *
+ * É o subconjunto da VACINA-012 — *documentação diverge do estado real* — que
+ * **dá para conferir por máquina**. O resto dela não dá: documento que descreve
+ * um comportamento que mudou continua passando aqui, e isso está declarado na
+ * §6 como limitação, não resolvido às escondidas.
+ *
+ * Medido em 11/08/2026, ao criar: **0 quebradas nas quatro classes**. Portão
+ * que nasce verde é legítimo desde que a sabotagem prove que ele mede — e é o
+ * que impede a próxima remoção de deixar rastro morto na documentação.
+ */
+const REFERENCIAS = [
+  {
+    nome: "vacina",
+    padrao: /\bVACINA-(\d{3})\b/g,
+    universo: () => new Set(
+      fs.readdirSync(path.join(raiz, "diretrizes", "vacinas"))
+        .map(f => (/^VACINA-(\d+)/.exec(f) ?? [])[1])
+        .filter(Boolean)
+    ),
+    comoEscrever: n => `VACINA-${n}`
+  },
+  {
+    nome: "sprint",
+    padrao: /\b(S-\d{2})\b/g,
+    universo: () => new Set(
+      [...leia("diretrizes/INVENTARIO-DE-EXECUCAO.md").matchAll(/^## Sprint (S-\d+)/gm)].map(m => m[1])
+    ),
+    comoEscrever: n => n
+  },
+  {
+    nome: "Marco",
+    padrao: /`(M-[A-Z][A-Z0-9-]+)`/g,
+    universo: () => new Set(
+      [...leia("diretrizes/INVENTARIO-DE-EXECUCAO.md").matchAll(
+        /^\|\s*`(M-[A-Z0-9-]+)`\s*\|[^|]*\|\s*(?:aberto|sem sprint|concluído)/gm
+      )].map(m => m[1])
+    ),
+    comoEscrever: n => `\`${n}\``
+  },
+  {
+    nome: "função do banco",
+    padrao: /`public\.([a-z0-9_]+)\(/g,
+    universo: () => {
+      const sql = fs
+        .readdirSync(path.join(raiz, "supabase", "migrations"))
+        .filter(n => n.endsWith(".sql"))
+        .sort()
+        .map(n => fs.readFileSync(path.join(raiz, "supabase", "migrations", n), "utf8"))
+        .join("\n")
+        .replace(/--[^\n]*/g, "");
+      const vivas = new Set(
+        [...sql.matchAll(/create\s+(?:or\s+replace\s+)?function\s+public\.([a-z0-9_]+)/gi)].map(m => m[1].toLowerCase())
+      );
+      for (const m of sql.matchAll(/drop\s+function\s+(?:if\s+exists\s+)?public\.([a-z0-9_]+)/gi)) {
+        vivas.delete(m[1].toLowerCase());
+      }
+      return vivas;
+    },
+    comoEscrever: n => `public.${n}(`
+  }
+];
+
+for (const referencia of REFERENCIAS) {
+  const universo = referencia.universo();
+  for (const doc of DOCUMENTOS) {
+    // Documento datado no nome descreve o repositório daquele dia, e o que ele
+    // citava pode ter sido removido desde então — legitimamente.
+    if (/\d{4}-\d{2}-\d{2}/.test(doc)) continue;
+    const texto = leia(doc);
+    for (const achado of texto.matchAll(referencia.padrao)) {
+      if (universo.has(achado[1])) continue;
+      problemas.push({
+        doc,
+        linha: texto.slice(0, achado.index).split("\n").length,
+        nome: referencia.nome,
+        dito: referencia.comoEscrever(achado[1]),
+        real: "não existe",
+        trecho: referencia.comoEscrever(achado[1])
+      });
+    }
+  }
+}
+
+/**
  * Documento que se contradiz na própria data.
  *
  * `MODULOS.md` e `INVENTARIO.md` carregavam **duas** linhas "Atualizado em",
@@ -147,19 +232,21 @@ for (const doc of DOCUMENTOS) {
 }
 
 if (problemas.length) {
-  console.error("Números afirmados em documento canônico que não batem com o repositório:\n");
+  console.error("Documentação canônica que não bate com o repositório:\n");
   for (const p of problemas) {
     console.error(`  ${p.doc}:${p.linha} — diz "${p.trecho.trim()}", o real é ${p.real}`);
   }
   console.error(
     "\nNúmero errado em documento canônico é pior que número ausente: quem lê e mede a diferença\n" +
-      "conclui que falta o que não existe. Corrija o texto, ou — se a citação for histórica —\n" +
-      "escreva a data ao lado dela, porque medição datada não envelhece."
+      "conclui que falta o que não existe. Referência morta é pior ainda: manda procurar o que\n" +
+      "foi removido. Corrija o texto, ou — se a citação for histórica — escreva a data ao lado\n" +
+      "dela, porque medição datada não envelhece."
   );
   process.exit(1);
 }
 
 console.log(
-  `Números afirmados conferidos: ${conferidas} citação(ões) em ${DOCUMENTOS.length} documento(s), ` +
-    `sobre ${AFIRMACOES.length} medição(ões) — todas batem com o repositório.`
+  `Documentação conferida contra o repositório: ${conferidas} citação(ões) numérica(s) em ${DOCUMENTOS.length} ` +
+    `documento(s), sobre ${AFIRMACOES.length} medição(ões), e as referências das ${REFERENCIAS.length} classes ` +
+    `(${REFERENCIAS.map(r => r.nome).join(", ")}) — todas existem e todas batem.`
 );

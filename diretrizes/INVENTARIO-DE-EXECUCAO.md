@@ -2139,6 +2139,7 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
+| 2026-08-11 | Conferência da R9 ao fechar a S-75: **`M-0` continua aberto** | Quatro sprints penduradas nele — S-19 (riscos residuais da Etapa 20), S-22 (recuperação do repositório), S-39 (proteção de ramo, bloqueada) e S-73 (vacinas universais que viram teste). Fechar a S-75 não fecha o Marco, e é exatamente o que a R9 existe para impedir. Nenhuma reordenação: a próxima sprint é decisão da virada seguinte. |
 | 2026-08-11 | A S-43 passa de `em andamento` a `bloqueada`; a S-75 assume a vaga da R3 | **Bloqueio declarado, não reordenação de prioridade.** A T-43.3 tarefa 5 precisa das filas do canal no banco, e isso depende da S-69 — decisão do proprietário sobre aplicar migrations. Manter a S-43 como `em andamento` ocupava a vaga única da R3 e fazia o inventário parecer ter trabalho em curso onde havia espera. A S-75 estava em execução de fato, com 2 de 5 tarefas entregues, e passa a declarar isso. |
 | 2026-08-10 | A S-43 (migração de linguagens) passa à frente da S-23 (fundação de interface), que vai para `bloqueada` | **Decisão de prioridade do proprietário arquitetural**, caso previsto na R5: *"inicie as conversões dos códigos para Go, Typescript, Python e Rust conforme nosso mapa"*. A reordenação **apenas registra o que já era verdade**: a S-23 tem 23 tarefas concluídas e 11 abertas, e nenhuma avançou durante as S-38 a S-43. A R3 não acusou antes porque a S-43 constava como `pendente`; ao ativá-la, o validador reprovou com duas sprints em andamento e obrigou a explicitar a escolha. Retomar a S-23 exige tirar a S-43 da vaga. |
 | 2026-08-10 | A convergência do Projeto RH passa de `S-38` para `S-40` | **Colisão de numeração**, não reordenação de trabalho. As duas sprints foram escritas em paralelo, em ramos diferentes, e as duas se chamavam `S-38`. A da `main` (endurecimento dos portões) chegou primeiro pelo PR #45, junto da `S-39`; a do RH renumera para o fim, conforme a R4. Nenhuma tarefa mudou de ordem nem de conteúdo. |
@@ -2397,7 +2398,7 @@ por facilidade.
 
 ## Sprint S-75 — Varrer o que está obsoleto no inventário e nos canônicos
 
-**Estado:** em andamento
+**Estado:** concluída
 **Marco:** M-0
 
 Aberta em 11/08/2026 pela suspeita do proprietário — *"tem muita coisa
@@ -2421,7 +2422,7 @@ declaradas. O que sobra é o que ele **não** sabe conferir, e é o trabalho des
 sprint.
 
 - [x] T-75.1 — **Ampliada de 3 para 4 medições protegidas**, e a lição foi o que *não* deu para proteger. `destinos de menu` entrou. **`sprints` e `Marcos` foram tentados e retirados no mesmo dia**: em prosa não são contáveis com precisão — "17 de 25 módulos em 4 sprints ou mais" e "### 7.4 Sprints W-19 a W-22" casavam como se fossem contagem, e a medição de Marcos contava 41 porque a tabela de bloqueio da S-69 usa linhas com a mesma forma do registro. **Três acusações falsas em cinco** — portão que erra assim gasta a confiança de quem o lê. Entrou também a isenção de **documento com data no nome**, datado por construção
-- [ ] T-75.2 — **Fato obsoleto, não só número**: documento que descreve comportamento que não existe mais. É a VACINA-012, que segue sem portão, e é mais difícil porque exige comparar prosa com código
+- [x] T-75.2 — **Metade resolvida, e a outra metade declarada como não resolvida.** Existe um subconjunto da VACINA-012 que **dá para conferir por máquina**: referência citada que não existe mais. Quatro classes entraram no portão — vacina, sprint, Marco e função do banco — e as quatro estão provadas por sabotagem. Medido ao criar: **0 quebradas nas quatro**, o que confirma que o apodrecimento estava só nos números. O que **não** dá para conferir continua sem portão: documento que descreve um comportamento que mudou passa, porque exige comparar prosa com código. Está escrito como limitação no próprio validador, não resolvido às escondidas
 - [x] T-75.3 — **Varredura executada.** De 71 arquivos citados no inventário, **3 não existem**, e só **1 estava em tarefa aberta**: a T-28.11 mandava ler de um módulo "curvas.ts" que foi removido. Corrigida — a leitura de `project_progress_snapshots` já acontece hoje nas páginas de obra, e o que falta da tarefa é só a **gravação**. Os outros 2 estão em tarefas fechadas e são registro histórico. `ocorrencias` aparece citada, e é legítimo: é o registro da própria remoção, na S-44. Virou portão no `validate:inventory`
 - [x] T-75.4 — **Uma achada: a S-32**, com **46 tarefas feitas e zero abertas**, parada em `pendente`. Fechada. Sprint entregue e não fechada segura o Marco dela aberto pela R9, sem motivo. Virou portão no `validate:inventory`, provado por sabotagem — reabrir a S-32 reprova
-- [ ] T-75.5 — Registrar o que for achado no `REGISTRO-DE-ERROS.json`, para o Pareto medir a família `governanca` com denominador real
+- [x] T-75.5 — **Registrado, e o denominador mudou a leitura.** O registro foi de 20 para 31 ocorrências ao longo da sprint, e `governanca` consolidou-se como **40% do peso com 9 das 10 sem portão** — a família mais cara e a menos protegida. Os quatro portões desta leva (Marco, R9, números afirmados e inventário obsoleto) atacam exatamente ela

@@ -92,6 +92,35 @@ resolvidas, sem reescrever o que foi medido.
 | `MODULOS.md` ganha uma segunda linha "Atualizado em" | `exit=1` — acusa a contradição de data |
 | restaurado | `exit=0` |
 
+## A metade da VACINA-012 que deu para conferir
+
+*(acrescentado em 11/08/2026, pela T-75.2)*
+
+A VACINA-012 — *documentação diverge do estado real* — parecia não ter portão
+possível, porque exige comparar prosa com código. Mas existe um subconjunto que
+**é** mecanicamente verificável: **referência citada que não existe mais**.
+
+Quatro classes entraram, todas provadas por sabotagem:
+
+| Classe | Como é citada | Universo real |
+| --- | --- | --- |
+| vacina | `VACINA-999` | arquivos em `diretrizes/vacinas/` |
+| sprint | `S-99` | cabeçalhos `## Sprint` do inventário |
+| Marco | `` `M-INEXISTENTE` `` | linhas do Registro de Marcos |
+| função do banco | `` `public.funcao_fantasma(` `` | `create function` menos `drop function` |
+
+Medido ao criar: **0 quebradas nas quatro classes** — o que confirma por outro
+caminho a conclusão da varredura: o apodrecimento estava nos números, não nas
+referências.
+
+Portão que nasce verde é legítimo desde que a sabotagem prove que ele mede. O
+valor dele é futuro: impedir que a próxima remoção deixe rastro morto na
+documentação.
+
+**A outra metade continua sem portão**, e é a maior: documento que descreve um
+comportamento que mudou passa por aqui. Está escrito no validador, ao lado do
+código, e não foi resolvido às escondidas.
+
 ## Limitações da prevenção
 
 - **Só confere o que está na lista.** Três medições hoje. Número não declarado
