@@ -337,6 +337,51 @@ o produto parece parado, e é aqui que o manual tem mais a oferecer.
 | **Complementa** | O `sudo()` e as *record rules* do mergulho XI.11 já renderam a VACINA-065 ontem — sete funções corrigidas. |
 | **Trazer** | ⬤ antes-e-depois no registro de auditoria |
 
+### 3.6 Os dois módulos que ainda não existem
+
+Decididos pelo proprietário em 11/08/2026, depois do confronto. Entram na matriz
+como os outros: com o que o manual oferece, o que recusamos e por quê. Ainda
+**não estão em `lib/modules/registry.ts`** — declarar a chave lá obriga, no mesmo
+passo, semeadura em `app_modules`, menu e rota, conforme a VACINA-064. Esse
+encadeamento é a primeira tarefa de cada Marco, não um efeito colateral deste
+documento.
+
+#### `contabilidade` — a fazer · Marco `M-CONTABILIDADE`
+**Odoo:** Contabilidade e Faturamento — **11 fórmulas, 16 relatórios**, o
+aplicativo mais denso dos 61.
+
+Hoje o `financeiro` cobre o operacional da obra — contas, parcelas, medições,
+liquidações. O que falta é a camada que responde *"como a empresa está"*, e não
+*"como esta obra está"*.
+
+| | |
+| --- | --- |
+| **O que traz valor imediato** | **Contabilidade analítica.** É o mecanismo único do qual saem rentabilidade por obra, comprometido de orçamento e rateio de um custo entre duas obras. Nós resolvemos com `project_id` como coluna dura: mais simples, mais rápido, e incapaz de dividir. |
+| **Os relatórios que faltam** | Balanço, DRE, Razão Geral, Balancete, **Razão do Parceiro** (extrato do cliente), **A Receber e A Pagar Vencido por idade**, **Fluxo de Caixa em operacional/investimento/financiamento**, **Resumo Executivo** (margem bruta, líquida, ROI, prazo médio) e **Trilha de Auditoria** com valor anterior e novo. |
+| **O que complementa** | **Diferimento por dias e por meses** — receita e despesa por competência. Contrato de obra é exatamente isso, e nós tratamos por caixa. |
+| **O que fica de fora, e é decisão** | ○ **Fiscal brasileiro — NF-e, NFS-e, SPED, obrigação acessória.** É outro produto, com risco regulatório próprio; errar vira multa do contribuinte, não defeito de software. O próprio manual encerra a seção de localizações com *"validação com profissional local"*. Entra, se entrar, por decisão registrada com responsável nomeado — nunca por consequência de ter feito o gerencial. |
+| **Escopo da fase 1** | contábil **gerencial**: plano de contas, diários, lançamento, analítica, conciliação bancária e os oito relatórios acima. Sem emissão, sem transmissão, sem apuração de tributo. |
+
+#### `ia` — a fazer · Marco `M-IA`
+**Odoo:** IA (10 procedimentos) — e é o ponto em que o manual **menos** ajuda.
+
+O aplicativo de IA do Odoo é assistente de redação e classificação. O que o
+proprietário pediu é diferente e mais ambicioso: **IA que executa ato de
+escrituração** — lança, classifica, concilia, cobra.
+
+| | |
+| --- | --- |
+| **Fazemos melhor, e por larga margem** | A ponte de IA da S-22 já tem orçamento diário com reserva e commit, trava por conversa com token de cerca, citação de fonte validada contra o texto gerado, aprovação prévia para escrita crítica, caminho de devolução ao humano e contagem de sinal de injeção removido. Nada disso está no manual. |
+| **Fazem melhor** | Nada que eu consiga sustentar para este recorte. |
+| **O que o manual empresta mesmo assim** | As **159 fórmulas** são o que torna a IA verificável: ato cuja regra está escrita pode ser conferido depois. IA que classifica sem regra declarada não é auditável. |
+| **O que este módulo é** | A generalização da ponte da S-22 de um canal só para toda a plataforma, com **níveis de autonomia por tipo de ato** e uma lista do que nunca é autônomo. |
+| **Contrato** | [`IA-OPERADORA.md`](IA-OPERADORA.md) — canônico. Quatro níveis (N0 sugerir → N3 lançar sozinha), padrão N0, sete atos que nunca chegam a N3, e quatro pré-condições: fonte citada, reversível com desfazer escrito antes, rastro antes-e-depois, recusa possível. |
+| **Dependência dura** | **E12** (antes-e-depois na auditoria) deixa de ser acabamento e vira pré-requisito: sem ele, nenhum ato passa de N1. |
+
+**O primeiro emprego útil da IA é E7**, os relatórios de ausência: varrer, achar
+o que falta e cobrar é o trabalho burocrático que ninguém quer fazer, e é
+reversível por natureza — cobrança errada custa um aviso, não um lançamento.
+
 ---
 
 ## 4. Visão global — o que a matriz diz quando lida de uma vez

@@ -127,6 +127,8 @@ planejada ainda), `concluído` (tem sprint e nenhuma delas está aberta).
 | `M-AUDITORIA` | Finalizar o módulo Auditoria | aberto |
 | `M-ADMINISTRACAO` | Finalizar o módulo Administração | aberto |
 | `M-DASHBOARD` | Finalizar a central de aplicativos | sem sprint |
+| `M-CONTABILIDADE` | Criar e finalizar o módulo Contabilidade (gerencial; fiscal fica fora, §3.6 do confronto) | aberto |
+| `M-IA` | Criar e finalizar o módulo de IA operadora, sob o contrato de `IA-OPERADORA.md` | aberto |
 | `M-SEGURANCA` | Correções de segurança aplicadas no banco, não só no repositório | aberto |
 | `M-PLATAFORMA` | Mapa tecnológico: as fases de migração de linguagem da §36 | aberto |
 | `M-TRAVESSIAS` | Travessias ponta a ponta como suíte de teste | aberto |
@@ -138,7 +140,7 @@ planejada ainda), `concluído` (tem sprint e nenhuma delas está aberta).
 | `M-4` | Generalização do produto: vocabulário e presets de segmento | aberto |
 | `M-5` | Padrão de interface de mercado | aberto |
 
-**Onze módulos estão em `sem sprint`.** Não é omissão do registro: é o retrato
+**Onze módulos existentes estão em `sem sprint`.** Não é omissão do registro: é o retrato
 honesto de que ninguém planejou trabalho para eles. Entre eles estão
 `planejamento` e `tarefas`, que têm **1 página cada** e menu de 17% a 20%
 próprio — o núcleo operacional da obra sem nenhuma sprint prevista. É a mesma
@@ -2140,3 +2142,79 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 4. Marca `[x]` ao concluir, com evidência (R2).
 5. Ao terminar a sprint, marca `concluída`, e só então escolhe a próxima — podendo reordenar as pendentes, com registro (R5, R6).
 6. Descobriu algo novo? Vai para o fim (R4), nunca no meio.
+
+---
+
+## Sprint S-64 — Contabilidade: a chave, o catálogo e a analítica
+
+**Estado:** pendente
+**Marco:** M-CONTABILIDADE
+
+Módulo novo, decidido pelo proprietário em 11/08/2026. Entra no fim conforme a
+R4, declarando o Marco. Escopo, lacunas e o que fica **fora** — fiscal
+brasileiro — em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md)
+§3.6. Conforme a R8, esta sprint aponta e não repete.
+
+A analítica vem primeiro porque é dela que saem a rentabilidade (E3), o
+comprometido (E4) e o rateio de um custo entre duas obras. Relatório antes de
+analítica seria relatório sobre um eixo que não existe.
+
+- [ ] T-64.1 — **A cadeia inteira da chave, num passo só**: `contabilidade` no `MODULE_REGISTRY`, semeadura em `app_modules`, bloco de menu e pasta de rota. As quatro coisas juntas, porque `validate:modulos-semeados` cobra as cinco direções e a VACINA-064 nasceu exatamente de fazer isso pela metade
+- [ ] T-64.2 — Persona e rotina antes da primeira tela, conforme `PERSONAS-E-ROTINAS.md`: quem entra, vindo de onde, para resolver o quê e em quantos cliques
+- [ ] T-64.3 — Plano de contas e diários, por organização, com semeadura padrão editável
+- [ ] T-64.4 — **Distribuição analítica com percentual**, permitindo um custo pertencer a mais de uma obra — o mecanismo do qual E3 e E4 dependem
+- [ ] T-64.5 — Lançamento contábil com partida dobrada conferida no banco, e estorno como lançamento novo, nunca exclusão de linha
+- [ ] T-64.6 — Prova por sabotagem: lançamento desbalanceado reprova; soma de percentuais analíticos fora da distribuição pretendida reprova
+
+## Sprint S-65 — Contabilidade: os relatórios que respondem "como a empresa está"
+
+**Estado:** pendente
+**Marco:** M-CONTABILIDADE
+
+Os oito relatórios da §3.6 do confronto. Cada um declara **a pergunta que
+responde**, como faz a tabela do manual — a nossa tabela de relatórios tem
+título, e a deles tem pergunta.
+
+- [ ] T-65.1 — Razão Geral, Balancete e Balanço, com caminho de volta ao lançamento
+- [ ] T-65.2 — DRE gerencial por período, com comparação entre períodos
+- [ ] T-65.3 — **Razão do Parceiro**: o extrato do cliente, que hoje não existe
+- [ ] T-65.4 — **A Receber e A Pagar Vencido por idade** — família de relatório de ausência (E7)
+- [ ] T-65.5 — **Fluxo de Caixa** separado em operacional, investimento e financiamento
+- [ ] T-65.6 — Resumo Executivo: margem bruta, margem líquida, ROI e prazos médios
+- [ ] T-65.7 — Cada relatório com a pergunta declarada e a definição do número legível ao usuário, não só ao código
+
+## Sprint S-66 — IA operadora: o registro de atos e o portão da autonomia
+
+**Estado:** pendente
+**Marco:** M-IA
+
+Módulo novo, decidido pelo proprietário em 11/08/2026. O contrato está em
+[`IA-OPERADORA.md`](IA-OPERADORA.md) e é canônico; esta sprint **implementa o
+portão que aquele documento declara não ter** (§9).
+
+Nada de modelo, prompt ou provedor entra aqui. Primeiro o registro de atos e as
+regras que o CI sabe cobrar — porque autonomia sem portão é a coisa que este
+repositório mede que não dura.
+
+- [ ] T-66.1 — A cadeia inteira da chave `ia`, como em T-64.1
+- [ ] T-66.2 — Tabela de **atos da IA**: módulo, ato, nível (N0..N3), caminho de desfazer, quem aprovou o nível e quando. Padrão de todo ato novo é **N0**
+- [ ] T-66.3 — **Portão `validate:ia-autonomia`**: ato em N2/N3 sem caminho de desfazer reprova; ato em N2/N3 cujo gravador não escreve antes-e-depois reprova; ato da lista do §4 declarado acima de N1 reprova
+- [ ] T-66.4 — Prova por sabotagem das três direções, com o caso legítimo passando — portão que só sabe reprovar não mede
+- [ ] T-66.5 — Generalizar orçamento, trava e citação da ponte da S-22 para além do canal, **sem reimplementar**: partir de `20260804200000_stage22_ai_bridge.sql` com as correções da VACINA-065
+- [ ] T-66.6 — Degradação segura: sem orçamento, sem provedor ou sem confiança, cai para N0 e avisa; nunca para em silêncio
+
+## Sprint S-67 — IA operadora: o primeiro trabalho, que é cobrar o que falta
+
+**Estado:** pendente
+**Marco:** M-IA
+
+O primeiro emprego útil é **E7**, os relatórios de ausência. Escolhido por ser
+reversível por natureza: cobrança errada custa um aviso, não um lançamento.
+Depende de S-66 (o portão) e de E12 (antes-e-depois), que é pré-condição de
+qualquer ato acima de N1.
+
+- [ ] T-67.1 — Varredura no plano de execução em Go que já existe, como segunda carga — sem runtime novo, sem ADR
+- [ ] T-67.2 — Primeiros atos, todos em N1: documento faltante, lead sem acompanhamento, recebível vencido, pedido de compra atrasado
+- [ ] T-67.3 — Cada aviso cita a fonte e oferece a ação; nenhum grava sozinho
+- [ ] T-67.4 — Teto de volume por tipo de ato: 500 avisos numa madrugada é incidente, mesmo com cada um certo
+- [ ] T-67.5 — Medir taxa de acerto com denominador declarado, antes de qualquer conversa sobre subir nível

@@ -327,3 +327,23 @@ Definition of Done para produção:
 - todas as FKs indexadas;
 - CI verde;
 - PR pronto para revisão, sem merge automático.
+
+## `contabilidade` — Contabilidade *(a fazer — Marco `M-CONTABILIDADE`)*
+
+- rota `/app/contabilidade`;
+- **ainda não declarado em `lib/modules/registry.ts`**: a chave só entra junto da semeadura em `app_modules`, do menu e da rota, conforme a VACINA-064;
+- escopo da fase 1 é **contábil gerencial**: plano de contas, diários, lançamento com partida dobrada, distribuição analítica com percentual e conciliação bancária;
+- **fiscal brasileiro fica fora** — NF-e, NFS-e, SPED e apuração de tributo são decisão própria, com responsável nomeado; risco regulatório não é consequência de ter feito o gerencial;
+- a distribuição analítica é o mecanismo do qual dependem a rentabilidade da obra (E3) e o comprometido de orçamento (E4);
+- estorno é lançamento novo; linha de lançamento nunca é apagada;
+- confronto e lacunas em `CONFRONTO-ODOO-19-E-INNOV.md` §3.6.
+
+## `ia` — IA operadora *(a fazer — Marco `M-IA`)*
+
+- rota `/app/ia`;
+- **ainda não declarado em `lib/modules/registry.ts`**, pela mesma regra;
+- não é assistente de resposta: é IA que **executa ato de escrituração** — lança, classifica, concilia, cobra;
+- generaliza a ponte de IA da S-22 (orçamento diário, trava por objeto, citação validada, aprovação de escrita crítica, devolução ao humano) de um canal só para toda a plataforma;
+- quatro níveis de autonomia por tipo de ato e por organização, **padrão N0**; sete atos nunca chegam a N3, entre eles assinar, emitir documento fiscal, mover dinheiro e alterar a própria autonomia;
+- quatro pré-condições de qualquer ato autônomo: fonte citada, reversível com o desfazer escrito antes, rastro com antes-e-depois, e recusa possível;
+- contrato canônico em `IA-OPERADORA.md`; o portão que o sustenta é a T-66.3.

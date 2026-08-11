@@ -62,7 +62,7 @@ e a regra que o governa é uma só: **o repositório é a fonte canônica, o Not
 o índice**. Quando os dois divergirem, o repositório ganha e o verbete é
 atualizado. Quem mede algo novo registra lá, com o número e a data.
 
-Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/CONFRONTO-ODOO-19-E-INNOV.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/FLUXOS-E-RISCOS.md` → `diretrizes/PADRAO-DE-INTERFACE.md` → `diretrizes/MAPA-TECNOLOGICO.md` → `diretrizes/PROVA-POR-SABOTAGEM.md`.
+Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/CONFRONTO-ODOO-19-E-INNOV.md` → `diretrizes/IA-OPERADORA.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/FLUXOS-E-RISCOS.md` → `diretrizes/PADRAO-DE-INTERFACE.md` → `diretrizes/MAPA-TECNOLOGICO.md` → `diretrizes/PROVA-POR-SABOTAGEM.md`.
 
 ## Antes de criar tela
 
