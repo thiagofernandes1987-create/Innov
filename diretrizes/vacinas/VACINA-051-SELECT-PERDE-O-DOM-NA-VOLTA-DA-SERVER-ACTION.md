@@ -100,7 +100,22 @@ Depois: prévia com 7 lacunas, documento emitido com 7.
 
 ## Prevenção automática
 
-`verif26.mjs` no arnês compara, na tela de emissão, a contagem de lacunas da
-prévia com a do documento emitido, e confere que cliente, obra e título
-continuam selecionados depois da ida ao servidor. É a mesma medição que
-encontrou o defeito, agora rodando como verificação.
+**Nenhuma, e a correção deste texto é parte do achado.**
+
+Até 11/08/2026 esta seção afirmava: *"`verif26.mjs` no arnês compara, na tela de
+emissão, a contagem de lacunas da prévia com a do documento emitido"*. **Esse
+arquivo não existe neste repositório** — veio de um arnês que nunca foi
+versionado aqui. A varredura da S-73, que contou quantas vacinas tinham portão
+para decidir onde investir, classificou esta como tendo. Contou errado por causa
+desta frase.
+
+Prevenção declarada e ausente é pior que prevenção nenhuma: quem lê para de
+procurar. Hoje a conferência é **humana**, e `pnpm validate:prevencao-declarada`
+existe para impedir que a próxima afirmação dessas volte a passar.
+
+A prevenção executável é a **T-73.3** do inventário, e o que ela precisa cobrir
+está medido: no repositório inteiro há **um** `<select name=…>` controlado por
+estado dentro de componente com `useActionState` — o desta vacina, já corrigido.
+Os outros 16 usam `defaultValue`, e campo não controlado não diverge do DOM
+porque o DOM é a verdade dele. O portão, portanto, não é para o que existe: é
+para o próximo `value={estado}` que alguém escrever.

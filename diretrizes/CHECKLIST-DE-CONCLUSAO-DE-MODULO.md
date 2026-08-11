@@ -41,7 +41,7 @@ trabalhar não é praticada — e foi exatamente o que aconteceu.
 
 ## 2. A segunda razão, que é pior
 
-Metade destas perguntas **já tem portão pronto** no repositório. São 46
+Metade destas perguntas **já tem portão pronto** no repositório. São 47
 validadores. E nenhum deles responde a pergunta que decide um Marco:
 
 > *este módulo está pronto?*

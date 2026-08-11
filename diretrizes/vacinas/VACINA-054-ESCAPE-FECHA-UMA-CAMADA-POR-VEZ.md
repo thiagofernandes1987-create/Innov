@@ -100,8 +100,19 @@ lista fechada  → Escape → formulário fechado: sim
 
 ## Prevenção automática
 
-`verif28.mjs` no arnês exercita a sequência completa na tela de cronograma:
-lista aberta → `Escape` → confere que a lista fechou, **que o formulário
-continua aberto** e que o texto digitado permanece; depois `Escape` de novo →
-confere que aí sim o formulário fecha. Foi o roteiro que encontrou o defeito,
-agora afirmando as duas metades.
+**Nenhuma, pelo mesmo motivo da VACINA-051.**
+
+Até 11/08/2026 esta seção afirmava que `verif28.mjs` exercitava a sequência
+completa na tela de cronograma. **Esse arquivo não existe neste repositório.**
+As duas vacinas de formulário que a S-73 contou como protegidas eram as duas que
+citavam um arnês ausente — e são justamente as que tratam do defeito mais caro
+de todos, o que apaga o que a pessoa acabou de digitar.
+
+Hoje a conferência é **humana**, e `pnpm validate:prevencao-declarada` impede
+que a próxima afirmação dessas volte a passar.
+
+A prevenção executável é a **T-73.4**. O que ela precisa cobrir está medido:
+nove componentes tratam `Escape`, sete deles por ouvinte de `document` — camadas
+externas, que é o lado que sofre. Só um é camada interna dispensável
+(`campo-com-sugestao.tsx`), e é o que já barra a propagação. O portão é para o
+próximo controle dispensável que alguém escrever sem barrar.

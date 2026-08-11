@@ -216,6 +216,8 @@ jobs:
         run: pnpm validate:crlf-normalizado
       - name: Validate queries against real table columns (VACINA-036)
         run: pnpm validate:colunas-existentes
+      - name: Validate vaccines do not declare absent prevention
+        run: pnpm validate:prevencao-declarada
       - name: Validate code map against the code
         run: pnpm validate:code-map
       - name: Validate migrations against the applied ledger (VACINA-057)

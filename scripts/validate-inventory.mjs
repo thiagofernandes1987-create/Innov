@@ -133,6 +133,13 @@ if (versionados.size > 0) {
         if (versionados.has(alvo)) continue;
         if (!alvo.includes("/") && versionados.has(alvo)) continue;
         if (fs.existsSync(alvo)) continue;
+        // Citação datada é registro, não premissa. A T-73.3 cita `verif26.mjs`
+        // **de propósito**, para registrar que a VACINA-051 declarava prevenção
+        // por um arquivo que nunca foi versionado aqui. Apagar a menção apagaria
+        // a prova de que a afirmação existiu. Mesma isenção do
+        // `validate:numeros-afirmados` e do `validate:prevencao-declarada`.
+        const entorno = tarefa.slice(Math.max(0, citado.index - 240), citado.index + 240);
+        if (/\d{2}\/\d{2}\/\d{4}|\bnunca foi versionad|\bque também não existe\b/i.test(entorno)) continue;
         errors.push(
           `${sprint.id} tem tarefa aberta citando \`${alvo}\`, que não existe. A premissa da tarefa caiu: ` +
             `o arquivo foi removido ou renomeado. Corrija a tarefa — tarefa fechada é isenta, porque é registro histórico.`

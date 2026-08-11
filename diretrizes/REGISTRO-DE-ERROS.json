@@ -392,6 +392,26 @@
       "tinha_portao": false,
       "detectado_por": "revisão própria, ao conferir uma acusação contra a migration",
       "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Duas vacinas declaravam prevenção automática por arquivo que nunca foi versionado aqui (`verif26.mjs` e `verif28.mjs`). A varredura da S-73 contou as duas como tendo portão, e são justamente as do defeito mais caro — formulário que apaga o que a pessoa digitou",
+      "familia": "portao",
+      "onde": "diretrizes/vacinas/VACINA-051 e VACINA-054",
+      "vacina": "VACINA-012",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria, ao abrir a T-73.3",
+      "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "O portão de prevenção declarada lia só a primeira seção `## Prevenção automática` de cada arquivo. A própria sabotagem passou: bastava acrescentar uma segunda seção falsa depois da verdadeira",
+      "familia": "portao",
+      "onde": "scripts/validate-prevencao-declarada.mjs",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "sabotagem",
+      "custo": "medio"
     }
   ]
 }
