@@ -214,6 +214,64 @@ trilhas por papel (§2.8) não viram sprint: entram como alteração nos documen
 canônicos que já existem — `PADRAO-DE-INTERFACE.md`, `PROVA-POR-SABOTAGEM.md` e
 `PERSONAS-E-ROTINAS.md`.
 
+## 4.1 Segundo passe — a estrutura real do manual, medida
+
+A primeira leitura tratou o material como texto e extraiu conceito. O segundo
+passe mediu a **estrutura**, e ela é mais útil do que o conceito:
+
+```
+procedimentos documentados         : 438
+dimensões por procedimento         :  28
+títulos H3 distintos               : 356
+```
+
+Os 438 batem exatamente com as 438 ocorrências de `Status V7` que o arquivo de
+validação declara — ou seja, cada procedimento passou pelo mesmo confronto com
+a fonte oficial. Não é uma enciclopédia solta: é um **gabarito aplicado 438
+vezes**.
+
+Das 28 dimensões, duas são as que o INNOV nunca escreve, e por isso foram as
+extraídas:
+
+| Dimensão | O que ela obriga a responder |
+| --- | --- |
+| **4. Quando não usar** | o caso em que a ferramenta certa é outra |
+| **24. Reversão** | como desfazer **sem apagar** |
+
+Filtrando os 438 por domínio equivalente no INNOV e exigindo as duas dimensões
+preenchidas, sobram **255**. Destes, **18** carregam regra de reversão forte —
+proibição explícita de apagar, exigência de estorno, ou preservação de trilha —
+e **11** sem duplicata de regra.
+
+### O padrão que se repete nos 11
+
+Sempre a mesma forma, em domínios diferentes:
+
+> **Reverta pelo evento de origem, não pelo valor. Nunca apague o que já
+> produziu efeito; emita o documento contrário e preserve os dois.**
+
+Aplicado a conta contábil: *"não corrija histórico renomeando a conta supondo
+que a classificação original desapareceu"*. A estoque: *"reverta o evento de
+origem — devolução para recebimento, nota de crédito para fatura; mudança de
+custo sem trilha destrói a auditabilidade"*. A folha: *"não apague holerite
+pago; preserve o original, o documento de reversão e a autorização"*.
+
+O INNOV já chegou nessa regra por um caminho só, e por dor: a `VACINA-039`
+(atualização mensal de referência não altera orçamento histórico) e a
+`VACINA-049` (salvar não muda estado de publicação) são casos particulares
+dela. O que falta é a **regra geral escrita**, e um lugar onde ela seja
+consultada antes de cada módulo novo.
+
+### Onde isso ficou
+
+Base [Referência Odoo — quando não usar e como reverter](https://app.notion.com/p/0783cadd2ab94274bbf9c684e543f576),
+com 6 procedimentos semeados, cada um com o julgamento de aplicabilidade
+(`adotar`, `adaptar`, `não se aplica`) e o motivo de importar aqui.
+
+Não semeei os 255 nem os 438. Verbete copiado em massa entra sem julgamento, e
+julgamento é justamente o que separa referência de entulho. O que semeei foi o
+**padrão** e os casos que o INNOV vai encontrar nas travessias da S-49.
+
 ## 5. Uma ressalva honesta sobre prioridade
 
 Nada disto muda o fato de que **68 migrations do RH e 25 da mensageria não estão
