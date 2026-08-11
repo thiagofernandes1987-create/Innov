@@ -51,6 +51,17 @@ O documento traz, ao lado do texto original, a **medição executada** contra ca
 
 ## Memória entre sessões
 
+**Antes de abrir arquivo, consulte o índice.** A base de conhecimento no Notion
+existe para achar o fato sem gastar janela de contexto lendo `diretrizes/`
+inteiro — [Partida a frio](https://app.notion.com/p/3b947a93b8968165b4c1fc0cbf897b47)
+primeiro, depois a base `Conhecimento INNOV`, filtrando por Tipo e Módulo.
+Diante de erro, procure em `Tipo = Vacina` **antes** de diagnosticar.
+
+O contrato de uso está em [`diretrizes/MEMORIA-EXTERNA.md`](diretrizes/MEMORIA-EXTERNA.md),
+e a regra que o governa é uma só: **o repositório é a fonte canônica, o Notion é
+o índice**. Quando os dois divergirem, o repositório ganha e o verbete é
+atualizado. Quem mede algo novo registra lá, com o número e a data.
+
 Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/FLUXOS-E-RISCOS.md` → `diretrizes/PADRAO-DE-INTERFACE.md` → `diretrizes/MAPA-TECNOLOGICO.md` → `diretrizes/PROVA-POR-SABOTAGEM.md`.
 
 ## Antes de criar tela
