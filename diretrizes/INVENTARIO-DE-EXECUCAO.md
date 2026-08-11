@@ -1629,6 +1629,97 @@ descoberto.
 
 ---
 
+## Sprint S-46 — Camada transversal única, a mobília que hoje cada módulo refaz
+
+**Estado:** pendente
+
+Nasce da leitura do material do Odoo 19 em 11/08/2026, analisada em
+`diretrizes/APROVEITAMENTO-ODOO-19-2026-08-11.md`. O Odoo tem uma camada
+chamada **Essentials** — *"a camada de recursos comuns usada por praticamente
+todo o sistema"* — que entrega estágios, atividades, chatter, busca com filtros
+salvos e as visões para os 37 aplicativos de uma vez. O INNOV não tem essa
+camada: tem 25 módulos, cada um reconstruindo o que precisa.
+
+Medido no repositório: **56 páginas de detalhe, 6 com histórico**. Cinquenta
+fichas em que o usuário abre e não vê o que aconteceu. No banco, o mesmo
+conceito aparece fatiado — `channel_conversation_notes`, `pipeline_card_notes` e
+`sac_ticket_messages` para "anotar num registro"; `crm_activities` e
+`pipeline_card_activities` para "o que fazer em seguida". Zero filtros salvos,
+zero paleta de comandos, uma visão pivot.
+
+Não é falta de trabalho: é trabalho repetido, dividido por 25. Entra no fim
+conforme a R4.
+
+### Tarefas
+
+- [ ] T-46.1 — Registro polimórfico de eventos por objeto: comentário, nota, mudança de campo, anexo, atividade agendada e seguidor, com uma política de acesso só
+- [ ] T-46.2 — Componente único de linha do tempo, montável por qualquer ficha
+- [ ] T-46.3 — Ligar as 50 fichas sem histórico; medir antes e depois, que o número só pode subir
+- [ ] T-46.4 — Consolidar as 3 tabelas de nota e as 2 de atividade, com migração de dado e sem perda de trilha
+- [ ] T-46.5 — Busca com filtros salvos como camada, não por módulo
+- [ ] T-46.6 — Portão que reprova ficha de detalhe nova sem linha do tempo, provado por sabotagem
+- [ ] T-46.7 — **Guarda contra o efeito colateral que o próprio material avisa:** histórico é evidência contextual e não substitui campo estruturado. Mudança relevante registrada só em comentário continua sendo inconsistência
+
+---
+
+## Sprint S-47 — Rentabilidade por obra, com as maturidades separadas
+
+**Estado:** pendente
+
+O deep dive XI.9 do material descreve a armadilha: **Expected**, **To Invoice**
+e **Invoiced** são estágios do mesmo fluxo, e somar os três *"duplica
+economicamente o fato"*. O que se acompanha é a migração entre colunas.
+
+Medido no INNOV: existe `finance_cost_centers`, e "margem" só aparece em
+orçamento (BDI/markup). **Não existe visão de rentabilidade por obra** — nada
+que compare custo consumido com receita reconhecida numa obra viva. Para uma
+plataforma de construção, é a tela que o dono da empresa abre primeiro.
+
+### Tarefas
+
+- [ ] T-47.1 — Cinco maturidades como colunas distintas e nunca somadas: Previsto (contrato + aditivos), A medir, Medido, Faturado, Recebido
+- [ ] T-47.2 — Custo consumido por obra a partir de compras, estoque, folha e despesas, sempre pelo centro de custo
+- [ ] T-47.3 — **O teste que o material dá pronto:** procurar registros economicamente ligados à obra e **sem** vínculo analítico. São o que some do painel; no INNOV, custo lançado sem centro de custo
+- [ ] T-47.4 — Portão que reprova soma entre maturidades, provado por sabotagem
+
+---
+
+## Sprint S-48 — Ficha de definição de relatório e matriz de integração
+
+**Estado:** pendente
+
+Duas peças de documentação executável do material do Odoo, ambas baratas e de
+alto retorno de manutenção.
+
+### Tarefas
+
+- [ ] T-48.1 — Ficha de definição por relatório: modelo-fonte, medida, dimensão, data, estados, organização, moeda, filtros, transformação e drill-down. *"O auditor primeiro compara definições e só depois números"*
+- [ ] T-48.2 — Portão: relatório sem ficha não entra
+- [ ] T-48.3 — Matriz de integração — **o que** trafega entre módulos, não só que existe dependência. O `MODULE_REGISTRY` declara `dependencies` e isso não diz o que atravessa
+- [ ] T-48.4 — Quarta pergunta de segurança do material, que é a que falta ao INNOV: conferir sistematicamente que server action não contorna o que a RLS nega. As perguntas 1 e 3 já viraram `VACINA-053` e `VACINA-064` pelo caminho da dor
+
+---
+
+## Sprint S-49 — Travessias ponta a ponta como suíte de teste
+
+**Estado:** pendente
+
+O material define seis reconciliações com walkthrough e testes de exceção
+nomeados. Hoje o INNOV testa por módulo; testar por travessia é o que pega o
+defeito que mora **entre** dois módulos, que é onde ele costuma morar.
+
+### Tarefas
+
+- [ ] T-49.1 — Proposta → Contrato → Medição → Fatura → Recebimento
+- [ ] T-49.2 — Solicitação → Cotação → Pedido → Recebimento → Pagamento
+- [ ] T-49.3 — Entrada → Saída para obra → Custo apropriado
+- [ ] T-49.4 — EAP → Cronograma → Diário → Avanço físico → Medição
+- [ ] T-49.5 — Admissão → Ponto → Folha → eSocial → Pagamento
+- [ ] T-49.6 — Obra → Custo → Receita → Rentabilidade
+- [ ] T-49.7 — Testes de exceção em cada travessia, com os nomes que o material dá: entrega parcial, faturamento parcial, pagamento parcial, devolução, desconto não autorizado e cancelamento depois de etapa derivada
+
+---
+
 ## Registro de reordenação
 
 Toda mudança na ordem de execução das sprints, conforme R5 e R6.
