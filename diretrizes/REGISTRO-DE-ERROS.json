@@ -342,6 +342,16 @@
       "tinha_portao": true,
       "detectado_por": "portão próprio",
       "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Afirmei por várias mensagens que \"120 funções são chamáveis por anon no banco\". O banco vivo diz 2. Medi o estado final do repositório — incluindo migrations não aplicadas — e chamei o resultado de \"o banco\"",
+      "familia": "medicao",
+      "onde": "scripts/validate-execute-revogado.mjs e as mensagens da S-73",
+      "vacina": "VACINA-057",
+      "tinha_portao": false,
+      "detectado_por": "advisor do Supabase, ao abrir a S-69",
+      "custo": "alto"
     }
   ]
 }

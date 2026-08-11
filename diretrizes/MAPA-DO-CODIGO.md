@@ -35,7 +35,7 @@ a ignorar.
 | Funções do banco declaradas | 414 |
 | Funções do banco chamadas do código | 200 |
 | Suítes de teste | 108, com 1014 casos |
-| Migrations | 272 |
+| Migrations | 273 |
 | Validadores de CI | 57 |
 | Módulos de `lib/` citados por algum teste | 94 de 146 |
 
@@ -1513,7 +1513,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `save_object_definition_draft` | `supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql` | `app/actions/objetos.ts` |
 | `search_sinapi_references` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/app/orcamentos/sinapi/page.tsx` |
 | `select_procurement_quote` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
-| `semear_modelos_da_empresa` | `supabase/migrations/20260811061000_definidoras_conferem_participacao.sql` | `app/actions/documentos.ts` |
+| `semear_modelos_da_empresa` | `supabase/migrations/20260811190000_semeadura_de_modelos_confere_participacao.sql` | `app/actions/documentos.ts` |
 | `semear_motivos_de_perda` | `supabase/migrations/20260811060000_semeadura_de_lista_confere_participacao.sql` | — (só por SQL ou trigger) |
 | `set_channel_ai_daily_budget` | `supabase/migrations/20260805003000_stage22_governed_bot_profiles.sql` | `app/actions/messaging-bots.ts` |
 | `set_channel_conversation_actor` | `supabase/migrations/20260804180000_stage22_multiprovider_inbox.sql` | — (só por SQL ou trigger) |
@@ -1546,7 +1546,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `submit_procurement_request` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
 | `task_dependency_cria_ciclo` | `supabase/migrations/20260727180000_planejamento_ciclo_dependencia.sql` | — (só por SQL ou trigger) |
 | `task_dependency_sem_ciclo` | `supabase/migrations/20260727180000_planejamento_ciclo_dependencia.sql` | — (só por SQL ou trigger) |
-| `tg_semear_modelos_da_empresa` | `supabase/migrations/20260811061000_definidoras_conferem_participacao.sql` | — (só por SQL ou trigger) |
+| `tg_semear_modelos_da_empresa` | `supabase/migrations/20260811190000_semeadura_de_modelos_confere_participacao.sql` | — (só por SQL ou trigger) |
 | `tg_semear_motivos_de_perda` | `supabase/migrations/20260811060000_semeadura_de_lista_confere_participacao.sql` | — (só por SQL ou trigger) |
 | `tipologias_do_cub` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
 | `touch_updated_at` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |

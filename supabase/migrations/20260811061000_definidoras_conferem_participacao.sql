@@ -1,11 +1,20 @@
--- Seis funções `security definer` recebiam o `organization_id` de quem chama e
--- agiam sobre ele sem perguntar se o chamador pertence àquela organização.
+-- Cinco funções `security definer` da etapa 22 recebiam o `organization_id` de
+-- quem chama e agiam sobre ele sem perguntar se o chamador pertence àquela
+-- organização.
+--
+-- **Separada em 11/08/2026.** Esta migration nasceu com seis funções; a sexta
+-- era `semear_modelos_da_empresa`, que **está viva no banco** enquanto as cinco
+-- daqui dependem de tabelas da etapa 22 que **não estão aplicadas**. Juntas, a
+-- correção de uma escrita cross-tenant viva ficaria esperando por um módulo sem
+-- relação com ela. A semeadura de modelos foi para
+-- `20260811190000_semeadura_de_modelos_confere_participacao.sql`, com o mesmo
+-- conteúdo.
 --
 -- `security definer` roda com os privilégios do dono da função e por isso **não
 -- passa por RLS**. Quando a função ainda recebe como parâmetro justamente o
 -- campo que separa uma empresa da outra, ela vira uma porta que ignora a
 -- política e aceita o destino de quem bate. A conferência que a RLS faria
--- sozinha precisa ser feita à mão, e nestas seis não estava.
+-- sozinha precisa ser feita à mão, e nestas cinco não estava.
 --
 -- O que dava para fazer, sem ler uma linha de dado alheio:
 --
@@ -18,8 +27,6 @@
 --   release_channel_ai_conversation  apagar a trava de conversa de outra empresa
 --   consume_channel_critical_write_approval  queimar aprovação pendente de
 --                               escrita crítica de outra empresa
---   semear_modelos_da_empresa   inserir os modelos PLATAFORMA como linhas de
---                               `document_templates` de outra empresa
 --
 -- Nenhuma delas é vazamento de leitura; todas são escrita cross-tenant, que é
 -- exatamente o que a RLS existe para impedir em todo o resto do esquema.
@@ -36,7 +43,7 @@
 --
 -- O guarda de cada uma é o da sua família, não um novo inventado aqui.
 --
--- Sobre `service_role`: as seis continuam concedidas a ele, como as irmãs já
+-- Sobre `service_role`: as cinco continuam concedidas a ele, como as irmãs já
 -- eram. `has_module_permission` depende de `auth.uid()` e recusa chamada sem
 -- sessão, então o plano de execução não pode chamá-las como `service_role` —
 -- restrição que as irmãs já carregavam desde a S-22 e que nenhum chamador de
@@ -171,92 +178,5 @@ as $$ begin
     and consumed_at is null and expires_at > clock_timestamp();
   return found;
 end $$;
-
--- ---------------------------------------------------------------------------
--- Semeadura de modelos — guarda da família das semeadoras: is_org_member.
--- ---------------------------------------------------------------------------
-
-create or replace function public.semear_modelos_da_empresa(p_organization_id uuid)
-returns integer
-language plpgsql
-security definer
-set search_path = public
-as $$
-declare
-  v_copiados integer;
-begin
-  if p_organization_id is null then
-    raise exception 'organização não informada';
-  end if;
-  if not public.is_org_member(p_organization_id) then
-    raise exception 'sem acesso a esta organização';
-  end if;
-
-  insert into public.document_templates (
-    organization_id, scope, name, document_type, description, body_markdown,
-    variables, client_visible, status, version_number, derived_from,
-    published_at, created_at, updated_at
-  )
-  select
-    p_organization_id, 'ORGANIZACAO', padrao.name, padrao.document_type, padrao.description,
-    padrao.body_markdown, padrao.variables, padrao.client_visible, padrao.status, 1, padrao.id,
-    case when padrao.status = 'PUBLISHED' then now() end, now(), now()
-  from public.document_templates padrao
-  where padrao.scope = 'PLATAFORMA'
-    and padrao.archived_at is null
-    -- Idempotente: rodar de novo traz só o que ainda não veio. É o que permite
-    -- usar a mesma função no cadastro da empresa e no botão "trazer padrões"
-    -- de quem já existia antes de o padrão ser publicado.
-    and not exists (
-      select 1 from public.document_templates copia
-       where copia.organization_id = p_organization_id
-         and copia.derived_from = padrao.id
-         and copia.archived_at is null
-    );
-
-  get diagnostics v_copiados = row_count;
-  return v_copiados;
-end;
-$$;
-
-comment on function public.semear_modelos_da_empresa(uuid) is
-  'Copia os modelos PLATAFORMA para a empresa, como linhas dela. Idempotente: só traz o que ainda não veio. Recusa organização de que o chamador não participa.';
-
--- O gatilho semeava chamando a função acima. Com o guarda, essa chamada passa a
--- falhar exatamente onde ela precisa funcionar: no `insert` de `organizations`,
--- quando a empresa acabou de nascer e ainda não existe participação para
--- conferir — a mesma armadilha que a semeadura de motivos de perda tem em
--- `20260811060000`. O gatilho copia direto, com o mesmo conteúdo e a mesma
--- idempotência, e não passa mais pela função concedida ao usuário final.
-create or replace function public.tg_semear_modelos_da_empresa()
-returns trigger
-language plpgsql
-security definer
-set search_path = public
-as $$
-begin
-  insert into public.document_templates (
-    organization_id, scope, name, document_type, description, body_markdown,
-    variables, client_visible, status, version_number, derived_from,
-    published_at, created_at, updated_at
-  )
-  select
-    new.id, 'ORGANIZACAO', padrao.name, padrao.document_type, padrao.description,
-    padrao.body_markdown, padrao.variables, padrao.client_visible, padrao.status, 1, padrao.id,
-    case when padrao.status = 'PUBLISHED' then now() end, now(), now()
-  from public.document_templates padrao
-  where padrao.scope = 'PLATAFORMA'
-    and padrao.archived_at is null
-    and not exists (
-      select 1 from public.document_templates copia
-       where copia.organization_id = new.id
-         and copia.derived_from = padrao.id
-         and copia.archived_at is null
-    );
-  return new;
-end;
-$$;
-
-revoke all on function public.tg_semear_modelos_da_empresa() from public, anon, authenticated;
 
 commit;

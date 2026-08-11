@@ -352,6 +352,7 @@
       "rh_worker_portal_payslip_projection_fix",
       "rh_worker_portal_payslips",
       "semeadura_de_lista_confere_participacao",
+      "semeadura_de_modelos_confere_participacao",
       "stage10_homologation_hardening",
       "stage13_quality_forms_hardening",
       "stage13_quality_forms_seed",
@@ -396,7 +397,7 @@
       "workflow_documental_descobrivel"
     ],
     "_registrado_em": "2026-08-11",
-    "_novos_neste_checkpoint": 2
+    "_novos_neste_checkpoint": 3
   },
   "privilegios": {
     "_leia": "TRUNCATE, TRIGGER e REFERENCES concedidos a anon ou authenticated. TRUNCATE não é filtrado por RLS (VACINA-059): a lista tem de continuar vazia.",

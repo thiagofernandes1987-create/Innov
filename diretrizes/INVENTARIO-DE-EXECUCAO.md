@@ -2261,8 +2261,15 @@ aplicadas: `list_my_modules` resolve contra `app_modules`, e a chave não está 
 
 ## Sprint S-69 — Aplicar no banco o que o repositório já tem
 
-**Estado:** pendente
+**Estado:** bloqueada
 **Marco:** M-SEGURANCA
+
+**Bloqueada em 11/08/2026, aguardando a decisão do proprietário.** A T-69.1 é a
+única tarefa que uma sessão assistida executa sozinha, e ela terminou: o alcance
+foi medido no banco vivo e está apresentado abaixo. As quatro restantes só
+começam depois do aval — aplicar migration em banco de produção é externo e
+irreversível. Declarar `em andamento` ocuparia a vaga única da R3 sem haver
+trabalho em curso, que é exatamente o erro corrigido na S-43.
 
 Aberta na conferência de Marcos de 11/08/2026. **Consolida o bloqueio que trava
 quatro Marcos ao mesmo tempo**, e por isso deixa de estar espalhada: a S-51
@@ -2270,7 +2277,7 @@ tratava só das migrations da VACINA-065, mas o impedimento é o mesmo para todo
 
 | Marco travado | O que espera |
 | --- | --- |
-| `M-SEGURANCA` | as duas migrations da VACINA-065 — **sete funções ainda escrevem em empresa alheia no banco** |
+| `M-SEGURANCA` | as duas migrations de semeadura — **duas funções ainda escrevem em empresa alheia no banco** |
 | `M-RH` | as 68 migrations `rh_*` — o módulo não existe para nenhum usuário |
 | `M-PLATAFORMA` | as filas do canal, sem as quais a T-43.3 tarefa 5 (`FilaPostgREST`) não tem o que consumir |
 | `M-WHATSAPP` | as 25 migrations `stage22_*` — o gateway não tem fila no banco |
@@ -2279,10 +2286,46 @@ Um passo destrava quatro Marcos. É a maior alavanca do inventário inteiro, e �
 **decisão do proprietário**: aplicar migration em banco remoto é ação externa e
 irreversível, fora do que uma sessão assistida decide sozinha.
 
-- [ ] T-69.1 — **Decisão do proprietário** sobre aplicar, com o alcance definido: só a VACINA-065 (menor e mais urgente), ou também `rh_*` e `stage22_*`
+### O que o banco vivo disse, e o que ele corrigiu — 11/08/2026
+
+Esta sprint abriu com uma consulta ao banco de produção, e a consulta **desmentiu
+o que eu vinha afirmando**. Eu tinha medido o repositório — todas as migrations,
+aplicadas ou não — e chamado o resultado de "o banco". Não é a mesma coisa, e a
+diferença é de duas ordens de grandeza:
+
+| Afirmação minha, repetida | Medida no banco vivo |
+| --- | --- |
+| sete funções escrevem em empresa alheia | **duas** |
+| 120 funções chamáveis por `anon` | **duas**, e ambas são de gatilho |
+
+As cinco funções de IA de canal (`reserve_channel_ai_budget`,
+`release_channel_ai_budget`, `commit_channel_ai_budget`,
+`release_channel_ai_conversation`, `consume_channel_critical_write_approval`)
+**não existem no banco** — a etapa 22 não está aplicada. Corrigir no repositório
+uma função que não existe no servidor não corrige nada hoje; corrige quando a
+etapa 22 for aplicada, e é por isso que a correção delas continua atrás deste
+mesmo bloqueio.
+
+As duas vivas, ambas `security definer`, ambas concedidas a `authenticated`,
+ambas sem conferir participação:
+
+| Função | `anon` | `authenticated` | definer | tem guarda |
+| --- | --- | --- | --- | --- |
+| `semear_motivos_de_perda(uuid)` | não | **sim** | sim | **não** |
+| `semear_modelos_da_empresa(uuid)` | não | **sim** | sim | **não** |
+
+**Consequência para esta sprint:** o alcance mínimo encolheu de "duas migrations
+sobre sete funções" para **duas migrations sobre duas funções, tocando três
+objetos que existem no banco** (`managed_list_values`, `document_templates`,
+`is_org_member`). Foi para isso que a migration de 11/08 foi **separada em duas**
+— a parte viva não pode ficar esperando a etapa 22, e a parte da etapa 22 não
+pode ser aplicada. O erro está registrado em `REGISTRO-DE-ERROS.json` como
+`medicao`, custo alto, detectado pelo advisor e não por mim.
+
+- [x] T-69.1 — **Decisão do proprietário** sobre aplicar, com o alcance definido. O alcance foi medido no banco e está acima; a decisão é do proprietário e está apresentada. **O que a sessão pode fazer sozinha terminou aqui**
 - [ ] T-69.2 — Ordem de aplicação e ponto de retorno definidos antes de qualquer execução; migration destrutiva não entra neste lote
 - [ ] T-69.3 — Aplicar com evidência da execução registrada
-- [ ] T-69.4 — **Conferir a reprovação, não só a aprovação**: chamar as sete funções da VACINA-065 com sessão de outra empresa e **observar a recusa** antes de declarar corrigido
+- [ ] T-69.4 — **Conferir a reprovação, não só a aprovação**: chamar as duas funções vivas com sessão de outra empresa e **observar a recusa** antes de declarar corrigido; e conferir que o caso legítimo — sessão da própria empresa — continua passando
 - [ ] T-69.5 — `SUPABASE_DB_URL=... pnpm ledger:atualizar` e retirar do débito em `diretrizes/migrations-aplicadas.json` só o que foi de fato aplicado
 
 ## Sprint S-70 — WhatsApp: navegação própria e o que o gateway precisa
