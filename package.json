@@ -36,6 +36,8 @@
     "validate:crlf-normalizado": "node scripts/validate-crlf-normalizado.mjs",
     "validate:colunas-existentes": "node scripts/validate-colunas-existentes.mjs",
     "validate:prevencao-declarada": "node scripts/validate-prevencao-declarada.mjs",
+    "validate:escape-uma-camada": "node scripts/validate-escape-uma-camada.mjs",
+    "validate:campo-controlado": "node scripts/validate-campo-controlado-reencostado.mjs",
     "checklist:modulo": "node scripts/checklist-de-modulo.mjs",
     "pareto:erros": "node scripts/pareto-de-erros.mjs",
     "mapa:codigo": "node scripts/gerar-mapa-do-codigo.mjs",

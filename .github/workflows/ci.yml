@@ -218,6 +218,10 @@ jobs:
         run: pnpm validate:colunas-existentes
       - name: Validate vaccines do not declare absent prevention
         run: pnpm validate:prevencao-declarada
+      - name: Validate Escape closes one layer at a time (VACINA-054)
+        run: pnpm validate:escape-uma-camada
+      - name: Validate controlled fields are re-anchored to the DOM (VACINA-051)
+        run: pnpm validate:campo-controlado
       - name: Validate code map against the code
         run: pnpm validate:code-map
       - name: Validate migrations against the applied ledger (VACINA-057)

@@ -41,7 +41,7 @@ trabalhar não é praticada — e foi exatamente o que aconteceu.
 
 ## 2. A segunda razão, que é pior
 
-Metade destas perguntas **já tem portão pronto** no repositório. São 47
+Metade destas perguntas **já tem portão pronto** no repositório. São 49
 validadores. E nenhum deles responde a pergunta que decide um Marco:
 
 > *este módulo está pronto?*
@@ -157,8 +157,8 @@ acabou de digitar. Nenhuma tem portão.
 | | Item | Quem responde | Nasceu de |
 | --- | --- | --- | --- |
 | 🤖 | **Texto longo volta igual ao que foi digitado** — sem CRLF, sem diferença invisível | `pnpm validate:crlf-normalizado` + `tests/formulario-campos.test.ts` | **VACINA-048**: `textarea` chega com CRLF e nunca bate com o que está na tela |
-| 👤 | **Seleção sobrevive à volta da server action** — é o DOM que o formulário envia, não o estado do React | teste E2E | **VACINA-051**: `select` controlado perde a seleção na volta |
-| 👤 | **`Escape` fecha o menor contexto aberto**, nunca o formulário inteiro | teste E2E | **VACINA-054**: `Escape` com sugestão aberta descartava o preenchimento todo |
+| 🤖 | **Seleção sobrevive à volta da server action** — é o DOM que o formulário envia, não o estado do React | `pnpm validate:campo-controlado` | **VACINA-051**: `select` controlado perde a seleção na volta |
+| 🤖 | **`Escape` fecha o menor contexto aberto**, nunca o formulário inteiro | `pnpm validate:escape-uma-camada` | **VACINA-054**: `Escape` com sugestão aberta descartava o preenchimento todo |
 | 👤 | **Falha de gravação preserva o que foi preenchido** e diz o que corrigir | revisão | **VACINA-042**: falha de formulário apagava o contexto |
 | 👤 | Campo obrigatório é conferido **no servidor**, não só no `required` | revisão | POST montado à mão grava qualquer coisa |
 
@@ -262,8 +262,8 @@ ocorrências e zero cobertura.
 | Vacina | Teste que a fixaria |
 | --- | --- |
 | V048 | enviar `textarea` com `\r\n` e afirmar que volta normalizado — **feito na T-73.2**, com portão em `validate:crlf-normalizado` |
-| V051 | E2E: escolher opção, disparar server action, afirmar a seleção no DOM |
-| V054 | E2E: `Escape` com sugestão aberta fecha só a sugestão |
+| V051 | campo controlado ancorado no DOM — **feito na T-73.3**, em `validate:campo-controlado` |
+| V054 | `Escape` no elemento barra a propagação — **feito na T-73.4**, em `validate:escape-uma-camada` |
 | V036 | consultas conferidas contra as colunas reais — **feito na T-73.5**, em `validate:colunas-existentes` |
 | V004 | validador SQL de `EXECUTE` herdado, irmão do `validate:definer-com-guarda` — **feito na T-73.1**, em `validate:execute-revogado` |
 

@@ -31,13 +31,13 @@ a ignorar.
 | Aplicativos no registro | 25 |
 | Rotas | 229 (205 páginas, 24 de API) |
 | Server actions | 323 em 72 arquivos |
-| Módulos de `lib/` | 147 |
+| Módulos de `lib/` | 148 |
 | Funções do banco declaradas | 414 |
 | Funções do banco chamadas do código | 200 |
 | Suítes de teste | 109, com 1023 casos |
 | Migrations | 273 |
-| Validadores de CI | 60 |
-| Módulos de `lib/` citados por algum teste | 95 de 147 |
+| Validadores de CI | 62 |
+| Módulos de `lib/` citados por algum teste | 95 de 148 |
 
 ## 1. Aplicativos
 
@@ -1029,6 +1029,7 @@ Todo arquivo `"use server"` só exporta função assíncrona (VACINA-047), confe
 | `@/lib/financial/cash-flow` | não | `cashFlowRisk`, `formatMoney`, `summarizeCashFlow` |
 | `@/lib/forms/campos` | sim | `campoDeTexto` |
 | `@/lib/forms/project-creation-state` | não | `INITIAL_PROJECT_CREATION_STATE`, `projectCreationError` |
+| `@/lib/forms/reencostar-no-dom` | não | `useReencostarNoDom` |
 | `@/lib/forms/report-action-state` | não | `INITIAL_REPORT_ACTION_STATE`, `reportActionError` |
 | `@/lib/inventory/domain` | não | `formatInventoryCurrency`, `formatInventoryQuantity`, `movementLabel`, `movementRequiresNegative`, `movementRequiresPositive`, `normalizeInventoryDashboard` |
 | `@/lib/inventory/server` | não | `loadInventoryDashboard` |
@@ -1686,10 +1687,12 @@ Declaradas em migration e chamadas por `.rpc()`.
 | Script |
 |---|
 | `scripts/validate-assercoes.mjs` |
+| `scripts/validate-campo-controlado-reencostado.mjs` |
 | `scripts/validate-colunas-existentes.mjs` |
 | `scripts/validate-crlf-normalizado.mjs` |
 | `scripts/validate-definer-com-guarda.mjs` |
 | `scripts/validate-documentation.mjs` |
+| `scripts/validate-escape-uma-camada.mjs` |
 | `scripts/validate-execute-revogado.mjs` |
 | `scripts/validate-exports-mortos.mjs` |
 | `scripts/validate-extension-functions.mjs` |
@@ -1753,7 +1756,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | RPC chamada sem declaração em migration | 3 |
 | Módulo de `lib/` nunca importado | 0 |
 | Server action nunca referenciada | 0 |
-| Módulo de `lib/` sem teste que o cite | 52 de 147 |
+| Módulo de `lib/` sem teste que o cite | 53 de 148 |
 
 ### Módulos sem teste que os cite
 
@@ -1771,6 +1774,7 @@ Medido, não exigido. A lista existe para escolher onde o próximo teste rende m
 - `@/lib/file-security/server`
 - `@/lib/financial/cash-flow`
 - `@/lib/forms/project-creation-state`
+- `@/lib/forms/reencostar-no-dom`
 - `@/lib/forms/report-action-state`
 - `@/lib/inventory/domain`
 - `@/lib/inventory/server`

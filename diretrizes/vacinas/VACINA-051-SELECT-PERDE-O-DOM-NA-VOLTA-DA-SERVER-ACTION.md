@@ -100,22 +100,42 @@ Depois: prévia com 7 lacunas, documento emitido com 7.
 
 ## Prevenção automática
 
-**Nenhuma, e a correção deste texto é parte do achado.**
+Até 11/08/2026 esta seção afirmava que `verif26.mjs` comparava, na tela de
+emissão, a contagem de lacunas da prévia com a do documento emitido. **Esse
+arquivo nunca foi versionado aqui** — e a varredura da S-73, que contou quantas
+vacinas tinham portão para decidir onde investir, contou esta como tendo por
+causa daquela frase.
 
-Até 11/08/2026 esta seção afirmava: *"`verif26.mjs` no arnês compara, na tela de
-emissão, a contagem de lacunas da prévia com a do documento emitido"*. **Esse
-arquivo não existe neste repositório** — veio de um arnês que nunca foi
-versionado aqui. A varredura da S-73, que contou quantas vacinas tinham portão
-para decidir onde investir, classificou esta como tendo. Contou errado por causa
-desta frase.
+Hoje são duas peças:
 
-Prevenção declarada e ausente é pior que prevenção nenhuma: quem lê para de
-procurar. Hoje a conferência é **humana**, e `pnpm validate:prevencao-declarada`
-existe para impedir que a próxima afirmação dessas volte a passar.
+- **`lib/forms/reencostar-no-dom.ts`** — o gancho `useReencostarNoDom`, que
+  reencosta o DOM no estado depois de cada renderização. A mecânica saiu de
+  dentro da tela de emissão porque a regra não é dela: é de todo campo
+  controlado que atravessa uma server action mais de uma vez. Enquanto viveu lá
+  dentro, o único jeito de a próxima tela herdar a correção era alguém lembrar;
+- **`pnpm validate:campo-controlado`** — o portão. Em componente com
+  `useActionState`, campo controlado (`value={…}`) **e** enviado (`name`) tem de
+  carregar `ref={campo("nome")}`.
 
-A prevenção executável é a **T-73.3** do inventário, e o que ela precisa cobrir
-está medido: no repositório inteiro há **um** `<select name=…>` controlado por
-estado dentro de componente com `useActionState` — o desta vacina, já corrigido.
-Os outros 16 usam `defaultValue`, e campo não controlado não diverge do DOM
-porque o DOM é a verdade dele. O portão, portanto, não é para o que existe: é
-para o próximo `value={estado}` que alguém escrever.
+**A primeira medição estava errada, e o portão a corrigiu.** Eu havia contado
+"um único campo controlado, o desta vacina, já corrigido" — olhando só para
+`<select>`, e por linha, o que perdeu os que abrem em várias linhas. O portão
+achou **12 campos controlados e enviados em 10 componentes**, seis deles sem
+âncora: três no editor de modelo — a mesma tela da VACINA-048 — e três no
+formulário de proposta, que re-renderiza a cada erro de campo.
+
+E a versão por arquivo do próprio portão escondia mais um. Enquanto ele
+perguntava *"esta tela usa o gancho?"*, passava; ao perguntar *"este campo está
+ancorado?"*, apontou o `titulo` **da própria tela de emissão** — deixado de fora
+da correção original de julho, que ancorou os cinco `select` e esqueceu o campo
+de texto ao lado deles.
+
+Provado por sabotagem, com o caso legítimo passando: tirar a âncora de um campo
+reprova mesmo com os outros ancorados; campo com `defaultValue` continua isento,
+porque não controlado não diverge — o DOM é a verdade dele.
+
+## Limitações da prevenção
+
+O portão cobra a presença da âncora, não que ela funcione. Que o gancho de fato
+reponha o valor é o que a conferência humana na tela ainda decide: salvar,
+conferir que a seleção continua, emitir e comparar as contagens.
