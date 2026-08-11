@@ -302,6 +302,26 @@
       "tinha_portao": true,
       "detectado_por": "portão próprio",
       "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Acrescentei dois padrões ao portão de números sem testar a precisão deles: 3 das 5 acusações eram falsas, incluindo uma por função de medir errada",
+      "familia": "portao",
+      "onde": "scripts/validate-numeros-afirmados.mjs",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "medio"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "A S-43 ficou declarada `em andamento` estando travada pela S-69, ocupando a vaga única da R3 e fazendo o inventário parecer ter trabalho em curso onde havia espera",
+      "familia": "governanca",
+      "onde": "INVENTARIO-DE-EXECUCAO.md",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "virada de sprint",
+      "custo": "medio"
     }
   ]
 }

@@ -26,7 +26,7 @@ opinião não sustenta uma reescrita.
 ### 1.1 A dispersão, medida
 
 Contado sobre `diretrizes/INVENTARIO-DE-EXECUCAO.md` no estado anterior à
-reescrita: **51 sprints, 712 tarefas**, e a lógica de cada módulo espalhada por
+reescrita, em 11/08/2026: **51 sprints, 712 tarefas**, e a lógica de cada módulo espalhada por
 sprints que não são "sobre" aquele módulo.
 
 | Medida | Valor |

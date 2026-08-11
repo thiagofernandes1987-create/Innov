@@ -59,6 +59,21 @@ const AFIRMACOES = [
     nome: "módulos no registry",
     padrao: /(\d+)\s+módulos\s+no\s+registry/gi,
     medir: () => [...leia("lib/modules/registry.ts").matchAll(/\{\s*key:"[a-z_]+"/g)].length
+  },
+  // `sprints` e `Marcos` foram tentados como afirmações e **retirados no mesmo
+  // dia**, 11/08/2026. Em prosa eles não são contáveis com precisão: "17 de 25
+  // módulos em 4 sprints ou mais" e "### 7.4 Sprints W-19 a W-22" casavam como
+  // se fossem contagem, e a medição de Marcos contava 41 porque a tabela de
+  // bloqueio da S-69 usa linhas com a mesma forma do registro.
+  //
+  // Três acusações falsas em cinco. Portão que erra assim gasta a confiança de
+  // quem o lê, e um portão em que ninguém confia é pior que portão nenhum —
+  // porque dá a impressão de proteção. Quem quiser proteger estes dois números
+  // precisa primeiro de uma forma inequívoca de escrevê-los no texto.
+  {
+    nome: "destinos de menu",
+    padrao: /(\d+)\s+destinos\s+de\s+menu/gi,
+    medir: () => [...leia("lib/casca/menus.ts").matchAll(/href:\s*"/g)].length
   }
 ];
 
@@ -87,6 +102,14 @@ for (const afirmacao of AFIRMACOES) {
       // registro: quem quiser citar um número antigo escreve a data ao lado, e
       // o portão para de cobrar. Quem afirma sem data está dizendo "é assim
       // agora", e aí o número tem de bater.
+      // Documento com data no nome é datado por construção: um relatório
+      // chamado `...-2026-07-28.md` é o retrato daquele dia, e cobrar dele o
+      // número de hoje é pedir que o passado se atualize.
+      if (/\d{4}-\d{2}-\d{2}/.test(doc)) {
+        conferidas += 1;
+        continue;
+      }
+
       const entorno = texto.slice(Math.max(0, achado.index - 240), achado.index + 240);
       if (/\d{2}\/\d{2}\/\d{4}|\b\d{1,2}\s+de\s+[a-zç]+\s+de\s+\d{4}\b|\bS-\d+\b/i.test(entorno)) {
         conferidas += 1;
