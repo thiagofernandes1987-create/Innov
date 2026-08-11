@@ -35,8 +35,8 @@ a ignorar.
 | Funções do banco declaradas | 414 |
 | Funções do banco chamadas do código | 200 |
 | Suítes de teste | 108, com 1014 casos |
-| Migrations | 268 |
-| Validadores de CI | 54 |
+| Migrations | 270 |
+| Validadores de CI | 55 |
 | Módulos de `lib/` citados por algum teste | 94 de 146 |
 
 ## 1. Aplicativos
@@ -1213,7 +1213,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `claim_whatsapp_outbound_dispatch` | `supabase/migrations/20260805004000_stage22_whatsapp_dispatch_claim.sql` | `app/actions/whatsapp.ts` |
 | `close_rh_payroll` | `supabase/migrations/20260807131500_rh_foundation_security_hardening.sql` | `app/actions/rh.ts` |
 | `close_rh_time_period_to_payroll` | `supabase/migrations/20260807150500_rh_time_payroll_export_contract_fix.sql` | `app/actions/rh-time.ts` |
-| `commit_channel_ai_budget` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | `app/actions/messaging-bots.ts` |
+| `commit_channel_ai_budget` | `supabase/migrations/20260811061000_definidoras_conferem_participacao.sql` | `app/actions/messaging-bots.ts` |
 | `compare_and_swap_channel_session_credentials` | `supabase/migrations/20260804123500_stage22_session_credential_store_function_fix.sql` | — (só por SQL ou trigger) |
 | `compare_and_swap_channel_session_credentials_fenced` | `supabase/migrations/20260804134000_stage22_session_runtime_leases.sql` | — (só por SQL ou trigger) |
 | `complete_channel_delivery_attempt` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
@@ -1225,7 +1225,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `complete_whatsapp_outbound_dispatch` | `supabase/migrations/20260805004000_stage22_whatsapp_dispatch_claim.sql` | `app/actions/whatsapp.ts` |
 | `complete_whatsapp_outbound_message` | `supabase/migrations/20260810012500_sanitize_persisted_provider_errors.sql` | — (só por SQL ou trigger) |
 | `confirm_channel_identity_alias` | `supabase/migrations/20260804160000_stage22_identity_reconciliation.sql` | — (só por SQL ou trigger) |
-| `consume_channel_critical_write_approval` | `supabase/migrations/20260804220000_stage22_security_hardening.sql` | — (só por SQL ou trigger) |
+| `consume_channel_critical_write_approval` | `supabase/migrations/20260811061000_definidoras_conferem_participacao.sql` | — (só por SQL ou trigger) |
 | `consume_inventory_reservation` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | `app/actions/inventory.ts` |
 | `convert_crm_lead` | `supabase/migrations/20260721013534_stage18_crm_functions.sql` | `app/actions/relationship.ts` |
 | `create_advanced_signature_document` | `supabase/migrations/20260720054200_stage12_2_document_layout_workflow.sql` | `app/actions/advanced-signatures.ts` |
@@ -1481,8 +1481,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `registrar_cub_manual` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | `app/actions/cub.ts` |
 | `registrar_mensagem_recebida_whatsapp` | `supabase/migrations/20260805010000_stage22_contador_de_nao_lidas_atomico.sql` | `app/api/webhooks/whatsapp/route.ts` |
 | `registrar_valor_usado` | `supabase/migrations/20260803200000_catalogo_de_valores_usados.sql` | `lib/sugestoes/servidor.ts` |
-| `release_channel_ai_budget` | `supabase/migrations/20260805003000_stage22_governed_bot_profiles.sql` | `app/actions/messaging-bots.ts` |
-| `release_channel_ai_conversation` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | `app/actions/messaging-bots.ts` |
+| `release_channel_ai_budget` | `supabase/migrations/20260811061000_definidoras_conferem_participacao.sql` | `app/actions/messaging-bots.ts` |
+| `release_channel_ai_conversation` | `supabase/migrations/20260811061000_definidoras_conferem_participacao.sql` | `app/actions/messaging-bots.ts` |
 | `release_inventory_reservation` | `supabase/migrations/20260720160300_stage17_inventory_procurement_reservations.sql` | `app/actions/inventory.ts` |
 | `release_project_document_version` | `supabase/migrations/20260719223100_stage12_planning_functions.sql` | `app/actions/projects.ts` |
 | `release_proposal_version` | `supabase/migrations/20260719231500_stage9_workflows.sql` | — (só por SQL ou trigger) |
@@ -1491,7 +1491,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `replay_channel_ingress_event` | `supabase/migrations/20260804142000_stage22_ingress_normalization.sql` | — (só por SQL ou trigger) |
 | `replay_channel_outbox_event` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
 | `request_channel_ai_handoff` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | — (só por SQL ou trigger) |
-| `reserve_channel_ai_budget` | `supabase/migrations/20260804200000_stage22_ai_bridge.sql` | `app/actions/messaging-bots.ts` |
+| `reserve_channel_ai_budget` | `supabase/migrations/20260811061000_definidoras_conferem_participacao.sql` | `app/actions/messaging-bots.ts` |
 | `reserve_channel_delivery_capacity` | `supabase/migrations/20260804151000_stage22_outbox_delivery.sql` | — (só por SQL ou trigger) |
 | `resolve_channel_operational_alert` | `supabase/migrations/20260804230000_stage22_messaging_observability.sql` | — (só por SQL ou trigger) |
 | `resolve_observability_alert` | `supabase/migrations/20260721122302_stage19_observability_functions.sql` | `app/actions/observability.ts` |
@@ -1513,8 +1513,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `save_object_definition_draft` | `supabase/migrations/20260804001000_object_runtime_acao_de_permissao_valida.sql` | `app/actions/objetos.ts` |
 | `search_sinapi_references` | `supabase/migrations/20260729020000_sinapi_official_catalog.sql` | `app/app/orcamentos/sinapi/page.tsx` |
 | `select_procurement_quote` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
-| `semear_modelos_da_empresa` | `supabase/migrations/20260803160000_semear_modelos_da_empresa.sql` | `app/actions/documentos.ts` |
-| `semear_motivos_de_perda` | `supabase/migrations/20260803235000_listas_cadastradas_por_escopo.sql` | — (só por SQL ou trigger) |
+| `semear_modelos_da_empresa` | `supabase/migrations/20260811061000_definidoras_conferem_participacao.sql` | `app/actions/documentos.ts` |
+| `semear_motivos_de_perda` | `supabase/migrations/20260811060000_semeadura_de_lista_confere_participacao.sql` | — (só por SQL ou trigger) |
 | `set_channel_ai_daily_budget` | `supabase/migrations/20260805003000_stage22_governed_bot_profiles.sql` | `app/actions/messaging-bots.ts` |
 | `set_channel_conversation_actor` | `supabase/migrations/20260804180000_stage22_multiprovider_inbox.sql` | — (só por SQL ou trigger) |
 | `set_channel_conversation_state` | `supabase/migrations/20260804180000_stage22_multiprovider_inbox.sql` | — (só por SQL ou trigger) |
@@ -1546,8 +1546,8 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `submit_procurement_request` | `supabase/migrations/20260720103100_stage14_procurement_security.sql` | `app/actions/procurement.ts` |
 | `task_dependency_cria_ciclo` | `supabase/migrations/20260727180000_planejamento_ciclo_dependencia.sql` | — (só por SQL ou trigger) |
 | `task_dependency_sem_ciclo` | `supabase/migrations/20260727180000_planejamento_ciclo_dependencia.sql` | — (só por SQL ou trigger) |
-| `tg_semear_modelos_da_empresa` | `supabase/migrations/20260803160000_semear_modelos_da_empresa.sql` | — (só por SQL ou trigger) |
-| `tg_semear_motivos_de_perda` | `supabase/migrations/20260803235000_listas_cadastradas_por_escopo.sql` | — (só por SQL ou trigger) |
+| `tg_semear_modelos_da_empresa` | `supabase/migrations/20260811061000_definidoras_conferem_participacao.sql` | — (só por SQL ou trigger) |
+| `tg_semear_motivos_de_perda` | `supabase/migrations/20260811060000_semeadura_de_lista_confere_participacao.sql` | — (só por SQL ou trigger) |
 | `tipologias_do_cub` | `supabase/migrations/20260804080000_cub_registrado_a_mao_com_procedencia.sql` | — (só por SQL ou trigger) |
 | `touch_updated_at` | `supabase/migrations/20260719230000_stage9_financial_contracts.sql` | — (só por SQL ou trigger) |
 | `transition_sac_ticket` | `supabase/migrations/20260721013654_stage18_sac_functions.sql` | `app/actions/relationship.ts` |
@@ -1684,6 +1684,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | Script |
 |---|
 | `scripts/validate-assercoes.mjs` |
+| `scripts/validate-definer-com-guarda.mjs` |
 | `scripts/validate-documentation.mjs` |
 | `scripts/validate-exports-mortos.mjs` |
 | `scripts/validate-extension-functions.mjs` |

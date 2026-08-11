@@ -1718,6 +1718,50 @@ defeito que mora **entre** dois módulos, que é onde ele costuma morar.
 - [ ] T-49.6 — Obra → Custo → Receita → Rentabilidade
 - [ ] T-49.7 — Testes de exceção em cada travessia, com os nomes que o material dá: entrega parcial, faturamento parcial, pagamento parcial, devolução, desconto não autorizado e cancelamento depois de etapa derivada
 
+## Sprint S-50 — Escrita cross-tenant em funções definidoras, e o portão que faltava
+
+**Estado:** concluída
+
+Nasceu da leitura do mergulho **XI.11 do manual do Odoo** (ACL, record rules e
+`sudo()`), que descreve no vocabulário de lá o mesmo risco que o INNOV tem aqui:
+`sudo()` é o `security definer` deste esquema — os dois ignoram a política de
+linha, e nos dois a conferência que a política faria passa a ser
+responsabilidade de quem escreve o corpo. Entra no fim conforme a R4. Causa-raiz
+em `diretrizes/vacinas/VACINA-065-DEFINIDORA-QUE-RECEBE-A-ORGANIZACAO-E-NAO-CONFERE-PARTICIPACAO.md`.
+
+### Tarefas
+
+- [x] T-50.1 — **Sete funções escreviam em organização alheia.** Definidoras que recebem `organization_id` por parâmetro, concedidas a `authenticated`, sem conferir participação: `reserve_channel_ai_budget` (estourar o orçamento diário de IA de vizinho — negação de serviço), `release_channel_ai_budget`, `commit_channel_ai_budget`, `release_channel_ai_conversation`, `consume_channel_critical_write_approval`, `semear_modelos_da_empresa` e `semear_motivos_de_perda`. Nenhuma é vazamento de leitura; **todas são escrita cross-tenant**
+- [x] T-50.2 — **Corrigidas com o guarda da própria família, não com um inventado.** As cinco de canal com `has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer')`, que é o que as três irmãs do **mesmo arquivo** já usavam; as duas semeadoras com `is_org_member`, que é o que `registrar_valor_usado` já usava. Os dois gatilhos de semeadura passaram a copiar direto: com o guarda, chamar a função quebraria no `insert` de `organizations`, quando **ainda não há participação para conferir**. `20260811060000`, `20260811061000`
+- [x] T-50.3 — **`pnpm validate:definer-com-guarda`, no CI.** Reprova quando uma função é, no estado final, definidora **e** recebe `organization_id` **e** é executável por `authenticated`/`anon` **e** não cita guarda nenhum. Medido: **414 funções, 328 definidoras, 0 sem `set search_path`, 20 gatilhos, 204 sem organização por parâmetro, 26 só para `service_role`, 78 conferidas**. `VACINA-065`
+- [x] T-50.4 — **O portão achou 6 dos 7; a auditoria manual tinha achado 1.** A triagem à mão leu as funções que pareciam relevantes e aceitou como guardada qualquer uma cujo entorno mencionasse conferência. É a medida honesta do que separa varredura de portão, e está registrada na vacina em vez de omitida
+- [x] T-50.5 — **Três defeitos do próprio portão, corrigidos antes de valer.** A primeira versão lia as migrations como saco de declarações e acusou **3 funções à toa** — `write_audit` e `ensure_organization_module_defaults` já revogadas de `authenticated`, `search_sinapi_references` já rebaixada a `security invoker` pela VACINA-004. O terceiro era pior porque era **falso negativo**: o corpo terminava na função seguinte em vez do fecho da citação em cifrão, e cada função herdava o guarda da vizinha — foi o que escondeu `consume_channel_critical_write_approval` e `release_channel_ai_budget`. Agora tudo é reduzido em ordem cronológica, e vence a última declaração
+- [x] T-50.6 — **Prova por sabotagem, quatro vezes, com restauração conferida.** Tirar o guarda de `reserve_channel_ai_budget` reprova; tirar o de `semear_motivos_de_perda` reprova; **migration nova** com definidora sem guarda reprova — que é o caso do dia a dia; e **reconceder** `write_audit` a `authenticated` depois do `revoke` reprova, o que prova que a redução cronológica re-arma em vez de silenciar para sempre
+- [x] T-50.7 — **Bateria completa verde:** 42/42 validadores, `lint`, `typecheck`, **1.077 testes** (12 pulados), testes Python e `go vet` + `go test` do plano de execução
+
+---
+
+## Sprint S-51 — Aplicar no banco a correção da escrita cross-tenant
+
+**Estado:** pendente
+
+Separada da S-50 pela **R7**: a correção está escrita, provada e no repositório,
+mas aplicar migration no banco remoto é decisão do proprietário, não do
+desenvolvedor. Sai da S-50 e entra no fim conforme a R4.
+
+Enquanto esta sprint não fechar, **o defeito continua vivo no banco**. Vale
+dizer com todas as letras o que o portão faz e o que ele não faz:
+`validate:definer-com-guarda` impede que uma função nova chegue sem guarda ao
+repositório; ele não altera nenhuma função que já está aplicada.
+
+### Tarefas
+
+- [ ] T-51.1 — Aplicar `20260811060000_semeadura_de_lista_confere_participacao.sql` e `20260811061000_definidoras_conferem_participacao.sql`, com evidência da execução
+- [ ] T-51.2 — Conferir no banco que as sete funções passaram a recusar organização de que o chamador não participa, com chamada real de sessão de outra empresa — reprovação observada antes de declarar corrigido
+- [ ] T-51.3 — Rodar `SUPABASE_DB_URL=... pnpm ledger:atualizar` e tirar as duas do débito em `diretrizes/migrations-aplicadas.json`
+
+---
+
 ---
 
 ## Registro de reordenação

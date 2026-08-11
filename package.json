@@ -30,6 +30,7 @@
     "validate:postgrest-embeds": "node scripts/validate-postgrest-embeds.mjs",
     "validate:module-keys": "node scripts/validate-module-keys.mjs",
     "validate:modulos-semeados": "node scripts/validate-modulos-semeados.mjs",
+    "validate:definer-com-guarda": "node scripts/validate-definer-com-guarda.mjs",
     "mapa:codigo": "node scripts/gerar-mapa-do-codigo.mjs",
     "validate:code-map": "node scripts/gerar-mapa-do-codigo.mjs --verificar",
     "validate:migrations-applied": "node scripts/validate-migrations-applied.mjs",

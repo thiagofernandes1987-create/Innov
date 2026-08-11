@@ -144,6 +144,7 @@ Vacina pode ser substituída somente em PR próprio, preservando garantia igual 
 | `VACINA-062` | Correção visual considerada concluída sem observar o preview publicado | vigente | captura obrigatória no mesmo viewport, tema e persona, comparação antes/depois e revisão de logs |
 | `VACINA-063` | Rede lógica tratada como linhas independentes permite ciclo, duplicidade ou referência fora do escopo | parcial | validação de escopo, duplicidade, hierarquia e ciclo antes da gravação; RPC transacional concorrente ainda pendente |
 | `VACINA-064` | Aplicativo declarado no registry do código e ausente de `app_modules` some da central sem erro nenhum | vigente | `validate:modulos-semeados` cruza registry, semeadura, menus e roteador nas cinco direções |
+| `VACINA-065` | Função `security definer` que recebe `organization_id` por parâmetro e é concedida a `authenticated` escreve em empresa alheia sem conferir participação | vigente | `validate:definer-com-guarda` exige guarda no corpo; sete funções corrigidas com o guarda da própria família |
 
 ## 4. Arquivos
 
@@ -212,7 +213,8 @@ diretrizes/vacinas/
 ├── VACINA-061-GUARDA-QUE-LE-O-VALOR-NOVO-DO-CAMPO-QUE-DECIDE-A-GUARDA.md
 ├── VACINA-062-CORRECAO-VISUAL-EXIGE-CAPTURA-DO-PREVIEW.md
 ├── VACINA-063-REDE-LOGICA-VALIDADA-ANTES-DA-GRAVACAO.md
-└── VACINA-064-MODULO-DECLARADO-NO-CODIGO-E-AUSENTE-DO-CATALOGO.md
+├── VACINA-064-MODULO-DECLARADO-NO-CODIGO-E-AUSENTE-DO-CATALOGO.md
+└── VACINA-065-DEFINIDORA-QUE-RECEBE-A-ORGANIZACAO-E-NAO-CONFERE-PARTICIPACAO.md
 ```
 
 ## 5. Aplicação no Encerramento da Etapa 22

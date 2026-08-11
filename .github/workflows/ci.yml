@@ -206,6 +206,8 @@ jobs:
         run: pnpm validate:module-keys
       - name: Validate module catalog across registry, app_modules and menus (VACINA-064)
         run: pnpm validate:modulos-semeados
+      - name: Validate security definer functions guard the organization (VACINA-065)
+        run: pnpm validate:definer-com-guarda
       - name: Validate code map against the code
         run: pnpm validate:code-map
       - name: Validate migrations against the applied ledger (VACINA-057)
