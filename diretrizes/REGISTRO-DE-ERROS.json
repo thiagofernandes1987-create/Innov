@@ -412,6 +412,16 @@
       "tinha_portao": false,
       "detectado_por": "sabotagem",
       "custo": "medio"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "O portão de prevenção declarada varria a árvore de trabalho em vez do que está versionado. Passou local e reprovou no CI: `.qa/*/relatorio.json` é saída de `pnpm qa:visual`, existe na máquina de quem rodou o QA e não existe num checkout limpo",
+      "familia": "medicao",
+      "onde": "scripts/validate-prevencao-declarada.mjs",
+      "vacina": "não é causa nova",
+      "tinha_portao": true,
+      "detectado_por": "CI",
+      "custo": "medio"
     }
   ]
 }

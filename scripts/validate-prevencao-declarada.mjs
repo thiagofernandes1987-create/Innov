@@ -40,22 +40,30 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { execSync } from "node:child_process";
 
 const raiz = process.cwd();
 const pasta = path.join(raiz, "diretrizes", "vacinas");
 const scripts = JSON.parse(fs.readFileSync(path.join(raiz, "package.json"), "utf8")).scripts;
 
-function varrer(dir, acc = []) {
-  for (const entrada of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (["node_modules", ".git", ".next", ".claude"].includes(entrada.name)) continue;
-    const p = path.join(dir, entrada.name);
-    if (entrada.isDirectory()) varrer(p, acc);
-    else acc.push(path.relative(raiz, p));
-  }
-  return acc;
+/**
+ * O universo é o que está **versionado**, não o que está no disco.
+ *
+ * A primeira versão deste portão varria a árvore de trabalho. Passou aqui e
+ * reprovou no CI, e a diferença é exatamente o defeito: `.qa/*//*relatorio.json` é
+ * saída gerada por `pnpm qa:visual`, existe na máquina de quem já rodou o QA e
+ * não existe num checkout limpo. Medir o disco mede quem mediu antes.
+ *
+ * É a mesma classe de erro que trocou "o banco" por "o repositório" na S-69:
+ * medir a coisa parecida em vez da coisa. Prevenção que só existe na máquina de
+ * quem a escreveu não é prevenção — e o CI é o único juiz que enxerga isso.
+ */
+const versionados = new Set();
+const nomesNoRepositorio = new Set();
+for (const arquivo of execSync("git ls-files", { encoding: "utf8" }).split("\n").filter(Boolean)) {
+  versionados.add(arquivo);
+  nomesNoRepositorio.add(path.basename(arquivo));
 }
-
-const nomesNoRepositorio = new Set(varrer(raiz).map(p => path.basename(p)));
 
 const vacinas = fs.readdirSync(pasta).filter(f => /^VACINA-\d+.*\.md$/.test(f)).sort();
 const problemas = [];
@@ -104,15 +112,15 @@ for (const nome of vacinas) {
   for (const achado of corpo.matchAll(/`([a-z0-9_./-]+\.(?:mjs|ts|tsx|js|sql|json|yml))`/gi)) {
     citacoes += 1;
     const citado = achado[1];
-    const existe = citado.includes("/")
-      ? fs.existsSync(path.join(raiz, citado))
-      : nomesNoRepositorio.has(citado);
+    const existe = citado.includes("/") ? versionados.has(citado) : nomesNoRepositorio.has(citado);
     if (existe || datado(entorno(achado))) continue;
     problemas.push({
       nome,
       linha: linhaDaSecao,
       citado,
-      o_que: citado.includes("/") ? "caminho não existe" : "nenhum arquivo com esse nome no repositório"
+      o_que: citado.includes("/")
+        ? "esse caminho não está versionado"
+        : "nenhum arquivo versionado com esse nome"
     });
   }
 }
