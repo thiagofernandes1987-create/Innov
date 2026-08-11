@@ -8,8 +8,8 @@ contêiner.
 O contêiner é reciclado e o chat novo começa sem memória. O repositório já
 resolve parte disso — `diretrizes/` é versionado e sobrevive. Mas ler o
 repositório para recuperar contexto custa caro: são mais de 30 documentos
-canônicos, 64 vacinas, um inventário com 49 sprints e um mapa de código de
-1.806 linhas. Uma sessão que começa lendo tudo gasta a janela de contexto antes
+canônicos, 66 vacinas, um inventário com 73 sprints e um mapa de código de
+1.806 linhas — medido em 11/08/2026. Uma sessão que começa lendo tudo gasta a janela de contexto antes
 de escrever a primeira linha de código.
 
 A base no Notion existe para uma coisa só: **encontrar o fato sem abrir o
@@ -61,7 +61,7 @@ informação: diz o que mudou e desde quando.
 
 1. Lê **Partida a frio**.
 2. Consulta a base pelo assunto, filtrando por Tipo e Módulo.
-3. Diante de erro: procura em `Tipo = Vacina` **antes** de diagnosticar. São 64
+3. Diante de erro: procura em `Tipo = Vacina` **antes** de diagnosticar. São 66
    causas-raiz catalogadas; se a sua está lá, a solução também está.
 4. Só então abre o arquivo apontado.
 5. Ao terminar, volta e registra o que mediu, com data.

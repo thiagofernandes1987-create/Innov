@@ -1838,7 +1838,7 @@ pego mais cedo, porque ela nasce na resolução de merge, não na escrita.
 - [x] T-40.4.1 — **Persona nova é mudança de esquema, e o portão avisou na hora.** O `tests/personas-db-contract.test.ts` reprovou a P17 porque a S-30 gravou o vocabulário **no banco**, em seis restrições `check` que casavam `^P([1-9]|1[0-6])$`. Sem a migration, a P17 existiria no código e seria recusada na primeira gravação. A migration descobre as restrições **pelo texto da definição** — elas são anônimas, e o nome real é o gerado pelo PostgreSQL — e falha de propósito se não encontrar exatamente seis. Faixa ampliada para `^P([1-9]|[1-9][0-9])$`, não para P17: fixar o teto na persona recém-criada garantiria repetir esta migration na próxima. Aplicada e conferida no banco: **6 restrições ampliadas, 0 antigas, evento no catálogo, 17 tipos**; e provada por inserção — `aceitou P17=t | recusou PX=t | recusou P0=t`, com o `raise` desfazendo tudo
 - [x] T-40.4.2 — O teste de contrato passou a ler **o catálogo inteiro de migrations**, não um arquivo. A migration da S-30 já está aplicada, e migration aplicada é imutável — editá-la produziria um "aplicado divergente do arquivo", exatamente o que o `validate:migrations-applied` existe para reprovar. Persona nova entra por migration nova
 - [x] T-40.5 — **O portão de interoperabilidade XMLDSig não estava quebrado: faltava o binário.** `xmlsec1` ausente no contêiner fazia o gate do eSocial falhar com aparência de regressão. Instalado, o teste passa — a mesma C14N do `xmllint` e assinatura verificada externamente. Limitação de ambiente declarada como tal, não contornada com `skip`
-- [x] T-40.6 — Bateria completa sobre o resultado: `tsc` **0 erros**, `eslint --max-warnings=0` limpo, **88 arquivos e 812 testes** passando, e os 17 validadores verdes, incluindo `migrations-applied` (243 arquivos, 208 aplicadas, nenhuma divergência nova) e `code-map` (226 rotas, 314 server actions, 318 funções de banco)
+- [x] T-40.6 — Bateria completa sobre o resultado: `tsc` **0 erros**, `eslint --max-warnings=0` limpo, **88 arquivos e 812 testes** passando, e os 17 validadores verdes daquele dia (10/08/2026), incluindo `migrations-applied` (243 arquivos, 208 aplicadas, nenhuma divergência nova) e `code-map` (226 rotas, 314 server actions, 318 funções de banco)
 
 As **67 migrations `rh_*` seguem declaradas não aplicadas** no débito congelado de
 `diretrizes/migrations-aplicadas.json`, com o responsável nomeado. O registro ali
@@ -1899,7 +1899,7 @@ Fase 2 (introduzir Go) não começa antes dela.
 - [x] T-42.1 — **Mapa versionado como canônico**, em `diretrizes/MAPA-TECNOLOGICO.md`: o documento original íntegro, 1.997 linhas, mais a **medição executada** ao lado de cada afirmação que dependia de medição. Estava só como anexo de conversa, e a regra do repositório é explícita — decisão que vive em conversa se perde quando o contêiner é reciclado. Recuperado do transcrito e depois substituído pelo original enviado pelo responsável
 - [x] T-42.2 — Registradas as **duas inconsistências internas** do documento, com número: a §21 põe Go em **23 das 44 linhas (52,3%)** enquanto a §33 do mesmo texto estabelece **5% a 15%** — não podem valer juntas, e a §33 é a que corresponde à §36; e a Fase 1 da §36 já estava concluída quando o documento foi lido
 - [x] T-42.3 — `README.md` atualizado. Ele anunciava **"Etapa 19", "Etapa 18 incorporada à main", versão `0.19.0`** — três incorporações atrás. Passa a `0.22.0`, com RH, gateway e a seção de portões anti-regressão
-- [x] T-42.4 — `CLAUDE.md` atualizada: a regra de **portão provado por sabotagem**, os dois validadores de população, a exigência de rodar **todos** os 54 validadores, e a seção de linguagens com o portão da §37
+- [x] T-42.4 — `CLAUDE.md` atualizada: a regra de **portão provado por sabotagem**, os dois validadores de população, a exigência de rodar **todos** os validadores — 54 na contagem de 10/08/2026, e a seção de linguagens com o portão da §37
 - [x] T-42.5 — **Buraco no `validate:documentation`, encontrado ao registrar o mapa.** A lista de canônicos é escrita à mão, e **três** documentos declaravam `**Documento canônico:** sim` no próprio corpo sem constar dela: `CONTRATO-AUDITAVEL-DE-PERSONAS`, `MAPA-TECNOLOGICO` e `PROVA-POR-SABOTAGEM`. Apagar qualquer um passaria verde. É a mesma falha que a VACINA-014 corrigiu para as vacinas — lista à mão não é atualizada por quem escreve o documento. Conferência agora é bidirecional; de **25 para 28** canônicos, e provado por sabotagem: documento novo que se declara canônico sem registro reprova
 
 O que resta da Fase 1 e toda a Fase 2 seguem na **S-43**, porque a R3 admite uma
@@ -2391,3 +2391,34 @@ por facilidade.
 - [ ] T-74.3 — Priorizar dentro das duas as **77 definidoras não-gatilho**, que somam ignorar RLS com herdar `EXECUTE` de `PUBLIC`
 - [ ] T-74.4 — Conferir no banco com `has_function_privilege`, e **observar a recusa** para `anon` antes de declarar corrigido
 - [ ] T-74.5 — Atualizar `EXECUTE-PUBLIC-ACEITOS.json` a cada lote; o número só pode cair
+
+## Sprint S-75 — Varrer o que está obsoleto no inventário e nos canônicos
+
+**Estado:** pendente
+**Marco:** M-0
+
+Aberta em 11/08/2026 pela suspeita do proprietário — *"tem muita coisa
+desatualizada ou obsoleta"* —, confirmada em parte e refutada em parte pela
+varredura. Causa-raiz e prova em `VACINA-067`.
+
+**O que a varredura achou, e o que ela não achou:**
+
+```
+links internos quebrados nos 43 documentos ...... 0
+comandos `pnpm` citados que não existem ......... 0
+números afirmados fora de data .................. 12, em 8 documentos
+documentos com duas datas "Atualizado em" ....... 2
+```
+
+O apodrecimento **não estava na estrutura**: estava nos números. O pior deles
+vivia no `CLAUDE.md`, lido no início de toda sessão.
+
+`pnpm validate:numeros-afirmados` fecha essa porta para as três medições
+declaradas. O que sobra é o que ele **não** sabe conferir, e é o trabalho desta
+sprint.
+
+- [ ] T-75.1 — Ampliar a lista curada de medições protegidas: sprints, Marcos, módulos semeados, destinos de menu, funções do banco. Cada uma entra com a sua função de medir
+- [ ] T-75.2 — **Fato obsoleto, não só número**: documento que descreve comportamento que não existe mais. É a VACINA-012, que segue sem portão, e é mais difícil porque exige comparar prosa com código
+- [ ] T-75.3 — Varrer sprint por sprint procurando tarefa cuja premissa caiu — arquivo que não existe mais, decisão revogada, módulo renomeado
+- [ ] T-75.4 — Conferir se alguma sprint `pendente` já foi entregue fora da ordem formal do inventário. A S-34 tinha uma nota admitindo exatamente isso, e o caso foi resolvido só quando alguém leu
+- [ ] T-75.5 — Registrar o que for achado no `REGISTRO-DE-ERROS.json`, para o Pareto medir a família `governanca` com denominador real

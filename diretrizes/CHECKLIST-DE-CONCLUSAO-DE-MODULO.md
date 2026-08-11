@@ -41,7 +41,7 @@ trabalhar não é praticada — e foi exatamente o que aconteceu.
 
 ## 2. A segunda razão, que é pior
 
-Metade destas perguntas **já tem portão pronto** no repositório. São 42
+Metade destas perguntas **já tem portão pronto** no repositório. São 44
 validadores. E nenhum deles responde a pergunta que decide um Marco:
 
 > *este módulo está pronto?*
@@ -219,7 +219,7 @@ acabou de digitar. Nenhuma tem portão.
 
 ---
 
-## 5. De onde vieram os itens — a varredura das 66 vacinas
+## 5. De onde vieram os itens — a varredura das vacinas
 
 Este checklist não foi inventado. Ele saiu de uma pergunta do proprietário —
 *"o que das vacinas ou erros que cometemos são comuns em todos os Marcos e
@@ -230,7 +230,7 @@ o catálogo inteiro em 11/08/2026.
 
 | | Quantidade |
 | --- | ---: |
-| Vacinas catalogadas | **66** |
+| Vacinas catalogadas | **67** |
 | Já com portão citado (validador, CI ou `qa:*`) | **33** |
 | **Sem portão nenhum** | **33** |
 

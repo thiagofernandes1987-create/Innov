@@ -32,6 +32,7 @@
     "validate:modulos-semeados": "node scripts/validate-modulos-semeados.mjs",
     "validate:definer-com-guarda": "node scripts/validate-definer-com-guarda.mjs",
     "validate:execute-revogado": "node scripts/validate-execute-revogado.mjs",
+    "validate:numeros-afirmados": "node scripts/validate-numeros-afirmados.mjs",
     "checklist:modulo": "node scripts/checklist-de-modulo.mjs",
     "pareto:erros": "node scripts/pareto-de-erros.mjs",
     "mapa:codigo": "node scripts/gerar-mapa-do-codigo.mjs",

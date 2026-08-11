@@ -118,6 +118,6 @@ Em caso de divergência, **`diretrizes/UI-UX-PRO-MAX.md` prevalece**. Ele é doc
 
 - `diretrizes/` é fonte canônica. `diretrizes/vacinas/` registra decisões verificadas por CI: contrariar uma vacina reprova o build, mesmo quando a mudança parece tecnicamente correta. Consultar antes de alterar configuração de CI, instalação de dependência ou privilégio de banco.
 - Nenhuma etapa é concluída sem código, migrations, testes, documentação, vacinas, homologação e CI compatíveis.
-- `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:python` e **todos** os `pnpm validate:*` devem passar antes de qualquer afirmação de conclusão. São 54 validadores; rodar um subconjunto e declarar a bateria verde já custou caro — foi um dos 46 não executados que pegou o defeito.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:python` e **todos** os `pnpm validate:*` devem passar antes de qualquer afirmação de conclusão. São 44 validadores; rodar um subconjunto e declarar a bateria verde já custou caro — foi um dos 46 não executados que pegou o defeito.
 - Dois deles medem população, não caso isolado, e por isso o número só pode cair: `pnpm validate:exports-mortos` (export sem nenhum importador — o equivalente ao `U1000` do `staticcheck`, sem trocar de linguagem) e `pnpm validate:assercoes` (teto de asserção fraca). Débito aceito vive datado em `diretrizes/EXPORTS-MORTOS-ACEITOS.json` e `diretrizes/ASSERCOES-FRACAS-ACEITAS.json`, com motivo — nunca em regex silenciosa.
 - `.claude/skills` é conteúdo de terceiros, fora do eslint e do tsc. Não é código da plataforma.

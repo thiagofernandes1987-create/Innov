@@ -1,8 +1,6 @@
 # Contratos dos módulos — Innovar Platform
 
-**Atualizado em:** 04 de agosto de 2026  
-**Versão estável:** 0.19.0  
-**Atualizado em:** 9 de agosto de 2026  
+**Atualizado em:** 11 de agosto de 2026  
 **Versão:** 0.19.0  
 **Registro técnico:** `lib/modules/registry.ts`
 

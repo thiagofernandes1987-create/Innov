@@ -242,6 +242,36 @@
       "tinha_portao": false,
       "detectado_por": "revisão própria",
       "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Cinco documentos canônicos afirmavam '54 validadores' — inclusive o CLAUDE.md, lido no início de toda sessão — quando o real era 43; e os documentos discordavam entre si (54, 43, 42, 41, 17)",
+      "familia": "governanca",
+      "onde": "documentação canônica",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "proprietário",
+      "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "MODULOS.md e INVENTARIO.md carregavam duas linhas 'Atualizado em' com datas diferentes; a mais antiga aparecia primeiro",
+      "familia": "governanca",
+      "onde": "documentação canônica",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Script de correção em lote abortou num `assert` no meio e deixou as substituições seguintes sem aplicar; só percebi porque o portão continuou reprovando",
+      "familia": "processo",
+      "onde": "correção de números afirmados",
+      "vacina": "não é causa nova",
+      "tinha_portao": true,
+      "detectado_por": "portão próprio",
+      "custo": "baixo"
     }
   ]
 }

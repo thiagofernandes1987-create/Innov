@@ -146,6 +146,7 @@ Vacina pode ser substituída somente em PR próprio, preservando garantia igual 
 | `VACINA-064` | Aplicativo declarado no registry do código e ausente de `app_modules` some da central sem erro nenhum | vigente | `validate:modulos-semeados` cruza registry, semeadura, menus e roteador nas cinco direções |
 | `VACINA-065` | Função `security definer` que recebe `organization_id` por parâmetro e é concedida a `authenticated` escreve em empresa alheia sem conferir participação | vigente | `validate:definer-com-guarda` exige guarda no corpo; sete funções corrigidas com o guarda da própria família |
 | `VACINA-066` | Regra que manda o achado novo para o fim do arquivo protege o foco e espalha a lógica do módulo, porque trata posição física e dono lógico como a mesma coisa | vigente | Marco vira rótulo; `validate:inventory` exige `Marco:` na sprint e impede fechar Marco com sprint aberta apontando para ele (R9) |
+| `VACINA-067` | Número afirmado em documento canônico envelhece e passa a mentir com cara de medição — em 11/08/2026, cinco documentos diziam 54 validadores — inclusive o `CLAUDE.md` — quando o real era 43 | vigente | `validate:numeros-afirmados` confere as quantidades declaradas contra o repositório e acusa documento que se contradiz na data; citação com data no entorno é isenta, porque medição datada não envelhece |
 
 ## 4. Arquivos
 
@@ -216,7 +217,8 @@ diretrizes/vacinas/
 ├── VACINA-063-REDE-LOGICA-VALIDADA-ANTES-DA-GRAVACAO.md
 ├── VACINA-064-MODULO-DECLARADO-NO-CODIGO-E-AUSENTE-DO-CATALOGO.md
 ├── VACINA-065-DEFINIDORA-QUE-RECEBE-A-ORGANIZACAO-E-NAO-CONFERE-PARTICIPACAO.md
-└── VACINA-066-REGRA-QUE-PROTEGE-O-FOCO-DESTROI-A-COERENCIA.md
+├── VACINA-066-REGRA-QUE-PROTEGE-O-FOCO-DESTROI-A-COERENCIA.md
+└── VACINA-067-NUMERO-AFIRMADO-EM-DOCUMENTO-CANONICO-ENVELHECE.md
 ```
 
 ## 5. Aplicação no Encerramento da Etapa 22
