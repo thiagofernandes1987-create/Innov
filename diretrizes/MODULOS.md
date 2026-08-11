@@ -77,16 +77,25 @@ Confronto e lacunas em `CONFRONTO-ODOO-19-E-INNOV.md` §3.2 e §4.1.
 
 Definition of Done:
 
-- documentação atualizada no mesmo PR;
-- migration aplicada e homologada;
+**O esqueleto é o de todos os módulos** — existência, dado, chamada, cálculo,
+navegação, QA, persona, KPI e prova — e vive em
+`CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. Conforme a **R8**, não é repetido aqui.
+Rodar `pnpm checklist:modulo equipes` para o retrato mecânico.
+
+Específico deste módulo, e é só isto:
+
 - **custo/hora com dono e vigência**: pertence à pessoa, não à linha de equipe de uma obra; alterar o valor **abre vigência nova e não reescreve o passado**;
-- **custo/hora usado em cálculo**, não só exibido: existe ao menos um número no produto que só existe porque ele existe — o custo de mão de obra do diário (E2);
+- **custo/hora usado em cálculo**, não só exibido — hoje `project_resources.hourly_cost`, `project_resources.daily_cost` e `project_team_members.hourly_cost` são três números exibidos que não entram em conta nenhuma;
 - **capacidade por pessoa e por papel**, base da alocação do planejamento (`horas planejadas ÷ capacidade disponível`);
 - **papel antes da pessoa**: a obra planeja a função a alocar antes de existir alguém para ela;
-- **navegação própria**: o menu do módulo deixa de ser anel para os vizinhos, com destinos que existem porque o módulo tem profundidade — e não o contrário;
-- integrante sem custo declarado **não quebra o cálculo**: aparece como custo não informado, nunca como zero;
+- integrante sem custo declarado aparece como não informado, **nunca como zero**;
 - valor de custo protegido por `view_sensitive_financials`;
 - testes de vigência: custo alterado não muda o custo já apurado de período fechado;
+- documentação atualizada no mesmo PR;
+- migration aplicada e homologada;
+- saldo não editável diretamente;
+- movimentos concluídos imutáveis;
+- testes de concorrência e saldo;
 - isolamento multiempresa e multiobra;
 - CI verde.
 

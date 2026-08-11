@@ -1,0 +1,5 @@
+{
+  "_leia": "Quais tabelas pertencem a cada módulo. Não é dedutível: `project_teams` pertence a `equipes` ou a `obras`? É decisão de desenho, e heurística errada aqui aprovaria o módulo errado. Preenchido módulo a módulo, na sprint que escreve a definição de pronto daquele módulo — nunca em mutirão, porque em mutirão sai chutado. Consumido por `scripts/checklist-de-modulo.mjs`.",
+  "_atualizado_em": "2026-08-11",
+  "equipes": ["project_teams", "project_team_members", "project_resources"]
+}

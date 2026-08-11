@@ -41,6 +41,7 @@ Diante de qualquer erro: consultar [`VACINAS.md`](./VACINAS.md) **antes** de pro
 | **Como se prova que um portão protege** | [`PROVA-POR-SABOTAGEM.md`](./PROVA-POR-SABOTAGEM.md) | ao criar teste, validador ou verificação de CI |
 | **O que cada módulo tem, calcula e mostra — e o que lhe falta** | [`CONFRONTO-ODOO-19-E-INNOV.md`](./CONFRONTO-ODOO-19-E-INNOV.md) | antes de mexer em qualquer módulo, e antes de planejar trabalho novo |
 | **O que a IA pode executar sozinha, e o que nunca pode** | [`IA-OPERADORA.md`](./IA-OPERADORA.md) | antes de dar à IA qualquer ato que escreva no banco |
+| **Quando um módulo pode ser dado por concluído** | [`CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`](./CHECKLIST-DE-CONCLUSAO-DE-MODULO.md) | ao abrir e ao fechar o Marco de qualquer módulo |
 | **Quem usa e o que sabe** | [`PERSONAS-E-ROTINAS.md`](./PERSONAS-E-ROTINAS.md) | antes de criar tela ou permissão |
 | **Como provar autoridade, controle e evidência** | [`CONTRATO-AUDITAVEL-DE-PERSONAS.md`](./CONTRATO-AUDITAVEL-DE-PERSONAS.md) | antes de auditar pessoa, rotina, tela, processo ou controle |
 | **O que quebra e a quem se pede socorro** | [`FLUXOS-E-RISCOS.md`](./FLUXOS-E-RISCOS.md) | antes de criar qualquer objeto ou fluxo |
@@ -157,12 +158,14 @@ Não confie neste parágrafo para saber o que fazer agora — confie no inventá
 1. `CLAUDE.md` na raiz;
 2. **este arquivo**;
 3. `diretrizes/INVENTARIO-DE-EXECUCAO.md` — o que fazer agora;
-4. `diretrizes/METODO-DE-TRABALHO.md`, e `diretrizes/PROVA-POR-SABOTAGEM.md` ao criar portão;
-5. `diretrizes/SPEC.md` e `diretrizes/ESTADO-ATUAL.json`;
-6. `diretrizes/ARQUITETURA.md`;
-7. `diretrizes/OBJECT-RUNTIME.md` quando o assunto for customização;
-8. `diretrizes/VACINAS.md` antes de resolver erro;
-9. `diretrizes/UI-UX-PRO-MAX.md` quando o assunto for interface;
-10. `diretrizes/PERSONAS-E-ROTINAS.md`, `diretrizes/CONTRATO-AUDITAVEL-DE-PERSONAS.md` e `diretrizes/FLUXOS-E-RISCOS.md` antes de criar ou auditar qualquer coisa nova.
+4. **`diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`** — o mesmo para todo módulo, e é o que decide se um Marco pode fechar. **Antes de mexer em módulo, não depois**: os itens de RLS, contraste, transbordo, alvo de toque e função sem chamador existem porque cada um já passou por toda a bateria verde e chegou à tela ou ao banco;
+5. `diretrizes/CONFRONTO-ODOO-19-E-INNOV.md` — o que cada módulo tem, calcula e mostra, e o que lhe falta;
+6. `diretrizes/METODO-DE-TRABALHO.md`, e `diretrizes/PROVA-POR-SABOTAGEM.md` ao criar portão;
+7. `diretrizes/SPEC.md` e `diretrizes/ESTADO-ATUAL.json`;
+8. `diretrizes/ARQUITETURA.md`;
+9. `diretrizes/OBJECT-RUNTIME.md` quando o assunto for customização;
+10. `diretrizes/VACINAS.md` antes de resolver erro;
+11. `diretrizes/UI-UX-PRO-MAX.md` quando o assunto for interface;
+12. `diretrizes/PERSONAS-E-ROTINAS.md`, `diretrizes/CONTRATO-AUDITAVEL-DE-PERSONAS.md` e `diretrizes/FLUXOS-E-RISCOS.md` antes de criar ou auditar qualquer coisa nova.
 
 Nenhum desses passos depende de memória de conversa, de arquivo temporário de contêiner ou de máquina local. É essa a razão de existir deste diretório.

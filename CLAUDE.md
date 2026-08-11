@@ -62,7 +62,7 @@ e a regra que o governa é uma só: **o repositório é a fonte canônica, o Not
 o índice**. Quando os dois divergirem, o repositório ganha e o verbete é
 atualizado. Quem mede algo novo registra lá, com o número e a data.
 
-Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/CONFRONTO-ODOO-19-E-INNOV.md` → `diretrizes/IA-OPERADORA.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/FLUXOS-E-RISCOS.md` → `diretrizes/PADRAO-DE-INTERFACE.md` → `diretrizes/MAPA-TECNOLOGICO.md` → `diretrizes/PROVA-POR-SABOTAGEM.md`.
+Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md` → `diretrizes/CONFRONTO-ODOO-19-E-INNOV.md` → `diretrizes/IA-OPERADORA.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/FLUXOS-E-RISCOS.md` → `diretrizes/PADRAO-DE-INTERFACE.md` → `diretrizes/MAPA-TECNOLOGICO.md` → `diretrizes/PROVA-POR-SABOTAGEM.md`.
 
 ## Antes de criar tela
 
@@ -78,6 +78,7 @@ Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md
 - **o Marco é a unidade de conclusão** — quase sempre *"finalizar o módulo X"* — e a **sprint é o conjunto de tarefas** para chegar lá;
 - **o que é novo vai para o fim do arquivo e declara o seu `Marco:`**. A posição física protege o foco (não se para a sprint em curso); o rótulo protege a coerência. Tratar as duas como a mesma coisa foi a causa medida da dispersão: **4,5 sprints por módulo em média**, 17 de 25 módulos em 4 sprints ou mais;
 - **o Marco não fecha com sprint aberta apontando para ele**: ao terminar uma sprint, antes de começar a próxima, confere-se o Marco — se sobrou algo pendurado nele, decide-se a ordem e o que precisa ser destravado. Um passo de cada vez, módulo por módulo;
+- **a conferência do Marco segue um checklist único**, igual para todos os módulos, em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md` — existência, dado, chamada, cálculo, navegação, QA, persona, KPI e prova. `pnpm checklist:modulo <chave>` responde os itens mecânicos; item humano sem evidência conta como não feito. Definição de pronto de módulo **não repete** esse esqueleto: registra só o que é específico dele;
 - **tarefa aponta, não descreve**: a lógica do módulo mora em `diretrizes/CONFRONTO-ODOO-19-E-INNOV.md`, e a tarefa aponta para lá. Regra repetida em dois documentos diverge em silêncio;
 - **a ordem pode mudar apenas na virada de sprint**, e toda reordenação é registrada com justificativa — pré-requisito descoberto ou sprint que vira base reaproveitável para as seguintes.
 

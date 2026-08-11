@@ -14,6 +14,7 @@ const requiredCanonical=[
  "diretrizes/MAPA-TECNOLOGICO.md","diretrizes/PROVA-POR-SABOTAGEM.md",
   "diretrizes/CONFRONTO-ODOO-19-E-INNOV.md",
   "diretrizes/IA-OPERADORA.md",
+  "diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md",
  "diretrizes/WORKERS.md","diretrizes/ADR-0001-CAMADA-DE-EXECUCAO.md"
 ];
 // A lista acima é escrita à mão, e isso já falhou uma vez — do mesmo jeito que

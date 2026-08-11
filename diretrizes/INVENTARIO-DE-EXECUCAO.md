@@ -68,6 +68,8 @@ Três coisas mudam, e só a terceira é cosmética:
 **R9 — O Marco só fecha quando nenhuma sprint aberta o referencia.** *(nova em 11/08/2026)* Ao concluir uma sprint, **antes de começar a próxima**, confira o Marco dela: se existir qualquer sprint aberta declarando aquele Marco — inclusive uma que acabou de chegar no fim do arquivo — o Marco **continua aberto**. Nesse momento se decide a ordem: qual sprint vem agora, e se o achado novo precisa de um passo anterior que o destrave. Marco sem nenhuma sprint não pode ser declarado `concluído`; ele está `sem sprint`.
 
 > É esta regra que faz o modelo funcionar. A R4 deixa o achado novo esperar no fim sem interromper; a R9 garante que ele não seja esquecido, porque o Marco não fecha por cima dele. Um passo de cada vez, módulo por módulo. Verificada por `pnpm validate:inventory`.
+>
+> **O procedimento da conferência é o mesmo para todo módulo** e está em [`CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`](CHECKLIST-DE-CONCLUSAO-DE-MODULO.md): existência, dado, chamada, cálculo, navegação, QA, persona, KPI e prova. Rodar `pnpm checklist:modulo <chave>` para o retrato mecânico. Item de verificação humana sem evidência registrada **conta como não feito**.
 
 **R8 — Tarefa aponta, não descreve.** *(nova em 11/08/2026)* Tarefa não reescreve a lógica do módulo: ela **aponta** para a seção dele no confronto e diz o que fazer, em que ordem e com que evidência. Regra de negócio ou número repetido em dois documentos diverge em silêncio — é a mesma razão pela qual o Notion é índice e o repositório é fonte.
 
@@ -2343,4 +2345,6 @@ não tem profundidade que justifique menu.
 - [ ] T-72.2 — **Papel antes da pessoa**: a obra planeja a função a alocar antes de existir alguém para ela. É o desenho de *Roles* do manual, e é o que uma obra precisa no início
 - [ ] T-72.3 — Navegação própria: destinos que existem porque o módulo tem profundidade. Não acrescentar item de menu antes de existir a página — foi assim que quatro módulos ficaram com menu de vizinho
 - [ ] T-72.4 — Persona e rotina antes de qualquer tela nova, com as quatro perguntas de `PERSONAS-E-ROTINAS.md`
-- [ ] T-72.5 — Conferir o Marco pela **R9** com a definição de pronto de `MODULOS.md` na mão, e só então decidir o fechamento
+- [ ] T-72.5 — Declarar as tabelas do módulo em `diretrizes/tabelas-por-modulo.json` — já feito para `equipes` em 11/08/2026, e é pré-requisito dos itens de dado do checklist
+- [ ] T-72.6 — Percorrer o [`CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`](CHECKLIST-DE-CONCLUSAO-DE-MODULO.md) inteiro, registrando evidência de cada item de verificação humana; item sem evidência conta como não feito
+- [ ] T-72.7 — Conferir o Marco pela **R9** com o checklist e a definição de pronto na mão, e só então decidir o fechamento
