@@ -120,9 +120,9 @@ planejada ainda), `concluído` (tem sprint e nenhuma delas está aberta).
 | `M-COMPRAS` | Finalizar o módulo Compras e Suprimentos | aberto |
 | `M-ESTOQUE` | Finalizar o módulo Estoque | aberto |
 | `M-FINANCEIRO` | Finalizar o módulo Financeiro Operacional | sem sprint |
-| `M-RH` | Finalizar o módulo RH | **candidato a fechamento** |
+| `M-RH` | Finalizar o módulo RH | aberto |
 | `M-SAC` | Finalizar o módulo Pós-venda | aberto |
-| `M-WHATSAPP` | Finalizar o módulo WhatsApp | **candidato a fechamento** |
+| `M-WHATSAPP` | Finalizar o módulo WhatsApp | aberto |
 | `M-RELATORIOS` | Finalizar o módulo Relatórios | aberto |
 | `M-AUDITORIA` | Finalizar o módulo Auditoria | aberto |
 | `M-ADMINISTRACAO` | Finalizar o módulo Administração | aberto |
@@ -146,12 +146,15 @@ honesto de que ninguém planejou trabalho para eles. Entre eles estão
 próprio — o núcleo operacional da obra sem nenhuma sprint prevista. É a mesma
 conclusão que o índice por módulo mostra por outro caminho.
 
-**`M-RH` e `M-WHATSAPP` são candidatos a fechamento** — têm sprint e nenhuma
-aberta. Fechar é decisão do proprietário na virada, conforme a R9, não do
-validador. No caso do RH há um impedimento conhecido: as 68 migrations `rh_*`
-não estão aplicadas, então o módulo está pronto no repositório e ausente do
-banco. Fechar o Marco antes disso seria declarar concluído o que nenhum usuário
-alcança.
+**`M-RH` e `M-WHATSAPP` apareceram como candidatos a fechamento em 11/08/2026, e
+a conferência da R9 mostrou que não eram.** As sprints ligadas a eles — S-40 e
+S-41 — eram de **convergência de ramo**, e a S-42 estava ligada a `M-RH` por
+engano sendo sobre mapa tecnológico. Fechar teria declarado dois módulos prontos
+com base em merge de branch.
+
+É a limitação declarada na VACINA-066: **o portão confere vínculo, não
+pertinência**. Ele acusa o esquecimento; o engano continua sendo trabalho de
+quem confere na virada. A correção abriu S-68, S-69 e S-70, e religou a S-42.
 
 ---
 
@@ -358,6 +361,7 @@ temos lista; sem probabilidade não temos previsão. Confronto §3.1.
 - [ ] T-62.1 — Probabilidade por etapa, editável por empresa
 - [ ] T-62.2 — Receita rateada e previsão por período de fechamento
 - [ ] T-62.3 — Margem por linha na proposta (`(preço − custo) × quantidade`)
+- [ ] T-62.4 — **Herdada da T-34.10.1**, que ficava presa numa sprint de Administração esperando algo que não existia: ao criar o marcador de cartão, reavaliá-lo contra o critério da T-34.10 — dimensão que gera contagem usa lista cadastrada; vocabulário de tela, não
 
 ## Sprint S-63 — E12: antes-e-depois na trilha de auditoria
 **Estado:** pendente
@@ -1534,7 +1538,7 @@ R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
 
 ## Sprint S-34 — Listas cadastradas: o que a empresa decide que existe como opção
 
-**Estado:** pendente
+**Estado:** concluída
 **Marco:** M-ADMINISTRACAO
 
 > **Nota de estado, para não parecer contradição.** As tarefas marcadas abaixo já estão
@@ -1575,7 +1579,6 @@ os dois igual foi o erro de T-32.0.6.
   - [x] T-34.9.3 — A classificação A/B/C **some abaixo de cinco motivos**. Medido na tela: com dois, "praça errada" com 44% da perda saía como classe C, que é o rótulo de desprezível. ABC pressupõe cauda longa; sem ela, a ordem por valor já é a mensagem inteira
   - [x] T-34.9.4 — Regra da tabela canônica corrigida num caso que ela não previa: com um motivo só, o acumulado da primeira linha já é 100% e a maior causa sairia como C. A primeira linha é sempre A — ela é, por definição, a prioridade
 - [x] T-34.10 — Avaliada a mesma tela para marcador de cartão e etapa de funil. **Resposta: não, e por motivos diferentes.** Etapa de funil é vocabulário, não dimensão: cada construtora nomeia as próprias etapas, elas mudam por trilha e ninguém soma "quantas etapas 'Qualificação' existem" — curar obrigaria a passar por Administração para criar uma coluna, que é o oposto do que a tela do funil precisa ser. Marcador de cartão não existe no produto; avaliar antes de existir seria decidir sobre o que não se viu. O critério fica escrito: **cura-se o que alimenta contagem; observa-se o que nomeia**
-  - [ ] T-34.10.1 — Reavaliar marcador de cartão quando ele existir, contra esse critério
 
 - [x] T-34.11 — Medidor de alvo de toque passa a aplicar a isenção da WCAG 2.5.5 para link **dentro de frase**: aumentar um link em texto corrido exigiria quebrar a linha do parágrafo, e reprovar a marcação correta ensina a ignorar o vermelho. Só isenta quando há frase em volta — link sozinho num parágrafo é botão mal vestido e continua medido. Provado com teste negativo: encolhendo a barra de relatórios de propósito, a reprovação volta
 - [x] T-34.12 — Barra de navegação dos relatórios em 41px, três abaixo do mínimo. Executivo, obras, financeiro, compras, qualidade, perdas, metas, salvos e snapshots fecham em 0
@@ -1863,7 +1866,7 @@ conforme a R4.
 ## Sprint S-42 — Mapa tecnológico canônico e fechamento da Fase 1
 
 **Estado:** concluída
-**Marco:** M-RH
+**Marco:** M-PLATAFORMA
 
 Decisão do responsável em 10/08/2026: adotar o mapa tecnológico **completo**,
 na estratégia de fases da própria §36 do documento. Entra no fim conforme a R4.
@@ -2218,3 +2221,97 @@ qualquer ato acima de N1.
 - [ ] T-67.3 — Cada aviso cita a fonte e oferece a ação; nenhum grava sozinho
 - [ ] T-67.4 — Teto de volume por tipo de ato: 500 avisos numa madrugada é incidente, mesmo com cada um certo
 - [ ] T-67.5 — Medir taxa de acerto com denominador declarado, antes de qualquer conversa sobre subir nível
+
+## Sprint S-68 — RH: o que falta para o módulo existir para o usuário
+
+**Estado:** pendente
+**Marco:** M-RH
+
+Aberta na conferência de Marcos de 11/08/2026, conforme a **R9**. O validador
+apontava `M-RH` como candidato a fechamento, e a conferência mostrou que **não
+era**: as duas sprints ligadas a ele — S-40 e S-42 — eram de **convergência de
+ramo** e de **mapa tecnológico**, não de conclusão do módulo. A S-42 foi religada
+a `M-PLATAFORMA`; esta sprint é o trabalho que o Marco realmente exige.
+
+O módulo é o mais construído da plataforma — **57 das 180 páginas**, menu 100%
+próprio. E **nenhum usuário o alcança**, porque as 68 migrations `rh_*` não estão
+aplicadas: `list_my_modules` resolve contra `app_modules`, e a chave não está lá.
+É a VACINA-064 vista pelo lado da aplicação.
+
+- [ ] T-68.1 — **Bloqueado por S-69.** Aplicar as 68 migrations `rh_*` e conferir que a chave `rh` aparece em `app_modules` e que a central lista o módulo
+- [ ] T-68.2 — Decidir as **5 RPCs sem chamador e sem teste** (`create_rh_payroll_parameter` e irmãs): ligar a uma tela, cobrir com teste, ou remover por migration destrutiva com decisão registrada
+- [ ] T-68.3 — Custo/hora no cadastro do funcionário, com vigência — mesma peça de **E1** (S-52), que mora em `M-EQUIPES` e é lida aqui
+- [ ] T-68.4 — Conferência da persona e da rotina operacional contra `PERSONAS-E-ROTINAS.md`, com as quatro perguntas respondidas para as telas que já existem
+- [ ] T-68.5 — Confronto com o manual (§3.5): o que fica de fora e por quê — recrutamento não é gargalo hoje; frota é `◐` e depende de decisão
+
+## Sprint S-69 — Aplicar no banco o que o repositório já tem
+
+**Estado:** pendente
+**Marco:** M-SEGURANCA
+
+Aberta na conferência de Marcos de 11/08/2026. **Consolida o bloqueio que trava
+quatro Marcos ao mesmo tempo**, e por isso deixa de estar espalhada: a S-51
+tratava só das migrations da VACINA-065, mas o impedimento é o mesmo para todos.
+
+| Marco travado | O que espera |
+| --- | --- |
+| `M-SEGURANCA` | as duas migrations da VACINA-065 — **sete funções ainda escrevem em empresa alheia no banco** |
+| `M-RH` | as 68 migrations `rh_*` — o módulo não existe para nenhum usuário |
+| `M-PLATAFORMA` | as filas do canal, sem as quais a T-43.3 tarefa 5 (`FilaPostgREST`) não tem o que consumir |
+| `M-WHATSAPP` | as 25 migrations `stage22_*` — o gateway não tem fila no banco |
+
+Um passo destrava quatro Marcos. É a maior alavanca do inventário inteiro, e é
+**decisão do proprietário**: aplicar migration em banco remoto é ação externa e
+irreversível, fora do que uma sessão assistida decide sozinha.
+
+- [ ] T-69.1 — **Decisão do proprietário** sobre aplicar, com o alcance definido: só a VACINA-065 (menor e mais urgente), ou também `rh_*` e `stage22_*`
+- [ ] T-69.2 — Ordem de aplicação e ponto de retorno definidos antes de qualquer execução; migration destrutiva não entra neste lote
+- [ ] T-69.3 — Aplicar com evidência da execução registrada
+- [ ] T-69.4 — **Conferir a reprovação, não só a aprovação**: chamar as sete funções da VACINA-065 com sessão de outra empresa e **observar a recusa** antes de declarar corrigido
+- [ ] T-69.5 — `SUPABASE_DB_URL=... pnpm ledger:atualizar` e retirar do débito em `diretrizes/migrations-aplicadas.json` só o que foi de fato aplicado
+
+## Sprint S-70 — WhatsApp: navegação própria e o que o gateway precisa
+
+**Estado:** pendente
+**Marco:** M-WHATSAPP
+
+Aberta na conferência de Marcos de 11/08/2026, pelo mesmo motivo da S-68: o
+validador apontava `M-WHATSAPP` como candidato a fechamento, e a S-41 ligada a
+ele era **convergência de ramo**, não conclusão de módulo.
+
+Medido: 4 páginas e **menu com 1 destino próprio em 5** — 20%, um dos cinco
+módulos cujo menu é majoritariamente atalho para vizinho. Confronto em
+[`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5.
+
+- [ ] T-70.1 — Navegação interna própria: hoje o menu do módulo é anel para os vizinhos, e o módulo não tem profundidade que justifique menu
+- [ ] T-70.2 — **Bloqueado por S-69.** Filas do canal aplicadas, sem as quais o gateway não drena
+- [ ] T-70.3 — SLA de atendimento, compartilhado com `M-SAC` (E8, S-59) — a política é a mesma, a tela é que difere
+- [ ] T-70.4 — Persona e rotina, com as quatro perguntas de `PERSONAS-E-ROTINAS.md`
+
+## Sprint S-71 — Administração: escrever o que "finalizado" significa, e fechar a diferença
+
+**Estado:** pendente
+**Marco:** M-ADMINISTRACAO
+
+Aberta na conferência de Marcos de 11/08/2026, conforme a **R9**, e é o terceiro
+caso idêntico do mesmo dia — depois de `M-RH` e `M-WHATSAPP`.
+
+A S-34 fechou (listas cadastradas, 14 tarefas entregues), e o Marco apareceu como
+candidato. A conferência diz **não**: o Marco tem **uma sprint**, sobre listas, e
+o módulo tem **10 páginas e menu 6/6 próprio**. Fechar declararia Administração
+pronta porque a tela de motivos de perda ficou pronta.
+
+**O buraco é estrutural e vale para quase todos os 37 Marcos:** cada um declara
+*"finalizar o módulo X"* e **nenhum diz o que "finalizado" significa para X**.
+Sem isso, a R9 impede fechar por cima de sprint aberta, mas não impede fechar por
+cima de escopo que ninguém escreveu.
+
+O lugar da definição já existe e tem precedente cobrado por CI: `MODULOS.md`
+carrega o contrato de cada módulo, e o validador já exige *Definition of Done* no
+contrato do `estoque`. Estender isso a todos é o trabalho — **um módulo por vez**,
+começando por este.
+
+- [ ] T-71.1 — Escrever em `MODULOS.md` a **definição de pronto** do `administracao`: o que o módulo precisa ter para o Marco poder fechar, derivado do confronto §3.5 e do estado medido
+- [ ] T-71.2 — Conferir a diferença entre a definição e as 10 páginas de hoje, e listar o que falta como tarefa
+- [ ] T-71.3 — **Portão**: estender a verificação de *Definition of Done* — hoje só o `estoque` — para exigir que todo Marco de módulo aponte a sua, e reprovar Marco `concluído` cuja definição não exista. Provar por sabotagem, com o caso legítimo passando
+- [ ] T-71.4 — Só então conferir o Marco de novo, conforme a R9
