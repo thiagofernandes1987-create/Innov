@@ -388,16 +388,44 @@ reversível por natureza — cobrança errada custa um aviso, não um lançament
 
 Lendo as 25 linhas juntas, três coisas aparecem que nenhuma linha isolada mostra.
 
-### 4.1 Falta um campo, e ele trava sete módulos
+### 4.1 O custo/hora trava sete módulos — e não é por estar faltando
 
-**Custo/hora por pessoa.** Aparece como pré-requisito em `equipes`, `diario`,
-`planejamento`, `obras`, `financeiro`, `rh` e `orcamentos`. Todas as fórmulas de
-custo de mão de obra do manual — Projeto, Planilhas de Horas, Serviço de Campo —
-começam nesse campo. Sem ele, "custo da obra" só pode ser material e serviço
-contratado, que é o que temos hoje.
+*(corrigido em 11/08/2026, ao escrever a definição de pronto do `equipes`)*
 
-É um campo. Ele destrava sete módulos. É o melhor retorno por esforço da matriz
-inteira, e é a resposta técnica para *"está demorando muito para avançar"*.
+**A primeira versão desta seção dizia "falta um campo". Estava errada na forma.**
+O campo existe desde a etapa 12, em duas tabelas, e a medição no código é esta:
+
+| Coluna | Desde | Escrita por | Lida por | Usada em cálculo |
+| --- | --- | --- | --- | --- |
+| `project_resources.hourly_cost` | 19/07/2026 | `createProjectResource` | a tela `/app/obras/[id]/equipes`, formatada como moeda | **não** |
+| `project_team_members.hourly_cost` | 19/07/2026 | **ninguém** | **ninguém** | **não** |
+
+A segunda é coluna morta há quase um mês: nem escritor, nem leitor. A primeira é
+pior de um jeito mais sutil — ela é **exibida**, o que dá a impressão de que o
+custo de mão de obra existe no produto. Ele é digitado, guardado e mostrado, e
+não entra em conta nenhuma.
+
+A substância da conclusão continua de pé, e é isto que trava `equipes`, `diario`,
+`planejamento`, `obras`, `financeiro`, `rh` e `orcamentos`:
+
+1. **Não há vigência.** Custo muda; sem data de início, corrigir o valor reescreve
+   o passado, e o custo da obra do trimestre anterior muda sozinho.
+2. **Não está na pessoa.** Um está no *recurso do projeto*, o outro no *integrante
+   da equipe do projeto*. A mesma pessoa em duas obras são duas linhas, dois
+   valores e nenhum vínculo — não há de quem seja o custo.
+3. **Ninguém calcula com ele.** Nenhuma das fórmulas do manual — Projeto,
+   Planilhas de Horas, Serviço de Campo — tem contraparte aqui, porque não há
+   hora apontada para multiplicar.
+
+O trabalho não é criar um campo: é **dar dono, vigência e uso** ao que já existe.
+Continua sendo o melhor retorno por esforço da matriz, e continua sendo a resposta
+técnica para *"está demorando muito para avançar"* — mas por um motivo diferente
+do que eu havia escrito, e o motivo importa para quem for executar.
+
+**Como o erro passou.** Eu concluí "falta o campo" lendo o manual e a matriz, sem
+abrir o esquema. Ler o que falta é mais fácil do que medir o que existe e não
+serve — e produz a conclusão errada com a mesma confiança. Foi a exigência de
+escrever a **definição de pronto** que obrigou a olhar o código.
 
 ### 4.2 Falta um estágio, e ele é onde mora o dinheiro da obra
 

@@ -59,6 +59,37 @@ Cada módulo possui chave estável, rota, estado por organização, dependência
 - depende de `obras`;
 - equipes, integrantes, recursos e atribuições.
 
+**Estado medido em 11/08/2026** — é o ponto de partida da definição abaixo, e
+não uma promessa do que existe:
+
+| | |
+| --- | --- |
+| Páginas | **1** própria (`/app/equipes`) + 1 dentro de obras (`/app/obras/[id]/equipes`) |
+| Menu | **1 destino próprio em 5** — os outros quatro são atalho para vizinho |
+| Tabelas | `project_teams`, `project_team_members`, `project_resources` |
+| Server actions próprias | **nenhuma**; a escrita vem de `app/actions/projects.ts` |
+| `project_resources.hourly_cost` | escrito e **exibido**, nunca usado em cálculo |
+| `project_team_members.hourly_cost` | **sem escritor e sem leitor** desde 19/07/2026 |
+
+O módulo hoje **mostra** custo de mão de obra e não **calcula** com ele. É a
+distância entre parecer pronto e estar pronto, e é o que esta definição fecha.
+Confronto e lacunas em `CONFRONTO-ODOO-19-E-INNOV.md` §3.2 e §4.1.
+
+Definition of Done:
+
+- documentação atualizada no mesmo PR;
+- migration aplicada e homologada;
+- **custo/hora com dono e vigência**: pertence à pessoa, não à linha de equipe de uma obra; alterar o valor **abre vigência nova e não reescreve o passado**;
+- **custo/hora usado em cálculo**, não só exibido: existe ao menos um número no produto que só existe porque ele existe — o custo de mão de obra do diário (E2);
+- **capacidade por pessoa e por papel**, base da alocação do planejamento (`horas planejadas ÷ capacidade disponível`);
+- **papel antes da pessoa**: a obra planeja a função a alocar antes de existir alguém para ela;
+- **navegação própria**: o menu do módulo deixa de ser anel para os vizinhos, com destinos que existem porque o módulo tem profundidade — e não o contrário;
+- integrante sem custo declarado **não quebra o cálculo**: aparece como custo não informado, nunca como zero;
+- valor de custo protegido por `view_sensitive_financials`;
+- testes de vigência: custo alterado não muda o custo já apurado de período fechado;
+- isolamento multiempresa e multiobra;
+- CI verde.
+
 ## `orcamentos` — Orçamentos
 
 - rota `/app/orcamentos`;

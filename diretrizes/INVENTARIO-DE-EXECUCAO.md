@@ -222,15 +222,24 @@ nada e entrega sozinho.
 **Marco:** M-EQUIPES
 **Módulos atingidos:** `equipes`, `rh`, `diario`, `planejamento`, `obras`, `financeiro`, `orcamentos`
 
-O campo que trava sete módulos. Todas as fórmulas de custo de mão de obra do
-manual — Projeto, Planilhas de Horas, Serviço de Campo — começam nele. Sem ele,
-custo de obra só pode ser material e serviço contratado, que é o que temos hoje.
-Justificativa e origem: confronto §4.1.
+Trava sete módulos, e **não por estar faltando** — o campo existe desde a etapa
+12, em duas tabelas. A medição está no confronto §4.1 e na definição de pronto do
+módulo em `MODULOS.md`:
 
-- [ ] T-52.1 — Migration: custo/hora no integrante da equipe e no funcionário, com vigência (o custo muda e o histórico não pode ser reescrito)
-- [ ] T-52.2 — Guarda de participação na RPC de leitura, conforme VACINA-065 — definidora que recebe organização confere participação
-- [ ] T-52.3 — Campo no cadastro, com `view_sensitive_financials` decidindo quem vê
-- [ ] T-52.4 — Prova por sabotagem: custo removido derruba o cálculo dependente e o teste acusa
+```
+project_resources.hourly_cost      escrito e EXIBIDO, nunca usado em cálculo
+project_team_members.hourly_cost   sem escritor e sem leitor desde 19/07/2026
+```
+
+O módulo **mostra** custo de mão de obra e não **calcula** com ele. O trabalho é
+dar **dono, vigência e uso** ao que já existe — não criar campo.
+
+- [ ] T-52.1 — Decidir o dono: o custo pertence à **pessoa**, não à linha de equipe de uma obra. Hoje a mesma pessoa em duas obras são duas linhas, dois valores e nenhum vínculo
+- [ ] T-52.2 — Migration de **vigência**: alterar o custo abre período novo e não reescreve o passado. Sem isso, corrigir um valor muda o custo já apurado de trimestre fechado
+- [ ] T-52.3 — Resolver as duas colunas existentes: qual sobrevive, qual é migrada e qual é removida. `project_team_members.hourly_cost` é coluna morta e a remoção é migration destrutiva — decisão registrada, não silenciosa
+- [ ] T-52.4 — Campo no cadastro, com `view_sensitive_financials` decidindo quem vê; guarda de participação em qualquer RPC nova, conforme VACINA-065
+- [ ] T-52.5 — Integrante **sem custo declarado** aparece como não informado, nunca como zero — zero é um número e entra na conta mentindo
+- [ ] T-52.6 — Prova por sabotagem: custo alterado **não** muda o custo apurado de período fechado; e remover o custo derruba o cálculo dependente com o teste acusando
 
 ## Sprint S-53 — E2: apontamento de hora no diário
 **Estado:** pendente
@@ -2315,3 +2324,23 @@ começando por este.
 - [ ] T-71.2 — Conferir a diferença entre a definição e as 10 páginas de hoje, e listar o que falta como tarefa
 - [ ] T-71.3 — **Portão**: estender a verificação de *Definition of Done* — hoje só o `estoque` — para exigir que todo Marco de módulo aponte a sua, e reprovar Marco `concluído` cuja definição não exista. Provar por sabotagem, com o caso legítimo passando
 - [ ] T-71.4 — Só então conferir o Marco de novo, conforme a R9
+
+## Sprint S-72 — Equipes: capacidade, papel antes da pessoa e navegação própria
+
+**Estado:** pendente
+**Marco:** M-EQUIPES
+
+Aberta em 11/08/2026 ao escrever a **definição de pronto** do módulo em
+`MODULOS.md`. A S-52 (E1) fecha o custo/hora; esta fecha o resto da diferença
+entre a definição e o que existe. Conforme a R8, aponta e não repete.
+
+Medido: **1 página própria** e **menu com 1 destino próprio em 5** — quatro dos
+cinco itens são atalho para `planejamento`, `tarefas`, `obras` e `relatorios`. O
+menu não é navegação do módulo; é anel entre irmãos, e ele existe porque o módulo
+não tem profundidade que justifique menu.
+
+- [ ] T-72.1 — **Capacidade por pessoa e por papel**, que é a base da alocação do planejamento (`horas planejadas ÷ capacidade disponível`) — confronto §3.2
+- [ ] T-72.2 — **Papel antes da pessoa**: a obra planeja a função a alocar antes de existir alguém para ela. É o desenho de *Roles* do manual, e é o que uma obra precisa no início
+- [ ] T-72.3 — Navegação própria: destinos que existem porque o módulo tem profundidade. Não acrescentar item de menu antes de existir a página — foi assim que quatro módulos ficaram com menu de vizinho
+- [ ] T-72.4 — Persona e rotina antes de qualquer tela nova, com as quatro perguntas de `PERSONAS-E-ROTINAS.md`
+- [ ] T-72.5 — Conferir o Marco pela **R9** com a definição de pronto de `MODULOS.md` na mão, e só então decidir o fechamento
