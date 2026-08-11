@@ -272,6 +272,36 @@
       "tinha_portao": true,
       "detectado_por": "portão próprio",
       "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "A S-32 ficou com 46 tarefas feitas e zero abertas parada em `pendente`, segurando o Marco M-5 aberto sem motivo",
+      "familia": "governanca",
+      "onde": "INVENTARIO-DE-EXECUCAO.md",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "varredura da S-75",
+      "custo": "medio"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "A tarefa aberta T-28.11 mandava ler de `curvas.ts`, arquivo removido; a premissa da tarefa caiu e ninguém voltou nela",
+      "familia": "governanca",
+      "onde": "INVENTARIO-DE-EXECUCAO.md",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "varredura da S-75",
+      "custo": "medio"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Ao corrigir a T-28.11 escrevi o nome do arquivo morto entre crases dentro da própria explicação, e o portão novo acusou a minha correção",
+      "familia": "processo",
+      "onde": "INVENTARIO-DE-EXECUCAO.md",
+      "vacina": "não é causa nova",
+      "tinha_portao": true,
+      "detectado_por": "portão próprio",
+      "custo": "baixo"
     }
   ]
 }

@@ -1239,7 +1239,7 @@ apontou. Vai para o fim conforme R4.
 - [ ] T-28.8 — **Ver quem mais está alocado no mesmo endereço hoje**. Resolve por conversa, no local, em cinco minutos, o conflito de sequenciamento que hoje escala para a coordenação
 - [ ] T-28.9 — **Situação financeira do cliente visível antes de a equipe sair**, não depois. Descobrir depois custa os R$ 942,40 da Lei 2
 - [ ] T-28.10 — **Cobertura de apontamento** como número visível, e detecção do padrão suspeito — progresso monotônico com variância zero é o padrão de quem preenche de cabeça no fim de semana. **Falso é pior que ausente**, porque ausente ao menos se enxerga
-- [ ] T-28.11 — **Gravar `project_progress_snapshots` ao aprovar o diário**, e ler dele em `curvas.ts`. A tabela existe desde a etapa 12 com `snapshot_date`, `planned_progress`, `actual_progress` e `source`, e `daily_log_activities` já tem `progress_before`/`progress_after` datados pelo `log_date` do diário. **Sem migration** — falta só escrever e ler, e a curva de realizado deixa de ser reconstruída para ser medida
+- [ ] T-28.11 — **Gravar `project_progress_snapshots` ao aprovar o diário.** *(premissa corrigida em 11/08/2026 pela varredura da S-75: a redação anterior mandava ler dele num módulo "curvas.ts" que não existe mais — a leitura já acontece hoje em `app/app/obras/[id]/page.tsx` e `app/cliente/obras/[id]/page.tsx`. O que falta é só a **gravação**.)* A tabela existe desde a etapa 12 com `snapshot_date`, `planned_progress`, `actual_progress` e `source`, e `daily_log_activities` já tem `progress_before`/`progress_after` datados pelo `log_date` do diário. **Sem migration** — falta só escrever e ler, e a curva de realizado deixa de ser reconstruída para ser medida
 
 ---
 
@@ -1410,7 +1410,7 @@ não pede trabalho novo — ela **precifica** o que já estava na fila e mostra 
 ---
 
 ## Sprint S-32 — Reúso de informação: sugestão, documento por modelo e campo próprio
-**Estado:** pendente
+**Estado:** concluída
 **Marco:** M-5
 
 Ditada pelo responsável em 2 de agosto. Desenho e dissecação em
@@ -2419,6 +2419,6 @@ sprint.
 
 - [ ] T-75.1 — Ampliar a lista curada de medições protegidas: sprints, Marcos, módulos semeados, destinos de menu, funções do banco. Cada uma entra com a sua função de medir
 - [ ] T-75.2 — **Fato obsoleto, não só número**: documento que descreve comportamento que não existe mais. É a VACINA-012, que segue sem portão, e é mais difícil porque exige comparar prosa com código
-- [ ] T-75.3 — Varrer sprint por sprint procurando tarefa cuja premissa caiu — arquivo que não existe mais, decisão revogada, módulo renomeado
-- [ ] T-75.4 — Conferir se alguma sprint `pendente` já foi entregue fora da ordem formal do inventário. A S-34 tinha uma nota admitindo exatamente isso, e o caso foi resolvido só quando alguém leu
+- [x] T-75.3 — **Varredura executada.** De 71 arquivos citados no inventário, **3 não existem**, e só **1 estava em tarefa aberta**: a T-28.11 mandava ler de um módulo "curvas.ts" que foi removido. Corrigida — a leitura de `project_progress_snapshots` já acontece hoje nas páginas de obra, e o que falta da tarefa é só a **gravação**. Os outros 2 estão em tarefas fechadas e são registro histórico. `ocorrencias` aparece citada, e é legítimo: é o registro da própria remoção, na S-44. Virou portão no `validate:inventory`
+- [x] T-75.4 — **Uma achada: a S-32**, com **46 tarefas feitas e zero abertas**, parada em `pendente`. Fechada. Sprint entregue e não fechada segura o Marco dela aberto pela R9, sem motivo. Virou portão no `validate:inventory`, provado por sabotagem — reabrir a S-32 reprova
 - [ ] T-75.5 — Registrar o que for achado no `REGISTRO-DE-ERROS.json`, para o Pareto medir a família `governanca` com denominador real

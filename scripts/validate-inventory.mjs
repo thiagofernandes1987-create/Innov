@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { execSync } from "node:child_process";
 
 // Verifica as regras estruturais do inventário de execução.
 // As regras vivem em diretrizes/INVENTARIO-DE-EXECUCAO.md, seção "Regras de operação".
@@ -34,7 +35,7 @@ for (const line of lines) {
 for (const line of lines) {
   const heading = line.match(/^## Sprint (S-\d+)\s+—\s+(.+)$/);
   if (heading) {
-    current = { id: heading[1], name: heading[2].trim(), state: null, marco: null, open: 0, done: 0 };
+    current = { id: heading[1], name: heading[2].trim(), state: null, marco: null, open: 0, done: 0, abertas: [] };
     sprints.push(current);
     continue;
   }
@@ -51,8 +52,10 @@ for (const line of lines) {
   const marco = line.match(/^\*\*Marco:\*\*\s*(\S+)\s*$/);
   if (marco) { current.marco = marco[1]; continue; }
 
-  if (/^\s*-\s\[\s\]\s/.test(line)) current.open += 1;
-  else if (/^\s*-\s\[x\]\s/i.test(line)) current.done += 1;
+  if (/^\s*-\s\[\s\]\s/.test(line)) {
+    current.open += 1;
+    current.abertas.push(line);
+  } else if (/^\s*-\s\[x\]\s/i.test(line)) current.done += 1;
 }
 
 if (sprints.length === 0) errors.push("Nenhuma sprint encontrada. O inventário precisa de ao menos uma.");
@@ -84,6 +87,58 @@ for (const sprint of sprints) {
     errors.push(`${sprint.id} não declara **Marco:**. Regra R4: o novo vai para o fim do arquivo, mas declara a que Marco pertence.`);
   } else if (marcos.size > 0 && !marcos.has(sprint.marco)) {
     errors.push(`${sprint.id} declara o Marco "${sprint.marco}", que não existe no "Registro de Marcos".`);
+  }
+}
+
+// Sprint entregue e não fechada.
+//
+// Sprint com todas as tarefas marcadas e estado diferente de `concluída` é
+// trabalho pronto que continua ocupando a fila, e — pela R9 — segura o Marco
+// dela aberto sem motivo. A S-32 passou assim: **46 tarefas feitas, zero
+// abertas, estado `pendente`**, e só foi vista na varredura da S-75.
+for (const sprint of sprints) {
+  if (sprint.state !== "concluída" && sprint.open === 0 && sprint.done > 0) {
+    errors.push(
+      `${sprint.id} tem ${sprint.done} tarefa(s) feita(s) e nenhuma aberta, mas está "${sprint.state}". ` +
+        `Sprint entregue e não fechada segura o Marco dela aberto (R9). Marque \`concluída\` ou reabra o que falta.`
+    );
+  }
+}
+
+/**
+ * Tarefa aberta que cita arquivo inexistente.
+ *
+ * A premissa dela caiu: o arquivo foi removido ou renomeado, e ninguém voltou
+ * à tarefa. Quem for executá-la vai procurar o que não existe.
+ *
+ * **Tarefa fechada é isenta, e a isenção é deliberada.** Ela é registro do que
+ * foi feito naquele dia; corrigir o caminho depois falsificaria o histórico —
+ * é a mesma regra da VACINA-067 sobre medição datada. Havia 7 assim na
+ * varredura de 11/08/2026, todas legítimas.
+ */
+const versionados = new Set();
+try {
+  for (const arquivo of execSync("git ls-files", { encoding: "utf8" }).split("\n").filter(Boolean)) {
+    versionados.add(arquivo);
+    versionados.add(arquivo.split("/").pop());
+  }
+} catch {
+  // Sem git — o portão não inventa reprovação sobre o que não conseguiu medir.
+}
+if (versionados.size > 0) {
+  for (const sprint of sprints) {
+    for (const tarefa of sprint.abertas) {
+      for (const citado of tarefa.matchAll(/`([A-Za-z0-9_.\/-]+\.(?:ts|tsx|mjs|sql|json|md|svg|png|go|py))`/g)) {
+        const alvo = citado[1];
+        if (versionados.has(alvo)) continue;
+        if (!alvo.includes("/") && versionados.has(alvo)) continue;
+        if (fs.existsSync(alvo)) continue;
+        errors.push(
+          `${sprint.id} tem tarefa aberta citando \`${alvo}\`, que não existe. A premissa da tarefa caiu: ` +
+            `o arquivo foi removido ou renomeado. Corrija a tarefa — tarefa fechada é isenta, porque é registro histórico.`
+        );
+      }
+    }
   }
 }
 
