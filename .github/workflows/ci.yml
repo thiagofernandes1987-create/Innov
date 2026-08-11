@@ -208,6 +208,8 @@ jobs:
         run: pnpm validate:modulos-semeados
       - name: Validate security definer functions guard the organization (VACINA-065)
         run: pnpm validate:definer-com-guarda
+      - name: Validate EXECUTE is revoked from PUBLIC (VACINA-004)
+        run: pnpm validate:execute-revogado
       - name: Validate code map against the code
         run: pnpm validate:code-map
       - name: Validate migrations against the applied ledger (VACINA-057)

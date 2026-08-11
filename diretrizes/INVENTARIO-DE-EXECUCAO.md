@@ -2373,3 +2373,21 @@ coisa — o formulário perdendo o que a pessoa digitou — e zero cobertura.
 - [ ] T-73.4 — **V054**: E2E de `Escape` fechando o menor contexto aberto, nunca o formulário
 - [ ] T-73.5 — **V036**: conferir as consultas contra os tipos gerados do Supabase
 - [ ] T-73.6 — Os quatro do meio valem **por módulo**: entram no checklist como teste exigido, não como revisão
+
+## Sprint S-74 — Queimar o débito da VACINA-004: 120 funções herdando `EXECUTE` de `PUBLIC`
+
+**Estado:** pendente
+**Marco:** M-SEGURANCA
+
+Aberta em 11/08/2026 pela T-73.1, que criou o portão e mediu o estoque. Detalhe
+e prova por sabotagem na própria VACINA-004; débito datado em
+`diretrizes/EXECUTE-PUBLIC-ACEITOS.json`. Conforme a R8, aponta e não repete.
+
+O portão impede **crescer**; esta sprint faz **cair**. A ordem é por risco, não
+por facilidade.
+
+- [ ] T-74.1 — **As 73 com `grant` explícito primeiro**: revogar de `public, anon` é seguro porque o grant nominal sobrevive ao revoke. Migration nova, nunca edição de migration aplicada
+- [ ] T-74.2 — **As 47 sem `grant` nenhum**: cada uma precisa decidir o papel — `authenticated` se o produto a chama do navegador, `service_role` se é auxiliar. Revogar sem conceder as torna inalcançáveis
+- [ ] T-74.3 — Priorizar dentro das duas as **77 definidoras não-gatilho**, que somam ignorar RLS com herdar `EXECUTE` de `PUBLIC`
+- [ ] T-74.4 — Conferir no banco com `has_function_privilege`, e **observar a recusa** para `anon` antes de declarar corrigido
+- [ ] T-74.5 — Atualizar `EXECUTE-PUBLIC-ACEITOS.json` a cada lote; o número só pode cair

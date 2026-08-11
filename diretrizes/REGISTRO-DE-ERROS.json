@@ -1,0 +1,237 @@
+{
+  "_leia": "Registro de OCORRÊNCIAS de erro, não de causas. A diferença é o que torna o Pareto possível: `VACINAS.md` cataloga cada causa-raiz UMA vez; aqui cada acontecimento entra de novo, mesmo repetido. Frequência é o eixo do Pareto, e ela só existe se o repetido for registrado. Lido por `pnpm pareto:erros`.",
+  "_regra": "Todo erro entra, inclusive — e principalmente — os meus. Erro que só aparece quando alguém reclama não tem frequência medida, e sem frequência o Pareto vira opinião ordenada. Erro corrigido no mesmo minuto conta igual: o custo baixo é consequência de ter sido pego cedo, não prova de que era pequeno.",
+  "_campos": {
+    "data": "AAAA-MM-DD",
+    "o_que": "o erro em uma frase, no que ele fez de errado — não no que deveria ter feito",
+    "familia": "medicao | portao | analise | governanca | interface | formulario | schema | seguranca | processo",
+    "onde": "arquivo, documento ou área",
+    "vacina": "id da vacina se a causa já estava catalogada; 'inédita' se não; 'não é causa nova' quando é repetição de padrão conhecido sem vacina própria",
+    "tinha_portao": "havia portão que deveria ter pego? true/false",
+    "detectado_por": "quem pegou — validador, sabotagem, proprietário, revisão própria",
+    "custo": "baixo | medio | alto — o que custou até ser pego"
+  },
+  "_atualizado_em": "2026-08-11",
+  "ocorrencias": [
+    {
+      "data": "2026-08-10",
+      "o_que": "Concluí que o sistema de menus era código morto porque procurei pelo nome errado da função (`menusDoModulo` em vez de `menusDe`)",
+      "familia": "analise",
+      "onde": "auditoria de alcançabilidade",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-10",
+      "o_que": "Heurística de função órfã contou 67 em vez de 10 porque o regex casava `execute function public.f(` além de `create function`",
+      "familia": "medicao",
+      "onde": "auditoria de superfícies",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-10",
+      "o_que": "Heurística de tabela órfã contou 20 em vez de 1 por não descontar DDL, índice, RLS e `grant`",
+      "familia": "medicao",
+      "onde": "auditoria de superfícies",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-10",
+      "o_que": "Escrevi teste que comparava uma função pura consigo mesma — asserção que nunca pode falhar",
+      "familia": "portao",
+      "onde": "apps/execution-plane",
+      "vacina": "não é causa nova",
+      "tinha_portao": true,
+      "detectado_por": "staticcheck SA4000",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-10",
+      "o_que": "Teste de SIGTERM afirmava que o laço para no lote seguinte — entrega de sinal é assíncrona e a afirmação era mais forte que o contrato",
+      "familia": "portao",
+      "onde": "apps/execution-plane/main_test.go",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "sabotagem",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-10",
+      "o_que": "Sabotagem do `context.WithoutCancel` não reprovou teste nenhum porque os dublês ignoravam o contexto — portão verde sobre nada",
+      "familia": "portao",
+      "onde": "apps/execution-plane/main_test.go",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "sabotagem",
+      "custo": "medio"
+    },
+    {
+      "data": "2026-08-10",
+      "o_que": "Usei `toBeGreaterThanOrEqual(6)` onde o contrato era uma lista fechada — asserção fraca",
+      "familia": "portao",
+      "onde": "tests/",
+      "vacina": "não é causa nova",
+      "tinha_portao": true,
+      "detectado_por": "validate:assercoes",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Extração de vacinas perdeu 9 em silêncio porque o catálogo tem duas tabelas com vocabulário de estado diferente",
+      "familia": "medicao",
+      "onde": "leitura de VACINAS.md",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Afirmei que o CI estava travado havia uma hora; as execuções eram de minutos antes — li o horário errado",
+      "familia": "analise",
+      "onde": "acompanhamento de PR",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Medi a dispersão do inventário em 3,2 sprints por módulo com regex sensível a acento; o número real é 4,5 e `diario` saía com zero",
+      "familia": "medicao",
+      "onde": "diagnóstico do inventário",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "medio"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Primeira versão do validador de definidoras leu histórico em vez de estado final e acusou 3 funções à toa — `write_audit`, `ensure_organization_module_defaults` e `search_sinapi_references`",
+      "familia": "portao",
+      "onde": "scripts/validate-definer-com-guarda.mjs",
+      "vacina": "065",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "medio"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "O mesmo validador terminava o corpo da função na `create` seguinte, fazendo cada função herdar o guarda da vizinha — falso NEGATIVO que escondeu dois achados reais",
+      "familia": "portao",
+      "onde": "scripts/validate-definer-com-guarda.mjs",
+      "vacina": "065",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Auditoria manual das definidoras achou 1 achado real; o portão automático achou 7 — errei por 6 aceitando como guardada qualquer função cujo entorno mencionasse conferência",
+      "familia": "analise",
+      "onde": "auditoria de segurança",
+      "vacina": "065",
+      "tinha_portao": false,
+      "detectado_por": "portão próprio",
+      "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Declarei no documento canônico que a R8 tinha portão mecânico quando ela não tem",
+      "familia": "governanca",
+      "onde": "CONFRONTO-ODOO-19-E-INNOV.md",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Troquei a R4 por 'o novo entra na posição do módulo', reintroduzindo a interrupção que a R4 existia para impedir",
+      "familia": "governanca",
+      "onde": "INVENTARIO-DE-EXECUCAO.md",
+      "vacina": "066",
+      "tinha_portao": false,
+      "detectado_por": "proprietário",
+      "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Declarei `M-4` duas vezes — 'Espinha do confronto' colidindo com 'Generalização do produto'",
+      "familia": "governanca",
+      "onde": "INVENTARIO-DE-EXECUCAO.md",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "baixo"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Liguei sprints a Marcos por palavra-chave e não por sentido: S-42 (mapa tecnológico) ficou sob M-RH, e S-40/S-41 (convergência de ramo) faziam dois Marcos parecerem prontos",
+      "familia": "governanca",
+      "onde": "INVENTARIO-DE-EXECUCAO.md",
+      "vacina": "066",
+      "tinha_portao": true,
+      "detectado_por": "conferência da R9",
+      "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Afirmei em documento canônico que 'falta o campo custo/hora'; ele existe desde a etapa 12 em duas tabelas — concluí sem abrir o esquema",
+      "familia": "analise",
+      "onde": "CONFRONTO-ODOO-19-E-INNOV.md §4.1",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Escrevi definição de pronto sob medida para um módulo em vez do esqueleto igual para todos — trinta e sete Marcos gerariam trinta e sete redações",
+      "familia": "governanca",
+      "onde": "MODULOS.md",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "proprietário",
+      "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Deixei de aplicar boas práticas já acordadas — RLS, contraste, transbordo — por não estarem em documento lido antes de trabalhar",
+      "familia": "processo",
+      "onde": "método de trabalho",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "proprietário",
+      "custo": "alto"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "Li o código de saída do `tail` em vez do `node` num pipe e reportei sabotagem restaurada quando o validador ainda reprovava — segunda vez no mesmo dia",
+      "familia": "medicao",
+      "onde": "prova por sabotagem",
+      "vacina": "inédita",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria",
+      "custo": "medio"
+    },
+    {
+      "data": "2026-08-11",
+      "o_que": "A VACINA-004 existia desde a etapa 10 e nunca teve portão: 120 de 407 funções herdam EXECUTE de PUBLIC, 77 delas definidoras que ignoram RLS",
+      "familia": "seguranca",
+      "onde": "supabase/migrations",
+      "vacina": "004",
+      "tinha_portao": false,
+      "detectado_por": "portão próprio",
+      "custo": "alto"
+    }
+  ]
+}
