@@ -1,10 +1,46 @@
-# Inventário de execução — marcos, sprints e tarefas
+# Inventário de execução — fila de trabalho, ordenada por dependência
 
 **Documento canônico:** sim
-**Atualizado em:** 25 de julho de 2026
+**Reescrito em:** 11 de agosto de 2026
 **Verificado por:** `pnpm validate:inventory`
 
-Este arquivo é o **estado vivo do trabalho**. `INVENTARIO.md` inventaria o que a plataforma **é**; este inventaria o que está sendo **feito**.
+Este arquivo é a **fila**: o que se faz agora e em que ordem. Ele não é mais o
+dono da lógica dos módulos — essa mudança é o assunto da seção seguinte.
+
+Os outros dois de leitura obrigatória ao lado deste:
+`INVENTARIO.md` inventaria o que a plataforma **é**;
+[`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) diz, **por
+módulo**, o que ele tem, calcula, mostra e ainda lhe falta.
+
+---
+
+## Por que este arquivo foi reescrito
+
+A crítica foi do proprietário, e ela estava certa:
+
+> *"por que está crescendo desgovernado, a cada coisa que eu informo que você não
+> fez sempre adiciona um monte de tarefas e Sprints em lugares aleatórios e a
+> lógica de um único módulo fica toda espaçada, um pouco em cada lugar"*
+
+Medido antes da reescrita: **51 sprints, 712 tarefas**, e a lógica de cada módulo
+espalhada por uma **média de 4,5 sprints**. **17 dos 25 módulos** apareciam em 4
+sprints ou mais; **9 em 6 ou mais**. O `diario` aparecia em 7 sprints — S-19,
+S-20, S-25, S-28, S-29, S-49, S-50 — e **nenhuma delas era sobre o diário**.
+
+A causa não foi desleixo: foi a **R4**, que mandava todo trabalho novo para o fim
+do arquivo. A intenção era proteger a ordem de execução. O efeito foi que toda
+descoberta sobre um módulo já planejado nascia longe de tudo com que se
+relacionava. E como quase toda sprint nova veio de uma observação do
+proprietário, o arquivo virou o registro cronológico das conversas em vez do
+plano do produto: **sete das últimas oito sprints são reativas**.
+
+Três coisas mudam, e só a terceira é cosmética:
+
+1. **A lógica sai daqui.** Passa a morar em `CONFRONTO-ODOO-19-E-INNOV.md`, uma
+   seção por módulo, inteira. Tarefa daqui **aponta** para lá (R8).
+2. **A R4 muda.** Trabalho novo entra na posição do módulo a que pertence, não no
+   fim do arquivo.
+3. **A fila vem antes do histórico.** O que fazer agora estava na linha 1.700.
 
 ---
 
@@ -16,7 +52,9 @@ Este arquivo é o **estado vivo do trabalho**. `INVENTARIO.md` inventaria o que 
 
 **R3 — Uma sprint por vez.** Não se inicia sprint nova antes de concluir a atual. **No máximo uma sprint em `em andamento`**, e o validador reprova o contrário.
 
-**R4 — O que é novo vai para o fim.** Sprint nova, oportunidade de melhoria ou lacuna descoberta entra **no final do inventário**, com as tarefas e subtarefas dela. Nunca no meio, nunca empurrando a sprint atual.
+**R4 — O que é novo entra na posição do módulo, não no fim.** *(reescrita em 11/08/2026)* Descoberta, lacuna ou oportunidade sobre um módulo que já tem trabalho previsto entra **junto do trabalho daquele módulo**, e a seção do módulo no confronto é atualizada. Só vai para o fim do arquivo o que **não pertence a nenhum módulo existente**.
+
+> A versão anterior — *"o que é novo vai para o fim"* — foi a causa medida da dispersão. Ela protegia a ordem de execução e destruía a coerência por módulo. A ordem passa a ser protegida pela R3 e pela R5, que já bastavam para isso.
 
 **R5 — A ordem pode mudar, mas só na virada.** Ao **iniciar** uma sprint nova — nunca no meio de uma — a ordem de execução das sprints pendentes pode ser reordenada. Dois casos legítimos:
 
@@ -25,7 +63,9 @@ Este arquivo é o **estado vivo do trabalho**. `INVENTARIO.md` inventaria o que 
 
 **R6 — Reordenar exige registro.** Toda reordenação vira linha na tabela da seção "Registro de reordenação", com data, o que mudou e **por quê**. Reordenação sem justificativa registrada é a forma de o plano virar improviso.
 
-**R7 — Sprint concluída não tem tarefa em aberto.** Marcar sprint como `concluída` com tarefa `[ ]` reprova no validador. Se sobrou tarefa, ou a sprint não está concluída, ou a tarefa vira sprint nova no fim (R4).
+**R7 — Sprint concluída não tem tarefa em aberto.** Marcar sprint como `concluída` com tarefa `[ ]` reprova no validador. Se sobrou tarefa, ou a sprint não está concluída, ou a tarefa vira sprint própria.
+
+**R8 — Tarefa aponta, não descreve.** *(nova em 11/08/2026)* Tarefa não reescreve a lógica do módulo: ela **aponta** para a seção dele no confronto e diz o que fazer, em que ordem e com que evidência. Regra de negócio ou número repetido em dois documentos diverge em silêncio — é a mesma razão pela qual o Notion é índice e o repositório é fonte.
 
 ---
 
@@ -37,6 +77,225 @@ Este arquivo é o **estado vivo do trabalho**. `INVENTARIO.md` inventaria o que 
 | `em andamento` | em execução — no máximo uma por vez |
 | `concluída` | todas as tarefas marcadas e evidência registrada |
 | `bloqueada` | não pode avançar; o bloqueio está descrito na sprint |
+
+---
+
+## Índice por módulo — onde mora o trabalho de cada um
+
+Esta tabela existe para responder, em um lugar só, a pergunta que antes exigia
+garimpar sete sprints: **onde está tudo sobre este módulo**.
+
+Colunas medidas em 11/08/2026: *Páginas* são `page.tsx` atribuídos ao módulo de
+prefixo de rota mais longo; *Menu* é destinos próprios sobre total — quanto menor
+a fração, mais o menu é atalho para o vizinho em vez de navegação interna.
+
+| Módulo | Páginas | Menu próprio | Feitas | Abertas | Sprints que o tocam |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `dashboard` | 5 | 0/0 | 5 | 4 | S-08, S-23, S-25, S-27, S-28, S-33, S-37, S-44 |
+| `crm` | 8 | 4/4 | 7 | 4 | S-23, S-24, S-26, S-30, S-32, S-33 |
+| `clientes` | 3 | 2/2 | 3 | 0 | S-23 |
+| `obras` | 10 | 2/5 | 6 | 3 | S-20, S-25, S-32, S-33, S-34 |
+| `planejamento` | 1 | **1/6** | 10 | 4 | S-23, S-24, S-25, S-27, S-30, S-32, S-33 |
+| `tarefas` | 1 | **1/5** | 8 | 4 | S-04, S-21, S-24, S-27, S-32, S-33 |
+| `diario` | 1 | **1/5** | 1 | 8 | S-19, S-20, S-25, S-28, S-29, S-49, S-50 |
+| `equipes` | 1 | **1/5** | 1 | 3 | S-25, S-26, S-31, S-33 |
+| `orcamentos` | 6 | 3/5 | 8 | 0 | S-23, S-33, S-37 |
+| `propostas` | 2 | 2/5 | 1 | 1 | S-13, S-33 |
+| `contratos` | 2 | 2/5 | 2 | 1 | S-03, S-11, S-33 |
+| `aditivos` | 2 | 2/5 | 0 | 1 | S-47 |
+| `assinaturas` | 3 | 2/2 | 2 | 0 | S-23, S-33 |
+| `documentos` | 2 | 2/5 | 6 | 1 | S-19, S-23, S-32, S-38, S-42 |
+| `modelos` | 2 | 2/3 | 9 | 0 | S-32, S-33, S-34, S-50 |
+| `qualidade` | 8 | 3/3 | 4 | 3 | S-20, S-23, S-26, S-31, S-33, S-34 |
+| `compras` | 7 | 3/4 | 1 | 3 | S-26, S-28, S-34, S-47 |
+| `estoque` | 17 | 7/7 | 2 | 2 | S-21, S-26, S-33, S-47 |
+| `financeiro` | 9 | 4/4 | 3 | 2 | S-23, S-26, S-30, S-34 |
+| `rh` | 57 | 5/5 | 9 | 2 | S-40, S-42, S-44, S-45 |
+| `sac` | 3 | 2/3 | 5 | 2 | S-05, S-23, S-24, S-29, S-30, S-44, S-50 |
+| `whatsapp` | 4 | **1/5** | 6 | 0 | S-23, S-41, S-50 |
+| `relatorios` | 10 | 7/7 | 5 | 1 | S-16, S-23, S-34 |
+| `auditoria` | 6 | 4/4 | 5 | 3 | S-15, S-30, S-31, S-33, S-37, S-44, S-45, S-50 |
+| `administracao` | 10 | 6/6 | 8 | 1 | S-05, S-13, S-23, S-24, S-32, S-34 |
+
+**O que a tabela mostra de imediato.** Cinco módulos têm menu majoritariamente de
+atalho para vizinho — `planejamento`, `tarefas`, `diario`, `equipes` e
+`whatsapp`. Os quatro primeiros formam o núcleo operacional da obra e somam
+**4 páginas**. É a explicação medida para a sensação de que o produto não avança:
+não falta trabalho feito (180 páginas), falta trabalho feito **no núcleo** — 57
+das 180 são do RH.
+
+---
+
+# Marco M-4 — Espinha derivada do confronto com o manual do Odoo 19
+
+Objetivo: fechar as lacunas que o confronto mediu, **na ordem em que uma destrava
+a outra** — não na ordem em que foram descobertas.
+
+Origem de cada sprint: [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md)
+§3 (matriz por módulo), §4 (visão global) e §5 (especificação por linguagem).
+Conforme a **R8**, as tarefas abaixo apontam para lá e não repetem a lógica.
+
+**Dependência medida:** `E1 → E2 → E3` é a espinha — E3 não fecha sem E2, e E2
+não fecha sem E1. E4 e E5 correm em paralelo a partir de E1. E7 não depende de
+nada e entrega sozinho.
+
+## Sprint S-52 — E1: custo/hora por integrante
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `equipes`, `rh`, `diario`, `planejamento`, `obras`, `financeiro`, `orcamentos`
+
+O campo que trava sete módulos. Todas as fórmulas de custo de mão de obra do
+manual — Projeto, Planilhas de Horas, Serviço de Campo — começam nele. Sem ele,
+custo de obra só pode ser material e serviço contratado, que é o que temos hoje.
+Justificativa e origem: confronto §4.1.
+
+- [ ] T-52.1 — Migration: custo/hora no integrante da equipe e no funcionário, com vigência (o custo muda e o histórico não pode ser reescrito)
+- [ ] T-52.2 — Guarda de participação na RPC de leitura, conforme VACINA-065 — definidora que recebe organização confere participação
+- [ ] T-52.3 — Campo no cadastro, com `view_sensitive_financials` decidindo quem vê
+- [ ] T-52.4 — Prova por sabotagem: custo removido derruba o cálculo dependente e o teste acusa
+
+## Sprint S-53 — E2: apontamento de hora no diário
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `diario`, `obras`, `financeiro`
+
+Transforma o diário de registro em **fonte de custo**. Hoje o diário é a única
+superfície do produto que o campo alimenta todo dia e que não produz número
+nenhum. Confronto §3.2 (`diario`).
+
+- [ ] T-53.1 — `daily_log_activities` recebe horas e pessoa
+- [ ] T-53.2 — Custo derivado de E1, calculado no banco e nunca digitado
+- [ ] T-53.3 — Worksheet configurável por tipo de serviço, no motor de modelos que já existe (`modelos`)
+- [ ] T-53.4 — O diário aprovado continua sendo a única porta para o cliente; hora e custo **não** são visíveis ao cliente
+
+## Sprint S-54 — E3: rentabilidade da obra em três colunas
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `obras`, `financeiro`, `orcamentos`, `compras`
+
+A peça mais valiosa da matriz. Separa **prometido** (`Expected`), **direito**
+(`To Invoice`) e **fato** (`Invoiced`). Temos as duas pontas e não temos o meio —
+e o meio é a medição aprovada e não faturada, o número que o dono da construtora
+persegue em planilha todo mês. Confronto §4.2.
+
+- [ ] T-54.1 — RPC `project_profitability(org, project)` em SQL — leitura derivada, sem escrita, para não trazer linha para fora só para somar
+- [ ] T-54.2 — Receita: medição aprovada, contrato, aditivo; custo: material, hora (E2), compra
+- [ ] T-54.3 — Tela da obra com as três colunas e o caminho de volta ao documento de origem
+- [ ] T-54.4 — Prova por sabotagem: medição aprovada e não faturada tem de aparecer em `To Invoice` e sumir de lá ao faturar
+
+## Sprint S-55 — E4: comprometido do orçamento
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `orcamentos`, `compras`, `financeiro`
+
+`Comprometido = realizado + pedido de compra confirmado ainda não faturado`. É o
+que impede a obra de gastar duas vezes o mesmo dinheiro. Confronto §3.3, §3.4.
+
+- [ ] T-55.1 — RPC do comprometido por obra e por item de orçamento
+- [ ] T-55.2 — Exibir no orçamento ao lado de previsto e realizado
+- [ ] T-55.3 — Alerta quando comprometido ultrapassa o previsto do item
+
+## Sprint S-56 — E5: prazo de fornecedor e atraso previsto
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `compras`, `estoque`, `planejamento`
+
+`Chegada prevista = prazo do pedido + lead time do fornecedor`. Uma fórmula de
+uma linha que produz a única visão que importa em suprimentos: **o que vai
+atrasar a obra**. Confronto §3.3.
+
+- [ ] T-56.1 — Lead time no cadastro do fornecedor, por produto quando houver
+- [ ] T-56.2 — Chegada prevista derivada, nunca digitada
+- [ ] T-56.3 — Pedido atrasado no painel quando a chegada prevista passa sem recebimento
+
+## Sprint S-57 — E6: quantidade prevista de estoque
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `estoque`, `compras`
+
+`Prevista = em mãos + entradas previstas − saídas previstas`. Nosso estoque
+conhece o presente e não conhece o futuro. Confronto §3.3.
+
+- [ ] T-57.1 — RPC da quantidade prevista no horizonte consultado
+- [ ] T-57.2 — Regra de reposição mínimo/máximo disparando pelo previsto
+- [ ] T-57.3 — Decidir e implementar a valoração (AVCO), com ADR se a escolha divergir do mapa
+
+## Sprint S-58 — E7: relatórios de ausência
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `crm`, `compras`, `sac`, `financeiro`, `documentos`
+
+A crítica mais dura do confronto: dos 146 relatórios do manual, uma família
+inteira é de **ausência e atraso**, e nenhum dos nossos 10 é assim. Relatório de
+ausência é o que faz o sistema **cobrar** em vez de esperar. Confronto §4.3.
+
+Roda no **plano de execução em Go**, que já tem tentativa, backoff e
+classificação de falha — segunda carga do plano que já existe, não camada nova.
+
+- [ ] T-58.1 — Varredura agendada que produz pendência, não tela
+- [ ] T-58.2 — Lead sem acompanhamento; recebível vencido por idade; pedido atrasado; documento não enviado
+- [ ] T-58.3 — A pendência chega pela casca, com teto por pessoa e agrupamento por obra (decisão já registrada em S-29)
+
+## Sprint S-59 — E8: SLA no pós-venda
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `sac`, `whatsapp`
+
+Assistência técnica sem SLA não tem como prometer prazo. Confronto §3.5.
+
+- [ ] T-59.1 — Política de SLA por tipo de ocorrência, com prazo calculado e nunca digitado
+- [ ] T-59.2 — `tempo até SLA` e `taxa de SLA` como indicadores
+- [ ] T-59.3 — Carga por atendente e avaliação pós-atendimento
+
+## Sprint S-60 — E9: solicitação de documento com cobrança
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `documentos`, `contratos`, `qualidade`, `rh`
+
+Nossa gestão documental é **passiva**: guarda o que chega. A solicitação de
+arquivo inverte isso — o sistema pede o documento que falta a quem deve enviá-lo
+e acompanha. Confronto §3.5.
+
+- [ ] T-60.1 — Pedido de documento com destinatário, prazo e pasta de destino
+- [ ] T-60.2 — Cobrança pelo plano de execução (mesma carga de E7)
+- [ ] T-60.3 — Versão com bloqueio e progresso de assinatura (`concluídos ÷ requeridos`)
+
+## Sprint S-61 — E10: filtro global e snapshot de indicador
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `relatorios`, `dashboard`
+
+Período escolhido uma vez vale para o painel inteiro; e o indicador vira foto
+datada, que é o que permite comparar. Confronto §3.5.
+
+- [ ] T-61.1 — Estado de filtro no servidor, aplicado a todas as visualizações do painel
+- [ ] T-61.2 — Snapshot datado do indicador em tabela própria
+- [ ] T-61.3 — Definição do KPI legível ao usuário, não só ao código
+
+## Sprint S-62 — E11: probabilidade e previsão no funil
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `crm`, `propostas`
+
+`Receita rateada = receita esperada × probabilidade`. Temos valor e etapa, então
+temos lista; sem probabilidade não temos previsão. Confronto §3.1.
+
+- [ ] T-62.1 — Probabilidade por etapa, editável por empresa
+- [ ] T-62.2 — Receita rateada e previsão por período de fechamento
+- [ ] T-62.3 — Margem por linha na proposta (`(preço − custo) × quantidade`)
+
+## Sprint S-63 — E12: antes-e-depois na trilha de auditoria
+**Estado:** pendente
+**Marco:** M-4
+**Módulos atingidos:** `auditoria`, todos
+
+`write_audit` grava o evento, não o antes-e-depois. A Trilha de Auditoria do
+manual registra valor anterior e valor novo por campo — é o que transforma o log
+em prova. Confronto §3.5.
+
+- [ ] T-63.1 — `write_audit` passa a receber valor anterior
+- [ ] T-63.2 — Tela de auditoria mostra a diferença, não só o evento
+- [ ] T-63.3 — Prova por sabotagem: alteração sem antes-e-depois reprova
 
 ---
 

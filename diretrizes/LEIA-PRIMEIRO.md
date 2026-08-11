@@ -39,6 +39,7 @@ Diante de qualquer erro: consultar [`VACINAS.md`](./VACINAS.md) **antes** de pro
 |---|---|---|
 | **Como se trabalha** | [`METODO-DE-TRABALHO.md`](./METODO-DE-TRABALHO.md) | sempre, antes de propor |
 | **Como se prova que um portão protege** | [`PROVA-POR-SABOTAGEM.md`](./PROVA-POR-SABOTAGEM.md) | ao criar teste, validador ou verificação de CI |
+| **O que cada módulo tem, calcula e mostra — e o que lhe falta** | [`CONFRONTO-ODOO-19-E-INNOV.md`](./CONFRONTO-ODOO-19-E-INNOV.md) | antes de mexer em qualquer módulo, e antes de planejar trabalho novo |
 | **Quem usa e o que sabe** | [`PERSONAS-E-ROTINAS.md`](./PERSONAS-E-ROTINAS.md) | antes de criar tela ou permissão |
 | **Como provar autoridade, controle e evidência** | [`CONTRATO-AUDITAVEL-DE-PERSONAS.md`](./CONTRATO-AUDITAVEL-DE-PERSONAS.md) | antes de auditar pessoa, rotina, tela, processo ou controle |
 | **O que quebra e a quem se pede socorro** | [`FLUXOS-E-RISCOS.md`](./FLUXOS-E-RISCOS.md) | antes de criar qualquer objeto ou fluxo |
