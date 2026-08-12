@@ -77,8 +77,18 @@ jobs:
       # era o desta plataforma, e o alvo nunca foi impresso porque ninguém
       # imprime um segredo. Este passo imprime o `project_ref` — que já está
       # versionado — e recusa quando ele não bate com `diretrizes/BANCO-ALVO.json`.
+      # `--exigir` é o que diferencia este lugar do terminal de quem desenvolve.
+      # Rodar `--conferir` sem credencial é uso legítimo na máquina de alguém:
+      # olha-se o plano sem tocar no banco. **Aqui não é.** Este workflow existe
+      # para falar com o banco, e o segredo é injetado pelo runner.
+      #
+      # Sem `--exigir`, o primeiro disparo real (12/08/2026, run 31651934504)
+      # saiu VERDE com `SUPABASE_DB_URL:` vazio — porque o GitHub expande
+      # segredo indefinido como string vazia, em silêncio. Um passo chamado
+      # "conferir para onde o segredo aponta" que aprova quando não há segredo
+      # é exatamente o portão que não mede nada.
       - name: Conferir para onde SUPABASE_DB_URL aponta
-        run: node scripts/banco-alvo.mjs --conferir | tee alvo-conferido.txt
+        run: node scripts/banco-alvo.mjs --conferir --exigir | tee alvo-conferido.txt
 
       - name: Instalar psql
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client

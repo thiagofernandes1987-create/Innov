@@ -83,6 +83,54 @@ export function refDaUrl(url) {
   return null;
 }
 
+/**
+ * O `project_ref` de uma URL **pública** de API — `https://<ref>.supabase.co`.
+ *
+ * É outra forma que a mesma pergunta assume. A `SUPABASE_DB_URL` esconde o
+ * `ref` no host do Postgres; a `NEXT_PUBLIC_SUPABASE_URL` o traz no subdomínio.
+ * Ler só a primeira deixou cinco workflows de homologação e E2E rodando três
+ * semanas contra o projeto errado (T-79.8), verdes o tempo todo.
+ */
+export function refDaUrlPublica(url) {
+  if (!url) return null;
+  const m = /https?:\/\/([a-z]{20})\.supabase\.(?:co|com)/.exec(url);
+  return m ? m[1] : null;
+}
+
+/**
+ * Confere o alvo do **ambiente da aplicação**, não o da conexão de banco.
+ *
+ * Não recebe nem toca em chave: o `ref` da URL pública já está versionado em
+ * `.mcp.json` e em `BANCO-ALVO.json`, e a chave publicável nova não carrega
+ * `ref` nenhum. Conferir a URL é o que dá para conferir sem ler segredo — e é
+ * o suficiente para impedir que a bateria inteira meça o banco errado.
+ */
+export function anunciarAmbienteOuSair(url, { origem = "NEXT_PUBLIC_SUPABASE_URL" } = {}) {
+  const canonico = alvoDeclarado();
+  const esperado = (process.env.BANCO_ALVO ?? "").trim() || canonico.project_ref;
+  const ref = refDaUrlPublica(url);
+
+  if (!ref) {
+    console.error(
+      `Não reconheci o projeto em ${origem}.\n` +
+        `Esperado \`${esperado}\`, no formato https://<ref>.supabase.co.\n` +
+        "Alvo não reconhecido não passa por não saber."
+    );
+    process.exit(2);
+  }
+  if (ref !== esperado) {
+    console.error(
+      `${origem} aponta para \`${ref}\` e o alvo declarado é \`${esperado}\`.\n` +
+        "Nada foi executado.\n\n" +
+        "A bateria mediria um banco que não é o desta plataforma — e passaria verde,\n" +
+        "porque portão que mede o objeto errado não reprova nunca (T-79.8)."
+    );
+    process.exit(2);
+  }
+  console.log(`Ambiente conferido: \`${ref}\` (${canonico.nome_de_exibicao}), conforme diretrizes/BANCO-ALVO.json.`);
+  return { ref, esperado, canonico };
+}
+
 /** Onde a conexão chega, em texto que pode ser impresso e colado. */
 export function descreverAlvo(url) {
   const ref = refDaUrl(url);
@@ -214,7 +262,23 @@ if (executadoDireto) {
       `(${canonico.nome_de_exibicao}), desde ${canonico.declarado_em}.`
   );
   const url = process.env.SUPABASE_DB_URL ?? process.env.DATABASE_URL ?? "";
+  const exigir = process.argv.includes("--exigir");
   if (!url) {
+    // Ausência de credencial é resposta legítima no terminal de quem
+    // desenvolve, e **inaceitável** onde o segredo deveria ter sido injetado.
+    // `--exigir` marca a diferença, e ela não é teórica: o primeiro disparo
+    // real do workflow saiu verde com o segredo vazio, porque o GitHub expande
+    // segredo indefinido como string vazia sem avisar ninguém.
+    if (exigir) {
+      console.error(
+        "SUPABASE_DB_URL está VAZIA neste ambiente.\n\n" +
+          "Onde este comando roda, o segredo deveria ter sido injetado pelo runner. O GitHub\n" +
+          "expande segredo indefinido como string vazia, **em silêncio** — então o passo passaria\n" +
+          "verde e o relatório diria que o alvo foi conferido, sem nada ter sido conferido.\n\n" +
+          "Ou o segredo é criado nas configurações do repositório, ou este workflow não deve rodar."
+      );
+      process.exit(2);
+    }
     console.log("SUPABASE_DB_URL não está no ambiente — nada para conferir aqui.");
     process.exit(0);
   }

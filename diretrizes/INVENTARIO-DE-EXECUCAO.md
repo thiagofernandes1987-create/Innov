@@ -2811,7 +2811,27 @@ tg_semear_modelos_da_empresa   idem
 
   **O instrumento está pronto desde 12/08/2026** (T-79.5): o workflow ganhou o passo *"Conferir para onde SUPABASE_DB_URL aponta"*, que roda antes de instalar o cliente, imprime o `project_ref` alcançado — nunca a credencial — e recusa quando não bate com `diretrizes/BANCO-ALVO.json`. A evidência sai no artefato `alvo-conferido.txt`.
 
-  **Falta a execução, que é externa:** disparar o `aplicar-migrations` em modo `conferir`. Ele não toca no banco. Enquanto não for disparado, a resposta continua sendo *não medida* — que é exatamente o estado que abriu esta sprint
+  **Respondido em 12/08/2026, e a resposta não é a que eu supunha.** Disparado o `aplicar-migrations` em modo `conferir` (run `31651934504`, branch da sprint). O log do runner:
+
+```
+env:
+  SUPABASE_DB_URL:
+```
+
+  **O segredo não existe.** Não aponta para o projeto errado — não aponta para lugar nenhum. O GitHub expande segredo indefinido como string vazia, **em silêncio**, e é por isso que as duas execuções anteriores na `main` (12/08, 09:26 e 09:34) falharam sem explicar.
+
+  **E o disparo pegou um defeito no portão que eu tinha entregue horas antes:** o passo *"Conferir para onde SUPABASE_DB_URL aponta"* saiu **verde** com o segredo vazio, porque em `--conferir` eu deixava passar quando não havia URL. Um passo com esse nome, aprovando quando não há o que conferir, é o portão que não mede nada — a mesma família da VACINA-057 e da regra da prova por sabotagem, cometida dentro da correção que a invoca.
+
+  Corrigido com `--exigir`, que separa os dois lugares: rodar `--conferir` sem credencial é legítimo no terminal de quem desenvolve, e inaceitável onde o runner deveria ter injetado o segredo. Provado por sabotagem:
+
+```
+segredo ausente  com --exigir ....... exit=2
+segredo vazio    com --exigir ....... exit=2   (como o GitHub de fato expande)
+segredo ausente  sem --exigir ....... exit=0   (o caso legítimo continua passando)
+segredo certo    com --exigir ....... exit=0
+```
+
+  **O que falta agora é criar o segredo**, apontando para a conexão direta do `jpqoje…`. É ação do proprietário e destrava a T-79.6
 - [x] T-79.5 — **Portão entregue em 12/08/2026.** O alvo é declarado e conferido, e a conferência acontece **antes** de abrir conexão.
 
   Três peças, e a primeira é a que faltava:
