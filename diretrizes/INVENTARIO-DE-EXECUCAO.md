@@ -2772,6 +2772,21 @@ obras ..................... 0
 
   **E há uma causa que nenhuma medição anterior tinha visto:** a branch `main` deste projeto está em **`MIGRATIONS_FAILED` desde 22/07/2026**. As 101 tabelas de diferença não são atraso de quem esqueceu de aplicar — são de uma sequência que **tentou e quebrou**, e ficou três semanas nesse estado. Aplicar por cima sem saber onde parou repete a falha
 - [ ] T-79.2 — Refazer as sete medições da tabela acima contra `jpqoje…`, e corrigir cada documento com o número novo e a data
-- [ ] T-79.3 — Decidir o que fazer no projeto `wyeoju…`: reverter as quatro funções para a definição anterior, ou deixar como está por serem mudanças que só endurecem. **Decisão do proprietário**, com o motivo registrado
+- [x] T-79.3 — **Decidido em 12/08/2026: ficam como estão.** Decisão delegada pelo proprietário, e o motivo é um só e decisivo — **reverter reintroduziria uma escrita cross-tenant viva.**
+
+  O que foi alterado no `wyeoju…`, e nada além disso:
+
+```
+semear_motivos_de_perda        ganhou guarda de participação
+semear_modelos_da_empresa      ganhou guarda de participação
+tg_semear_motivos_de_perda     corpo embutido, para o gatilho não chamar a função guardada
+tg_semear_modelos_da_empresa   idem
+```
+
+  As quatro são `create or replace function`. **Nenhuma toca dado.** O ensaio de criação de empresa, desfeito por construção, provou que o comportamento legítimo continua: 9 motivos semeados, nenhuma sobra.
+
+  O princípio de não deixar mudança onde não se devia mexer é real, e não vence este caso: voltar atrás seria **abrir de novo, com conhecimento de causa, um buraco por onde qualquer usuário autenticado escrevia em empresa alheia**. Restaurar um estado defeituoso em nome da pureza do registro é pior que registrar a alteração e seguir.
+
+  O que **não** foi feito e continua sendo decisão sua: se o `wyeoju…` deve ser desativado. Isso é apagar projeto, não reverter função — outra ação, outro aval.
 - [ ] T-79.4 — Conferir para onde `secrets.SUPABASE_DB_URL` aponta antes de qualquer nova execução do `aplicar-migrations`
 - [ ] T-79.5 — **Portão**: fazer o `aplicar-migrations` e os scripts de leitura exigirem que o `project_ref`/banco alvo seja declarado e conferido, em vez de herdado de configuração invisível. Provar por sabotagem com alvo trocado
