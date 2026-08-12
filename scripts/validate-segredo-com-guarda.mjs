@@ -60,13 +60,47 @@ function temGuarda(texto, segredo) {
   );
 }
 
+/**
+ * A segunda forma de o workflow descartar o sinal, e ela mordeu no mesmo dia.
+ *
+ * Em bash, o status de um pipeline é o do **último** comando. `node script |
+ * tee arquivo` devolve o status do `tee`, que é sempre 0 — então um script que
+ * recusa com `exit 2` vira um passo verde.
+ *
+ * Medido em 12/08/2026, no run `31652604375`: o passo com `--exigir` recusou
+ * corretamente o segredo vazio, e o `| tee` jogou a recusa fora. O portão
+ * funcionou e o workflow apagou o resultado — a mesma família de "gravar o
+ * sinal e não olhar para ele" que a VACINA-069 documenta pela entrada.
+ */
+function pipelinesSemPipefail(texto) {
+  const linhas = texto.split("\n");
+  const achados = [];
+  linhas.forEach((linha, i) => {
+    if (!/\|\s*tee\b/.test(linha)) return;
+    const janela = linhas.slice(Math.max(0, i - 12), i).join("\n");
+    if (!/set\s+-o\s+pipefail|set\s+-eo?\s*pipefail/.test(janela)) achados.push(i + 1);
+  });
+  return achados;
+}
+
 const problemas = [];
 let workflowsConferidos = 0;
 let segredosConferidos = 0;
 let dividaUsada = 0;
 
+let pipelinesConferidos = 0;
+
 for (const arquivo of fs.readdirSync(DIR).filter(n => /\.ya?ml$/.test(n)).sort()) {
   const texto = fs.readFileSync(path.join(DIR, arquivo), "utf8");
+
+  for (const linha of pipelinesSemPipefail(texto)) {
+    problemas.push({
+      onde: `.github/workflows/${arquivo}:${linha}`,
+      o_que: "`| tee` sem `set -o pipefail` — o status do pipeline é o do `tee`, sempre 0, então a recusa do comando anterior é descartada e o passo passa verde"
+    });
+  }
+  pipelinesConferidos += (texto.match(/\|\s*tee\b/g) ?? []).length;
+
   const usados = [...new Set([...texto.matchAll(/secrets\.([A-Z0-9_]+)/g)].map(m => m[1]))].sort();
   if (!usados.length) continue;
   workflowsConferidos += 1;
@@ -105,6 +139,7 @@ if (problemas.length) {
 }
 
 console.log(
-  `Segredos de workflow conferidos: ${segredosConferidos} uso(s) em ${workflowsConferidos} workflow(s); ` +
-    `todos recusam o valor vazio ou estão em dívida datada (${dividaUsada}).`
+  `Sinal de workflow conferido: ${segredosConferidos} uso(s) de segredo em ${workflowsConferidos} workflow(s), ` +
+    `todos recusando o valor vazio ou em dívida datada (${dividaUsada}); ` +
+    `${pipelinesConferidos} pipeline(s) com \`tee\`, todos preservando o código de saída.`
 );

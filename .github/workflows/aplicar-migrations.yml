@@ -88,13 +88,17 @@ jobs:
       # "conferir para onde o segredo aponta" que aprova quando não há segredo
       # é exatamente o portão que não mede nada.
       - name: Conferir para onde SUPABASE_DB_URL aponta
-        run: node scripts/banco-alvo.mjs --conferir --exigir | tee alvo-conferido.txt
+        run: |
+          set -o pipefail
+          node scripts/banco-alvo.mjs --conferir --exigir | tee alvo-conferido.txt
 
       - name: Instalar psql
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
 
       - name: Plano
-        run: node scripts/aplicar-migrations-pendentes.mjs --conferir | tee plano-de-migrations.txt
+        run: |
+          set -o pipefail
+          node scripts/aplicar-migrations-pendentes.mjs --conferir | tee plano-de-migrations.txt
 
       - name: Aplicar
         if: inputs.modo == 'aplicar'
