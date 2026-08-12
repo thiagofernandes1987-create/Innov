@@ -2708,7 +2708,7 @@ existem no repositório e nenhuma foi usada.
 
 ## Sprint S-79 — Tudo que foi medido no banco em 11 e 12/08 está no projeto errado
 
-**Estado:** pendente
+**Estado:** em andamento
 **Marco:** M-SEGURANCA
 
 Aberta em 12/08/2026, no fim do documento conforme a **R4**. É a correção mais
@@ -2788,5 +2788,41 @@ tg_semear_modelos_da_empresa   idem
   O princípio de não deixar mudança onde não se devia mexer é real, e não vence este caso: voltar atrás seria **abrir de novo, com conhecimento de causa, um buraco por onde qualquer usuário autenticado escrevia em empresa alheia**. Restaurar um estado defeituoso em nome da pureza do registro é pior que registrar a alteração e seguir.
 
   O que **não** foi feito e continua sendo decisão sua: se o `wyeoju…` deve ser desativado. Isso é apagar projeto, não reverter função — outra ação, outro aval.
-- [ ] T-79.4 — Conferir para onde `secrets.SUPABASE_DB_URL` aponta antes de qualquer nova execução do `aplicar-migrations`
-- [ ] T-79.5 — **Portão**: fazer o `aplicar-migrations` e os scripts de leitura exigirem que o `project_ref`/banco alvo seja declarado e conferido, em vez de herdado de configuração invisível. Provar por sabotagem com alvo trocado
+- [ ] T-79.4 — Conferir para onde `secrets.SUPABASE_DB_URL` aponta antes de qualquer nova execução do `aplicar-migrations`.
+
+  **O instrumento está pronto desde 12/08/2026** (T-79.5): o workflow ganhou o passo *"Conferir para onde SUPABASE_DB_URL aponta"*, que roda antes de instalar o cliente, imprime o `project_ref` alcançado — nunca a credencial — e recusa quando não bate com `diretrizes/BANCO-ALVO.json`. A evidência sai no artefato `alvo-conferido.txt`.
+
+  **Falta a execução, que é externa:** disparar o `aplicar-migrations` em modo `conferir`. Ele não toca no banco. Enquanto não for disparado, a resposta continua sendo *não medida* — que é exatamente o estado que abriu esta sprint
+- [x] T-79.5 — **Portão entregue em 12/08/2026.** O alvo é declarado e conferido, e a conferência acontece **antes** de abrir conexão.
+
+  Três peças, e a primeira é a que faltava:
+
+```
+diretrizes/BANCO-ALVO.json          a declaração canônica, em commit
+scripts/banco-alvo.mjs              a conferência em tempo de execução
+pnpm validate:banco-alvo            o portão no CI
+```
+
+  **A conferência tem dois sentidos, não um.** A primeira versão do portão acusou os seis `run-*-db-tests.mjs` por não conferirem o alvo declarado — e o alvo certo deles é justamente **outro**, porque eles criam e derrubam banco descartável. Ali alvo errado não é medição errada: é `drop database` no lugar errado. Virou `recusarBancoDaPlataforma()`, e a acusação errada virou guarda.
+
+  **O alvo é a primeira linha impressa.** Um plano de 119 migrations acima da linha do alvo é um plano que se lê inteiro antes de descobrir para onde vai — e foi lendo o conteúdo certo sem olhar o destino que a S-79 aconteceu.
+
+  Desviar continua possível com `BANCO_ALVO=<ref>` ou `=local`, e é de propósito: a diferença entre desviar por engano e desviar digitando. Quando o alvo não é o canônico, a saída diz isso em duas linhas em vez de anunciar sucesso.
+
+  **Provado por sabotagem**, 13 execuções, com strings de conexão falsas:
+
+```
+alvo trocado no --conferir .............. exit=2, recusa antes do plano
+alvo certo, direta e pooler ............. exit=0, segue para o plano
+.mcp.json apontando para outro projeto .. exit=1
+script novo lendo SUPABASE_DB_URL ....... exit=1
+workflow sem o passo de conferência ..... exit=1
+citação a outro projeto sem data ........ exit=1
+BANCO-ALVO.json removido ................ exit=1, ausência não passa
+teste de banco apontado para Supabase ... exit=2
+o mesmo, apontado para Postgres local ... segue, o caso legítimo passa
+```
+
+  Duas correções nasceram da própria sabotagem, e as duas eram defeito real: a acusação aos seis scripts, e uma mensagem que imprimia `wyeoju… (supabase-crimson-bridge)` — batizando o projeto desviado com o nome do certo.
+
+  Registrado como [`VACINA-068`](vacinas/VACINA-068-ALVO-DE-BANCO-HERDADO-EM-VEZ-DE-DECLARADO.md). Três citações de documento foram corrigidas no caminho: duas eram comando copiável apontando para o projeto errado (`docs/ETAPA-10`), e passaram a ler o `ref` da declaração; uma era registro sem data (`docs/ETAPA-17-ESTOQUE`), e ganhou a data em vez de ser reescrita

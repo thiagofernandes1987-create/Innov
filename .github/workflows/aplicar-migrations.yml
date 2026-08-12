@@ -72,6 +72,14 @@ jobs:
         with:
           node-version: 24
 
+      # Antes de tudo, inclusive antes de instalar o cliente: para onde este
+      # segredo aponta? A S-79 custou dois dias de trabalho num projeto que não
+      # era o desta plataforma, e o alvo nunca foi impresso porque ninguém
+      # imprime um segredo. Este passo imprime o `project_ref` — que já está
+      # versionado — e recusa quando ele não bate com `diretrizes/BANCO-ALVO.json`.
+      - name: Conferir para onde SUPABASE_DB_URL aponta
+        run: node scripts/banco-alvo.mjs --conferir | tee alvo-conferido.txt
+
       - name: Instalar psql
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
 
@@ -97,6 +105,7 @@ jobs:
         with:
           name: evidencia-de-migrations
           path: |
+            alvo-conferido.txt
             plano-de-migrations.txt
             resultado-de-migrations.txt
             ledger-depois.txt

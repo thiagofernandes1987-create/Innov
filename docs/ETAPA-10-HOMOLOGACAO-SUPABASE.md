@@ -88,10 +88,16 @@ Os tipos foram gerados com sucesso a partir do projeto real. Para atualizar o ar
 
 ```bash
 supabase gen types typescript \
-  --project-id wyeojufebtwblsubkunr \
+  --project-id "$(node -p "require('./diretrizes/BANCO-ALVO.json').project_ref")" \
   --schema public \
   > lib/supabase/database.types.ts
 ```
+
+> **Corrigido em 12/08/2026.** Até esta data a linha trazia o `project_ref`
+> escrito à mão, e era o do projeto errado — comando copiável apontando para um
+> banco que não é o desta plataforma. O alvo agora vem de
+> [`diretrizes/BANCO-ALVO.json`](../diretrizes/BANCO-ALVO.json), que é onde ele
+> é declarado e de onde `pnpm validate:banco-alvo` o confere.
 
 O comando deve ser repetido depois de qualquer migration que altere tabelas, enums ou RPCs.
 
@@ -108,7 +114,7 @@ Execução:
 
 ```bash
 ALLOW_INSECURE_DEMO_USERS=true \
-NEXT_PUBLIC_SUPABASE_URL="https://wyeojufebtwblsubkunr.supabase.co" \
+NEXT_PUBLIC_SUPABASE_URL="https://$(node -p "require('./diretrizes/BANCO-ALVO.json').project_ref").supabase.co" \
 SUPABASE_SERVICE_ROLE_KEY="..." \
 DEMO_ADMIN_PASSWORD="..." \
 DEMO_CLIENT_PASSWORD="..." \

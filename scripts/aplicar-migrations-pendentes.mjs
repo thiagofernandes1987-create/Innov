@@ -40,10 +40,20 @@
 // `SUPABASE_DB_URL` é lida do ambiente e **nunca impressa**. Prefira a conexão
 // direta (`db.<ref>.supabase.co:5432`) à do pooler: o pooler em modo transaction
 // não suporta bem DDL em lote.
+//
+// ## O alvo é conferido antes de abrir conexão
+//
+// Desde 12/08/2026, e pelo motivo da S-79: dois dias de trabalho de banco foram
+// para o projeto errado porque o alvo era **herdado** — parâmetro de ferramenta
+// num caso, segredo opaco no runner no outro, invisível nos dois. Aqui o alvo é
+// comparado com `diretrizes/BANCO-ALVO.json` e anunciado antes da primeira
+// migration. `--conferir` também o imprime, e é assim que se descobre para onde
+// `secrets.SUPABASE_DB_URL` aponta sem nunca imprimi-la.
 
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
+import { alvoDeclarado, anunciarAlvoOuSair } from "./banco-alvo.mjs";
 
 const raiz = process.cwd();
 const MIGRATIONS = path.join(raiz, "supabase", "migrations");
@@ -61,6 +71,24 @@ const ate = (() => {
 if (conferir === aplicar) {
   console.error("Use `--conferir` (não toca no banco) ou `--aplicar`. Nunca os dois, nunca nenhum.");
   process.exit(2);
+}
+
+// O alvo é a **primeira** coisa impressa, antes até de contar o lote. A ordem
+// não é estética: um plano de 119 migrations impresso acima da linha do alvo é
+// um plano que se lê inteiro antes de descobrir para onde ele vai — e foi
+// exatamente lendo o conteúdo certo sem olhar o destino que a S-79 aconteceu.
+{
+  const canonico = alvoDeclarado();
+  console.log(
+    `Alvo declarado: \`${canonico.project_ref}\` (${canonico.nome_de_exibicao}), ` +
+      `em diretrizes/BANCO-ALVO.json desde ${canonico.declarado_em}.`
+  );
+  // Em `--conferir` a conexão pode não existir no ambiente, e isso não reprova:
+  // conferir plano sem credencial é uso legítimo. O que não pode é existir uma
+  // conexão apontando para outro lugar e o plano sair como se estivesse certo.
+  if (process.env.SUPABASE_DB_URL) anunciarAlvoOuSair(process.env.SUPABASE_DB_URL);
+  else if (conferir) console.log("SUPABASE_DB_URL não está neste ambiente — o alvo real será conferido no `--aplicar`.");
+  console.log("");
 }
 
 /**
@@ -130,6 +158,8 @@ if (!url) {
   );
   process.exit(2);
 }
+
+anunciarAlvoOuSair(url);
 
 const aplicadasAgora = [];
 for (const [i, m] of doLote.entries()) {

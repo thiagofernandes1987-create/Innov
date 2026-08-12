@@ -420,7 +420,7 @@ Custo de estoque é informativo e não cria lançamento automaticamente. Relató
 
 ## 10. Homologação
 
-Executada no Supabase `wyeojufebtwblsubkunr` com dados temporários revertidos.
+Executada em 20/07/2026 no Supabase `wyeojufebtwblsubkunr`, com dados temporários revertidos. Aquele projeto **não é** o banco desta plataforma — o alvo declarado está em [`diretrizes/BANCO-ALVO.json`](../diretrizes/BANCO-ALVO.json) e a troca está registrada na S-79. A homologação abaixo fica como registro datado: refazê-la contra o banco certo é trabalho da T-79.2, e reescrever a data falsificaria o que foi medido.
 
 Confirmado:
 
