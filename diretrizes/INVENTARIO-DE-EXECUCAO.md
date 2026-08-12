@@ -2753,7 +2753,24 @@ de criação de empresa foi desfeito por construção e não deixou linha.
 O ledger foi corrigido: as duas **voltaram ao débito**, porque no projeto correto
 continuam pendentes.
 
-- [ ] T-79.1 — Reapontar o MCP e conferir a identidade do banco **antes** de qualquer medição: `current_database()`, `inet_server_addr()` e a contagem de tabelas, comparados com o que o proprietário confirma
+- [x] T-79.1 — **Alvo corrigido e medido em 12/08/2026.** O projeto desta plataforma é `jpqojevrmefcvsgoffnp`, cujo nome de exibição é `supabase-crimson-bridge`. `.env.local` e a declaração de projeto conectado em `INVENTARIO.md` foram repontados; as duas citações no histórico de tarefas ficam como estão, porque registram aplicação datada e reescrevê-las falsificaria o registro.
+
+  **O `project_id` era parâmetro da ferramenta, não configuração.** Eu escolhi o projeto de uma lista e nunca conferi — não havia nada apontando o alvo errado, havia a ausência de conferência. É por isso que a T-79.5 existe.
+
+  Primeira medição do banco correto, e ela muda o diagnóstico:
+
+```
+tabelas em public ......... 144      (contra 245 no projeto errado)
+funções ................... 196      (contra 252)
+rh_workers ................ não existe
+filas do canal ............ não existem
+organizações / clientes ... 1 / 1
+obras ..................... 0
+```
+
+  **Não é caso de migrar dados.** O banco correto tem uma organização, um cliente e nenhuma obra — é ambiente novo, não espelho de produção. Copiar o outro por cima seria semear um banco com dado de um ambiente paralelo.
+
+  **E há uma causa que nenhuma medição anterior tinha visto:** a branch `main` deste projeto está em **`MIGRATIONS_FAILED` desde 22/07/2026**. As 101 tabelas de diferença não são atraso de quem esqueceu de aplicar — são de uma sequência que **tentou e quebrou**, e ficou três semanas nesse estado. Aplicar por cima sem saber onde parou repete a falha
 - [ ] T-79.2 — Refazer as sete medições da tabela acima contra `jpqoje…`, e corrigir cada documento com o número novo e a data
 - [ ] T-79.3 — Decidir o que fazer no projeto `wyeoju…`: reverter as quatro funções para a definição anterior, ou deixar como está por serem mudanças que só endurecem. **Decisão do proprietário**, com o motivo registrado
 - [ ] T-79.4 — Conferir para onde `secrets.SUPABASE_DB_URL` aponta antes de qualquer nova execução do `aplicar-migrations`

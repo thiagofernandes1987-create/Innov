@@ -25,7 +25,10 @@
 - branch experimental da Etapa 22: `feature/etapa-22-provider-whatsapp-web-baileys`;
 - PR `#40`: draft, aberto, não mesclado e pendente de revisão.
 - Supabase Auth, PostgreSQL, RLS e Storage;
-- projeto Supabase conectado: `wyeojufebtwblsubkunr`;
+- projeto Supabase conectado: `jpqojevrmefcvsgoffnp` (`supabase-crimson-bridge`);
+  Até 12/08/2026 este arquivo dizia `wyeojufebtwblsubkunr`, e era o projeto errado —
+  foi o que levou dois dias de medição e uma aplicação ao banco que não é o desta
+  plataforma. A correção e o que deixou de valer estão na S-79;
 - a branch RH não está mesclada nem homologada externamente.
 
 ## 2. Estado dos aplicativos
