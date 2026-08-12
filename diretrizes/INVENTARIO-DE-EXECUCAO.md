@@ -2626,11 +2626,41 @@ banco ao lado de cada uma, e o portão reprova qualquer coluna nova fora dessa
 lista — e também reprova entrada que ninguém usa mais, para que a lista só possa
 encolher.
 
+### A aplicação virou comando, em 12/08/2026
+
+O proprietário deu aval para aplicar tudo, e o aval esbarrou num limite de
+ferramenta: pelo MCP a aplicação é uma chamada por arquivo com o SQL colado
+dentro, e são **121 arquivos, 0,88 MB**. Parar no meio de 121 migrations
+ordenadas deixa o banco num estado que nem o repositório nem o ledger descrevem.
+
+`pnpm migrations:conferir` imprime o plano sem tocar no banco;
+`pnpm migrations:aplicar` executa. A disciplina é a que a S-69 usou nas duas
+primeiras: ordem por nome de arquivo, **uma transação por arquivo**
+(`--single-transaction` com `ON_ERROR_STOP=1`), parada no primeiro erro e as
+destrutivas fora do lote.
+
+O plano conferido diz duas coisas que valem registro:
+
+```
+pendentes ................... 121
+no lote ..................... 117
+fora, por perderem dado .....   4
+```
+
+E a ordem resolve sozinha o impasse da S-76: os dois lotes de revogação de
+`EXECUTE` caem nas posições **116 e 117**, depois de tudo que cria as 100
+funções que hoje faltam. Aplicados ali, não há o que filtrar nem o que tolerar.
+
+**Falta só a credencial.** `SUPABASE_DB_URL` é lida do ambiente e nunca
+impressa; variável de ambiente é injetada na criação do contêiner, então uma
+configurada agora só aparece em sessão nova.
+
 - [ ] T-77.1 — Inventariar as 77 tabelas: quais têm dado em produção, quais são de etapa abandonada e quais foram criadas fora de migration. Sem esse corte, "escrever as migrations que faltam" não tem sujeito
 - [ ] T-77.2 — Gerar a migration de linha de base a partir do schema medido, **sem inventar tipo**: cada coluna com o tipo, nulidade e padrão lidos de `information_schema`
 - [ ] T-77.3 — Retirar de `diretrizes/COLUNAS-SEM-MIGRATION.json` cada coluna que a linha de base passar a declarar. O portão reprova entrada órfã, então a lista se fecha sozinha
 - [ ] T-77.4 — Conferir as 23 colunas que estão na migration e não no banco: quais são etapa 22 não aplicada (esperam a S-69) e quais são resíduo de migration que nunca rodou
 - [ ] T-77.5 — **Prova**: subir um banco vazio só com as migrations e rodar `pnpm validate:colunas-existentes` contra ele. Enquanto essa prova não existir, "o repositório recria o banco" é suposição
+- [ ] T-77.6 — Aplicar as 117 do lote com `pnpm migrations:aplicar`, e as 4 destrutivas uma a uma, cada uma com decisão registrada. Depois, `pnpm ledger:atualizar` tirando do débito **só o que de fato entrou**
 
 ## Sprint S-78 — A biblioteca de modelos da plataforma está vazia
 
