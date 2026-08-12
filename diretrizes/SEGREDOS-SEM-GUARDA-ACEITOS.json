@@ -1,0 +1,135 @@
+{
+  "$comentario": [
+    "Dívida datada do `pnpm validate:segredo-com-guarda`.",
+    "",
+    "O GitHub expande segredo indefinido como string vazia, em silêncio. Estes",
+    "usos ainda não recusam o vazio explicitamente. O número só pode diminuir:",
+    "o portão reprova quem aumentar, e reprova entrada que deixou de se aplicar.",
+    "",
+    "Medido em 12/08/2026, ao criar o portão: 17 workflows consomem segredo,",
+    "11 já se defendiam e 6 não."
+  ],
+  "medido_em": "2026-08-12",
+  "aceitos": [
+    {
+      "workflow": "module-visual-qa.yml",
+      "segredo": "DEMO_CLIENT_EMAIL",
+      "aceito_em": "2026-08-12",
+      "motivo": "QA visual: sem as contas demo o navegador nem abre, e a falha aparece no próprio passo. Guarda explícita pendente."
+    },
+    {
+      "workflow": "module-visual-qa.yml",
+      "segredo": "DEMO_CLIENT_PASSWORD",
+      "aceito_em": "2026-08-12",
+      "motivo": "QA visual: sem as contas demo o navegador nem abre, e a falha aparece no próprio passo. Guarda explícita pendente."
+    },
+    {
+      "workflow": "module-visual-qa.yml",
+      "segredo": "VERCEL_AUTOMATION_BYPASS_SECRET",
+      "aceito_em": "2026-08-12",
+      "motivo": "QA visual: sem as contas demo o navegador nem abre, e a falha aparece no próprio passo. Guarda explícita pendente."
+    },
+    {
+      "workflow": "qa-launcher-projects.yml",
+      "segredo": "VERCEL_AUTOMATION_BYPASS_SECRET",
+      "aceito_em": "2026-08-12",
+      "motivo": "Mesma família do QA visual. Guarda explícita pendente."
+    },
+    {
+      "workflow": "qa-planning-persona.yml",
+      "segredo": "QA_PERSONAS_JSON",
+      "aceito_em": "2026-08-12",
+      "motivo": "QA de persona: QA_PERSONAS_JSON vazio faria a bateria rodar sem persona nenhuma e passar. É o caso mais grave dos seis."
+    },
+    {
+      "workflow": "qa-public-launcher-fixture.yml",
+      "segredo": "VERCEL_AUTOMATION_BYPASS_SECRET",
+      "aceito_em": "2026-08-12",
+      "motivo": "Fixture pública: o bypass vazio derruba o acesso ao preview e a falha aparece na requisição. Guarda explícita pendente."
+    },
+    {
+      "workflow": "rh-esocial-restricted-homologation.yml",
+      "segredo": "ESOCIAL_CERTIFICATE_PASSPHRASE",
+      "aceito_em": "2026-08-12",
+      "motivo": "Homologação restrita, disparo manual: 9 segredos de certificado. Sem eles a assinatura falha, mas a mensagem não diz que o segredo faltava."
+    },
+    {
+      "workflow": "rh-esocial-restricted-homologation.yml",
+      "segredo": "ESOCIAL_CERTIFICATE_PFX_BASE64",
+      "aceito_em": "2026-08-12",
+      "motivo": "Homologação restrita, disparo manual: 9 segredos de certificado. Sem eles a assinatura falha, mas a mensagem não diz que o segredo faltava."
+    },
+    {
+      "workflow": "rh-esocial-restricted-homologation.yml",
+      "segredo": "ESOCIAL_HOMOLOGATION_EMPLOYER_NUMBER",
+      "aceito_em": "2026-08-12",
+      "motivo": "Homologação restrita, disparo manual: 9 segredos de certificado. Sem eles a assinatura falha, mas a mensagem não diz que o segredo faltava."
+    },
+    {
+      "workflow": "rh-esocial-restricted-homologation.yml",
+      "segredo": "ESOCIAL_HOMOLOGATION_EMPLOYER_TYPE",
+      "aceito_em": "2026-08-12",
+      "motivo": "Homologação restrita, disparo manual: 9 segredos de certificado. Sem eles a assinatura falha, mas a mensagem não diz que o segredo faltava."
+    },
+    {
+      "workflow": "rh-esocial-restricted-homologation.yml",
+      "segredo": "ESOCIAL_HOMOLOGATION_UNSIGNED_EVENT_BASE64",
+      "aceito_em": "2026-08-12",
+      "motivo": "Homologação restrita, disparo manual: 9 segredos de certificado. Sem eles a assinatura falha, mas a mensagem não diz que o segredo faltava."
+    },
+    {
+      "workflow": "rh-esocial-restricted-homologation.yml",
+      "segredo": "ESOCIAL_SIGNING_CERTIFICATE_PEM",
+      "aceito_em": "2026-08-12",
+      "motivo": "Homologação restrita, disparo manual: 9 segredos de certificado. Sem eles a assinatura falha, mas a mensagem não diz que o segredo faltava."
+    },
+    {
+      "workflow": "rh-esocial-restricted-homologation.yml",
+      "segredo": "ESOCIAL_SIGNING_PRIVATE_KEY_PEM",
+      "aceito_em": "2026-08-12",
+      "motivo": "Homologação restrita, disparo manual: 9 segredos de certificado. Sem eles a assinatura falha, mas a mensagem não diz que o segredo faltava."
+    },
+    {
+      "workflow": "rh-esocial-restricted-homologation.yml",
+      "segredo": "ESOCIAL_TRANSMITTER_REGISTRATION_NUMBER",
+      "aceito_em": "2026-08-12",
+      "motivo": "Homologação restrita, disparo manual: 9 segredos de certificado. Sem eles a assinatura falha, mas a mensagem não diz que o segredo faltava."
+    },
+    {
+      "workflow": "rh-esocial-restricted-homologation.yml",
+      "segredo": "ESOCIAL_TRANSMITTER_REGISTRATION_TYPE",
+      "aceito_em": "2026-08-12",
+      "motivo": "Homologação restrita, disparo manual: 9 segredos de certificado. Sem eles a assinatura falha, mas a mensagem não diz que o segredo faltava."
+    },
+    {
+      "workflow": "whatsapp-meta-test-number-e2e.yml",
+      "segredo": "WHATSAPP_ACCESS_TOKEN",
+      "aceito_em": "2026-08-12",
+      "motivo": "E2E de número de teste, disparo manual. Sem token a chamada à Graph API falha com erro do provedor, não com erro de configuração."
+    },
+    {
+      "workflow": "whatsapp-meta-test-number-e2e.yml",
+      "segredo": "WHATSAPP_TEST_PHONE_NUMBER_ID",
+      "aceito_em": "2026-08-12",
+      "motivo": "E2E de número de teste, disparo manual. Sem token a chamada à Graph API falha com erro do provedor, não com erro de configuração."
+    },
+    {
+      "workflow": "whatsapp-meta-test-number-e2e.yml",
+      "segredo": "WHATSAPP_TEST_RECIPIENT",
+      "aceito_em": "2026-08-12",
+      "motivo": "E2E de número de teste, disparo manual. Sem token a chamada à Graph API falha com erro do provedor, não com erro de configuração."
+    },
+    {
+      "workflow": "whatsapp-meta-test-number-e2e.yml",
+      "segredo": "WHATSAPP_TEST_TEMPLATE_LANGUAGE",
+      "aceito_em": "2026-08-12",
+      "motivo": "E2E de número de teste, disparo manual. Sem token a chamada à Graph API falha com erro do provedor, não com erro de configuração."
+    },
+    {
+      "workflow": "whatsapp-meta-test-number-e2e.yml",
+      "segredo": "WHATSAPP_TEST_TEMPLATE_NAME",
+      "aceito_em": "2026-08-12",
+      "motivo": "E2E de número de teste, disparo manual. Sem token a chamada à Graph API falha com erro do provedor, não com erro de configuração."
+    }
+  ]
+}

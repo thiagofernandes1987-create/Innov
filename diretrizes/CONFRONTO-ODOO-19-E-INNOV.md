@@ -332,7 +332,7 @@ o produto parece parado, e é aqui que o manual tem mais a oferecer.
 
 | | |
 | --- | --- |
-| **Fazemos melhor** | 68 vacinas com prevenção executável, 50 validadores no CI, e a regra de prova por sabotagem. Não há equivalente no manual — a Parte 1 fala de método de auditoria, mas como disciplina humana, não como portão automático. |
+| **Fazemos melhor** | 69 vacinas com prevenção executável, 51 validadores no CI, e a regra de prova por sabotagem. Não há equivalente no manual — a Parte 1 fala de método de auditoria, mas como disciplina humana, não como portão automático. |
 | **Fazem melhor** | **Trilha de Auditoria contábil** com valor anterior e valor novo por campo. Nosso `write_audit` grava o evento, não o antes-e-depois. |
 | **Complementa** | O `sudo()` e as *record rules* do mergulho XI.11 já renderam a VACINA-065 ontem — sete funções corrigidas. |
 | **Trazer** | ⬤ antes-e-depois no registro de auditoria |
