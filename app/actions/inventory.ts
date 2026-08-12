@@ -1,12 +1,13 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{hasCapability,requireCapability}from"@/lib/authorization";
 import{reportDataAccessError}from"@/lib/errors/data-access";
 
 type ProviderLikeError={code?:string|null;statusCode?:string|number|null;name?:string|null};
-function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
+function text(data:FormData,key:string){return campoDeTexto(data, key).trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
 function numberOrNull(value:unknown){if(value===null||value===undefined||String(value).trim()==="")return null;const parsed=Number(value);return Number.isFinite(parsed)?parsed:null;}
 function boolean(data:FormData,key:string){return data.get(key)!==null;}

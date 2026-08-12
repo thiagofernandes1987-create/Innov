@@ -8,6 +8,7 @@ import { requireOrganizationContext } from "@/lib/auth";
 import { reportDataAccessError } from "@/lib/errors/data-access";
 import { MODULE_BY_KEY } from "@/lib/modules/registry";
 import { PERSONAS_OPERACIONAIS, type PersonaId } from "@/lib/personas/runtime";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const PERSONA_IDS = new Set(PERSONAS_OPERACIONAIS.map(persona => persona.id));
 const ROTA = "/app/administracao/responsabilidades";
@@ -15,7 +16,7 @@ const ROTA_EXCECOES = "/app/excecoes";
 const MENSAGEM_BANCO = "Não foi possível concluir a operação. Tente novamente e, se o problema persistir, informe o horário ao administrador.";
 
 function value(formData: FormData, key: string): string {
-  return String(formData.get(key) ?? "").trim();
+  return campoDeTexto(formData, key).trim();
 }
 
 function fail(message: string): never {

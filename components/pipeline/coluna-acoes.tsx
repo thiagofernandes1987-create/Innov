@@ -159,7 +159,17 @@ export function FormularioNovoCartao({
         executar(() => criarCartao(pipelineId, stageId, titulo, registro), aoFechar);
       }}
       onKeyDown={event => {
-        if (event.key === "Escape") aoFechar();
+        // Este formulário é uma camada dispensável: `Escape` fecha ele, e
+        // fechar já é agir. Sem barrar a propagação, a mesma tecla continua
+        // subindo e chega ao ouvinte de janela do vizinho — o menu da etapa —,
+        // e um gesto fecha duas coisas (VACINA-054). O caro dos dois é este:
+        // fechar o menu custa um clique, fechar o formulário custa o que foi
+        // digitado.
+        if (event.key === "Escape") {
+          event.preventDefault();
+          event.stopPropagation();
+          aoFechar();
+        }
       }}
     >
       <div className="conversa-abas" role="tablist" aria-label="Origem do cartão">

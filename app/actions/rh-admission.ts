@@ -1,12 +1,13 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireCapability}from"@/lib/authorization";
 import{lerMoeda}from"@/lib/validacao/moeda";
-function text(d:FormData,k:string){return String(d.get(k)??"").trim();}
+function text(d:FormData,k:string){return campoDeTexto(d, k).trim();}
 function opt(d:FormData,k:string){return text(d,k)||null;}
 function date(d:FormData,k:string){return text(d,k)||null;}
 function digits(v:string){return v.replace(/\D/g,"");}

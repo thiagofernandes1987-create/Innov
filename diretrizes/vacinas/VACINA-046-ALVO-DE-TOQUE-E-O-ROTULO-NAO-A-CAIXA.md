@@ -97,9 +97,16 @@ que mostra que a mudança não passou a aprovar o que reprovava.
 ## Prevenção automática
 
 Regra aplicada em `scripts/qa/harness.mjs` — `pnpm qa:visual <modulo> <rota>` —,
-que é o medidor usado em todos os módulos do loop de QA; o `relatorio.json` de
-cada tela guarda a lista `pequenos` com tag, texto e medidas, para o resultado
-poder ser conferido em vez de acreditado.
+que é o medidor usado em todos os módulos do loop de QA.
+
+O medidor grava, para cada tela, um relatório em `.qa/<modulo>/` com a lista
+`pequenos` — tag, texto e medidas —, para o resultado poder ser conferido em vez
+de acreditado. **Esse relatório é saída, não artefato do repositório:** ele é
+gerado por quem roda o QA e `.qa/` não é versionado. Quem procurar por ele num
+checkout limpo não vai achar, e é por isso que o artefato citado aqui é o
+medidor, não o que ele escreve — corrigido em 11/08/2026, quando o
+`validate:prevencao-declarada` reprovou esta seção no CI e passou na máquina
+local, que é exatamente a diferença entre as duas coisas.
 
 O arnês passou a ser versionado nesta correção. Antes vivia no diretório
 temporário da sessão, que o contêiner recicla: instrumento que se perde não

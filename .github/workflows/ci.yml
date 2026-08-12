@@ -204,6 +204,24 @@ jobs:
         run: pnpm validate:postgrest-embeds
       - name: Validate module keys against app_modules (VACINA-053)
         run: pnpm validate:module-keys
+      - name: Validate module catalog across registry, app_modules and menus (VACINA-064)
+        run: pnpm validate:modulos-semeados
+      - name: Validate security definer functions guard the organization (VACINA-065)
+        run: pnpm validate:definer-com-guarda
+      - name: Validate EXECUTE is revoked from PUBLIC (VACINA-004)
+        run: pnpm validate:execute-revogado
+      - name: Validate asserted numbers in canonical docs (VACINA-067)
+        run: pnpm validate:numeros-afirmados
+      - name: Validate multiline form input is newline-normalized (VACINA-048)
+        run: pnpm validate:crlf-normalizado
+      - name: Validate queries against real table columns (VACINA-036)
+        run: pnpm validate:colunas-existentes
+      - name: Validate vaccines do not declare absent prevention
+        run: pnpm validate:prevencao-declarada
+      - name: Validate Escape closes one layer at a time (VACINA-054)
+        run: pnpm validate:escape-uma-camada
+      - name: Validate controlled fields are re-anchored to the DOM (VACINA-051)
+        run: pnpm validate:campo-controlado
       - name: Validate code map against the code
         run: pnpm validate:code-map
       - name: Validate migrations against the applied ledger (VACINA-057)

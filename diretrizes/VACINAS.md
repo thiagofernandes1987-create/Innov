@@ -143,6 +143,10 @@ Vacina pode ser substituída somente em PR próprio, preservando garantia igual 
 | `VACINA-061` | Guarda que lê o valor **novo** do campo que decide se ela se aplica é guarda opcional para quem sabe qual campo desligar — trocar `source_key` tornava o custo publicado pela CAIXA editável, com a procedência intacta ao lado | aplicada | a regra passou a olhar o que a linha **é**: recusa no `UPDATE` quando era oficial **ou** quando passaria a ser, conferência contra o pai antigo e novo nos filhos, o CUB com gatilho além da RLS, e `revoke` de escrita nas tabelas de sistema |
 | `VACINA-062` | Correção visual considerada concluída sem observar o preview publicado | vigente | captura obrigatória no mesmo viewport, tema e persona, comparação antes/depois e revisão de logs |
 | `VACINA-063` | Rede lógica tratada como linhas independentes permite ciclo, duplicidade ou referência fora do escopo | parcial | validação de escopo, duplicidade, hierarquia e ciclo antes da gravação; RPC transacional concorrente ainda pendente |
+| `VACINA-064` | Aplicativo declarado no registry do código e ausente de `app_modules` some da central sem erro nenhum | vigente | `validate:modulos-semeados` cruza registry, semeadura, menus e roteador nas cinco direções |
+| `VACINA-065` | Função `security definer` que recebe `organization_id` por parâmetro e é concedida a `authenticated` escreve em empresa alheia sem conferir participação | vigente | `validate:definer-com-guarda` exige guarda no corpo; sete funções corrigidas com o guarda da própria família |
+| `VACINA-066` | Regra que manda o achado novo para o fim do arquivo protege o foco e espalha a lógica do módulo, porque trata posição física e dono lógico como a mesma coisa | vigente | Marco vira rótulo; `validate:inventory` exige `Marco:` na sprint e impede fechar Marco com sprint aberta apontando para ele (R9) |
+| `VACINA-067` | Número afirmado em documento canônico envelhece e passa a mentir com cara de medição — em 11/08/2026, cinco documentos diziam 54 validadores — inclusive o `CLAUDE.md` — quando o real era 43 | vigente | `validate:numeros-afirmados` confere as quantidades declaradas contra o repositório e acusa documento que se contradiz na data; citação com data no entorno é isenta, porque medição datada não envelhece |
 
 ## 4. Arquivos
 
@@ -210,7 +214,11 @@ diretrizes/vacinas/
 ├── VACINA-060-LEITOR-QUE-NAO-ENTENDE-O-ARQUIVO-RESPONDE-ZERO.md
 ├── VACINA-061-GUARDA-QUE-LE-O-VALOR-NOVO-DO-CAMPO-QUE-DECIDE-A-GUARDA.md
 ├── VACINA-062-CORRECAO-VISUAL-EXIGE-CAPTURA-DO-PREVIEW.md
-└── VACINA-063-REDE-LOGICA-VALIDADA-ANTES-DA-GRAVACAO.md
+├── VACINA-063-REDE-LOGICA-VALIDADA-ANTES-DA-GRAVACAO.md
+├── VACINA-064-MODULO-DECLARADO-NO-CODIGO-E-AUSENTE-DO-CATALOGO.md
+├── VACINA-065-DEFINIDORA-QUE-RECEBE-A-ORGANIZACAO-E-NAO-CONFERE-PARTICIPACAO.md
+├── VACINA-066-REGRA-QUE-PROTEGE-O-FOCO-DESTROI-A-COERENCIA.md
+└── VACINA-067-NUMERO-AFIRMADO-EM-DOCUMENTO-CANONICO-ENVELHECE.md
 ```
 
 ## 5. Aplicação no Encerramento da Etapa 22

@@ -155,7 +155,7 @@ Commit: `T-43.3: os seis portões de Go da §24, provados por sabotagem`
 
 ---
 
-### Task 2: O protocolo da fila como domínio tipado, atrás de uma interface
+### Task 2: O protocolo da fila como domínio tipado, atrás de uma interface — CONCLUÍDA
 
 **Files:**
 - Create: `apps/execution-plane/fila.go`
@@ -173,16 +173,16 @@ Commit: `T-43.3: os seis portões de Go da §24, provados por sabotagem`
 
 Os limites do banco viram invariantes do tipo: `Falhar` recusa `BackoffSegundos` fora de 0–3600 antes de chegar ao Postgres; `Reivindicar` recusa limite fora de 1–100; `IniciarTentativa` recusa SHA que não case `^[0-9a-f]{64}$`.
 
-- [ ] **Step 1: Teste — `Drenar` conclui o evento quando o despacho dá certo**
-- [ ] **Step 2: Teste — `Drenar` chama `Falhar` com retentável quando o provedor devolve 5xx**
-- [ ] **Step 3: Teste — `Drenar` chama `Falhar` com não-retentável em 4xx**
-- [ ] **Step 4: Teste — a ordem por `SequenceNumber` dentro de uma conversa é preservada**
-- [ ] **Step 5: Teste — reivindicação com limite 0 ou 101 é recusada antes do banco**
-- [ ] **Step 6: Rodar, confirmar vermelho, implementar, confirmar verde, commitar**
+- [x] **Step 1: Teste — `Drenar` conclui o evento quando o despacho dá certo**
+- [x] **Step 2: Teste — `Drenar` chama `Falhar` com retentável quando o provedor devolve 5xx**
+- [x] **Step 3: Teste — `Drenar` chama `Falhar` com não-retentável em 4xx**
+- [x] **Step 4: Teste — a ordem por `SequenceNumber` dentro de uma conversa é preservada**
+- [x] **Step 5: Teste — reivindicação com limite 0 ou 101 é recusada antes do banco**
+- [x] **Step 6: Rodar, confirmar vermelho, implementar, confirmar verde, commitar**
 
 ---
 
-### Task 3: Cliente do gateway, com a assinatura provada idêntica à do TypeScript
+### Task 3: Cliente do gateway, com a assinatura provada idêntica à do TypeScript — CONCLUÍDA
 
 **Files:**
 - Create: `apps/execution-plane/gateway.go`
@@ -195,23 +195,23 @@ Os limites do banco viram invariantes do tipo: `Falhar` recusa `BackoffSegundos`
 
 A §26 exige contrato entre linguagens provado por fixture. O teste em Go e o teste em TypeScript leem **o mesmo arquivo** e precisam produzir a **mesma assinatura**, byte a byte — a mesma técnica que validou o benchmark, onde os dois runtimes produziram HMAC idêntico.
 
-- [ ] **Step 1: Gerar a fixture a partir da implementação TypeScript que já existe** (`apps/messaging-gateway/src/security.ts`), com pelo menos um caso de corpo vazio e um de corpo com acento
-- [ ] **Step 2: Teste em Go lendo a fixture**
-- [ ] **Step 3: Teste em TypeScript lendo a mesma fixture**
-- [ ] **Step 4: Sabotar — mudar a ordem da carga canônica no lado Go e confirmar que o teste reprova**
-- [ ] **Step 5: Commitar**
+- [x] **Step 1: Gerar a fixture a partir da implementação TypeScript que já existe** (`apps/messaging-gateway/src/security.ts`), com pelo menos um caso de corpo vazio e um de corpo com acento
+- [x] **Step 2: Teste em Go lendo a fixture**
+- [x] **Step 3: Teste em TypeScript lendo a mesma fixture**
+- [x] **Step 4: Sabotar — mudar a ordem da carga canônica no lado Go e confirmar que o teste reprova**
+- [x] **Step 5: Commitar**
 
 ---
 
-### Task 4: Laço de vida longa, encerramento limpo e observabilidade
+### Task 4: Laço de vida longa, encerramento limpo e observabilidade — CONCLUÍDA
 
 **Files:**
 - Create: `apps/execution-plane/main.go`
 - Create: `apps/execution-plane/main_test.go`
 
-- [ ] **Step 1: Teste — `SIGTERM` termina o lote em curso e não reivindica outro**
-- [ ] **Step 2: Teste — fila vazia espera o intervalo em vez de girar em laço quente**
-- [ ] **Step 3: Implementar, provar por sabotagem que o teste de encerramento pega um `os.Exit` abrupto, commitar**
+- [x] **Step 1: Teste — `SIGTERM` termina o lote em curso e não reivindica outro**
+- [x] **Step 2: Teste — fila vazia espera o intervalo em vez de girar em laço quente**
+- [x] **Step 3: Implementar, provar por sabotagem que o teste de encerramento pega um `os.Exit` abrupto, commitar**
 
 ---
 

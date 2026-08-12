@@ -1,10 +1,46 @@
-# Inventário de execução — marcos, sprints e tarefas
+# Inventário de execução — fila de trabalho, ordenada por dependência
 
 **Documento canônico:** sim
-**Atualizado em:** 25 de julho de 2026
+**Reescrito em:** 11 de agosto de 2026
 **Verificado por:** `pnpm validate:inventory`
 
-Este arquivo é o **estado vivo do trabalho**. `INVENTARIO.md` inventaria o que a plataforma **é**; este inventaria o que está sendo **feito**.
+Este arquivo é a **fila**: o que se faz agora e em que ordem. Ele não é mais o
+dono da lógica dos módulos — essa mudança é o assunto da seção seguinte.
+
+Os outros dois de leitura obrigatória ao lado deste:
+`INVENTARIO.md` inventaria o que a plataforma **é**;
+[`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) diz, **por
+módulo**, o que ele tem, calcula, mostra e ainda lhe falta.
+
+---
+
+## Por que este arquivo foi reescrito
+
+A crítica foi do proprietário, e ela estava certa:
+
+> *"por que está crescendo desgovernado, a cada coisa que eu informo que você não
+> fez sempre adiciona um monte de tarefas e Sprints em lugares aleatórios e a
+> lógica de um único módulo fica toda espaçada, um pouco em cada lugar"*
+
+Medido antes da reescrita: **51 sprints, 712 tarefas**, e a lógica de cada módulo
+espalhada por uma **média de 4,5 sprints**. **17 dos 25 módulos** apareciam em 4
+sprints ou mais; **9 em 6 ou mais**. O `diario` aparecia em 7 sprints — S-19,
+S-20, S-25, S-28, S-29, S-49, S-50 — e **nenhuma delas era sobre o diário**.
+
+A causa não foi desleixo: foi a **R4**, que mandava todo trabalho novo para o fim
+do arquivo. A intenção era proteger a ordem de execução. O efeito foi que toda
+descoberta sobre um módulo já planejado nascia longe de tudo com que se
+relacionava. E como quase toda sprint nova veio de uma observação do
+proprietário, o arquivo virou o registro cronológico das conversas em vez do
+plano do produto: **sete das últimas oito sprints são reativas**.
+
+Três coisas mudam, e só a terceira é cosmética:
+
+1. **A lógica sai daqui.** Passa a morar em `CONFRONTO-ODOO-19-E-INNOV.md`, uma
+   seção por módulo, inteira. Tarefa daqui **aponta** para lá (R8).
+2. **A R4 muda.** Trabalho novo entra na posição do módulo a que pertence, não no
+   fim do arquivo.
+3. **A fila vem antes do histórico.** O que fazer agora estava na linha 1.700.
 
 ---
 
@@ -16,7 +52,9 @@ Este arquivo é o **estado vivo do trabalho**. `INVENTARIO.md` inventaria o que 
 
 **R3 — Uma sprint por vez.** Não se inicia sprint nova antes de concluir a atual. **No máximo uma sprint em `em andamento`**, e o validador reprova o contrário.
 
-**R4 — O que é novo vai para o fim.** Sprint nova, oportunidade de melhoria ou lacuna descoberta entra **no final do inventário**, com as tarefas e subtarefas dela. Nunca no meio, nunca empurrando a sprint atual.
+**R4 — O que é novo vai para o fim do arquivo e declara o seu Marco.** Sprint nova, oportunidade ou lacuna descoberta entra **no final do inventário**, nunca no meio, nunca empurrando a sprint atual — é o que permite terminar o que está em curso em vez de parar pela metade. E declara `**Marco:**`, que é quem a puxa de volta para a coerência.
+
+> Posição física e dono lógico são coisas diferentes. Em 11/08/2026 eu havia trocado esta regra por "o novo entra na posição do módulo", tentando resolver a dispersão por posição. Estava errado: isso reintroduz exatamente a interrupção que a R4 existe para evitar. A dispersão se resolve pelo **rótulo de Marco** e pela **R9**, não movendo texto.
 
 **R5 — A ordem pode mudar, mas só na virada.** Ao **iniciar** uma sprint nova — nunca no meio de uma — a ordem de execução das sprints pendentes pode ser reordenada. Dois casos legítimos:
 
@@ -25,7 +63,15 @@ Este arquivo é o **estado vivo do trabalho**. `INVENTARIO.md` inventaria o que 
 
 **R6 — Reordenar exige registro.** Toda reordenação vira linha na tabela da seção "Registro de reordenação", com data, o que mudou e **por quê**. Reordenação sem justificativa registrada é a forma de o plano virar improviso.
 
-**R7 — Sprint concluída não tem tarefa em aberto.** Marcar sprint como `concluída` com tarefa `[ ]` reprova no validador. Se sobrou tarefa, ou a sprint não está concluída, ou a tarefa vira sprint nova no fim (R4).
+**R7 — Sprint concluída não tem tarefa em aberto.** Marcar sprint como `concluída` com tarefa `[ ]` reprova no validador. Se sobrou tarefa, ou a sprint não está concluída, ou a tarefa vira sprint própria.
+
+**R9 — O Marco só fecha quando nenhuma sprint aberta o referencia.** *(nova em 11/08/2026)* Ao concluir uma sprint, **antes de começar a próxima**, confira o Marco dela: se existir qualquer sprint aberta declarando aquele Marco — inclusive uma que acabou de chegar no fim do arquivo — o Marco **continua aberto**. Nesse momento se decide a ordem: qual sprint vem agora, e se o achado novo precisa de um passo anterior que o destrave. Marco sem nenhuma sprint não pode ser declarado `concluído`; ele está `sem sprint`.
+
+> É esta regra que faz o modelo funcionar. A R4 deixa o achado novo esperar no fim sem interromper; a R9 garante que ele não seja esquecido, porque o Marco não fecha por cima dele. Um passo de cada vez, módulo por módulo. Verificada por `pnpm validate:inventory`.
+>
+> **O procedimento da conferência é o mesmo para todo módulo** e está em [`CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`](CHECKLIST-DE-CONCLUSAO-DE-MODULO.md): existência, dado, chamada, cálculo, navegação, QA, persona, KPI e prova. Rodar `pnpm checklist:modulo <chave>` para o retrato mecânico. Item de verificação humana sem evidência registrada **conta como não feito**.
+
+**R8 — Tarefa aponta, não descreve.** *(nova em 11/08/2026)* Tarefa não reescreve a lógica do módulo: ela **aponta** para a seção dele no confronto e diz o que fazer, em que ordem e com que evidência. Regra de negócio ou número repetido em dois documentos diverge em silêncio — é a mesma razão pela qual o Notion é índice e o repositório é fonte.
 
 ---
 
@@ -37,6 +83,337 @@ Este arquivo é o **estado vivo do trabalho**. `INVENTARIO.md` inventaria o que 
 | `em andamento` | em execução — no máximo uma por vez |
 | `concluída` | todas as tarefas marcadas e evidência registrada |
 | `bloqueada` | não pode avançar; o bloqueio está descrito na sprint |
+
+---
+
+## Registro de Marcos — o objetivo global de cada frente
+
+O **Marco é a unidade de conclusão**: um objetivo global, quase sempre da forma
+*"finalizar o módulo X"*. A **sprint é o conjunto de tarefas para concluí-lo**, e
+um Marco costuma precisar de várias.
+
+**O Marco é rótulo, não seção.** Isto é deliberado e é o que faz o modelo
+funcionar: achado novo vai fisicamente para o **fim do arquivo** — para você
+terminar a sprint em curso sem parar no meio — mas declara o Marco a que
+pertence. Posição física protege o foco; o rótulo protege a coerência. As duas
+coisas eram tratadas como uma só, e foi por isso que a lógica de cada módulo se
+espalhou.
+
+**Estados do Marco:** `aberto` (tem sprint aberta), `sem sprint` (nenhuma sprint
+planejada ainda), `concluído` (tem sprint e nenhuma delas está aberta).
+
+| Marco | Objetivo global | Estado |
+| --- | --- | --- |
+| `M-CRM` | Finalizar o módulo CRM e Vendas | aberto |
+| `M-CLIENTES` | Finalizar o módulo Clientes | sem sprint |
+| `M-OBRAS` | Finalizar o módulo Obras | aberto |
+| `M-PLANEJAMENTO` | Finalizar o módulo Planejamento | sem sprint |
+| `M-TAREFAS` | Finalizar o módulo Tarefas | sem sprint |
+| `M-DIARIO` | Finalizar o módulo Diário de Obras | aberto |
+| `M-EQUIPES` | Finalizar o módulo Equipes | aberto |
+| `M-ORCAMENTOS` | Finalizar o módulo Orçamentos | aberto |
+| `M-PROPOSTAS` | Finalizar o módulo Propostas | sem sprint |
+| `M-CONTRATOS` | Finalizar o módulo Contratos | sem sprint |
+| `M-ADITIVOS` | Finalizar o módulo Aditivos | sem sprint |
+| `M-ASSINATURAS` | Finalizar o módulo Assinaturas | sem sprint |
+| `M-DOCUMENTOS` | Finalizar o módulo Documentos | aberto |
+| `M-MODELOS` | Finalizar o módulo Modelos e Documentações | sem sprint |
+| `M-QUALIDADE` | Finalizar o módulo Qualidade | sem sprint |
+| `M-COMPRAS` | Finalizar o módulo Compras e Suprimentos | aberto |
+| `M-ESTOQUE` | Finalizar o módulo Estoque | aberto |
+| `M-FINANCEIRO` | Finalizar o módulo Financeiro Operacional | sem sprint |
+| `M-RH` | Finalizar o módulo RH | aberto |
+| `M-SAC` | Finalizar o módulo Pós-venda | aberto |
+| `M-WHATSAPP` | Finalizar o módulo WhatsApp | aberto |
+| `M-RELATORIOS` | Finalizar o módulo Relatórios | aberto |
+| `M-AUDITORIA` | Finalizar o módulo Auditoria | aberto |
+| `M-ADMINISTRACAO` | Finalizar o módulo Administração | aberto |
+| `M-DASHBOARD` | Finalizar a central de aplicativos | sem sprint |
+| `M-CONTABILIDADE` | Criar e finalizar o módulo Contabilidade (gerencial; fiscal fica fora, §3.6 do confronto) | aberto |
+| `M-IA` | Criar e finalizar o módulo de IA operadora, sob o contrato de `IA-OPERADORA.md` | aberto |
+| `M-SEGURANCA` | Correções de segurança aplicadas no banco, não só no repositório | aberto |
+| `M-PLATAFORMA` | Mapa tecnológico: as fases de migração de linguagem da §36 | aberto |
+| `M-TRAVESSIAS` | Travessias ponta a ponta como suíte de teste | aberto |
+| `M-LEGADO` | Decompor as sprints que ainda misturam módulos | aberto |
+| `M-0` | Governança e memória de sessão | aberto |
+| `M-1` | Fundação do Object Runtime | aberto |
+| `M-2` | Customização completa | aberto |
+| `M-3` | Escala e produto público | aberto |
+| `M-4` | Generalização do produto: vocabulário e presets de segmento | aberto |
+| `M-5` | Padrão de interface de mercado | aberto |
+
+**Onze módulos existentes estão em `sem sprint`.** Não é omissão do registro: é o retrato
+honesto de que ninguém planejou trabalho para eles. Entre eles estão
+`planejamento` e `tarefas`, que têm **1 página cada** e menu de 17% a 20%
+próprio — o núcleo operacional da obra sem nenhuma sprint prevista. É a mesma
+conclusão que o índice por módulo mostra por outro caminho.
+
+**`M-RH` e `M-WHATSAPP` apareceram como candidatos a fechamento em 11/08/2026, e
+a conferência da R9 mostrou que não eram.** As sprints ligadas a eles — S-40 e
+S-41 — eram de **convergência de ramo**, e a S-42 estava ligada a `M-RH` por
+engano sendo sobre mapa tecnológico. Fechar teria declarado dois módulos prontos
+com base em merge de branch.
+
+É a limitação declarada na VACINA-066: **o portão confere vínculo, não
+pertinência**. Ele acusa o esquecimento; o engano continua sendo trabalho de
+quem confere na virada. A correção abriu S-68, S-69 e S-70, e religou a S-42.
+
+---
+
+## Índice por módulo — onde mora o trabalho de cada um
+
+Esta tabela existe para responder, em um lugar só, a pergunta que antes exigia
+garimpar sete sprints: **onde está tudo sobre este módulo**.
+
+Colunas medidas em 11/08/2026: *Páginas* são `page.tsx` atribuídos ao módulo de
+prefixo de rota mais longo; *Menu* é destinos próprios sobre total — quanto menor
+a fração, mais o menu é atalho para o vizinho em vez de navegação interna.
+
+| Módulo | Páginas | Menu próprio | Feitas | Abertas | Sprints que o tocam |
+| --- | ---: | ---: | ---: | ---: | --- |
+| `dashboard` | 5 | 0/0 | 5 | 4 | S-08, S-23, S-25, S-27, S-28, S-33, S-37, S-44 |
+| `crm` | 8 | 4/4 | 7 | 4 | S-23, S-24, S-26, S-30, S-32, S-33 |
+| `clientes` | 3 | 2/2 | 3 | 0 | S-23 |
+| `obras` | 10 | 2/5 | 6 | 3 | S-20, S-25, S-32, S-33, S-34 |
+| `planejamento` | 1 | **1/6** | 10 | 4 | S-23, S-24, S-25, S-27, S-30, S-32, S-33 |
+| `tarefas` | 1 | **1/5** | 8 | 4 | S-04, S-21, S-24, S-27, S-32, S-33 |
+| `diario` | 1 | **1/5** | 1 | 8 | S-19, S-20, S-25, S-28, S-29, S-49, S-50 |
+| `equipes` | 1 | **1/5** | 1 | 3 | S-25, S-26, S-31, S-33 |
+| `orcamentos` | 6 | 3/5 | 8 | 0 | S-23, S-33, S-37 |
+| `propostas` | 2 | 2/5 | 1 | 1 | S-13, S-33 |
+| `contratos` | 2 | 2/5 | 2 | 1 | S-03, S-11, S-33 |
+| `aditivos` | 2 | 2/5 | 0 | 1 | S-47 |
+| `assinaturas` | 3 | 2/2 | 2 | 0 | S-23, S-33 |
+| `documentos` | 2 | 2/5 | 6 | 1 | S-19, S-23, S-32, S-38, S-42 |
+| `modelos` | 2 | 2/3 | 9 | 0 | S-32, S-33, S-34, S-50 |
+| `qualidade` | 8 | 3/3 | 4 | 3 | S-20, S-23, S-26, S-31, S-33, S-34 |
+| `compras` | 7 | 3/4 | 1 | 3 | S-26, S-28, S-34, S-47 |
+| `estoque` | 17 | 7/7 | 2 | 2 | S-21, S-26, S-33, S-47 |
+| `financeiro` | 9 | 4/4 | 3 | 2 | S-23, S-26, S-30, S-34 |
+| `rh` | 57 | 5/5 | 9 | 2 | S-40, S-42, S-44, S-45 |
+| `sac` | 3 | 2/3 | 5 | 2 | S-05, S-23, S-24, S-29, S-30, S-44, S-50 |
+| `whatsapp` | 4 | **1/5** | 6 | 0 | S-23, S-41, S-50 |
+| `relatorios` | 10 | 7/7 | 5 | 1 | S-16, S-23, S-34 |
+| `auditoria` | 6 | 4/4 | 5 | 3 | S-15, S-30, S-31, S-33, S-37, S-44, S-45, S-50 |
+| `administracao` | 10 | 6/6 | 8 | 1 | S-05, S-13, S-23, S-24, S-32, S-34 |
+
+**O que a tabela mostra de imediato.** Cinco módulos têm menu majoritariamente de
+atalho para vizinho — `planejamento`, `tarefas`, `diario`, `equipes` e
+`whatsapp`. Os quatro primeiros formam o núcleo operacional da obra e somam
+**4 páginas**. É a explicação medida para a sensação de que o produto não avança:
+não falta trabalho feito (180 páginas), falta trabalho feito **no núcleo** — 57
+das 180 são do RH.
+
+---
+
+## Espinha derivada do confronto com o manual do Odoo 19
+
+Objetivo: fechar as lacunas que o confronto mediu, **na ordem em que uma destrava
+a outra** — não na ordem em que foram descobertas.
+
+Origem de cada sprint: [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md)
+§3 (matriz por módulo), §4 (visão global) e §5 (especificação por linguagem).
+Conforme a **R8**, as tarefas abaixo apontam para lá e não repetem a lógica.
+
+**Dependência medida:** `E1 → E2 → E3` é a espinha — E3 não fecha sem E2, e E2
+não fecha sem E1. E4 e E5 correm em paralelo a partir de E1. E7 não depende de
+nada e entrega sozinho.
+
+## Sprint S-52 — E1: custo/hora por integrante
+**Estado:** pendente
+**Marco:** M-EQUIPES
+**Módulos atingidos:** `equipes`, `rh`, `diario`, `planejamento`, `obras`, `financeiro`, `orcamentos`
+
+Trava sete módulos, e **não por estar faltando** — o campo existe desde a etapa
+12, em duas tabelas. A medição está no confronto §4.1 e na definição de pronto do
+módulo em `MODULOS.md`:
+
+```
+project_resources.hourly_cost      escrito e EXIBIDO, nunca usado em cálculo
+project_team_members.hourly_cost   sem escritor e sem leitor desde 19/07/2026
+```
+
+O módulo **mostra** custo de mão de obra e não **calcula** com ele. O trabalho é
+dar **dono, vigência e uso** ao que já existe — não criar campo.
+
+- [x] T-52.1 — **Decidido em 12/08/2026, e a medição no banco vivo mudou o desenho.** O custo pertence à **pessoa, com vigência**; a alocação **referencia** e só sobrescreve quando declarado.
+
+  Três números decidiram, e nenhum deles é opinião:
+
+```
+rh_workers existe no banco ............. NÃO   (as 68 migrations rh_* não estão aplicadas)
+project_team_members ................... 0 linhas, 0 com custo
+project_resources ...................... 2 linhas, as 2 do tipo LABOR
+```
+
+  **Por que o dono não pode ser `rh_workers`.** Seria o lugar natural — é o cadastro de pessoa da plataforma — mas ele **não existe no servidor**. Ancorar o E1 nele acorrentaria sete módulos ao lote de RH, que é operação própria e ainda não autorizada. O custo canônico nasce numa tabela do módulo `equipes`, com vínculo **opcional** a `rh_workers` para quando o RH for aplicado.
+
+  **Por que `project_resources.hourly_cost` sobrevive.** Ele não é custo de pessoa: é custo de **recurso** — retroescavadeira, material, subempreiteiro. Fundir os dois apagaria a distinção. Recurso `LABOR` que representa uma pessoa nomeada passa a apontar para ela; equipe genérica — *"2 pedreiros"* — mantém custo próprio.
+
+  **Por que `project_team_members.hourly_cost` morre.** Zero linhas, zero com custo, sem escritor e sem leitor desde 19/07. Remover não perde dado nenhum — é a coluna que a T-52.3 já apontava como morta, agora com o número que autoriza a remoção sem cerimônia.
+
+  A consequência para as outras tarefas: a T-52.2 (vigência) passa a valer sobre a tabela nova do `equipes`, não sobre `project_team_members`; e a T-52.3 deixa de ser decisão e vira execução.
+- [ ] T-52.2 — Migration de **vigência**: alterar o custo abre período novo e não reescreve o passado. Sem isso, corrigir um valor muda o custo já apurado de trimestre fechado
+- [ ] T-52.3 — Resolver as duas colunas existentes: qual sobrevive, qual é migrada e qual é removida. `project_team_members.hourly_cost` é coluna morta e a remoção é migration destrutiva — decisão registrada, não silenciosa
+- [ ] T-52.4 — Campo no cadastro, com `view_sensitive_financials` decidindo quem vê; guarda de participação em qualquer RPC nova, conforme VACINA-065
+- [ ] T-52.5 — Integrante **sem custo declarado** aparece como não informado, nunca como zero — zero é um número e entra na conta mentindo
+- [ ] T-52.6 — Prova por sabotagem: custo alterado **não** muda o custo apurado de período fechado; e remover o custo derruba o cálculo dependente com o teste acusando
+- [ ] T-52.7 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo equipes` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.2, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-53 — E2: apontamento de hora no diário
+**Estado:** pendente
+**Marco:** M-DIARIO
+**Módulos atingidos:** `diario`, `obras`, `financeiro`
+
+Transforma o diário de registro em **fonte de custo**. Hoje o diário é a única
+superfície do produto que o campo alimenta todo dia e que não produz número
+nenhum. Confronto §3.2 (`diario`).
+
+- [ ] T-53.1 — `daily_log_activities` recebe horas e pessoa
+- [ ] T-53.2 — Custo derivado de E1, calculado no banco e nunca digitado
+- [ ] T-53.3 — Worksheet configurável por tipo de serviço, no motor de modelos que já existe (`modelos`)
+- [ ] T-53.4 — O diário aprovado continua sendo a única porta para o cliente; hora e custo **não** são visíveis ao cliente
+- [ ] T-53.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo diario` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.2, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-54 — E3: rentabilidade da obra em três colunas
+**Estado:** pendente
+**Marco:** M-OBRAS
+**Módulos atingidos:** `obras`, `financeiro`, `orcamentos`, `compras`
+
+A peça mais valiosa da matriz. Separa **prometido** (`Expected`), **direito**
+(`To Invoice`) e **fato** (`Invoiced`). Temos as duas pontas e não temos o meio —
+e o meio é a medição aprovada e não faturada, o número que o dono da construtora
+persegue em planilha todo mês. Confronto §4.2.
+
+- [ ] T-54.1 — RPC `project_profitability(org, project)` em SQL — leitura derivada, sem escrita, para não trazer linha para fora só para somar
+- [ ] T-54.2 — Receita: medição aprovada, contrato, aditivo; custo: material, hora (E2), compra
+- [ ] T-54.3 — Tela da obra com as três colunas e o caminho de volta ao documento de origem
+- [ ] T-54.4 — Prova por sabotagem: medição aprovada e não faturada tem de aparecer em `To Invoice` e sumir de lá ao faturar
+- [ ] T-54.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo obras` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.2, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-55 — E4: comprometido do orçamento
+**Estado:** pendente
+**Marco:** M-ORCAMENTOS
+**Módulos atingidos:** `orcamentos`, `compras`, `financeiro`
+
+`Comprometido = realizado + pedido de compra confirmado ainda não faturado`. É o
+que impede a obra de gastar duas vezes o mesmo dinheiro. Confronto §3.3, §3.4.
+
+- [ ] T-55.1 — RPC do comprometido por obra e por item de orçamento
+- [ ] T-55.2 — Exibir no orçamento ao lado de previsto e realizado
+- [ ] T-55.3 — Alerta quando comprometido ultrapassa o previsto do item
+- [ ] T-55.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo orcamentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.4, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-56 — E5: prazo de fornecedor e atraso previsto
+**Estado:** pendente
+**Marco:** M-COMPRAS
+**Módulos atingidos:** `compras`, `estoque`, `planejamento`
+
+`Chegada prevista = prazo do pedido + lead time do fornecedor`. Uma fórmula de
+uma linha que produz a única visão que importa em suprimentos: **o que vai
+atrasar a obra**. Confronto §3.3.
+
+- [ ] T-56.1 — Lead time no cadastro do fornecedor, por produto quando houver
+- [ ] T-56.2 — Chegada prevista derivada, nunca digitada
+- [ ] T-56.3 — Pedido atrasado no painel quando a chegada prevista passa sem recebimento
+- [ ] T-56.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo compras` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.3, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-57 — E6: quantidade prevista de estoque
+**Estado:** pendente
+**Marco:** M-ESTOQUE
+**Módulos atingidos:** `estoque`, `compras`
+
+`Prevista = em mãos + entradas previstas − saídas previstas`. Nosso estoque
+conhece o presente e não conhece o futuro. Confronto §3.3.
+
+- [ ] T-57.1 — RPC da quantidade prevista no horizonte consultado
+- [ ] T-57.2 — Regra de reposição mínimo/máximo disparando pelo previsto
+- [ ] T-57.3 — Decidir e implementar a valoração (AVCO), com ADR se a escolha divergir do mapa
+- [ ] T-57.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo estoque` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.3, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-58 — E7: relatórios de ausência
+**Estado:** pendente
+**Marco:** M-RELATORIOS
+**Módulos atingidos:** `crm`, `compras`, `sac`, `financeiro`, `documentos`
+
+A crítica mais dura do confronto: dos 146 relatórios do manual, uma família
+inteira é de **ausência e atraso**, e nenhum dos nossos 10 é assim. Relatório de
+ausência é o que faz o sistema **cobrar** em vez de esperar. Confronto §4.3.
+
+Roda no **plano de execução em Go**, que já tem tentativa, backoff e
+classificação de falha — segunda carga do plano que já existe, não camada nova.
+
+- [ ] T-58.1 — Varredura agendada que produz pendência, não tela
+- [ ] T-58.2 — Lead sem acompanhamento; recebível vencido por idade; pedido atrasado; documento não enviado
+- [ ] T-58.3 — A pendência chega pela casca, com teto por pessoa e agrupamento por obra (decisão já registrada em S-29)
+- [ ] T-58.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo relatorios` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-59 — E8: SLA no pós-venda
+**Estado:** pendente
+**Marco:** M-SAC
+**Módulos atingidos:** `sac`, `whatsapp`
+
+Assistência técnica sem SLA não tem como prometer prazo. Confronto §3.5.
+
+- [ ] T-59.1 — Política de SLA por tipo de ocorrência, com prazo calculado e nunca digitado
+- [ ] T-59.2 — `tempo até SLA` e `taxa de SLA` como indicadores
+- [ ] T-59.3 — Carga por atendente e avaliação pós-atendimento
+- [ ] T-59.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo sac` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-60 — E9: solicitação de documento com cobrança
+**Estado:** pendente
+**Marco:** M-DOCUMENTOS
+**Módulos atingidos:** `documentos`, `contratos`, `qualidade`, `rh`
+
+Nossa gestão documental é **passiva**: guarda o que chega. A solicitação de
+arquivo inverte isso — o sistema pede o documento que falta a quem deve enviá-lo
+e acompanha. Confronto §3.5.
+
+- [ ] T-60.1 — Pedido de documento com destinatário, prazo e pasta de destino
+- [ ] T-60.2 — Cobrança pelo plano de execução (mesma carga de E7)
+- [ ] T-60.3 — Versão com bloqueio e progresso de assinatura (`concluídos ÷ requeridos`)
+- [ ] T-60.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo documentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-61 — E10: filtro global e snapshot de indicador
+**Estado:** pendente
+**Marco:** M-RELATORIOS
+**Módulos atingidos:** `relatorios`, `dashboard`
+
+Período escolhido uma vez vale para o painel inteiro; e o indicador vira foto
+datada, que é o que permite comparar. Confronto §3.5.
+
+- [ ] T-61.1 — Estado de filtro no servidor, aplicado a todas as visualizações do painel
+- [ ] T-61.2 — Snapshot datado do indicador em tabela própria
+- [ ] T-61.3 — Definição do KPI legível ao usuário, não só ao código
+- [ ] T-61.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo relatorios` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-62 — E11: probabilidade e previsão no funil
+**Estado:** pendente
+**Marco:** M-CRM
+**Módulos atingidos:** `crm`, `propostas`
+
+`Receita rateada = receita esperada × probabilidade`. Temos valor e etapa, então
+temos lista; sem probabilidade não temos previsão. Confronto §3.1.
+
+- [ ] T-62.1 — Probabilidade por etapa, editável por empresa
+- [ ] T-62.2 — Receita rateada e previsão por período de fechamento
+- [ ] T-62.3 — Margem por linha na proposta (`(preço − custo) × quantidade`)
+- [ ] T-62.4 — **Herdada da T-34.10.1**, que ficava presa numa sprint de Administração esperando algo que não existia: ao criar o marcador de cartão, reavaliá-lo contra o critério da T-34.10 — dimensão que gera contagem usa lista cadastrada; vocabulário de tela, não
+- [ ] T-62.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo crm` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.1, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-63 — E12: antes-e-depois na trilha de auditoria
+**Estado:** pendente
+**Marco:** M-AUDITORIA
+**Módulos atingidos:** `auditoria`, todos
+
+`write_audit` grava o evento, não o antes-e-depois. A Trilha de Auditoria do
+manual registra valor anterior e valor novo por campo — é o que transforma o log
+em prova. Confronto §3.5.
+
+- [ ] T-63.1 — `write_audit` passa a receber valor anterior
+- [ ] T-63.2 — Tela de auditoria mostra a diferença, não só o evento
+- [ ] T-63.3 — Prova por sabotagem: alteração sem antes-e-depois reprova
+- [ ] T-63.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo auditoria` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ---
 
@@ -890,7 +1267,7 @@ apontou. Vai para o fim conforme R4.
 - [ ] T-28.8 — **Ver quem mais está alocado no mesmo endereço hoje**. Resolve por conversa, no local, em cinco minutos, o conflito de sequenciamento que hoje escala para a coordenação
 - [ ] T-28.9 — **Situação financeira do cliente visível antes de a equipe sair**, não depois. Descobrir depois custa os R$ 942,40 da Lei 2
 - [ ] T-28.10 — **Cobertura de apontamento** como número visível, e detecção do padrão suspeito — progresso monotônico com variância zero é o padrão de quem preenche de cabeça no fim de semana. **Falso é pior que ausente**, porque ausente ao menos se enxerga
-- [ ] T-28.11 — **Gravar `project_progress_snapshots` ao aprovar o diário**, e ler dele em `curvas.ts`. A tabela existe desde a etapa 12 com `snapshot_date`, `planned_progress`, `actual_progress` e `source`, e `daily_log_activities` já tem `progress_before`/`progress_after` datados pelo `log_date` do diário. **Sem migration** — falta só escrever e ler, e a curva de realizado deixa de ser reconstruída para ser medida
+- [ ] T-28.11 — **Gravar `project_progress_snapshots` ao aprovar o diário.** *(premissa corrigida em 11/08/2026 pela varredura da S-75: a redação anterior mandava ler dele num módulo "curvas.ts" que não existe mais — a leitura já acontece hoje em `app/app/obras/[id]/page.tsx` e `app/cliente/obras/[id]/page.tsx`. O que falta é só a **gravação**.)* A tabela existe desde a etapa 12 com `snapshot_date`, `planned_progress`, `actual_progress` e `source`, e `daily_log_activities` já tem `progress_before`/`progress_after` datados pelo `log_date` do diário. **Sem migration** — falta só escrever e ler, e a curva de realizado deixa de ser reconstruída para ser medida
 
 ---
 
@@ -1061,7 +1438,7 @@ não pede trabalho novo — ela **precifica** o que já estava na fila e mostra 
 ---
 
 ## Sprint S-32 — Reúso de informação: sugestão, documento por modelo e campo próprio
-**Estado:** pendente
+**Estado:** concluída
 **Marco:** M-5
 
 Ditada pelo responsável em 2 de agosto. Desenho e dissecação em
@@ -1167,6 +1544,7 @@ sete.
 ## Sprint S-33 — Defeitos silenciosos encontrados na verificação da S-32
 
 **Estado:** pendente
+**Marco:** M-LEGADO
 
 Descobertos ao verificar T-32.0 no navegador, e registrados no fim conforme a
 R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
@@ -1199,7 +1577,8 @@ R4. Nenhum deles tem sintoma: todos aprovam nas ferramentas e falham em uso.
 
 ## Sprint S-34 — Listas cadastradas: o que a empresa decide que existe como opção
 
-**Estado:** pendente
+**Estado:** concluída
+**Marco:** M-ADMINISTRACAO
 
 > **Nota de estado, para não parecer contradição.** As tarefas marcadas abaixo já estão
 > entregues, e a sprint segue `pendente` porque a R3 admite **uma** sprint em andamento e a
@@ -1239,7 +1618,6 @@ os dois igual foi o erro de T-32.0.6.
   - [x] T-34.9.3 — A classificação A/B/C **some abaixo de cinco motivos**. Medido na tela: com dois, "praça errada" com 44% da perda saía como classe C, que é o rótulo de desprezível. ABC pressupõe cauda longa; sem ela, a ordem por valor já é a mensagem inteira
   - [x] T-34.9.4 — Regra da tabela canônica corrigida num caso que ela não previa: com um motivo só, o acumulado da primeira linha já é 100% e a maior causa sairia como C. A primeira linha é sempre A — ela é, por definição, a prioridade
 - [x] T-34.10 — Avaliada a mesma tela para marcador de cartão e etapa de funil. **Resposta: não, e por motivos diferentes.** Etapa de funil é vocabulário, não dimensão: cada construtora nomeia as próprias etapas, elas mudam por trilha e ninguém soma "quantas etapas 'Qualificação' existem" — curar obrigaria a passar por Administração para criar uma coluna, que é o oposto do que a tela do funil precisa ser. Marcador de cartão não existe no produto; avaliar antes de existir seria decidir sobre o que não se viu. O critério fica escrito: **cura-se o que alimenta contagem; observa-se o que nomeia**
-  - [ ] T-34.10.1 — Reavaliar marcador de cartão quando ele existir, contra esse critério
 
 - [x] T-34.11 — Medidor de alvo de toque passa a aplicar a isenção da WCAG 2.5.5 para link **dentro de frase**: aumentar um link em texto corrido exigiria quebrar a linha do parágrafo, e reprovar a marcação correta ensina a ignorar o vermelho. Só isenta quando há frase em volta — link sozinho num parágrafo é botão mal vestido e continua medido. Provado com teste negativo: encolhendo a barra de relatórios de propósito, a reprovação volta
 - [x] T-34.12 — Barra de navegação dos relatórios em 41px, três abaixo do mínimo. Executivo, obras, financeiro, compras, qualidade, perdas, metas, salvos e snapshots fecham em 0
@@ -1251,6 +1629,7 @@ os dois igual foi o erro de T-32.0.6.
 ## Sprint S-35 — Object Runtime: o registro visto e lido
 
 **Estado:** pendente
+**Marco:** M-1
 
 Descoberta ao fechar a T-32.3, e entra **no fim** conforme a R4. A fundação e o
 estúdio existem e foram exercitados; o que não existe é o outro lado do balcão.
@@ -1275,6 +1654,7 @@ estimativas fundamentadas, exatamente como a §12.2 declara.
 ## Sprint S-36 — A barra superior em largura de tablet
 
 **Estado:** pendente
+**Marco:** M-5
 
 Descoberta ao medir a T-33.13, e entra **no fim** conforme a R4. Não é o
 defeito que a T-33.13 tratava: sobrou depois de resolvê-lo, e é de outro lugar.
@@ -1305,6 +1685,7 @@ tarefa sobre a página de orçamento, seria redesenhar a casca de lado.
 ## Sprint S-37 — Orçamento analítico: SINAPI que importa, CUB completo e o corte material × mão de obra
 
 **Estado:** pendente
+**Marco:** M-ORCAMENTOS
 
 Nasce de uma auditoria pedida pelo responsável em 04/08/2026 — *"no módulo de
 orçamento eu incluí um modo para sincronizar o Sinapi automaticamente para
@@ -1392,12 +1773,14 @@ de material nem de mão de obra em tela nenhuma.
 - [x] T-37.12 — **Referência oficial não muda de dono.** O registro original desta tarefa estava **errado no diagnóstico**: eu havia anotado "gravável por qualquer membro interno" a partir da política (`for all`) e do privilégio, sem executar. Na execução, a escrita direta é negada — existe o gatilho `guard_official_cost_reference`, que eu não tinha procurado. Mas a tentativa por outro caminho achou um buraco de verdade, mais estreito e pior: **no `UPDATE` a guarda lia `new.source_key`**, o valor novo do campo que decide se ela se aplica. Medido: `update cost_compositions set source_key='PROPRIA'` é permitido, e depois disso o custo de 208,33 vira 1,00 — **com `source_url`, `source_sha256` e `base_date` intactos ao lado**, atestando um número que já não é aquele. Corrigido para olhar o que a linha **é**: recusa no `UPDATE` quando era oficial **ou** quando passaria a ser (senão a composição da casa seria promovida a oficial), conferência contra o pai antigo e novo nos filhos, e o CUB entrou na mesma proteção — dependia só da RLS de leitura, com o privilégio de escrita ainda concedido. Provado com a **mesma** prova de antes, sem alterá-la: cinco tentativas, cinco negadas; e os quatro caminhos legítimos conferidos um a um. **VACINA-061**, que registra também o erro de método: inferência de esquema encontra o que se procura, execução encontra o que não se procurava
 - [x] T-37.11 — **Função de diagnóstico global removida, na ordem certa.** O pré-requisito era o hardening R3B, que estava no débito congelado da S-22 — e enquanto ele não entrasse, a função não era órfã: a policy `observability_diagnostics_select` a chamava, e o `drop` teria falhado por dependência ou aberto o diagnóstico global. Alcance do R3B conferido **antes** de aplicar: nenhuma função `SECURITY INVOKER` chama `record_audit_event` ou `write_audit` (as 21 que usam são todas `definer`), e a tabela de diagnóstico está vazia, então restringir a leitura global não esconde nada hoje. Aplicado, e só então a remoção — com policies dependentes, funções dependentes e dependências de catálogo **todas em zero**. O débito congelado do R3B saiu da lista: 18 arquivos sem aplicação viraram 17
 - [x] T-37.11.1 — Erro meu, pego pelo `validate:migrations-applied`: apliquei os dois corpos de função do R3B com **nome lógico diferente** do arquivo, criando um "aplicado sem arquivo". É exatamente o que a VACINA-057 existe para pegar, e pegou na primeira execução. Corrigido no registro — a DDL pertence ao R3B e já constava por lá
+- [ ] T-37.15 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo orcamentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.4, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ---
 
 ## Sprint S-38 — Endurecer o que o compilador não pega, sem trocar de linguagem
 
 **Estado:** concluída
+**Marco:** M-DOCUMENTOS
 
 Nasce da decisão do responsável em 10/08/2026, depois da avaliação executada do
 mapa tecnológico polyglota: *"vamos mudar a partir de agora que não temos
@@ -1447,6 +1830,7 @@ fica pendurada numa sprint que já entregou.
 ## Sprint S-39 — Proteção de ramo na `main`
 
 **Estado:** bloqueada
+**Marco:** M-0
 
 Separada da S-38 pela R7: a S-38 entregou tudo o que o repositório consegue
 fazer sozinho, e isto depende de uma ação que só o dono do repositório executa.
@@ -1457,6 +1841,7 @@ fazer sozinho, e isto depende de uma ação que só o dono do repositório execu
 ## Sprint S-40 — Convergência do Projeto RH com a `main` reparada
 
 **Estado:** concluída
+**Marco:** M-RH
 
 O PR #42 nasceu sobre uma `main` de 6 de agosto e ficou 539 commits à frente
 enquanto a `main` andava 247. Converge aqui, com a bateria inteira executada
@@ -1482,7 +1867,7 @@ pego mais cedo, porque ela nasce na resolução de merge, não na escrita.
 - [x] T-40.4.1 — **Persona nova é mudança de esquema, e o portão avisou na hora.** O `tests/personas-db-contract.test.ts` reprovou a P17 porque a S-30 gravou o vocabulário **no banco**, em seis restrições `check` que casavam `^P([1-9]|1[0-6])$`. Sem a migration, a P17 existiria no código e seria recusada na primeira gravação. A migration descobre as restrições **pelo texto da definição** — elas são anônimas, e o nome real é o gerado pelo PostgreSQL — e falha de propósito se não encontrar exatamente seis. Faixa ampliada para `^P([1-9]|[1-9][0-9])$`, não para P17: fixar o teto na persona recém-criada garantiria repetir esta migration na próxima. Aplicada e conferida no banco: **6 restrições ampliadas, 0 antigas, evento no catálogo, 17 tipos**; e provada por inserção — `aceitou P17=t | recusou PX=t | recusou P0=t`, com o `raise` desfazendo tudo
 - [x] T-40.4.2 — O teste de contrato passou a ler **o catálogo inteiro de migrations**, não um arquivo. A migration da S-30 já está aplicada, e migration aplicada é imutável — editá-la produziria um "aplicado divergente do arquivo", exatamente o que o `validate:migrations-applied` existe para reprovar. Persona nova entra por migration nova
 - [x] T-40.5 — **O portão de interoperabilidade XMLDSig não estava quebrado: faltava o binário.** `xmlsec1` ausente no contêiner fazia o gate do eSocial falhar com aparência de regressão. Instalado, o teste passa — a mesma C14N do `xmllint` e assinatura verificada externamente. Limitação de ambiente declarada como tal, não contornada com `skip`
-- [x] T-40.6 — Bateria completa sobre o resultado: `tsc` **0 erros**, `eslint --max-warnings=0` limpo, **88 arquivos e 812 testes** passando, e os 17 validadores verdes, incluindo `migrations-applied` (243 arquivos, 208 aplicadas, nenhuma divergência nova) e `code-map` (226 rotas, 314 server actions, 318 funções de banco)
+- [x] T-40.6 — Bateria completa sobre o resultado: `tsc` **0 erros**, `eslint --max-warnings=0` limpo, **88 arquivos e 812 testes** passando, e os 17 validadores verdes daquele dia (10/08/2026), incluindo `migrations-applied` (243 arquivos, 208 aplicadas, nenhuma divergência nova) e `code-map` (226 rotas, 314 server actions, 318 funções de banco)
 
 As **67 migrations `rh_*` seguem declaradas não aplicadas** no débito congelado de
 `diretrizes/migrations-aplicadas.json`, com o responsável nomeado. O registro ali
@@ -1496,6 +1881,7 @@ GO/NO_GO — continuam sendo pré-requisito de produção, não de merge.
 ## Sprint S-41 — Gateway de mensageria converge com a `main`
 
 **Estado:** concluída
+**Marco:** M-WHATSAPP
 
 O `apps/messaging-gateway/` — 54 arquivos — nunca chegou à `main`: a PR #40
 mesclou em `feature/etapa-22-whatsapp-omnichannel`, e esse ramo ficou **454
@@ -1520,6 +1906,7 @@ conforme a R4.
 ## Sprint S-42 — Mapa tecnológico canônico e fechamento da Fase 1
 
 **Estado:** concluída
+**Marco:** M-PLATAFORMA
 
 Decisão do responsável em 10/08/2026: adotar o mapa tecnológico **completo**,
 na estratégia de fases da própria §36 do documento. Entra no fim conforme a R4.
@@ -1541,7 +1928,7 @@ Fase 2 (introduzir Go) não começa antes dela.
 - [x] T-42.1 — **Mapa versionado como canônico**, em `diretrizes/MAPA-TECNOLOGICO.md`: o documento original íntegro, 1.997 linhas, mais a **medição executada** ao lado de cada afirmação que dependia de medição. Estava só como anexo de conversa, e a regra do repositório é explícita — decisão que vive em conversa se perde quando o contêiner é reciclado. Recuperado do transcrito e depois substituído pelo original enviado pelo responsável
 - [x] T-42.2 — Registradas as **duas inconsistências internas** do documento, com número: a §21 põe Go em **23 das 44 linhas (52,3%)** enquanto a §33 do mesmo texto estabelece **5% a 15%** — não podem valer juntas, e a §33 é a que corresponde à §36; e a Fase 1 da §36 já estava concluída quando o documento foi lido
 - [x] T-42.3 — `README.md` atualizado. Ele anunciava **"Etapa 19", "Etapa 18 incorporada à main", versão `0.19.0`** — três incorporações atrás. Passa a `0.22.0`, com RH, gateway e a seção de portões anti-regressão
-- [x] T-42.4 — `CLAUDE.md` atualizada: a regra de **portão provado por sabotagem**, os dois validadores de população, a exigência de rodar **todos** os 54 validadores, e a seção de linguagens com o portão da §37
+- [x] T-42.4 — `CLAUDE.md` atualizada: a regra de **portão provado por sabotagem**, os dois validadores de população, a exigência de rodar **todos** os validadores — 54 na contagem de 10/08/2026, e a seção de linguagens com o portão da §37
 - [x] T-42.5 — **Buraco no `validate:documentation`, encontrado ao registrar o mapa.** A lista de canônicos é escrita à mão, e **três** documentos declaravam `**Documento canônico:** sim` no próprio corpo sem constar dela: `CONTRATO-AUDITAVEL-DE-PERSONAS`, `MAPA-TECNOLOGICO` e `PROVA-POR-SABOTAGEM`. Apagar qualquer um passaria verde. É a mesma falha que a VACINA-014 corrigiu para as vacinas — lista à mão não é atualizada por quem escreve o documento. Conferência agora é bidirecional; de **25 para 28** canônicos, e provado por sabotagem: documento novo que se declara canônico sem registro reprova
 
 O que resta da Fase 1 e toda a Fase 2 seguem na **S-43**, porque a R3 admite uma
@@ -1551,9 +1938,12 @@ sprint em andamento por vez e a R7 não admite sprint concluída com tarefa aber
 
 ## Sprint S-43 — Fase 2 da §36: classificar workers e a ADR de Go
 
-**Estado:** em andamento
+**Estado:** bloqueada
+**Marco:** M-PLATAFORMA
 
-Três das quatro tarefas concluídas; a T-43.3 em curso.
+Três das quatro tarefas concluídas; a T-43.3 parada na tarefa 5.
+
+**Bloqueada em 11/08/2026, e a mudança de estado é correção de honestidade.** A T-43.3 entregou as tarefas 2, 3 e 4 no PR #55; a tarefa 5 é a `FilaPostgREST`, e as filas do canal **não existem no banco** — dependem da S-69. Sprint travada declarada como `em andamento` ocupa a vaga única da R3 e esconde o bloqueio: quem lê o inventário acha que há trabalho em curso quando não há.
 
 **A ADR-0001 foi ratificada por instrução direta do proprietário arquitetural em
 10/08/2026** — *"inicie as conversões dos códigos para Go, Typescript, Python e
@@ -1580,11 +1970,200 @@ de entrada e não é negociável: **nenhuma linguagem nova entra sem ADR**.
 - [x] T-43.2 — **ADR de Go**, com os doze itens da §37 e o benchmark que a §39 exige. Entregue em `diretrizes/ADR-0001-CAMADA-DE-EXECUCAO.md`, com as medições reproduzíveis em `benchmarks/camada-de-execucao/`. **Estado: proposta, aguardando ratificação do proprietário arquitetural** — a §37 condiciona a Fase 2 à ADR aprovada, e aprovar não é tarefa desta sessão. O benchmark **contraria a expectativa**: a CPU é 0,03% de um job de despacho, e trocar Node por Go economiza **0,41 s de CPU por dia** a 100 mil mensagens/dia; o Node satura em 6.549 jobs/s contra 27.884 do Go, mas a necessidade medida é de **1,16 job/s**, o que dá **57× de folga**. Dentro do próprio Go, escrever com `map[string]any` em vez de struct custa **2,14×** — mais que os 1,45× entre as duas linguagens. A ADR por isso separa o que o mapa juntava: **extrair a camada do request é decisão incondicional** (§4, critérios 3, 4, 7 e 8), **a linguagem é decisão condicionada** — TypeScript agora, Go por quatro gatilhos numéricos. Conflito com a leitura literal da §7.4 e da §36 registrado na própria ADR, §16
 - [ ] T-43.3 — Fase 2 da §36 — construir a camada de execução em Go, padronizar queue/retry, instrumentar OpenTelemetry. Plano em `docs/superpowers/plans/2026-08-10-camada-de-execucao-go.md`
   - [x] **Tarefa 1 — os seis portões de Go da §24**, em `.github/workflows/go-gates.yml`, cada um **visto reprovando** conforme `PROVA-POR-SABOTAGEM.md`: `gofmt` listou o arquivo; `go vet` pegou `%d` com string; `staticcheck` pegou `U1000` que `build` e `vet` aprovaram; `golangci-lint` pegou `errcheck` com rc=1; `go test` ficou vermelho; `go test -race` acusou `DATA RACE`. Módulo `apps/execution-plane` criado sem dependência de terceiros, conforme a §38
-  - [ ] Tarefa 2 — protocolo da fila como domínio tipado, atrás da interface `Fila`, com os limites do banco virando invariante do tipo
-  - [ ] Tarefa 3 — cliente do gateway com assinatura provada **byte a byte idêntica** à do TypeScript, por fixture compartilhada (§26)
-  - [ ] Tarefa 4 — laço de vida longa, encerramento limpo em `SIGTERM`, observabilidade
+  - [x] **Tarefa 2 — protocolo da fila como domínio tipado.** `fila.go` e `despacho.go`, com as três faixas que o Postgres cobra viradas invariante: limite de reivindicação 1..100 (`INVALID_CLAIM_LIMIT`), SHA `^[0-9a-f]{64}$` (`INVALID_PAYLOAD_SHA256`) e backoff 0..3600 (`INVALID_BACKOFF`), lidas literalmente de `20260804151000_stage22_outbox_delivery.sql`. A validação não mora dentro de `Drenar` — mora no decorador `ComValidacao`, senão protegeria só quem passa por `Drenar`, e a `FilaPostgREST` da Tarefa 5 entraria pelo lado. **Duas decisões que os testes fixaram:** o 429 mora na faixa 4xx e mesmo assim retenta, então classificar por faixa erra; e falhar um evento **barra os posteriores da mesma conversa no mesmo lote** — o banco só garante ordem entre reivindicações, e sem essa barreira um lote com 1, 2 e 3 entrega a 2 e a 3 depois da 1 falhar. Conversas distintas não se contaminam. **17 testes**, os seis portões da §24 verdes, e seis sabotagens vistas reprovando pelo teste certo: limite sem recusa, 429 no default, barreira removida, faixa de backoff sem cobrança, motivo com texto cru do provedor e SHA em maiúsculas. O `staticcheck` reprovou um teste **meu** com `SA4000` — `SHA256Hex(p) != SHA256Hex(p)` prova que função pura é determinística e nada mais; trocado por oráculo externo calculado em Python
+  - [x] **Tarefa 3 — assinatura do gateway provada idêntica à do TypeScript, por fixture compartilhada.** `gateway.go` é a **segunda** implementação do mesmo algoritmo, e a §26 aceita essa dívida desde que provada por fixture, não por leitura comparada. `tests/fixtures/assinatura-gateway.json` foi **gerado pela implementação TypeScript real** (`signGatewayRequest`, executada pelo vitest), não escrito à mão; os dois testes leem **o mesmo arquivo** e reproduzem cada assinatura byte a byte. Seis casos, escolhidos pelo que costuma divergir entre runtimes: corpo vazio, acento, método em minúsculas, caminho com query, emoji fora do BMP e o separador `.` dentro do nonce e do caminho. **Ambiguidade registrada, não corrigida:** a junção por ponto é ambígua quando os campos contêm ponto — corrigir de um lado só quebraria o contrato com o gateway em produção, então fica fixada por um caso da fixture e a correção, se vier, muda os dois lados no mesmo commit. **Sete sabotagens vistas reprovando:** ordem da carga trocada, método sem normalizar, separador trocado, corpo cru no lugar do sha256, assinatura em maiúsculas, fixture editada à mão (reprova nos **dois** lados) e contrato encolhido em um caso (reprova nos dois). O `validate:assercoes` reprovou uma asserção **minha** — `toBeGreaterThanOrEqual(6)` é piso de quantidade, e contrato que encolhe em silêncio deixa de ser contrato; trocada por lista fechada com `toEqual`. Teto segue em 523
+  - [x] **Tarefa 4 — laço de vida longa, encerramento limpo e observabilidade.** `main.go`, com a decisão que define o arquivo: cancelar o contexto quer dizer **"pare de reivindicar"**, não "largue o que está na mão". `SIGTERM` que aborta o lote no meio deixa evento em `CLAIMED` sem tentativa fechada, e o banco só libera depois do `lock_timeout` de dois minutos — multiplicado por um deploy que reinicia réplicas, é fila parada sem ninguém ter derrubado nada. O lote roda sob `context.WithoutCancel` com prazo próprio; o sinal interrompe o **próximo** ciclo. **OpenTelemetry não entrou, e a omissão é declarada:** seria a primeira dependência de terceiro do módulo, e o `go.mod` exige justificativa escrita em revisão (§38). Entrou `log/slog` em JSON — contagem por lote, duração e motivo de encerramento. Trocar por OTel é ADR, não efeito colateral de uma tarefa de laço. **Dois achados da própria sabotagem, os dois sobre teste e não sobre código.** O primeiro: o teste de `SIGTERM` real afirmava que o laço para exatamente no lote seguinte, e reprovou — entrega de sinal é assíncrona, o laço chegou a reivindicar mais um lote antes de enxergar o cancelamento. Reescrito para afirmar o que vale em qualquer ordem: **nenhum evento reivindicado fica sem desfecho**. O segundo é o pior: sabotar o `context.WithoutCancel` — que é a parada abrupta — **não reprovou teste nenhum**, porque os dublês ignoravam o contexto e cancelar não mudava nada para eles. Dublê complacente é portão que não mede. Corrigidos para falhar com contexto cancelado, como PostgREST e HTTP fazem; a mesma sabotagem passou a reprovar com "o lote em curso foi abandonado no meio". **31 testes** no módulo, seis portões da §24 verdes, `-race` estável em `-count=3`
   - [ ] **Tarefa 5 — BLOQUEADA.** Implementação PostgREST e **aplicação das migrations**. Medido em 10/08: as filas **não existem no banco** — 0 de 5 tabelas, 0 de 8 RPCs, contra 256 tabelas no `public`. `stage22_multiprovider_storage` e `stage22_outbox_delivery` estão no débito congelado, que condiciona a saída a *"deploy de código compatível, aplicação controlada e testes DB"*. **Nenhum consumidor pode ser ligado antes disso, e a aplicação é decisão do responsável nomeado**
 - [x] T-43.4 — Reconciliar §21 e §33, registrado no preâmbulo do `MAPA-TECNOLOGICO.md` e mensurável por `node scripts/medir-distribuicao.mjs`. **A premissa desta tarefa estava errada e a medição a corrigiu:** os "52,3% contra 5–15%" comparavam **presença** com **volume** — 100% das linhas da §21 são polyglotas, com 2,30 linguagens por linha, e as presenças somam 101 para 44 linhas, logo não formam fatia. Na mesma unidade (linguagem principal), sobra uma divergência **real, localizada em Go e menor**: 20,5% contra teto de 15%. O problema maior é outro: **a §33 não é mensurável como está** — este repositório fica dos dois lados da faixa conforme se conte o ledger de migrations (TypeScript 84,3% ou 58,0%; SQL 11,1% ou 38,9%), porque migration é append-only e cresce de forma monotônica contra o código de aplicação. Regra proposta: §21 é **autorização**, não orçamento; §33 é **alarme** medido sobre código vivo; §33 **nunca decide caso concreto** (seria o "otimizar por intuição" da §39); onde divergirem, prevalece a ADR da §37. **Requer ratificação**, como a ADR-0001
+
+---
+
+## Sprint S-44 — Auditoria de superfícies esquecidas e o portão do catálogo de módulos
+
+**Estado:** concluída
+**Marco:** M-LEGADO
+
+Nasceu de um relato de uso — *"o módulo de RH está sem chamada ativa, não se
+esqueça de validar se existem mais funções, módulos, tabelas, variáveis
+esquecidas"* — e de um pedido explícito de corrigir os casos equivalentes que
+aparecessem. Entra no fim conforme a R4. Relatório em
+`diretrizes/AUDITORIA-SUPERFICIES-ESQUECIDAS-2026-08-10.md`.
+
+### Tarefas
+
+- [x] T-44.1 — **Causa do relato isolada: é aplicação, não código.** O RH está inteiro no repositório (registry, menu, rotas, actions), e a central não lê o registry — lê `list_my_modules`, que resolve contra `public.app_modules`. Medido no projeto remoto: **25 módulos no registry contra 23 linhas em `app_modules`**. A semeadura existe em `20260809141000_rh_module_catalog_seed.sql`; as **68 migrations `rh_*` não estão aplicadas**, débito já declarado no ledger. Num ambiente nascido só das migrations, o RH aparece
+- [x] T-44.2 — **Um segundo caso da mesma família, vivo e não percebido: `MENUS_DO_MODULO.ocorrencias`.** A chave do aplicativo de pós-venda é `sac`; `ocorrencias` é a **rota**. Como `navegacao-do-modulo` pede o menu por `moduleForPath()`, que devolve a chave do registry, aquele bloco **nunca foi renderizado uma vez sequer** — e os dois destinos já existiam dentro de `sac`, que é por que nada parecia faltar na tela. Removido: destinos distintos continuam **74**, o total cai de **112 para 110**
+- [x] T-44.3 — **`pnpm validate:modulos-semeados`, o portão que faltava.** O `validate:module-keys` cobre uma direção só — *chave usada em SQL precisa estar semeada* — e parte do SQL; módulo declarado no registry que nenhuma policy cita ainda passa por ele calado. Foi por aí que o RH ficou dois dias com código e sem catálogo. O novo cruza registry × `app_modules` × menus × roteador nas **cinco direções**, com `dashboard` como única exceção declarada e justificada. `VACINA-064`
+- [x] T-44.4 — **Provado por sabotagem, cinco direções, uma por vez.** Base `exit=0`; módulo novo sem semeadura reprova em [A] e [D]; registry renomeado reprova em [A] e [B]; a rechave do `ocorrencias` reprova em [C]; menu renomeado reprova em [C] e [D]; rota sem pasta reprova em [E]; restaurado, `exit=0`
+- [x] T-44.5 — **Funções: 10 RPCs sem chamador em 404 vivas.** Cinco têm teste DB e esperam interface (piloto de mensageria e `create_proposal_from_budget_version`); **cinco são do RH e não têm nem chamador nem teste**. A mais instrutiva é `create_rh_payroll_parameter`: o código chama a irmã `create_rh_payroll_parameter_from_template`, e o nome quase igual é exatamente o que faz auditoria por leitura concluir que existe chamador. Remoção é migration destrutiva — fica para o piloto do módulo
+- [x] T-44.6 — **Tabelas: 1 em 331.** `object_records` é a única sem leitura nem escrita fora do DDL, e é superfície declarada do Object Runtime, com teste DB e documentação. As outras 19 da primeira passagem caíram quando a medição passou a descontar DDL, índice, RLS e `grant` — o número 20 era artefato do heurístico, não achado
+- [x] T-44.7 — **Variáveis: 27 de runtime sem declaração em lugar nenhum, todas corrigidas.** De 136 lidas em código, 85 não apareciam em `README`, `.env.example`, `vercel.json`, `deploy/`, `docs/` ou `diretrizes/`; **27 delas são lidas pelo produto em execução** e 23 são do próprio RH. Três com consequência silenciosa: `ESOCIAL_ENABLE_PRODUCTION` (só o literal `"true"` libera produção), `SINAPI_PROBE_TOKEN` (menos de 32 caracteres fecha a rota) e `BAILEYS_LAB_CONFIRM`. Declaradas em `.env.example` com o default real lido do código. Medido depois: **27 → 0**
+- [x] T-44.8 — Bateria completa: `eslint` limpo, `tsc` 0 erros, **1.068 testes em 112 arquivos**, `pnpm test:python` OK e **41 validadores verdes** — o `validate:code-map` reprovou por mapa desatualizado e foi regenerado
+
+---
+
+## Sprint S-45 — Pendências herdadas da auditoria de superfícies
+
+**Estado:** pendente
+**Marco:** M-LEGADO
+
+O que a S-44 mediu e **não** resolveu, porque depende de ação externa,
+irreversível ou de decisão do responsável. Nomeado aqui para não voltar a ser
+descoberto.
+
+### Tarefas
+
+- [ ] T-45.1 — **Aplicar as 68 migrations `rh_*`**, sem o que o módulo continua invisível no projeto remoto. Ação externa e irreversível; o próprio ledger condiciona a saída do débito a homologação isolada com evidência real. **Decisão do responsável nomeado**
+- [ ] T-45.2 — Decidir sobre as **5 RPCs de RH sem chamador e sem teste** — `approve_rh_payroll_accounting_batch`, `generate_rh_payroll_accounting_batch`, `generate_rh_payroll_provisions`, `create_rh_payroll_parameter` e `create_rh_employment_esocial_contract_profile_version`: ligar a interface ou remover por migration
+- [ ] T-45.3 — Decidir sobre as **5 superfícies testadas sem tela** — as quatro do piloto de mensageria e `create_proposal_from_budget_version`
+- [ ] T-45.4 — Interface do Object Runtime, sem a qual `object_records` segue sendo tabela sem leitor
+- [ ] T-45.5 — Declarar as **58 variáveis de script, teste e CI** ainda sem menção em documento nenhum. Severidade menor: nenhuma é lida pelo produto em execução
+
+---
+
+## Sprint S-46 — Camada transversal única, a mobília que hoje cada módulo refaz
+
+**Estado:** pendente
+**Marco:** M-5
+
+Nasce da leitura do material do Odoo 19 em 11/08/2026, analisada em
+`diretrizes/APROVEITAMENTO-ODOO-19-2026-08-11.md`. O Odoo tem uma camada
+chamada **Essentials** — *"a camada de recursos comuns usada por praticamente
+todo o sistema"* — que entrega estágios, atividades, chatter, busca com filtros
+salvos e as visões para os 37 aplicativos de uma vez. O INNOV não tem essa
+camada: tem 25 módulos, cada um reconstruindo o que precisa.
+
+Medido no repositório: **56 páginas de detalhe, 6 com histórico**. Cinquenta
+fichas em que o usuário abre e não vê o que aconteceu. No banco, o mesmo
+conceito aparece fatiado — `channel_conversation_notes`, `pipeline_card_notes` e
+`sac_ticket_messages` para "anotar num registro"; `crm_activities` e
+`pipeline_card_activities` para "o que fazer em seguida". Zero filtros salvos,
+zero paleta de comandos, uma visão pivot.
+
+Não é falta de trabalho: é trabalho repetido, dividido por 25. Entra no fim
+conforme a R4.
+
+### Tarefas
+
+- [ ] T-46.1 — Registro polimórfico de eventos por objeto: comentário, nota, mudança de campo, anexo, atividade agendada e seguidor, com uma política de acesso só
+- [ ] T-46.2 — Componente único de linha do tempo, montável por qualquer ficha
+- [ ] T-46.3 — Ligar as 50 fichas sem histórico; medir antes e depois, que o número só pode subir
+- [ ] T-46.4 — Consolidar as 3 tabelas de nota e as 2 de atividade, com migração de dado e sem perda de trilha
+- [ ] T-46.5 — Busca com filtros salvos como camada, não por módulo
+- [ ] T-46.6 — Portão que reprova ficha de detalhe nova sem linha do tempo, provado por sabotagem
+- [ ] T-46.7 — **Guarda contra o efeito colateral que o próprio material avisa:** histórico é evidência contextual e não substitui campo estruturado. Mudança relevante registrada só em comentário continua sendo inconsistência
+
+---
+
+## Sprint S-47 — Rentabilidade por obra, com as maturidades separadas
+
+**Estado:** pendente
+**Marco:** M-OBRAS
+
+O deep dive XI.9 do material descreve a armadilha: **Expected**, **To Invoice**
+e **Invoiced** são estágios do mesmo fluxo, e somar os três *"duplica
+economicamente o fato"*. O que se acompanha é a migração entre colunas.
+
+Medido no INNOV: existe `finance_cost_centers`, e "margem" só aparece em
+orçamento (BDI/markup). **Não existe visão de rentabilidade por obra** — nada
+que compare custo consumido com receita reconhecida numa obra viva. Para uma
+plataforma de construção, é a tela que o dono da empresa abre primeiro.
+
+### Tarefas
+
+- [ ] T-47.1 — Cinco maturidades como colunas distintas e nunca somadas: Previsto (contrato + aditivos), A medir, Medido, Faturado, Recebido
+- [ ] T-47.2 — Custo consumido por obra a partir de compras, estoque, folha e despesas, sempre pelo centro de custo
+- [ ] T-47.3 — **O teste que o material dá pronto:** procurar registros economicamente ligados à obra e **sem** vínculo analítico. São o que some do painel; no INNOV, custo lançado sem centro de custo
+- [ ] T-47.4 — Portão que reprova soma entre maturidades, provado por sabotagem
+- [ ] T-47.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo obras` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.2, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+---
+
+## Sprint S-48 — Ficha de definição de relatório e matriz de integração
+
+**Estado:** pendente
+**Marco:** M-RELATORIOS
+
+Duas peças de documentação executável do material do Odoo, ambas baratas e de
+alto retorno de manutenção.
+
+### Tarefas
+
+- [ ] T-48.1 — Ficha de definição por relatório: modelo-fonte, medida, dimensão, data, estados, organização, moeda, filtros, transformação e drill-down. *"O auditor primeiro compara definições e só depois números"*
+- [ ] T-48.2 — Portão: relatório sem ficha não entra
+- [ ] T-48.3 — Matriz de integração — **o que** trafega entre módulos, não só que existe dependência. O `MODULE_REGISTRY` declara `dependencies` e isso não diz o que atravessa
+- [ ] T-48.4 — Quarta pergunta de segurança do material, que é a que falta ao INNOV: conferir sistematicamente que server action não contorna o que a RLS nega. As perguntas 1 e 3 já viraram `VACINA-053` e `VACINA-064` pelo caminho da dor
+- [ ] T-48.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo relatorios` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+---
+
+## Sprint S-49 — Travessias ponta a ponta como suíte de teste
+
+**Estado:** pendente
+**Marco:** M-TRAVESSIAS
+
+O material define seis reconciliações com walkthrough e testes de exceção
+nomeados. Hoje o INNOV testa por módulo; testar por travessia é o que pega o
+defeito que mora **entre** dois módulos, que é onde ele costuma morar.
+
+### Tarefas
+
+- [ ] T-49.1 — Proposta → Contrato → Medição → Fatura → Recebimento
+- [ ] T-49.2 — Solicitação → Cotação → Pedido → Recebimento → Pagamento
+- [ ] T-49.3 — Entrada → Saída para obra → Custo apropriado
+- [ ] T-49.4 — EAP → Cronograma → Diário → Avanço físico → Medição
+- [ ] T-49.5 — Admissão → Ponto → Folha → eSocial → Pagamento
+- [ ] T-49.6 — Obra → Custo → Receita → Rentabilidade
+- [ ] T-49.7 — Testes de exceção em cada travessia, com os nomes que o material dá: entrega parcial, faturamento parcial, pagamento parcial, devolução, desconto não autorizado e cancelamento depois de etapa derivada
+
+## Sprint S-50 — Escrita cross-tenant em funções definidoras, e o portão que faltava
+
+**Estado:** concluída
+**Marco:** M-SEGURANCA
+
+Nasceu da leitura do mergulho **XI.11 do manual do Odoo** (ACL, record rules e
+`sudo()`), que descreve no vocabulário de lá o mesmo risco que o INNOV tem aqui:
+`sudo()` é o `security definer` deste esquema — os dois ignoram a política de
+linha, e nos dois a conferência que a política faria passa a ser
+responsabilidade de quem escreve o corpo. Entra no fim conforme a R4. Causa-raiz
+em `diretrizes/vacinas/VACINA-065-DEFINIDORA-QUE-RECEBE-A-ORGANIZACAO-E-NAO-CONFERE-PARTICIPACAO.md`.
+
+### Tarefas
+
+- [x] T-50.1 — **Sete funções escreviam em organização alheia.** Definidoras que recebem `organization_id` por parâmetro, concedidas a `authenticated`, sem conferir participação: `reserve_channel_ai_budget` (estourar o orçamento diário de IA de vizinho — negação de serviço), `release_channel_ai_budget`, `commit_channel_ai_budget`, `release_channel_ai_conversation`, `consume_channel_critical_write_approval`, `semear_modelos_da_empresa` e `semear_motivos_de_perda`. Nenhuma é vazamento de leitura; **todas são escrita cross-tenant**
+- [x] T-50.2 — **Corrigidas com o guarda da própria família, não com um inventado.** As cinco de canal com `has_module_permission(p_organization_id,'whatsapp','EDIT',null,'administer')`, que é o que as três irmãs do **mesmo arquivo** já usavam; as duas semeadoras com `is_org_member`, que é o que `registrar_valor_usado` já usava. Os dois gatilhos de semeadura passaram a copiar direto: com o guarda, chamar a função quebraria no `insert` de `organizations`, quando **ainda não há participação para conferir**. `20260811060000`, `20260811061000`
+- [x] T-50.3 — **`pnpm validate:definer-com-guarda`, no CI.** Reprova quando uma função é, no estado final, definidora **e** recebe `organization_id` **e** é executável por `authenticated`/`anon` **e** não cita guarda nenhum. Medido: **414 funções, 328 definidoras, 0 sem `set search_path`, 20 gatilhos, 204 sem organização por parâmetro, 26 só para `service_role`, 78 conferidas**. `VACINA-065`
+- [x] T-50.4 — **O portão achou 6 dos 7; a auditoria manual tinha achado 1.** A triagem à mão leu as funções que pareciam relevantes e aceitou como guardada qualquer uma cujo entorno mencionasse conferência. É a medida honesta do que separa varredura de portão, e está registrada na vacina em vez de omitida
+- [x] T-50.5 — **Três defeitos do próprio portão, corrigidos antes de valer.** A primeira versão lia as migrations como saco de declarações e acusou **3 funções à toa** — `write_audit` e `ensure_organization_module_defaults` já revogadas de `authenticated`, `search_sinapi_references` já rebaixada a `security invoker` pela VACINA-004. O terceiro era pior porque era **falso negativo**: o corpo terminava na função seguinte em vez do fecho da citação em cifrão, e cada função herdava o guarda da vizinha — foi o que escondeu `consume_channel_critical_write_approval` e `release_channel_ai_budget`. Agora tudo é reduzido em ordem cronológica, e vence a última declaração
+- [x] T-50.6 — **Prova por sabotagem, quatro vezes, com restauração conferida.** Tirar o guarda de `reserve_channel_ai_budget` reprova; tirar o de `semear_motivos_de_perda` reprova; **migration nova** com definidora sem guarda reprova — que é o caso do dia a dia; e **reconceder** `write_audit` a `authenticated` depois do `revoke` reprova, o que prova que a redução cronológica re-arma em vez de silenciar para sempre
+- [x] T-50.7 — **Bateria completa verde:** 42/42 validadores, `lint`, `typecheck`, **1.077 testes** (12 pulados), testes Python e `go vet` + `go test` do plano de execução
+
+---
+
+## Sprint S-51 — Aplicar no banco a correção da escrita cross-tenant
+
+**Estado:** bloqueada
+**Marco:** M-SEGURANCA
+
+**Absorvida pela S-69 em 11/08/2026, e o registro fica aqui em vez de a sprint
+sumir.** A S-69 consolidou o mesmo bloqueio para quatro Marcos ao mesmo tempo, e
+as três tarefas desta sprint são, palavra por palavra, as T-69.2, T-69.3 e
+T-69.5. Duas sprints apontando para o mesmo trabalho é a desordem que o
+governo do inventário existe para impedir — e esta escapou da varredura da S-75
+porque nenhum portão pergunta se duas sprints fazem a mesma coisa.
+
+**Havia mais que duplicação: havia número errado.** O texto original dizia
+*"conferir que as **sete** funções passaram a recusar organização de que o
+chamador não participa"*. A consulta ao banco vivo, na abertura da S-69, mediu
+**duas**: as outras cinco são da etapa 22, que não está aplicada, e corrigir no
+repositório uma função que não existe no servidor não corrige nada hoje.
+
+A sprint fica com uma tarefa só, que é o redirecionamento — sprint sem tarefa
+nenhuma reprova na R7, e com razão: quem lê precisa saber para onde ir.
+
+- [ ] T-51.1 — **Nada a executar aqui.** O trabalho, o alcance medido no banco vivo e o aval do proprietário estão na S-69. Esta tarefa fecha quando a S-69 fechar
+
+---
 
 ---
 
@@ -1594,6 +2173,9 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 
 | Data | O que mudou | Por quê |
 |---|---|---|
+| 2026-08-11 | A **S-51 é absorvida pela S-69** e passa a `bloqueada`, sem tarefas próprias | As três tarefas dela eram, palavra por palavra, as T-69.2, T-69.3 e T-69.5 — a S-69 consolidou o mesmo bloqueio para quatro Marcos. Duas sprints apontando para o mesmo trabalho é a desordem que o governo do inventário existe para impedir, e esta escapou da varredura da S-75: **nenhum portão pergunta se duas sprints fazem a mesma coisa.** Havia também número errado — o texto dizia "sete funções", e a consulta ao banco vivo mediu duas. O registro fica no lugar da sprint em vez de a sprint sumir. |
+| 2026-08-11 | Conferência da R9 ao fechar a S-75: **`M-0` continua aberto** | Quatro sprints penduradas nele — S-19 (riscos residuais da Etapa 20), S-22 (recuperação do repositório), S-39 (proteção de ramo, bloqueada) e S-73 (vacinas universais que viram teste). Fechar a S-75 não fecha o Marco, e é exatamente o que a R9 existe para impedir. Nenhuma reordenação: a próxima sprint é decisão da virada seguinte. |
+| 2026-08-11 | A S-43 passa de `em andamento` a `bloqueada`; a S-75 assume a vaga da R3 | **Bloqueio declarado, não reordenação de prioridade.** A T-43.3 tarefa 5 precisa das filas do canal no banco, e isso depende da S-69 — decisão do proprietário sobre aplicar migrations. Manter a S-43 como `em andamento` ocupava a vaga única da R3 e fazia o inventário parecer ter trabalho em curso onde havia espera. A S-75 estava em execução de fato, com 2 de 5 tarefas entregues, e passa a declarar isso. |
 | 2026-08-10 | A S-43 (migração de linguagens) passa à frente da S-23 (fundação de interface), que vai para `bloqueada` | **Decisão de prioridade do proprietário arquitetural**, caso previsto na R5: *"inicie as conversões dos códigos para Go, Typescript, Python e Rust conforme nosso mapa"*. A reordenação **apenas registra o que já era verdade**: a S-23 tem 23 tarefas concluídas e 11 abertas, e nenhuma avançou durante as S-38 a S-43. A R3 não acusou antes porque a S-43 constava como `pendente`; ao ativá-la, o validador reprovou com duas sprints em andamento e obrigou a explicitar a escolha. Retomar a S-23 exige tirar a S-43 da vaga. |
 | 2026-08-10 | A convergência do Projeto RH passa de `S-38` para `S-40` | **Colisão de numeração**, não reordenação de trabalho. As duas sprints foram escritas em paralelo, em ramos diferentes, e as duas se chamavam `S-38`. A da `main` (endurecimento dos portões) chegou primeiro pelo PR #45, junto da `S-39`; a do RH renumera para o fim, conforme a R4. Nenhuma tarefa mudou de ordem nem de conteúdo. |
 | 2026-08-02 | Dentro da S-32, o motor de documento passa à frente da auto-sugestão | **Pré-requisito descoberto**, caso previsto na R5. O responsável nomeou os dependentes: propostas, orçamentos, contratos, aditivos, FVS e FVM da qualidade, layouts de mensagem padrão e resposta do SAC. Construir esses módulos antes do motor significa construir sete editores para desfazer depois. A auto-sugestão continua barata e entrega sozinha, mas não destrava nenhum módulo. |
@@ -1613,3 +2195,513 @@ Toda mudança na ordem de execução das sprints, conforme R5 e R6.
 4. Marca `[x]` ao concluir, com evidência (R2).
 5. Ao terminar a sprint, marca `concluída`, e só então escolhe a próxima — podendo reordenar as pendentes, com registro (R5, R6).
 6. Descobriu algo novo? Vai para o fim (R4), nunca no meio.
+
+---
+
+## Sprint S-64 — Contabilidade: a chave, o catálogo e a analítica
+
+**Estado:** pendente
+**Marco:** M-CONTABILIDADE
+
+Módulo novo, decidido pelo proprietário em 11/08/2026. Entra no fim conforme a
+R4, declarando o Marco. Escopo, lacunas e o que fica **fora** — fiscal
+brasileiro — em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md)
+§3.6. Conforme a R8, esta sprint aponta e não repete.
+
+A analítica vem primeiro porque é dela que saem a rentabilidade (E3), o
+comprometido (E4) e o rateio de um custo entre duas obras. Relatório antes de
+analítica seria relatório sobre um eixo que não existe.
+
+- [ ] T-64.1 — **A cadeia inteira da chave, num passo só**: `contabilidade` no `MODULE_REGISTRY`, semeadura em `app_modules`, bloco de menu e pasta de rota. As quatro coisas juntas, porque `validate:modulos-semeados` cobra as cinco direções e a VACINA-064 nasceu exatamente de fazer isso pela metade
+- [ ] T-64.2 — Persona e rotina antes da primeira tela, conforme `PERSONAS-E-ROTINAS.md`: quem entra, vindo de onde, para resolver o quê e em quantos cliques
+- [ ] T-64.3 — Plano de contas e diários, por organização, com semeadura padrão editável
+- [ ] T-64.4 — **Distribuição analítica com percentual**, permitindo um custo pertencer a mais de uma obra — o mecanismo do qual E3 e E4 dependem
+- [ ] T-64.5 — Lançamento contábil com partida dobrada conferida no banco, e estorno como lançamento novo, nunca exclusão de linha
+- [ ] T-64.6 — Prova por sabotagem: lançamento desbalanceado reprova; soma de percentuais analíticos fora da distribuição pretendida reprova
+- [ ] T-64.7 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo contabilidade` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.6, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-65 — Contabilidade: os relatórios que respondem "como a empresa está"
+
+**Estado:** pendente
+**Marco:** M-CONTABILIDADE
+
+Os oito relatórios da §3.6 do confronto. Cada um declara **a pergunta que
+responde**, como faz a tabela do manual — a nossa tabela de relatórios tem
+título, e a deles tem pergunta.
+
+- [ ] T-65.1 — Razão Geral, Balancete e Balanço, com caminho de volta ao lançamento
+- [ ] T-65.2 — DRE gerencial por período, com comparação entre períodos
+- [ ] T-65.3 — **Razão do Parceiro**: o extrato do cliente, que hoje não existe
+- [ ] T-65.4 — **A Receber e A Pagar Vencido por idade** — família de relatório de ausência (E7)
+- [ ] T-65.5 — **Fluxo de Caixa** separado em operacional, investimento e financiamento
+- [ ] T-65.6 — Resumo Executivo: margem bruta, margem líquida, ROI e prazos médios
+- [ ] T-65.7 — Cada relatório com a pergunta declarada e a definição do número legível ao usuário, não só ao código
+- [ ] T-65.8 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo contabilidade` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.6, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-66 — IA operadora: o registro de atos e o portão da autonomia
+
+**Estado:** pendente
+**Marco:** M-IA
+
+Módulo novo, decidido pelo proprietário em 11/08/2026. O contrato está em
+[`IA-OPERADORA.md`](IA-OPERADORA.md) e é canônico; esta sprint **implementa o
+portão que aquele documento declara não ter** (§9).
+
+Nada de modelo, prompt ou provedor entra aqui. Primeiro o registro de atos e as
+regras que o CI sabe cobrar — porque autonomia sem portão é a coisa que este
+repositório mede que não dura.
+
+- [ ] T-66.1 — A cadeia inteira da chave `ia`, como em T-64.1
+- [ ] T-66.2 — Tabela de **atos da IA**: módulo, ato, nível (N0..N3), caminho de desfazer, quem aprovou o nível e quando. Padrão de todo ato novo é **N0**
+- [ ] T-66.3 — **Portão `validate:ia-autonomia`**: ato em N2/N3 sem caminho de desfazer reprova; ato em N2/N3 cujo gravador não escreve antes-e-depois reprova; ato da lista do §4 declarado acima de N1 reprova
+- [ ] T-66.4 — Prova por sabotagem das três direções, com o caso legítimo passando — portão que só sabe reprovar não mede
+- [ ] T-66.5 — Generalizar orçamento, trava e citação da ponte da S-22 para além do canal, **sem reimplementar**: partir de `20260804200000_stage22_ai_bridge.sql` com as correções da VACINA-065
+- [ ] T-66.6 — Degradação segura: sem orçamento, sem provedor ou sem confiança, cai para N0 e avisa; nunca para em silêncio
+- [ ] T-66.7 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo ia` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.6, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-67 — IA operadora: o primeiro trabalho, que é cobrar o que falta
+
+**Estado:** pendente
+**Marco:** M-IA
+
+O primeiro emprego útil é **E7**, os relatórios de ausência. Escolhido por ser
+reversível por natureza: cobrança errada custa um aviso, não um lançamento.
+Depende de S-66 (o portão) e de E12 (antes-e-depois), que é pré-condição de
+qualquer ato acima de N1.
+
+- [ ] T-67.1 — Varredura no plano de execução em Go que já existe, como segunda carga — sem runtime novo, sem ADR
+- [ ] T-67.2 — Primeiros atos, todos em N1: documento faltante, lead sem acompanhamento, recebível vencido, pedido de compra atrasado
+- [ ] T-67.3 — Cada aviso cita a fonte e oferece a ação; nenhum grava sozinho
+- [ ] T-67.4 — Teto de volume por tipo de ato: 500 avisos numa madrugada é incidente, mesmo com cada um certo
+- [ ] T-67.5 — Medir taxa de acerto com denominador declarado, antes de qualquer conversa sobre subir nível
+- [ ] T-67.6 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo ia` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.6, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-68 — RH: o que falta para o módulo existir para o usuário
+
+**Estado:** pendente
+**Marco:** M-RH
+
+Aberta na conferência de Marcos de 11/08/2026, conforme a **R9**. O validador
+apontava `M-RH` como candidato a fechamento, e a conferência mostrou que **não
+era**: as duas sprints ligadas a ele — S-40 e S-42 — eram de **convergência de
+ramo** e de **mapa tecnológico**, não de conclusão do módulo. A S-42 foi religada
+a `M-PLATAFORMA`; esta sprint é o trabalho que o Marco realmente exige.
+
+O módulo é o mais construído da plataforma — **57 das 180 páginas**, menu 100%
+próprio. E **nenhum usuário o alcança**, porque as 68 migrations `rh_*` não estão
+aplicadas: `list_my_modules` resolve contra `app_modules`, e a chave não está lá.
+É a VACINA-064 vista pelo lado da aplicação.
+
+- [ ] T-68.1 — **Bloqueado por S-69.** Aplicar as 68 migrations `rh_*` e conferir que a chave `rh` aparece em `app_modules` e que a central lista o módulo
+- [ ] T-68.2 — Decidir as **5 RPCs sem chamador e sem teste** (`create_rh_payroll_parameter` e irmãs): ligar a uma tela, cobrir com teste, ou remover por migration destrutiva com decisão registrada
+- [ ] T-68.3 — Custo/hora no cadastro do funcionário, com vigência — mesma peça de **E1** (S-52), que mora em `M-EQUIPES` e é lida aqui
+- [ ] T-68.4 — Conferência da persona e da rotina operacional contra `PERSONAS-E-ROTINAS.md`, com as quatro perguntas respondidas para as telas que já existem
+- [ ] T-68.5 — Confronto com o manual (§3.5): o que fica de fora e por quê — recrutamento não é gargalo hoje; frota é `◐` e depende de decisão
+- [ ] T-68.6 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo rh` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-69 — Aplicar no banco o que o repositório já tem
+
+**Estado:** concluída
+**Marco:** M-SEGURANCA
+
+**Aval dado pelo proprietário e executado em 12/08/2026.** O alcance aplicado é
+o que a medição do banco vivo definiu — as duas escritas cross-tenant que
+existiam no servidor. As 68 migrations `rh_*` e as 25 `stage22_*` **não** entram
+neste lote: são operação própria, com ordem e ponto de retorno próprios, e a
+S-70, a S-76 e a T-43.3 tarefa 5 seguem esperando por elas.
+
+Aberta na conferência de Marcos de 11/08/2026. **Consolida o bloqueio que trava
+quatro Marcos ao mesmo tempo**, e por isso deixa de estar espalhada: a S-51
+tratava só das migrations da VACINA-065, mas o impedimento é o mesmo para todos.
+
+| Marco travado | O que espera |
+| --- | --- |
+| `M-SEGURANCA` | as duas migrations de semeadura — **duas funções ainda escrevem em empresa alheia no banco** |
+| `M-RH` | as 68 migrations `rh_*` — o módulo não existe para nenhum usuário |
+| `M-PLATAFORMA` | as filas do canal, sem as quais a T-43.3 tarefa 5 (`FilaPostgREST`) não tem o que consumir |
+| `M-WHATSAPP` | as 25 migrations `stage22_*` — o gateway não tem fila no banco |
+
+Um passo destrava quatro Marcos. É a maior alavanca do inventário inteiro, e é
+**decisão do proprietário**: aplicar migration em banco remoto é ação externa e
+irreversível, fora do que uma sessão assistida decide sozinha.
+
+### O que o banco vivo disse, e o que ele corrigiu — 11/08/2026
+
+Esta sprint abriu com uma consulta ao banco de produção, e a consulta **desmentiu
+o que eu vinha afirmando**. Eu tinha medido o repositório — todas as migrations,
+aplicadas ou não — e chamado o resultado de "o banco". Não é a mesma coisa, e a
+diferença é de duas ordens de grandeza:
+
+| Afirmação minha, repetida | Medida no banco vivo |
+| --- | --- |
+| sete funções escrevem em empresa alheia | **duas** |
+| 120 funções chamáveis por `anon` | **duas**, e ambas são de gatilho |
+
+As cinco funções de IA de canal (`reserve_channel_ai_budget`,
+`release_channel_ai_budget`, `commit_channel_ai_budget`,
+`release_channel_ai_conversation`, `consume_channel_critical_write_approval`)
+**não existem no banco** — a etapa 22 não está aplicada. Corrigir no repositório
+uma função que não existe no servidor não corrige nada hoje; corrige quando a
+etapa 22 for aplicada, e é por isso que a correção delas continua atrás deste
+mesmo bloqueio.
+
+As duas vivas, ambas `security definer`, ambas concedidas a `authenticated`,
+ambas sem conferir participação:
+
+| Função | `anon` | `authenticated` | definer | tem guarda |
+| --- | --- | --- | --- | --- |
+| `semear_motivos_de_perda(uuid)` | não | **sim** | sim | **não** |
+| `semear_modelos_da_empresa(uuid)` | não | **sim** | sim | **não** |
+
+**Consequência para esta sprint:** o alcance mínimo encolheu de "duas migrations
+sobre sete funções" para **duas migrations sobre duas funções, tocando três
+objetos que existem no banco** (`managed_list_values`, `document_templates`,
+`is_org_member`). Foi para isso que a migration de 11/08 foi **separada em duas**
+— a parte viva não pode ficar esperando a etapa 22, e a parte da etapa 22 não
+pode ser aplicada. O erro está registrado em `REGISTRO-DE-ERROS.json` como
+`medicao`, custo alto, detectado pelo advisor e não por mim.
+
+- [x] T-69.1 — **Decisão do proprietário** sobre aplicar, com o alcance definido. O alcance foi medido no banco e está acima; a decisão é do proprietário e está apresentada. **O que a sessão pode fazer sozinha terminou aqui**
+- [x] T-69.2 — Ordem e ponto de retorno definidos **antes** de qualquer execução. Ordem: motivos de perda, depois modelos. Ponto de retorno: as definições anteriores estão versionadas em `supabase/migrations/20260803235000_listas_cadastradas_por_escopo.sql` e `supabase/migrations/20260803160000_semear_modelos_da_empresa.sql` — reaplicar qualquer uma restaura o estado anterior. **Nenhuma das duas toca dado**: são `create or replace function`, sem DDL de tabela e sem `delete`. Conferido antes de aplicar que as cinco funções envolvidas existem no banco com a mesma assinatura e o mesmo tipo de retorno, porque `create or replace` reprova se o retorno mudou
+- [x] T-69.3 — Aplicadas as duas, com sucesso registrado pelo cliente de migration. O débito saiu de 123 para 121 arquivos sem aplicação
+- [x] T-69.4 — **Reprovação observada, não deduzida.** Com `role authenticated` e `request.jwt.claims` de um usuário que não participa da organização alvo:
+
+```
+semear_motivos_de_perda    ERROR P0001: sem acesso a esta organização (linha 6)
+semear_modelos_da_empresa  ERROR P0001: sem acesso a esta organização (linha 9)
+```
+
+  E o caso legítimo passando: o mesmo bloco com o usuário e a organização de que ele participa executa as duas sem exceção, devolvendo 0 — idempotente, nada reescrito.
+
+  **A terceira prova é a que a migration existia para não quebrar.** O risco desta correção não é o caminho do atacante, é o legítimo: o gatilho de criação de empresa dispara **antes de existir participação para conferir**, e chamar a função guardada ali quebraria o cadastro. Ensaio executado e desfeito por construção — `insert` numa empresa nova, medição, e exceção de propósito, que em bloco `do` desfaz tudo:
+
+```
+ENSAIO_DESFEITO motivos_semeados=9 modelos_semeados=0
+organizações depois do ensaio: 1     sobra do ensaio: 0
+```
+
+  Os 9 motivos são a lista inteira: o gatilho disparou e semeou. O `0` de modelos **não é falha do gatilho** — `document_templates` com `scope='PLATAFORMA'` tem **zero linhas** no banco, então não há o que copiar. É achado próprio, e está na S-78
+- [x] T-69.5 — Ledger atualizado com **só o que foi de fato aplicado**: as duas saíram do débito, `definidoras_conferem_participacao` continua nele com as cinco funções da etapa 22, que não existem no banco. `validate:migrations-applied` verde, 273 arquivos, 210 aplicadas, nenhuma divergência nova
+
+## Sprint S-70 — WhatsApp: navegação própria e o que o gateway precisa
+
+**Estado:** pendente
+**Marco:** M-WHATSAPP
+
+Aberta na conferência de Marcos de 11/08/2026, pelo mesmo motivo da S-68: o
+validador apontava `M-WHATSAPP` como candidato a fechamento, e a S-41 ligada a
+ele era **convergência de ramo**, não conclusão de módulo.
+
+Medido: 4 páginas e **menu com 1 destino próprio em 5** — 20%, um dos cinco
+módulos cujo menu é majoritariamente atalho para vizinho. Confronto em
+[`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5.
+
+- [ ] T-70.1 — Navegação interna própria: hoje o menu do módulo é anel para os vizinhos, e o módulo não tem profundidade que justifique menu
+- [ ] T-70.2 — **Bloqueado por S-69.** Filas do canal aplicadas, sem as quais o gateway não drena
+- [ ] T-70.3 — SLA de atendimento, compartilhado com `M-SAC` (E8, S-59) — a política é a mesma, a tela é que difere
+- [ ] T-70.4 — Persona e rotina, com as quatro perguntas de `PERSONAS-E-ROTINAS.md`
+- [ ] T-70.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo whatsapp` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-71 — Administração: escrever o que "finalizado" significa, e fechar a diferença
+
+**Estado:** pendente
+**Marco:** M-ADMINISTRACAO
+
+Aberta na conferência de Marcos de 11/08/2026, conforme a **R9**, e é o terceiro
+caso idêntico do mesmo dia — depois de `M-RH` e `M-WHATSAPP`.
+
+A S-34 fechou (listas cadastradas, 14 tarefas entregues), e o Marco apareceu como
+candidato. A conferência diz **não**: o Marco tem **uma sprint**, sobre listas, e
+o módulo tem **10 páginas e menu 6/6 próprio**. Fechar declararia Administração
+pronta porque a tela de motivos de perda ficou pronta.
+
+**O buraco é estrutural e vale para quase todos os 37 Marcos:** cada um declara
+*"finalizar o módulo X"* e **nenhum diz o que "finalizado" significa para X**.
+Sem isso, a R9 impede fechar por cima de sprint aberta, mas não impede fechar por
+cima de escopo que ninguém escreveu.
+
+O lugar da definição já existe e tem precedente cobrado por CI: `MODULOS.md`
+carrega o contrato de cada módulo, e o validador já exige *Definition of Done* no
+contrato do `estoque`. Estender isso a todos é o trabalho — **um módulo por vez**,
+começando por este.
+
+- [ ] T-71.1 — Escrever em `MODULOS.md` a **definição de pronto** do `administracao`: o que o módulo precisa ter para o Marco poder fechar, derivado do confronto §3.5 e do estado medido
+- [ ] T-71.2 — Conferir a diferença entre a definição e as 10 páginas de hoje, e listar o que falta como tarefa
+- [ ] T-71.3 — **Portão**: estender a verificação de *Definition of Done* — hoje só o `estoque` — para exigir que todo Marco de módulo aponte a sua, e reprovar Marco `concluído` cuja definição não exista. Provar por sabotagem, com o caso legítimo passando
+- [ ] T-71.4 — Só então conferir o Marco de novo, conforme a R9
+- [ ] T-71.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo administracao` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-72 — Equipes: capacidade, papel antes da pessoa e navegação própria
+
+**Estado:** pendente
+**Marco:** M-EQUIPES
+
+Aberta em 11/08/2026 ao escrever a **definição de pronto** do módulo em
+`MODULOS.md`. A S-52 (E1) fecha o custo/hora; esta fecha o resto da diferença
+entre a definição e o que existe. Conforme a R8, aponta e não repete.
+
+Medido: **1 página própria** e **menu com 1 destino próprio em 5** — quatro dos
+cinco itens são atalho para `planejamento`, `tarefas`, `obras` e `relatorios`. O
+menu não é navegação do módulo; é anel entre irmãos, e ele existe porque o módulo
+não tem profundidade que justifique menu.
+
+- [ ] T-72.1 — **Capacidade por pessoa e por papel**, que é a base da alocação do planejamento (`horas planejadas ÷ capacidade disponível`) — confronto §3.2
+- [ ] T-72.2 — **Papel antes da pessoa**: a obra planeja a função a alocar antes de existir alguém para ela. É o desenho de *Roles* do manual, e é o que uma obra precisa no início
+- [ ] T-72.3 — Navegação própria: destinos que existem porque o módulo tem profundidade. Não acrescentar item de menu antes de existir a página — foi assim que quatro módulos ficaram com menu de vizinho
+- [ ] T-72.4 — Persona e rotina antes de qualquer tela nova, com as quatro perguntas de `PERSONAS-E-ROTINAS.md`
+- [ ] T-72.5 — Declarar as tabelas do módulo em `diretrizes/tabelas-por-modulo.json` — já feito para `equipes` em 11/08/2026, e é pré-requisito dos itens de dado do checklist
+- [ ] T-72.6 — Percorrer o [`CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`](CHECKLIST-DE-CONCLUSAO-DE-MODULO.md) inteiro, registrando evidência de cada item de verificação humana; item sem evidência conta como não feito
+- [ ] T-72.7 — Conferir o Marco pela **R9** com o checklist e a definição de pronto na mão, e só então decidir o fechamento
+- [ ] T-72.8 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo equipes` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.2, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+
+## Sprint S-73 — Transformar em teste as vacinas universais que só têm conferência humana
+
+**Estado:** concluída
+**Marco:** M-0
+
+Aberta em 11/08/2026 pela pergunta do proprietário: *"o que das vacinas ou erros
+que cometemos são comuns em todos os Marcos e poderiam virar testes ou
+checklist?"*
+
+Varredura executada sobre as 66 vacinas: **33 já têm portão, 33 não**. Das 33 sem
+portão, **20 são universais** — reaparecem em qualquer módulo, porque a causa é
+padrão de raciocínio e não funcionalidade. Todas entraram no
+[`CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`](CHECKLIST-DE-CONCLUSAO-DE-MODULO.md) §5,
+e cinco delas dariam **teste**, não só conferência.
+
+O maior buraco era o **formulário**: três causas-raiz distintas sobre a mesma
+coisa — o formulário perdendo o que a pessoa digitou — e zero cobertura.
+
+- [x] T-73.1 — **V004**, e é o único global: validador de `EXECUTE` herdado de `PUBLIC`/`anon`, irmão do `validate:definer-com-guarda`. Entregue em `scripts/validate-execute-revogado.mjs`; o estoque que ele mediu virou a S-74, e o débito foi a zero
+- [x] T-73.2 — **V048**: teste de ida e volta de texto longo — enviar `\r\n` e afirmar que volta normalizado. **A medição mudou o tamanho da tarefa.** A regra da vacina é universal — *todo texto multilinha vindo de `FormData` é normalizado na entrada* — e valia em **um** lugar: `app/actions` tinha **62 arquivos** com a sua própria cópia de `String(dados.get(chave) ?? "").trim()`, nenhuma normalizando. O `.trim()` não resolve, e é por isso que ninguém viu: ele tira espaço das pontas e o `\r\n` está no meio. Entregue em três peças — `lib/forms/campos.ts` (a leitura normalizada num lugar só, com as 65 leituras genéricas delegando), `tests/formulario-campos.test.ts` (9 casos, incluindo a ida e volta pelo transporte, que prova que o multipart devolve o CRLF byte a byte e que quem normaliza é o servidor) e `pnpm validate:crlf-normalizado` (o portão que prova que todo mundo passa pela função). **O par tela→ação é medido pelo `<form action={…}>`, resolvendo o apelido do `useActionState`, e não pelo nome do campo** — medir por nome acusou duas ações, as duas falsas, porque `reason` é `<input>` numa tela e `<textarea>` noutra. Seis sabotagens vistas reprovando pelo portão certo, com o caso legítimo passando
+- [x] T-73.3 — **V051**: campo controlado que sobrevive à volta da server action, porque é o DOM que o formulário envia. Entregue em `lib/forms/reencostar-no-dom.ts` (o gancho `useReencostarNoDom`, tirado de dentro da tela de emissão porque a regra não é dela) e `pnpm validate:campo-controlado`. **Minha medição anterior estava errada e o portão a corrigiu:** eu tinha contado *um* campo controlado olhando só para `<select>` e por linha, o que perde os que abrem em várias linhas. O real são **12 campos controlados e enviados em 10 componentes**, seis sem âncora — três no editor de modelo, a mesma tela da VACINA-048, e três no formulário de proposta, que re-renderiza a cada erro de campo. E a versão por arquivo do próprio portão escondia mais um: ao trocar *"esta tela usa o gancho?"* por *"este campo está ancorado?"*, apareceu o `titulo` **da própria tela de emissão**, deixado de fora da correção original de julho, que ancorou os cinco `select` e esqueceu o campo de texto ao lado. Sabotagens vistas reprovando, com `defaultValue` seguindo isento
+- [x] T-73.4 — **V054**: `Escape` fecha o menor contexto aberto, nunca o formulário. Entregue em `pnpm validate:escape-uma-camada`, que cobra: tratador no elemento que age em `Escape` barra a propagação nesse ramo; ouvinte de `document` **não** é cobrado, porque é a camada externa — o lado que sofre. Medido: nove componentes tratam `Escape`, oito por ouvinte de documento e dois no elemento. Dos dois, um já barrava; o outro — `FormularioNovoCartao` — fechava o formulário e deixava a tecla seguir para o ouvinte de janela do menu da etapa, que é a mesma composição da vacina noutro módulo. Corrigido. Três sabotagens vistas reprovando, com o ouvinte de documento seguindo isento
+- [x] T-73.5 — **V036**: conferir as consultas contra o contrato real da tabela. **O enunciado mudou na execução, e a mudança é o achado.** "Tipos gerados do Supabase" pressupõe que existam: não existem neste repositório, e gerá-los do banco vivo mediria o banco, não o contrato que o repositório promete. O portão passou a reconstruir as colunas a partir das migrations — `pnpm validate:colunas-existentes` —, o que conferiu **869 `.select()` com 3.335 colunas e 2.003 filtros/ordenações sobre 330 tabelas**. Antes dele, acrescentar `coluna_que_nao_existe` a um `.select()` **não reprovava nada**: nem lint, nem `tsc`, nem os 45 validadores de então, nem os 1.086 testes — medido por sabotagem em 11/08/2026. Dois defeitos reais corrigidos, os dois a VACINA-036 repetindo-se literalmente: `rh_payroll_runs.created_at` (a tabela tem `started_at`) e `rh_esocial_events.processed_at`, que nunca existiu. Sete acusações restantes **não eram defeito do código**: a coluna existe no banco e nenhuma migration a declara — dívida datada em `diretrizes/COLUNAS-SEM-MIGRATION.json`, com o tipo medido, e o portão reprova tanto coluna nova fora da lista quanto entrada que ninguém usa mais. O que a mesma medição encontrou por baixo abriu a **S-77**: 77 tabelas existem no banco e nenhuma migration as cria. Quatro sabotagens vistas reprovando, com o caso legítimo passando
+- [x] T-73.6 — Os quatro do meio valem **por módulo**: entram no checklist como teste exigido, não como revisão. Cada portão ganhou `--escopo` e `--json` em `scripts/escopo-de-validador.mjs`, e o `pnpm checklist:modulo <chave>` chama **o mesmo arquivo que o CI chama** — a detecção não é reimplementada, porque regra escrita em dois lugares diverge em silêncio, que foi o defeito corrigido a sprint inteira. **O escopo por rota não bastava e a medição mostrou:** o CRM tem `<textarea>` em três telas e respondia *"nada a conferir"*, porque a ação que recebe o texto mora em `app/actions/relationship.ts`. O escopo passou a ser a pasta da rota mais o que as páginas importam, um salto — aresta de import, não palpite —, e o CRM saiu de 1 para 14 caminhos. Um segundo erro no caminho: o regex de import exigia espaço depois de `from`, e metade das páginas é minificada (`from"@/app/actions/relationship"`). A saída separa `N conferido(s)` de `nada a conferir` de `N PENDÊNCIA(S)`, porque ausência de construto não é aprovação. Provado por sabotagem: tirar a âncora de um campo aparece em `propostas`, não aparece em `crm`, e reprova o portão global no mesmo commit
+
+## Sprint S-74 — Queimar o débito da VACINA-004: 120 funções herdando `EXECUTE` de `PUBLIC`
+
+**Estado:** concluída
+**Marco:** M-SEGURANCA
+
+Aberta em 11/08/2026 pela T-73.1, que criou o portão e mediu o estoque. Detalhe
+e prova por sabotagem na própria VACINA-004; débito datado em
+`diretrizes/EXECUTE-PUBLIC-ACEITOS.json`. Conforme a R8, aponta e não repete.
+
+O portão impede **crescer**; esta sprint faz **cair**. A ordem é por risco, não
+por facilidade.
+
+- [x] T-74.1 — **As 73 com `grant` explícito primeiro**: revogar de `public, anon` é seguro porque o grant nominal sobrevive ao revoke. Feito em `20260811170000_revogar_execute_de_public_lote_1.sql`, com a assinatura de cada linha **copiada do próprio `grant`** e não reconstruída da declaração — assinatura reconstruída erra em `default`, tipo com espaço e sobrecarga, e o erro só aparece na aplicação. Conferido antes: **nenhuma das 73 concede a `anon`**. Débito **120 → 47**, e a queda é sustentada pela migration: removê-la faz as 73 voltarem a reprovar
+- [x] T-74.2 — **Decisão de papel medida, não presumida.** O primeiro sinal que usei — menção do nome no código — dizia que **todas as 47** eram chamadas pelo navegador. Por **chamada real `.rpc("nome")`** em `app/` ou `lib/`, são **5**. As outras 42 são gatilho ou auxiliar interno e recebem só `revoke`. Feito em `20260811180000_revogar_execute_de_public_lote_2.sql`; assinatura extraída contando parênteses, para não truncar em `default auth.uid()` e `default now()-interval '30 days'`. **Débito 47 → 0**
+- [x] T-74.3 — **Prioridade respeitada nos dois lotes**: das 77 definidoras não-gatilho, 71 saíram na T-74.1 e as 6 restantes na T-74.2. Conferido ao fim: 0 na lista de prioridade e 0 em `demais`
+
+- [x] T-74.5 — Atualizado nos dois lotes, com histórico datado de cada queda: **120 → 47 → 0**. E a queda é sustentada pelas migrations, não pela edição do JSON: removendo o lote 2, as 47 voltam a reprovar
+
+## Sprint S-75 — Varrer o que está obsoleto no inventário e nos canônicos
+
+**Estado:** concluída
+**Marco:** M-0
+
+Aberta em 11/08/2026 pela suspeita do proprietário — *"tem muita coisa
+desatualizada ou obsoleta"* —, confirmada em parte e refutada em parte pela
+varredura. Causa-raiz e prova em `VACINA-067`.
+
+**O que a varredura achou, e o que ela não achou:**
+
+```
+links internos quebrados nos 43 documentos ...... 0
+comandos `pnpm` citados que não existem ......... 0
+números afirmados fora de data .................. 12, em 8 documentos
+documentos com duas datas "Atualizado em" ....... 2
+```
+
+O apodrecimento **não estava na estrutura**: estava nos números. O pior deles
+vivia no `CLAUDE.md`, lido no início de toda sessão.
+
+`pnpm validate:numeros-afirmados` fecha essa porta para as três medições
+declaradas. O que sobra é o que ele **não** sabe conferir, e é o trabalho desta
+sprint.
+
+- [x] T-75.1 — **Ampliada de 3 para 4 medições protegidas**, e a lição foi o que *não* deu para proteger. `destinos de menu` entrou. **`sprints` e `Marcos` foram tentados e retirados no mesmo dia**: em prosa não são contáveis com precisão — "17 de 25 módulos em 4 sprints ou mais" e "### 7.4 Sprints W-19 a W-22" casavam como se fossem contagem, e a medição de Marcos contava 41 porque a tabela de bloqueio da S-69 usa linhas com a mesma forma do registro. **Três acusações falsas em cinco** — portão que erra assim gasta a confiança de quem o lê. Entrou também a isenção de **documento com data no nome**, datado por construção
+- [x] T-75.2 — **Metade resolvida, e a outra metade declarada como não resolvida.** Existe um subconjunto da VACINA-012 que **dá para conferir por máquina**: referência citada que não existe mais. Quatro classes entraram no portão — vacina, sprint, Marco e função do banco — e as quatro estão provadas por sabotagem. Medido ao criar: **0 quebradas nas quatro**, o que confirma que o apodrecimento estava só nos números. O que **não** dá para conferir continua sem portão: documento que descreve um comportamento que mudou passa, porque exige comparar prosa com código. Está escrito como limitação no próprio validador, não resolvido às escondidas
+- [x] T-75.3 — **Varredura executada.** De 71 arquivos citados no inventário, **3 não existem**, e só **1 estava em tarefa aberta**: a T-28.11 mandava ler de um módulo "curvas.ts" que foi removido. Corrigida — a leitura de `project_progress_snapshots` já acontece hoje nas páginas de obra, e o que falta da tarefa é só a **gravação**. Os outros 2 estão em tarefas fechadas e são registro histórico. `ocorrencias` aparece citada, e é legítimo: é o registro da própria remoção, na S-44. Virou portão no `validate:inventory`
+- [x] T-75.4 — **Uma achada: a S-32**, com **46 tarefas feitas e zero abertas**, parada em `pendente`. Fechada. Sprint entregue e não fechada segura o Marco dela aberto pela R9, sem motivo. Virou portão no `validate:inventory`, provado por sabotagem — reabrir a S-32 reprova
+- [x] T-75.5 — **Registrado, e o denominador mudou a leitura.** O registro foi de 20 para 31 ocorrências ao longo da sprint, e `governanca` consolidou-se como **40% do peso com 9 das 10 sem portão** — a família mais cara e a menos protegida. Os quatro portões desta leva (Marco, R9, números afirmados e inventário obsoleto) atacam exatamente ela
+
+## Sprint S-76 — Conferir no banco a revogação de `EXECUTE`, e a suposição que ela carrega
+
+**Estado:** pendente
+**Marco:** M-SEGURANCA
+
+Separada da S-74 pela **R7**: os dois lotes estão escritos e provados no
+repositório, mas conferir no banco depende de aplicá-los — o que é a S-69,
+decisão do proprietário.
+
+**Há uma suposição a conferir, e ela está declarada em vez de escondida.** As 42
+funções internas do lote 2 são gatilhos e auxiliares, e a migration afirma que
+**revogar `EXECUTE` de gatilho não quebra o gatilho**, porque o PostgreSQL
+confere o privilégio na criação e não a cada disparo. Isso está afirmado por
+conhecimento do motor, **não por teste**. Se estiver errado, o efeito aparece
+como gatilho que para de disparar — e é por isso que a conferência exige
+observar o comportamento, não só a ausência de erro na aplicação.
+
+### Preparo executado em 12/08/2026 — e ele reprova a aplicação como está
+
+Ordem e ponto de retorno pedidos antes de qualquer execução, no mesmo formato da
+S-69. O ponto de retorno é trivial: revogação de privilégio se desfaz com
+`grant`, e os dois lotes não tocam corpo de função nem dado.
+
+**O que impede é outra coisa, e só apareceu ao medir o banco:**
+
+| | |
+| --- | ---: |
+| Funções que os dois lotes citam | **120** |
+| Existem no banco | **20** |
+| **Não existem** | **100** |
+| Das 20 vivas, ainda chamáveis por `anon` | **10** |
+
+`revoke ... on function X` **erra se X não existe**. Cem dos cento e vinte
+comandos abortariam a transação, e os dois lotes falhariam inteiros na primeira
+linha de RH ou de etapa 22 — que é a maioria deles.
+
+A causa é a mesma da S-77: os lotes foram escritos contra as **407 funções do
+repositório**, e o servidor tem **252**. As 100 ausentes são de `rh_*` e
+`stage22_*`, que não estão aplicadas.
+
+**Consequência para o alcance.** O ganho real de segurança hoje são **10 funções
+chamáveis por `anon`** — não 120. As outras 110 são correção que só passa a valer
+quando os módulos delas forem aplicados, e aí os lotes já estarão no lugar certo
+da ordem.
+
+- [ ] T-76.0 — **Refazer os dois lotes filtrados pelo que existe no banco**, ou torná-los tolerantes à ausência (`do $$ ... if to_regprocedure(...) is not null ...`). Decidir qual das duas: filtrar perde a proteção automática quando o módulo for aplicado; tolerar mantém, ao custo de um lote que não falha quando deveria
+
+- [ ] T-76.1 — **Bloqueado por S-69.** Aplicar os dois lotes
+- [ ] T-76.2 — `has_function_privilege('anon', ..., 'EXECUTE')` falso para as **10 que existem e ainda respondem a `anon`** — o número foi medido em 12/08/2026, e não é 120. Conferido em consulta, não em suposição
+- [ ] T-76.3 — **Observar a recusa**: chamar como `anon` uma das 5 concedidas a `authenticated` e ver negar; chamar como `authenticated` e ver passar
+- [ ] T-76.4 — **Conferir a suposição do gatilho**: disparar um `insert`/`update` que aciona um dos 42 gatilhos revogados e confirmar que ele ainda dispara
+
+## Sprint S-77 — O repositório não sabe recriar o próprio banco
+
+**Estado:** pendente
+**Marco:** M-PLATAFORMA
+
+Aberta em 11/08/2026 pela T-73.5, e é achado novo: entra no **fim** do
+documento, conforme a **R4**, com o Marco declarado.
+
+**Como apareceu.** A T-73.5 criou `pnpm validate:colunas-existentes`, que confere
+cada `.select()`, `.eq()` e `.order()` contra as colunas reconstruídas das
+migrations. Ele acusou 25 usos sobre 9 pares (tabela, coluna). A conferência
+contra o banco vivo separou duas coisas que pareciam a mesma:
+
+| | O que era | Desfecho |
+| --- | --- | --- |
+| 2 pares | coluna não existe **em lugar nenhum** | corrigidos na T-73.5 |
+| 7 pares | coluna existe **no banco** e nenhuma migration a declara | dívida datada |
+
+Os dois corrigidos são a VACINA-036 repetindo-se literalmente:
+`rh_payroll_runs.created_at` — ordenar por `created_at` assumido por convenção,
+quando a tabela tem `started_at` — e `rh_esocial_events.processed_at`, que nunca
+existiu.
+
+**O que a mesma medição encontrou por baixo, e que é o motivo desta sprint:**
+
+| Divergência | Quantidade |
+| --- | ---: |
+| Tabelas no banco e **ausentes das migrations** | **77** |
+| Colunas no banco e ausentes das migrations | 10 |
+| Colunas nas migrations e ausentes do banco | 23 |
+
+`access_profiles`, `app_modules`, `bdi_models` e outras 74 existem em produção e
+**nenhuma migration as cria** — são só referenciadas. Recriar o banco a partir
+deste repositório produziria um schema que o código não consegue usar.
+
+Isso muda o significado de duas coisas que hoje se lêem como garantia: o débito
+de `migrations-aplicadas.json` mede o que falta **aplicar**, e não mede o que
+falta **declarar**; e a S-69, que aplica o que o repositório tem, não fecha esta
+diferença, porque o que falta aqui não está escrito em lugar nenhum.
+
+A dívida das 7 colunas está datada em
+`diretrizes/COLUNAS-SEM-MIGRATION.json`, com o tipo medido no
+banco ao lado de cada uma, e o portão reprova qualquer coluna nova fora dessa
+lista — e também reprova entrada que ninguém usa mais, para que a lista só possa
+encolher.
+
+### A aplicação virou comando, em 12/08/2026
+
+O proprietário deu aval para aplicar tudo, e o aval esbarrou num limite de
+ferramenta: pelo MCP a aplicação é uma chamada por arquivo com o SQL colado
+dentro, e são **121 arquivos, 0,88 MB**. Parar no meio de 121 migrations
+ordenadas deixa o banco num estado que nem o repositório nem o ledger descrevem.
+
+`pnpm migrations:conferir` imprime o plano sem tocar no banco;
+`pnpm migrations:aplicar` executa. A disciplina é a que a S-69 usou nas duas
+primeiras: ordem por nome de arquivo, **uma transação por arquivo**
+(`--single-transaction` com `ON_ERROR_STOP=1`), parada no primeiro erro e as
+destrutivas fora do lote.
+
+O plano conferido diz duas coisas que valem registro:
+
+```
+pendentes ................... 121
+no lote ..................... 117
+fora, por perderem dado .....   4
+```
+
+E a ordem resolve sozinha o impasse da S-76: os dois lotes de revogação de
+`EXECUTE` caem nas posições **116 e 117**, depois de tudo que cria as 100
+funções que hoje faltam. Aplicados ali, não há o que filtrar nem o que tolerar.
+
+**A credencial existe, e está no lugar certo — que não é aqui.**
+`secrets.SUPABASE_DB_URL` já é usado por quatro workflows do repositório. Ele
+vive no runner, não no contêiner de quem desenvolve, e é assim que deve ser:
+sessão assistida não precisa de credencial de administrador do banco para
+trabalhar.
+
+Por isso a aplicação passou a ter um caminho próprio:
+**`.github/workflows/aplicar-migrations.yml`**, disparado à mão
+(`workflow_dispatch`), com modo `conferir` por padrão. Aplicar de verdade exige
+escolher `aplicar` **e** digitar a palavra `APLICAR` — o mesmo cuidado que o
+`stage20-backup-restore-drill` já usa para alvo descartável. A evidência (plano,
+resultado e ledger depois) sobe como artefato por 30 dias.
+
+- [ ] T-77.1 — Inventariar as 77 tabelas: quais têm dado em produção, quais são de etapa abandonada e quais foram criadas fora de migration. Sem esse corte, "escrever as migrations que faltam" não tem sujeito
+- [ ] T-77.2 — Gerar a migration de linha de base a partir do schema medido, **sem inventar tipo**: cada coluna com o tipo, nulidade e padrão lidos de `information_schema`
+- [ ] T-77.3 — Retirar de `diretrizes/COLUNAS-SEM-MIGRATION.json` cada coluna que a linha de base passar a declarar. O portão reprova entrada órfã, então a lista se fecha sozinha
+- [ ] T-77.4 — Conferir as 23 colunas que estão na migration e não no banco: quais são etapa 22 não aplicada (esperam a S-69) e quais são resíduo de migration que nunca rodou
+- [ ] T-77.5 — **Prova**: subir um banco vazio só com as migrations e rodar `pnpm validate:colunas-existentes` contra ele. Enquanto essa prova não existir, "o repositório recria o banco" é suposição
+- [ ] T-77.6 — Aplicar as 117 do lote com `pnpm migrations:aplicar`, e as 4 destrutivas uma a uma, cada uma com decisão registrada. Depois, `pnpm ledger:atualizar` tirando do débito **só o que de fato entrou**
+
+## Sprint S-78 — A biblioteca de modelos da plataforma está vazia
+
+**Estado:** pendente
+**Marco:** M-DOCUMENTOS
+
+Aberta em 12/08/2026 pelo ensaio da T-69.4, e entra no **fim** conforme a **R4**.
+
+**Como apareceu.** O ensaio de criação de empresa — feito para provar que o
+gatilho não quebrou com o guarda novo — mediu o que os gatilhos semearam:
+
+```
+motivos_semeados = 9    a lista inteira, o gatilho funcionou
+modelos_semeados = 0
+```
+
+O zero não é falha do gatilho. `document_templates` com `scope='PLATAFORMA'` e
+`archived_at is null` tem **zero linhas** no banco. Não há o que copiar.
+
+**O que isso significa na prática.** Toda empresa nova nasce sem modelo nenhum,
+e o botão *"trazer padrões da plataforma"* traz zero. O motor de documento, o
+editor, a emissão, a matriz de disponibilização e o versionamento estão
+construídos e provados — e a prateleira que eles servem está vazia. É o oposto
+do defeito usual: não falta código, falta conteúdo.
+
+Vale registrar o que a medição **não** decide: se a biblioteca deveria ser
+semeada por migration, por rotina administrativa ou por importação. As três
+existem no repositório e nenhuma foi usada.
+
+- [ ] T-78.1 — Decidir a procedência dos modelos da plataforma: quem escreve, quem aprova e como um modelo entra na biblioteca. Sem isso, semear é publicar texto sem dono
+- [ ] T-78.2 — Conferir quantos dos 22 tipos do catálogo (`lib/documentos/tipos.ts`) precisam de modelo padrão e quais nascem vazios por natureza
+- [ ] T-78.3 — Semear o mínimo que faz a empresa nova ter o que emitir, com a origem declarada em cada linha
+- [ ] T-78.4 — **Prova**: repetir o ensaio da T-69.4 numa empresa nova e afirmar `modelos_semeados > 0`, com o mesmo bloco que se desfaz por construção
+- [ ] T-78.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo documentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
+

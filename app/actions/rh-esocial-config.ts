@@ -1,5 +1,6 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 
 import{redirect}from"next/navigation";
@@ -7,7 +8,7 @@ import{revalidatePath}from"next/cache";
 import{requireCapability}from"@/lib/authorization";
 
 const PATH="/app/rh/configuracao/esocial";
-function text(d:FormData,k:string){return String(d.get(k)??"").trim();}
+function text(d:FormData,k:string){return campoDeTexto(d, k).trim();}
 function num(d:FormData,k:string){const v=text(d,k);return v===""?null:Number(v.replace(",","."));}
 function fail(message:string):never{redirect(`${PATH}?error=${encodeURIComponent(message)}`);}
 

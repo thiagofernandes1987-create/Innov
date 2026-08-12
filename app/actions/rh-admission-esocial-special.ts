@@ -1,11 +1,12 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireCapability}from"@/lib/authorization";
 import{reportDataAccessError}from"@/lib/errors/data-access";
 
-function text(d:FormData,k:string){return String(d.get(k)??"").trim();}
+function text(d:FormData,k:string){return campoDeTexto(d, k).trim();}
 function num(d:FormData,k:string){const v=text(d,k);return v?Number(v):null;}
 function digits(v:string){return v.replace(/\D/g,"");}
 function cpfs(v:string){return v.split(/[\s,;]+/).map(digits).filter(Boolean);}

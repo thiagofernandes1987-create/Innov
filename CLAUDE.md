@@ -51,7 +51,18 @@ O documento traz, ao lado do texto original, a **medição executada** contra ca
 
 ## Memória entre sessões
 
-Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/FLUXOS-E-RISCOS.md` → `diretrizes/PADRAO-DE-INTERFACE.md` → `diretrizes/MAPA-TECNOLOGICO.md` → `diretrizes/PROVA-POR-SABOTAGEM.md`.
+**Antes de abrir arquivo, consulte o índice.** A base de conhecimento no Notion
+existe para achar o fato sem gastar janela de contexto lendo `diretrizes/`
+inteiro — [Partida a frio](https://app.notion.com/p/3b947a93b8968165b4c1fc0cbf897b47)
+primeiro, depois a base `Conhecimento INNOV`, filtrando por Tipo e Módulo.
+Diante de erro, procure em `Tipo = Vacina` **antes** de diagnosticar.
+
+O contrato de uso está em [`diretrizes/MEMORIA-EXTERNA.md`](diretrizes/MEMORIA-EXTERNA.md),
+e a regra que o governa é uma só: **o repositório é a fonte canônica, o Notion é
+o índice**. Quando os dois divergirem, o repositório ganha e o verbete é
+atualizado. Quem mede algo novo registra lá, com o número e a data.
+
+Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md` → `diretrizes/INVENTARIO-DE-EXECUCAO.md` → `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md` → `diretrizes/CONFRONTO-ODOO-19-E-INNOV.md` → `diretrizes/IA-OPERADORA.md` → `diretrizes/METODO-DE-TRABALHO.md` → `diretrizes/SPEC.md` → `diretrizes/ESTADO-ATUAL.json` → `diretrizes/ARQUITETURA.md` → `diretrizes/OBJECT-RUNTIME.md` → `diretrizes/VACINAS.md` → `diretrizes/UI-UX-PRO-MAX.md` → `diretrizes/PERSONAS-E-ROTINAS.md` → `diretrizes/FLUXOS-E-RISCOS.md` → `diretrizes/PADRAO-DE-INTERFACE.md` → `diretrizes/MAPA-TECNOLOGICO.md` → `diretrizes/PROVA-POR-SABOTAGEM.md`.
 
 ## Antes de criar tela
 
@@ -64,7 +75,11 @@ Um chat novo recupera contexto por: `CLAUDE.md` → `diretrizes/LEIA-PRIMEIRO.md
 - **ler no início** de toda sessão e a cada reinício de serviço;
 - **marcar `[x]` no momento** em que a tarefa ou subtarefa termina, com evidência — não acumular checks para o fim;
 - **uma sprint por vez**: não iniciar sprint nova antes de concluir a atual;
-- **o que é novo vai para o fim**: sprint, oportunidade ou lacuna descoberta entra no final do inventário, nunca no meio;
+- **o Marco é a unidade de conclusão** — quase sempre *"finalizar o módulo X"* — e a **sprint é o conjunto de tarefas** para chegar lá;
+- **o que é novo vai para o fim do arquivo e declara o seu `Marco:`**. A posição física protege o foco (não se para a sprint em curso); o rótulo protege a coerência. Tratar as duas como a mesma coisa foi a causa medida da dispersão: **4,5 sprints por módulo em média**, 17 de 25 módulos em 4 sprints ou mais;
+- **o Marco não fecha com sprint aberta apontando para ele**: ao terminar uma sprint, antes de começar a próxima, confere-se o Marco — se sobrou algo pendurado nele, decide-se a ordem e o que precisa ser destravado. Um passo de cada vez, módulo por módulo;
+- **a conferência do Marco segue um checklist único**, igual para todos os módulos, em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md` — existência, dado, chamada, cálculo, navegação, QA, persona, KPI e prova. `pnpm checklist:modulo <chave>` responde os itens mecânicos; item humano sem evidência conta como não feito. Definição de pronto de módulo **não repete** esse esqueleto: registra só o que é específico dele;
+- **tarefa aponta, não descreve**: a lógica do módulo mora em `diretrizes/CONFRONTO-ODOO-19-E-INNOV.md`, e a tarefa aponta para lá. Regra repetida em dois documentos diverge em silêncio;
 - **a ordem pode mudar apenas na virada de sprint**, e toda reordenação é registrada com justificativa — pré-requisito descoberto ou sprint que vira base reaproveitável para as seguintes.
 
 `pnpm validate:inventory` reprova sprint concluída com tarefa em aberto e mais de uma sprint em andamento.
@@ -103,6 +118,6 @@ Em caso de divergência, **`diretrizes/UI-UX-PRO-MAX.md` prevalece**. Ele é doc
 
 - `diretrizes/` é fonte canônica. `diretrizes/vacinas/` registra decisões verificadas por CI: contrariar uma vacina reprova o build, mesmo quando a mudança parece tecnicamente correta. Consultar antes de alterar configuração de CI, instalação de dependência ou privilégio de banco.
 - Nenhuma etapa é concluída sem código, migrations, testes, documentação, vacinas, homologação e CI compatíveis.
-- `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:python` e **todos** os `pnpm validate:*` devem passar antes de qualquer afirmação de conclusão. São 54 validadores; rodar um subconjunto e declarar a bateria verde já custou caro — foi um dos 46 não executados que pegou o defeito.
+- `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm test:python` e **todos** os `pnpm validate:*` devem passar antes de qualquer afirmação de conclusão. São 49 validadores; rodar um subconjunto e declarar a bateria verde já custou caro — foi um dos 46 não executados que pegou o defeito.
 - Dois deles medem população, não caso isolado, e por isso o número só pode cair: `pnpm validate:exports-mortos` (export sem nenhum importador — o equivalente ao `U1000` do `staticcheck`, sem trocar de linguagem) e `pnpm validate:assercoes` (teto de asserção fraca). Débito aceito vive datado em `diretrizes/EXPORTS-MORTOS-ACEITOS.json` e `diretrizes/ASSERCOES-FRACAS-ACEITAS.json`, com motivo — nunca em regex silenciosa.
 - `.claude/skills` é conteúdo de terceiros, fora do eslint e do tsc. Não é código da plataforma.

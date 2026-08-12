@@ -5,8 +5,9 @@ import { redirect } from "next/navigation";
 import { requireAccessAdministration } from "@/lib/authorization";
 import { reportDataAccessError } from "@/lib/errors/data-access";
 import { toDatabaseAccessLevel, type ModuleAccessLevel } from "@/lib/modules/registry";
+import { campoDeTexto } from "@/lib/forms/campos";
 
-function value(formData:FormData,key:string){return String(formData.get(key)??"").trim();}
+function value(formData:FormData,key:string){return campoDeTexto(formData, key).trim();}
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}
 function failDatabase(path:string,message:string,operation:string,error:unknown):never{
   reportDataAccessError(operation,error as {code?:string|null;statusCode?:string|number|null;name?:string|null});

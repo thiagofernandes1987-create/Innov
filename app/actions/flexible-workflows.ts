@@ -7,6 +7,7 @@ import { requireCapability } from "@/lib/authorization";
 import { requireOrganizationContext } from "@/lib/auth";
 import { reportDataAccessError } from "@/lib/errors/data-access";
 import type { ProjectCreationState } from "@/lib/forms/project-creation-state";
+import { campoDeTexto } from "@/lib/forms/campos";
 import {
   classifyProjectCreationProviderError,
   validateFlexibleProject
@@ -32,7 +33,7 @@ export type ProposalUploadPreparation =
   | { ok: false; message: string };
 
 function text(formData: FormData, key: string) {
-  return String(formData.get(key) ?? "").trim();
+  return campoDeTexto(formData, key).trim();
 }
 
 function optional(formData: FormData, key: string) {

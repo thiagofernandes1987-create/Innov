@@ -1,5 +1,6 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 
 import{revalidatePath}from"next/cache";
@@ -8,7 +9,7 @@ import{requireCapability}from"@/lib/authorization";
 import{lerMoeda}from"@/lib/validacao/moeda";
 
 const BASE="/app/rh/obrigacoes/dctfweb/mit";
-function t(d:FormData,k:string){return String(d.get(k)??"").trim();}function o(d:FormData,k:string){return t(d,k)||null;}function num(d:FormData,k:string){const v=t(d,k);return v?Number(v):null;}function money(d:FormData,k:string){return lerMoeda(t(d,k));}function check(d:FormData,k:string){return d.get(k)==="on"||d.get(k)==="true";}function digits(v:string){return v.replace(/\D/g,"");}function fail(path:string,m:string):never{redirect(`${path}?error=${encodeURIComponent(m)}`);}
+function t(d:FormData,k:string){return campoDeTexto(d, k).trim();}function o(d:FormData,k:string){return t(d,k)||null;}function num(d:FormData,k:string){const v=t(d,k);return v?Number(v):null;}function money(d:FormData,k:string){return lerMoeda(t(d,k));}function check(d:FormData,k:string){return d.get(k)==="on"||d.get(k)==="true";}function digits(v:string){return v.replace(/\D/g,"");}function fail(path:string,m:string):never{redirect(`${path}?error=${encodeURIComponent(m)}`);}
 
 export async function createMitApuration(data:FormData){const context=await requireCapability("rh","create");const month=t(data,"referenceMonth");if(!/^\d{4}-\d{2}$/.test(month))fail(BASE,"Competência inválida.");const sem=check(data,"semMovimento"),cpf=digits(t(data,"responsibleCpf"));if(cpf.length!==11)fail(BASE,"CPF do responsável deve conter 11 dígitos.");const{data:id,error}=await context.supabase.rpc("create_rh_mit_apuration",{p_organization_id:context.organizationId,p_employer_id:t(data,"employerId"),p_reference_month:`${month}-01`,p_sem_movimento:sem,p_qualificacao_pj:Number(t(data,"qualificacaoPj")),p_tributacao_lucro:sem?null:num(data,"tributacaoLucro"),p_variacoes_monetarias:sem?null:num(data,"variacoesMonetarias"),p_regime_pis_cofins:sem?null:num(data,"regimePisCofins"),p_balanco_lucro_real:sem?null:check(data,"balancoLucroReal"),p_responsible_cpf:cpf,p_responsible_ddd:digits(t(data,"responsibleDdd"))||null,p_responsible_phone:digits(t(data,"responsiblePhone"))||null,p_responsible_email:o(data,"responsibleEmail"),p_responsible_crc_state:o(data,"crcState")?.toUpperCase()??null,p_responsible_crc_number:o(data,"crcNumber")});if(error)fail(BASE,mensagemDeFalha("rh-mit.createMitApuration", error));redirect(`${BASE}/${id}`);}
 

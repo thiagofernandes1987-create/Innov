@@ -100,8 +100,33 @@ lista fechada  → Escape → formulário fechado: sim
 
 ## Prevenção automática
 
-`verif28.mjs` no arnês exercita a sequência completa na tela de cronograma:
-lista aberta → `Escape` → confere que a lista fechou, **que o formulário
-continua aberto** e que o texto digitado permanece; depois `Escape` de novo →
-confere que aí sim o formulário fecha. Foi o roteiro que encontrou o defeito,
-agora afirmando as duas metades.
+Até 11/08/2026 esta seção afirmava que `verif28.mjs` exercitava a sequência na
+tela de cronograma. **Esse arquivo nunca foi versionado aqui**, e o mesmo vale
+para a VACINA-051: as duas vacinas de formulário que a S-73 contou como
+protegidas eram as duas que citavam um arnês ausente — e são as do defeito mais
+caro, o que apaga o que a pessoa acabou de digitar.
+
+`pnpm validate:escape-uma-camada` cobra a regra: **tratador de tecla no elemento
+(`onKeyDown` no JSX) que age em `Escape` tem de barrar a propagação nesse ramo.**
+Se agiu, consumiu a tecla; deixá-la subir entrega o mesmo gesto a quem está por
+fora, e por fora costuma estar o formulário inteiro.
+
+Ouvinte de `document`/`window` **não** é cobrado: ele é a camada externa, o lado
+que sofre a propagação. Barrar ali impediria o comportamento correto — que é o
+segundo `Escape` fechar o formulário.
+
+Medido ao criar: nove componentes tratam `Escape`, **oito** por ouvinte de
+documento e **dois** no elemento. Dos dois, um já barrava; o outro —
+`FormularioNovoCartao`, em `components/pipeline/coluna-acoes.tsx` — fechava o
+formulário e deixava a tecla seguir para o ouvinte de janela do menu da etapa,
+que é a mesma composição desta vacina noutro módulo. Corrigido.
+
+Provado por sabotagem, com o caso legítimo passando: tirar a barreira do
+componente de sugestão reprova, desfazer a correção do cartão reprova, e o
+ouvinte de documento continua isento.
+
+## Limitações da prevenção
+
+O portão vê o ramo do `Escape`, não a árvore montada. Duas camadas que só se
+encontram em runtime — porque uma é renderizada condicionalmente pela outra —
+continuam exigindo a conferência na tela, que é onde este defeito nasceu.

@@ -11,12 +11,13 @@ import { fileSecurityMessage } from "@/lib/file-security/domain";
 import { secureUpload } from "@/lib/file-security/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSigningToken, safeFileName, sha256 } from "@/lib/signatures/crypto";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const PDF_MIME="application/pdf";
 const DOCX_MIME="application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 const MAX_DOCUMENT_SIZE=50*1024*1024;
 
-function text(formData:FormData,key:string){return String(formData.get(key)??"").trim();}
+function text(formData:FormData,key:string){return campoDeTexto(formData, key).trim();}
 function optional(formData:FormData,key:string){const value=text(formData,key);return value||null;}
 function numberValue(formData:FormData,key:string){const parsed=Number(text(formData,key).replace(",","."));return Number.isFinite(parsed)?parsed:null;}
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}

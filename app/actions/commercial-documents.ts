@@ -3,9 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 function text(formData: FormData, key: string) {
-  return String(formData.get(key) ?? "").trim();
+  return campoDeTexto(formData, key).trim();
 }
 
 function optional(formData: FormData, key: string) {

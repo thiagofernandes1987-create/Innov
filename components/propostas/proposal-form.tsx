@@ -6,6 +6,7 @@ import {
   prepareProposalUpload,
   type ProposalCreationState
 } from "@/app/actions/flexible-workflows";
+import { useReencostarNoDom } from "@/lib/forms/reencostar-no-dom";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 
 export type ProposalBudgetOption = {
@@ -49,6 +50,17 @@ export function ProposalForm({
   const [fixedValue, setFixedValue] = useState(0);
   const [discountPercent, setDiscountPercent] = useState(0);
   const [uploadedPath, setUploadedPath] = useState("");
+
+  // A ação devolve erro de campo e o formulário continua montado: é a segunda
+  // ida ao servidor que larga o valor no DOM, e é o DOM que vai no envio
+  // seguinte (VACINA-051). Os dois numéricos entram como texto porque é assim
+  // que o elemento guarda o valor — comparar número com o `value` do campo
+  // daria diferente sempre e reescreveria o DOM a cada renderização.
+  const campo = useReencostarNoDom({
+    budgetVersionId,
+    fixedValue: String(fixedValue),
+    discountPercent: String(discountPercent)
+  });
   const [uploadState, setUploadState] = useState<UploadState>({
     status: "idle",
     message: "Opcional para rascunho. Obrigatório para liberar ao cliente. Somente PDF, até 20 MB."
@@ -157,6 +169,7 @@ export function ProposalForm({
         {pricingMode === "BUDGET" ? (
           <label className="span-2">Orçamento calculado
             <select
+              ref={campo("budgetVersionId")}
               name="budgetVersionId"
               required
               value={budgetVersionId}
@@ -188,6 +201,7 @@ export function ProposalForm({
             </label>
             <label>Valor fixo da proposta
               <input
+                ref={campo("fixedValue")}
                 name="fixedValue"
                 type="number"
                 inputMode="decimal"
@@ -223,6 +237,7 @@ export function ProposalForm({
           </div>
           <label>Desconto (%)
             <input
+              ref={campo("discountPercent")}
               name="discountPercent"
               type="number"
               inputMode="decimal"

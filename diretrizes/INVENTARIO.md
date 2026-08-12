@@ -1,11 +1,10 @@
 # Inventário canônico — Innovar Platform
 
-**Atualizado em:** 04 de agosto de 2026  
+**Atualizado em:** 11 de agosto de 2026  
 **Base estável:** `main`  
 **Versão estável:** 0.19.0  
 **Última etapa incorporada:** 19  
 **Próxima etapa oficial:** 20 — Prontidão de Produção  
-**Atualizado em:** 9 de agosto de 2026  
 **Base estável:** `main`  
 **Commit-base da branch:** `ecf80482`  
 **Branch funcional ativa:** `feature/etapa-22-whatsapp-omnichannel`; Projeto RH em `feature/projeto-rh-especificacao-funcional`  

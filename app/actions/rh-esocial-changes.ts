@@ -1,5 +1,6 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 
 import{redirect}from"next/navigation";
@@ -9,7 +10,7 @@ import{signEsocialXml}from"@/lib/rh/integrations/esocial-signature";
 import{buildS2205Brazil,buildS2206StandardClt}from"@/lib/rh/integrations/esocial-change-xml";
 import{xmlSha256,type EsocialEnvironment}from"@/lib/rh/integrations/esocial-xml";
 
-function text(d:FormData,k:string){return String(d.get(k)??"").trim();}
+function text(d:FormData,k:string){return campoDeTexto(d, k).trim();}
 function opt(d:FormData,k:string){return text(d,k)||null;}
 function num(d:FormData,k:string){const v=text(d,k);return v===""?null:Number(v.replace(",","."));}
 function money(d:FormData,k:string){return lerMoeda(text(d,k));}
@@ -24,7 +25,7 @@ function transmitter(fallbackType:1|2,fallbackNumber:string){const raw=Number(pr
 async function requireAcceptedS2200(context:Awaited<ReturnType<typeof requireCapability>>,workerId:string){
  const{data:cases,error}=await context.supabase.from("rh_admission_cases").select("id").eq("organization_id",context.organizationId).eq("activated_worker_id",workerId);if(error)throw new Error(mensagemDeFalha("rh-esocial-changes.requireAcceptedS2200", error));
  const ids=(cases??[]).map(c=>c.id);if(!ids.length)throw new Error("Vínculo sem caso de admissão correlacionado ao eSocial.");
- const{data:event,error:eError}=await context.supabase.from("rh_esocial_events").select("id,receipt_number").eq("organization_id",context.organizationId).eq("event_type","S-2200").eq("status","ACCEPTED").in("source_id",ids).order("processed_at",{ascending:false}).limit(1).maybeSingle();
+ const{data:event,error:eError}=await context.supabase.from("rh_esocial_events").select("id,receipt_number").eq("organization_id",context.organizationId).eq("event_type","S-2200").eq("status","ACCEPTED").in("source_id",ids).order("updated_at",{ascending:false}).limit(1).maybeSingle();
  if(eError)throw new Error(mensagemDeFalha("rh-esocial-changes.requireAcceptedS2200", eError));if(!event)throw new Error("S-2200 ainda não está ACCEPTED no RET; S-2205/S-2206 permanecem bloqueados.");return event;
 }
 

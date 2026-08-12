@@ -1,5 +1,6 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 
 import{revalidatePath}from"next/cache";
@@ -7,7 +8,7 @@ import{redirect}from"next/navigation";
 import{requireCapability}from"@/lib/authorization";
 import{lerMoeda}from"@/lib/validacao/moeda";
 
-function t(d:FormData,k:string){return String(d.get(k)??"").trim();}
+function t(d:FormData,k:string){return campoDeTexto(d, k).trim();}
 function o(d:FormData,k:string){return t(d,k)||null;}
 function n(d:FormData,k:string){return lerMoeda(t(d,k));}
 function int(d:FormData,k:string){const v=Number(t(d,k)||"0");return Number.isFinite(v)?Math.trunc(v):0;}

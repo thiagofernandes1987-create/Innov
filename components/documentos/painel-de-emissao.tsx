@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { emitirDocumento } from "@/app/actions/documentos";
 import { EMISSAO_INICIAL } from "@/lib/documentos/modelos";
+import { useReencostarNoDom } from "@/lib/forms/reencostar-no-dom";
 import { markdownParaHTML } from "@/lib/documentos/markdown";
 
 // Painel de emissão: escolher, ver e então gravar.
@@ -64,14 +65,11 @@ export function PainelDeEmissao({
   // O efeito reencosta o DOM no estado depois de cada renderização. É o uso
   // legítimo de efeito — sincronizar com um sistema externo, que aqui é o
   // próprio elemento —, e não `setState` disfarçado.
-  const campos = useRef<Record<string, HTMLSelectElement | null>>({});
-  const escolhas = { clienteId, obraId, orcamentoId, propostaId, modeloId };
-  useEffect(() => {
-    for (const [nome, valor] of Object.entries(escolhas)) {
-      const campo = campos.current[nome];
-      if (campo && campo.value !== valor) campo.value = valor;
-    }
-  });
+  // A mecânica mora em `useReencostarNoDom` porque a regra não é desta tela: é
+  // de todo campo controlado que atravessa uma server action mais de uma vez.
+  // Enquanto viveu aqui dentro, o único jeito de a próxima tela herdar a
+  // correção era alguém lembrar dela.
+  const campo = useReencostarNoDom({ clienteId, obraId, orcamentoId, propostaId, modeloId, titulo });
 
   const html = useMemo(() => (estado.texto ? markdownParaHTML(estado.texto) : ""), [estado.texto]);
   const modelo = modelos.find(m => m.id === modeloId);
@@ -94,7 +92,7 @@ export function PainelDeEmissao({
       <section className="card-pad emissao-escolhas">
         <label>
           <span>Modelo</span>
-          <select ref={el => { campos.current.modeloId = el; }} name="modeloId" value={modeloId} onChange={e => setModeloId(e.target.value)}>
+          <select ref={campo("modeloId")} name="modeloId" value={modeloId} onChange={e => setModeloId(e.target.value)}>
             {modelos.map(m => (
               <option key={m.id} value={m.id}>{m.nome} — {m.tipo}</option>
             ))}
@@ -103,7 +101,7 @@ export function PainelDeEmissao({
 
         <label>
           <span>Título do documento</span>
-          <input name="titulo" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder={modelo?.nome ?? "Documento"} maxLength={160} />
+          <input ref={campo("titulo")} name="titulo" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder={modelo?.nome ?? "Documento"} maxLength={160} />
         </label>
 
         {/* Cada lista é opcional. Um termo de treinamento não tem orçamento, e
@@ -111,7 +109,7 @@ export function PainelDeEmissao({
             passar da tela. O que faltar vira lacuna, e a lacuna aparece. */}
         <label>
           <span>Cliente</span>
-          <select ref={el => { campos.current.clienteId = el; }} name="clienteId" value={clienteId} onChange={e => setClienteId(e.target.value)}>
+          <select ref={campo("clienteId")} name="clienteId" value={clienteId} onChange={e => setClienteId(e.target.value)}>
             <option value="">— sem cliente —</option>
             {clientes.map(c => <option key={c.id} value={c.id}>{c.nome}</option>)}
           </select>
@@ -119,7 +117,7 @@ export function PainelDeEmissao({
 
         <label>
           <span>Obra</span>
-          <select ref={el => { campos.current.obraId = el; }} name="obraId" value={obraId} onChange={e => setObraId(e.target.value)}>
+          <select ref={campo("obraId")} name="obraId" value={obraId} onChange={e => setObraId(e.target.value)}>
             <option value="">— sem obra —</option>
             {obras.map(o => <option key={o.id} value={o.id}>{o.nome}</option>)}
           </select>
@@ -127,7 +125,7 @@ export function PainelDeEmissao({
 
         <label>
           <span>Orçamento</span>
-          <select ref={el => { campos.current.orcamentoId = el; }} name="orcamentoId" value={orcamentoId} onChange={e => setOrcamentoId(e.target.value)}>
+          <select ref={campo("orcamentoId")} name="orcamentoId" value={orcamentoId} onChange={e => setOrcamentoId(e.target.value)}>
             <option value="">— sem orçamento —</option>
             {orcamentos.map(o => <option key={o.id} value={o.id}>{o.nome}</option>)}
           </select>
@@ -135,7 +133,7 @@ export function PainelDeEmissao({
 
         <label>
           <span>Proposta</span>
-          <select ref={el => { campos.current.propostaId = el; }} name="propostaId" value={propostaId} onChange={e => setPropostaId(e.target.value)}>
+          <select ref={campo("propostaId")} name="propostaId" value={propostaId} onChange={e => setPropostaId(e.target.value)}>
             <option value="">— sem proposta —</option>
             {propostas.map(p => <option key={p.id} value={p.id}>{p.nome}</option>)}
           </select>

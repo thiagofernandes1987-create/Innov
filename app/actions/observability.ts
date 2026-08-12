@@ -1,12 +1,13 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{revalidatePath}from"next/cache";
 import{redirect}from"next/navigation";
 import{requireCapability}from"@/lib/authorization";
 import{reportDataAccessError}from"@/lib/errors/data-access";
 
 type ProviderLikeError={code?:string|null;statusCode?:string|number|null;name?:string|null};
-function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
+function text(data:FormData,key:string){return campoDeTexto(data, key).trim();}
 function optional(data:FormData,key:string){return text(data,key)||null;}
 function number(data:FormData,key:string,fallback:number){const value=Number(text(data,key));return Number.isFinite(value)?value:fallback;}
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}

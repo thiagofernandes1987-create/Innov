@@ -16,6 +16,7 @@ import {
   type BotRetrievalMode
 } from "@/lib/messaging/bots";
 import { ConversationCanonicalRetrievalStore } from "@/lib/messaging/canonical-retrieval.server";
+import { campoDeTexto } from "@/lib/forms/campos";
 import {
   OpenAiProviderError,
   openAiMessagingEnvironmentStatus
@@ -24,7 +25,7 @@ import {
 const path = "/app/whatsapp/bots";
 
 function text(data: FormData, key: string) {
-  return String(data.get(key) ?? "").trim();
+  return campoDeTexto(data, key).trim();
 }
 
 function optional(data: FormData, key: string) {

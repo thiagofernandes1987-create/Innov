@@ -1,0 +1,69 @@
+{
+  "_leia": "Coluna que existe no banco de produção e não é declarada por nenhuma migration. O código a usa e funciona hoje; o repositório, sozinho, não a recria. `pnpm validate:colunas-existentes` aceita estas e reprova qualquer outra — a lista só pode encolher.",
+  "_por_que": "Medido em 11/08/2026 ao criar o portão da VACINA-036. O portão confere as consultas contra as migrations, e acusou 25 usos sobre 7 pares (tabela, coluna). A conferência contra o banco vivo separou o que era defeito do que era divergência: dois pares não existiam em lugar nenhum e foram corrigidos no mesmo commit (`rh_esocial_events.processed_at` e `rh_payroll_runs.created_at`); estes sete existem no banco e faltam na migration. Não é o código que está errado — é o repositório que não sabe recriar o próprio schema.",
+  "_alcance_real": "Estes sete são o que o portão enxerga, não o tamanho do problema. A mesma medição contou 77 tabelas presentes no banco e ausentes das migrations — `access_profiles`, `app_modules`, `bdi_models` e outras 74 — e 23 colunas na migration e ausentes do banco (`whatsapp_*`, etapa 22 parcialmente aplicada). A reconciliação é a S-77; esta lista cobre só o que trava o portão.",
+  "_regra": "Nada entra aqui sem data e sem a prova da consulta ao banco. Sair daqui é escrever a migration que declara a coluna, com o tipo medido — não apagar a linha.",
+  "_atualizado_em": "2026-08-11",
+  "_medido_em": "2026-08-11",
+  "colunas": [
+    {
+      "tabela": "clients",
+      "coluna": "address_line",
+      "tipo_no_banco": "text",
+      "nulo": true,
+      "padrao": null,
+      "desde": "desconhecido — nenhuma migration a declara"
+    },
+    {
+      "tabela": "clients",
+      "coluna": "archived_at",
+      "tipo_no_banco": "timestamp with time zone",
+      "nulo": true,
+      "padrao": null,
+      "desde": "desconhecido — nenhuma migration a declara",
+      "observacao": "É a coluna mais usada da lista: nove consultas filtram por `.is(\"archived_at\", null)` para esconder cliente arquivado. Sem ela, todas as nove abortam."
+    },
+    {
+      "tabela": "clients",
+      "coluna": "city",
+      "tipo_no_banco": "text",
+      "nulo": true,
+      "padrao": null,
+      "desde": "desconhecido — nenhuma migration a declara"
+    },
+    {
+      "tabela": "clients",
+      "coluna": "postal_code",
+      "tipo_no_banco": "text",
+      "nulo": true,
+      "padrao": null,
+      "desde": "desconhecido — nenhuma migration a declara"
+    },
+    {
+      "tabela": "clients",
+      "coluna": "state",
+      "tipo_no_banco": "text",
+      "nulo": true,
+      "padrao": null,
+      "desde": "desconhecido — nenhuma migration a declara"
+    },
+    {
+      "tabela": "clients",
+      "coluna": "status",
+      "tipo_no_banco": "text",
+      "nulo": false,
+      "padrao": "'ACTIVE'::text",
+      "desde": "desconhecido — nenhuma migration a declara",
+      "observacao": "É `not null` com padrão. Recriar o banco pelas migrations produziria uma tabela sem esta coluna, e a tela de assinaturas — que faz `.neq(\"status\", …)` — pararia."
+    },
+    {
+      "tabela": "organization_memberships",
+      "coluna": "access_profile_id",
+      "tipo_no_banco": "uuid",
+      "nulo": true,
+      "padrao": null,
+      "desde": "desconhecido — nenhuma migration a declara",
+      "observacao": "Aponta para `public.access_profiles`, que também não tem `create table` em migration nenhuma — só é referenciada."
+    }
+  ]
+}

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireOrganizationContext } from "@/lib/auth";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const managementRoles = [
   "SUPER_ADMIN",
@@ -22,7 +23,7 @@ const fieldRoles = [
 ] as const;
 
 function text(formData: FormData, name: string) {
-  return String(formData.get(name) ?? "").trim();
+  return campoDeTexto(formData, name).trim();
 }
 
 function optionalNumber(formData: FormData, name: string) {

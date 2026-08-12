@@ -11,6 +11,7 @@ import { secureUpload } from "@/lib/file-security/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { evaluateQualityResponse, parseQualityFormSchema, type QualityAnswerMap, type QualityFormSchema } from "@/lib/quality/forms";
 import { safeFileName, sha256 } from "@/lib/signatures/crypto";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const MAX_DOCUMENT_SIZE=50*1024*1024;
 const MAX_ATTACHMENT_SIZE=20*1024*1024;
@@ -24,7 +25,7 @@ const ATTACHMENT_MIMES=new Set([
 ]);
 type ProviderLikeError={code?:string|null;statusCode?:string|number|null;name?:string|null};
 
-function text(formData:FormData,key:string){return String(formData.get(key)??"").trim();}
+function text(formData:FormData,key:string){return campoDeTexto(formData, key).trim();}
 function optional(formData:FormData,key:string){const value=text(formData,key);return value||null;}
 function fail(path:string,message:string):never{redirect(`${path}${path.includes("?")?"&":"?"}error=${encodeURIComponent(message)}`);}
 function failData(path:string,operation:string,error:ProviderLikeError|null|undefined,message:string):never{reportDataAccessError(`quality.${operation}`,error);fail(path,message);}

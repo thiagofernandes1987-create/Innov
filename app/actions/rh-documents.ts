@@ -1,5 +1,6 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 
 import{createHash,randomUUID}from"node:crypto";
@@ -8,7 +9,7 @@ import{redirect}from"next/navigation";
 import{hasCapability,requireCapability}from"@/lib/authorization";
 
 const BASE="/app/rh/documentos",BUCKET="rh-documents",MAX=20*1024*1024;
-function t(d:FormData,k:string){return String(d.get(k)??"").trim();}function o(d:FormData,k:string){return t(d,k)||null;}function fail(path:string,m:string):never{redirect(`${path}?error=${encodeURIComponent(m)}`);}function safeName(name:string){return name.replace(/[^A-Za-z0-9._-]/g,"-").slice(-150)||"documento";}
+function t(d:FormData,k:string){return campoDeTexto(d, k).trim();}function o(d:FormData,k:string){return t(d,k)||null;}function fail(path:string,m:string):never{redirect(`${path}?error=${encodeURIComponent(m)}`);}function safeName(name:string){return name.replace(/[^A-Za-z0-9._-]/g,"-").slice(-150)||"documento";}
 function detect(bytes:Buffer){if(bytes.subarray(0,5).toString("ascii")==="%PDF-")return"application/pdf";if(bytes.length>=3&&bytes[0]===0xff&&bytes[1]===0xd8&&bytes[2]===0xff)return"image/jpeg";if(bytes.length>=8&&bytes.subarray(0,8).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a])))return"image/png";return null;}
 async function requireSensitiveIfNeeded(context:Awaited<ReturnType<typeof requireCapability>>,sensitivity:string){if(["CLINICAL","JUDICIAL"].includes(sensitivity)&&!await hasCapability("rh","view_sensitive_financials",null,context))fail(BASE,"Documento clínico/judicial exige acesso sensível do RH.");}
 

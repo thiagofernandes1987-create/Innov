@@ -1,0 +1,67 @@
+{
+  "_leia": "Contrato de assinatura entre TypeScript e Go, exigido pela §26 do MAPA-TECNOLOGICO.md. Os valores de `assinatura` foram GERADOS pela implementação TypeScript real — apps/messaging-gateway/src/security.ts, signGatewayRequest — e não escritos à mão. Dois testes leem este mesmo arquivo e precisam reproduzir cada assinatura byte a byte: tests/gateway-assinatura-compartilhada.test.ts e apps/execution-plane/gateway_test.go. Mudar um valor daqui sem mudar as duas implementações reprova os dois lados.",
+  "algoritmo": "HMAC-SHA256(segredo, [timestamp, nonce, METODO, caminho, sha256hex(corpo)].join('.')), em hexadecimal minúsculo",
+  "segredo": "segredo-de-fixture-nao-usar-em-producao",
+  "casos": [
+    {
+      "nome": "corpo vazio",
+      "timestamp": "1770000000",
+      "nonce": "nonce-vazio",
+      "metodo": "GET",
+      "caminho": "/health",
+      "corpo": "",
+      "cargaCanonica": "1770000000.nonce-vazio.GET./health.e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "assinatura": "89d09638f2d378ddd7ff79b0aed1f63bf93cb33c841838c3cb0d0e8a2904f16f"
+    },
+    {
+      "nome": "corpo com acento",
+      "timestamp": "1770000001",
+      "nonce": "nonce-acento",
+      "metodo": "POST",
+      "caminho": "/v1/mensagens",
+      "corpo": "{\"texto\":\"Instalação concluída às 5h30 — obra São João\"}",
+      "cargaCanonica": "1770000001.nonce-acento.POST./v1/mensagens.e28cb93f6c0d04845a8fa53b7f460c277cc80408af08d50a1a3a4af879e99f25",
+      "assinatura": "64463828128ace9b1ecd5bc8304c197f1f5e8fcb25111f0685a95ef9bbfb9b4b"
+    },
+    {
+      "nome": "método em minúsculas é normalizado para maiúsculas",
+      "timestamp": "1770000002",
+      "nonce": "nonce-metodo",
+      "metodo": "post",
+      "caminho": "/v1/mensagens",
+      "corpo": "{\"texto\":\"ok\"}",
+      "cargaCanonica": "1770000002.nonce-metodo.POST./v1/mensagens.0bf4875ac4c5f6cfb8eb667afeda6c75455dc0fe0400b03a4dc16b185468a63d",
+      "assinatura": "c544b60b50cb6ff03d7d4a40c0d1c583ad44e435f3360ab9c7c5b31de256cd81"
+    },
+    {
+      "nome": "caminho com query",
+      "timestamp": "1770000003",
+      "nonce": "nonce-query",
+      "metodo": "GET",
+      "caminho": "/v1/mensagens?conversa=abc&limite=20",
+      "corpo": "",
+      "cargaCanonica": "1770000003.nonce-query.GET./v1/mensagens?conversa=abc&limite=20.e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "assinatura": "3eb02a0aec7d8e43dd7a5a47ebed317c3a3805f215d4935a60b6d0bc98b3122c"
+    },
+    {
+      "nome": "corpo com emoji fora do BMP",
+      "timestamp": "1770000004",
+      "nonce": "nonce-emoji",
+      "metodo": "POST",
+      "caminho": "/v1/mensagens",
+      "corpo": "{\"texto\":\"entrega confirmada 🧱🏗️\"}",
+      "cargaCanonica": "1770000004.nonce-emoji.POST./v1/mensagens.22881a0823f9a2cc1b27e7b94cb7c656974aeae4f279767c1322f435847b39bf",
+      "assinatura": "dce70d0fd79a0a290b8a73860438b7cb25ad193f214c08de83466fc30e8c3396"
+    },
+    {
+      "nome": "corpo e nonce com ponto, que é o separador da carga canônica",
+      "timestamp": "1770000005",
+      "nonce": "nonce.com.ponto",
+      "metodo": "PUT",
+      "caminho": "/v1/comandos/1.2.3",
+      "corpo": "{\"a\":\"1.2.3\"}",
+      "cargaCanonica": "1770000005.nonce.com.ponto.PUT./v1/comandos/1.2.3.2169288afc2c3c932fb580ca1a06857b7590338746486e7fb6d7eb2e92ba7717",
+      "assinatura": "289299920c1db5df832ebeacf72b72029f55fdf76040d7a4fae3c7cdcd37571f"
+    }
+  ]
+}

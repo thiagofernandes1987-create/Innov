@@ -9,10 +9,11 @@ import { signEsocialXml } from "@/lib/rh/integrations/esocial-signature";
 import { buildS2200TransitionClt, type S2200CpfChange, type S2200Succession } from "@/lib/rh/integrations/esocial-worker-transition-xml";
 import type { S2200ApprenticeInfo, S2200ImmigrantInfo, S2200TemporaryInfo } from "@/lib/rh/integrations/esocial-worker-xml";
 import { xmlSha256, type EsocialEnvironment } from "@/lib/rh/integrations/esocial-xml";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 type RhContext = Awaited<ReturnType<typeof requireCapability>>;
 
-function text(data: FormData, key: string) { return String(data.get(key) ?? "").trim(); }
+function text(data: FormData, key: string) { return campoDeTexto(data, key).trim(); }
 function optional(data: FormData, key: string) { return text(data, key) || null; }
 function numeric(data: FormData, key: string) { const value = text(data, key); return value === "" ? null : Number(value); }
 function digits(value: string) { return value.replace(/\D/g, ""); }

@@ -1,5 +1,6 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 
 import{revalidatePath}from"next/cache";
@@ -8,7 +9,7 @@ import{requireCapability}from"@/lib/authorization";
 import{lerMoeda}from"@/lib/validacao/moeda";
 
 const BASE="/app/rh/beneficios";
-function t(d:FormData,k:string){return String(d.get(k)??"").trim();}function o(d:FormData,k:string){return t(d,k)||null;}function money(d:FormData,k:string){return lerMoeda(t(d,k));}function fail(path:string,m:string):never{redirect(`${path}?error=${encodeURIComponent(m)}`);}
+function t(d:FormData,k:string){return campoDeTexto(d, k).trim();}function o(d:FormData,k:string){return t(d,k)||null;}function money(d:FormData,k:string){return lerMoeda(t(d,k));}function fail(path:string,m:string):never{redirect(`${path}?error=${encodeURIComponent(m)}`);}
 export async function createBenefitCatalogItem(data:FormData){const c=await requireCapability("rh","configure"),code=t(data,"code").toUpperCase();if(!code||!t(data,"name"))fail(BASE,"Código e nome são obrigatórios.");const{error}=await c.supabase.from("rh_benefit_catalog").insert({organization_id:c.organizationId,code,name:t(data,"name"),benefit_type:t(data,"benefitType"),provider_name:o(data,"providerName"),employee_share_type:t(data,"employeeShareType")||"FIXED",employee_share_value:money(data,"employeeShareValue"),created_by:c.userId});if(error)fail(BASE,mensagemDeFalha("rh-benefits.createBenefitCatalogItem", error));revalidatePath(BASE);}
 export async function enrollWorkerBenefit(data:FormData){const c=await requireCapability("rh","update");const{error}=await c.supabase.from("rh_benefit_enrollments").insert({organization_id:c.organizationId,employment_id:t(data,"employmentId"),benefit_id:t(data,"benefitId"),valid_from:t(data,"validFrom"),valid_to:o(data,"validTo"),status:"ACTIVE",plan_reference:o(data,"planReference"),created_by:c.userId});if(error)fail(BASE,mensagemDeFalha("rh-benefits.enrollWorkerBenefit", error));revalidatePath(BASE);}
 export async function registerBenefitCharge(data:FormData){const c=await requireCapability("rh","update"),month=t(data,"referenceMonth");if(!/^\d{4}-\d{2}$/.test(month))fail(BASE,"Competência inválida.");const{error}=await c.supabase.from("rh_benefit_charges").upsert({organization_id:c.organizationId,enrollment_id:t(data,"enrollmentId"),reference_month:`${month}-01`,provider_amount:money(data,"providerAmount")??0,employer_amount:money(data,"employerAmount")??0,employee_amount:money(data,"employeeAmount")??0,copay_amount:money(data,"copayAmount")??0,source_reference:o(data,"sourceReference"),status:"VALIDATED",created_by:c.userId},{onConflict:"enrollment_id,reference_month"});if(error)fail(BASE,mensagemDeFalha("rh-benefits.registerBenefitCharge", error));revalidatePath(BASE);}

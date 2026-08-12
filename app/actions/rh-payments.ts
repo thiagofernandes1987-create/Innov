@@ -1,10 +1,11 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 import{redirect}from"next/navigation";
 import{revalidatePath}from"next/cache";
 import{requireCapability}from"@/lib/authorization";
-const PATH="/app/rh/folha/pagamentos";function text(d:FormData,k:string){return String(d.get(k)??"").trim();}function fail(m:string):never{redirect(`${PATH}?error=${encodeURIComponent(m)}`);}
+const PATH="/app/rh/folha/pagamentos";function text(d:FormData,k:string){return campoDeTexto(d, k).trim();}function fail(m:string):never{redirect(`${PATH}?error=${encodeURIComponent(m)}`);}
 export async function saveWorkerBankAccount(data:FormData){const context=await requireCapability("rh","update");const pix=text(data,"pixKey")||null,bank=text(data,"bankCode")||null,branch=text(data,"branchNumber")||null,account=text(data,"accountNumber")||null;if(!pix&&(!bank||!branch||!account))fail("Informe PIX ou conta bancária completa.");const{error}=await context.supabase.from("rh_worker_bank_accounts").insert({organization_id:context.organizationId,worker_id:text(data,"workerId"),account_holder_tax_id:text(data,"holderTaxId").replace(/\D/g,""),bank_code:bank,branch_number:branch,account_number:account,account_digit:text(data,"accountDigit")||null,account_type:text(data,"accountType")||null,pix_key_type:text(data,"pixKeyType")||null,pix_key:pix,priority:Number(text(data,"priority")||1),valid_from:text(data,"validFrom")||new Date().toISOString().slice(0,10),evidence_reference:text(data,"evidenceReference")||null,created_by:context.userId});if(error)fail(mensagemDeFalha("rh-payments.saveWorkerBankAccount", error));revalidatePath(PATH);redirect(PATH);}
 export async function createPaymentBatch(data:FormData){const context=await requireCapability("rh","approve");const{data:id,error}=await context.supabase.rpc("create_rh_payroll_payment_batch",{p_period_id:text(data,"periodId"),p_provider_code:text(data,"providerCode"),p_file_format:text(data,"fileFormat")||"OPERATIONAL_CSV_V1"});if(error)fail(mensagemDeFalha("rh-payments.createPaymentBatch", error));revalidatePath(PATH);redirect(`${PATH}?batch=${id}`);}
 export async function markPaymentBatchSent(data:FormData){const context=await requireCapability("rh","approve");const{error}=await context.supabase.rpc("mark_rh_payroll_payment_batch_sent",{p_batch_id:text(data,"batchId")});if(error)fail(mensagemDeFalha("rh-payments.markPaymentBatchSent", error));revalidatePath(PATH);redirect(PATH);}

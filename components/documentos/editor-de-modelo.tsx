@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { duplicarModelo, excluirModelo, salvarModelo } from "@/app/actions/documentos";
+import { useReencostarNoDom } from "@/lib/forms/reencostar-no-dom";
 import {
   ROTULO_ESCOPO,
   dicionarioDeExemplo,
@@ -93,6 +94,13 @@ export function EditorDeModelo({
   const [corpo, setCorpo] = useState(corpoInicial);
   const [nome, setNome] = useState(nomeInicial);
   const [tipo, setTipo] = useState(tipoInicial);
+
+  // Este formulário atravessa a server action mais de uma vez sem desmontar —
+  // salvar rascunho, publicar, salvar como — e é aí que a VACINA-051 morde: a
+  // resposta re-renderiza a árvore do servidor, o navegador larga o valor do
+  // campo, e o React não repõe porque o estado dele não mudou. Estado e DOM
+  // divergem, e é o DOM que o formulário envia.
+  const campo = useReencostarNoDom({ corpo, nome, tipo });
   const [clienteVe, setClienteVe] = useState(clienteVeInicial);
   const [selecao, setSelecao] = useState<Selecao>({ inicio: 0, fim: 0 });
   const [aba, setAba] = useState<Aba>("markdown");
@@ -455,7 +463,7 @@ export function EditorDeModelo({
       <input type="hidden" name="versao" value={versaoAtual} />
       <input type="hidden" name="publicar" value="" disabled />
       {clienteVe ? <input type="hidden" name="clienteVe" value="1" /> : null}
-      <textarea name="corpo" value={corpo} readOnly hidden />
+      <textarea ref={campo("corpo")} name="corpo" value={corpo} readOnly hidden />
       <input
         ref={entrada}
         type="file"
@@ -474,6 +482,7 @@ export function EditorDeModelo({
         <span className="editor-doc-identidade">
           <span className="editor-doc-icone" aria-hidden="true">▤</span>
           <input
+            ref={campo("nome")}
             className={erroDoNome ? "editor-doc-nome invalido" : "editor-doc-nome"}
             name="nome"
             value={nome}
@@ -484,6 +493,7 @@ export function EditorDeModelo({
             maxLength={120}
           />
           <select
+            ref={campo("tipo")}
             className="editor-doc-tipo"
             name="tipo"
             value={tipo}

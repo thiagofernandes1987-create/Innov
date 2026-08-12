@@ -1,5 +1,6 @@
 "use server";
 
+import { campoDeTexto } from "@/lib/forms/campos";
 import{mensagemDeFalha}from"@/lib/errors/data-access";
 
 import{revalidatePath}from"next/cache";
@@ -7,7 +8,7 @@ import{redirect}from"next/navigation";
 import{requireCapability}from"@/lib/authorization";
 
 const PATH="/app/rh/sst";
-function text(d:FormData,k:string){return String(d.get(k)??"").trim();}
+function text(d:FormData,k:string){return campoDeTexto(d, k).trim();}
 function opt(d:FormData,k:string){return text(d,k)||null;}
 function num(d:FormData,k:string){const v=text(d,k);return v===""?null:Number(v.replace(",","."));}
 function bool(d:FormData,k:string){return d.get(k)==="on"||text(d,k)==="true";}

@@ -6,9 +6,10 @@ import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
 import { parseEsocialIndividualResults } from "@/lib/rh/integrations/esocial-result-parser";
 import { queryEsocialBatch, sha256, type EsocialEnvironment, type EsocialHttpResult } from "@/lib/rh/integrations/esocial-transport";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const BASE = "/app/rh/obrigacoes/esocial";
-function text(data: FormData, key: string) { return String(data.get(key) ?? "").trim(); }
+function text(data: FormData, key: string) { return campoDeTexto(data, key).trim(); }
 function fail(path: string, message: string): never { redirect(`${path}?error=${encodeURIComponent(message)}`); }
 function success(path: string, message: string): never { redirect(`${path}?success=${encodeURIComponent(message)}`); }
 function environment(value: string): EsocialEnvironment { return value === "PRODUCTION" ? "PRODUCTION" : "RESTRICTED"; }

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
 import type { OperatorPresence } from "@/lib/messaging/inbox";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const path = "/app/whatsapp/inbox";
 const allowedReturnKeys = new Set([
@@ -20,13 +21,13 @@ const allowedReturnKeys = new Set([
 ]);
 
 function required(data: FormData, key: string): string {
-  const value = String(data.get(key) ?? "").trim();
+  const value = campoDeTexto(data, key).trim();
   if (!value) throw new Error(`REQUIRED_FIELD:${key}`);
   return value;
 }
 
 function optional(data: FormData, key: string): string | null {
-  const value = String(data.get(key) ?? "").trim();
+  const value = campoDeTexto(data, key).trim();
   return value || null;
 }
 

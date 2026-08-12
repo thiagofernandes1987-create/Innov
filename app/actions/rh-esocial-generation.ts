@@ -6,9 +6,10 @@ import { redirect } from "next/navigation";
 import { requireCapability } from "@/lib/authorization";
 import { signEsocialXml } from "@/lib/rh/integrations/esocial-signature";
 import { buildS1000,buildS1005,buildS1010,buildS1020,makeEsocialEventId,xmlSha256,type EsocialEnvironment,type EsocialOperation } from "@/lib/rh/integrations/esocial-xml";
+import { campoDeTexto } from "@/lib/forms/campos";
 
 const BASE="/app/rh/obrigacoes/esocial";
-function text(data:FormData,key:string){return String(data.get(key)??"").trim();}
+function text(data:FormData,key:string){return campoDeTexto(data, key).trim();}
 function fail(path:string,message:string):never{redirect(`${path}?error=${encodeURIComponent(message)}`);}
 function environment(value:string):EsocialEnvironment{return value==="PRODUCTION"?"PRODUCTION":"RESTRICTED";}
 function operation(value:string):EsocialOperation{return value==="RECTIFY"?"RECTIFY":value==="DELETE"?"DELETE":"INCLUDE";}
