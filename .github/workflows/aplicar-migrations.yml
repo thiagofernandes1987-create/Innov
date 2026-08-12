@@ -1,0 +1,104 @@
+# Aplica as migrations pendentes no banco, pelo runner.
+#
+# Por que aqui e não numa sessão assistida: `SUPABASE_DB_URL` é segredo do
+# repositório e existe no runner, não no contêiner de quem desenvolve. Aplicar
+# pelo MCP significaria colar 0,88 MB de SQL em 121 chamadas, e parar no meio de
+# 121 migrations ordenadas deixa o banco num estado que nem o repositório nem o
+# ledger descrevem.
+#
+# O padrão é `workflow_dispatch`: **nunca dispara sozinho**. Aplicar migration é
+# ação externa e irreversível, e a decisão é de quem clica.
+#
+# O modo padrão é `conferir`, que imprime o plano e não toca no banco. Para
+# aplicar de verdade é preciso, além de escolher `aplicar`, digitar a palavra de
+# confirmação — o mesmo cuidado que o `stage20-backup-restore-drill` já usa para
+# alvo descartável.
+
+name: aplicar-migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "conferir imprime o plano e não toca no banco; aplicar executa"
+        required: true
+        default: conferir
+        type: choice
+        options:
+          - conferir
+          - aplicar
+      confirmacao:
+        description: "Para aplicar, digite APLICAR. Qualquer outra coisa recusa."
+        required: false
+        default: ""
+        type: string
+      ate:
+        description: "Limita o lote às N primeiras. Vazio aplica o lote inteiro."
+        required: false
+        default: ""
+        type: string
+      com_destrutivas:
+        description: "Inclui as que perdem dado. Só com decisão registrada."
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  migrations:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Recusar aplicação sem confirmação explícita
+        if: inputs.modo == 'aplicar'
+        run: |
+          if [ "${{ inputs.confirmacao }}" != "APLICAR" ]; then
+            echo "::error::Modo 'aplicar' exige a confirmação literal APLICAR. Nada foi enviado ao banco."
+            exit 1
+          fi
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "::error::SUPABASE_DB_URL não está configurada neste repositório."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Instalar psql
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Plano
+        run: node scripts/aplicar-migrations-pendentes.mjs --conferir | tee plano-de-migrations.txt
+
+      - name: Aplicar
+        if: inputs.modo == 'aplicar'
+        run: |
+          set -o pipefail
+          args=(--aplicar)
+          [ -n "${{ inputs.ate }}" ] && args+=(--ate "${{ inputs.ate }}")
+          [ "${{ inputs.com_destrutivas }}" = "true" ] && args+=(--com-destrutivas)
+          node scripts/aplicar-migrations-pendentes.mjs "${args[@]}" | tee resultado-de-migrations.txt
+
+      - name: Estado do ledger depois
+        if: always() && inputs.modo == 'aplicar'
+        run: node scripts/atualizar-ledger-de-migrations.mjs | tee ledger-depois.txt || true
+
+      - name: Guardar evidência
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: evidencia-de-migrations
+          path: |
+            plano-de-migrations.txt
+            resultado-de-migrations.txt
+            ledger-depois.txt
+          if-no-files-found: warn
+          retention-days: 30

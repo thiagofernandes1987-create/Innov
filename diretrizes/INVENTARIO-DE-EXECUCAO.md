@@ -2651,9 +2651,18 @@ E a ordem resolve sozinha o impasse da S-76: os dois lotes de revogação de
 `EXECUTE` caem nas posições **116 e 117**, depois de tudo que cria as 100
 funções que hoje faltam. Aplicados ali, não há o que filtrar nem o que tolerar.
 
-**Falta só a credencial.** `SUPABASE_DB_URL` é lida do ambiente e nunca
-impressa; variável de ambiente é injetada na criação do contêiner, então uma
-configurada agora só aparece em sessão nova.
+**A credencial existe, e está no lugar certo — que não é aqui.**
+`secrets.SUPABASE_DB_URL` já é usado por quatro workflows do repositório. Ele
+vive no runner, não no contêiner de quem desenvolve, e é assim que deve ser:
+sessão assistida não precisa de credencial de administrador do banco para
+trabalhar.
+
+Por isso a aplicação passou a ter um caminho próprio:
+**`.github/workflows/aplicar-migrations.yml`**, disparado à mão
+(`workflow_dispatch`), com modo `conferir` por padrão. Aplicar de verdade exige
+escolher `aplicar` **e** digitar a palavra `APLICAR` — o mesmo cuidado que o
+`stage20-backup-restore-drill` já usa para alvo descartável. A evidência (plano,
+resultado e ledger depois) sobe como artefato por 30 dias.
 
 - [ ] T-77.1 — Inventariar as 77 tabelas: quais têm dado em produção, quais são de etapa abandonada e quais foram criadas fora de migration. Sem esse corte, "escrever as migrations que faltam" não tem sujeito
 - [ ] T-77.2 — Gerar a migration de linha de base a partir do schema medido, **sem inventar tipo**: cada coluna com o tipo, nulidade e padrão lidos de `information_schema`
