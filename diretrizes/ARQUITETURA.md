@@ -1,7 +1,7 @@
 # Arquitetura canônica — Innovar Platform
 
 **Versão estável:** 0.19.0  
-**Atualizado em:** 04 de agosto de 2026
+**Atualizado em:** 12 de agosto de 2026
 
 ## 1. Visão geral
 
@@ -236,3 +236,104 @@ Buckets permanecem privados. Upload valida sessão, módulo, tipo, tamanho, cont
 Ordem mínima: documentação, vacinas, ledger, validadores estruturais, testes PostgreSQL, lint, typecheck, TypeScript, Python, build do gateway, smoke do container e build Next.js.
 
 A reconstrução exige clone do GitHub, secrets externos, migrations ordenadas, ledger compatível, dependências, validadores e smoke tests. Procedimento: `diretrizes/RECUPERACAO.md`.
+
+
+---
+
+## 11. Arquitetura final — linguagem por camada
+
+Acrescentado em 12/08/2026, porque até aqui este documento descrevia a
+plataforma **como ela é** e não dizia para onde ela vai. Quem lia a §1 concluía
+que a arquitetura final é a atual, e não é.
+
+O documento normativo é [`MAPA-TECNOLOGICO.md`](MAPA-TECNOLOGICO.md); esta seção
+é o resumo executável dele, com o **estado medido de cada fase**.
+
+| Camada | Linguagem | Estado em 12/08/2026 |
+| --- | --- | --- |
+| Interface, server actions, rotas | **TypeScript** | vigente — 84,3% do código vivo, e nenhuma conversão prevista |
+| Regra de negócio derivada de dado | **SQL** (view/RPC) | vigente — é onde E3, E4 e E6 nascem |
+| Plano de execução: fila, varredura, cobrança | **Go** (`apps/execution-plane`) | construído e **sem consumidor** — as filas não existem no banco |
+| IA, RAG, OCR, plantas | **Python** | **Fase 4** — não existe código; não é conversão, é construção |
+| Componentes de altíssimo desempenho | **Rust** | **Fase 6**, vedada pela §9.3 até cinco pré-requisitos, incluindo protótipo e benchmark |
+
+**A regra que antecede as cinco linhas:** §37 do mapa — *nenhuma linguagem nova
+entra no repositório sem ADR* com os doze itens que ela lista. A ADR-0001
+(camada de execução em Go) está ratificada por instrução do proprietário
+arquitetural, com a divergência entre o recomendado e o decidido registrada nela
+própria.
+
+### 11.1 O que o benchmark da ADR-0001 contrariou
+
+Vale estar aqui porque é o número que impede repetir a decisão por intuição:
+
+```
+CPU num job de despacho ............... 0,03%
+economia de trocar Node por Go ........ 0,41 s de CPU por dia a 100 mil msg/dia
+saturação Node ........................ 6.549 jobs/s
+saturação Go .......................... 27.884 jobs/s
+necessidade medida .................... 1,16 job/s   →  57× de folga
+`map[string]any` em vez de struct ..... 2,14× mais caro que a diferença entre as linguagens
+```
+
+A ADR por isso separa o que o mapa juntava: **extrair a camada do request é
+decisão incondicional**; **a linguagem é decisão condicionada**.
+
+---
+
+## 12. Arquitetura final — o que ainda não existe, por módulo
+
+A lógica de cada módulo mora em
+[`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md), e a **R8** manda
+apontar em vez de repetir. O que este documento acrescenta é a **espinha de
+dependência**, que é arquitetura e não escopo:
+
+```
+E1 custo/hora  →  E2 apontamento de hora  →  E3 rentabilidade em três colunas
+   │                                            (SQL: view/RPC)
+   ├─→ E4 comprometido do orçamento (SQL)
+   └─→ E5 lead time e chegada prevista (SQL + TS)
+
+E7 relatórios de ausência (Go)   — não depende de nada, entrega sozinho
+E9 solicitação de documento      — SQL + TS + Go (a cobrança)
+```
+
+**E3 não fecha sem E2, e E2 não fecha sem E1.** É por isso que o custo/hora —
+uma coluna que já existe desde a etapa 12 — trava sete módulos: não por estar
+faltando, mas por não ter dono, vigência nem uso.
+
+Decidido em 12/08/2026 (T-52.1): **o custo pertence à pessoa, com vigência**, em
+tabela do módulo `equipes`, com vínculo opcional a `rh_workers` — e não em
+`rh_workers` diretamente, porque ele não existe no servidor e ancorar ali
+acorrentaria sete módulos ao lote de RH.
+
+---
+
+## 13. A distância entre o repositório e o servidor
+
+Esta seção existe porque a §4 diz *"migrations ordenadas"* e isso descreve a
+intenção, não o estado. Medido em 12/08/2026, contra o banco de produção:
+
+| | |
+| --- | ---: |
+| Migrations no repositório | 273 |
+| Aplicadas | 210 |
+| **Pendentes** | **121** |
+| Tabelas no banco | 245 |
+| Tabelas no banco **sem `create table` em migration nenhuma** | **77** |
+| Funções no banco | 252 |
+| Funções que o repositório declara | 407 |
+
+São duas divergências de direções opostas, e as duas são arquitetura:
+
+- **o repositório tem o que o banco não tem** — 121 migrations, entre elas as 67
+  de `rh_*` e as 28 de `stage22_*`. O módulo de RH não existe para nenhum
+  usuário; as filas do canal não existem, e por isso o plano de execução em Go
+  está construído e sem consumidor;
+- **o banco tem o que o repositório não declara** — 77 tabelas e 7 colunas.
+  Recriar o banco a partir deste repositório produziria um schema que o código
+  não consegue usar. É a S-77.
+
+Enquanto as duas não fecharem, *"a reconstrução exige clone do GitHub e
+migrations ordenadas"* — §10 — **não é verdade**, e está escrito aqui em vez de
+ser descoberto no dia da reconstrução.

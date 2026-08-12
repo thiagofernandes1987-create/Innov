@@ -258,7 +258,7 @@ project_resources ...................... 2 linhas, as 2 do tipo LABOR
 - [ ] T-52.4 — Campo no cadastro, com `view_sensitive_financials` decidindo quem vê; guarda de participação em qualquer RPC nova, conforme VACINA-065
 - [ ] T-52.5 — Integrante **sem custo declarado** aparece como não informado, nunca como zero — zero é um número e entra na conta mentindo
 - [ ] T-52.6 — Prova por sabotagem: custo alterado **não** muda o custo apurado de período fechado; e remover o custo derruba o cálculo dependente com o teste acusando
-- [ ] T-52.7 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo equipes` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-52.7 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo equipes` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.2, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-53 — E2: apontamento de hora no diário
 **Estado:** pendente
@@ -273,7 +273,7 @@ nenhum. Confronto §3.2 (`diario`).
 - [ ] T-53.2 — Custo derivado de E1, calculado no banco e nunca digitado
 - [ ] T-53.3 — Worksheet configurável por tipo de serviço, no motor de modelos que já existe (`modelos`)
 - [ ] T-53.4 — O diário aprovado continua sendo a única porta para o cliente; hora e custo **não** são visíveis ao cliente
-- [ ] T-53.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo diario` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-53.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo diario` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.2, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-54 — E3: rentabilidade da obra em três colunas
 **Estado:** pendente
@@ -289,7 +289,7 @@ persegue em planilha todo mês. Confronto §4.2.
 - [ ] T-54.2 — Receita: medição aprovada, contrato, aditivo; custo: material, hora (E2), compra
 - [ ] T-54.3 — Tela da obra com as três colunas e o caminho de volta ao documento de origem
 - [ ] T-54.4 — Prova por sabotagem: medição aprovada e não faturada tem de aparecer em `To Invoice` e sumir de lá ao faturar
-- [ ] T-54.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo obras` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-54.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo obras` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.2, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-55 — E4: comprometido do orçamento
 **Estado:** pendente
@@ -302,7 +302,7 @@ que impede a obra de gastar duas vezes o mesmo dinheiro. Confronto §3.3, §3.4.
 - [ ] T-55.1 — RPC do comprometido por obra e por item de orçamento
 - [ ] T-55.2 — Exibir no orçamento ao lado de previsto e realizado
 - [ ] T-55.3 — Alerta quando comprometido ultrapassa o previsto do item
-- [ ] T-55.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo orcamentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-55.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo orcamentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.4, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-56 — E5: prazo de fornecedor e atraso previsto
 **Estado:** pendente
@@ -316,7 +316,7 @@ atrasar a obra**. Confronto §3.3.
 - [ ] T-56.1 — Lead time no cadastro do fornecedor, por produto quando houver
 - [ ] T-56.2 — Chegada prevista derivada, nunca digitada
 - [ ] T-56.3 — Pedido atrasado no painel quando a chegada prevista passa sem recebimento
-- [ ] T-56.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo compras` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-56.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo compras` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.3, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-57 — E6: quantidade prevista de estoque
 **Estado:** pendente
@@ -329,7 +329,7 @@ conhece o presente e não conhece o futuro. Confronto §3.3.
 - [ ] T-57.1 — RPC da quantidade prevista no horizonte consultado
 - [ ] T-57.2 — Regra de reposição mínimo/máximo disparando pelo previsto
 - [ ] T-57.3 — Decidir e implementar a valoração (AVCO), com ADR se a escolha divergir do mapa
-- [ ] T-57.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo estoque` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-57.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo estoque` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.3, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-58 — E7: relatórios de ausência
 **Estado:** pendente
@@ -346,7 +346,7 @@ classificação de falha — segunda carga do plano que já existe, não camada 
 - [ ] T-58.1 — Varredura agendada que produz pendência, não tela
 - [ ] T-58.2 — Lead sem acompanhamento; recebível vencido por idade; pedido atrasado; documento não enviado
 - [ ] T-58.3 — A pendência chega pela casca, com teto por pessoa e agrupamento por obra (decisão já registrada em S-29)
-- [ ] T-58.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo relatorios` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-58.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo relatorios` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-59 — E8: SLA no pós-venda
 **Estado:** pendente
@@ -358,7 +358,7 @@ Assistência técnica sem SLA não tem como prometer prazo. Confronto §3.5.
 - [ ] T-59.1 — Política de SLA por tipo de ocorrência, com prazo calculado e nunca digitado
 - [ ] T-59.2 — `tempo até SLA` e `taxa de SLA` como indicadores
 - [ ] T-59.3 — Carga por atendente e avaliação pós-atendimento
-- [ ] T-59.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo sac` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-59.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo sac` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-60 — E9: solicitação de documento com cobrança
 **Estado:** pendente
@@ -372,7 +372,7 @@ e acompanha. Confronto §3.5.
 - [ ] T-60.1 — Pedido de documento com destinatário, prazo e pasta de destino
 - [ ] T-60.2 — Cobrança pelo plano de execução (mesma carga de E7)
 - [ ] T-60.3 — Versão com bloqueio e progresso de assinatura (`concluídos ÷ requeridos`)
-- [ ] T-60.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo documentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-60.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo documentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-61 — E10: filtro global e snapshot de indicador
 **Estado:** pendente
@@ -385,7 +385,7 @@ datada, que é o que permite comparar. Confronto §3.5.
 - [ ] T-61.1 — Estado de filtro no servidor, aplicado a todas as visualizações do painel
 - [ ] T-61.2 — Snapshot datado do indicador em tabela própria
 - [ ] T-61.3 — Definição do KPI legível ao usuário, não só ao código
-- [ ] T-61.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo relatorios` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-61.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo relatorios` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-62 — E11: probabilidade e previsão no funil
 **Estado:** pendente
@@ -399,7 +399,7 @@ temos lista; sem probabilidade não temos previsão. Confronto §3.1.
 - [ ] T-62.2 — Receita rateada e previsão por período de fechamento
 - [ ] T-62.3 — Margem por linha na proposta (`(preço − custo) × quantidade`)
 - [ ] T-62.4 — **Herdada da T-34.10.1**, que ficava presa numa sprint de Administração esperando algo que não existia: ao criar o marcador de cartão, reavaliá-lo contra o critério da T-34.10 — dimensão que gera contagem usa lista cadastrada; vocabulário de tela, não
-- [ ] T-62.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo crm` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-62.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo crm` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.1, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-63 — E12: antes-e-depois na trilha de auditoria
 **Estado:** pendente
@@ -413,7 +413,7 @@ em prova. Confronto §3.5.
 - [ ] T-63.1 — `write_audit` passa a receber valor anterior
 - [ ] T-63.2 — Tela de auditoria mostra a diferença, não só o evento
 - [ ] T-63.3 — Prova por sabotagem: alteração sem antes-e-depois reprova
-- [ ] T-63.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo auditoria` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-63.4 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo auditoria` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ---
 
@@ -1773,7 +1773,7 @@ de material nem de mão de obra em tela nenhuma.
 - [x] T-37.12 — **Referência oficial não muda de dono.** O registro original desta tarefa estava **errado no diagnóstico**: eu havia anotado "gravável por qualquer membro interno" a partir da política (`for all`) e do privilégio, sem executar. Na execução, a escrita direta é negada — existe o gatilho `guard_official_cost_reference`, que eu não tinha procurado. Mas a tentativa por outro caminho achou um buraco de verdade, mais estreito e pior: **no `UPDATE` a guarda lia `new.source_key`**, o valor novo do campo que decide se ela se aplica. Medido: `update cost_compositions set source_key='PROPRIA'` é permitido, e depois disso o custo de 208,33 vira 1,00 — **com `source_url`, `source_sha256` e `base_date` intactos ao lado**, atestando um número que já não é aquele. Corrigido para olhar o que a linha **é**: recusa no `UPDATE` quando era oficial **ou** quando passaria a ser (senão a composição da casa seria promovida a oficial), conferência contra o pai antigo e novo nos filhos, e o CUB entrou na mesma proteção — dependia só da RLS de leitura, com o privilégio de escrita ainda concedido. Provado com a **mesma** prova de antes, sem alterá-la: cinco tentativas, cinco negadas; e os quatro caminhos legítimos conferidos um a um. **VACINA-061**, que registra também o erro de método: inferência de esquema encontra o que se procura, execução encontra o que não se procurava
 - [x] T-37.11 — **Função de diagnóstico global removida, na ordem certa.** O pré-requisito era o hardening R3B, que estava no débito congelado da S-22 — e enquanto ele não entrasse, a função não era órfã: a policy `observability_diagnostics_select` a chamava, e o `drop` teria falhado por dependência ou aberto o diagnóstico global. Alcance do R3B conferido **antes** de aplicar: nenhuma função `SECURITY INVOKER` chama `record_audit_event` ou `write_audit` (as 21 que usam são todas `definer`), e a tabela de diagnóstico está vazia, então restringir a leitura global não esconde nada hoje. Aplicado, e só então a remoção — com policies dependentes, funções dependentes e dependências de catálogo **todas em zero**. O débito congelado do R3B saiu da lista: 18 arquivos sem aplicação viraram 17
 - [x] T-37.11.1 — Erro meu, pego pelo `validate:migrations-applied`: apliquei os dois corpos de função do R3B com **nome lógico diferente** do arquivo, criando um "aplicado sem arquivo". É exatamente o que a VACINA-057 existe para pegar, e pegou na primeira execução. Corrigido no registro — a DDL pertence ao R3B e já constava por lá
-- [ ] T-37.15 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo orcamentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-37.15 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo orcamentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.4, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ---
 
@@ -2075,7 +2075,7 @@ plataforma de construção, é a tela que o dono da empresa abre primeiro.
 - [ ] T-47.2 — Custo consumido por obra a partir de compras, estoque, folha e despesas, sempre pelo centro de custo
 - [ ] T-47.3 — **O teste que o material dá pronto:** procurar registros economicamente ligados à obra e **sem** vínculo analítico. São o que some do painel; no INNOV, custo lançado sem centro de custo
 - [ ] T-47.4 — Portão que reprova soma entre maturidades, provado por sabotagem
-- [ ] T-47.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo obras` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-47.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo obras` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.2, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ---
 
@@ -2093,7 +2093,7 @@ alto retorno de manutenção.
 - [ ] T-48.2 — Portão: relatório sem ficha não entra
 - [ ] T-48.3 — Matriz de integração — **o que** trafega entre módulos, não só que existe dependência. O `MODULE_REGISTRY` declara `dependencies` e isso não diz o que atravessa
 - [ ] T-48.4 — Quarta pergunta de segurança do material, que é a que falta ao INNOV: conferir sistematicamente que server action não contorna o que a RLS nega. As perguntas 1 e 3 já viraram `VACINA-053` e `VACINA-064` pelo caminho da dor
-- [ ] T-48.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo relatorios` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-48.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo relatorios` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ---
 
@@ -2218,7 +2218,7 @@ analítica seria relatório sobre um eixo que não existe.
 - [ ] T-64.4 — **Distribuição analítica com percentual**, permitindo um custo pertencer a mais de uma obra — o mecanismo do qual E3 e E4 dependem
 - [ ] T-64.5 — Lançamento contábil com partida dobrada conferida no banco, e estorno como lançamento novo, nunca exclusão de linha
 - [ ] T-64.6 — Prova por sabotagem: lançamento desbalanceado reprova; soma de percentuais analíticos fora da distribuição pretendida reprova
-- [ ] T-64.7 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo contabilidade` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-64.7 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo contabilidade` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.6, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-65 — Contabilidade: os relatórios que respondem "como a empresa está"
 
@@ -2236,7 +2236,7 @@ título, e a deles tem pergunta.
 - [ ] T-65.5 — **Fluxo de Caixa** separado em operacional, investimento e financiamento
 - [ ] T-65.6 — Resumo Executivo: margem bruta, margem líquida, ROI e prazos médios
 - [ ] T-65.7 — Cada relatório com a pergunta declarada e a definição do número legível ao usuário, não só ao código
-- [ ] T-65.8 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo contabilidade` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-65.8 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo contabilidade` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.6, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-66 — IA operadora: o registro de atos e o portão da autonomia
 
@@ -2257,7 +2257,7 @@ repositório mede que não dura.
 - [ ] T-66.4 — Prova por sabotagem das três direções, com o caso legítimo passando — portão que só sabe reprovar não mede
 - [ ] T-66.5 — Generalizar orçamento, trava e citação da ponte da S-22 para além do canal, **sem reimplementar**: partir de `20260804200000_stage22_ai_bridge.sql` com as correções da VACINA-065
 - [ ] T-66.6 — Degradação segura: sem orçamento, sem provedor ou sem confiança, cai para N0 e avisa; nunca para em silêncio
-- [ ] T-66.7 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo ia` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-66.7 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo ia` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.6, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-67 — IA operadora: o primeiro trabalho, que é cobrar o que falta
 
@@ -2274,7 +2274,7 @@ qualquer ato acima de N1.
 - [ ] T-67.3 — Cada aviso cita a fonte e oferece a ação; nenhum grava sozinho
 - [ ] T-67.4 — Teto de volume por tipo de ato: 500 avisos numa madrugada é incidente, mesmo com cada um certo
 - [ ] T-67.5 — Medir taxa de acerto com denominador declarado, antes de qualquer conversa sobre subir nível
-- [ ] T-67.6 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo ia` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-67.6 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo ia` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.6, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-68 — RH: o que falta para o módulo existir para o usuário
 
@@ -2297,7 +2297,7 @@ aplicadas: `list_my_modules` resolve contra `app_modules`, e a chave não está 
 - [ ] T-68.3 — Custo/hora no cadastro do funcionário, com vigência — mesma peça de **E1** (S-52), que mora em `M-EQUIPES` e é lida aqui
 - [ ] T-68.4 — Conferência da persona e da rotina operacional contra `PERSONAS-E-ROTINAS.md`, com as quatro perguntas respondidas para as telas que já existem
 - [ ] T-68.5 — Confronto com o manual (§3.5): o que fica de fora e por quê — recrutamento não é gargalo hoje; frota é `◐` e depende de decisão
-- [ ] T-68.6 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo rh` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-68.6 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo rh` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-69 — Aplicar no banco o que o repositório já tem
 
@@ -2400,7 +2400,7 @@ módulos cujo menu é majoritariamente atalho para vizinho. Confronto em
 - [ ] T-70.2 — **Bloqueado por S-69.** Filas do canal aplicadas, sem as quais o gateway não drena
 - [ ] T-70.3 — SLA de atendimento, compartilhado com `M-SAC` (E8, S-59) — a política é a mesma, a tela é que difere
 - [ ] T-70.4 — Persona e rotina, com as quatro perguntas de `PERSONAS-E-ROTINAS.md`
-- [ ] T-70.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo whatsapp` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-70.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo whatsapp` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-71 — Administração: escrever o que "finalizado" significa, e fechar a diferença
 
@@ -2429,7 +2429,7 @@ começando por este.
 - [ ] T-71.2 — Conferir a diferença entre a definição e as 10 páginas de hoje, e listar o que falta como tarefa
 - [ ] T-71.3 — **Portão**: estender a verificação de *Definition of Done* — hoje só o `estoque` — para exigir que todo Marco de módulo aponte a sua, e reprovar Marco `concluído` cuja definição não exista. Provar por sabotagem, com o caso legítimo passando
 - [ ] T-71.4 — Só então conferir o Marco de novo, conforme a R9
-- [ ] T-71.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo administracao` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-71.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo administracao` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-72 — Equipes: capacidade, papel antes da pessoa e navegação própria
 
@@ -2452,7 +2452,7 @@ não tem profundidade que justifique menu.
 - [ ] T-72.5 — Declarar as tabelas do módulo em `diretrizes/tabelas-por-modulo.json` — já feito para `equipes` em 11/08/2026, e é pré-requisito dos itens de dado do checklist
 - [ ] T-72.6 — Percorrer o [`CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`](CHECKLIST-DE-CONCLUSAO-DE-MODULO.md) inteiro, registrando evidência de cada item de verificação humana; item sem evidência conta como não feito
 - [ ] T-72.7 — Conferir o Marco pela **R9** com o checklist e a definição de pronto na mão, e só então decidir o fechamento
-- [ ] T-72.8 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo equipes` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-72.8 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo equipes` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.2, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
 ## Sprint S-73 — Transformar em teste as vacinas universais que só têm conferência humana
 
@@ -2664,5 +2664,5 @@ existem no repositório e nenhuma foi usada.
 - [ ] T-78.2 — Conferir quantos dos 22 tipos do catálogo (`lib/documentos/tipos.ts`) precisam de modelo padrão e quais nascem vazios por natureza
 - [ ] T-78.3 — Semear o mínimo que faz a empresa nova ter o que emitir, com a origem declarada em cada linha
 - [ ] T-78.4 — **Prova**: repetir o ensaio da T-69.4 numa empresa nova e afirmar `modelos_semeados > 0`, com o mesmo bloco que se desfaz por construção
-- [ ] T-78.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo documentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio
+- [ ] T-78.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo documentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
