@@ -2265,15 +2265,14 @@ aplicadas: `list_my_modules` resolve contra `app_modules`, e a chave não está 
 
 ## Sprint S-69 — Aplicar no banco o que o repositório já tem
 
-**Estado:** bloqueada
+**Estado:** concluída
 **Marco:** M-SEGURANCA
 
-**Bloqueada em 11/08/2026, aguardando a decisão do proprietário.** A T-69.1 é a
-única tarefa que uma sessão assistida executa sozinha, e ela terminou: o alcance
-foi medido no banco vivo e está apresentado abaixo. As quatro restantes só
-começam depois do aval — aplicar migration em banco de produção é externo e
-irreversível. Declarar `em andamento` ocuparia a vaga única da R3 sem haver
-trabalho em curso, que é exatamente o erro corrigido na S-43.
+**Aval dado pelo proprietário e executado em 12/08/2026.** O alcance aplicado é
+o que a medição do banco vivo definiu — as duas escritas cross-tenant que
+existiam no servidor. As 68 migrations `rh_*` e as 25 `stage22_*` **não** entram
+neste lote: são operação própria, com ordem e ponto de retorno próprios, e a
+S-70, a S-76 e a T-43.3 tarefa 5 seguem esperando por elas.
 
 Aberta na conferência de Marcos de 11/08/2026. **Consolida o bloqueio que trava
 quatro Marcos ao mesmo tempo**, e por isso deixa de estar espalhada: a S-51
@@ -2327,10 +2326,26 @@ pode ser aplicada. O erro está registrado em `REGISTRO-DE-ERROS.json` como
 `medicao`, custo alto, detectado pelo advisor e não por mim.
 
 - [x] T-69.1 — **Decisão do proprietário** sobre aplicar, com o alcance definido. O alcance foi medido no banco e está acima; a decisão é do proprietário e está apresentada. **O que a sessão pode fazer sozinha terminou aqui**
-- [ ] T-69.2 — Ordem de aplicação e ponto de retorno definidos antes de qualquer execução; migration destrutiva não entra neste lote
-- [ ] T-69.3 — Aplicar com evidência da execução registrada
-- [ ] T-69.4 — **Conferir a reprovação, não só a aprovação**: chamar as duas funções vivas com sessão de outra empresa e **observar a recusa** antes de declarar corrigido; e conferir que o caso legítimo — sessão da própria empresa — continua passando
-- [ ] T-69.5 — `SUPABASE_DB_URL=... pnpm ledger:atualizar` e retirar do débito em `diretrizes/migrations-aplicadas.json` só o que foi de fato aplicado
+- [x] T-69.2 — Ordem e ponto de retorno definidos **antes** de qualquer execução. Ordem: motivos de perda, depois modelos. Ponto de retorno: as definições anteriores estão versionadas em `supabase/migrations/20260803235000_listas_cadastradas_por_escopo.sql` e `supabase/migrations/20260803160000_semear_modelos_da_empresa.sql` — reaplicar qualquer uma restaura o estado anterior. **Nenhuma das duas toca dado**: são `create or replace function`, sem DDL de tabela e sem `delete`. Conferido antes de aplicar que as cinco funções envolvidas existem no banco com a mesma assinatura e o mesmo tipo de retorno, porque `create or replace` reprova se o retorno mudou
+- [x] T-69.3 — Aplicadas as duas, com sucesso registrado pelo cliente de migration. O débito saiu de 123 para 121 arquivos sem aplicação
+- [x] T-69.4 — **Reprovação observada, não deduzida.** Com `role authenticated` e `request.jwt.claims` de um usuário que não participa da organização alvo:
+
+```
+semear_motivos_de_perda    ERROR P0001: sem acesso a esta organização (linha 6)
+semear_modelos_da_empresa  ERROR P0001: sem acesso a esta organização (linha 9)
+```
+
+  E o caso legítimo passando: o mesmo bloco com o usuário e a organização de que ele participa executa as duas sem exceção, devolvendo 0 — idempotente, nada reescrito.
+
+  **A terceira prova é a que a migration existia para não quebrar.** O risco desta correção não é o caminho do atacante, é o legítimo: o gatilho de criação de empresa dispara **antes de existir participação para conferir**, e chamar a função guardada ali quebraria o cadastro. Ensaio executado e desfeito por construção — `insert` numa empresa nova, medição, e exceção de propósito, que em bloco `do` desfaz tudo:
+
+```
+ENSAIO_DESFEITO motivos_semeados=9 modelos_semeados=0
+organizações depois do ensaio: 1     sobra do ensaio: 0
+```
+
+  Os 9 motivos são a lista inteira: o gatilho disparou e semeou. O `0` de modelos **não é falha do gatilho** — `document_templates` com `scope='PLATAFORMA'` tem **zero linhas** no banco, então não há o que copiar. É achado próprio, e está na S-78
+- [x] T-69.5 — Ledger atualizado com **só o que foi de fato aplicado**: as duas saíram do débito, `definidoras_conferem_participacao` continua nele com as cinco funções da etapa 22, que não existem no banco. `validate:migrations-applied` verde, 273 arquivos, 210 aplicadas, nenhuma divergência nova
 
 ## Sprint S-70 — WhatsApp: navegação própria e o que o gateway precisa
 
@@ -2547,3 +2562,36 @@ encolher.
 - [ ] T-77.3 — Retirar de `diretrizes/COLUNAS-SEM-MIGRATION.json` cada coluna que a linha de base passar a declarar. O portão reprova entrada órfã, então a lista se fecha sozinha
 - [ ] T-77.4 — Conferir as 23 colunas que estão na migration e não no banco: quais são etapa 22 não aplicada (esperam a S-69) e quais são resíduo de migration que nunca rodou
 - [ ] T-77.5 — **Prova**: subir um banco vazio só com as migrations e rodar `pnpm validate:colunas-existentes` contra ele. Enquanto essa prova não existir, "o repositório recria o banco" é suposição
+
+## Sprint S-78 — A biblioteca de modelos da plataforma está vazia
+
+**Estado:** pendente
+**Marco:** M-DOCUMENTOS
+
+Aberta em 12/08/2026 pelo ensaio da T-69.4, e entra no **fim** conforme a **R4**.
+
+**Como apareceu.** O ensaio de criação de empresa — feito para provar que o
+gatilho não quebrou com o guarda novo — mediu o que os gatilhos semearam:
+
+```
+motivos_semeados = 9    a lista inteira, o gatilho funcionou
+modelos_semeados = 0
+```
+
+O zero não é falha do gatilho. `document_templates` com `scope='PLATAFORMA'` e
+`archived_at is null` tem **zero linhas** no banco. Não há o que copiar.
+
+**O que isso significa na prática.** Toda empresa nova nasce sem modelo nenhum,
+e o botão *"trazer padrões da plataforma"* traz zero. O motor de documento, o
+editor, a emissão, a matriz de disponibilização e o versionamento estão
+construídos e provados — e a prateleira que eles servem está vazia. É o oposto
+do defeito usual: não falta código, falta conteúdo.
+
+Vale registrar o que a medição **não** decide: se a biblioteca deveria ser
+semeada por migration, por rotina administrativa ou por importação. As três
+existem no repositório e nenhuma foi usada.
+
+- [ ] T-78.1 — Decidir a procedência dos modelos da plataforma: quem escreve, quem aprova e como um modelo entra na biblioteca. Sem isso, semear é publicar texto sem dono
+- [ ] T-78.2 — Conferir quantos dos 22 tipos do catálogo (`lib/documentos/tipos.ts`) precisam de modelo padrão e quais nascem vazios por natureza
+- [ ] T-78.3 — Semear o mínimo que faz a empresa nova ter o que emitir, com a origem declarada em cada linha
+- [ ] T-78.4 — **Prova**: repetir o ensaio da T-69.4 numa empresa nova e afirmar `modelos_semeados > 0`, com o mesmo bloco que se desfaz por construção

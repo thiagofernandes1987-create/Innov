@@ -183,3 +183,26 @@ silenciar para sempre — uma reconcessão futura volta a ser acusada.
   `service_role` não são conferidas, porque não são alcançáveis pelo navegador.
   Se alguma delas for concedida a `authenticated` um dia, ela entra no portão
   no mesmo instante — foi isso que S4 provou.
+
+## Estado no banco — 12/08/2026
+
+O portão protege o repositório contra reincidência; ele não altera função que já
+está aplicada. Por isso o estado do banco é registro separado, e este é ele:
+
+| Função | Antes | Agora |
+| --- | --- | --- |
+| `semear_motivos_de_perda` | definidora, concedida a `authenticated`, **sem guarda** | recusa organização de que o chamador não participa |
+| `semear_modelos_da_empresa` | idem | idem |
+| as cinco da etapa 22 | **não existem no banco** | continuam não existindo |
+
+Recusa observada em sessão de usuário que não participa da organização alvo —
+`P0001: sem acesso a esta organização` — e caso legítimo passando, com as duas
+devolvendo 0 por idempotência.
+
+**A prova que faltava não era a do atacante, era a do caminho legítimo.** O
+gatilho de criação de empresa dispara antes de existir participação para
+conferir; chamar a função guardada ali quebraria o cadastro. Por isso os dois
+gatilhos passaram a semear direto, com o mesmo conteúdo, e o ensaio de criação
+de empresa — desfeito por construção — confirmou 9 motivos semeados e nenhuma
+sobra.
+
