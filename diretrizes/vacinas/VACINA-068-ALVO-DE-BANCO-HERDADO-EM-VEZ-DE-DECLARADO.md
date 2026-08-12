@@ -57,6 +57,51 @@ alvo" não é uma operação possível: é uma intenção.
 Nas duas primeiras o erro custou uma execução de CI. Nesta, custou a confiança
 em todo número de banco produzido em dois dias.
 
+### As duas causas mecânicas, medidas em 12/08/2026
+
+*(acrescentado depois de recuperar o acesso ao banco)*
+
+Ficar em "eu escolhi de uma lista e não confiri" era autocrítica, não diagnóstico.
+Medido, o mecanismo é pior e mais específico:
+
+```
+list_projects        → 1 projeto:      wyeojufebtwblsubkunr
+list_organizations   → 1 organização:  wyczhqzyfyaqgdeelbuj
+get_project(jpqoje…) → responde:       org vercel_icfg_JXX1qOSYgSSnIvOjuMACVBnV
+```
+
+**O projeto certo não aparece na listagem.** Ele pertence a uma organização
+gerida pelo Vercel, e nenhuma das duas ferramentas de descoberta a enumera —
+mas o acesso direto funciona. Escolher "da lista" **nunca poderia** ter dado o
+projeto certo: só o alcança quem já sabe o `ref` e pergunta por ele. Uma lista
+que omite o alvo certo e mostra um parecido é pior que uma lista vazia, porque
+a vazia obriga a perguntar.
+
+A segunda, que fecha o caminho do diagnóstico por ensaio: **`execute_sql` do MCP
+roda em transação somente-leitura** (`25006: cannot execute CREATE TABLE in a
+read-only transaction`). Toda medição por ali é inofensiva por construção, e
+nenhuma migration pode ser ensaiada e desfeita por ela.
+
+### A variante que este portão não pega: chave e URL discordando
+
+Encontrada em 12/08/2026, auditando as chaves a pedido do proprietário. O
+`.env.local` tinha:
+
+```
+NEXT_PUBLIC_SUPABASE_URL              → jpqoje…   (certo)
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY  → wyeoju…   (errado)
+```
+
+Ao reapontar o arquivo eu troquei a URL e deixei a chave: a metade visível
+corrigida e a invisível intacta, **dentro da correção do erro que é exatamente
+isso**.
+
+O que torna a variante silenciosa: a chave publicável nova (`sb_publishable_…`)
+**não carrega o `ref`**, ao contrário do JWT anon legado, que o traz na claim
+`ref`. Não há como conferir olhando — só comparando com a chave real do projeto.
+Portão para isso é a T-79.7, e ele não pode viver no repositório: a chave de
+produção está no Vercel, fora do alcance de qualquer validador de CI.
+
 ## Como foi detectado
 
 Pelo proprietário, ao ver o `ref` numa mensagem minha e responder

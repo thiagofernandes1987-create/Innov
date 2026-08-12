@@ -2771,7 +2771,26 @@ obras ..................... 0
   **Não é caso de migrar dados.** O banco correto tem uma organização, um cliente e nenhuma obra — é ambiente novo, não espelho de produção. Copiar o outro por cima seria semear um banco com dado de um ambiente paralelo.
 
   **E há uma causa que nenhuma medição anterior tinha visto:** a branch `main` deste projeto está em **`MIGRATIONS_FAILED` desde 22/07/2026**. As 101 tabelas de diferença não são atraso de quem esqueceu de aplicar — são de uma sequência que **tentou e quebrou**, e ficou três semanas nesse estado. Aplicar por cima sem saber onde parou repete a falha
-- [ ] T-79.2 — Refazer as sete medições da tabela acima contra `jpqoje…`, e corrigir cada documento com o número novo e a data
+- [ ] T-79.2 — Refazer as sete medições da tabela acima contra `jpqoje…`, e corrigir cada documento com o número novo e a data.
+
+  **Medido em 12/08/2026, com acesso ao banco certo.** Estrutura:
+
+```
+tabelas base (relkind r,p) ....... 144
+views ............................ 11
+funções em public ................ 196   (158 são security definer)
+migrations registradas ........... 143   última: 20260721221145
+migrations pendentes ............. 166   1,2 MB de SQL, 7 destrutivas
+```
+
+  **Duas causas mecânicas novas, que explicam o erro melhor do que "eu não confiri":**
+
+  1. **O projeto certo não aparece na listagem.** `list_projects` devolve **1** projeto — `wyeoju…` — e `list_organizations` devolve **1** organização. O `jpqoje…` pertence a `vercel_icfg_JXX1qOSYgSSnIvOjuMACVBnV`, uma organização gerida pelo Vercel que nenhuma das duas enumera. `get_project('jpqoje…')` responde normalmente. Escolher "da lista" **nunca poderia** ter dado o projeto certo: só o alcança quem já sabe o `ref` e pergunta direto.
+  2. **`execute_sql` do MCP é transação somente-leitura** (`25006: cannot execute CREATE TABLE in a read-only transaction`). Toda medição por ali é inofensiva por construção — e nenhum ensaio de migration pode ser feito por ela.
+
+  **Um defeito meu, encontrado ao auditar as chaves a pedido do proprietário:** o `.env.local` tinha `NEXT_PUBLIC_SUPABASE_URL` apontando para `jpqoje…` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` sendo a chave publicável do `wyeoju…`. Ao reapontar na T-79.1 eu troquei a URL e deixei a chave — a metade visível corrigida e a invisível intacta, dentro da correção do erro que é exatamente isso. Confirmado por comparação com as chaves reais dos dois projetos e corrigido em 12/08/2026. A chave publicável nova (`sb_publishable_…`) **não carrega o `ref`**, ao contrário do JWT anon legado: é por isso que URL e chave podem discordar em silêncio.
+
+  **Falta:** as medições de população — 77 tabelas sem `create table`, 7 colunas fora das migrations, funções chamáveis por `anon`, biblioteca de modelos — só fazem sentido depois que as 166 pendentes entrarem. Medir população num banco três semanas atrás do repositório mede o atraso, não o defeito
 - [x] T-79.3 — **Decidido em 12/08/2026: ficam como estão.** Decisão delegada pelo proprietário, e o motivo é um só e decisivo — **reverter reintroduziria uma escrita cross-tenant viva.**
 
   O que foi alterado no `wyeoju…`, e nada além disso:
@@ -2826,3 +2845,13 @@ o mesmo, apontado para Postgres local ... segue, o caso legítimo passa
   Duas correções nasceram da própria sabotagem, e as duas eram defeito real: a acusação aos seis scripts, e uma mensagem que imprimia `wyeoju… (supabase-crimson-bridge)` — batizando o projeto desviado com o nome do certo.
 
   Registrado como [`VACINA-068`](vacinas/VACINA-068-ALVO-DE-BANCO-HERDADO-EM-VEZ-DE-DECLARADO.md). Três citações de documento foram corrigidas no caminho: duas eram comando copiável apontando para o projeto errado (`docs/ETAPA-10`), e passaram a ler o `ref` da declaração; uma era registro sem data (`docs/ETAPA-17-ESTOQUE`), e ganhou a data em vez de ser reescrita
+- [ ] T-79.6 — **Aplicar as 166 migrations pendentes em `jpqoje…`**, decidido pelo proprietário em 12/08/2026 (*"vamos migrar tudo para o jpqoje"*).
+
+  **A primeira pendente já entrou, e ela derruba a hipótese do diagnóstico.** `20260722104500_stage20_sac_attachment_security` aplicou **sem erro** — logo o `MIGRATIONS_FAILED` de 22/07/2026 **não veio dela**. A falha está adiante na fila, ou no ambiente de preview da branch; não em quebrar no primeiro passo.
+
+  Transcrição conferida: o `md5` do que entrou no banco é `b9e45a559abbaafb912f89b7c4a4bd3e`, **idêntico** ao do arquivo do repositório. Registro do carimbo: o `apply_migration` grava a versão com a data de hoje (`20260812232835`), não a do arquivo — o casamento do ledger é por nome lógico, então continua batendo, mas a ordem gravada no banco deixa de refletir a ordem de escrita.
+
+  **Por que as outras 166 não seguem por aqui:** são **1,2 MB** de SQL, e o `apply_migration` recebe o texto digitado por mim, não lido do arquivo. Transcrever 1,2 MB em 166 chamadas é caro e, pior, cada uma é uma chance nova de o banco divergir do repositório em silêncio — o defeito que este projeto inteiro combate. O mecanismo certo já existe e **lê o arquivo**: `scripts/aplicar-migrations-pendentes.mjs` por `psql`, no workflow `aplicar-migrations`.
+
+  **Bloqueio único e pequeno:** `secrets.SUPABASE_DB_URL` precisa apontar para `jpqoje…`. O portão da T-79.5 **recusa** se apontar para outro lugar — é a proteção funcionando, não obstáculo. As 7 destrutivas ficam fora do lote e são decisão própria de cada uma
+- [ ] T-79.7 — **Portão**: chave e URL do Supabase precisam concordar. A chave publicável nova (`sb_publishable_…`) **não carrega o `ref`**, ao contrário do JWT anon legado — então `NEXT_PUBLIC_SUPABASE_URL` pode apontar para um projeto e a chave pertencer a outro, e nenhum validador vê. Foi o que aconteceu com o `.env.local`, por engano meu na T-79.1. O portão do repositório não alcança segredo do Vercel; o que alcança é conferência em tempo de execução, na criação do cliente. Provar por sabotagem com chave trocada
