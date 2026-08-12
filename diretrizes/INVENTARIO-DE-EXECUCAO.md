@@ -2705,3 +2705,56 @@ existem no repositório e nenhuma foi usada.
 - [ ] T-78.4 — **Prova**: repetir o ensaio da T-69.4 numa empresa nova e afirmar `modelos_semeados > 0`, com o mesmo bloco que se desfaz por construção
 - [ ] T-78.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo documentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
+
+## Sprint S-79 — Tudo que foi medido no banco em 11 e 12/08 está no projeto errado
+
+**Estado:** pendente
+**Marco:** M-SEGURANCA
+
+Aberta em 12/08/2026, no fim do documento conforme a **R4**. É a correção mais
+cara desta série, e o erro é meu.
+
+**O que aconteceu.** O MCP do Supabase desta sessão estava configurado para o
+projeto `wyeoju…`. Todo o trabalho de banco de 11 e 12/08 — medição e aplicação —
+foi contra ele. O projeto correto desta plataforma é **`jpqoje…`**, informado
+pelo proprietário em 12/08.
+
+**A classe do erro é a que este repositório vem catalogando o dia inteiro:**
+medir a coisa parecida em vez da coisa. O `validate:prevencao-declarada` media o
+disco em vez do repositório; a S-69 media o repositório em vez do banco; aqui eu
+medi **um banco** em vez **do** banco. A diferença é que nas duas primeiras o
+erro custou uma execução de CI, e nesta ele custa a confiança em todo número de
+banco produzido nos dois dias.
+
+### O que deixa de valer até ser remedido
+
+| Afirmação | Onde está escrita |
+| --- | --- |
+| 245 tabelas, 252 funções em `public` | `ARQUITETURA.md` §13 |
+| 77 tabelas sem `create table` em migration | `ARQUITETURA.md` §13, S-77 |
+| 7 colunas no banco e não nas migrations | `COLUNAS-SEM-MIGRATION.json` |
+| 121 migrations pendentes; 210 aplicadas | `migrations-aplicadas.json` |
+| 10 funções chamáveis por `anon`; 20 de 120 alvos existem | S-76 |
+| `document_templates` com `scope='PLATAFORMA'` = 0 linhas | S-78 |
+| Duas escritas cross-tenant corrigidas no banco | S-69, `VACINA-065` |
+
+Nenhuma delas é necessariamente falsa para o projeto correto — **nenhuma foi
+verificada nele.** É a diferença entre estar errado e não ter medido, e as duas
+exigem o mesmo trabalho.
+
+### O que foi escrito no projeto errado
+
+Duas migrations de semeadura, aplicadas em 12/08 com aval do proprietário — que
+foi dado para o alvo que eu apresentei, e o alvo estava errado. As duas são
+`create or replace function`, **não tocam dado**, e o efeito é endurecer: as
+funções passaram a recusar organização de que o chamador não participa. O ensaio
+de criação de empresa foi desfeito por construção e não deixou linha.
+
+O ledger foi corrigido: as duas **voltaram ao débito**, porque no projeto correto
+continuam pendentes.
+
+- [ ] T-79.1 — Reapontar o MCP e conferir a identidade do banco **antes** de qualquer medição: `current_database()`, `inet_server_addr()` e a contagem de tabelas, comparados com o que o proprietário confirma
+- [ ] T-79.2 — Refazer as sete medições da tabela acima contra `jpqoje…`, e corrigir cada documento com o número novo e a data
+- [ ] T-79.3 — Decidir o que fazer no projeto `wyeoju…`: reverter as quatro funções para a definição anterior, ou deixar como está por serem mudanças que só endurecem. **Decisão do proprietário**, com o motivo registrado
+- [ ] T-79.4 — Conferir para onde `secrets.SUPABASE_DB_URL` aponta antes de qualquer nova execução do `aplicar-migrations`
+- [ ] T-79.5 — **Portão**: fazer o `aplicar-migrations` e os scripts de leitura exigirem que o `project_ref`/banco alvo seja declarado e conferido, em vez de herdado de configuração invisível. Provar por sabotagem com alvo trocado
