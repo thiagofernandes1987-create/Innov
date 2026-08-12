@@ -236,7 +236,23 @@ project_team_members.hourly_cost   sem escritor e sem leitor desde 19/07/2026
 O módulo **mostra** custo de mão de obra e não **calcula** com ele. O trabalho é
 dar **dono, vigência e uso** ao que já existe — não criar campo.
 
-- [ ] T-52.1 — Decidir o dono: o custo pertence à **pessoa**, não à linha de equipe de uma obra. Hoje a mesma pessoa em duas obras são duas linhas, dois valores e nenhum vínculo
+- [x] T-52.1 — **Decidido em 12/08/2026, e a medição no banco vivo mudou o desenho.** O custo pertence à **pessoa, com vigência**; a alocação **referencia** e só sobrescreve quando declarado.
+
+  Três números decidiram, e nenhum deles é opinião:
+
+```
+rh_workers existe no banco ............. NÃO   (as 68 migrations rh_* não estão aplicadas)
+project_team_members ................... 0 linhas, 0 com custo
+project_resources ...................... 2 linhas, as 2 do tipo LABOR
+```
+
+  **Por que o dono não pode ser `rh_workers`.** Seria o lugar natural — é o cadastro de pessoa da plataforma — mas ele **não existe no servidor**. Ancorar o E1 nele acorrentaria sete módulos ao lote de RH, que é operação própria e ainda não autorizada. O custo canônico nasce numa tabela do módulo `equipes`, com vínculo **opcional** a `rh_workers` para quando o RH for aplicado.
+
+  **Por que `project_resources.hourly_cost` sobrevive.** Ele não é custo de pessoa: é custo de **recurso** — retroescavadeira, material, subempreiteiro. Fundir os dois apagaria a distinção. Recurso `LABOR` que representa uma pessoa nomeada passa a apontar para ela; equipe genérica — *"2 pedreiros"* — mantém custo próprio.
+
+  **Por que `project_team_members.hourly_cost` morre.** Zero linhas, zero com custo, sem escritor e sem leitor desde 19/07. Remover não perde dado nenhum — é a coluna que a T-52.3 já apontava como morta, agora com o número que autoriza a remoção sem cerimônia.
+
+  A consequência para as outras tarefas: a T-52.2 (vigência) passa a valer sobre a tabela nova do `equipes`, não sobre `project_team_members`; e a T-52.3 deixa de ser decisão e vira execução.
 - [ ] T-52.2 — Migration de **vigência**: alterar o custo abre período novo e não reescreve o passado. Sem isso, corrigir um valor muda o custo já apurado de trimestre fechado
 - [ ] T-52.3 — Resolver as duas colunas existentes: qual sobrevive, qual é migrada e qual é removida. `project_team_members.hourly_cost` é coluna morta e a remoção é migration destrutiva — decisão registrada, não silenciosa
 - [ ] T-52.4 — Campo no cadastro, com `view_sensitive_financials` decidindo quem vê; guarda de participação em qualquer RPC nova, conforme VACINA-065
@@ -2529,8 +2545,38 @@ conhecimento do motor, **não por teste**. Se estiver errado, o efeito aparece
 como gatilho que para de disparar — e é por isso que a conferência exige
 observar o comportamento, não só a ausência de erro na aplicação.
 
+### Preparo executado em 12/08/2026 — e ele reprova a aplicação como está
+
+Ordem e ponto de retorno pedidos antes de qualquer execução, no mesmo formato da
+S-69. O ponto de retorno é trivial: revogação de privilégio se desfaz com
+`grant`, e os dois lotes não tocam corpo de função nem dado.
+
+**O que impede é outra coisa, e só apareceu ao medir o banco:**
+
+| | |
+| --- | ---: |
+| Funções que os dois lotes citam | **120** |
+| Existem no banco | **20** |
+| **Não existem** | **100** |
+| Das 20 vivas, ainda chamáveis por `anon` | **10** |
+
+`revoke ... on function X` **erra se X não existe**. Cem dos cento e vinte
+comandos abortariam a transação, e os dois lotes falhariam inteiros na primeira
+linha de RH ou de etapa 22 — que é a maioria deles.
+
+A causa é a mesma da S-77: os lotes foram escritos contra as **407 funções do
+repositório**, e o servidor tem **252**. As 100 ausentes são de `rh_*` e
+`stage22_*`, que não estão aplicadas.
+
+**Consequência para o alcance.** O ganho real de segurança hoje são **10 funções
+chamáveis por `anon`** — não 120. As outras 110 são correção que só passa a valer
+quando os módulos delas forem aplicados, e aí os lotes já estarão no lugar certo
+da ordem.
+
+- [ ] T-76.0 — **Refazer os dois lotes filtrados pelo que existe no banco**, ou torná-los tolerantes à ausência (`do $$ ... if to_regprocedure(...) is not null ...`). Decidir qual das duas: filtrar perde a proteção automática quando o módulo for aplicado; tolerar mantém, ao custo de um lote que não falha quando deveria
+
 - [ ] T-76.1 — **Bloqueado por S-69.** Aplicar os dois lotes
-- [ ] T-76.2 — `has_function_privilege('anon', ..., 'EXECUTE')` falso para as 120, conferido em consulta e não em suposição
+- [ ] T-76.2 — `has_function_privilege('anon', ..., 'EXECUTE')` falso para as **10 que existem e ainda respondem a `anon`** — o número foi medido em 12/08/2026, e não é 120. Conferido em consulta, não em suposição
 - [ ] T-76.3 — **Observar a recusa**: chamar como `anon` uma das 5 concedidas a `authenticated` e ver negar; chamar como `authenticated` e ver passar
 - [ ] T-76.4 — **Conferir a suposição do gatilho**: disparar um `insert`/`update` que aciona um dos 42 gatilhos revogados e confirmar que ele ainda dispara
 

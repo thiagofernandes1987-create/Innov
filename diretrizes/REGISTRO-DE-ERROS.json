@@ -482,6 +482,16 @@
       "tinha_portao": false,
       "detectado_por": "revisão própria, ao conferir o campo que o parser expõe",
       "custo": "medio"
+    },
+    {
+      "data": "2026-08-12",
+      "o_que": "Os dois lotes de revogação de EXECUTE foram escritos contra as 407 funções do repositório; o banco tem 252. De 120 alvos, 100 não existem, e `revoke` em função inexistente aborta a transação — os lotes falhariam inteiros se aplicados",
+      "familia": "medicao",
+      "onde": "supabase/migrations/2026081117/18*_revogar_execute_de_public_lote_*.sql",
+      "vacina": "VACINA-057",
+      "tinha_portao": false,
+      "detectado_por": "preparo da aplicação, ao medir o banco antes de executar",
+      "custo": "alto"
     }
   ]
 }
