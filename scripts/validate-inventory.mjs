@@ -35,7 +35,7 @@ for (const line of lines) {
 for (const line of lines) {
   const heading = line.match(/^## Sprint (S-\d+)\s+—\s+(.+)$/);
   if (heading) {
-    current = { id: heading[1], name: heading[2].trim(), state: null, marco: null, open: 0, done: 0, abertas: [] };
+    current = { id: heading[1], name: heading[2].trim(), state: null, marco: null, open: 0, done: 0, abertas: [], corpo: [] };
     sprints.push(current);
     continue;
   }
@@ -45,6 +45,7 @@ for (const line of lines) {
   // fazer o validador perder as tarefas que vêm depois dela.
   if (/^#{1,2}\s/.test(line)) { current = null; continue; }
   if (!current) continue;
+  current.corpo.push(line);
 
   const state = line.match(/^\*\*Estado:\*\*\s*(.+?)\s*$/);
   if (state) { current.state = state[1]; continue; }
@@ -172,6 +173,44 @@ for (const [id, marco] of marcos) {
     errors.push(`Regra R9 violada: o Marco ${id} está "concluído" sem nenhuma sprint. Marco sem sprint está "sem sprint", não concluído.`);
 }
 
+// ---------------------------------------------------------------------------
+// Sprint de Marco de módulo carrega o checklist universal.
+//
+// A crítica que abriu isto foi do proprietário: *"nas sprints temos os
+// checklist, e tem coisas que são idênticas para todos… por isso não temos os
+// checklist, você não está se atentando a isso."* Medido em 12/08/2026:
+// **28 sprints apontavam para um Marco de módulo e nenhuma citava o
+// checklist** — o documento canônico existia e não era cobrado de ninguém.
+//
+// A cobrança é por **ponteiro, não por cópia**. Repetir os nove blocos em 28
+// sprints é a R8 ao contrário: regra escrita em 28 lugares diverge em silêncio,
+// que é o defeito que a S-73 passou o dia corrigindo em código.
+//
+// Sprint `concluída` é isenta: fechou antes de o checklist existir, e reabrir
+// tarefa em sprint fechada reprovaria a R7. Falsificar o passado para satisfazer
+// uma regra nova é pior que registrar que ela nasceu depois.
+// ---------------------------------------------------------------------------
+{
+  const registry = fs.readFileSync("lib/modules/registry.ts", "utf8");
+  const chaves = new Set([...registry.matchAll(/\{\s*key:"([a-z_]+)"/g)].map(m => m[1]));
+  // Os dois módulos decididos e ainda não semeados no registry.
+  chaves.add("contabilidade");
+  chaves.add("ia");
+
+  for (const sprint of sprints) {
+    if (sprint.state === "concluída") continue;
+    if (!sprint.marco) continue;
+    const chave = sprint.marco.slice(2).toLowerCase();
+    if (!chaves.has(chave)) continue;
+    if (sprint.corpo.some(l => l.includes("checklist:modulo"))) continue;
+    errors.push(
+      `${sprint.id} aponta para o Marco de módulo \`${sprint.marco}\` e não carrega o checklist universal. ` +
+        `Acrescente uma tarefa com \`pnpm checklist:modulo ${chave}\` e o ponteiro para ` +
+        `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md — apontando, não repetindo o esqueleto (R8).`
+    );
+  }
+}
+
 if (errors.length > 0) {
   for (const error of errors) console.error(`- ${error}`);
   console.error(`\nInventário de execução reprovado: ${errors.length} problema(s).`);
@@ -180,6 +219,7 @@ if (errors.length > 0) {
 
 const totals = sprints.reduce((acc, sprint) => ({ open: acc.open + sprint.open, done: acc.done + sprint.done }), { open: 0, done: 0 });
 const byState = [...validStates].map(state => `${sprints.filter(sprint => sprint.state === state).length} ${state}`).join(", ");
+
 console.log(`Inventário de execução validado: ${sprints.length} sprints (${byState}); ${totals.done} tarefas concluídas e ${totals.open} em aberto.`);
 
 // R9, lado informativo: qual Marco pode ser fechado na próxima virada.

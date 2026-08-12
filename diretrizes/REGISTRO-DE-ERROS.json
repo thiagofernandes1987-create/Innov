@@ -11,7 +11,7 @@
     "detectado_por": "quem pegou — validador, sabotagem, proprietário, revisão própria",
     "custo": "baixo | medio | alto — o que custou até ser pego"
   },
-  "_atualizado_em": "2026-08-11",
+  "_atualizado_em": "2026-08-12",
   "ocorrencias": [
     {
       "data": "2026-08-10",
@@ -462,6 +462,26 @@
       "tinha_portao": false,
       "detectado_por": "revisão própria, ao conferir o import na página",
       "custo": "baixo"
+    },
+    {
+      "data": "2026-08-12",
+      "o_que": "O proprietário perguntou se as sprints carregavam o checklist universal. Medido: 28 sprints apontam para Marco de módulo e **nenhuma** citava o checklist. O documento canônico existia desde 11/08 e não era cobrado de ninguém",
+      "familia": "governanca",
+      "onde": "diretrizes/INVENTARIO-DE-EXECUCAO.md",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "proprietário",
+      "custo": "alto"
+    },
+    {
+      "data": "2026-08-12",
+      "o_que": "Escrevi o portão do checklist **depois** do bloco que reporta os erros e sai do processo: código morto que nunca rodou, e o validador passou verde. Além disso lia `sprint.texto`, campo que não existe no parser",
+      "familia": "portao",
+      "onde": "scripts/validate-inventory.mjs",
+      "vacina": "não é causa nova",
+      "tinha_portao": false,
+      "detectado_por": "revisão própria, ao conferir o campo que o parser expõe",
+      "custo": "medio"
     }
   ]
 }

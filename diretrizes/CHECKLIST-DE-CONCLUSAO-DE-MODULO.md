@@ -305,3 +305,26 @@ mesmo commit.
   negativo é silêncio que parece aprovação.
 - **Só `equipes` tem tabelas declaradas** em 11/08/2026. Os outros 24 saem com os
   itens de dado como "não apurável", que é a verdade, e não como aprovados.
+
+
+---
+
+## 9. Como o checklist chega às sprints — desde 12/08/2026
+
+O documento existia e **não era cobrado de ninguém**. Medido no dia em que o
+proprietário perguntou: **28 sprints apontavam para um Marco de módulo e zero
+citavam o checklist**.
+
+A cobrança entrou no `validate:inventory`, e é por **ponteiro, não por cópia**:
+toda sprint aberta cujo Marco é de módulo carrega uma tarefa com
+`pnpm checklist:modulo <chave>` e o link para este arquivo. Repetir os nove
+blocos em 28 sprints seria a R8 ao contrário — regra escrita em 28 lugares
+diverge em silêncio.
+
+Sprint `concluída` é isenta: fechou antes de o checklist existir, e reabrir
+tarefa em sprint fechada reprovaria a R7. Falsificar o passado para satisfazer
+uma regra nova é pior que registrar que ela nasceu depois — quatro sprints estão
+nessa condição (S-34, S-38, S-40 e S-41).
+
+Provado por sabotagem: sprint de módulo sem a tarefa reprova, sprint nova de
+módulo nasce reprovando, e sprint que não é de módulo continua isenta.
