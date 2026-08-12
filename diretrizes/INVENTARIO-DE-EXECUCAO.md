@@ -2855,3 +2855,37 @@ o mesmo, apontado para Postgres local ... segue, o caso legítimo passa
 
   **Bloqueio único e pequeno:** `secrets.SUPABASE_DB_URL` precisa apontar para `jpqoje…`. O portão da T-79.5 **recusa** se apontar para outro lugar — é a proteção funcionando, não obstáculo. As 7 destrutivas ficam fora do lote e são decisão própria de cada uma
 - [ ] T-79.7 — **Portão**: chave e URL do Supabase precisam concordar. A chave publicável nova (`sb_publishable_…`) **não carrega o `ref`**, ao contrário do JWT anon legado — então `NEXT_PUBLIC_SUPABASE_URL` pode apontar para um projeto e a chave pertencer a outro, e nenhum validador vê. Foi o que aconteceu com o `.env.local`, por engano meu na T-79.1. O portão do repositório não alcança segredo do Vercel; o que alcança é conferência em tempo de execução, na criação do cliente. Provar por sabotagem com chave trocada
+- [ ] T-79.8 — **A CI inteira valida o banco errado.** Medido em 12/08/2026, a pedido do proprietário (*"já verificou todas as chaves do GitHub?"*).
+
+  Valor de segredo do GitHub é *write-only* — ninguém lê, nem o assistente. Mas o que ele **faz** é observável, e foi assim que se descobriu.
+
+  Os workflows exigem **34 segredos**. Cinco deles recebem a mesma trinca Supabase: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` e `SUPABASE_SERVICE_ROLE_KEY` — `rh-browser-e2e`, `sinapi-atualizacao`, `stage11-homologation`, `stage18-concurrent-e2e` e `stage20-inventory-concurrency-e2e`.
+
+  A prova é o horário de login, não a leitura do segredo:
+
+```
+jpqoje…   0 usuários, nenhuma conta de homologação, nenhum login jamais
+wyeoju…   5 usuários, as duas contas demo
+
+           admin@innov.eng.br    12/08 23:32:51.538
+           cliente@cliente.com   12/08 23:32:51.570   <- mesmo instante
+           adm@admin.com         12/08 23:33:57.708
+           gestor@admin.com      12/08 23:34:04.497
+
+CI do PR #56, segunda execução: checks de 23:32:30 a 23:34:23
+```
+
+  As duas contas demo entrando **no mesmo instante** é a assinatura do job *"Admin + Client simultaneous Supabase E2E"*. Os segredos apontam para o `wyeoju…`.
+
+  **O que isso significa, e é maior que a T-79.6:** toda a bateria de homologação, E2E e QA visual vem passando verde contra um banco que não é o desta plataforma. Aplicar as 166 migrations no `jpqoje…` **não muda isso** — a CI continuaria verde testando o outro. Portão que mede o objeto errado não reprova nunca, e é a terceira vez que esta sprint encontra a mesma forma.
+
+  **Ordem obrigatória**, porque inverter deixa a CI vermelha sem motivo aparente:
+
+```
+1. migrations aplicadas no jpqoje…            (T-79.6)
+2. contas de homologação criadas lá           scripts/provision-homologation-users.mjs
+3. os três segredos repontados                e só então
+4. a bateria roda contra o banco certo
+```
+
+  O passo 2 não é detalhe: `jpqoje…` tem **zero** usuários. Repontar os segredos antes disso derruba os cinco workflows no login, e o erro pareceria de credencial em vez de ambiente vazio
