@@ -121,8 +121,12 @@ jobs:
             exit 1
           fi
 
+      # A prévia roda **também no modo `conferir`**, e a razão é de desenho: na
+      # primeira versão ela só era alcançável pedindo `recriar`, ou seja, quem
+      # quisesse ver o que seria apagado precisava antes armar a operação que
+      # apaga. Prévia que exige armar a bomba não é prévia.
       - name: Conferir o que seria apagado
-        if: inputs.modo == 'recriar'
+        if: inputs.modo == 'recriar' || inputs.modo == 'conferir'
         run: |
           set -o pipefail
           node scripts/recriar-banco-do-zero.mjs --conferir | tee estado-antes-do-reset.txt
