@@ -1,0 +1,32 @@
+{
+  "$comentario": [
+    "Declaração canônica do banco desta plataforma.",
+    "",
+    "Existe porque em 11 e 12/08/2026 dois dias inteiros de medição e duas",
+    "migrations foram para o projeto errado. O `project_ref` do MCP era",
+    "parâmetro de ferramenta, não configuração conferida: eu escolhi um projeto",
+    "de uma lista e nunca confiri contra nada, porque não havia nada contra o",
+    "que conferir. Este arquivo é esse 'contra o que'.",
+    "",
+    "Quem lê este arquivo: `scripts/banco-alvo.mjs`, e por ele todo script que",
+    "toca o banco. Quem confere que ele bate com o resto: ",
+    "`pnpm validate:banco-alvo`.",
+    "",
+    "Trocar o alvo é mudar esta declaração — em commit, com data e motivo. Não",
+    "é exportar uma variável diferente e seguir."
+  ],
+  "project_ref": "jpqojevrmefcvsgoffnp",
+  "nome_de_exibicao": "supabase-crimson-bridge",
+  "host_direto": "db.jpqojevrmefcvsgoffnp.supabase.co",
+  "declarado_em": "2026-08-12",
+  "declarado_por": "proprietário",
+  "por_que": "Projeto apontado pelo Vercel e confirmado pelo proprietário em 12/08/2026. É o banco desta plataforma.",
+  "historico": [
+    {
+      "project_ref": "wyeojufebtwblsubkunr",
+      "usado_ate": "2026-08-12",
+      "o_que_foi": "Projeto paralelo, usado por engano em 11 e 12/08/2026. Toda medição de banco daqueles dois dias saiu dele. As citações datadas nos documentos ficam como estão: falsificar registro é pior que registro incômodo.",
+      "estado": "não é o alvo; a desativação dele é decisão separada do proprietário"
+    }
+  ]
+}

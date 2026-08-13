@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import { recusarBancoDaPlataforma } from "./banco-alvo.mjs";
 
 const files = [
   "supabase/tests/messaging-multiprovider/fixture.sql",
@@ -19,6 +20,10 @@ for (const file of files) {
 }
 
 const url = process.env.DATABASE_URL ?? "";
+// Banco descartável: este script cria e derruba um banco no servidor apontado
+// por DATABASE_URL. Alcançar um projeto Supabase aqui não é alvo errado — é
+// `drop database` no lugar errado (S-79).
+recusarBancoDaPlataforma(url);
 const database = process.env.MESSAGING_RUNTIME_LEASE_TEST_DB ?? "messaging_runtime_lease_test";
 
 function psql(args) {

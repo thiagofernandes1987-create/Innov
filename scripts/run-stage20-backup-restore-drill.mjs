@@ -3,6 +3,7 @@ import os from"node:os";
 import path from"node:path";
 import{createHash,randomUUID}from"node:crypto";
 import{spawn}from"node:child_process";
+import{anunciarAlvoOuSair,refDaUrl}from"./banco-alvo.mjs";
 
 const reportPath="stage20-backup-restore-report.json";
 const sourceUrl=process.env.SUPABASE_DB_URL;
@@ -151,6 +152,12 @@ const check=(name,details={})=>report.checks.push({name,ok:true,...details});
 let secrets=[];
 
 try{
+ // A origem do dump precisa ser o banco declarado: um ensaio de restauração
+ // que copia o projeto errado prova a recuperação de dado que não é o nosso, e
+ // passa verde (S-79). O destino é o oposto — precisa **não** ser o declarado,
+ // porque ele é sobrescrito.
+ anunciarAlvoOuSair(sourceUrl,{origem:"SUPABASE_DB_URL (origem do dump)"});
+ assert(!refDaUrl(targetUrl)||refDaUrl(targetUrl)!==refDaUrl(sourceUrl),"Destino da restauração não pode ser o mesmo projeto da origem.");
  const source=parseDatabaseUrl(sourceUrl,"SUPABASE_DB_URL");
  const target=parseDatabaseUrl(targetUrl,"SUPABASE_RESTORE_DB_URL");
  assert(confirmation===expectedConfirmation,"Confirmação do destino descartável ausente ou inválida.");

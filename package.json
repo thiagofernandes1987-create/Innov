@@ -34,6 +34,8 @@
     "validate:execute-revogado": "node scripts/validate-execute-revogado.mjs",
     "validate:numeros-afirmados": "node scripts/validate-numeros-afirmados.mjs",
     "validate:crlf-normalizado": "node scripts/validate-crlf-normalizado.mjs",
+    "validate:banco-alvo": "node scripts/validate-banco-alvo-declarado.mjs",
+    "validate:segredo-com-guarda": "node scripts/validate-segredo-com-guarda.mjs",
     "validate:colunas-existentes": "node scripts/validate-colunas-existentes.mjs",
     "validate:prevencao-declarada": "node scripts/validate-prevencao-declarada.mjs",
     "validate:escape-uma-camada": "node scripts/validate-escape-uma-camada.mjs",

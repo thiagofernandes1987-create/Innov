@@ -492,6 +492,16 @@
       "tinha_portao": false,
       "detectado_por": "preparo da aplicação, ao medir o banco antes de executar",
       "custo": "alto"
+    },
+    {
+      "data": "2026-08-12",
+      "o_que": "Medi e apliquei no projeto Supabase errado durante dois dias. O MCP apontava para `wyeoju…`; o projeto desta plataforma é `jpqoje…`. Sete medições publicadas em documento canônico e duas migrations aplicadas — todas contra o banco errado",
+      "familia": "medicao",
+      "onde": "S-69, S-76, S-77, S-78, ARQUITETURA.md §13, COLUNAS-SEM-MIGRATION.json",
+      "vacina": "VACINA-057",
+      "tinha_portao": false,
+      "detectado_por": "proprietário, ao passar o project_ref correto",
+      "custo": "alto"
     }
   ]
 }

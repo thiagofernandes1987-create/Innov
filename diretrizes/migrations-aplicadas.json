@@ -1,6 +1,6 @@
 {
   "_leia": "Instantâneo do que está aplicado no banco, para o CI comparar sem alcançar o banco. A comparação é pelo NOME LÓGICO: o ledger carimba a versão no momento da aplicação, então o número do arquivo e o da versão aplicada não coincidem — comparar por número produziria um resultado sem sentido. Atualize com `SUPABASE_DB_URL=... pnpm ledger:atualizar` (scripts/atualizar-ledger-de-migrations.mjs) e commite junto da migration.",
-  "projeto": "wyeojufebtwblsubkunr",
+  "projeto": "jpqojevrmefcvsgoffnp (correto) — medições históricas deste arquivo foram feitas em wyeojufebtwblsubkunr",
   "atualizado_em": "2026-08-12",
   "aplicadas": [
     "accept_proposal_client_audit",
@@ -52,8 +52,6 @@
     "safe_project_creation_workflows",
     "sanitize_persisted_provider_errors",
     "seed_sinduscon_sp_cub_2026_06",
-    "semeadura_de_lista_confere_participacao",
-    "semeadura_de_modelos_confere_participacao",
     "semear_modelos_da_empresa",
     "semear_modulo_modelos",
     "signature_business_completion",
@@ -215,7 +213,7 @@
     "unidade_funde_expoente"
   ],
   "debito": {
-    "_responsavel": "S-22 + PR #44 — divergências históricas congeladas; migrations destrutivas da auditoria de regressão só saem do débito após deploy de código compatível, aplicação controlada e testes DB. Qualquer divergência NOVA fora destas listas reprova. PR #42 (Projeto RH) — as migrations `rh_*` estão presentes no ramo e NÃO aplicadas. Etapa 22 / gateway de mensageria (PR #46) — as migrations `stage22_*` idem. Em nenhum dos casos o registro aqui equivale a aplicação ou autoriza produção: depende de homologação isolada com evidência real. VACINA-065 (correção de escrita cross-tenant) — **as duas escritas cross-tenant vivas foram corrigidas no banco em 12/08/2026**, com aval do proprietário: `semeadura_de_lista_confere_participacao` e `semeadura_de_modelos_confere_participacao` aplicadas, recusa observada em sessão de organização alheia e caso legítimo passando. Segue no débito `definidoras_conferem_participacao`, com as cinco funções da etapa 22 — elas **não existem no banco**, porque a etapa 22 não está aplicada, e corrigir no repositório função que não existe no servidor não corrige nada hoje. O portão `validate:definer-com-guarda` protege o repositório contra reincidência; o banco agora está protegido nas duas funções que existiam nele. T-74.1 (VACINA-004) — `revogar_execute_de_public_lote_1` tira `EXECUTE` de `PUBLIC` de 73 funções, 71 delas definidoras que não são gatilho. Enquanto não aplicada, essas funções seguem chamáveis por `anon` no banco. Entra no mesmo lote de decisão da S-69.",
+    "_responsavel": "⚠️ CORREÇÃO DE 12/08/2026 — TODO O ESTADO ABAIXO FOI MEDIDO NO PROJETO ERRADO. As medições e a aplicação de 11 e 12/08 foram feitas contra o projeto Supabase `wyeoju…`; o projeto correto desta plataforma é `jpqoje…`. Nada aqui descreve o banco desta plataforma até ser remedido. As duas migrations de semeadura VOLTARAM ao débito: foram aplicadas no projeto errado e, no correto, continuam pendentes. S-22 + PR #44 — divergências históricas congeladas; migrations destrutivas da auditoria de regressão só saem do débito após deploy de código compatível, aplicação controlada e testes DB. Qualquer divergência NOVA fora destas listas reprova. PR #42 (Projeto RH) — as migrations `rh_*` estão presentes no ramo e NÃO aplicadas. Etapa 22 / gateway de mensageria (PR #46) — as migrations `stage22_*` idem. Em nenhum dos casos o registro aqui equivale a aplicação ou autoriza produção: depende de homologação isolada com evidência real. VACINA-065 (correção de escrita cross-tenant) — **as duas escritas cross-tenant vivas foram corrigidas no banco em 12/08/2026**, com aval do proprietário: `semeadura_de_lista_confere_participacao` e `semeadura_de_modelos_confere_participacao` aplicadas, recusa observada em sessão de organização alheia e caso legítimo passando. Segue no débito `definidoras_conferem_participacao`, com as cinco funções da etapa 22 — elas **não existem no banco**, porque a etapa 22 não está aplicada, e corrigir no repositório função que não existe no servidor não corrige nada hoje. O portão `validate:definer-com-guarda` protege o repositório contra reincidência; o banco agora está protegido nas duas funções que existiam nele. T-74.1 (VACINA-004) — `revogar_execute_de_public_lote_1` tira `EXECUTE` de `PUBLIC` de 73 funções, 71 delas definidoras que não são gatilho. Enquanto não aplicada, essas funções seguem chamáveis por `anon` no banco. Entra no mesmo lote de decisão da S-69.",
     "aplicadas_sem_arquivo": [
       "aplicativo_modelos_e_documentacoes",
       "biblioteca_de_modelos_acervo_unico",
@@ -353,6 +351,8 @@
       "rh_worker_portal_payslip_lines",
       "rh_worker_portal_payslip_projection_fix",
       "rh_worker_portal_payslips",
+      "semeadura_de_lista_confere_participacao",
+      "semeadura_de_modelos_confere_participacao",
       "stage10_homologation_hardening",
       "stage13_quality_forms_hardening",
       "stage13_quality_forms_seed",

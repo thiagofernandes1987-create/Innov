@@ -214,6 +214,10 @@ jobs:
         run: pnpm validate:numeros-afirmados
       - name: Validate multiline form input is newline-normalized (VACINA-048)
         run: pnpm validate:crlf-normalizado
+      - name: Validate the target database is declared and checked (S-79)
+        run: pnpm validate:banco-alvo
+      - name: Validate workflow secrets refuse the empty value (VACINA-069)
+        run: pnpm validate:segredo-com-guarda
       - name: Validate queries against real table columns (VACINA-036)
         run: pnpm validate:colunas-existentes
       - name: Validate vaccines do not declare absent prevention

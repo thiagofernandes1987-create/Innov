@@ -24,6 +24,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
+import { anunciarAlvoOuSair } from "./banco-alvo.mjs";
 
 const raiz = process.cwd();
 const MIGRATIONS = path.join(raiz, "supabase", "migrations");
@@ -37,6 +38,13 @@ if (!url) {
   );
   process.exit(1);
 }
+
+// O instantâneo do ledger é a foto de **um** banco, e o arquivo não carrega
+// qual. Tirar a foto do projeto errado e commitá-la faz o `validate:migrations-
+// applied` comparar o repositório com um banco que não é o da plataforma — e
+// ficar verde. Foi o que aconteceu em 11 e 12/08/2026 (S-79). Por isso o alvo é
+// conferido aqui também, e não só onde se escreve.
+anunciarAlvoOuSair(url);
 
 /** O nome lógico da migration, sem o carimbo. Mesma regra do validador. */
 function nomeLogico(nome) {

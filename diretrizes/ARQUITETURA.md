@@ -311,6 +311,11 @@ acorrentaria sete módulos ao lote de RH.
 
 ## 13. A distância entre o repositório e o servidor
 
+> ⚠️ **Os números desta seção foram medidos no projeto Supabase errado**
+> (`wyeoju…`, e não `jpqoje…`), em 12/08/2026. Ficam aqui porque apagar
+> medição errada esconde que ela existiu; **não valem para esta plataforma** até
+> serem refeitos. A correção é a S-79.
+
 Esta seção existe porque a §4 diz *"migrations ordenadas"* e isso descreve a
 intenção, não o estado. Medido em 12/08/2026, contra o banco de produção:
 

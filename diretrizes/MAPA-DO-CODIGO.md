@@ -36,7 +36,7 @@ a ignorar.
 | Funções do banco chamadas do código | 200 |
 | Suítes de teste | 109, com 1023 casos |
 | Migrations | 273 |
-| Validadores de CI | 62 |
+| Validadores de CI | 64 |
 | Módulos de `lib/` citados por algum teste | 95 de 148 |
 
 ## 1. Aplicativos
@@ -1687,6 +1687,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | Script |
 |---|
 | `scripts/validate-assercoes.mjs` |
+| `scripts/validate-banco-alvo-declarado.mjs` |
 | `scripts/validate-campo-controlado-reencostado.mjs` |
 | `scripts/validate-colunas-existentes.mjs` |
 | `scripts/validate-crlf-normalizado.mjs` |
@@ -1732,6 +1733,7 @@ Declaradas em migration e chamadas por `.rpc()`.
 | `scripts/validate-pipeline.mjs` |
 | `scripts/validate-postgrest-embeds.mjs` |
 | `scripts/validate-prevencao-declarada.mjs` |
+| `scripts/validate-segredo-com-guarda.mjs` |
 | `scripts/validate-server-actions.mjs` |
 | `scripts/validate-stage12-1.mjs` |
 | `scripts/validate-stage12-2.mjs` |

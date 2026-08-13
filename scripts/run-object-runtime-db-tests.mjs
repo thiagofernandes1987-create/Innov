@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import { recusarBancoDaPlataforma } from "./banco-alvo.mjs";
 
 // Executa os testes de comportamento do catálogo do Object Runtime contra um
 // PostgreSQL real. Sem banco disponível, sai com código 0 e diz que não rodou —
@@ -28,6 +29,10 @@ for (const file of files) {
 }
 
 const url = process.env.DATABASE_URL ?? "";
+// Banco descartável: este script cria e derruba um banco no servidor apontado
+// por DATABASE_URL. Alcançar um projeto Supabase aqui não é alvo errado — é
+// `drop database` no lugar errado (S-79).
+recusarBancoDaPlataforma(url);
 const database = process.env.OBJECT_RUNTIME_TEST_DB ?? "object_runtime_test";
 
 // `raise notice` do PostgreSQL sai por stderr. Sem redirecionar, um script que

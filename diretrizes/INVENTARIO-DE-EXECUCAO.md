@@ -2705,3 +2705,207 @@ existem no repositório e nenhuma foi usada.
 - [ ] T-78.4 — **Prova**: repetir o ensaio da T-69.4 numa empresa nova e afirmar `modelos_semeados > 0`, com o mesmo bloco que se desfaz por construção
 - [ ] T-78.5 — **Checklist universal de conclusão de módulo**, o mesmo para todos: `pnpm checklist:modulo documentos` responde os itens mecânicos, e os humanos — persona, QA visual, KPI, relatório de ausência — ficam em `diretrizes/CHECKLIST-DE-CONCLUSAO-DE-MODULO.md`. **Item humano sem evidência conta como não feito.** A tarefa aponta e não repete o esqueleto (R8): regra escrita em 28 sprints diverge em silêncio. A lógica deste módulo mora em [`CONFRONTO-ODOO-19-E-INNOV.md`](CONFRONTO-ODOO-19-E-INNOV.md) §3.5, e a arquitetura final em [`ARQUITETURA.md`](ARQUITETURA.md) §11 e §12 — apontando, não repetindo (R8)
 
+
+## Sprint S-79 — Tudo que foi medido no banco em 11 e 12/08 está no projeto errado
+
+**Estado:** em andamento
+**Marco:** M-SEGURANCA
+
+Aberta em 12/08/2026, no fim do documento conforme a **R4**. É a correção mais
+cara desta série, e o erro é meu.
+
+**O que aconteceu.** O MCP do Supabase desta sessão estava configurado para o
+projeto `wyeoju…`. Todo o trabalho de banco de 11 e 12/08 — medição e aplicação —
+foi contra ele. O projeto correto desta plataforma é **`jpqoje…`**, informado
+pelo proprietário em 12/08.
+
+**A classe do erro é a que este repositório vem catalogando o dia inteiro:**
+medir a coisa parecida em vez da coisa. O `validate:prevencao-declarada` media o
+disco em vez do repositório; a S-69 media o repositório em vez do banco; aqui eu
+medi **um banco** em vez **do** banco. A diferença é que nas duas primeiras o
+erro custou uma execução de CI, e nesta ele custa a confiança em todo número de
+banco produzido nos dois dias.
+
+### O que deixa de valer até ser remedido
+
+| Afirmação | Onde está escrita |
+| --- | --- |
+| 245 tabelas, 252 funções em `public` | `ARQUITETURA.md` §13 |
+| 77 tabelas sem `create table` em migration | `ARQUITETURA.md` §13, S-77 |
+| 7 colunas no banco e não nas migrations | `COLUNAS-SEM-MIGRATION.json` |
+| 121 migrations pendentes; 210 aplicadas | `migrations-aplicadas.json` |
+| 10 funções chamáveis por `anon`; 20 de 120 alvos existem | S-76 |
+| `document_templates` com `scope='PLATAFORMA'` = 0 linhas | S-78 |
+| Duas escritas cross-tenant corrigidas no banco | S-69, `VACINA-065` |
+
+Nenhuma delas é necessariamente falsa para o projeto correto — **nenhuma foi
+verificada nele.** É a diferença entre estar errado e não ter medido, e as duas
+exigem o mesmo trabalho.
+
+### O que foi escrito no projeto errado
+
+Duas migrations de semeadura, aplicadas em 12/08 com aval do proprietário — que
+foi dado para o alvo que eu apresentei, e o alvo estava errado. As duas são
+`create or replace function`, **não tocam dado**, e o efeito é endurecer: as
+funções passaram a recusar organização de que o chamador não participa. O ensaio
+de criação de empresa foi desfeito por construção e não deixou linha.
+
+O ledger foi corrigido: as duas **voltaram ao débito**, porque no projeto correto
+continuam pendentes.
+
+- [x] T-79.1 — **Alvo corrigido e medido em 12/08/2026.** O projeto desta plataforma é `jpqojevrmefcvsgoffnp`, cujo nome de exibição é `supabase-crimson-bridge`. `.env.local` e a declaração de projeto conectado em `INVENTARIO.md` foram repontados; as duas citações no histórico de tarefas ficam como estão, porque registram aplicação datada e reescrevê-las falsificaria o registro.
+
+  **O `project_id` era parâmetro da ferramenta, não configuração.** Eu escolhi o projeto de uma lista e nunca conferi — não havia nada apontando o alvo errado, havia a ausência de conferência. É por isso que a T-79.5 existe.
+
+  Primeira medição do banco correto, e ela muda o diagnóstico:
+
+```
+tabelas em public ......... 144      (contra 245 no projeto errado)
+funções ................... 196      (contra 252)
+rh_workers ................ não existe
+filas do canal ............ não existem
+organizações / clientes ... 1 / 1
+obras ..................... 0
+```
+
+  **Não é caso de migrar dados.** O banco correto tem uma organização, um cliente e nenhuma obra — é ambiente novo, não espelho de produção. Copiar o outro por cima seria semear um banco com dado de um ambiente paralelo.
+
+  **E há uma causa que nenhuma medição anterior tinha visto:** a branch `main` deste projeto está em **`MIGRATIONS_FAILED` desde 22/07/2026**. As 101 tabelas de diferença não são atraso de quem esqueceu de aplicar — são de uma sequência que **tentou e quebrou**, e ficou três semanas nesse estado. Aplicar por cima sem saber onde parou repete a falha
+- [ ] T-79.2 — Refazer as sete medições da tabela acima contra `jpqoje…`, e corrigir cada documento com o número novo e a data.
+
+  **Medido em 12/08/2026, com acesso ao banco certo.** Estrutura:
+
+```
+tabelas base (relkind r,p) ....... 144
+views ............................ 11
+funções em public ................ 196   (158 são security definer)
+migrations registradas ........... 143   última: 20260721221145
+migrations pendentes ............. 166   1,2 MB de SQL, 7 destrutivas
+```
+
+  **Duas causas mecânicas novas, que explicam o erro melhor do que "eu não confiri":**
+
+  1. **O projeto certo não aparece na listagem.** `list_projects` devolve **1** projeto — `wyeoju…` — e `list_organizations` devolve **1** organização. O `jpqoje…` pertence a `vercel_icfg_JXX1qOSYgSSnIvOjuMACVBnV`, uma organização gerida pelo Vercel que nenhuma das duas enumera. `get_project('jpqoje…')` responde normalmente. Escolher "da lista" **nunca poderia** ter dado o projeto certo: só o alcança quem já sabe o `ref` e pergunta direto.
+  2. **`execute_sql` do MCP é transação somente-leitura** (`25006: cannot execute CREATE TABLE in a read-only transaction`). Toda medição por ali é inofensiva por construção — e nenhum ensaio de migration pode ser feito por ela.
+
+  **Um defeito meu, encontrado ao auditar as chaves a pedido do proprietário:** o `.env.local` tinha `NEXT_PUBLIC_SUPABASE_URL` apontando para `jpqoje…` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` sendo a chave publicável do `wyeoju…`. Ao reapontar na T-79.1 eu troquei a URL e deixei a chave — a metade visível corrigida e a invisível intacta, dentro da correção do erro que é exatamente isso. Confirmado por comparação com as chaves reais dos dois projetos e corrigido em 12/08/2026. A chave publicável nova (`sb_publishable_…`) **não carrega o `ref`**, ao contrário do JWT anon legado: é por isso que URL e chave podem discordar em silêncio.
+
+  **Falta:** as medições de população — 77 tabelas sem `create table`, 7 colunas fora das migrations, funções chamáveis por `anon`, biblioteca de modelos — só fazem sentido depois que as 166 pendentes entrarem. Medir população num banco três semanas atrás do repositório mede o atraso, não o defeito
+- [x] T-79.3 — **Decidido em 12/08/2026: ficam como estão.** Decisão delegada pelo proprietário, e o motivo é um só e decisivo — **reverter reintroduziria uma escrita cross-tenant viva.**
+
+  O que foi alterado no `wyeoju…`, e nada além disso:
+
+```
+semear_motivos_de_perda        ganhou guarda de participação
+semear_modelos_da_empresa      ganhou guarda de participação
+tg_semear_motivos_de_perda     corpo embutido, para o gatilho não chamar a função guardada
+tg_semear_modelos_da_empresa   idem
+```
+
+  As quatro são `create or replace function`. **Nenhuma toca dado.** O ensaio de criação de empresa, desfeito por construção, provou que o comportamento legítimo continua: 9 motivos semeados, nenhuma sobra.
+
+  O princípio de não deixar mudança onde não se devia mexer é real, e não vence este caso: voltar atrás seria **abrir de novo, com conhecimento de causa, um buraco por onde qualquer usuário autenticado escrevia em empresa alheia**. Restaurar um estado defeituoso em nome da pureza do registro é pior que registrar a alteração e seguir.
+
+  O que **não** foi feito e continua sendo decisão sua: se o `wyeoju…` deve ser desativado. Isso é apagar projeto, não reverter função — outra ação, outro aval.
+- [ ] T-79.4 — Conferir para onde `secrets.SUPABASE_DB_URL` aponta antes de qualquer nova execução do `aplicar-migrations`.
+
+  **O instrumento está pronto desde 12/08/2026** (T-79.5): o workflow ganhou o passo *"Conferir para onde SUPABASE_DB_URL aponta"*, que roda antes de instalar o cliente, imprime o `project_ref` alcançado — nunca a credencial — e recusa quando não bate com `diretrizes/BANCO-ALVO.json`. A evidência sai no artefato `alvo-conferido.txt`.
+
+  **Respondido em 12/08/2026, e a resposta não é a que eu supunha.** Disparado o `aplicar-migrations` em modo `conferir` (run `31651934504`, branch da sprint). O log do runner:
+
+```
+env:
+  SUPABASE_DB_URL:
+```
+
+  **O segredo não existe.** Não aponta para o projeto errado — não aponta para lugar nenhum. O GitHub expande segredo indefinido como string vazia, **em silêncio**, e é por isso que as duas execuções anteriores na `main` (12/08, 09:26 e 09:34) falharam sem explicar.
+
+  **E o disparo pegou um defeito no portão que eu tinha entregue horas antes:** o passo *"Conferir para onde SUPABASE_DB_URL aponta"* saiu **verde** com o segredo vazio, porque em `--conferir` eu deixava passar quando não havia URL. Um passo com esse nome, aprovando quando não há o que conferir, é o portão que não mede nada — a mesma família da VACINA-057 e da regra da prova por sabotagem, cometida dentro da correção que a invoca.
+
+  Corrigido com `--exigir`, que separa os dois lugares: rodar `--conferir` sem credencial é legítimo no terminal de quem desenvolve, e inaceitável onde o runner deveria ter injetado o segredo. Provado por sabotagem:
+
+```
+segredo ausente  com --exigir ....... exit=2
+segredo vazio    com --exigir ....... exit=2   (como o GitHub de fato expande)
+segredo ausente  sem --exigir ....... exit=0   (o caso legítimo continua passando)
+segredo certo    com --exigir ....... exit=0
+```
+
+  **O que falta agora é criar o segredo**, apontando para a conexão direta do `jpqoje…`. É ação do proprietário e destrava a T-79.6
+- [x] T-79.5 — **Portão entregue em 12/08/2026.** O alvo é declarado e conferido, e a conferência acontece **antes** de abrir conexão.
+
+  Três peças, e a primeira é a que faltava:
+
+```
+diretrizes/BANCO-ALVO.json          a declaração canônica, em commit
+scripts/banco-alvo.mjs              a conferência em tempo de execução
+pnpm validate:banco-alvo            o portão no CI
+```
+
+  **A conferência tem dois sentidos, não um.** A primeira versão do portão acusou os seis `run-*-db-tests.mjs` por não conferirem o alvo declarado — e o alvo certo deles é justamente **outro**, porque eles criam e derrubam banco descartável. Ali alvo errado não é medição errada: é `drop database` no lugar errado. Virou `recusarBancoDaPlataforma()`, e a acusação errada virou guarda.
+
+  **O alvo é a primeira linha impressa.** Um plano de 119 migrations acima da linha do alvo é um plano que se lê inteiro antes de descobrir para onde vai — e foi lendo o conteúdo certo sem olhar o destino que a S-79 aconteceu.
+
+  Desviar continua possível com `BANCO_ALVO=<ref>` ou `=local`, e é de propósito: a diferença entre desviar por engano e desviar digitando. Quando o alvo não é o canônico, a saída diz isso em duas linhas em vez de anunciar sucesso.
+
+  **Provado por sabotagem**, 13 execuções, com strings de conexão falsas:
+
+```
+alvo trocado no --conferir .............. exit=2, recusa antes do plano
+alvo certo, direta e pooler ............. exit=0, segue para o plano
+.mcp.json apontando para outro projeto .. exit=1
+script novo lendo SUPABASE_DB_URL ....... exit=1
+workflow sem o passo de conferência ..... exit=1
+citação a outro projeto sem data ........ exit=1
+BANCO-ALVO.json removido ................ exit=1, ausência não passa
+teste de banco apontado para Supabase ... exit=2
+o mesmo, apontado para Postgres local ... segue, o caso legítimo passa
+```
+
+  Duas correções nasceram da própria sabotagem, e as duas eram defeito real: a acusação aos seis scripts, e uma mensagem que imprimia `wyeoju… (supabase-crimson-bridge)` — batizando o projeto desviado com o nome do certo.
+
+  Registrado como [`VACINA-068`](vacinas/VACINA-068-ALVO-DE-BANCO-HERDADO-EM-VEZ-DE-DECLARADO.md). Três citações de documento foram corrigidas no caminho: duas eram comando copiável apontando para o projeto errado (`docs/ETAPA-10`), e passaram a ler o `ref` da declaração; uma era registro sem data (`docs/ETAPA-17-ESTOQUE`), e ganhou a data em vez de ser reescrita
+- [ ] T-79.6 — **Aplicar as 166 migrations pendentes em `jpqoje…`**, decidido pelo proprietário em 12/08/2026 (*"vamos migrar tudo para o jpqoje"*).
+
+  **A primeira pendente já entrou, e ela derruba a hipótese do diagnóstico.** `20260722104500_stage20_sac_attachment_security` aplicou **sem erro** — logo o `MIGRATIONS_FAILED` de 22/07/2026 **não veio dela**. A falha está adiante na fila, ou no ambiente de preview da branch; não em quebrar no primeiro passo.
+
+  Transcrição conferida: o `md5` do que entrou no banco é `b9e45a559abbaafb912f89b7c4a4bd3e`, **idêntico** ao do arquivo do repositório. Registro do carimbo: o `apply_migration` grava a versão com a data de hoje (`20260812232835`), não a do arquivo — o casamento do ledger é por nome lógico, então continua batendo, mas a ordem gravada no banco deixa de refletir a ordem de escrita.
+
+  **Por que as outras 166 não seguem por aqui:** são **1,2 MB** de SQL, e o `apply_migration` recebe o texto digitado por mim, não lido do arquivo. Transcrever 1,2 MB em 166 chamadas é caro e, pior, cada uma é uma chance nova de o banco divergir do repositório em silêncio — o defeito que este projeto inteiro combate. O mecanismo certo já existe e **lê o arquivo**: `scripts/aplicar-migrations-pendentes.mjs` por `psql`, no workflow `aplicar-migrations`.
+
+  **Bloqueio único e pequeno:** `secrets.SUPABASE_DB_URL` precisa apontar para `jpqoje…`. O portão da T-79.5 **recusa** se apontar para outro lugar — é a proteção funcionando, não obstáculo. As 7 destrutivas ficam fora do lote e são decisão própria de cada uma
+- [ ] T-79.7 — **Portão**: chave e URL do Supabase precisam concordar. A chave publicável nova (`sb_publishable_…`) **não carrega o `ref`**, ao contrário do JWT anon legado — então `NEXT_PUBLIC_SUPABASE_URL` pode apontar para um projeto e a chave pertencer a outro, e nenhum validador vê. Foi o que aconteceu com o `.env.local`, por engano meu na T-79.1. O portão do repositório não alcança segredo do Vercel; o que alcança é conferência em tempo de execução, na criação do cliente. Provar por sabotagem com chave trocada
+- [ ] T-79.8 — **A CI inteira valida o banco errado.** Medido em 12/08/2026, a pedido do proprietário (*"já verificou todas as chaves do GitHub?"*).
+
+  Valor de segredo do GitHub é *write-only* — ninguém lê, nem o assistente. Mas o que ele **faz** é observável, e foi assim que se descobriu.
+
+  Os workflows exigem **34 segredos**. Cinco deles recebem a mesma trinca Supabase: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` e `SUPABASE_SERVICE_ROLE_KEY` — `rh-browser-e2e`, `sinapi-atualizacao`, `stage11-homologation`, `stage18-concurrent-e2e` e `stage20-inventory-concurrency-e2e`.
+
+  A prova é o horário de login, não a leitura do segredo:
+
+```
+jpqoje…   0 usuários, nenhuma conta de homologação, nenhum login jamais
+wyeoju…   5 usuários, as duas contas demo
+
+           admin@innov.eng.br    12/08 23:32:51.538
+           cliente@cliente.com   12/08 23:32:51.570   <- mesmo instante
+           adm@admin.com         12/08 23:33:57.708
+           gestor@admin.com      12/08 23:34:04.497
+
+CI do PR #56, segunda execução: checks de 23:32:30 a 23:34:23
+```
+
+  As duas contas demo entrando **no mesmo instante** é a assinatura do job *"Admin + Client simultaneous Supabase E2E"*. Os segredos apontam para o `wyeoju…`.
+
+  **O que isso significa, e é maior que a T-79.6:** toda a bateria de homologação, E2E e QA visual vem passando verde contra um banco que não é o desta plataforma. Aplicar as 166 migrations no `jpqoje…` **não muda isso** — a CI continuaria verde testando o outro. Portão que mede o objeto errado não reprova nunca, e é a terceira vez que esta sprint encontra a mesma forma.
+
+  **Ordem obrigatória**, porque inverter deixa a CI vermelha sem motivo aparente:
+
+```
+1. migrations aplicadas no jpqoje…            (T-79.6)
+2. contas de homologação criadas lá           scripts/provision-homologation-users.mjs
+3. os três segredos repontados                e só então
+4. a bateria roda contra o banco certo
+```
+
+  O passo 2 não é detalhe: `jpqoje…` tem **zero** usuários. Repontar os segredos antes disso derruba os cinco workflows no login, e o erro pareceria de credencial em vez de ambiente vazio
