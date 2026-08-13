@@ -27,8 +27,9 @@ on:
         options:
           - conferir
           - aplicar
+          - recriar
       confirmacao:
-        description: "Para aplicar, digite APLICAR. Qualquer outra coisa recusa."
+        description: "aplicar exige APLICAR; recriar exige RECRIAR DO ZERO. Qualquer outra coisa recusa."
         required: false
         default: ""
         type: string
@@ -104,7 +105,45 @@ jobs:
       - name: Instalar psql
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends postgresql-client
 
+      # `recriar` apaga o schema `public` inteiro e o histórico de migrations,
+      # e aplica as 273 do repositório em ordem. Decidido pelo proprietário em
+      # 13/08/2026: o banco tinha 49 migrations aplicadas sem arquivo nenhum no
+      # repositório, e aplicar as 178 pendentes por cima colidiria em
+      # `already exists` — que é o que deixou a branch em MIGRATIONS_FAILED.
+      #
+      # Duas confirmações, e de propósito: a do formulário (`RECRIAR DO ZERO`) e
+      # a do script (`--confirmar RECRIAR`). Não há ponto de retorno.
+      - name: Recusar recriação sem confirmação explícita
+        if: inputs.modo == 'recriar'
+        run: |
+          if [ "${{ inputs.confirmacao }}" != "RECRIAR DO ZERO" ]; then
+            echo "::error::Modo 'recriar' exige a confirmação literal 'RECRIAR DO ZERO'. Nada foi enviado ao banco."
+            exit 1
+          fi
+
+      - name: Conferir o que seria apagado
+        if: inputs.modo == 'recriar'
+        run: |
+          set -o pipefail
+          node scripts/recriar-banco-do-zero.mjs --conferir | tee estado-antes-do-reset.txt
+
+      - name: Recriar o banco do zero
+        if: inputs.modo == 'recriar'
+        run: |
+          set -o pipefail
+          node scripts/recriar-banco-do-zero.mjs --recriar --confirmar RECRIAR | tee resultado-do-reset.txt
+
+      - name: Aplicar as 273 em ordem
+        if: inputs.modo == 'recriar'
+        run: |
+          set -o pipefail
+          node scripts/aplicar-migrations-pendentes.mjs --aplicar --todas --com-destrutivas | tee resultado-de-migrations.txt
+
+      # O plano lê o ledger, e depois de `recriar` o ledger ainda descreve o
+      # banco de antes. Imprimi-lo ali seria um relatório correto sobre um
+      # estado que deixou de existir.
       - name: Plano
+        if: inputs.modo != 'recriar'
         run: |
           set -o pipefail
           node scripts/aplicar-migrations-pendentes.mjs --conferir | tee plano-de-migrations.txt
@@ -119,7 +158,7 @@ jobs:
           node scripts/aplicar-migrations-pendentes.mjs "${args[@]}" | tee resultado-de-migrations.txt
 
       - name: Estado do ledger depois
-        if: always() && inputs.modo == 'aplicar'
+        if: always() && (inputs.modo == 'aplicar' || inputs.modo == 'recriar')
         run: node scripts/atualizar-ledger-de-migrations.mjs | tee ledger-depois.txt || true
 
       - name: Guardar evidência
@@ -129,6 +168,8 @@ jobs:
           name: evidencia-de-migrations
           path: |
             alvo-conferido.txt
+            estado-antes-do-reset.txt
+            resultado-do-reset.txt
             plano-de-migrations.txt
             resultado-de-migrations.txt
             ledger-depois.txt

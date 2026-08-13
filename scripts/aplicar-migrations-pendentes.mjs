@@ -63,6 +63,11 @@ const args = process.argv.slice(2);
 const conferir = args.includes("--conferir");
 const aplicar = args.includes("--aplicar");
 const comDestrutivas = args.includes("--com-destrutivas");
+// Depois de `recriar-banco-do-zero.mjs`, o ledger não descreve mais o banco:
+// ele lista o que estava aplicado antes do reset. `--todas` ignora o ledger e
+// aplica os 273 arquivos em ordem, que é o único plano correto para um schema
+// que acabou de nascer vazio.
+const aplicarTodas = args.includes("--todas");
 const ate = (() => {
   const i = args.indexOf("--ate");
   return i === -1 ? Infinity : Number(args[i + 1]);
@@ -113,8 +118,8 @@ const chaveDoArquivo = nome => nome.replace(/^\d+_/, "").replace(/\.sql$/, "");
 const ledger = JSON.parse(fs.readFileSync(LEDGER, "utf8"));
 const debito = new Set(ledger.debito.arquivos_sem_aplicacao);
 
-const todas = fs.readdirSync(MIGRATIONS).filter(n => n.endsWith(".sql")).sort();
-const pendentes = todas.filter(n => debito.has(chaveDoArquivo(n)));
+const todas_os_arquivos = fs.readdirSync(MIGRATIONS).filter(n => n.endsWith(".sql")).sort();
+const pendentes = todas_os_arquivos.filter(n => aplicarTodas || debito.has(chaveDoArquivo(n)));
 
 const classificadas = pendentes.map(nome => {
   const sql = fs.readFileSync(path.join(MIGRATIONS, nome), "utf8");
@@ -124,7 +129,11 @@ const classificadas = pendentes.map(nome => {
 const doLote = classificadas.filter(m => comDestrutivas || !m.destrutiva).slice(0, ate);
 const foraDoLote = classificadas.filter(m => !doLote.includes(m));
 
-console.log(`Pendentes no ledger: ${classificadas.length}`);
+console.log(
+  aplicarTodas
+    ? `Aplicando TODAS as ${classificadas.length} migrations do repositório (ledger ignorado por --todas)`
+    : `Pendentes no ledger: ${classificadas.length}`
+);
 console.log(`  no lote ..........: ${doLote.length}`);
 console.log(`  fora do lote .....: ${foraDoLote.length}` +
   (comDestrutivas ? "" : `  (${classificadas.filter(m => m.destrutiva).length} destrutiva(s) + limite --ate)`));
