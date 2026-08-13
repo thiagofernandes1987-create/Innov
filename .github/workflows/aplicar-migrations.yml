@@ -49,6 +49,15 @@ permissions:
 jobs:
   migrations:
     runs-on: ubuntu-latest
+    # Declarar o ambiente faz o job enxergar **os dois lugares**: os segredos de
+    # repositório e os do ambiente `homologation`, que é onde o
+    # `stage20-backup-restore-drill` guarda os dele.
+    #
+    # Sem esta linha, um segredo criado em Environments é invisível aqui — e o
+    # sintoma é exatamente o mesmo de segredo inexistente, porque o GitHub
+    # expande os dois como string vazia (VACINA-069). Em 13/08/2026 essa
+    # ambiguidade custou três disparos até a causa ficar clara.
+    environment: homologation
     env:
       SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
 
